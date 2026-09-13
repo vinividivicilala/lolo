@@ -418,16 +418,13 @@ interface TourStep {
 
 // ===== PHYSICS MENURU TITLE COMPONENT =====
 // Teks "Menuru" 450px biru
-// Huruf jatuh & terpentok di:
-//   - batas bawah area (di atas judul Live Chat Agent)
-//   - batas kiri & kanan layar
-// Physics: jatuh dengan gravity + bounce saat membentur dinding
+// Huruf jatuh, terpentok di batas bawah (atas judul Live Chat Agent), kiri & kanan
+// Huruf BERDIRI KOKOH di atas lantai (tidak tenggelam)
 const PhysicsMenuruTitle = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
-  // Measure container on mount & resize
   useEffect(() => {
     if (typeof window === "undefined") return;
     const updateDims = () => {
@@ -458,14 +455,19 @@ const PhysicsMenuruTitle = () => {
     const containerH = dimensions.height;
 
     // ====== BATAS AREA JATUH ======
-    // Huruf TIDAK BOLEH jatuh melewati containerH (batas bawah = di atas judul Live Chat Agent)
-    // Huruf juga TIDAK BOLEH keluar dari kiri/kanan container
-    const floorY = containerH - 80; // batas bawah (lantai)
-    const ceilingY = 0; // batas atas
-    const leftBound = -containerW / 2 + 40; // kiri
-    const rightBound = containerW / 2 - 40; // kanan
+    // Lantai: 30px dari dasar container (di atas judul Live Chat Agent)
+    const floorY = containerH - 30;
+    const leftBound = -containerW / 2 + 80;
+    const rightBound = containerW / 2 - 80;
 
-    // Set posisi awal: huruf di atas viewport (di atas container)
+    // PENTING: Ambil tinggi masing-masing huruf dari bounding rect
+    // Huruf akan di-set agar SISI BAWAH huruf menyentuh lantai (bukan pusat)
+    const charHeights = chars.map((c: any) => {
+      const rect = c.getBoundingClientRect();
+      return rect.height || 300; // fallback 300
+    });
+
+    // Set posisi awal: huruf di atas viewport
     chars.forEach((char, i) => {
       gsap.set(char, {
         y: -900 - i * 60,
@@ -476,30 +478,34 @@ const PhysicsMenuruTitle = () => {
       });
     });
 
-    // Simulasi physics per huruf — jatuh + terpentok
+    // Simulasi physics per huruf
     chars.forEach((char, i) => {
-      // Parameter physics per huruf
       const startDelay = i * 0.12 + Math.random() * 0.2;
-      const vx0 = (Math.random() - 0.5) * 400; // kecepatan horizontal awal
-      const vy0 = 0; // kecepatan vertikal awal
+      const vx0 = (Math.random() - 0.5) * 400;
       const gravity = 1400 + Math.random() * 600;
-      const restitution = 0.35; // koefisien pantul (bounce saat bentur dinding)
-      const friction = 0.85; // gesekan saat menyentuh lantai
+      const restitution = 0.35;
+      const friction = 0.85;
 
-      // Posisi awal (dalam koordinat halaman)
       const startX = (i - chars.length / 2) * 60 + (Math.random() - 0.5) * 200;
       const startY = -900 - i * 60;
 
-      // Physics simulation variables
       let x = startX;
       let y = startY;
       let vx = vx0;
-      let vy = vy0;
+      let vy = 0;
       let rotation = (Math.random() - 0.5) * 100;
-      let rotV = (Math.random() - 0.5) * 400; // kecepatan rotasi
+      let rotV = (Math.random() - 0.5) * 400;
 
-      // Buat timeline GSAP dengan physics manual
-      const duration = 4.5; // total durasi animasi
+      // Ketinggian huruf ini (untuk hitung lantai efektif)
+      // Huruf memiliki transform-origin center, jadi "bawah" huruf = y + halfHeight
+      const charH = charHeights[i];
+      const halfH = charH / 2;
+
+      // Lantai efektif = floorY - halfH
+      // Agar HURUF BERDIRI (bukan tenggelam): pusat huruf berhenti di floorY - halfH
+      const effectiveFloorY = floorY - halfH;
+
+      const duration = 4.5;
       const fps = 60;
       const totalFrames = duration * fps;
       const dt = 1 / fps;
@@ -513,27 +519,27 @@ const PhysicsMenuruTitle = () => {
         y += vy * dt;
         rotation += rotV * dt;
 
-        // Cek tabrakan dengan lantai (batas bawah = floorY)
-        if (y >= floorY) {
-          y = floorY;
-          vy = -vy * restitution; // pantul
-          vx *= friction; // gesekan
+        // Tabrakan dengan lantai efektif (bawah huruf mentok lantai)
+        if (y >= effectiveFloorY) {
+          y = effectiveFloorY;
+          vy = -vy * restitution;
+          vx *= friction;
           rotV *= friction;
 
-          // Jika kecepatan vertikal sangat kecil, hentikan (settle)
+          // Jika kecepatan kecil, hentikan (settle)
           if (Math.abs(vy) < 30) {
             vy = 0;
           }
         }
 
-        // Cek tabrakan dengan batas kiri
+        // Tabrakan dengan batas kiri
         if (x <= leftBound) {
           x = leftBound;
           vx = -vx * restitution;
           rotV = -rotV * restitution;
         }
 
-        // Cek tabrakan dengan batas kanan
+        // Tabrakan dengan batas kanan
         if (x >= rightBound) {
           x = rightBound;
           vx = -vx * restitution;
@@ -542,14 +548,13 @@ const PhysicsMenuruTitle = () => {
 
         positions.push({ x, y, rotation });
 
-        // Jika huruf sudah tenang (velocity ~ 0), break
+        // Settle — semua velocity kecil, berhenti
         if (
           Math.abs(vy) < 5 &&
           Math.abs(vx) < 5 &&
           Math.abs(rotV) < 10 &&
-          y >= floorY - 1
+          y >= effectiveFloorY - 1
         ) {
-          // Isi frame sisanya dengan posisi akhir
           for (let k = frame; k < totalFrames; k++) {
             positions.push({ x, y, rotation });
           }
@@ -557,7 +562,7 @@ const PhysicsMenuruTitle = () => {
         }
       }
 
-      // Buat timeline GSAP yang mengikuti posisi physics
+      // Animasikan GSAP mengikuti posisi physics
       const tl = gsap.timeline({ delay: startDelay });
       const totalSteps = positions.length;
       for (let f = 1; f < totalSteps; f++) {
@@ -585,9 +590,9 @@ const PhysicsMenuruTitle = () => {
       ref={containerRef}
       style={{
         width: "100%",
-        height: "700px", // area jatuh — tepat di atas judul Live Chat Agent
-        marginBottom: "40px", // jarak aman ke judul di bawahnya
-        overflow: "hidden", // PENTING: biar huruf terpentok (tidak keluar area)
+        height: "700px",
+        marginBottom: "40px",
+        overflow: "hidden",
         position: "relative",
         backgroundColor: "#ffffff",
         display: "flex",
@@ -3551,7 +3556,7 @@ export default function HomePage(): React.JSX.Element {
         {/* ===== PHYSICS MENURU TITLE (PALING ATAS) ===== */}
         <PhysicsMenuruTitle />
 
-        {/* LIVE CHAT AGENT — langsung di bawah area physics dengan jarak aman */}
+        {/* LIVE CHAT AGENT */}
         <div style={{ padding: "0 40px", maxWidth: "1600px", margin: "0 auto", width: "100%" }}>
           <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} />
         </div>
