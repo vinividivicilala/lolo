@@ -407,9 +407,8 @@ interface TourStep {
 }
 
 // ===== PHYSICS MENURU TITLE =====
-// Teks "Menuru" UTUH (satu kesatuan), jatuh dari atas
-// Badan huruf PENUH di atas lantai (tidak tenggelam)
-// Goyang halus (rotasi kecil), mentok kiri/kanan
+// Teks "Menuru" UTUH, jatuh, badan full di atas lantai
+// Pakai wrapper flex center — TIDAK pakai translateX(-50%)
 const PhysicsMenuruTitle = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
@@ -435,70 +434,63 @@ const PhysicsMenuruTitle = () => {
     if (!containerRef.current || !textRef.current) return;
     if (dimensions.width === 0 || dimensions.height === 0) return;
 
-    const containerW = dimensions.width;
+    // Pastikan transform reset sebelum ukur
+    gsap.set(textRef.current, { x: 0, y: 0, clearProps: "all" });
+
     const containerH = dimensions.height;
+    const containerW = dimensions.width;
 
-    // ==== UKUR TINGGI & LEBAR TEKS MURNI ====
-    // Reset transform dulu
-    gsap.set(textRef.current, { x: 0, y: 0, rotation: 0 });
-    const textW = textRef.current.offsetWidth;
-    const textH = textRef.current.offsetHeight;
+    // Ambil tinggi teks setelah reset
+    const textEl = textRef.current;
+    const textW = textEl.offsetWidth;
+    const textH = textEl.offsetHeight;
 
-    // ==== BATAS AREA ====
-    // Lantai = dasar container (badan teks penuh di atas)
-    // Karena transform-origin: center center, maka:
-    //   y_pusat_akhir = floorY - (tinggi_teks / 2)
-    //   dasar teks = y_pusat_akhir + tinggi_teks / 2 = floorY ✅
-    const floorY = containerH - 20;
-    const leftBound = -containerW / 2 + 40;
-    const rightBound = containerW / 2 - 40;
+    // ===== BATAS AREA =====
+    // Lantai = 40px dari dasar container
+    const floorY = containerH - 40;
 
-    // Batas horizontal untuk teks (dengan lebar teks)
-    const halfTextW = textW / 2;
-    const halfTextH = textH / 2;
+    // Karena textRef punya transform-origin "center center", kita atur:
+    //   y_akhir = floorY - textH/2   →   dasar teks = floorY
+    const restY = floorY - textH / 2;
 
-    // Posisi X & Y akhir
-    const restY = floorY - halfTextH; // pusat teks saat badan penuh di lantai
-    const startY = -textH - 200; // awal di atas container
+    // Start: di atas container
+    const startY = -textH - 100;
 
-    // Simulasi physics MANUAL untuk teks (satu objek)
-    let x = 0; // mulai tengah
+    // Batas horizontal (dengan lebar teks)
+    const leftBound = -containerW / 2 + textW / 2 + 20;
+    const rightBound = containerW / 2 - textW / 2 - 20;
+
+    // ===== SIMULASI PHYSICS MANUAL =====
+    let x = 0;
     let y = startY;
-    let vx = (Math.random() - 0.5) * 100; // kecepatan horizontal kecil
-    let vy = 0; // kecepatan vertikal
+    let vx = (Math.random() - 0.5) * 80;
+    let vy = 0;
     let rotation = 0;
-    let rotV = (Math.random() - 0.5) * 20; // rotasi sangat kecil
+    let rotV = (Math.random() - 0.5) * 15;
 
     const gravity = 1800;
     const restitution = 0.3;
-    const frictionGround = 0.7;
+    const frictionGround = 0.75;
     const frictionAir = 0.995;
     const dt = 1 / 60;
-    const totalFrames = 480; // ~8 detik
-    const maxRotRad = (6 * Math.PI) / 180; // max 6°
+    const totalFrames = 480;
+    const maxRotRad = (5 * Math.PI) / 180;
 
     const positions: Array<{ x: number; y: number; rotation: number }> = [];
 
     for (let frame = 0; frame < totalFrames; frame++) {
-      // Gravity
       vy += gravity * dt;
-
-      // Update
       x += vx * dt;
       y += vy * dt;
       rotation += rotV * dt;
 
-      // Air friction
       vx *= frictionAir;
       rotV *= frictionAir;
 
-      // ==== BATAS LANTAI ====
-      // Teks "berdiri" → DASAR teks mentok lantai
-      // restY = floorY - halfTextH → dasar teks = floorY
+      // Lantai — huruf TIDAK tenggelam
       if (y >= restY) {
         y = restY;
-
-        if (Math.abs(vy) > 100) {
+        if (Math.abs(vy) > 80) {
           vy = -vy * restitution;
         } else {
           vy = 0;
@@ -506,36 +498,26 @@ const PhysicsMenuruTitle = () => {
         vx *= frictionGround;
         rotV *= frictionGround;
 
-        // Settle
-        if (
-          Math.abs(vy) < 15 &&
-          Math.abs(vx) < 15 &&
-          Math.abs(rotV) < 0.15
-        ) {
+        if (Math.abs(vy) < 10 && Math.abs(vx) < 10 && Math.abs(rotV) < 0.1) {
           vy = 0;
           vx = 0;
           rotV = 0;
-          rotation = Math.max(-maxRotRad, Math.min(maxRotRad, rotation));
         }
       }
 
-      // ==== BATAS KIRI ====
-      const leftLimit = leftBound + halfTextW;
-      if (x <= leftLimit) {
-        x = leftLimit;
+      // Kiri / kanan
+      if (x <= leftBound) {
+        x = leftBound;
+        vx = -vx * restitution;
+        rotV = -rotV * 0.3;
+      }
+      if (x >= rightBound) {
+        x = rightBound;
         vx = -vx * restitution;
         rotV = -rotV * 0.3;
       }
 
-      // ==== BATAS KANAN ====
-      const rightLimit = rightBound - halfTextW;
-      if (x >= rightLimit) {
-        x = rightLimit;
-        vx = -vx * restitution;
-        rotV = -rotV * 0.3;
-      }
-
-      // ==== BATASI ROTASI ====
+      // Batasi rotasi
       if (rotation > maxRotRad) {
         rotation = maxRotRad;
         rotV = -Math.abs(rotV) * 0.3;
@@ -547,10 +529,8 @@ const PhysicsMenuruTitle = () => {
       positions.push({ x, y, rotation });
     }
 
-    // ==== ANIMASI GSAP ====
+    // ===== ANIMASI =====
     const tl = gsap.timeline();
-
-    // Set posisi awal
     tl.set(textRef.current, {
       x: positions[0].x,
       y: positions[0].y,
@@ -586,6 +566,7 @@ const PhysicsMenuruTitle = () => {
         overflow: "hidden",
         position: "relative",
         backgroundColor: "#ffffff",
+        // Flexbox: center horizontal & atas
         display: "flex",
         alignItems: "flex-start",
         justifyContent: "center",
@@ -604,12 +585,10 @@ const PhysicsMenuruTitle = () => {
           userSelect: "none",
           whiteSpace: "nowrap",
           display: "inline-block",
-          position: "absolute",
-          top: 0,
-          left: "50%",
-          marginLeft: "-50%", // center via margin? tidak, kita pakai translateX di GSAP
-          transform: "translateX(-50%)",
-          pointerEvents: "none",
+          // PENTING: TIDAK ada translateX, TIDAK ada position absolute
+          // Flexbox parent yang menaruh di tengah
+          // GSAP akan mengubah y (dan x kecil) dari sini
+          willChange: "transform",
         }}
       >
         Menuru
@@ -3763,14 +3742,6 @@ export default function HomePage(): React.JSX.Element {
         .split-char-livechat {
           display: inline-block;
           will-change: transform, opacity, filter;
-        }
-        .physics-char {
-          display: inline-block;
-          will-change: transform, opacity;
-          color: #0D3CFC !important;
-          transform-origin: center center !important;
-          opacity: 1 !important;
-          visibility: visible !important;
         }
         .chat-messages-container::-webkit-scrollbar,
         .chat-messages-container-admin::-webkit-scrollbar {
