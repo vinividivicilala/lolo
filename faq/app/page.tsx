@@ -407,8 +407,10 @@ interface TourStep {
 }
 
 // ===== PHYSICS MENURU TITLE =====
-// Teks "Menuru" UTUH, jatuh, badan full di atas lantai
-// Pakai wrapper flex center — TIDAK pakai translateX(-50%)
+// Teks "Menuru" 450px biru — dipecah per karakter
+// Setiap huruf JATUH dan MANTUL karena kena lantai
+// Badan huruf FULL di atas lantai (tidak tenggelam)
+// Desain tetap sama: 450px, biru full
 const PhysicsMenuruTitle = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
@@ -434,125 +436,268 @@ const PhysicsMenuruTitle = () => {
     if (!containerRef.current || !textRef.current) return;
     if (dimensions.width === 0 || dimensions.height === 0) return;
 
-    // Pastikan transform reset sebelum ukur
+    // Reset dulu
     gsap.set(textRef.current, { x: 0, y: 0, clearProps: "all" });
 
-    const containerH = dimensions.height;
-    const containerW = dimensions.width;
+    // Split teks jadi karakter
+    const split = new SplitText(textRef.current, {
+      type: "chars",
+      charsClass: "physics-char",
+    });
 
-    // Ambil tinggi teks setelah reset
-    const textEl = textRef.current;
-    const textW = textEl.offsetWidth;
-    const textH = textEl.offsetHeight;
+    const chars = split.chars;
+    const containerW = dimensions.width;
+    const containerH = dimensions.height;
 
     // ===== BATAS AREA =====
     // Lantai = 40px dari dasar container
     const floorY = containerH - 40;
 
-    // Karena textRef punya transform-origin "center center", kita atur:
-    //   y_akhir = floorY - textH/2   →   dasar teks = floorY
-    const restY = floorY - textH / 2;
-
-    // Start: di atas container
-    const startY = -textH - 100;
-
-    // Batas horizontal (dengan lebar teks)
-    const leftBound = -containerW / 2 + textW / 2 + 20;
-    const rightBound = containerW / 2 - textW / 2 - 20;
-
-    // ===== SIMULASI PHYSICS MANUAL =====
-    let x = 0;
-    let y = startY;
-    let vx = (Math.random() - 0.5) * 80;
-    let vy = 0;
-    let rotation = 0;
-    let rotV = (Math.random() - 0.5) * 15;
-
-    const gravity = 1800;
-    const restitution = 0.3;
-    const frictionGround = 0.75;
-    const frictionAir = 0.995;
-    const dt = 1 / 60;
-    const totalFrames = 480;
-    const maxRotRad = (5 * Math.PI) / 180;
-
-    const positions: Array<{ x: number; y: number; rotation: number }> = [];
-
-    for (let frame = 0; frame < totalFrames; frame++) {
-      vy += gravity * dt;
-      x += vx * dt;
-      y += vy * dt;
-      rotation += rotV * dt;
-
-      vx *= frictionAir;
-      rotV *= frictionAir;
-
-      // Lantai — huruf TIDAK tenggelam
-      if (y >= restY) {
-        y = restY;
-        if (Math.abs(vy) > 80) {
-          vy = -vy * restitution;
-        } else {
-          vy = 0;
-        }
-        vx *= frictionGround;
-        rotV *= frictionGround;
-
-        if (Math.abs(vy) < 10 && Math.abs(vx) < 10 && Math.abs(rotV) < 0.1) {
-          vy = 0;
-          vx = 0;
-          rotV = 0;
-        }
-      }
-
-      // Kiri / kanan
-      if (x <= leftBound) {
-        x = leftBound;
-        vx = -vx * restitution;
-        rotV = -rotV * 0.3;
-      }
-      if (x >= rightBound) {
-        x = rightBound;
-        vx = -vx * restitution;
-        rotV = -rotV * 0.3;
-      }
-
-      // Batasi rotasi
-      if (rotation > maxRotRad) {
-        rotation = maxRotRad;
-        rotV = -Math.abs(rotV) * 0.3;
-      } else if (rotation < -maxRotRad) {
-        rotation = -maxRotRad;
-        rotV = Math.abs(rotV) * 0.3;
-      }
-
-      positions.push({ x, y, rotation });
-    }
-
-    // ===== ANIMASI =====
-    const tl = gsap.timeline();
-    tl.set(textRef.current, {
-      x: positions[0].x,
-      y: positions[0].y,
-      rotation: positions[0].rotation,
+    // Ambil tinggi & lebar SETIAP huruf
+    // Karena transform-origin center center, restY = floorY - halfH
+    const metrics = chars.map((c: any) => {
+      const rect = c.getBoundingClientRect();
+      const h = rect.height || 0;
+      const w = rect.width || 0;
+      return { h, w, halfH: h / 2, halfW: w / 2 };
     });
 
-    for (let f = 1; f < positions.length; f++) {
-      tl.to(
-        textRef.current,
-        {
-          x: positions[f].x,
-          y: positions[f].y,
-          rotation: positions[f].rotation,
-          duration: dt,
-          ease: "none",
-        },
-        ">"
-      );
+    // Fallback kalau height 0
+    const charH = metrics.map((m) => (m.h > 10 ? m.h : 350));
+    const charW = metrics.map((m) => (m.w > 10 ? m.w : 250));
+
+    // ===== STATE PER HURUF =====
+    type CharState = {
+      i: number;
+      x: number;
+      y: number;
+      vx: number;
+      vy: number;
+      rotation: number;
+      rotV: number;
+      halfW: number;
+      halfH: number;
+      settled: boolean;
+      bounced: boolean; // sudah pernah mantul?
+    };
+
+    // Posisi X awal: tetap formasi "Menuru" (M-e-n-u-r-u)
+    // Hitung total lebar teks untuk distribusi
+    const totalW = charW.reduce((sum, w) => sum + w, 0);
+    let cumulative = 0;
+    const baseXList = chars.map((_, i) => {
+      const w = charW[i];
+      const x = -totalW / 2 + cumulative + w / 2;
+      cumulative += w;
+      return x;
+    });
+
+    const states: CharState[] = chars.map((_, i) => {
+      const h = charH[i];
+      const w = charW[i];
+      return {
+        i,
+        x: baseXList[i],
+        y: -1000 - i * 50, // start di atas, sedikit berurutan
+        vx: 0,
+        vy: 0,
+        rotation: 0,
+        rotV: 0,
+        halfW: w / 2,
+        halfH: h / 2,
+        settled: false,
+        bounced: false,
+      };
+    });
+
+    // Set transform awal
+    chars.forEach((char, i) => {
+      gsap.set(char, {
+        x: states[i].x,
+        y: states[i].y,
+        rotation: 0,
+        opacity: 1,
+        force3D: true,
+      });
+    });
+
+    // ===== SIMULASI PHYSICS =====
+    const gravity = 2000;
+    const restitution = 0.5; // koefisien pantul (cukup tinggi → mantul terasa)
+    const frictionGround = 0.85;
+    const frictionAir = 0.999;
+    const dt = 1 / 60;
+    const totalFrames = 600; // 10 detik
+    const maxRotRad = (10 * Math.PI) / 180; // max 10° rotasi
+
+    // Batas horizontal
+    const leftBound = -containerW / 2 + 20;
+    const rightBound = containerW / 2 - 20;
+
+    const frameData: Array<Array<{ x: number; y: number; rotation: number }>> = [];
+
+    for (let frame = 0; frame < totalFrames; frame++) {
+      const snapshot: Array<{ x: number; y: number; rotation: number }> = [];
+
+      for (let i = 0; i < states.length; i++) {
+        const s = states[i];
+
+        if (!s.settled) {
+          // Gravity
+          s.vy += gravity * dt;
+
+          // Update
+          s.x += s.vx * dt;
+          s.y += s.vy * dt;
+          s.rotation += s.rotV * dt;
+
+          // Air friction
+          s.vx *= frictionAir;
+          s.rotV *= frictionAir;
+
+          // ==== PANTULAN LANTAI ====
+          // Dasar huruf = y + halfH, mentok lantai saat y = floorY - halfH
+          const restY = floorY - s.halfH;
+
+          if (s.y >= restY) {
+            s.y = restY;
+
+            // Kalau kecepatan vertikal masih cukup → MANTUL
+            if (Math.abs(s.vy) > 50) {
+              s.vy = -s.vy * restitution;
+              s.bounced = true;
+              // Kasih sedikit rotasi acak agar terlihat mantul natural
+              s.rotV += (Math.random() - 0.5) * 3;
+            } else {
+              s.vy = 0;
+            }
+
+            // Friction horizontal saat di lantai
+            s.vx *= frictionGround;
+            s.rotV *= frictionGround;
+
+            // Settle — berhenti kalau lambat semua
+            if (
+              Math.abs(s.vy) < 15 &&
+              Math.abs(s.vx) < 10 &&
+              Math.abs(s.rotV) < 0.1
+            ) {
+              s.vy = 0;
+              s.vx = 0;
+              s.rotV = 0;
+              s.settled = true;
+            }
+          }
+
+          // ==== BATAS KIRI / KANAN ====
+          const leftLimit = leftBound + s.halfW;
+          const rightLimit = rightBound - s.halfW;
+
+          if (s.x <= leftLimit) {
+            s.x = leftLimit;
+            s.vx = -s.vx * restitution;
+            s.rotV = -s.rotV * 0.3;
+          }
+          if (s.x >= rightLimit) {
+            s.x = rightLimit;
+            s.vx = -s.vx * restitution;
+            s.rotV = -s.rotV * 0.3;
+          }
+
+          // ==== BATASI ROTASI ====
+          if (s.rotation > maxRotRad) {
+            s.rotation = maxRotRad;
+            s.rotV = -Math.abs(s.rotV) * 0.3;
+          } else if (s.rotation < -maxRotRad) {
+            s.rotation = -maxRotRad;
+            s.rotV = Math.abs(s.rotV) * 0.3;
+          }
+        }
+
+        snapshot.push({ x: s.x, y: s.y, rotation: s.rotation });
+      }
+
+      // ==== COLLISION ANTAR HURUF ====
+      // Dorong menjauh kalau overlap (horizontal saja agar tetap tegak)
+      for (let a = 0; a < states.length; a++) {
+        for (let b = a + 1; b < states.length; b++) {
+          const A = states[a];
+          const B = states[b];
+
+          const minDistX = A.halfW + B.halfW + 4;
+          const dx = B.x - A.x;
+          const dy = B.y - A.y;
+          const overlapX = minDistX - Math.abs(dx);
+          const overlapY = A.halfH + B.halfH - Math.abs(dy);
+
+          if (overlapX > 0 && overlapY > 0) {
+            const dirX = dx === 0 ? 1 : Math.sign(dx);
+            const pushX = overlapX / 2;
+            A.x -= dirX * pushX;
+            B.x += dirX * pushX;
+            A.vx = 0;
+            B.vx = 0;
+
+            // Clamp ke batas
+            const aL = leftBound + A.halfW;
+            const aR = rightBound - A.halfW;
+            const bL = leftBound + B.halfW;
+            const bR = rightBound - B.halfW;
+            A.x = Math.max(aL, Math.min(aR, A.x));
+            B.x = Math.max(bL, Math.min(bR, B.x));
+          }
+        }
+      }
+
+      // Update snapshot setelah collision
+      for (let i = 0; i < states.length; i++) {
+        snapshot[i] = {
+          x: states[i].x,
+          y: states[i].y,
+          rotation: states[i].rotation,
+        };
+      }
+
+      frameData.push(snapshot);
+
+      // Kalau semua sudah settle
+      if (states.every((s) => s.settled)) {
+        for (let k = frame + 1; k < totalFrames; k++) {
+          frameData.push(snapshot.map((p) => ({ ...p })));
+        }
+        break;
+      }
     }
 
+    // ==== ANIMASI GSAP per huruf ====
+    // Delay antar huruf kecil saja supaya tetap formasi jatuh
+    chars.forEach((char, i) => {
+      const delay = i * 0.06;
+      const tl = gsap.timeline({ delay });
+
+      tl.set(char, {
+        x: frameData[0][i].x,
+        y: frameData[0][i].y,
+        rotation: frameData[0][i].rotation,
+      });
+
+      for (let f = 1; f < frameData.length; f++) {
+        tl.to(
+          char,
+          {
+            x: frameData[f][i].x,
+            y: frameData[f][i].y,
+            rotation: frameData[f][i].rotation,
+            duration: dt,
+            ease: "none",
+          },
+          ">"
+        );
+      }
+    });
+
     return () => {
-      tl.kill();
+      if (split) split.revert();
     };
   }, [dimensions]);
 
@@ -566,7 +711,6 @@ const PhysicsMenuruTitle = () => {
         overflow: "hidden",
         position: "relative",
         backgroundColor: "#ffffff",
-        // Flexbox: center horizontal & atas
         display: "flex",
         alignItems: "flex-start",
         justifyContent: "center",
@@ -585,9 +729,6 @@ const PhysicsMenuruTitle = () => {
           userSelect: "none",
           whiteSpace: "nowrap",
           display: "inline-block",
-          // PENTING: TIDAK ada translateX, TIDAK ada position absolute
-          // Flexbox parent yang menaruh di tengah
-          // GSAP akan mengubah y (dan x kecil) dari sini
           willChange: "transform",
         }}
       >
@@ -3742,6 +3883,14 @@ export default function HomePage(): React.JSX.Element {
         .split-char-livechat {
           display: inline-block;
           will-change: transform, opacity, filter;
+        }
+        .physics-char {
+          display: inline-block;
+          will-change: transform, opacity;
+          color: #0D3CFC !important;
+          transform-origin: center center !important;
+          opacity: 1 !important;
+          visibility: visible !important;
         }
         .chat-messages-container::-webkit-scrollbar,
         .chat-messages-container-admin::-webkit-scrollbar {
