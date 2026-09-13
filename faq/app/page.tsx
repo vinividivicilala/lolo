@@ -417,177 +417,6 @@ interface TourStep {
   isLoginStep?: boolean;
 }
 
-// ===== PHYSICS MENURU TITLE COMPONENT =====
-// Teks "Menuru" 450px warna biru full
-// Huruf jatuh dari atas, berhenti TEPAT DI BAWAH judul "Live Chat Agent"
-// Huruf TIDAK terlalu jauh antar huruf (rapat), TIDAK menabrak judul
-const PhysicsMenuruTitle = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const textRef = useRef<HTMLDivElement>(null);
-  const [containerHeight, setContainerHeight] = useState(600);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const updateHeight = () => {
-      if (containerRef.current) {
-        setContainerHeight(containerRef.current.offsetHeight);
-      }
-    };
-    updateHeight();
-    window.addEventListener("resize", updateHeight);
-    return () => window.removeEventListener("resize", updateHeight);
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (!containerRef.current || !textRef.current) return;
-    if (containerHeight === 0) return;
-
-    const split = new SplitText(textRef.current, {
-      type: "chars",
-      charsClass: "physics-char",
-    });
-
-    const chars = split.chars;
-
-    // ===== POSISI AKHIR HURUF =====
-    // Huruf jatuh dan berhenti di area bawah container
-    // Tapi tidak terlalu jauh antar huruf (rapat, ±5px gap)
-    // Dan tetap ada jarak aman dengan judul Live Chat Agent (di bawah container)
-    const baseCharWidth = 240; // perkiraan lebar rata-rata per huruf "Menuru" 450px
-    const spacing = 5; // gap kecil antar huruf (rapat)
-    const totalWidth = (baseCharWidth + spacing) * chars.length;
-    const startX = -totalWidth / 2 + baseCharWidth / 2;
-
-    // Posisi Y akhir: di bagian bawah container, sekitar 75% tinggi
-    const floorY = containerHeight * 0.72;
-
-    // Set initial state: huruf di atas container, posisi acak
-    chars.forEach((char, i) => {
-      gsap.set(char, {
-        y: -900 - i * 60,
-        x: startX + i * (baseCharWidth + spacing), // posisi sejajar, rapat
-        rotation: (Math.random() - 0.5) * 30, // rotasi ringan saja
-        opacity: 1,
-        force3D: true,
-      });
-    });
-
-    const tl = gsap.timeline({
-      delay: 0.3,
-      defaults: { ease: "power1.in" },
-    });
-
-    chars.forEach((char, i) => {
-      const delay = i * 0.15 + Math.random() * 0.2;
-      const fallDuration = 3 + Math.random() * 1;
-
-      // Posisi X akhir: huruf tetap RAPAT (spacing kecil ± 5px)
-      const targetX = startX + i * (baseCharWidth + spacing) + (Math.random() - 0.5) * 15;
-      // Rotasi akhir: ringan saja (maks ±20°)
-      const targetRotation = (Math.random() - 0.5) * 40;
-      // Posisi Y akhir: sedikit variasi tapi tetap dekat floorY (tidak terlalu jauh)
-      const targetY = floorY + (Math.random() - 0.5) * 60;
-
-      const charTl = gsap.timeline({ delay });
-
-      // 1. Vertical Fall dengan physics2D
-      charTl.to(
-        char,
-        {
-          duration: fallDuration,
-          physics2D: {
-            velocity: 500 + Math.random() * 300,
-            angle: 90 + (Math.random() - 0.5) * 20,
-            gravity: 900 + Math.random() * 400,
-          },
-          ease: "none",
-        },
-        0
-      );
-
-      // 2. Horizontal drift (kecil saja, huruf tetap rapat)
-      charTl.to(
-        char,
-        {
-          duration: fallDuration,
-          x: targetX,
-          ease: "power1.inOut",
-        },
-        0
-      );
-
-      // 3. Rotation ringan
-      charTl.to(
-        char,
-        {
-          duration: fallDuration,
-          rotation: targetRotation,
-          ease: "power1.inOut",
-        },
-        0
-      );
-
-      // 4. Settle — huruf mendarat tepat di targetY (rapat, tidak menabrak judul)
-      charTl.to(
-        char,
-        {
-          duration: 0.8,
-          y: targetY,
-          rotation: targetRotation,
-          x: targetX,
-          ease: "power3.out",
-        },
-        fallDuration - 0.2
-      );
-    });
-
-    return () => {
-      tl.kill();
-      if (split) split.revert();
-    };
-  }, [containerHeight]);
-
-  return (
-    <div
-      ref={containerRef}
-      style={{
-        width: "100%",
-        height: "600px",
-        overflow: "visible",
-        position: "relative",
-        backgroundColor: "#ffffff",
-        display: "flex",
-        alignItems: "flex-start",
-        justifyContent: "center",
-      }}
-    >
-      <div
-        ref={textRef}
-        style={{
-          fontFamily: FONT_FAMILY,
-          fontSize: "450px",
-          fontWeight: 700,
-          color: "#0D3CFC",
-          letterSpacing: "-0.04em",
-          lineHeight: 1,
-          textAlign: "center",
-          userSelect: "none",
-          whiteSpace: "nowrap",
-          display: "inline-block",
-          position: "absolute",
-          top: 0,
-          left: "50%",
-          transform: "translateX(-50%)",
-          pointerEvents: "none",
-        }}
-      >
-        Menuru
-      </div>
-    </div>
-  );
-};
-
 // ===== ONBOARDING TOUR COMPONENT =====
 const OnboardingTour = ({
   steps,
@@ -610,13 +439,11 @@ const OnboardingTour = ({
 
   useEffect(() => {
     if (!isActive || !step) return;
-
     const updateRect = () => {
       const el = document.querySelector(`[data-tour="${step.target}"]`);
       if (el) {
         const rect = el.getBoundingClientRect();
         setTargetRect(rect);
-
         const tooltipWidth = 340;
         const tooltipHeight = 200;
         const arrowSize = 14;
@@ -985,6 +812,147 @@ const OnboardingTour = ({
   );
 };
 
+// ===== MENURU PHYSICS FALL COMPONENT =====
+const MenuruPhysicsFall = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLSpanElement>(null);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isMounted) return;
+    if (!textRef.current || !containerRef.current) return;
+
+    const container = containerRef.current;
+    const textEl = textRef.current;
+
+    // Split text into characters
+    const split = new SplitText(textEl, {
+      type: "chars",
+      charsClass: "menuru-fall-char",
+    });
+
+    const chars = split.chars;
+    if (!chars || chars.length === 0) return;
+
+    const containerRect = container.getBoundingClientRect();
+    const containerHeight = containerRect.height;
+    const containerWidth = containerRect.width;
+
+    // Set each char to absolute, initial random position, then fall with physics
+    chars.forEach((char: HTMLElement, i: number) => {
+      gsap.set(char, {
+        position: "absolute",
+        display: "inline-block",
+        willChange: "transform, opacity",
+        opacity: 0,
+      });
+    });
+
+    // Physics fall animation
+    const tl = gsap.timeline({ delay: 0.3 });
+
+    chars.forEach((char: HTMLElement, i: number) => {
+      // Random start position (above the container)
+      const startX = gsap.utils.random(0, Math.max(containerWidth - 80, 100));
+      const startY = gsap.utils.random(-600, -200);
+
+      // Random landing position (within container, bottom area)
+      const landX = gsap.utils.random(0, Math.max(containerWidth - 80, 100));
+      const landY = gsap.utils.random(
+        Math.max(containerHeight * 0.2, 20),
+        Math.max(containerHeight - 120, 60)
+      );
+
+      gsap.set(char, {
+        x: startX,
+        y: startY,
+        rotation: gsap.utils.random(-180, 180),
+        opacity: 1,
+      });
+
+      // Animate fall with Physics2D
+      tl.to(
+        char,
+        {
+          duration: gsap.utils.random(1.4, 2.2),
+          physics2D: {
+            velocity: gsap.utils.random(400, 800),
+            angle: gsap.utils.random(60, 120), // mostly downward
+            gravity: 1200,
+          },
+          x: landX,
+          y: landY,
+          rotation: gsap.utils.random(-15, 15),
+          ease: "none",
+        },
+        i * 0.06
+      );
+    });
+
+    return () => {
+      tl.kill();
+      split.revert();
+    };
+  }, [isMounted]);
+
+  if (!isMounted) {
+    return (
+      <div
+        style={{
+          width: "100%",
+          height: "260px",
+          position: "relative",
+          overflow: "hidden",
+          backgroundColor: "#ffffff",
+        }}
+      />
+    );
+  }
+
+  return (
+    <div
+      ref={containerRef}
+      style={{
+        width: "100%",
+        height: "260px",
+        position: "relative",
+        overflow: "hidden",
+        backgroundColor: "#ffffff",
+        display: "flex",
+        alignItems: "flex-end",
+        justifyContent: "flex-start",
+        paddingLeft: "40px",
+      }}
+    >
+      <span
+        ref={textRef}
+        style={{
+          fontFamily: FONT_FAMILY,
+          fontSize: "450px",
+          fontWeight: 700,
+          color: "#0D3CFC",
+          letterSpacing: "-0.02em",
+          textTransform: "none",
+          lineHeight: "0.8",
+          display: "inline-block",
+          position: "relative",
+          WebkitFontSmoothing: "antialiased",
+          MozOsxFontSmoothing: "grayscale",
+          pointerEvents: "none",
+          userSelect: "none",
+          whiteSpace: "nowrap",
+        }}
+      >
+        Menuru
+      </span>
+    </div>
+  );
+};
+
 // ===== LIVE CHAT AGENT COMPONENT =====
 const LiveChatAgent = ({
   user,
@@ -1232,7 +1200,6 @@ const LiveChatAgent = ({
 
   useEffect(() => {
     if (!db || !user || !isMounted) return;
-
     let q;
     if (isAdmin) {
       q = query(collection(db, "livechat_tickets"), orderBy("createdAt", "desc"));
@@ -1243,7 +1210,6 @@ const LiveChatAgent = ({
         orderBy("createdAt", "desc")
       );
     }
-
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const ticketList: Ticket[] = [];
       snapshot.forEach((docSnap) => {
@@ -3515,18 +3481,14 @@ export default function HomePage(): React.JSX.Element {
           fontFamily: FONT_FAMILY, overflow: "visible",
         }}
       >
-        {/* ===== PHYSICS MENURU TITLE ===== */}
-        <PhysicsMenuruTitle />
+        {/* ===== MENURU PHYSICS FALL — DI PALING ATAS ===== */}
+        <MenuruPhysicsFall />
 
-        {/* ===== LIVE CHAT AGENT ===== */}
-        <div
-          style={{
-            padding: "0 40px",
-            maxWidth: "1600px",
-            margin: "0 auto",
-            width: "100%",
-          }}
-        >
+        {/* SPACER supaya tidak tabrakan dengan Live Chat Agent */}
+        <div style={{ height: "60px", width: "100%" }} />
+
+        {/* LIVE CHAT AGENT */}
+        <div style={{ padding: "0 40px", maxWidth: "1600px", margin: "0 auto", width: "100%" }}>
           <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} />
         </div>
 
@@ -3673,7 +3635,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* MENURU Text + Copyright */}
+        {/* MENURU Text + Copyright (di bawah, animasi scroll) */}
         <div
           ref={menuruFooterRef}
           style={{
@@ -3750,13 +3712,15 @@ export default function HomePage(): React.JSX.Element {
           display: inline-block;
           will-change: transform, opacity, filter;
         }
-        .physics-char {
+        .menuru-fall-char {
           display: inline-block;
           will-change: transform, opacity;
-          color: #0D3CFC !important;
-          transform-origin: center center;
-          opacity: 1 !important;
-          visibility: visible !important;
+          color: #0D3CFC;
+          font-family: ${FONT_FAMILY};
+          font-weight: 700;
+          font-size: 450px;
+          line-height: 0.8;
+          letter-spacing: -0.02em;
         }
         .chat-messages-container::-webkit-scrollbar,
         .chat-messages-container-admin::-webkit-scrollbar {
