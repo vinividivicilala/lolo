@@ -23,10 +23,11 @@ import {
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
+import { Physics2DPlugin } from "gsap/Physics2DPlugin";
 
 // Register GSAP plugins
 if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger, SplitText);
+  gsap.registerPlugin(ScrollTrigger, SplitText, Physics2DPlugin);
 }
 
 // Firebase Config
@@ -416,6 +417,118 @@ interface TourStep {
   isLoginStep?: boolean;
 }
 
+// ===== PHYSICS MENURU TITLE COMPONENT =====
+// Teks "Menuru" font 450px warna biru full
+// Animasi Text Fall with Real Physics using GSAP Physics2DPlugin
+const PhysicsMenuruTitle = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!containerRef.current || !textRef.current) return;
+
+    // Split text into chars
+    const split = new SplitText(textRef.current, {
+      type: "chars",
+      charsClass: "physics-char",
+    });
+
+    const chars = split.chars;
+
+    // Set initial state: semua huruf di atas viewport, posisi x tidak beraturan
+    gsap.set(chars, {
+      y: -800,
+      x: (i) => (i - chars.length / 2) * 60 + (Math.random() - 0.5) * 200,
+      rotation: () => (Math.random() - 0.5) * 60,
+      opacity: 1,
+      force3D: true,
+    });
+
+    // Physics fall animation
+    chars.forEach((char, i) => {
+      const delay = i * 0.06 + Math.random() * 0.15;
+      const vx = (Math.random() - 0.5) * 200;
+      const vy = 600 + Math.random() * 400;
+      const gravity = 1200 + Math.random() * 400;
+
+      gsap.to(char, {
+        delay,
+        duration: 2.2,
+        physics2D: {
+          velocity: vy,
+          angle: 90 + (Math.random() - 0.5) * 30,
+          gravity: gravity,
+        },
+        rotation: () => (Math.random() - 0.5) * 40,
+        ease: "none",
+        onStart: () => {
+          gsap.set(char, { x: (i - chars.length / 2) * 60 + (Math.random() - 0.5) * 200 });
+        },
+      });
+
+      // Horizontal drift with physics feel
+      gsap.to(char, {
+        delay: delay + 0.1,
+        duration: 2.2,
+        x: `+=${vx}`,
+        ease: "none",
+        onComplete: () => {
+          // Small settle bounce
+          gsap.to(char, {
+            y: "+=8",
+            duration: 0.15,
+            yoyo: true,
+            repeat: 1,
+            ease: "power1.inOut",
+          });
+        },
+      });
+    });
+
+    // Cleanup
+    return () => {
+      if (split) split.revert();
+    };
+  }, []);
+
+  return (
+    <div
+      ref={containerRef}
+      style={{
+        width: "100%",
+        minHeight: "520px",
+        overflow: "hidden",
+        position: "relative",
+        backgroundColor: "#ffffff",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        paddingTop: "40px",
+        paddingBottom: "20px",
+      }}
+    >
+      <div
+        ref={textRef}
+        style={{
+          fontFamily: FONT_FAMILY,
+          fontSize: "450px",
+          fontWeight: 700,
+          color: "#0D3CFC",
+          letterSpacing: "-0.04em",
+          lineHeight: 1,
+          textAlign: "center",
+          userSelect: "none",
+          whiteSpace: "nowrap",
+          display: "inline-block",
+        }}
+      >
+        Menuru
+      </div>
+    </div>
+  );
+};
+
 // ===== ONBOARDING TOUR COMPONENT =====
 const OnboardingTour = ({
   steps,
@@ -436,7 +549,6 @@ const OnboardingTour = ({
 
   const step = steps[currentStep];
 
-  // Update target rect when step changes or on resize/scroll
   useEffect(() => {
     if (!isActive || !step) return;
 
@@ -446,7 +558,6 @@ const OnboardingTour = ({
         const rect = el.getBoundingClientRect();
         setTargetRect(rect);
 
-        // Compute tooltip position with arrow
         const tooltipWidth = 340;
         const tooltipHeight = 200;
         const arrowSize = 14;
@@ -455,14 +566,12 @@ const OnboardingTour = ({
         let left = 0;
         let arrow: "top" | "bottom" | "left" | "right" = "bottom";
 
-        // Determine best position based on available space
         const spaceBelow = window.innerHeight - rect.bottom;
         const spaceAbove = rect.top;
         const spaceRight = window.innerWidth - rect.right;
         const spaceLeft = rect.left;
 
         let pos = step.position || "bottom";
-        // Auto-flip if not enough space
         if (pos === "bottom" && spaceBelow < tooltipHeight + gap) {
           pos = spaceAbove > spaceBelow ? "top" : "bottom";
         }
@@ -494,7 +603,6 @@ const OnboardingTour = ({
           arrow = "left";
         }
 
-        // Clamp to viewport
         const padding = 12;
         if (left < padding) left = padding;
         if (left + tooltipWidth > window.innerWidth - padding) {
@@ -513,7 +621,6 @@ const OnboardingTour = ({
     };
 
     updateRect();
-    // Auto-scroll target into view
     const el = document.querySelector(`[data-tour="${step.target}"]`);
     if (el) {
       (el as HTMLElement).scrollIntoView({ behavior: "smooth", block: "center" });
@@ -547,10 +654,8 @@ const OnboardingTour = ({
     onComplete();
   };
 
-  // ===== ARROW RENDER (lengkungan penunjuk ke area target) =====
   const renderArrow = () => {
     const arrowSize = 14;
-    // Arrow color sama dengan bg tooltip (biru)
     const baseStyle: React.CSSProperties = {
       position: "absolute",
       width: 0,
@@ -620,7 +725,6 @@ const OnboardingTour = ({
 
   return (
     <>
-      {/* OVERLAY */}
       <div
         onClick={handleSkip}
         style={{
@@ -632,7 +736,6 @@ const OnboardingTour = ({
         }}
       />
 
-      {/* HIGHLIGHT SPOTLIGHT */}
       {targetRect && (
         <div
           style={{
@@ -650,7 +753,6 @@ const OnboardingTour = ({
         />
       )}
 
-      {/* TOOLTIP — BG BIRU FULL, TEKS PUTIH, TANPA SHADOW, TANPA BORDER WARNA */}
       <div
         style={{
           position: "fixed",
@@ -667,10 +769,8 @@ const OnboardingTour = ({
           transition: "all 0.3s ease",
         }}
       >
-        {/* ARROW PENUNJUK */}
         {renderArrow()}
 
-        {/* Step indicator */}
         <div
           style={{
             display: "flex",
@@ -735,7 +835,6 @@ const OnboardingTour = ({
           {step.content}
         </p>
 
-        {/* Buttons */}
         <div
           style={{
             display: "flex",
@@ -800,7 +899,6 @@ const OnboardingTour = ({
           </button>
         </div>
 
-        {/* Progress dots */}
         <div
           style={{
             display: "flex",
@@ -861,7 +959,6 @@ const LiveChatAgent = ({
   const [ticketMsgCounts, setTicketMsgCounts] = useState<{ [ticketId: string]: number }>({});
   const [searchQuery, setSearchQuery] = useState("");
 
-  // ===== TOUR STATE =====
   const [showTour, setShowTour] = useState(false);
   const [tourStep, setTourStep] = useState(0);
 
@@ -879,7 +976,6 @@ const LiveChatAgent = ({
     "Other",
   ];
 
-  // ===== TOUR STEPS =====
   const tourSteps: TourStep[] = [
     {
       target: "login-button",
@@ -926,7 +1022,6 @@ const LiveChatAgent = ({
     },
   ];
 
-  // ===== INIT =====
   useEffect(() => {
     setIsMounted(true);
     getCryptoKey()
@@ -937,7 +1032,6 @@ const LiveChatAgent = ({
       });
   }, []);
 
-  // ===== AUTO START TOUR =====
   useEffect(() => {
     if (!isMounted) return;
     if (isAdmin) return;
@@ -970,7 +1064,6 @@ const LiveChatAgent = ({
     setShowTour(true);
   };
 
-  // ===== GSAP TITLE ANIMATION =====
   useEffect(() => {
     if (!isMounted) return;
     if (liveChatTitleRef.current) {
@@ -1002,7 +1095,6 @@ const LiveChatAgent = ({
     };
   }, [isMounted]);
 
-  // ===== CHECK BAN STATUS =====
   useEffect(() => {
     if (!user || !isMounted) {
       setCheckingBan(false);
@@ -1053,7 +1145,6 @@ const LiveChatAgent = ({
     }
   };
 
-  // ===== REALTIME ONLINE AGENTS & USERS =====
   useEffect(() => {
     if (!db || !isMounted) return;
     const q = query(collection(db, "users"), where("online", "==", true));
@@ -1080,7 +1171,6 @@ const LiveChatAgent = ({
     return () => unsubscribe();
   }, [db, isMounted]);
 
-  // ===== QUERY TICKETS =====
   useEffect(() => {
     if (!db || !user || !isMounted) return;
 
@@ -1113,7 +1203,6 @@ const LiveChatAgent = ({
     return () => unsubscribe();
   }, [db, user, isAdmin, selectedTicket, isMounted]);
 
-  // ===== REALTIME PREVIEW =====
   useEffect(() => {
     if (!db || !tickets.length || !isMounted) return;
     const unsubscribes: (() => void)[] = [];
@@ -1153,7 +1242,6 @@ const LiveChatAgent = ({
     };
   }, [db, tickets, isMounted]);
 
-  // ===== MESSAGES FOR SELECTED TICKET =====
   useEffect(() => {
     if (!db || !selectedTicket || !isMounted) return;
     const q = query(
@@ -1181,7 +1269,6 @@ const LiveChatAgent = ({
     return () => unsubscribe();
   }, [db, selectedTicket, isMounted]);
 
-  // ===== MARK AS READ (ADMIN) =====
   useEffect(() => {
     if (!db || !selectedTicket || !user || !isAdmin || !isMounted) return;
     const unread = messages.filter((m) => m.senderId !== user.uid && !m.read);
@@ -1191,7 +1278,6 @@ const LiveChatAgent = ({
     });
   }, [messages, selectedTicket, db, user, isAdmin, isMounted]);
 
-  // ===== AUTO SELECT ACTIVE TICKET =====
   useEffect(() => {
     if (!user || isAdmin || !isMounted) return;
     const userTickets = tickets.filter((t) => t.userId === user.uid);
@@ -1206,7 +1292,6 @@ const LiveChatAgent = ({
     }
   }, [tickets, user, isAdmin, selectedTicket, isMounted]);
 
-  // ===== HELPERS =====
   const generateTicketId = (createdAt: any): string => {
     if (!createdAt) return "#TICKET-0000";
     const date = createdAt.toDate ? createdAt.toDate() : new Date(createdAt);
@@ -1892,7 +1977,6 @@ const LiveChatAgent = ({
     );
   };
 
-  // ===== LOADING / NOT LOGGED IN / BANNED / ETC =====
   if (checkingBan) {
     return (
       <div style={{ marginTop: "40px", paddingTop: "30px" }}>
@@ -2335,7 +2419,6 @@ const LiveChatAgent = ({
     );
   }
 
-  // ===== MAIN CHAT LAYOUT =====
   const waitingTicketsRaw = tickets.filter((t) => t.status === "waiting");
   const activeTicketsRaw = tickets.filter((t) => t.status === "active");
   const resolvedTicketsRaw = tickets.filter(
@@ -2356,7 +2439,6 @@ const LiveChatAgent = ({
         setCurrentStep={setTourStep}
       />
       <div style={{ marginTop: "40px", paddingTop: "30px" }}>
-        {/* HEADER */}
         <div
           style={{
             display: "flex",
@@ -2442,7 +2524,6 @@ const LiveChatAgent = ({
 
         {renderAnnouncementBroadcastSection()}
 
-        {/* CHAT AREA */}
         <div
           style={{
             display: "flex",
@@ -2455,7 +2536,6 @@ const LiveChatAgent = ({
         >
           {renderOnlinePanel()}
 
-          {/* TICKET LIST */}
           <div
             data-tour="chat-list"
             style={{
@@ -2832,7 +2912,6 @@ const LiveChatAgent = ({
             )}
           </div>
 
-          {/* MESSAGES */}
           <div
             style={{
               flex: 1,
@@ -3377,6 +3456,9 @@ export default function HomePage(): React.JSX.Element {
           fontFamily: FONT_FAMILY, overflow: "visible",
         }}
       >
+        {/* ===== PHYSICS MENURU TITLE (PALING ATAS) ===== */}
+        <PhysicsMenuruTitle />
+
         {/* LIVE CHAT AGENT */}
         <div style={{ padding: "0 40px", maxWidth: "1600px", margin: "0 auto", width: "100%" }}>
           <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} />
@@ -3601,6 +3683,12 @@ export default function HomePage(): React.JSX.Element {
         .split-char-livechat {
           display: inline-block;
           will-change: transform, opacity, filter;
+        }
+        .physics-char {
+          display: inline-block;
+          will-change: transform, opacity;
+          color: #0D3CFC !important;
+          transform-origin: center center;
         }
         .chat-messages-container::-webkit-scrollbar,
         .chat-messages-container-admin::-webkit-scrollbar {
