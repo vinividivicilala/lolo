@@ -407,14 +407,14 @@ interface TourStep {
 }
 
 // ===== PHYSICS MENURU TITLE =====
-// Teks "Menuru" UTUH 450px biru, jatuh dari atas
-// Setelah mentok lantai, tiap huruf bounce (pantulan) individual
-// Teks tetap formasi M-e-n-u-r-u, tidak diacak random
+// Huruf "Menuru" jatuh sebagai satu kesatuan, mentok lantai (badan penuh di atas)
+// Setelah mentok, pecah jadi huruf & bounce (pantulan) sekali
+// Setelah bounce selesai, huruf DIAM
+// Tidak ada bayangan
 const PhysicsMenuruTitle = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
-  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -431,89 +431,89 @@ const PhysicsMenuruTitle = () => {
     return () => window.removeEventListener("resize", updateDims);
   }, []);
 
-  // Step 1: Ukur tinggi teks utuh untuk hitung posisi lantai
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (!containerRef.current || !textRef.current) return;
     if (dimensions.width === 0 || dimensions.height === 0) return;
 
-    // Ukur tinggi teks utuh
-    const textH = textRef.current.offsetHeight;
     const containerH = dimensions.height;
+    const textEl = textRef.current;
 
+    // ==== UKUR TINGGI TEKS (reset transform dulu) ====
+    gsap.set(textEl, { x: 0, y: 0, clearProps: "all" });
+    const textH = textEl.offsetHeight;
+
+    // ==== BATAS LANTAI ====
     // Lantai = 40px dari dasar container
     const floorY = containerH - 40;
-    // restY = posisi Y akhir (pusat teks) saat badan penuh di atas lantai
+    // restY = Y pusat teks saat DASAR teks mentok lantai
     const restY = floorY - textH / 2;
 
-    // Set posisi awal (di atas container)
-    gsap.set(textRef.current, {
+    // ==== SET POSISI AWAL (di atas container) ====
+    gsap.set(textEl, {
       x: 0,
-      y: -textH - 100,
+      y: -textH - 200,
       rotation: 0,
     });
 
-    setIsReady(true);
+    // ==== TL UTAMA: JATUH → SPLIT → BOUNCE → DIAM ====
+    const masterTl = gsap.timeline();
 
-    // Animasi jatuh teks utuh (1 objek)
-    gsap.to(textRef.current, {
+    // STEP 1: Jatuh sebagai teks utuh (1 objek)
+    masterTl.to(textEl, {
       y: restY,
-      duration: 1.4,
-      ease: "bounce.out", // efek pantulan
+      duration: 1.2,
+      ease: "power2.in", // akselerasi jatuh
       onComplete: () => {
-        // Setelah jatuh, pecah jadi huruf & bounce individual
-        startCharBounce(floorY, textH);
+        // Setelah jatuh utuh, pecah jadi huruf
+        const split = new SplitText(textEl, {
+          type: "chars",
+          charsClass: "bounce-char",
+        });
+        const chars = split.chars;
+
+        // Reset posisi tiap char (karena textRef sudah di posisi akhir)
+        // tiap char di posisi normal (tidak ada transform)
+        chars.forEach((char) => {
+          gsap.set(char, {
+            y: 0,
+            x: 0,
+            rotation: 0,
+            transformOrigin: "center bottom",
+          });
+        });
+
+        // STEP 2: BOUNCE per huruf (hanya sekali)
+        chars.forEach((char, i) => {
+          const bounceHeight = 25 + Math.random() * 15; // 25-40px
+          const delay = i * 0.06 + Math.random() * 0.05;
+
+          // Bounce: naik lalu turun dengan easing
+          gsap.to(char, {
+            keyframes: [
+              { y: -bounceHeight, duration: 0.25, ease: "power2.out" },
+              { y: 0, duration: 0.5, ease: "bounce.out" },
+            ],
+            delay: delay,
+            // Setelah selesai, char diam di posisi akhir (y=0)
+          });
+
+          // Slight rotation saat bounce (goyang kecil) — juga sekali
+          gsap.to(char, {
+            keyframes: [
+              { rotation: (Math.random() - 0.5) * 6, duration: 0.25, ease: "power2.out" },
+              { rotation: 0, duration: 0.5, ease: "power2.in" },
+            ],
+            delay: delay,
+          });
+        });
       },
     });
+
+    return () => {
+      masterTl.kill();
+    };
   }, [dimensions]);
-
-  // Step 2: Setelah teks utuh mendarat, pecah jadi huruf & bounce individual
-  const startCharBounce = (floorY: number, textH: number) => {
-    if (!textRef.current) return;
-
-    // Split text jadi chars
-    const split = new SplitText(textRef.current, {
-      type: "chars",
-      charsClass: "bounce-char",
-    });
-
-    const chars = split.chars;
-
-    // Setiap huruf bounce individual dengan delay berbeda
-    chars.forEach((char, i) => {
-      // Reset transform ke 0 (karena textRef sudah di posisi akhir)
-      gsap.set(char, {
-        y: 0,
-        x: 0,
-        rotation: 0,
-      });
-
-      // Bounce animation: naik-turun dengan easing
-      const bounceHeight = 15 + Math.random() * 10; // 15-25px
-      const delay = i * 0.12; // delay bertahap dari kiri ke kanan
-
-      gsap.to(char, {
-        keyframes: [
-          { y: -bounceHeight, duration: 0.3, ease: "power2.out" },
-          { y: 0, duration: 0.4, ease: "bounce.out" },
-        ],
-        delay: delay,
-        repeat: -1, // Loop terus menerus
-        repeatDelay: 0.8, // Jeda antar bounce
-      });
-
-      // Slight rotation saat bounce (goyang kecil)
-      gsap.to(char, {
-        keyframes: [
-          { rotation: (Math.random() - 0.5) * 4, duration: 0.3, ease: "power2.out" },
-          { rotation: 0, duration: 0.4, ease: "power2.in" },
-        ],
-        delay: delay,
-        repeat: -1,
-        repeatDelay: 0.8,
-      });
-    });
-  };
 
   return (
     <div
@@ -528,6 +528,7 @@ const PhysicsMenuruTitle = () => {
         display: "flex",
         alignItems: "flex-start",
         justifyContent: "center",
+        // Tidak ada box-shadow / text-shadow
       }}
     >
       <div
@@ -544,6 +545,7 @@ const PhysicsMenuruTitle = () => {
           whiteSpace: "nowrap",
           display: "inline-block",
           willChange: "transform",
+          // Tidak ada text-shadow / filter drop-shadow
         }}
       >
         Menuru
@@ -3703,6 +3705,7 @@ export default function HomePage(): React.JSX.Element {
           will-change: transform;
           color: #0D3CFC !important;
           transform-origin: center bottom !important;
+          /* Tidak ada text-shadow / filter drop-shadow — tidak ada bayangan */
         }
         .chat-messages-container::-webkit-scrollbar,
         .chat-messages-container-admin::-webkit-scrollbar {
