@@ -33,7 +33,7 @@ const firebaseConfig = {
   measurementId: "G-8LMP7F4BE9"
 };
 
-// Initialize Firebase - LANGSUNG TANPA CONDITIONAL
+// Initialize Firebase
 const app = getApps().length === 0
   ? initializeApp(firebaseConfig)
   : getApps()[0];
@@ -85,7 +85,7 @@ const LogoutIcon = ({ size = 18 }: { size?: number }) => (
 );
 
 // Pesawat / Plane Icon
-const PlaneIcon = ({ size = 28, color = "#0D3CFC" }: { size?: number, color?: string }) => (
+const PlaneIcon = ({ size = 24, color = "#0D3CFC" }: { size?: number, color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M21 16V14L13 9V3.5C13 2.67 12.33 2 11.5 2C10.67 2 10 2.67 10 3.5V9L2 14V16L10 13.5V19L8 20.5V22L11.5 21L15 22V20.5L13 19V13.5L21 16Z" fill={color}/>
   </svg>
@@ -107,40 +107,6 @@ const menuItems = [
   { name: "Donation", number: "05" },
   { name: "Contact", number: "06" },
   { name: "Note", number: "07" }
-];
-
-// Timeline data
-const timelineData = [
-  {
-    year: "2019",
-    title: "Awal Mula Menuru",
-    description: "Menuru lahir dari sebuah ide sederhana: menghubungkan orang-orang melalui cerita dan pengalaman yang bermakna. Dimulai dari sebuah kamar kecil dengan satu laptop."
-  },
-  {
-    year: "2020",
-    title: "Komunitas Pertama",
-    description: "Kami membuka ruang bagi komunitas untuk berbagi. Dalam waktu singkat, ratusan orang bergabung dan mulai berbagi kisah mereka."
-  },
-  {
-    year: "2021",
-    title: "Ekspansi Produk",
-    description: "Menuru mulai mengembangkan produk digital: Note, Calendar, dan Blog. Semua dirancang untuk membantu orang mendokumentasikan perjalanan mereka."
-  },
-  {
-    year: "2022",
-    title: "Live Chat Agent",
-    description: "Kami meluncurkan Live Chat Agent untuk memberikan dukungan langsung kepada pengguna. Respon cepat, solusi tepat."
-  },
-  {
-    year: "2023",
-    title: "Donasi & Kolaborasi",
-    description: "Program donasi dan kolaborasi dengan berbagai komunitas kreatif. Menuru tumbuh menjadi ekosistem yang saling mendukung."
-  },
-  {
-    year: "2024",
-    title: "Masa Depan Cerah",
-    description: "Dengan dukungan komunitas, Menuru terus berkembang. Kami percaya setiap perjalanan memiliki cerita yang indah untuk dibagikan."
-  }
 ];
 
 // ===== LIVE CHAT AGENT COMPONENT =====
@@ -1576,10 +1542,10 @@ export default function StoriesPage(): React.JSX.Element {
 
   // Timeline refs
   const timelineRef = useRef<HTMLDivElement>(null);
-  const timelineLineRef = useRef<HTMLDivElement>(null);
-  const timelineProgressRef = useRef<HTMLDivElement>(null);
+  const timelineSvgRef = useRef<SVGSVGElement>(null);
+  const timelineProgressPathRef = useRef<SVGPathElement>(null);
+  const timelineDotRef = useRef<SVGCircleElement>(null);
   const timelinePlaneRef = useRef<HTMLDivElement>(null);
-  const timelineItemsRef = useRef<(HTMLDivElement | null)[]>([]);
 
   // Register GSAP plugins di dalam useEffect
   useEffect(() => {
@@ -1774,120 +1740,51 @@ export default function StoriesPage(): React.JSX.Element {
     };
   }, [showMain, isMounted]);
 
-  // ===== TIMELINE SCROLL ANIMATION =====
+  // ===== SCROLL-DRIVEN TIMELINE SYSTEM =====
   useEffect(() => {
     if (!showMain || !isMounted) return;
-    if (!timelineRef.current || !timelineLineRef.current || !timelineProgressRef.current || !timelinePlaneRef.current) return;
+    if (!timelineRef.current || !timelineProgressPathRef.current || !timelineDotRef.current) return;
 
-    const line = timelineLineRef.current;
-    const progress = timelineProgressRef.current;
-    const plane = timelinePlaneRef.current;
-    const items = timelineItemsRef.current.filter(Boolean);
+    const progressPath = timelineProgressPathRef.current;
+    const dot = timelineDotRef.current;
 
-    // Set initial state
-    gsap.set(progress, { scaleY: 0, transformOrigin: "top center" });
-    gsap.set(plane, { top: "0%" });
+    // Ambil total panjang path untuk animasi stroke-dashoffset
+    let pathLength = 0;
+    try {
+      pathLength = progressPath.getTotalLength();
+    } catch (e) {
+      console.warn("Could not get path length", e);
+      return;
+    }
 
-    // Progress line follows scroll
-    ScrollTrigger.create({
-      trigger: timelineRef.current,
-      start: "top 60%",
-      end: "bottom 80%",
-      scrub: 0.5,
-      onUpdate: (self) => {
-        const p = self.progress;
-        gsap.set(progress, { scaleY: p });
-        // Move plane along the line
-        const lineHeight = line.offsetHeight;
-        const planeY = p * (lineHeight - 40);
-        gsap.set(plane, { top: planeY });
-      }
+    // Set initial state: progress path invisible
+    gsap.set(progressPath, {
+      strokeDasharray: pathLength,
+      strokeDashoffset: pathLength,
     });
 
-    // Animate each timeline item
-    items.forEach((item, i) => {
-      if (!item) return;
-      const dot = item.querySelector('.timeline-dot') as HTMLElement | null;
-      const year = item.querySelector('.timeline-year') as HTMLElement | null;
-      const title = item.querySelector('.timeline-title') as HTMLElement | null;
-      const desc = item.querySelector('.timeline-desc') as HTMLElement | null;
-
-      if (dot) {
-        ScrollTrigger.create({
-          trigger: item,
-          start: "top 75%",
-          onEnter: () => {
-            gsap.to(dot, {
-              backgroundColor: "#0D3CFC",
-              borderColor: "#0D3CFC",
-              scale: 1.15,
-              duration: 0.5,
-              ease: "power2.out"
-            });
-          },
-          onLeaveBack: () => {
-            gsap.to(dot, {
-              backgroundColor: "#000000",
-              borderColor: "#000000",
-              scale: 1,
-              duration: 0.4,
-              ease: "power2.in"
-            });
-          }
+    // Buat ScrollTrigger untuk mengikuti scroll
+    ScrollTrigger.create({
+      trigger: timelineRef.current,
+      start: "top 70%",
+      end: "bottom 70%",
+      scrub: 0.5,
+      onUpdate: (self) => {
+        const progress = self.progress;
+        // Progress line: dari 0 ke pathLength
+        gsap.set(progressPath, {
+          strokeDashoffset: pathLength * (1 - progress),
         });
-      }
 
-      if (year) {
-        gsap.fromTo(year,
-          { opacity: 0, x: -30 },
-          {
-            opacity: 1,
-            x: 0,
-            duration: 0.7,
-            ease: "power3.out",
-            scrollTrigger: {
-              trigger: item,
-              start: "top 80%",
-              toggleActions: "play none none reverse"
-            }
-          }
-        );
-      }
-
-      if (title) {
-        gsap.fromTo(title,
-          { opacity: 0, x: 30 },
-          {
-            opacity: 1,
-            x: 0,
-            duration: 0.7,
-            delay: 0.1,
-            ease: "power3.out",
-            scrollTrigger: {
-              trigger: item,
-              start: "top 80%",
-              toggleActions: "play none none reverse"
-            }
-          }
-        );
-      }
-
-      if (desc) {
-        gsap.fromTo(desc,
-          { opacity: 0, x: 30 },
-          {
-            opacity: 1,
-            x: 0,
-            duration: 0.7,
-            delay: 0.2,
-            ease: "power3.out",
-            scrollTrigger: {
-              trigger: item,
-              start: "top 80%",
-              toggleActions: "play none none reverse"
-            }
-          }
-        );
+        // Titik bulat: bergerak sepanjang path
+        try {
+          const point = progressPath.getPointAtLength(pathLength * progress);
+          gsap.set(dot, {
+            attr: { cx: point.x, cy: point.y },
+          });
+        } catch (e) {
+          // ignore
+        }
       }
     });
 
@@ -2226,34 +2123,29 @@ export default function StoriesPage(): React.JSX.Element {
               </h1>
             </div>
 
-            {/* ===== SCROLL-DRIVEN TIMELINE ===== */}
+            {/* ===== SCROLL-DRIVEN TIMELINE SYSTEM ===== */}
             <div
               ref={timelineRef}
               style={{
                 marginTop: "100px",
                 width: "100%",
                 position: "relative",
-                paddingBottom: "120px",
+                paddingBottom: "200px",
+                minHeight: "800px",
               }}
             >
-              {/* Timeline Header dengan Plane Icon */}
+              {/* Plane Icon di atas - TIDAK IKUT SCROLL */}
               <div
+                ref={timelinePlaneRef}
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: "16px",
-                  marginBottom: "60px",
-                  position: "relative",
+                  justifyContent: "center",
+                  marginBottom: "40px",
                 }}
               >
                 <div
-                  ref={timelinePlaneRef}
                   style={{
-                    position: "absolute",
-                    left: "50%",
-                    top: 0,
-                    transform: "translateX(-50%)",
-                    zIndex: 10,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -2261,232 +2153,67 @@ export default function StoriesPage(): React.JSX.Element {
                     height: "48px",
                     borderRadius: "50%",
                     backgroundColor: "#ffffff",
-                    border: "3px solid #0D3CFC",
-                    boxShadow: "0 4px 16px rgba(13,60,252,0.2)",
+                    border: "2px solid #0D3CFC",
+                    boxShadow: "0 4px 16px rgba(13,60,252,0.15)",
                   }}
                 >
                   <PlaneIcon size={24} color="#0D3CFC" />
                 </div>
-                <div style={{ width: "100%", height: "60px" }} />
               </div>
 
-              {/* Timeline Container */}
+              {/* SVG Timeline dengan Path Melengkung */}
               <div
                 style={{
+                  width: "100%",
                   position: "relative",
                   display: "flex",
-                  flexDirection: "column",
-                  gap: "80px",
+                  justifyContent: "center",
                 }}
               >
-                {/* Base Line (Hitam / Abu) */}
-                <div
-                  ref={timelineLineRef}
+                <svg
+                  ref={timelineSvgRef}
+                  viewBox="0 0 1000 800"
+                  preserveAspectRatio="none"
                   style={{
-                    position: "absolute",
-                    left: "50%",
-                    top: 0,
-                    bottom: 0,
-                    width: "3px",
-                    backgroundColor: "#000000",
-                    transform: "translateX(-50%)",
-                    borderRadius: "2px",
-                    zIndex: 1,
+                    width: "100%",
+                    maxWidth: "1000px",
+                    height: "800px",
+                    overflow: "visible",
                   }}
-                />
+                >
+                  {/* Base path - garis hitam putus-putus kecil, melengkung S */}
+                  <path
+                    d="M 100 20 
+                       C 100 200, 900 200, 900 400 
+                       C 900 600, 100 600, 100 780"
+                    fill="none"
+                    stroke="#000000"
+                    strokeWidth="2"
+                    strokeDasharray="4 6"
+                    strokeLinecap="round"
+                  />
 
-                {/* Progress Line (Biru) */}
-                <div
-                  ref={timelineProgressRef}
-                  style={{
-                    position: "absolute",
-                    left: "50%",
-                    top: 0,
-                    bottom: 0,
-                    width: "3px",
-                    backgroundColor: "#0D3CFC",
-                    transform: "translateX(-50%) scaleY(0)",
-                    transformOrigin: "top center",
-                    borderRadius: "2px",
-                    zIndex: 2,
-                  }}
-                />
+                  {/* Progress path - garis biru kecil, mengikuti scroll */}
+                  <path
+                    ref={timelineProgressPathRef}
+                    d="M 100 20 
+                       C 100 200, 900 200, 900 400 
+                       C 900 600, 100 600, 100 780"
+                    fill="none"
+                    stroke="#0D3CFC"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                  />
 
-                {/* Timeline Items */}
-                {timelineData.map((item, index) => {
-                  const isLeft = index % 2 === 0;
-                  return (
-                    <div
-                      key={index}
-                      ref={(el) => { timelineItemsRef.current[index] = el; }}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        position: "relative",
-                        minHeight: "140px",
-                        zIndex: 3,
-                      }}
-                    >
-                      {/* Sisi Kiri - Tahun */}
-                      <div
-                        style={{
-                          flex: 1,
-                          display: "flex",
-                          justifyContent: isLeft ? "flex-end" : "flex-start",
-                          paddingRight: isLeft ? "60px" : "0",
-                          paddingLeft: isLeft ? "0" : "60px",
-                          textAlign: isLeft ? "right" : "left",
-                        }}
-                      >
-                        {isLeft && (
-                          <div
-                            className="timeline-year"
-                            style={{
-                              fontSize: "56px",
-                              fontWeight: 700,
-                              color: "#0D3CFC",
-                              fontFamily: FONT_FAMILY,
-                              letterSpacing: "-0.02em",
-                              lineHeight: 1,
-                            }}
-                          >
-                            {item.year}
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Titik Tengah */}
-                      <div
-                        style={{
-                          position: "relative",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          width: "40px",
-                          flexShrink: 0,
-                        }}
-                      >
-                        <div
-                          className="timeline-dot"
-                          style={{
-                            width: "18px",
-                            height: "18px",
-                            borderRadius: "50%",
-                            backgroundColor: "#000000",
-                            border: "3px solid #000000",
-                            boxShadow: "0 0 0 6px #ffffff",
-                            transition: "all 0.4s ease",
-                          }}
-                        />
-                      </div>
-
-                      {/* Sisi Kanan - Judul & Deskripsi */}
-                      <div
-                        style={{
-                          flex: 1,
-                          display: "flex",
-                          justifyContent: isLeft ? "flex-start" : "flex-end",
-                          paddingLeft: isLeft ? "60px" : "0",
-                          paddingRight: isLeft ? "0" : "60px",
-                          textAlign: isLeft ? "left" : "right",
-                        }}
-                      >
-                        {!isLeft && (
-                          <div>
-                            <div
-                              className="timeline-title"
-                              style={{
-                                fontSize: "32px",
-                                fontWeight: 700,
-                                color: "#0D3CFC",
-                                fontFamily: FONT_FAMILY,
-                                letterSpacing: "-0.01em",
-                                marginBottom: "8px",
-                              }}
-                            >
-                              {item.title}
-                            </div>
-                            <div
-                              className="timeline-desc"
-                              style={{
-                                fontSize: "18px",
-                                fontWeight: 400,
-                                color: "#666",
-                                fontFamily: FONT_FAMILY,
-                                lineHeight: 1.5,
-                                maxWidth: "420px",
-                                marginLeft: "auto",
-                              }}
-                            >
-                              {item.description}
-                            </div>
-                          </div>
-                        )}
-                        {isLeft && (
-                          <div>
-                            <div
-                              className="timeline-title"
-                              style={{
-                                fontSize: "32px",
-                                fontWeight: 700,
-                                color: "#0D3CFC",
-                                fontFamily: FONT_FAMILY,
-                                letterSpacing: "-0.01em",
-                                marginBottom: "8px",
-                              }}
-                            >
-                              {item.title}
-                            </div>
-                            <div
-                              className="timeline-desc"
-                              style={{
-                                fontSize: "18px",
-                                fontWeight: 400,
-                                color: "#666",
-                                fontFamily: FONT_FAMILY,
-                                lineHeight: 1.5,
-                                maxWidth: "420px",
-                              }}
-                            >
-                              {item.description}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Tahun di sisi kanan jika index ganjil */}
-                      {!isLeft && (
-                        <div
-                          style={{
-                            position: "absolute",
-                            right: 0,
-                            top: "50%",
-                            transform: "translateY(-50%)",
-                            width: "50%",
-                            display: "flex",
-                            justifyContent: "flex-end",
-                            paddingRight: "60px",
-                          }}
-                        >
-                          <div
-                            className="timeline-year"
-                            style={{
-                              fontSize: "56px",
-                              fontWeight: 700,
-                              color: "#0D3CFC",
-                              fontFamily: FONT_FAMILY,
-                              letterSpacing: "-0.02em",
-                              lineHeight: 1,
-                            }}
-                          >
-                            {item.year}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
+                  {/* Titik bulat kecil yang mengikuti progress */}
+                  <circle
+                    ref={timelineDotRef}
+                    cx="100"
+                    cy="20"
+                    r="5"
+                    fill="#0D3CFC"
+                  />
+                </svg>
               </div>
             </div>
           </div>
