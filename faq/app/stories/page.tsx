@@ -2292,6 +2292,7 @@ export default function StoriesPage(): React.JSX.Element {
                     2024 - Present
                   </span>
                 </div>
+                
                 {/* Titik 1 - Sisi kanan: Menuru + CURRENT, Founder and Developer, Deskripsi */}
 <div
   style={{
@@ -2365,6 +2366,34 @@ export default function StoriesPage(): React.JSX.Element {
   </div>
 </div>
 
+                
+{/* ===== KONTEN TITIK 2 (tengah) - cy=480 → 60% ===== */}
+
+{/* Titik 2 - Sisi kiri: Tahun */}
+<div
+  style={{
+    position: "absolute",
+    top: "60%",                 // = 480/800
+    left: "50%",                // = 500/1000
+    transform: "translate(calc(-100% - 30px), -50%)",
+    textAlign: "right",
+    lineHeight: 1,
+  }}
+>
+  <span
+    style={{
+      fontSize: "22px",
+      fontWeight: 600,
+      color: "#0D3CFC",
+      fontFamily: FONT_FAMILY,
+      letterSpacing: "-0.01em",
+      whiteSpace: "nowrap",
+    }}
+  >
+    2019 - 2023
+  </span>
+</div>
+                
 {/* Titik 2 - Sisi kanan: Universitas, Jurusan, Deskripsi */}
 <div
   style={{
