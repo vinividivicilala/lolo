@@ -2292,156 +2292,131 @@ export default function StoriesPage(): React.JSX.Element {
                     2024 - Present
                   </span>
                 </div>
-
                 {/* Titik 1 - Sisi kanan: Menuru + CURRENT, Founder and Developer, Deskripsi */}
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "22.5%",               // = 180/800
-                    left: "50%",                // = 500/1000
-                    transform: "translate(30px, -22px)",   // sejajar baris judul
-                    textAlign: "left",
-                    maxWidth: "360px",
-                  }}
-                >
-                  {/* Baris judul + CURRENT */}
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "10px",
-                      marginBottom: "4px",
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontSize: "22px",
-                        fontWeight: 700,
-                        color: "#0D3CFC",
-                        fontFamily: FONT_FAMILY,
-                        letterSpacing: "-0.01em",
-                        lineHeight: 1.2,
-                      }}
-                    >
-                      Menuru
-                    </span>
-                    <span
-                      style={{
-                        fontSize: "14px",
-                        fontWeight: 600,
-                        color: "#000000",
-                        fontFamily: FONT_FAMILY,
-                        letterSpacing: "0.08em",
-                        lineHeight: 1.2,
-                      }}
-                    >
-                      CURRENT
-                    </span>
-                  </div>
-                  <div
-                    style={{
-                      fontSize: "15px",
-                      fontWeight: 500,
-                      color: "#0D3CFC",
-                      fontFamily: FONT_FAMILY,
-                      lineHeight: 1.3,
-                      marginBottom: "6px",
-                      opacity: 0.85,
-                    }}
-                  >
-                    Founder and Developer
-                  </div>
-                  <div
-                    style={{
-                      fontSize: "13px",
-                      fontWeight: 400,
-                      color: "#0D3CFC",
-                      fontFamily: FONT_FAMILY,
-                      lineHeight: 1.5,
-                      opacity: 0.75,
-                    }}
-                  >
-                    Building the Menuru platform from scratch, designing the system, and developing features for the community.
-                  </div>
-                </div>
+<div
+  style={{
+    position: "absolute",
+    top: "22.5%",               // = 180/800 → sama dengan cy titik bulat 1
+    left: "50%",                // = 500/1000
+    transform: "translate(30px, -13px)",   // geser naik ≈ setengah tinggi baris judul
+    textAlign: "left",
+    maxWidth: "360px",
+  }}
+>
+  {/* Baris judul + CURRENT */}
+  <div
+    style={{
+      display: "flex",
+      alignItems: "center",
+      gap: "10px",
+      marginBottom: "4px",
+      lineHeight: 1.2,
+    }}
+  >
+    <span
+      style={{
+        fontSize: "22px",
+        fontWeight: 700,
+        color: "#0D3CFC",
+        fontFamily: FONT_FAMILY,
+        letterSpacing: "-0.01em",
+        lineHeight: 1.2,
+      }}
+    >
+      Menuru
+    </span>
+    <span
+      style={{
+        fontSize: "14px",
+        fontWeight: 600,
+        color: "#000000",
+        fontFamily: FONT_FAMILY,
+        letterSpacing: "0.08em",
+        lineHeight: 1.2,
+      }}
+    >
+      CURRENT
+    </span>
+  </div>
+  <div
+    style={{
+      fontSize: "15px",
+      fontWeight: 500,
+      color: "#0D3CFC",
+      fontFamily: FONT_FAMILY,
+      lineHeight: 1.3,
+      marginBottom: "6px",
+      opacity: 0.85,
+    }}
+  >
+    Founder and Developer
+  </div>
+  <div
+    style={{
+      fontSize: "13px",
+      fontWeight: 400,
+      color: "#0D3CFC",
+      fontFamily: FONT_FAMILY,
+      lineHeight: 1.5,
+      opacity: 0.75,
+    }}
+  >
+    Building the Menuru platform from scratch, designing the system, and developing features for the community.
+  </div>
+</div>
 
-                {/* ===== KONTEN TITIK 2 (tengah) - cy=480 → 60% ===== */}
+{/* Titik 2 - Sisi kanan: Universitas, Jurusan, Deskripsi */}
+<div
+  style={{
+    position: "absolute",
+    top: "60%",                 // = 480/800 → sama dengan cy titik bulat 2
+    left: "50%",                // = 500/1000
+    transform: "translate(30px, -13px)",   // geser naik ≈ setengah tinggi baris judul
+    textAlign: "left",
+    maxWidth: "360px",
+  }}
+>
+  <div
+    style={{
+      fontSize: "22px",
+      fontWeight: 700,
+      color: "#0D3CFC",
+      fontFamily: FONT_FAMILY,
+      letterSpacing: "-0.01em",
+      lineHeight: 1.2,
+      marginBottom: "4px",
+    }}
+  >
+    Gunadarma University
+  </div>
+  <div
+    style={{
+      fontSize: "15px",
+      fontWeight: 500,
+      color: "#0D3CFC",
+      fontFamily: FONT_FAMILY,
+      lineHeight: 1.3,
+      marginBottom: "6px",
+      opacity: 0.85,
+    }}
+  >
+    Graduate - Computer System
+  </div>
+  <div
+    style={{
+      fontSize: "13px",
+      fontWeight: 400,
+      color: "#0D3CFC",
+      fontFamily: FONT_FAMILY,
+      lineHeight: 1.5,
+      opacity: 0.75,
+    }}
+  >
+    Studied programming, networking, and information systems as a foundation for a career in technology.
+  </div>
+</div>
 
-                {/* Titik 2 - Sisi kiri: Tahun */}
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "60%",                 // = 480/800
-                    left: "50%",                // = 500/1000
-                    transform: "translate(calc(-100% - 30px), -50%)",
-                    textAlign: "right",
-                    lineHeight: 1,
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: "22px",
-                      fontWeight: 600,
-                      color: "#0D3CFC",
-                      fontFamily: FONT_FAMILY,
-                      letterSpacing: "-0.01em",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    2019 - 2023
-                  </span>
-                </div>
 
-                {/* Titik 2 - Sisi kanan: Universitas, Jurusan, Deskripsi */}
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "60%",                 // = 480/800
-                    left: "50%",                // = 500/1000
-                    transform: "translate(30px, -22px)",   // sejajar baris judul
-                    textAlign: "left",
-                    maxWidth: "360px",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: "22px",
-                      fontWeight: 700,
-                      color: "#0D3CFC",
-                      fontFamily: FONT_FAMILY,
-                      letterSpacing: "-0.01em",
-                      lineHeight: 1.2,
-                      marginBottom: "4px",
-                    }}
-                  >
-                    Gunadarma University
-                  </div>
-                  <div
-                    style={{
-                      fontSize: "15px",
-                      fontWeight: 500,
-                      color: "#0D3CFC",
-                      fontFamily: FONT_FAMILY,
-                      lineHeight: 1.3,
-                      marginBottom: "6px",
-                      opacity: 0.85,
-                    }}
-                  >
-                    Graduate - Computer System
-                  </div>
-                  <div
-                    style={{
-                      fontSize: "13px",
-                      fontWeight: 400,
-                      color: "#0D3CFC",
-                      fontFamily: FONT_FAMILY,
-                      lineHeight: 1.5,
-                      opacity: 0.75,
-                    }}
-                  >
-                    Studied programming, networking, and information systems as a foundation for a career in technology.
-                  </div>
-                </div>
 
                 {/* ===== Ujung garis bawah - Thank you ===== */}
                 <div
