@@ -2302,57 +2302,63 @@ export default function StoriesPage(): React.JSX.Element {
         2019 - 2023
       </span>
     </div>
-
     {/* Titik bulat 2 - Sisi kanan: Universitas, Jurusan, Deskripsi */}
-    <div
-      style={{
-        position: "absolute",
-        top: "50%",                 // = 400/800 → sama dengan cy=400
-        left: "50%",                // = 500/1000 → tepat di garis
-        transform: "translate(30px, -50%)",
-        textAlign: "left",
-        maxWidth: "360px",
-      }}
-    >
-      <div
-        style={{
-          fontSize: "22px",
-          fontWeight: 700,
-          color: "#0D3CFC",
-          fontFamily: FONT_FAMILY,
-          letterSpacing: "-0.01em",
-          lineHeight: 1.2,
-          marginBottom: "4px",
-        }}
-      >
-        Universitas Gunadarma
-      </div>
-      <div
-        style={{
-          fontSize: "15px",
-          fontWeight: 500,
-          color: "#0D3CFC",
-          fontFamily: FONT_FAMILY,
-          lineHeight: 1.3,
-          marginBottom: "6px",
-          opacity: 0.85,
-        }}
-      >
-        Graduate - Computer System
-      </div>
-      <div
-        style={{
-          fontSize: "13px",
-          fontWeight: 400,
-          color: "#0D3CFC",
-          fontFamily: FONT_FAMILY,
-          lineHeight: 1.5,
-          opacity: 0.75,
-        }}
-      >
-        Mempelajari pemrograman, jaringan, dan sistem informasi sebagai fondasi karier di dunia teknologi.
-      </div>
-    </div>
+<div
+  style={{
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(30px, -50%)",
+    textAlign: "left",
+    maxWidth: "360px",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+  }}
+>
+  <div
+    style={{
+      fontSize: "22px",
+      fontWeight: 700,
+      color: "#0D3CFC",
+      fontFamily: FONT_FAMILY,
+      letterSpacing: "-0.01em",
+      lineHeight: 1.2,
+      marginBottom: "4px",
+    }}
+  >
+    Universitas Gunadarma
+  </div>
+  <div
+    style={{
+      fontSize: "15px",
+      fontWeight: 500,
+      color: "#0D3CFC",
+      fontFamily: FONT_FAMILY,
+      lineHeight: 1.3,
+      marginBottom: "6px",
+      opacity: 0.85,
+    }}
+  >
+    Graduate - Computer System
+  </div>
+  <div
+    style={{
+      fontSize: "13px",
+      fontWeight: 400,
+      color: "#0D3CFC",
+      fontFamily: FONT_FAMILY,
+      lineHeight: 1.5,
+      opacity: 0.75,
+    }}
+  >
+    Mempelajari pemrograman, jaringan, dan sistem informasi sebagai fondasi karier di dunia teknologi.
+  </div>
+</div>
+
+
+    
+
 
     {/* Ujung garis bawah - Thank you */}
     <div
