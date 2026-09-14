@@ -84,7 +84,7 @@ const LogoutIcon = ({ size = 18 }: { size?: number }) => (
   </svg>
 );
 
-// Male Icon
+// Manusia Pria Icon
 const MaleIcon = ({ size = 40, color = "#0D3CFC" }: { size?: number, color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <circle cx="12" cy="7" r="4" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -99,7 +99,7 @@ const footerLinks = [
   { title: "Attention", links: ["Privacy Policy", "Terms of Service", "Help Center"] }
 ];
 
-// Menu items
+// Menu items for drawer
 const menuItems = [
   { name: "Community", number: "01" },
   { name: "Blog", number: "02" },
@@ -158,7 +158,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     "Account issues",
     "Donation",
     "Partnership",
-    "Others"
+    "Other"
   ];
 
   useEffect(() => {
@@ -347,7 +347,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     if (!db || !user || !selectedTopic) return;
     const hasActiveTicket = tickets.some(t => t.status === 'waiting' || t.status === 'active');
     if (hasActiveTicket) {
-      alert("You already have an active chat with the agent. Please wait until it's finished.");
+      alert("You still have an active chat with an agent. Please wait until it is finished.");
       return;
     }
     try {
@@ -521,6 +521,8 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   }
 
   if (!isAdmin) {
+    const activeTicket = tickets.find(t => t.status === 'waiting' || t.status === 'active');
+
     if (tickets.length === 0 && !showStartChat) {
       return (
         <div style={{ marginTop: "40px", paddingTop: "30px" }}>
@@ -632,7 +634,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           </div>
           <div style={{ maxWidth: "360px" }}>
             <div style={{ fontSize: "13px", marginBottom: "8px", fontFamily: FONT_FAMILY }}>
-              Select your topic:
+              Select your issue topic:
             </div>
             <select
               value={selectedTopic}
@@ -786,7 +788,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 const ticketId = generateTicketId(ticket.createdAt);
                 const isActive = selectedTicket?.id === ticket.id;
                 const statusLabel = ticket.status === 'waiting' ? 'Waiting' :
-                                    ticket.status === 'active' ? 'Active' : 'Done';
+                                    ticket.status === 'active' ? 'Active' : 'Resolved';
                 const statusColor = ticket.status === 'waiting' ? '#fef3c7' :
                                     ticket.status === 'active' ? '#d1fae5' : '#e5e7eb';
                 const statusTextColor = ticket.status === 'waiting' ? '#92400e' :
@@ -961,6 +963,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                     ) : (
                       messages.map((msg, idx) => {
                         const isMine = msg.senderId === user.uid;
+                        const isAgent = !isMine && msg.senderName === "Farid Ardiansyah";
                         return (
                           <div
                             key={idx}
@@ -1076,7 +1079,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 fontSize: "12px",
                 fontFamily: FONT_FAMILY,
               }}>
-                Select a chat from the list
+                Select a chat from the list on the left
               </div>
             )}
           </div>
@@ -1259,7 +1262,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 zIndex: 1,
               }}>
                 <ResolvedIcon />
-                <span>Done ({resolvedTickets.length})</span>
+                <span>Resolved ({resolvedTickets.length})</span>
               </div>
               {resolvedTickets.map((ticket) => {
                 const ticketId = generateTicketId(ticket.createdAt);
@@ -1456,7 +1459,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                         sendMessage();
                       }
                     }}
-                    placeholder="Type a reply..."
+                    placeholder="Type your reply..."
                     style={{
                       flex: 1,
                       padding: "5px 8px",
@@ -1502,7 +1505,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               fontSize: "12px",
               fontFamily: FONT_FAMILY,
             }}>
-              Select a chat from the list
+              Select a chat from the list on the left
             </div>
           )}
         </div>
@@ -1759,8 +1762,8 @@ export default function StoriesPage(): React.JSX.Element {
       strokeDashoffset: pathLength,
     });
 
-    // 2 titik sekarang: 0.25, 0.6
-    const dotPositions = [0.25, 0.6];
+    // Dot positions on path: titik 1 di 0.22, titik 2 di 0.60
+    const dotPositions = [0.22, 0.60];
     const dotPoints: { x: number, y: number }[] = [];
     
     dotPositions.forEach((ratio) => {
@@ -2029,7 +2032,7 @@ export default function StoriesPage(): React.JSX.Element {
     <>
       <Head>
         <title>Stories | Menuru Official</title>
-        <meta name="description" content="Inspiring stories and journeys from Menuru" />
+        <meta name="description" content="Inspiring stories from Menuru" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
         <meta name="theme-color" content="#0D3CFC" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -2039,11 +2042,11 @@ export default function StoriesPage(): React.JSX.Element {
         <link rel="icon" href="/images/ai.jpg" type="image/jpeg" />
         <link rel="apple-touch-icon" href="/images/ai.jpg" />
         <meta property="og:title" content="Stories | Menuru Official" />
-        <meta property="og:description" content="Inspiring stories and journeys from Menuru" />
+        <meta property="og:description" content="Inspiring stories from Menuru" />
         <meta property="og:image" content="/images/ai.jpg" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Stories | Menuru Official" />
-        <meta name="twitter:description" content="Inspiring stories and journeys from Menuru" />
+        <meta name="twitter:description" content="Inspiring stories from Menuru" />
         <meta name="twitter:image" content="/images/ai.jpg" />
       </Head>
 
@@ -2098,7 +2101,7 @@ export default function StoriesPage(): React.JSX.Element {
                   whiteSpace: "pre-line",
                 }}
               >
-                {`Every journey has a\nbeautiful story`}
+                {`Every journey has\nbeautiful stories`}
               </p>
             </div>
 
@@ -2149,7 +2152,7 @@ export default function StoriesPage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* STORIES TITLE */}
+            {/* STORIES TITLE - 350px */}
             <div
               style={{
                 marginTop: "80px",
@@ -2241,21 +2244,21 @@ export default function StoriesPage(): React.JSX.Element {
                     strokeLinecap="round"
                   />
 
-                  {/* Titik bulat 1 (atas) - cy=160 */}
+                  {/* Titik bulat 1 (atas) */}
                   <circle
                     ref={(el) => { timelineDotsRef.current[0] = el; }}
                     cx="500"
-                    cy="160"
+                    cy="180"
                     r="5"
                     fill="#000000"
                     stroke="#000000"
                     strokeWidth="0"
                   />
-                  {/* Titik bulat 2 (bawah) - cy=500, jarak lebih lebar */}
+                  {/* Titik bulat 2 (tengah) */}
                   <circle
                     ref={(el) => { timelineDotsRef.current[1] = el; }}
                     cx="500"
-                    cy="500"
+                    cy="480"
                     r="5"
                     fill="#000000"
                     stroke="#000000"
@@ -2263,14 +2266,14 @@ export default function StoriesPage(): React.JSX.Element {
                   />
                 </svg>
 
-                {/* ===== KONTEN TITIK 1 (atas) - cy=160 → 20% ===== */}
+                {/* ===== KONTEN TITIK 1 (atas) - cy=180 → 22.5% ===== */}
 
                 {/* Titik 1 - Sisi kiri: Tahun */}
                 <div
                   style={{
                     position: "absolute",
-                    top: "20%",
-                    left: "50%",
+                    top: "22.5%",               // = 180/800
+                    left: "50%",                // = 500/1000
                     transform: "translate(calc(-100% - 30px), -50%)",
                     textAlign: "right",
                     lineHeight: 1,
@@ -2290,18 +2293,18 @@ export default function StoriesPage(): React.JSX.Element {
                   </span>
                 </div>
 
-                {/* Titik 1 - Sisi kanan: Menuru + CURRENT badge, Founder and Developer, Deskripsi */}
+                {/* Titik 1 - Sisi kanan: Menuru + CURRENT, Founder and Developer, Deskripsi */}
                 <div
                   style={{
                     position: "absolute",
-                    top: "20%",
-                    left: "50%",
-                    transform: "translate(30px, -22px)",
+                    top: "22.5%",               // = 180/800
+                    left: "50%",                // = 500/1000
+                    transform: "translate(30px, -22px)",   // sejajar baris judul
                     textAlign: "left",
-                    maxWidth: "380px",
+                    maxWidth: "360px",
                   }}
                 >
-                  {/* Baris 1: Menuru + CURRENT badge */}
+                  {/* Baris judul + CURRENT */}
                   <div
                     style={{
                       display: "flex",
@@ -2324,16 +2327,12 @@ export default function StoriesPage(): React.JSX.Element {
                     </span>
                     <span
                       style={{
-                        fontSize: "10px",
-                        fontWeight: 700,
+                        fontSize: "14px",
+                        fontWeight: 600,
                         color: "#000000",
                         fontFamily: FONT_FAMILY,
                         letterSpacing: "0.08em",
-                        padding: "3px 8px",
-                        border: "1.5px solid #000000",
-                        borderRadius: "4px",
-                        lineHeight: 1,
-                        whiteSpace: "nowrap",
+                        lineHeight: 1.2,
                       }}
                     >
                       CURRENT
@@ -2362,18 +2361,18 @@ export default function StoriesPage(): React.JSX.Element {
                       opacity: 0.75,
                     }}
                   >
-                    Built Menuru from scratch, designed the system, and developed features for the community.
+                    Building the Menuru platform from scratch, designing the system, and developing features for the community.
                   </div>
                 </div>
 
-                {/* ===== KONTEN TITIK 2 (bawah) - cy=500 → 62.5% ===== */}
+                {/* ===== KONTEN TITIK 2 (tengah) - cy=480 → 60% ===== */}
 
                 {/* Titik 2 - Sisi kiri: Tahun */}
                 <div
                   style={{
                     position: "absolute",
-                    top: "62.5%",
-                    left: "50%",
+                    top: "60%",                 // = 480/800
+                    left: "50%",                // = 500/1000
                     transform: "translate(calc(-100% - 30px), -50%)",
                     textAlign: "right",
                     lineHeight: 1,
@@ -2397,11 +2396,11 @@ export default function StoriesPage(): React.JSX.Element {
                 <div
                   style={{
                     position: "absolute",
-                    top: "62.5%",
-                    left: "50%",
-                    transform: "translate(30px, -22px)",
+                    top: "60%",                 // = 480/800
+                    left: "50%",                // = 500/1000
+                    transform: "translate(30px, -22px)",   // sejajar baris judul
                     textAlign: "left",
-                    maxWidth: "380px",
+                    maxWidth: "360px",
                   }}
                 >
                   <div
@@ -2440,7 +2439,7 @@ export default function StoriesPage(): React.JSX.Element {
                       opacity: 0.75,
                     }}
                   >
-                    Studied programming, networking, and information systems as a foundation for a tech career.
+                    Studied programming, networking, and information systems as a foundation for a career in technology.
                   </div>
                 </div>
 
@@ -2448,7 +2447,7 @@ export default function StoriesPage(): React.JSX.Element {
                 <div
                   style={{
                     position: "absolute",
-                    top: "98.75%",
+                    top: "98.75%",              // = 790/800
                     left: "50%",
                     transform: "translate(30px, -50%)",
                     textAlign: "left",
@@ -2653,7 +2652,7 @@ export default function StoriesPage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* MENURU Text */}
+        {/* MENURU Text - 450px, left aligned */}
         <div
           ref={menuruFooterRef}
           style={{
@@ -2686,7 +2685,7 @@ export default function StoriesPage(): React.JSX.Element {
           </span>
         </div>
 
-        {/* Menu Overlay */}
+        {/* Menu Overlay - HANYA menuBoxRef */}
         <div
           ref={menuOverlayRef}
           className="menu-overlay"
@@ -2786,6 +2785,7 @@ export default function StoriesPage(): React.JSX.Element {
             ))}
           </div>
 
+          {/* HANYA menuBoxRef - How can this website grow? */}
           <div
             ref={menuBoxRef}
             style={{
@@ -2881,6 +2881,7 @@ export default function StoriesPage(): React.JSX.Element {
             </div>
           </div>
 
+          {/* stories text */}
           <div
             ref={storiesRef}
             style={{
