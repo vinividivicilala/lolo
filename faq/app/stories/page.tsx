@@ -2294,45 +2294,44 @@ export default function StoriesPage(): React.JSX.Element {
                   />
                 </svg>
 
-                {/* Kalimat di ujung garis bawah, sisi kanan */}
-                <div
-                  style={{
-                    position: "absolute",
-                    right: "0",
-                    bottom: "0",
-                    transform: "translateX(-10px) translateY(-20px)",
-                    maxWidth: "320px",
-                    textAlign: "right",
-                  }}
-                >
-                  <p
-                    style={{
-                      fontSize: "16px",
-                      fontWeight: 400,
-                      color: "#0D3CFC",
-                      fontFamily: FONT_FAMILY,
-                      lineHeight: 1.5,
-                      margin: 0,
-                      letterSpacing: "-0.01em",
-                    }}
-                  >
-                    Thank you for walk. See you again soon.
-                  </p>
-                  <p
-                    style={{
-                      fontSize: "16px",
-                      fontWeight: 400,
-                      color: "#0D3CFC",
-                      fontFamily: FONT_FAMILY,
-                      lineHeight: 1.5,
-                      margin: 0,
-                      marginTop: "4px",
-                      letterSpacing: "-0.01em",
-                    }}
-                  >
-                    Here are a few memories walk planning of life.
-                  </p>
-                </div>
+                {/* Kalimat di ujung garis bawah, sisi kanan garis */}
+<div
+  style={{
+    position: "absolute",
+    left: "calc(50% + 40px)",
+    bottom: "40px",
+    maxWidth: "400px",
+    textAlign: "left",
+  }}
+>
+  <p
+    style={{
+      fontSize: "32px",
+      fontWeight: 600,
+      color: "#0D3CFC",
+      fontFamily: FONT_FAMILY,
+      lineHeight: 1.2,
+      margin: 0,
+      letterSpacing: "-0.02em",
+    }}
+  >
+    Thank you for walk. See you again soon.
+  </p>
+  <p
+    style={{
+      fontSize: "32px",
+      fontWeight: 600,
+      color: "#0D3CFC",
+      fontFamily: FONT_FAMILY,
+      lineHeight: 1.2,
+      margin: 0,
+      marginTop: "8px",
+      letterSpacing: "-0.02em",
+    }}
+  >
+    Here are a few memories walk planning of life.
+  </p>
+</div>
               </div>
             </div>
           </div>
