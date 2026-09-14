@@ -2202,8 +2202,8 @@ export default function StoriesPage(): React.JSX.Element {
                 marginTop: "100px",
                 width: "100%",
                 position: "relative",
-                paddingBottom: "200px",
-                minHeight: "800px",
+                paddingBottom: "300px",
+                minHeight: "900px",
               }}
             >
               {/* Male Icon di atas - TANPA BULAT, TIDAK IKUT SCROLL */}
@@ -2240,7 +2240,7 @@ export default function StoriesPage(): React.JSX.Element {
                     overflow: "visible",
                   }}
                 >
-                  {/* Base path - garis hitam putus-putus kecil, melengkung S, mengarah ke ikon manusia */}
+                  {/* Base path - garis hitam putus-putus kecil, melengkung S */}
                   <path
                     d="M 500 10 
                        C 900 100, 900 300, 500 400 
@@ -2264,7 +2264,7 @@ export default function StoriesPage(): React.JSX.Element {
                     strokeLinecap="round"
                   />
 
-                  {/* 3 Titik bulat kecil di sepanjang garis */}
+                  {/* Titik bulat ke-1 (atas) */}
                   <circle
                     ref={(el) => { timelineDotsRef.current[0] = el; }}
                     cx="500"
@@ -2274,6 +2274,7 @@ export default function StoriesPage(): React.JSX.Element {
                     stroke="#000000"
                     strokeWidth="0"
                   />
+                  {/* Titik bulat ke-2 (tengah) */}
                   <circle
                     ref={(el) => { timelineDotsRef.current[1] = el; }}
                     cx="500"
@@ -2283,6 +2284,7 @@ export default function StoriesPage(): React.JSX.Element {
                     stroke="#000000"
                     strokeWidth="0"
                   />
+                  {/* Titik bulat ke-3 (bawah) */}
                   <circle
                     ref={(el) => { timelineDotsRef.current[2] = el; }}
                     cx="500"
@@ -2294,46 +2296,118 @@ export default function StoriesPage(): React.JSX.Element {
                   />
                 </svg>
 
-                {/* Kalimat di ujung garis bawah, rata kanan */}
-<div
-  style={{
-    position: "absolute",
-    left: "50%",
-    bottom: "10px",
-    transform: "translateX(20px)",
-    textAlign: "left",
-    whiteSpace: "nowrap",
-  }}
->
-  <p
-    style={{
-      fontSize: "28px",
-      fontWeight: 600,
-      color: "#0D3CFC",
-      fontFamily: FONT_FAMILY,
-      lineHeight: 1.3,
-      margin: 0,
-      letterSpacing: "-0.02em",
-    }}
-  >
-    Thank you for walk. See you again soon.
-  </p>
-  <p
-    style={{
-      fontSize: "28px",
-      fontWeight: 600,
-      color: "#0D3CFC",
-      fontFamily: FONT_FAMILY,
-      lineHeight: 1.3,
-      margin: 0,
-      letterSpacing: "-0.02em",
-    }}
-  >
-    Here are a few memories walk planning of life.
-  </p>
-</div>
+                {/* Konten Timeline di titik bulat ke-2 (tengah) */}
+                {/* Sisi kiri titik bulat: Tahun 2019 - 2023 */}
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "calc(50% - 10px)",
+                    left: "50%",
+                    transform: "translateX(calc(-100% - 60px))",
+                    textAlign: "right",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: "56px",
+                      fontWeight: 700,
+                      color: "#0D3CFC",
+                      fontFamily: FONT_FAMILY,
+                      letterSpacing: "-0.02em",
+                      lineHeight: 1,
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    2019 - 2023
+                  </span>
+                </div>
 
-               
+                {/* Sisi kanan titik bulat: Universitas, Jurusan, Deskripsi */}
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "calc(50% - 10px)",
+                    left: "calc(50% + 60px)",
+                    textAlign: "left",
+                    maxWidth: "400px",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: "28px",
+                      fontWeight: 700,
+                      color: "#0D3CFC",
+                      fontFamily: FONT_FAMILY,
+                      letterSpacing: "-0.01em",
+                      lineHeight: 1.2,
+                      marginBottom: "4px",
+                    }}
+                  >
+                    Universitas Gunadarma
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "20px",
+                      fontWeight: 500,
+                      color: "#0D3CFC",
+                      fontFamily: FONT_FAMILY,
+                      lineHeight: 1.3,
+                      marginBottom: "8px",
+                      opacity: 0.85,
+                    }}
+                  >
+                    Graduate - Computer System
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "16px",
+                      fontWeight: 400,
+                      color: "#666",
+                      fontFamily: FONT_FAMILY,
+                      lineHeight: 1.5,
+                    }}
+                  >
+                    Menempuh pendidikan di bidang Computer System, mempelajari pemrograman, jaringan, dan sistem informasi yang menjadi fondasi karier di dunia teknologi.
+                  </div>
+                </div>
+
+                {/* Kalimat di ujung garis bawah, rata kanan, 2 baris */}
+                <div
+                  style={{
+                    position: "absolute",
+                    left: "calc(50% + 40px)",
+                    bottom: "20px",
+                    textAlign: "left",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  <p
+                    style={{
+                      fontSize: "28px",
+                      fontWeight: 600,
+                      color: "#0D3CFC",
+                      fontFamily: FONT_FAMILY,
+                      lineHeight: 1.3,
+                      margin: 0,
+                      letterSpacing: "-0.02em",
+                    }}
+                  >
+                    Thank you for walk. See you again soon.
+                  </p>
+                  <p
+                    style={{
+                      fontSize: "28px",
+                      fontWeight: 600,
+                      color: "#0D3CFC",
+                      fontFamily: FONT_FAMILY,
+                      lineHeight: 1.3,
+                      margin: 0,
+                      letterSpacing: "-0.02em",
+                    }}
+                  >
+                    Here are a few memories walk planning of life.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
