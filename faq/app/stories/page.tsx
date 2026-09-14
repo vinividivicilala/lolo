@@ -2177,8 +2177,6 @@ export default function StoriesPage(): React.JSX.Element {
                 Stories
               </h1>
             </div>
-
-
             {/* ===== SCROLL-DRIVEN TIMELINE SYSTEM ===== */}
 <div
   ref={timelineRef}
@@ -2190,61 +2188,56 @@ export default function StoriesPage(): React.JSX.Element {
     minHeight: "1000px",
   }}
 >
-  {/* Teks "people plan" di atas icon */}
+  {/* Male Icon di atas + Teks 'people plan' + Menuru Brand */}
   <div
     style={{
       display: "flex",
+      flexDirection: "column",
       alignItems: "center",
-      justifyContent: "center",
-      marginBottom: "8px",
+      marginBottom: "20px",
       position: "relative",
       zIndex: 5,
     }}
   >
+    {/* Teks 'people plan' di atas icon */}
     <span
       style={{
-        fontSize: "14px",
+        fontSize: "18px",
         fontWeight: 500,
         color: "#0D3CFC",
         fontFamily: FONT_FAMILY,
-        letterSpacing: "0.15em",
-        textTransform: "uppercase",
-        opacity: 0.7,
+        letterSpacing: "0.02em",
+        marginBottom: "8px",
+        textTransform: "lowercase",
       }}
     >
       people plan
     </span>
-  </div>
 
-  {/* Icon + teks di sampingnya */}
-  <div
-    style={{
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      gap: "16px",
-      marginBottom: "20px",
-      position: "relative",
-      zIndex: 5,
-      maxWidth: "700px",
-      margin: "0 auto 20px auto",
-    }}
-  >
-    <MaleIcon size={48} color="#0D3CFC" />
-    <span
+    {/* Icon manusia + Menuru Brand di samping */}
+    <div
       style={{
-        fontSize: "15px",
-        fontWeight: 400,
-        color: "#0D3CFC",
-        fontFamily: FONT_FAMILY,
-        letterSpacing: "-0.01em",
-        lineHeight: 1.4,
-        opacity: 0.85,
-        textAlign: "left",
+        display: "flex",
+        alignItems: "center",
+        gap: "16px",
       }}
     >
-      Menuru Brand di lahirkan dari manusia yang tidak pernah menyerah
-    </span>
+      <MaleIcon size={48} color="#0D3CFC" />
+      <span
+        style={{
+          fontSize: "16px",
+          fontWeight: 500,
+          color: "#0D3CFC",
+          fontFamily: FONT_FAMILY,
+          lineHeight: 1.4,
+          textAlign: "left",
+          maxWidth: "420px",
+          textTransform: "lowercase",
+        }}
+      >
+        menuru brand di lahirkan dari manusia yang tidak pernah menyerah
+      </span>
+    </div>
   </div>
 
   {/* Wrapper SVG + konten overlay */}
@@ -2298,7 +2291,7 @@ export default function StoriesPage(): React.JSX.Element {
         stroke="#000000"
         strokeWidth="0"
       />
-      {/* Titik bulat 2 (tengah) */}
+      {/* Titik bulat 2 (tengah) - sejajar dengan teks di 50% */}
       <circle
         ref={(el) => { timelineDotsRef.current[1] = el; }}
         cx="500"
@@ -2320,7 +2313,7 @@ export default function StoriesPage(): React.JSX.Element {
       />
     </svg>
 
-    {/* ===== KONTEN ===== */}
+    {/* ===== KONTEN — sejajar dengan cy=400 (50% dari 800) ===== */}
 
     {/* Titik bulat 2 - Sisi kiri: Tahun */}
     <div
@@ -2438,6 +2431,9 @@ export default function StoriesPage(): React.JSX.Element {
     </div>
   </div>
 </div>
+
+
+
             
   
           </div>
