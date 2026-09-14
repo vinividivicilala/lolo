@@ -2177,7 +2177,8 @@ export default function StoriesPage(): React.JSX.Element {
                 Stories
               </h1>
             </div>
-            {/* ===== SCROLL-DRIVEN TIMELINE SYSTEM ===== */}
+            
+           {/* ===== SCROLL-DRIVEN TIMELINE SYSTEM ===== */}
 <div
   ref={timelineRef}
   style={{
@@ -2202,13 +2203,14 @@ export default function StoriesPage(): React.JSX.Element {
     <MaleIcon size={48} color="#0D3CFC" />
   </div>
 
-  {/* SVG Timeline */}
+  {/* Wrapper SVG + konten overlay — tinggi sama persis 800px */}
   <div
     style={{
       width: "100%",
+      maxWidth: "1000px",
+      height: "800px",
       position: "relative",
-      display: "flex",
-      justifyContent: "center",
+      margin: "0 auto",
     }}
   >
     <svg
@@ -2217,12 +2219,12 @@ export default function StoriesPage(): React.JSX.Element {
       preserveAspectRatio="none"
       style={{
         width: "100%",
-        maxWidth: "1000px",
         height: "800px",
+        display: "block",
         overflow: "visible",
       }}
     >
-      {/* Base path - LURUS TOTAL dari atas ke bawah */}
+      {/* Base path - LURUS */}
       <path
         d="M 500 10 L 500 790"
         fill="none"
@@ -2232,7 +2234,7 @@ export default function StoriesPage(): React.JSX.Element {
         strokeLinecap="round"
       />
 
-      {/* Progress path - mengikuti base path */}
+      {/* Progress path */}
       <path
         ref={timelineProgressPathRef}
         d="M 500 10 L 500 790"
@@ -2242,7 +2244,7 @@ export default function StoriesPage(): React.JSX.Element {
         strokeLinecap="round"
       />
 
-      {/* Titik bulat 1 (atas) */}
+      {/* Titik bulat 1 (atas) - 180/800 = 22.5% */}
       <circle
         ref={(el) => { timelineDotsRef.current[0] = el; }}
         cx="500"
@@ -2252,7 +2254,7 @@ export default function StoriesPage(): React.JSX.Element {
         stroke="#000000"
         strokeWidth="0"
       />
-      {/* Titik bulat 2 (tengah) */}
+      {/* Titik bulat 2 (tengah) - 485/800 = 60.625% */}
       <circle
         ref={(el) => { timelineDotsRef.current[1] = el; }}
         cx="500"
@@ -2262,7 +2264,7 @@ export default function StoriesPage(): React.JSX.Element {
         stroke="#000000"
         strokeWidth="0"
       />
-      {/* Titik bulat 3 (bawah) */}
+      {/* Titik bulat 3 (bawah) - 790/800 = 98.75% */}
       <circle
         ref={(el) => { timelineDotsRef.current[2] = el; }}
         cx="500"
@@ -2274,14 +2276,14 @@ export default function StoriesPage(): React.JSX.Element {
       />
     </svg>
 
-    {/* ===== KONTEN TIMELINE ===== */}
+    {/* ===== KONTEN TIMELINE — diposisikan relatif ke wrapper 800px ===== */}
 
-    {/* Titik bulat 2 - Sisi kiri: Tahun, sejajar dengan titik bulat 2 */}
+    {/* Titik bulat 2 - Sisi kiri: Tahun */}
     <div
       style={{
         position: "absolute",
-        top: "485px",
-        left: "50%",
+        top: "60.625%",           // = 485/800
+        left: "50%",              // = 500/1000
         transform: "translate(calc(-100% - 30px), -50%)",
         textAlign: "right",
         lineHeight: 1,
@@ -2301,12 +2303,12 @@ export default function StoriesPage(): React.JSX.Element {
       </span>
     </div>
 
-    {/* Titik bulat 2 - Sisi kanan: Judul + Deskripsi, sejajar dengan titik bulat 2 */}
+    {/* Titik bulat 2 - Sisi kanan: Universitas, Jurusan, Deskripsi */}
     <div
       style={{
         position: "absolute",
-        top: "485px",
-        left: "50%",
+        top: "60.625%",           // = 485/800
+        left: "50%",              // = 500/1000
         transform: "translate(30px, -50%)",
         textAlign: "left",
         maxWidth: "360px",
@@ -2352,12 +2354,12 @@ export default function StoriesPage(): React.JSX.Element {
       </div>
     </div>
 
-    {/* Ujung garis bawah - Thank you, sejajar dengan garis paling bawah */}
+    {/* Ujung garis bawah - Thank you, sejajar dengan garis bawah */}
     <div
       style={{
         position: "absolute",
-        top: "790px",
-        left: "50%",
+        top: "98.75%",            // = 790/800
+        left: "50%",              // = 500/1000
         transform: "translate(30px, -50%)",
         textAlign: "left",
         whiteSpace: "nowrap",
