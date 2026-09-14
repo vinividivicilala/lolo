@@ -1762,7 +1762,8 @@ export default function StoriesPage(): React.JSX.Element {
       strokeDashoffset: pathLength,
     });
 
-    const dotPositions = [0.05, 0.5, 0.95];
+    // Dot positions on path: 0.2, 0.5, 0.8
+    const dotPositions = [0.2, 0.5, 0.8];
     const dotPoints: { x: number, y: number }[] = [];
     
     dotPositions.forEach((ratio) => {
@@ -1789,7 +1790,6 @@ export default function StoriesPage(): React.JSX.Element {
 
     const animateDotActivated = (dot: SVGCircleElement) => {
       const tl = gsap.timeline();
-      
       tl.to(dot, {
         attr: { r: 9 },
         duration: 0.25,
@@ -1931,7 +1931,6 @@ export default function StoriesPage(): React.JSX.Element {
     }
   };
 
-  // Loading state
   if (!isMounted || loading) {
     return (
       <div
@@ -2180,225 +2179,224 @@ export default function StoriesPage(): React.JSX.Element {
             </div>
 
             {/* ===== SCROLL-DRIVEN TIMELINE SYSTEM ===== */}
-<div
-  ref={timelineRef}
-  style={{
-    marginTop: "100px",
-    width: "100%",
-    position: "relative",
-    paddingBottom: "200px",
-    minHeight: "1000px",
-  }}
->
-  {/* Male Icon di atas */}
-  <div
-    style={{
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      marginBottom: "20px",
-      position: "relative",
-      zIndex: 5,
-    }}
-  >
-    <MaleIcon size={48} color="#0D3CFC" />
-  </div>
+            <div
+              ref={timelineRef}
+              style={{
+                marginTop: "100px",
+                width: "100%",
+                position: "relative",
+                paddingBottom: "200px",
+                minHeight: "1000px",
+              }}
+            >
+              {/* Male Icon di atas - TANPA BULAT, TIDAK IKUT SCROLL */}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginBottom: "20px",
+                  position: "relative",
+                  zIndex: 5,
+                }}
+              >
+                <MaleIcon size={48} color="#0D3CFC" />
+              </div>
 
-  {/* SVG Timeline */}
-  <div
-    style={{
-      width: "100%",
-      position: "relative",
-      display: "flex",
-      justifyContent: "center",
-    }}
-  >
-    <svg
-      ref={timelineSvgRef}
-      viewBox="0 0 1000 800"
-      preserveAspectRatio="none"
-      style={{
-        width: "100%",
-        maxWidth: "1000px",
-        height: "800px",
-        overflow: "visible",
-      }}
-    >
-      {/* Base path - melengkung hanya di bagian atas, sisanya LURUS */}
-      <path
-        d="M 500 10 
-           C 650 40, 700 100, 500 180 
-           L 500 790"
-        fill="none"
-        stroke="#000000"
-        strokeWidth="2"
-        strokeDasharray="4 6"
-        strokeLinecap="round"
-      />
+              {/* SVG Timeline */}
+              <div
+                style={{
+                  width: "100%",
+                  position: "relative",
+                  display: "flex",
+                  justifyContent: "center",
+                }}
+              >
+                <svg
+                  ref={timelineSvgRef}
+                  viewBox="0 0 1000 800"
+                  preserveAspectRatio="none"
+                  style={{
+                    width: "100%",
+                    maxWidth: "1000px",
+                    height: "800px",
+                    overflow: "visible",
+                  }}
+                >
+                  {/* Base path - melengkung hanya di bagian atas, sisanya LURUS */}
+                  <path
+                    d="M 500 10 
+                       C 650 40, 700 100, 500 180 
+                       L 500 790"
+                    fill="none"
+                    stroke="#000000"
+                    strokeWidth="2"
+                    strokeDasharray="4 6"
+                    strokeLinecap="round"
+                  />
 
-      {/* Progress path - mengikuti base path */}
-      <path
-        ref={timelineProgressPathRef}
-        d="M 500 10 
-           C 650 40, 700 100, 500 180 
-           L 500 790"
-        fill="none"
-        stroke="#0D3CFC"
-        strokeWidth="3"
-        strokeLinecap="round"
-      />
+                  {/* Progress path - mengikuti base path */}
+                  <path
+                    ref={timelineProgressPathRef}
+                    d="M 500 10 
+                       C 650 40, 700 100, 500 180 
+                       L 500 790"
+                    fill="none"
+                    stroke="#0D3CFC"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                  />
 
-      {/* Titik bulat 1 (atas) - di y=180, awal garis lurus */}
-      <circle
-        ref={(el) => { timelineDotsRef.current[0] = el; }}
-        cx="500"
-        cy="180"
-        r="5"
-        fill="#000000"
-        stroke="#000000"
-        strokeWidth="0"
-      />
-      {/* Titik bulat 2 (tengah) - di y=485, tengah garis lurus */}
-      <circle
-        ref={(el) => { timelineDotsRef.current[1] = el; }}
-        cx="500"
-        cy="485"
-        r="5"
-        fill="#000000"
-        stroke="#000000"
-        strokeWidth="0"
-      />
-      {/* Titik bulat 3 (bawah) - di y=790, ujung garis */}
-      <circle
-        ref={(el) => { timelineDotsRef.current[2] = el; }}
-        cx="500"
-        cy="790"
-        r="5"
-        fill="#000000"
-        stroke="#000000"
-        strokeWidth="0"
-      />
-    </svg>
+                  {/* Titik bulat 1 (atas) - di y=180, awal garis lurus */}
+                  <circle
+                    ref={(el) => { timelineDotsRef.current[0] = el; }}
+                    cx="500"
+                    cy="180"
+                    r="5"
+                    fill="#000000"
+                    stroke="#000000"
+                    strokeWidth="0"
+                  />
+                  {/* Titik bulat 2 (tengah) - di y=485, tengah garis lurus */}
+                  <circle
+                    ref={(el) => { timelineDotsRef.current[1] = el; }}
+                    cx="500"
+                    cy="485"
+                    r="5"
+                    fill="#000000"
+                    stroke="#000000"
+                    strokeWidth="0"
+                  />
+                  {/* Titik bulat 3 (bawah) - di y=790, ujung garis */}
+                  <circle
+                    ref={(el) => { timelineDotsRef.current[2] = el; }}
+                    cx="500"
+                    cy="790"
+                    r="5"
+                    fill="#000000"
+                    stroke="#000000"
+                    strokeWidth="0"
+                  />
+                </svg>
 
-    {/* ===== KONTEN TIMELINE ===== */}
+                {/* ===== KONTEN TIMELINE ===== */}
 
-    {/* Titik bulat 2 - Sisi kiri: Tahun */}
-    <div
-      style={{
-        position: "absolute",
-        top: "485px",
-        left: "50%",
-        transform: "translateX(calc(-100% - 30px))",
-        textAlign: "right",
-        lineHeight: 1,
-      }}
-    >
-      <span
-        style={{
-          fontSize: "20px",
-          fontWeight: 600,
-          color: "#0D3CFC",
-          fontFamily: FONT_FAMILY,
-          letterSpacing: "-0.01em",
-          whiteSpace: "nowrap",
-        }}
-      >
-        2019 - 2023
-      </span>
-    </div>
+                {/* Titik bulat 2 - Sisi kiri: Tahun */}
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "485px",
+                    left: "50%",
+                    transform: "translateX(calc(-100% - 30px))",
+                    textAlign: "right",
+                    lineHeight: 1,
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: "20px",
+                      fontWeight: 600,
+                      color: "#0D3CFC",
+                      fontFamily: FONT_FAMILY,
+                      letterSpacing: "-0.01em",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    2019 - 2023
+                  </span>
+                </div>
 
-    {/* Titik bulat 2 - Sisi kanan: Universitas, Jurusan, Deskripsi */}
-    <div
-      style={{
-        position: "absolute",
-        top: "485px",
-        left: "50%",
-        transform: "translateX(30px)",
-        textAlign: "left",
-        maxWidth: "360px",
-      }}
-    >
-      <div
-        style={{
-          fontSize: "22px",
-          fontWeight: 700,
-          color: "#0D3CFC",
-          fontFamily: FONT_FAMILY,
-          letterSpacing: "-0.01em",
-          lineHeight: 1.2,
-          marginBottom: "2px",
-        }}
-      >
-        Universitas Gunadarma
-      </div>
-      <div
-        style={{
-          fontSize: "15px",
-          fontWeight: 500,
-          color: "#0D3CFC",
-          fontFamily: FONT_FAMILY,
-          lineHeight: 1.3,
-          marginBottom: "6px",
-          opacity: 0.85,
-        }}
-      >
-        Graduate - Computer System
-      </div>
-      <div
-        style={{
-          fontSize: "13px",
-          fontWeight: 400,
-          color: "#0D3CFC",
-          fontFamily: FONT_FAMILY,
-          lineHeight: 1.5,
-          opacity: 0.75,
-        }}
-      >
-        Mempelajari pemrograman, jaringan, dan sistem informasi sebagai fondasi karier di dunia teknologi.
-      </div>
-    </div>
+                {/* Titik bulat 2 - Sisi kanan: Universitas, Jurusan, Deskripsi */}
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "485px",
+                    left: "50%",
+                    transform: "translateX(30px)",
+                    textAlign: "left",
+                    maxWidth: "360px",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: "22px",
+                      fontWeight: 700,
+                      color: "#0D3CFC",
+                      fontFamily: FONT_FAMILY,
+                      letterSpacing: "-0.01em",
+                      lineHeight: 1.2,
+                      marginBottom: "2px",
+                    }}
+                  >
+                    Universitas Gunadarma
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "15px",
+                      fontWeight: 500,
+                      color: "#0D3CFC",
+                      fontFamily: FONT_FAMILY,
+                      lineHeight: 1.3,
+                      marginBottom: "6px",
+                      opacity: 0.85,
+                    }}
+                  >
+                    Graduate - Computer System
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "13px",
+                      fontWeight: 400,
+                      color: "#0D3CFC",
+                      fontFamily: FONT_FAMILY,
+                      lineHeight: 1.5,
+                      opacity: 0.75,
+                    }}
+                  >
+                    Mempelajari pemrograman, jaringan, dan sistem informasi sebagai fondasi karier di dunia teknologi.
+                  </div>
+                </div>
 
-    {/* Ujung garis bawah - Thank you, sejajar dengan garis paling bawah */}
-    <div
-      style={{
-        position: "absolute",
-        top: "790px",
-        left: "50%",
-        transform: "translateX(30px)",
-        textAlign: "left",
-        whiteSpace: "nowrap",
-      }}
-    >
-      <p
-        style={{
-          fontSize: "20px",
-          fontWeight: 600,
-          color: "#0D3CFC",
-          fontFamily: FONT_FAMILY,
-          lineHeight: 1.3,
-          margin: 0,
-          letterSpacing: "-0.02em",
-        }}
-      >
-        Thank you for walk. See you again soon.
-      </p>
-      <p
-        style={{
-          fontSize: "20px",
-          fontWeight: 600,
-          color: "#0D3CFC",
-          fontFamily: FONT_FAMILY,
-          lineHeight: 1.3,
-          margin: 0,
-          letterSpacing: "-0.02em",
-        }}
-      >
-        Here are a few memories walk planning of life.
-      </p>
-    </div>
-  </div>
-</div>
-
+                {/* Ujung garis bawah - Thank you, sejajar dengan garis paling bawah */}
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "790px",
+                    left: "50%",
+                    transform: "translateX(30px)",
+                    textAlign: "left",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  <p
+                    style={{
+                      fontSize: "20px",
+                      fontWeight: 600,
+                      color: "#0D3CFC",
+                      fontFamily: FONT_FAMILY,
+                      lineHeight: 1.3,
+                      margin: 0,
+                      letterSpacing: "-0.02em",
+                    }}
+                  >
+                    Thank you for walk. See you again soon.
+                  </p>
+                  <p
+                    style={{
+                      fontSize: "20px",
+                      fontWeight: 600,
+                      color: "#0D3CFC",
+                      fontFamily: FONT_FAMILY,
+                      lineHeight: 1.3,
+                      margin: 0,
+                      letterSpacing: "-0.02em",
+                    }}
+                  >
+                    Here are a few memories walk planning of life.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -2701,7 +2699,7 @@ export default function StoriesPage(): React.JSX.Element {
             ))}
           </div>
 
-          {/* menuBoxRef */}
+          {/* HANYA menuBoxRef - Bagaimana website ini bisa berkembang? */}
           <div
             ref={menuBoxRef}
             style={{
