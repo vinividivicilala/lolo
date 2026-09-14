@@ -2178,7 +2178,7 @@ export default function StoriesPage(): React.JSX.Element {
               </h1>
             </div>
             
-          {/* ===== SCROLL-DRIVEN TIMELINE SYSTEM ===== */}
+        {/* ===== SCROLL-DRIVEN TIMELINE SYSTEM ===== */}
 <div
   ref={timelineRef}
   style={{
@@ -2224,7 +2224,7 @@ export default function StoriesPage(): React.JSX.Element {
         overflow: "visible",
       }}
     >
-      {/* Base path - LURUS */}
+      {/* Base path - LURUS TOTAL */}
       <path
         d="M 500 10 L 500 790"
         fill="none"
@@ -2234,7 +2234,7 @@ export default function StoriesPage(): React.JSX.Element {
         strokeLinecap="round"
       />
 
-      {/* Progress path */}
+      {/* Progress path - mengikuti base path */}
       <path
         ref={timelineProgressPathRef}
         d="M 500 10 L 500 790"
@@ -2244,7 +2244,7 @@ export default function StoriesPage(): React.JSX.Element {
         strokeLinecap="round"
       />
 
-      {/* Titik bulat 1 */}
+      {/* Titik bulat 1 (atas) - y=180 */}
       <circle
         ref={(el) => { timelineDotsRef.current[0] = el; }}
         cx="500"
@@ -2254,17 +2254,17 @@ export default function StoriesPage(): React.JSX.Element {
         stroke="#000000"
         strokeWidth="0"
       />
-      {/* Titik bulat 2 */}
+      {/* Titik bulat 2 - DISAMAKAN dengan posisi teks = y=600 */}
       <circle
         ref={(el) => { timelineDotsRef.current[1] = el; }}
         cx="500"
-        cy="485"
+        cy="600"
         r="5"
         fill="#000000"
         stroke="#000000"
         strokeWidth="0"
       />
-      {/* Titik bulat 3 */}
+      {/* Titik bulat 3 (bawah) - y=790 */}
       <circle
         ref={(el) => { timelineDotsRef.current[2] = el; }}
         cx="500"
@@ -2276,100 +2276,90 @@ export default function StoriesPage(): React.JSX.Element {
       />
     </svg>
 
-    {/* ===== BARIS SEJAJAR TITIK BULAT 2 ===== */}
-    {/* Pakai flex row yang di-center vertikal di top 60.625% (=485/800) */}
+    {/* ===== KONTEN TIMELINE ===== */}
+
+    {/* Titik bulat 2 - Sisi kiri: Tahun. top: 75% dari 800px = 600px (sama dengan cy titik bulat 2) */}
     <div
       style={{
         position: "absolute",
-        top: "60.625%",              // 485/800
-        left: 0,
-        right: 0,
-        display: "flex",
-        alignItems: "center",         // KUNCI: semua item di-center vertikal
-        justifyContent: "center",
-        transform: "translateY(-50%)", // center baris terhadap top
-        gap: "60px",                  // jarak antara angka dan judul
+        top: "75%",                // = 600px
+        left: "50%",               // = 500px (tepat di garis)
+        transform: "translate(calc(-100% - 30px), -50%)",
+        textAlign: "right",
+        lineHeight: 1,
       }}
     >
-      {/* Sisi kiri: Tahun */}
-      <div
+      <span
         style={{
-          textAlign: "right",
-          flexShrink: 0,
+          fontSize: "22px",
+          fontWeight: 600,
+          color: "#0D3CFC",
+          fontFamily: FONT_FAMILY,
+          letterSpacing: "-0.01em",
+          whiteSpace: "nowrap",
         }}
       >
-        <span
-          style={{
-            fontSize: "22px",
-            fontWeight: 600,
-            color: "#0D3CFC",
-            fontFamily: FONT_FAMILY,
-            letterSpacing: "-0.01em",
-            whiteSpace: "nowrap",
-          }}
-        >
-          2019 - 2023
-        </span>
+        2019 - 2023
+      </span>
+    </div>
+
+    {/* Titik bulat 2 - Sisi kanan: Universitas, Jurusan, Deskripsi. top: 75% = 600px */}
+    <div
+      style={{
+        position: "absolute",
+        top: "75%",                // = 600px
+        left: "50%",               // = 500px
+        transform: "translate(30px, -50%)",
+        textAlign: "left",
+        maxWidth: "360px",
+      }}
+    >
+      <div
+        style={{
+          fontSize: "22px",
+          fontWeight: 700,
+          color: "#0D3CFC",
+          fontFamily: FONT_FAMILY,
+          letterSpacing: "-0.01em",
+          lineHeight: 1.2,
+          marginBottom: "4px",
+        }}
+      >
+        Universitas Gunadarma
       </div>
-
-      {/* Spacer — titik bulat ada di tengah, jadi kita beri ruang */}
-      <div style={{ width: "0px", flexShrink: 0 }} />
-
-      {/* Sisi kanan: Judul + Deskripsi */}
       <div
         style={{
-          textAlign: "left",
-          maxWidth: "360px",
-          flexShrink: 0,
+          fontSize: "15px",
+          fontWeight: 500,
+          color: "#0D3CFC",
+          fontFamily: FONT_FAMILY,
+          lineHeight: 1.3,
+          marginBottom: "6px",
+          opacity: 0.85,
         }}
       >
-        <div
-          style={{
-            fontSize: "22px",
-            fontWeight: 700,
-            color: "#0D3CFC",
-            fontFamily: FONT_FAMILY,
-            letterSpacing: "-0.01em",
-            lineHeight: 1.2,
-            marginBottom: "4px",
-          }}
-        >
-          Universitas Gunadarma
-        </div>
-        <div
-          style={{
-            fontSize: "15px",
-            fontWeight: 500,
-            color: "#0D3CFC",
-            fontFamily: FONT_FAMILY,
-            lineHeight: 1.3,
-            marginBottom: "6px",
-            opacity: 0.85,
-          }}
-        >
-          Graduate - Computer System
-        </div>
-        <div
-          style={{
-            fontSize: "13px",
-            fontWeight: 400,
-            color: "#0D3CFC",
-            fontFamily: FONT_FAMILY,
-            lineHeight: 1.5,
-            opacity: 0.75,
-          }}
-        >
-          Mempelajari pemrograman, jaringan, dan sistem informasi sebagai fondasi karier di dunia teknologi.
-        </div>
+        Graduate - Computer System
+      </div>
+      <div
+        style={{
+          fontSize: "13px",
+          fontWeight: 400,
+          color: "#0D3CFC",
+          fontFamily: FONT_FAMILY,
+          lineHeight: 1.5,
+          opacity: 0.75,
+        }}
+      >
+        Mempelajari pemrograman, jaringan, dan sistem informasi sebagai fondasi karier di dunia teknologi.
       </div>
     </div>
 
-    {/* Ujung garis bawah - Thank you */}
+    {/* Ujung garis bawah - Thank you, sejajar dengan garis bawah (y=790 → 98.75%) */}
     <div
       style={{
         position: "absolute",
-        top: "98.75%",              // 790/800
-        left: "50%",
+        top: "98.75%",             // = 790px
+        left: "50%",               // = 500px
         transform: "translate(30px, -50%)",
         textAlign: "left",
         whiteSpace: "nowrap",
