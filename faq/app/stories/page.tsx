@@ -1749,7 +1749,6 @@ export default function StoriesPage(): React.JSX.Element {
     const progressPath = timelineProgressPathRef.current;
     const dots = timelineDotsRef.current.filter(Boolean) as SVGCircleElement[];
 
-    // Ambil total panjang path untuk animasi stroke-dashoffset
     let pathLength = 0;
     try {
       pathLength = progressPath.getTotalLength();
@@ -1758,14 +1757,12 @@ export default function StoriesPage(): React.JSX.Element {
       return;
     }
 
-    // Set initial state: progress path invisible
     gsap.set(progressPath, {
       strokeDasharray: pathLength,
       strokeDashoffset: pathLength,
     });
 
-    // Dapatkan posisi masing-masing dot di sepanjang path (3 titik)
-    const dotPositions = [0.2, 0.5, 0.8];
+    const dotPositions = [0.05, 0.5, 0.95];
     const dotPoints: { x: number, y: number }[] = [];
     
     dotPositions.forEach((ratio) => {
@@ -1777,7 +1774,6 @@ export default function StoriesPage(): React.JSX.Element {
       }
     });
 
-    // Set posisi awal dots (hitam) dan scale awal
     dots.forEach((dot, i) => {
       if (dotPoints[i]) {
         gsap.set(dot, {
@@ -1789,10 +1785,8 @@ export default function StoriesPage(): React.JSX.Element {
       }
     });
 
-    // Reset activated state
     dotsActivatedRef.current = [false, false, false];
 
-    // Fungsi animasi untuk dot saat terlewati
     const animateDotActivated = (dot: SVGCircleElement) => {
       const tl = gsap.timeline();
       
@@ -1815,7 +1809,6 @@ export default function StoriesPage(): React.JSX.Element {
       });
     };
 
-    // Fungsi animasi untuk dot saat kembali ke hitam
     const animateDotDeactivated = (dot: SVGCircleElement) => {
       gsap.to(dot, {
         fill: "#000000",
@@ -1825,7 +1818,6 @@ export default function StoriesPage(): React.JSX.Element {
       });
     };
 
-    // Buat ScrollTrigger untuk mengikuti scroll
     ScrollTrigger.create({
       trigger: timelineRef.current,
       start: "top 70%",
@@ -2194,8 +2186,8 @@ export default function StoriesPage(): React.JSX.Element {
                 marginTop: "100px",
                 width: "100%",
                 position: "relative",
-                paddingBottom: "400px",
-                minHeight: "1100px",
+                paddingBottom: "200px",
+                minHeight: "900px",
               }}
             >
               {/* Male Icon di atas - TANPA BULAT, TIDAK IKUT SCROLL */}
@@ -2212,7 +2204,7 @@ export default function StoriesPage(): React.JSX.Element {
                 <MaleIcon size={48} color="#0D3CFC" />
               </div>
 
-              {/* SVG Timeline dengan Path */}
+              {/* SVG Timeline */}
               <div
                 style={{
                   width: "100%",
@@ -2232,11 +2224,11 @@ export default function StoriesPage(): React.JSX.Element {
                     overflow: "visible",
                   }}
                 >
-                  {/* Base path - bagian atas melengkung, sisanya lurus */}
+                  {/* Path: melengkung hanya di ujung atas, sisanya lurus vertikal */}
                   <path
                     d="M 500 10 
-                       C 620 60, 720 120, 500 200 
-                       L 500 790"
+                       C 400 40, 300 80, 300 150 
+                       L 300 790"
                     fill="none"
                     stroke="#000000"
                     strokeWidth="2"
@@ -2244,19 +2236,19 @@ export default function StoriesPage(): React.JSX.Element {
                     strokeLinecap="round"
                   />
 
-                  {/* Progress path - mengikuti base path */}
+                  {/* Progress path */}
                   <path
                     ref={timelineProgressPathRef}
                     d="M 500 10 
-                       C 620 60, 720 120, 500 200 
-                       L 500 790"
+                       C 400 40, 300 80, 300 150 
+                       L 300 790"
                     fill="none"
                     stroke="#0D3CFC"
                     strokeWidth="3"
                     strokeLinecap="round"
                   />
 
-                  {/* Titik bulat ke-1 (atas) */}
+                  {/* Titik bulat ke-1 (ujung lengkungan atas) */}
                   <circle
                     ref={(el) => { timelineDotsRef.current[0] = el; }}
                     cx="500"
@@ -2266,20 +2258,20 @@ export default function StoriesPage(): React.JSX.Element {
                     stroke="#000000"
                     strokeWidth="0"
                   />
-                  {/* Titik bulat ke-2 (tengah) */}
+                  {/* Titik bulat ke-2 (tengah garis lurus) */}
                   <circle
                     ref={(el) => { timelineDotsRef.current[1] = el; }}
-                    cx="500"
+                    cx="300"
                     cy="400"
                     r="5"
                     fill="#000000"
                     stroke="#000000"
                     strokeWidth="0"
                   />
-                  {/* Titik bulat ke-3 (bawah) */}
+                  {/* Titik bulat ke-3 (ujung bawah garis) */}
                   <circle
                     ref={(el) => { timelineDotsRef.current[2] = el; }}
-                    cx="500"
+                    cx="300"
                     cy="790"
                     r="5"
                     fill="#000000"
@@ -2288,14 +2280,14 @@ export default function StoriesPage(): React.JSX.Element {
                   />
                 </svg>
 
-                {/* Konten Timeline di titik bulat ke-2 (tengah) */}
-                {/* Sisi kiri titik bulat: Tahun 2019 - 2023 */}
+                {/* Konten di titik bulat ke-2 (tengah) */}
+                {/* Sisi kiri titik bulat: Tahun */}
                 <div
                   style={{
                     position: "absolute",
                     top: "calc(50% - 12px)",
-                    left: "50%",
-                    transform: "translateX(calc(-100% - 40px))",
+                    left: "30%",
+                    transform: "translateX(calc(-100% - 30px))",
                     textAlign: "right",
                   }}
                 >
@@ -2314,12 +2306,13 @@ export default function StoriesPage(): React.JSX.Element {
                   </span>
                 </div>
 
-                {/* Sisi kanan titik bulat: Universitas, Jurusan, Deskripsi */}
+                {/* Sisi kanan titik bulat: Universitas, Jurusan, Deskripsi (2 baris) */}
                 <div
                   style={{
                     position: "absolute",
                     top: "calc(50% - 12px)",
-                    left: "calc(50% + 40px)",
+                    left: "30%",
+                    transform: "translateX(30px)",
                     textAlign: "left",
                     maxWidth: "380px",
                   }}
@@ -2358,25 +2351,27 @@ export default function StoriesPage(): React.JSX.Element {
                       fontFamily: FONT_FAMILY,
                       lineHeight: 1.5,
                       opacity: 0.8,
+                      maxWidth: "380px",
                     }}
                   >
-                    Menempuh pendidikan di bidang Computer System, mempelajari pemrograman, jaringan, dan sistem informasi yang menjadi fondasi karier di dunia teknologi.
+                    Menempuh pendidikan di bidang Computer System, mempelajari pemrograman dan sistem informasi.
                   </div>
                 </div>
 
-                {/* Kalimat di ujung garis bawah, rata kanan, 2 baris - diturunkan ke bawah */}
+                {/* Kalimat di ujung garis bawah - sejajar dengan garis paling bawah */}
                 <div
                   style={{
                     position: "absolute",
-                    left: "calc(50% + 40px)",
-                    bottom: "-80px",
+                    left: "30%",
+                    bottom: "0",
+                    transform: "translateX(30px)",
                     textAlign: "left",
                     whiteSpace: "nowrap",
                   }}
                 >
                   <p
                     style={{
-                      fontSize: "24px",
+                      fontSize: "22px",
                       fontWeight: 600,
                       color: "#0D3CFC",
                       fontFamily: FONT_FAMILY,
@@ -2389,7 +2384,7 @@ export default function StoriesPage(): React.JSX.Element {
                   </p>
                   <p
                     style={{
-                      fontSize: "24px",
+                      fontSize: "22px",
                       fontWeight: 600,
                       color: "#0D3CFC",
                       fontFamily: FONT_FAMILY,
@@ -2705,7 +2700,7 @@ export default function StoriesPage(): React.JSX.Element {
             ))}
           </div>
 
-          {/* HANYA menuBoxRef - Bagaimana website ini bisa berkembang? */}
+          {/* menuBoxRef */}
           <div
             ref={menuBoxRef}
             style={{
