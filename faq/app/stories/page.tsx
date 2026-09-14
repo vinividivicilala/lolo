@@ -2178,7 +2178,7 @@ export default function StoriesPage(): React.JSX.Element {
               </h1>
             </div>
             
-        {/* ===== SCROLL-DRIVEN TIMELINE SYSTEM ===== */}
+      {/* ===== SCROLL-DRIVEN TIMELINE SYSTEM ===== */}
 <div
   ref={timelineRef}
   style={{
@@ -2203,7 +2203,7 @@ export default function StoriesPage(): React.JSX.Element {
     <MaleIcon size={48} color="#0D3CFC" />
   </div>
 
-  {/* Wrapper SVG + konten overlay — tinggi sama persis 800px */}
+  {/* Wrapper SVG + konten overlay */}
   <div
     style={{
       width: "100%",
@@ -2224,7 +2224,7 @@ export default function StoriesPage(): React.JSX.Element {
         overflow: "visible",
       }}
     >
-      {/* Base path - LURUS TOTAL */}
+      {/* Base path - LURUS */}
       <path
         d="M 500 10 L 500 790"
         fill="none"
@@ -2234,7 +2234,7 @@ export default function StoriesPage(): React.JSX.Element {
         strokeLinecap="round"
       />
 
-      {/* Progress path - mengikuti base path */}
+      {/* Progress path */}
       <path
         ref={timelineProgressPathRef}
         d="M 500 10 L 500 790"
@@ -2244,7 +2244,7 @@ export default function StoriesPage(): React.JSX.Element {
         strokeLinecap="round"
       />
 
-      {/* Titik bulat 1 (atas) - y=180 */}
+      {/* Titik bulat 1 (atas) */}
       <circle
         ref={(el) => { timelineDotsRef.current[0] = el; }}
         cx="500"
@@ -2254,17 +2254,17 @@ export default function StoriesPage(): React.JSX.Element {
         stroke="#000000"
         strokeWidth="0"
       />
-      {/* Titik bulat 2 - DISAMAKAN dengan posisi teks = y=600 */}
+      {/* Titik bulat 2 (tengah) - DIPINDAH ke 400 agar sejajar teks */}
       <circle
         ref={(el) => { timelineDotsRef.current[1] = el; }}
         cx="500"
-        cy="600"
+        cy="400"
         r="5"
         fill="#000000"
         stroke="#000000"
         strokeWidth="0"
       />
-      {/* Titik bulat 3 (bawah) - y=790 */}
+      {/* Titik bulat 3 (bawah) */}
       <circle
         ref={(el) => { timelineDotsRef.current[2] = el; }}
         cx="500"
@@ -2276,14 +2276,14 @@ export default function StoriesPage(): React.JSX.Element {
       />
     </svg>
 
-    {/* ===== KONTEN TIMELINE ===== */}
+    {/* ===== KONTEN — sejajar dengan cy=400 (50% dari 800) ===== */}
 
-    {/* Titik bulat 2 - Sisi kiri: Tahun. top: 75% dari 800px = 600px (sama dengan cy titik bulat 2) */}
+    {/* Titik bulat 2 - Sisi kiri: Tahun */}
     <div
       style={{
         position: "absolute",
-        top: "75%",                // = 600px
-        left: "50%",               // = 500px (tepat di garis)
+        top: "50%",                 // = 400/800 → sama dengan cy=400
+        left: "50%",                // = 500/1000 → tepat di garis
         transform: "translate(calc(-100% - 30px), -50%)",
         textAlign: "right",
         lineHeight: 1,
@@ -2303,12 +2303,12 @@ export default function StoriesPage(): React.JSX.Element {
       </span>
     </div>
 
-    {/* Titik bulat 2 - Sisi kanan: Universitas, Jurusan, Deskripsi. top: 75% = 600px */}
+    {/* Titik bulat 2 - Sisi kanan: Universitas, Jurusan, Deskripsi */}
     <div
       style={{
         position: "absolute",
-        top: "75%",                // = 600px
-        left: "50%",               // = 500px
+        top: "50%",                 // = 400/800 → sama dengan cy=400
+        left: "50%",                // = 500/1000 → tepat di garis
         transform: "translate(30px, -50%)",
         textAlign: "left",
         maxWidth: "360px",
@@ -2354,12 +2354,12 @@ export default function StoriesPage(): React.JSX.Element {
       </div>
     </div>
 
-    {/* Ujung garis bawah - Thank you, sejajar dengan garis bawah (y=790 → 98.75%) */}
+    {/* Ujung garis bawah - Thank you */}
     <div
       style={{
         position: "absolute",
-        top: "98.75%",             // = 790px
-        left: "50%",               // = 500px
+        top: "98.75%",              // = 790/800 → sama dengan cy=790
+        left: "50%",
         transform: "translate(30px, -50%)",
         textAlign: "left",
         whiteSpace: "nowrap",
