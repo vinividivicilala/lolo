@@ -84,7 +84,7 @@ const LogoutIcon = ({ size = 18 }: { size?: number }) => (
   </svg>
 );
 
-// Manusia Pria Icon (Male / Person Icon)
+// Manusia Pria Icon
 const MaleIcon = ({ size = 40, color = "#0D3CFC" }: { size?: number, color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <circle cx="12" cy="7" r="4" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -1794,23 +1794,19 @@ export default function StoriesPage(): React.JSX.Element {
 
     // Fungsi animasi untuk dot saat terlewati
     const animateDotActivated = (dot: SVGCircleElement) => {
-      // Animasi GSAP: warna hitam → biru + efek pulse
       const tl = gsap.timeline();
       
-      // Perbesar dulu (pop)
       tl.to(dot, {
         attr: { r: 9 },
         duration: 0.25,
         ease: "back.out(2)"
       })
-      // Kecilkan kembali ke ukuran normal
       .to(dot, {
         attr: { r: 5 },
         duration: 0.35,
         ease: "elastic.out(1, 0.5)"
       });
       
-      // Ubah warna ke biru
       gsap.to(dot, {
         fill: "#0D3CFC",
         stroke: "#0D3CFC",
@@ -1837,22 +1833,18 @@ export default function StoriesPage(): React.JSX.Element {
       scrub: 0.5,
       onUpdate: (self) => {
         const progress = self.progress;
-        // Progress line: dari 0 ke pathLength
         gsap.set(progressPath, {
           strokeDashoffset: pathLength * (1 - progress),
         });
 
-        // Cek setiap dot
         dots.forEach((dot, i) => {
           const dotRatio = dotPositions[i];
           const isActivated = dotsActivatedRef.current[i];
           
           if (progress >= dotRatio && !isActivated) {
-            // Baru terlewati → animasi ke biru
             dotsActivatedRef.current[i] = true;
             animateDotActivated(dot);
           } else if (progress < dotRatio && isActivated) {
-            // Kembali ke hitam (scroll ke atas)
             dotsActivatedRef.current[i] = false;
             animateDotDeactivated(dot);
           }
@@ -2202,8 +2194,8 @@ export default function StoriesPage(): React.JSX.Element {
                 marginTop: "100px",
                 width: "100%",
                 position: "relative",
-                paddingBottom: "300px",
-                minHeight: "900px",
+                paddingBottom: "400px",
+                minHeight: "1100px",
               }}
             >
               {/* Male Icon di atas - TANPA BULAT, TIDAK IKUT SCROLL */}
@@ -2220,7 +2212,7 @@ export default function StoriesPage(): React.JSX.Element {
                 <MaleIcon size={48} color="#0D3CFC" />
               </div>
 
-              {/* SVG Timeline dengan Path Melengkung */}
+              {/* SVG Timeline dengan Path */}
               <div
                 style={{
                   width: "100%",
@@ -2240,11 +2232,11 @@ export default function StoriesPage(): React.JSX.Element {
                     overflow: "visible",
                   }}
                 >
-                  {/* Base path - garis hitam putus-putus kecil, melengkung S */}
+                  {/* Base path - bagian atas melengkung, sisanya lurus */}
                   <path
                     d="M 500 10 
-                       C 900 100, 900 300, 500 400 
-                       C 100 500, 100 700, 500 790"
+                       C 620 60, 720 120, 500 200 
+                       L 500 790"
                     fill="none"
                     stroke="#000000"
                     strokeWidth="2"
@@ -2252,12 +2244,12 @@ export default function StoriesPage(): React.JSX.Element {
                     strokeLinecap="round"
                   />
 
-                  {/* Progress path - garis biru kecil, mengikuti scroll */}
+                  {/* Progress path - mengikuti base path */}
                   <path
                     ref={timelineProgressPathRef}
                     d="M 500 10 
-                       C 900 100, 900 300, 500 400 
-                       C 100 500, 100 700, 500 790"
+                       C 620 60, 720 120, 500 200 
+                       L 500 790"
                     fill="none"
                     stroke="#0D3CFC"
                     strokeWidth="3"
@@ -2301,19 +2293,19 @@ export default function StoriesPage(): React.JSX.Element {
                 <div
                   style={{
                     position: "absolute",
-                    top: "calc(50% - 10px)",
+                    top: "calc(50% - 12px)",
                     left: "50%",
-                    transform: "translateX(calc(-100% - 60px))",
+                    transform: "translateX(calc(-100% - 40px))",
                     textAlign: "right",
                   }}
                 >
                   <span
                     style={{
-                      fontSize: "56px",
-                      fontWeight: 700,
+                      fontSize: "22px",
+                      fontWeight: 600,
                       color: "#0D3CFC",
                       fontFamily: FONT_FAMILY,
-                      letterSpacing: "-0.02em",
+                      letterSpacing: "-0.01em",
                       lineHeight: 1,
                       whiteSpace: "nowrap",
                     }}
@@ -2326,15 +2318,15 @@ export default function StoriesPage(): React.JSX.Element {
                 <div
                   style={{
                     position: "absolute",
-                    top: "calc(50% - 10px)",
-                    left: "calc(50% + 60px)",
+                    top: "calc(50% - 12px)",
+                    left: "calc(50% + 40px)",
                     textAlign: "left",
-                    maxWidth: "400px",
+                    maxWidth: "380px",
                   }}
                 >
                   <div
                     style={{
-                      fontSize: "28px",
+                      fontSize: "24px",
                       fontWeight: 700,
                       color: "#0D3CFC",
                       fontFamily: FONT_FAMILY,
@@ -2347,7 +2339,7 @@ export default function StoriesPage(): React.JSX.Element {
                   </div>
                   <div
                     style={{
-                      fontSize: "20px",
+                      fontSize: "16px",
                       fontWeight: 500,
                       color: "#0D3CFC",
                       fontFamily: FONT_FAMILY,
@@ -2360,30 +2352,31 @@ export default function StoriesPage(): React.JSX.Element {
                   </div>
                   <div
                     style={{
-                      fontSize: "16px",
+                      fontSize: "14px",
                       fontWeight: 400,
-                      color: "#666",
+                      color: "#0D3CFC",
                       fontFamily: FONT_FAMILY,
                       lineHeight: 1.5,
+                      opacity: 0.8,
                     }}
                   >
                     Menempuh pendidikan di bidang Computer System, mempelajari pemrograman, jaringan, dan sistem informasi yang menjadi fondasi karier di dunia teknologi.
                   </div>
                 </div>
 
-                {/* Kalimat di ujung garis bawah, rata kanan, 2 baris */}
+                {/* Kalimat di ujung garis bawah, rata kanan, 2 baris - diturunkan ke bawah */}
                 <div
                   style={{
                     position: "absolute",
                     left: "calc(50% + 40px)",
-                    bottom: "20px",
+                    bottom: "-80px",
                     textAlign: "left",
                     whiteSpace: "nowrap",
                   }}
                 >
                   <p
                     style={{
-                      fontSize: "28px",
+                      fontSize: "24px",
                       fontWeight: 600,
                       color: "#0D3CFC",
                       fontFamily: FONT_FAMILY,
@@ -2396,7 +2389,7 @@ export default function StoriesPage(): React.JSX.Element {
                   </p>
                   <p
                     style={{
-                      fontSize: "28px",
+                      fontSize: "24px",
                       fontWeight: 600,
                       color: "#0D3CFC",
                       fontFamily: FONT_FAMILY,
