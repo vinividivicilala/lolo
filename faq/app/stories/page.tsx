@@ -2177,6 +2177,8 @@ export default function StoriesPage(): React.JSX.Element {
                 Stories
               </h1>
             </div>
+
+
             {/* ===== SCROLL-DRIVEN TIMELINE SYSTEM ===== */}
 <div
   ref={timelineRef}
@@ -2188,56 +2190,18 @@ export default function StoriesPage(): React.JSX.Element {
     minHeight: "1000px",
   }}
 >
-  {/* Male Icon di atas + Teks 'people plan' + Menuru Brand */}
+  {/* Male Icon di atas */}
   <div
     style={{
       display: "flex",
-      flexDirection: "column",
       alignItems: "center",
+      justifyContent: "center",
       marginBottom: "20px",
       position: "relative",
       zIndex: 5,
     }}
   >
-    {/* Teks 'people plan' di atas icon */}
-    <span
-      style={{
-        fontSize: "18px",
-        fontWeight: 500,
-        color: "#0D3CFC",
-        fontFamily: FONT_FAMILY,
-        letterSpacing: "0.02em",
-        marginBottom: "8px",
-        textTransform: "lowercase",
-      }}
-    >
-      people plan
-    </span>
-
-    {/* Icon manusia + Menuru Brand di samping */}
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: "16px",
-      }}
-    >
-      <MaleIcon size={48} color="#0D3CFC" />
-      <span
-        style={{
-          fontSize: "16px",
-          fontWeight: 500,
-          color: "#0D3CFC",
-          fontFamily: FONT_FAMILY,
-          lineHeight: 1.4,
-          textAlign: "left",
-          maxWidth: "420px",
-          textTransform: "lowercase",
-        }}
-      >
-        menuru brand di lahirkan dari manusia yang tidak pernah menyerah
-      </span>
-    </div>
+    <MaleIcon size={48} color="#0D3CFC" />
   </div>
 
   {/* Wrapper SVG + konten overlay */}
@@ -2291,7 +2255,7 @@ export default function StoriesPage(): React.JSX.Element {
         stroke="#000000"
         strokeWidth="0"
       />
-      {/* Titik bulat 2 (tengah) - sejajar dengan teks di 50% */}
+      {/* Titik bulat 2 (tengah) */}
       <circle
         ref={(el) => { timelineDotsRef.current[1] = el; }}
         cx="500"
@@ -2301,26 +2265,95 @@ export default function StoriesPage(): React.JSX.Element {
         stroke="#000000"
         strokeWidth="0"
       />
-      {/* Titik bulat 3 (bawah) */}
-      <circle
-        ref={(el) => { timelineDotsRef.current[2] = el; }}
-        cx="500"
-        cy="790"
-        r="5"
-        fill="#000000"
-        stroke="#000000"
-        strokeWidth="0"
-      />
+      {/* Titik bulat 3 DIHAPUS */}
     </svg>
 
-    {/* ===== KONTEN — sejajar dengan cy=400 (50% dari 800) ===== */}
+    {/* ===== KONTEN TITIK 1 (atas) - cy=180 → 22.5% ===== */}
 
-    {/* Titik bulat 2 - Sisi kiri: Tahun */}
+    {/* Titik 1 - Sisi kiri: Tahun */}
     <div
       style={{
         position: "absolute",
-        top: "50%",
-        left: "50%",
+        top: "22.5%",               // = 180/800
+        left: "50%",                // = 500/1000
+        transform: "translate(calc(-100% - 30px), -50%)",
+        textAlign: "right",
+        lineHeight: 1,
+      }}
+    >
+      <span
+        style={{
+          fontSize: "22px",
+          fontWeight: 600,
+          color: "#0D3CFC",
+          fontFamily: FONT_FAMILY,
+          letterSpacing: "-0.01em",
+          whiteSpace: "nowrap",
+        }}
+      >
+        2024 - Present
+      </span>
+    </div>
+
+    {/* Titik 1 - Sisi kanan: Menuru, Founder and Developer, Deskripsi */}
+    <div
+      style={{
+        position: "absolute",
+        top: "22.5%",               // = 180/800
+        left: "50%",                // = 500/1000
+        transform: "translate(30px, -22px)",   // sejajar baris judul
+        textAlign: "left",
+        maxWidth: "360px",
+      }}
+    >
+      <div
+        style={{
+          fontSize: "22px",
+          fontWeight: 700,
+          color: "#0D3CFC",
+          fontFamily: FONT_FAMILY,
+          letterSpacing: "-0.01em",
+          lineHeight: 1.2,
+          marginBottom: "4px",
+        }}
+      >
+        Menuru
+      </div>
+      <div
+        style={{
+          fontSize: "15px",
+          fontWeight: 500,
+          color: "#0D3CFC",
+          fontFamily: FONT_FAMILY,
+          lineHeight: 1.3,
+          marginBottom: "6px",
+          opacity: 0.85,
+        }}
+      >
+        Founder and Developer
+      </div>
+      <div
+        style={{
+          fontSize: "13px",
+          fontWeight: 400,
+          color: "#0D3CFC",
+          fontFamily: FONT_FAMILY,
+          lineHeight: 1.5,
+          opacity: 0.75,
+        }}
+      >
+        Membangun platform Menuru dari nol, merancang sistem, dan mengembangkan fitur untuk komunitas.
+      </div>
+    </div>
+
+    {/* ===== KONTEN TITIK 2 (tengah) - cy=400 → 50% ===== */}
+
+    {/* Titik 2 - Sisi kiri: Tahun */}
+    <div
+      style={{
+        position: "absolute",
+        top: "50%",                 // = 400/800
+        left: "50%",                // = 500/1000
         transform: "translate(calc(-100% - 30px), -50%)",
         textAlign: "right",
         lineHeight: 1,
@@ -2340,13 +2373,13 @@ export default function StoriesPage(): React.JSX.Element {
       </span>
     </div>
 
-    {/* Titik bulat 2 - Sisi kanan: Universitas, Jurusan, Deskripsi */}
+    {/* Titik 2 - Sisi kanan: Universitas, Jurusan, Deskripsi */}
     <div
       style={{
         position: "absolute",
-        top: "50%",
-        left: "50%",
-        transform: "translate(30px, -22px)",
+        top: "50%",                 // = 400/800
+        left: "50%",                // = 500/1000
+        transform: "translate(30px, -22px)",   // sejajar baris judul
         textAlign: "left",
         maxWidth: "360px",
       }}
@@ -2391,11 +2424,11 @@ export default function StoriesPage(): React.JSX.Element {
       </div>
     </div>
 
-    {/* Ujung garis bawah - Thank you */}
+    {/* ===== Ujung garis bawah - Thank you ===== */}
     <div
       style={{
         position: "absolute",
-        top: "98.75%",
+        top: "98.75%",              // = 790/800
         left: "50%",
         transform: "translate(30px, -50%)",
         textAlign: "left",
