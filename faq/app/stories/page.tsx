@@ -2293,6 +2293,46 @@ export default function StoriesPage(): React.JSX.Element {
                     strokeWidth="0"
                   />
                 </svg>
+
+                {/* Kalimat di ujung garis bawah, sisi kanan */}
+                <div
+                  style={{
+                    position: "absolute",
+                    right: "0",
+                    bottom: "0",
+                    transform: "translateX(-10px) translateY(-20px)",
+                    maxWidth: "320px",
+                    textAlign: "right",
+                  }}
+                >
+                  <p
+                    style={{
+                      fontSize: "16px",
+                      fontWeight: 400,
+                      color: "#0D3CFC",
+                      fontFamily: FONT_FAMILY,
+                      lineHeight: 1.5,
+                      margin: 0,
+                      letterSpacing: "-0.01em",
+                    }}
+                  >
+                    Thank you for walk. See you again soon.
+                  </p>
+                  <p
+                    style={{
+                      fontSize: "16px",
+                      fontWeight: 400,
+                      color: "#0D3CFC",
+                      fontFamily: FONT_FAMILY,
+                      lineHeight: 1.5,
+                      margin: 0,
+                      marginTop: "4px",
+                      letterSpacing: "-0.01em",
+                    }}
+                  >
+                    Here are a few memories walk planning of life.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
