@@ -2294,23 +2294,24 @@ export default function StoriesPage(): React.JSX.Element {
                   />
                 </svg>
 
-                {/* Kalimat di ujung garis bawah, sisi kanan garis */}
+                {/* Kalimat di ujung garis bawah, rata kanan */}
 <div
   style={{
     position: "absolute",
-    left: "calc(50% + 40px)",
-    bottom: "40px",
-    maxWidth: "400px",
+    left: "50%",
+    bottom: "10px",
+    transform: "translateX(20px)",
     textAlign: "left",
+    whiteSpace: "nowrap",
   }}
 >
   <p
     style={{
-      fontSize: "32px",
+      fontSize: "28px",
       fontWeight: 600,
       color: "#0D3CFC",
       fontFamily: FONT_FAMILY,
-      lineHeight: 1.2,
+      lineHeight: 1.3,
       margin: 0,
       letterSpacing: "-0.02em",
     }}
@@ -2319,19 +2320,20 @@ export default function StoriesPage(): React.JSX.Element {
   </p>
   <p
     style={{
-      fontSize: "32px",
+      fontSize: "28px",
       fontWeight: 600,
       color: "#0D3CFC",
       fontFamily: FONT_FAMILY,
-      lineHeight: 1.2,
+      lineHeight: 1.3,
       margin: 0,
-      marginTop: "8px",
       letterSpacing: "-0.02em",
     }}
   >
     Here are a few memories walk planning of life.
   </p>
 </div>
+
+               
               </div>
             </div>
           </div>
