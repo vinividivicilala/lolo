@@ -84,8 +84,8 @@ const LogoutIcon = ({ size = 18 }: { size?: number }) => (
   </svg>
 );
 
-// Pesawat / Plane Icon
-const PlaneIcon = ({ size = 24, color = "#0D3CFC" }: { size?: number, color?: string }) => (
+// Pesawat / Plane Icon (tanpa bulat)
+const PlaneIcon = ({ size = 32, color = "#0D3CFC" }: { size?: number, color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M21 16V14L13 9V3.5C13 2.67 12.33 2 11.5 2C10.67 2 10 2.67 10 3.5V9L2 14V16L10 13.5V19L8 20.5V22L11.5 21L15 22V20.5L13 19V13.5L21 16Z" fill={color}/>
   </svg>
@@ -1544,8 +1544,7 @@ export default function StoriesPage(): React.JSX.Element {
   const timelineRef = useRef<HTMLDivElement>(null);
   const timelineSvgRef = useRef<SVGSVGElement>(null);
   const timelineProgressPathRef = useRef<SVGPathElement>(null);
-  const timelineDotRef = useRef<SVGCircleElement>(null);
-  const timelinePlaneRef = useRef<HTMLDivElement>(null);
+  const timelineDotsRef = useRef<(SVGCircleElement | null)[]>([]);
 
   // Register GSAP plugins di dalam useEffect
   useEffect(() => {
@@ -1743,10 +1742,10 @@ export default function StoriesPage(): React.JSX.Element {
   // ===== SCROLL-DRIVEN TIMELINE SYSTEM =====
   useEffect(() => {
     if (!showMain || !isMounted) return;
-    if (!timelineRef.current || !timelineProgressPathRef.current || !timelineDotRef.current) return;
+    if (!timelineRef.current || !timelineProgressPathRef.current) return;
 
     const progressPath = timelineProgressPathRef.current;
-    const dot = timelineDotRef.current;
+    const dots = timelineDotsRef.current.filter(Boolean) as SVGCircleElement[];
 
     // Ambil total panjang path untuk animasi stroke-dashoffset
     let pathLength = 0;
@@ -1763,6 +1762,31 @@ export default function StoriesPage(): React.JSX.Element {
       strokeDashoffset: pathLength,
     });
 
+    // Dapatkan posisi masing-masing dot di sepanjang path (3 titik)
+    // 3 titik: di 25%, 50%, 75% dari total path
+    const dotPositions = [0.25, 0.5, 0.75];
+    const dotPoints: { x: number, y: number }[] = [];
+    
+    dotPositions.forEach((ratio) => {
+      try {
+        const point = progressPath.getPointAtLength(pathLength * ratio);
+        dotPoints.push({ x: point.x, y: point.y });
+      } catch (e) {
+        dotPoints.push({ x: 0, y: 0 });
+      }
+    });
+
+    // Set posisi awal dots (hitam)
+    dots.forEach((dot, i) => {
+      if (dotPoints[i]) {
+        gsap.set(dot, {
+          attr: { cx: dotPoints[i].x, cy: dotPoints[i].y },
+          fill: "#000000",
+          stroke: "#000000",
+        });
+      }
+    });
+
     // Buat ScrollTrigger untuk mengikuti scroll
     ScrollTrigger.create({
       trigger: timelineRef.current,
@@ -1776,15 +1800,17 @@ export default function StoriesPage(): React.JSX.Element {
           strokeDashoffset: pathLength * (1 - progress),
         });
 
-        // Titik bulat: bergerak sepanjang path
-        try {
-          const point = progressPath.getPointAtLength(pathLength * progress);
-          gsap.set(dot, {
-            attr: { cx: point.x, cy: point.y },
-          });
-        } catch (e) {
-          // ignore
-        }
+        // Ubah warna dots berdasarkan progress
+        dots.forEach((dot, i) => {
+          const dotRatio = dotPositions[i];
+          if (progress >= dotRatio) {
+            // Sudah terlewati → biru
+            gsap.set(dot, { fill: "#0D3CFC", stroke: "#0D3CFC" });
+          } else {
+            // Belum terlewati → hitam
+            gsap.set(dot, { fill: "#000000", stroke: "#000000" });
+          }
+        });
       }
     });
 
@@ -2134,31 +2160,18 @@ export default function StoriesPage(): React.JSX.Element {
                 minHeight: "800px",
               }}
             >
-              {/* Plane Icon di atas - TIDAK IKUT SCROLL */}
+              {/* Plane Icon di atas - TANPA BULAT, TIDAK IKUT SCROLL */}
               <div
-                ref={timelinePlaneRef}
                 style={{
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  marginBottom: "40px",
+                  marginBottom: "20px",
+                  position: "relative",
+                  zIndex: 5,
                 }}
               >
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    width: "48px",
-                    height: "48px",
-                    borderRadius: "50%",
-                    backgroundColor: "#ffffff",
-                    border: "2px solid #0D3CFC",
-                    boxShadow: "0 4px 16px rgba(13,60,252,0.15)",
-                  }}
-                >
-                  <PlaneIcon size={24} color="#0D3CFC" />
-                </div>
+                <PlaneIcon size={40} color="#0D3CFC" />
               </div>
 
               {/* SVG Timeline dengan Path Melengkung */}
@@ -2181,11 +2194,11 @@ export default function StoriesPage(): React.JSX.Element {
                     overflow: "visible",
                   }}
                 >
-                  {/* Base path - garis hitam putus-putus kecil, melengkung S */}
+                  {/* Base path - garis hitam putus-putus kecil, melengkung S, mengarah ke pesawat */}
                   <path
-                    d="M 100 20 
-                       C 100 200, 900 200, 900 400 
-                       C 900 600, 100 600, 100 780"
+                    d="M 500 10 
+                       C 900 100, 900 300, 500 400 
+                       C 100 500, 100 700, 500 790"
                     fill="none"
                     stroke="#000000"
                     strokeWidth="2"
@@ -2196,22 +2209,42 @@ export default function StoriesPage(): React.JSX.Element {
                   {/* Progress path - garis biru kecil, mengikuti scroll */}
                   <path
                     ref={timelineProgressPathRef}
-                    d="M 100 20 
-                       C 100 200, 900 200, 900 400 
-                       C 900 600, 100 600, 100 780"
+                    d="M 500 10 
+                       C 900 100, 900 300, 500 400 
+                       C 100 500, 100 700, 500 790"
                     fill="none"
                     stroke="#0D3CFC"
                     strokeWidth="3"
                     strokeLinecap="round"
                   />
 
-                  {/* Titik bulat kecil yang mengikuti progress */}
+                  {/* 3 Titik bulat kecil di sepanjang garis */}
                   <circle
-                    ref={timelineDotRef}
-                    cx="100"
-                    cy="20"
+                    ref={(el) => { timelineDotsRef.current[0] = el; }}
+                    cx="500"
+                    cy="10"
                     r="5"
-                    fill="#0D3CFC"
+                    fill="#000000"
+                    stroke="#000000"
+                    strokeWidth="0"
+                  />
+                  <circle
+                    ref={(el) => { timelineDotsRef.current[1] = el; }}
+                    cx="500"
+                    cy="400"
+                    r="5"
+                    fill="#000000"
+                    stroke="#000000"
+                    strokeWidth="0"
+                  />
+                  <circle
+                    ref={(el) => { timelineDotsRef.current[2] = el; }}
+                    cx="500"
+                    cy="790"
+                    r="5"
+                    fill="#000000"
+                    stroke="#000000"
+                    strokeWidth="0"
                   />
                 </svg>
               </div>
