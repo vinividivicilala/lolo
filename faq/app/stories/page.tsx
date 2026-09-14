@@ -84,7 +84,7 @@ const LogoutIcon = ({ size = 18 }: { size?: number }) => (
   </svg>
 );
 
-// Manusia Pria Icon
+// Male Icon
 const MaleIcon = ({ size = 40, color = "#0D3CFC" }: { size?: number, color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <circle cx="12" cy="7" r="4" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -96,10 +96,10 @@ const MaleIcon = ({ size = 40, color = "#0D3CFC" }: { size?: number, color?: str
 const footerLinks = [
   { title: "Get in Touch", links: ["Contact Us", "Instagram", "Live Chat"] },
   { title: "Product", links: ["Shop", "Note", "Calendar", "Blog", "Donation", "Community", "Live Chat Agent"] },
-  { title: "Attention", links: ["Kebijakan Privasi", "Ketentuan Kami", "Pusat Bantuan"] }
+  { title: "Attention", links: ["Privacy Policy", "Terms of Service", "Help Center"] }
 ];
 
-// Menu items for drawer
+// Menu items
 const menuItems = [
   { name: "Community", number: "01" },
   { name: "Blog", number: "02" },
@@ -153,12 +153,12 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const topics = [
-    "Pertanyaan tentang produk",
-    "Bantuan teknis",
-    "Permasalahan akun",
-    "Donasi",
-    "Kerjasama",
-    "Lainnya"
+    "Product inquiry",
+    "Technical support",
+    "Account issues",
+    "Donation",
+    "Partnership",
+    "Others"
   ];
 
   useEffect(() => {
@@ -347,7 +347,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
     if (!db || !user || !selectedTopic) return;
     const hasActiveTicket = tickets.some(t => t.status === 'waiting' || t.status === 'active');
     if (hasActiveTicket) {
-      alert("Anda masih memiliki chat aktif dengan agent. Tunggu hingga selesai.");
+      alert("You already have an active chat with the agent. Please wait until it's finished.");
       return;
     }
     try {
@@ -367,7 +367,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
       await addDoc(collection(db, "livechat_tickets", ticketRef.id, "messages"), {
         senderId: user.uid,
         senderName: user.displayName || user.email || "User",
-        text: `Halo, saya ingin bertanya tentang: ${selectedTopic}`,
+        text: `Hello, I would like to ask about: ${selectedTopic}`,
         timestamp: serverTimestamp(),
         read: false,
       });
@@ -381,7 +381,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   const sendMessage = async () => {
     if (!db || !selectedTicket || !messageText.trim() || !user) return;
     if (selectedTicket.status === 'resolved' || selectedTicket.status === 'closed') {
-      alert("Chat ini sudah selesai. Silahkan buat ticket baru.");
+      alert("This chat has ended. Please create a new ticket.");
       return;
     }
     try {
@@ -443,8 +443,8 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
 
   const getTypingText = (ticket: Ticket | null) => {
     if (!ticket || !ticket.typing) return null;
-    const name = ticket.typingUserName || "Seseorang";
-    return `${name} sedang mengetik...`;
+    const name = ticket.typingUserName || "Someone";
+    return `${name} is typing...`;
   };
 
   const handleLogout = async () => {
@@ -495,7 +495,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               fontFamily: FONT_FAMILY,
               marginBottom: "6px",
             }}>
-              Silakan login untuk menggunakan Live Chat Agent
+              Please login to use Live Chat Agent
             </p>
             <Link href="/" style={{ textDecoration: "none" }}>
               <button
@@ -521,8 +521,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
   }
 
   if (!isAdmin) {
-    const activeTicket = tickets.find(t => t.status === 'waiting' || t.status === 'active');
-
     if (tickets.length === 0 && !showStartChat) {
       return (
         <div style={{ marginTop: "40px", paddingTop: "30px" }}>
@@ -570,7 +568,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             </span>
           </div>
           <p style={{ fontSize: "13px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "10px" }}>
-            Butuh bantuan? Chat langsung dengan agent kami.
+            Need help? Chat directly with our agent.
           </p>
           <button
             onClick={() => setShowStartChat(true)}
@@ -590,7 +588,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
             }}
           >
             <ChatIcon />
-            <span>Mulai Live Chat</span>
+            <span>Start Live Chat</span>
           </button>
         </div>
       );
@@ -634,7 +632,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
           </div>
           <div style={{ maxWidth: "360px" }}>
             <div style={{ fontSize: "13px", marginBottom: "8px", fontFamily: FONT_FAMILY }}>
-              Pilih topik permasalahan Anda:
+              Select your topic:
             </div>
             <select
               value={selectedTopic}
@@ -652,7 +650,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 color: "#0D3CFC",
               }}
             >
-              <option value="">-- Pilih topik --</option>
+              <option value="">-- Select topic --</option>
               {topics.map((t) => (
                 <option key={t} value={t}>{t}</option>
               ))}
@@ -673,7 +671,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                   fontFamily: FONT_FAMILY,
                 }}
               >
-                Mulai Chat
+                Start Chat
               </button>
               <button
                 onClick={() => setShowStartChat(false)}
@@ -689,7 +687,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                   fontFamily: FONT_FAMILY,
                 }}
               >
-                Batal
+                Cancel
               </button>
             </div>
           </div>
@@ -774,7 +772,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               zIndex: 1,
             }}>
               <ChatIconSmall />
-              <span>Riwayat Chat</span>
+              <span>Chat History</span>
               <span style={{
                 marginLeft: "auto",
                 fontSize: "9px",
@@ -787,8 +785,8 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               {tickets.map((ticket) => {
                 const ticketId = generateTicketId(ticket.createdAt);
                 const isActive = selectedTicket?.id === ticket.id;
-                const statusLabel = ticket.status === 'waiting' ? 'Menunggu' :
-                                    ticket.status === 'active' ? 'Aktif' : 'Selesai';
+                const statusLabel = ticket.status === 'waiting' ? 'Waiting' :
+                                    ticket.status === 'active' ? 'Active' : 'Done';
                 const statusColor = ticket.status === 'waiting' ? '#fef3c7' :
                                     ticket.status === 'active' ? '#d1fae5' : '#e5e7eb';
                 const statusTextColor = ticket.status === 'waiting' ? '#92400e' :
@@ -835,7 +833,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               })}
               {tickets.length === 0 && (
                 <div style={{ padding: "20px 10px", textAlign: "center", color: "rgba(255,255,255,0.5)", fontSize: "11px" }}>
-                  Belum ada chat
+                  No chats yet
                 </div>
               )}
             </div>
@@ -861,7 +859,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                   fontFamily: FONT_FAMILY,
                 }}
               >
-                + Chat Baru
+                + New Chat
               </button>
             </div>
           </div>
@@ -896,11 +894,11 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
                       <span style={{ fontSize: "9px", color: selectedTicket.status === 'waiting' ? "#fef3c7" : "#d1fae5", fontFamily: FONT_FAMILY }}>
-                        {selectedTicket.status === 'waiting' ? 'Menunggu' : 'Aktif'}
+                        {selectedTicket.status === 'waiting' ? 'Waiting' : 'Active'}
                       </span>
                       {selectedTicket.typing && selectedTicket.status !== 'resolved' && (
                         <span style={{ fontSize: "9px", color: "#ffd700", fontStyle: "italic", fontFamily: FONT_FAMILY }}>
-                          {selectedTicket.typingUserName} mengetik...
+                          {selectedTicket.typingUserName} is typing...
                         </span>
                       )}
                       <span style={{ fontSize: "8px", color: "rgba(255,255,255,0.5)" }}>
@@ -922,7 +920,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                         fontFamily: FONT_FAMILY,
                       }}
                     >
-                      Selesaikan
+                      Resolve
                     </button>
                   )}
                 </div>
@@ -958,12 +956,11 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                   }}>
                     {messages.length === 0 ? (
                       <div style={{ textAlign: "center", color: "#999", fontSize: "11px", padding: "20px 0", fontFamily: FONT_FAMILY }}>
-                        Belum ada pesan
+                        No messages yet
                       </div>
                     ) : (
                       messages.map((msg, idx) => {
                         const isMine = msg.senderId === user.uid;
-                        const isAgent = !isMine && msg.senderName === "Farid Ardiansyah";
                         return (
                           <div
                             key={idx}
@@ -1031,7 +1028,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                           sendMessage();
                         }
                       }}
-                      placeholder={selectedTicket.status === 'waiting' ? "Menunggu agent..." : "Ketik pesan..."}
+                      placeholder={selectedTicket.status === 'waiting' ? "Waiting for agent..." : "Type a message..."}
                       disabled={selectedTicket.status === 'waiting'}
                       style={{
                         flex: 1,
@@ -1064,7 +1061,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                       }}
                     >
                       <SendIcon size={12} />
-                      <span>Kirim</span>
+                      <span>Send</span>
                     </button>
                   </div>
                 )}
@@ -1079,7 +1076,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 fontSize: "12px",
                 fontFamily: FONT_FAMILY,
               }}>
-                Pilih chat dari daftar di kiri
+                Select a chat from the list
               </div>
             )}
           </div>
@@ -1180,7 +1177,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 zIndex: 1,
               }}>
                 <WaitingIcon />
-                <span>Menunggu ({waitingTickets.length})</span>
+                <span>Waiting ({waitingTickets.length})</span>
               </div>
               {waitingTickets.map((ticket) => (
                 <div
@@ -1199,7 +1196,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 >
                   <div style={{ fontWeight: 500, fontSize: "11px", color: "#0D3CFC", fontFamily: FONT_FAMILY }}>{ticket.userName}</div>
                   <div style={{ fontSize: "9px", color: "#666", fontFamily: FONT_FAMILY }}>{ticket.topic}</div>
-                  {ticket.typing && <div style={{ fontSize: "8px", color: "#0D3CFC", fontStyle: "italic", fontFamily: FONT_FAMILY }}>{ticket.typingUserName} mengetik...</div>}
+                  {ticket.typing && <div style={{ fontSize: "8px", color: "#0D3CFC", fontStyle: "italic", fontFamily: FONT_FAMILY }}>{ticket.typingUserName} is typing...</div>}
                 </div>
               ))}
             </div>
@@ -1222,7 +1219,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 zIndex: 1,
               }}>
                 <ActiveIcon />
-                <span>Aktif ({activeTickets.length})</span>
+                <span>Active ({activeTickets.length})</span>
               </div>
               {activeTickets.map((ticket) => (
                 <div
@@ -1238,7 +1235,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 >
                   <div style={{ fontWeight: 500, fontSize: "11px", color: "#0D3CFC", fontFamily: FONT_FAMILY }}>{ticket.userName}</div>
                   <div style={{ fontSize: "9px", color: "#666", fontFamily: FONT_FAMILY }}>{ticket.topic}</div>
-                  {ticket.typing && <div style={{ fontSize: "8px", color: "#0D3CFC", fontStyle: "italic", fontFamily: FONT_FAMILY }}>{ticket.typingUserName} mengetik...</div>}
+                  {ticket.typing && <div style={{ fontSize: "8px", color: "#0D3CFC", fontStyle: "italic", fontFamily: FONT_FAMILY }}>{ticket.typingUserName} is typing...</div>}
                   {ticket.lastMessage && <div style={{ fontSize: "8px", color: "#999", marginTop: "2px", fontFamily: FONT_FAMILY }}>{ticket.lastMessage.substring(0, 25)}{ticket.lastMessage.length > 25 ? "..." : ""}</div>}
                 </div>
               ))}
@@ -1262,7 +1259,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 zIndex: 1,
               }}>
                 <ResolvedIcon />
-                <span>Selesai ({resolvedTickets.length})</span>
+                <span>Done ({resolvedTickets.length})</span>
               </div>
               {resolvedTickets.map((ticket) => {
                 const ticketId = generateTicketId(ticket.createdAt);
@@ -1290,7 +1287,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
 
           {waitingTickets.length === 0 && activeTickets.length === 0 && resolvedTickets.length === 0 && (
             <div style={{ padding: "20px 10px", textAlign: "center", color: "#999", fontSize: "11px", fontFamily: FONT_FAMILY }}>
-              Tidak ada chat masuk
+              No incoming chats
             </div>
           )}
         </div>
@@ -1325,11 +1322,11 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
                     <span style={{ fontSize: "9px", color: selectedTicket.status === 'waiting' ? "#fef3c7" : "#d1fae5", fontFamily: FONT_FAMILY }}>
-                      {selectedTicket.status === 'waiting' ? 'Menunggu' : 'Aktif'}
+                      {selectedTicket.status === 'waiting' ? 'Waiting' : 'Active'}
                     </span>
                     {selectedTicket.typing && selectedTicket.status !== 'resolved' && (
                       <span style={{ fontSize: "9px", color: "#ffd700", fontStyle: "italic", fontFamily: FONT_FAMILY }}>
-                        {selectedTicket.typingUserName} mengetik...
+                        {selectedTicket.typingUserName} is typing...
                       </span>
                     )}
                     <span style={{ fontSize: "8px", color: "rgba(255,255,255,0.5)" }}>
@@ -1351,7 +1348,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                       fontFamily: FONT_FAMILY,
                     }}
                   >
-                    Selesaikan
+                    Resolve
                   </button>
                 )}
               </div>
@@ -1387,7 +1384,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                 }}>
                   {messages.length === 0 ? (
                     <div style={{ textAlign: "center", color: "#999", fontSize: "11px", padding: "20px 0", fontFamily: FONT_FAMILY }}>
-                      Belum ada pesan
+                      No messages yet
                     </div>
                   ) : (
                     messages.map((msg, idx) => {
@@ -1459,7 +1456,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                         sendMessage();
                       }
                     }}
-                    placeholder="Ketik balasan..."
+                    placeholder="Type a reply..."
                     style={{
                       flex: 1,
                       padding: "5px 8px",
@@ -1490,7 +1487,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
                     }}
                   >
                     <SendIcon size={12} />
-                    <span>Kirim</span>
+                    <span>Send</span>
                   </button>
                 </div>
               )}
@@ -1505,7 +1502,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth }: { user: any; isAdmin: boolea
               fontSize: "12px",
               fontFamily: FONT_FAMILY,
             }}>
-              Pilih chat dari daftar di kiri
+              Select a chat from the list
             </div>
           )}
         </div>
@@ -1546,7 +1543,7 @@ export default function StoriesPage(): React.JSX.Element {
   const timelineSvgRef = useRef<SVGSVGElement>(null);
   const timelineProgressPathRef = useRef<SVGPathElement>(null);
   const timelineDotsRef = useRef<(SVGCircleElement | null)[]>([]);
-  const dotsActivatedRef = useRef<boolean[]>([false, false, false]);
+  const dotsActivatedRef = useRef<boolean[]>([false, false]);
 
   // Register GSAP plugins di dalam useEffect
   useEffect(() => {
@@ -1762,8 +1759,8 @@ export default function StoriesPage(): React.JSX.Element {
       strokeDashoffset: pathLength,
     });
 
-    // Dot positions on path: 0.2, 0.5, 0.8
-    const dotPositions = [0.2, 0.5, 0.8];
+    // 2 titik sekarang: 0.25, 0.6
+    const dotPositions = [0.25, 0.6];
     const dotPoints: { x: number, y: number }[] = [];
     
     dotPositions.forEach((ratio) => {
@@ -1786,7 +1783,7 @@ export default function StoriesPage(): React.JSX.Element {
       }
     });
 
-    dotsActivatedRef.current = [false, false, false];
+    dotsActivatedRef.current = [false, false];
 
     const animateDotActivated = (dot: SVGCircleElement) => {
       const tl = gsap.timeline();
@@ -2032,7 +2029,7 @@ export default function StoriesPage(): React.JSX.Element {
     <>
       <Head>
         <title>Stories | Menuru Official</title>
-        <meta name="description" content="Kisah dan cerita inspiratif dari Menuru" />
+        <meta name="description" content="Inspiring stories and journeys from Menuru" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
         <meta name="theme-color" content="#0D3CFC" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -2042,11 +2039,11 @@ export default function StoriesPage(): React.JSX.Element {
         <link rel="icon" href="/images/ai.jpg" type="image/jpeg" />
         <link rel="apple-touch-icon" href="/images/ai.jpg" />
         <meta property="og:title" content="Stories | Menuru Official" />
-        <meta property="og:description" content="Kisah dan cerita inspiratif dari Menuru" />
+        <meta property="og:description" content="Inspiring stories and journeys from Menuru" />
         <meta property="og:image" content="/images/ai.jpg" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Stories | Menuru Official" />
-        <meta name="twitter:description" content="Kisah dan cerita inspiratif dari Menuru" />
+        <meta name="twitter:description" content="Inspiring stories and journeys from Menuru" />
         <meta name="twitter:image" content="/images/ai.jpg" />
       </Head>
 
@@ -2101,7 +2098,7 @@ export default function StoriesPage(): React.JSX.Element {
                   whiteSpace: "pre-line",
                 }}
               >
-                {`Setiap perjalanan memiliki\ncerita yang indah`}
+                {`Every journey has a\nbeautiful story`}
               </p>
             </div>
 
@@ -2127,7 +2124,7 @@ export default function StoriesPage(): React.JSX.Element {
                     letterSpacing: "0.02em",
                   }}
                 >
-                  Baca Kisah Kami
+                  Read Our Stories
                 </span>
               </div>
 
@@ -2152,7 +2149,7 @@ export default function StoriesPage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* STORIES TITLE - 350px */}
+            {/* STORIES TITLE */}
             <div
               style={{
                 marginTop: "80px",
@@ -2178,297 +2175,315 @@ export default function StoriesPage(): React.JSX.Element {
               </h1>
             </div>
 
-
             {/* ===== SCROLL-DRIVEN TIMELINE SYSTEM ===== */}
-<div
-  ref={timelineRef}
-  style={{
-    marginTop: "100px",
-    width: "100%",
-    position: "relative",
-    paddingBottom: "200px",
-    minHeight: "1000px",
-  }}
->
-  {/* Male Icon di atas */}
-  <div
-    style={{
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      marginBottom: "20px",
-      position: "relative",
-      zIndex: 5,
-    }}
-  >
-    <MaleIcon size={48} color="#0D3CFC" />
-  </div>
+            <div
+              ref={timelineRef}
+              style={{
+                marginTop: "100px",
+                width: "100%",
+                position: "relative",
+                paddingBottom: "200px",
+                minHeight: "1000px",
+              }}
+            >
+              {/* Male Icon di atas */}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginBottom: "20px",
+                  position: "relative",
+                  zIndex: 5,
+                }}
+              >
+                <MaleIcon size={48} color="#0D3CFC" />
+              </div>
 
-  {/* Wrapper SVG + konten overlay */}
-  <div
-    style={{
-      width: "100%",
-      maxWidth: "1000px",
-      height: "800px",
-      position: "relative",
-      margin: "0 auto",
-    }}
-  >
-    <svg
-      ref={timelineSvgRef}
-      viewBox="0 0 1000 800"
-      preserveAspectRatio="none"
-      style={{
-        width: "100%",
-        height: "800px",
-        display: "block",
-        overflow: "visible",
-      }}
-    >
-      {/* Base path - LURUS */}
-      <path
-        d="M 500 10 L 500 790"
-        fill="none"
-        stroke="#000000"
-        strokeWidth="2"
-        strokeDasharray="4 6"
-        strokeLinecap="round"
-      />
+              {/* Wrapper SVG + konten overlay */}
+              <div
+                style={{
+                  width: "100%",
+                  maxWidth: "1000px",
+                  height: "800px",
+                  position: "relative",
+                  margin: "0 auto",
+                }}
+              >
+                <svg
+                  ref={timelineSvgRef}
+                  viewBox="0 0 1000 800"
+                  preserveAspectRatio="none"
+                  style={{
+                    width: "100%",
+                    height: "800px",
+                    display: "block",
+                    overflow: "visible",
+                  }}
+                >
+                  {/* Base path - LURUS */}
+                  <path
+                    d="M 500 10 L 500 790"
+                    fill="none"
+                    stroke="#000000"
+                    strokeWidth="2"
+                    strokeDasharray="4 6"
+                    strokeLinecap="round"
+                  />
 
-      {/* Progress path */}
-      <path
-        ref={timelineProgressPathRef}
-        d="M 500 10 L 500 790"
-        fill="none"
-        stroke="#0D3CFC"
-        strokeWidth="3"
-        strokeLinecap="round"
-      />
+                  {/* Progress path */}
+                  <path
+                    ref={timelineProgressPathRef}
+                    d="M 500 10 L 500 790"
+                    fill="none"
+                    stroke="#0D3CFC"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                  />
 
-      {/* Titik bulat 1 (atas) */}
-      <circle
-        ref={(el) => { timelineDotsRef.current[0] = el; }}
-        cx="500"
-        cy="180"
-        r="5"
-        fill="#000000"
-        stroke="#000000"
-        strokeWidth="0"
-      />
-      {/* Titik bulat 2 (tengah) */}
-      <circle
-        ref={(el) => { timelineDotsRef.current[1] = el; }}
-        cx="500"
-        cy="400"
-        r="5"
-        fill="#000000"
-        stroke="#000000"
-        strokeWidth="0"
-      />
-      {/* Titik bulat 3 DIHAPUS */}
-    </svg>
+                  {/* Titik bulat 1 (atas) - cy=160 */}
+                  <circle
+                    ref={(el) => { timelineDotsRef.current[0] = el; }}
+                    cx="500"
+                    cy="160"
+                    r="5"
+                    fill="#000000"
+                    stroke="#000000"
+                    strokeWidth="0"
+                  />
+                  {/* Titik bulat 2 (bawah) - cy=500, jarak lebih lebar */}
+                  <circle
+                    ref={(el) => { timelineDotsRef.current[1] = el; }}
+                    cx="500"
+                    cy="500"
+                    r="5"
+                    fill="#000000"
+                    stroke="#000000"
+                    strokeWidth="0"
+                  />
+                </svg>
 
-    {/* ===== KONTEN TITIK 1 (atas) - cy=180 → 22.5% ===== */}
+                {/* ===== KONTEN TITIK 1 (atas) - cy=160 → 20% ===== */}
 
-    {/* Titik 1 - Sisi kiri: Tahun */}
-    <div
-      style={{
-        position: "absolute",
-        top: "22.5%",               // = 180/800
-        left: "50%",                // = 500/1000
-        transform: "translate(calc(-100% - 30px), -50%)",
-        textAlign: "right",
-        lineHeight: 1,
-      }}
-    >
-      <span
-        style={{
-          fontSize: "22px",
-          fontWeight: 600,
-          color: "#0D3CFC",
-          fontFamily: FONT_FAMILY,
-          letterSpacing: "-0.01em",
-          whiteSpace: "nowrap",
-        }}
-      >
-        2024 - Present
-      </span>
-    </div>
+                {/* Titik 1 - Sisi kiri: Tahun */}
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "20%",
+                    left: "50%",
+                    transform: "translate(calc(-100% - 30px), -50%)",
+                    textAlign: "right",
+                    lineHeight: 1,
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: "22px",
+                      fontWeight: 600,
+                      color: "#0D3CFC",
+                      fontFamily: FONT_FAMILY,
+                      letterSpacing: "-0.01em",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    2024 - Present
+                  </span>
+                </div>
 
-    {/* Titik 1 - Sisi kanan: Menuru, Founder and Developer, Deskripsi */}
-    <div
-      style={{
-        position: "absolute",
-        top: "22.5%",               // = 180/800
-        left: "50%",                // = 500/1000
-        transform: "translate(30px, -22px)",   // sejajar baris judul
-        textAlign: "left",
-        maxWidth: "360px",
-      }}
-    >
-      <div
-        style={{
-          fontSize: "22px",
-          fontWeight: 700,
-          color: "#0D3CFC",
-          fontFamily: FONT_FAMILY,
-          letterSpacing: "-0.01em",
-          lineHeight: 1.2,
-          marginBottom: "4px",
-        }}
-      >
-        Menuru
-      </div>
-      <div
-        style={{
-          fontSize: "15px",
-          fontWeight: 500,
-          color: "#0D3CFC",
-          fontFamily: FONT_FAMILY,
-          lineHeight: 1.3,
-          marginBottom: "6px",
-          opacity: 0.85,
-        }}
-      >
-        Founder and Developer
-      </div>
-      <div
-        style={{
-          fontSize: "13px",
-          fontWeight: 400,
-          color: "#0D3CFC",
-          fontFamily: FONT_FAMILY,
-          lineHeight: 1.5,
-          opacity: 0.75,
-        }}
-      >
-        Membangun platform Menuru dari nol, merancang sistem, dan mengembangkan fitur untuk komunitas.
-      </div>
-    </div>
+                {/* Titik 1 - Sisi kanan: Menuru + CURRENT badge, Founder and Developer, Deskripsi */}
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "20%",
+                    left: "50%",
+                    transform: "translate(30px, -22px)",
+                    textAlign: "left",
+                    maxWidth: "380px",
+                  }}
+                >
+                  {/* Baris 1: Menuru + CURRENT badge */}
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                      marginBottom: "4px",
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: "22px",
+                        fontWeight: 700,
+                        color: "#0D3CFC",
+                        fontFamily: FONT_FAMILY,
+                        letterSpacing: "-0.01em",
+                        lineHeight: 1.2,
+                      }}
+                    >
+                      Menuru
+                    </span>
+                    <span
+                      style={{
+                        fontSize: "10px",
+                        fontWeight: 700,
+                        color: "#000000",
+                        fontFamily: FONT_FAMILY,
+                        letterSpacing: "0.08em",
+                        padding: "3px 8px",
+                        border: "1.5px solid #000000",
+                        borderRadius: "4px",
+                        lineHeight: 1,
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      CURRENT
+                    </span>
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "15px",
+                      fontWeight: 500,
+                      color: "#0D3CFC",
+                      fontFamily: FONT_FAMILY,
+                      lineHeight: 1.3,
+                      marginBottom: "6px",
+                      opacity: 0.85,
+                    }}
+                  >
+                    Founder and Developer
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "13px",
+                      fontWeight: 400,
+                      color: "#0D3CFC",
+                      fontFamily: FONT_FAMILY,
+                      lineHeight: 1.5,
+                      opacity: 0.75,
+                    }}
+                  >
+                    Built Menuru from scratch, designed the system, and developed features for the community.
+                  </div>
+                </div>
 
-    {/* ===== KONTEN TITIK 2 (tengah) - cy=400 → 50% ===== */}
+                {/* ===== KONTEN TITIK 2 (bawah) - cy=500 → 62.5% ===== */}
 
-    {/* Titik 2 - Sisi kiri: Tahun */}
-    <div
-      style={{
-        position: "absolute",
-        top: "50%",                 // = 400/800
-        left: "50%",                // = 500/1000
-        transform: "translate(calc(-100% - 30px), -50%)",
-        textAlign: "right",
-        lineHeight: 1,
-      }}
-    >
-      <span
-        style={{
-          fontSize: "22px",
-          fontWeight: 600,
-          color: "#0D3CFC",
-          fontFamily: FONT_FAMILY,
-          letterSpacing: "-0.01em",
-          whiteSpace: "nowrap",
-        }}
-      >
-        2019 - 2023
-      </span>
-    </div>
+                {/* Titik 2 - Sisi kiri: Tahun */}
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "62.5%",
+                    left: "50%",
+                    transform: "translate(calc(-100% - 30px), -50%)",
+                    textAlign: "right",
+                    lineHeight: 1,
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: "22px",
+                      fontWeight: 600,
+                      color: "#0D3CFC",
+                      fontFamily: FONT_FAMILY,
+                      letterSpacing: "-0.01em",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    2019 - 2023
+                  </span>
+                </div>
 
-    {/* Titik 2 - Sisi kanan: Universitas, Jurusan, Deskripsi */}
-    <div
-      style={{
-        position: "absolute",
-        top: "50%",                 // = 400/800
-        left: "50%",                // = 500/1000
-        transform: "translate(30px, -22px)",   // sejajar baris judul
-        textAlign: "left",
-        maxWidth: "360px",
-      }}
-    >
-      <div
-        style={{
-          fontSize: "22px",
-          fontWeight: 700,
-          color: "#0D3CFC",
-          fontFamily: FONT_FAMILY,
-          letterSpacing: "-0.01em",
-          lineHeight: 1.2,
-          marginBottom: "4px",
-        }}
-      >
-        Universitas Gunadarma
-      </div>
-      <div
-        style={{
-          fontSize: "15px",
-          fontWeight: 500,
-          color: "#0D3CFC",
-          fontFamily: FONT_FAMILY,
-          lineHeight: 1.3,
-          marginBottom: "6px",
-          opacity: 0.85,
-        }}
-      >
-        Graduate - Computer System
-      </div>
-      <div
-        style={{
-          fontSize: "13px",
-          fontWeight: 400,
-          color: "#0D3CFC",
-          fontFamily: FONT_FAMILY,
-          lineHeight: 1.5,
-          opacity: 0.75,
-        }}
-      >
-        Mempelajari pemrograman, jaringan, dan sistem informasi sebagai fondasi karier di dunia teknologi.
-      </div>
-    </div>
+                {/* Titik 2 - Sisi kanan: Universitas, Jurusan, Deskripsi */}
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "62.5%",
+                    left: "50%",
+                    transform: "translate(30px, -22px)",
+                    textAlign: "left",
+                    maxWidth: "380px",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: "22px",
+                      fontWeight: 700,
+                      color: "#0D3CFC",
+                      fontFamily: FONT_FAMILY,
+                      letterSpacing: "-0.01em",
+                      lineHeight: 1.2,
+                      marginBottom: "4px",
+                    }}
+                  >
+                    Gunadarma University
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "15px",
+                      fontWeight: 500,
+                      color: "#0D3CFC",
+                      fontFamily: FONT_FAMILY,
+                      lineHeight: 1.3,
+                      marginBottom: "6px",
+                      opacity: 0.85,
+                    }}
+                  >
+                    Graduate - Computer System
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "13px",
+                      fontWeight: 400,
+                      color: "#0D3CFC",
+                      fontFamily: FONT_FAMILY,
+                      lineHeight: 1.5,
+                      opacity: 0.75,
+                    }}
+                  >
+                    Studied programming, networking, and information systems as a foundation for a tech career.
+                  </div>
+                </div>
 
-    {/* ===== Ujung garis bawah - Thank you ===== */}
-    <div
-      style={{
-        position: "absolute",
-        top: "98.75%",              // = 790/800
-        left: "50%",
-        transform: "translate(30px, -50%)",
-        textAlign: "left",
-        whiteSpace: "nowrap",
-      }}
-    >
-      <p
-        style={{
-          fontSize: "20px",
-          fontWeight: 600,
-          color: "#0D3CFC",
-          fontFamily: FONT_FAMILY,
-          lineHeight: 1.3,
-          margin: 0,
-          letterSpacing: "-0.02em",
-        }}
-      >
-        Thank you for walk. See you again soon.
-      </p>
-      <p
-        style={{
-          fontSize: "20px",
-          fontWeight: 600,
-          color: "#0D3CFC",
-          fontFamily: FONT_FAMILY,
-          lineHeight: 1.3,
-          margin: 0,
-          letterSpacing: "-0.02em",
-        }}
-      >
-        Here are a few memories walk planning of life.
-      </p>
-    </div>
-  </div>
-</div>
-
-
-
-            
-  
+                {/* ===== Ujung garis bawah - Thank you ===== */}
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "98.75%",
+                    left: "50%",
+                    transform: "translate(30px, -50%)",
+                    textAlign: "left",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  <p
+                    style={{
+                      fontSize: "20px",
+                      fontWeight: 600,
+                      color: "#0D3CFC",
+                      fontFamily: FONT_FAMILY,
+                      lineHeight: 1.3,
+                      margin: 0,
+                      letterSpacing: "-0.02em",
+                    }}
+                  >
+                    Thank you for walk. See you again soon.
+                  </p>
+                  <p
+                    style={{
+                      fontSize: "20px",
+                      fontWeight: 600,
+                      color: "#0D3CFC",
+                      fontFamily: FONT_FAMILY,
+                      lineHeight: 1.3,
+                      margin: 0,
+                      letterSpacing: "-0.02em",
+                    }}
+                  >
+                    Here are a few memories walk planning of life.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -2580,10 +2595,10 @@ export default function StoriesPage(): React.JSX.Element {
                   {section.links.map((link, linkIdx) => {
                     let linkHref = "#";
                     let isAttention = false;
-                    if (link === "Kebijakan Privasi") {
+                    if (link === "Privacy Policy") {
                       linkHref = "/privacy-policy";
                       isAttention = true;
-                    } else if (link === "Ketentuan Kami") {
+                    } else if (link === "Terms of Service") {
                       linkHref = "/terms-of-service";
                       isAttention = true;
                     }
@@ -2638,7 +2653,7 @@ export default function StoriesPage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* MENURU Text - 450px, left aligned */}
+        {/* MENURU Text */}
         <div
           ref={menuruFooterRef}
           style={{
@@ -2671,7 +2686,7 @@ export default function StoriesPage(): React.JSX.Element {
           </span>
         </div>
 
-        {/* Menu Overlay - HANYA menuBoxRef */}
+        {/* Menu Overlay */}
         <div
           ref={menuOverlayRef}
           className="menu-overlay"
@@ -2771,7 +2786,6 @@ export default function StoriesPage(): React.JSX.Element {
             ))}
           </div>
 
-          {/* HANYA menuBoxRef - Bagaimana website ini bisa berkembang? */}
           <div
             ref={menuBoxRef}
             style={{
@@ -2813,7 +2827,7 @@ export default function StoriesPage(): React.JSX.Element {
                   lineHeight: 1.3,
                 }}
               >
-                Bagaimana website ini
+                How can this website
               </span>
               <span
                 style={{
@@ -2825,7 +2839,7 @@ export default function StoriesPage(): React.JSX.Element {
                   lineHeight: 1.3,
                 }}
               >
-                bisa berkembang?
+                grow further?
               </span>
               <span
                 style={{
@@ -2837,7 +2851,7 @@ export default function StoriesPage(): React.JSX.Element {
                   lineHeight: 1.3,
                 }}
               >
-                Dengan dukungan komunitas
+                With community support
               </span>
             </div>
             <div
@@ -2867,7 +2881,6 @@ export default function StoriesPage(): React.JSX.Element {
             </div>
           </div>
 
-          {/* stories text */}
           <div
             ref={storiesRef}
             style={{
