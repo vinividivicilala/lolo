@@ -2302,18 +2302,16 @@ export default function StoriesPage(): React.JSX.Element {
         2019 - 2023
       </span>
     </div>
+    
     {/* Titik bulat 2 - Sisi kanan: Universitas, Jurusan, Deskripsi */}
 <div
   style={{
     position: "absolute",
-    top: "50%",
-    left: "50%",
-    transform: "translate(30px, -50%)",
+    top: "50%",                 // = 400/800 → sama dengan cy=400
+    left: "50%",                // = 500/1000 → tepat di garis
+    transform: "translate(30px, -22px)",   // geser naik supaya baris judul sejajar
     textAlign: "left",
     maxWidth: "360px",
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
   }}
 >
   <div
