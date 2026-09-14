@@ -2177,8 +2177,9 @@ export default function StoriesPage(): React.JSX.Element {
                 Stories
               </h1>
             </div>
-            
-      {/* ===== SCROLL-DRIVEN TIMELINE SYSTEM ===== */}
+
+
+            {/* ===== SCROLL-DRIVEN TIMELINE SYSTEM ===== */}
 <div
   ref={timelineRef}
   style={{
@@ -2189,18 +2190,61 @@ export default function StoriesPage(): React.JSX.Element {
     minHeight: "1000px",
   }}
 >
-  {/* Male Icon di atas */}
+  {/* Teks "people plan" di atas icon */}
   <div
     style={{
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      marginBottom: "20px",
+      marginBottom: "8px",
       position: "relative",
       zIndex: 5,
     }}
   >
+    <span
+      style={{
+        fontSize: "14px",
+        fontWeight: 500,
+        color: "#0D3CFC",
+        fontFamily: FONT_FAMILY,
+        letterSpacing: "0.15em",
+        textTransform: "uppercase",
+        opacity: 0.7,
+      }}
+    >
+      people plan
+    </span>
+  </div>
+
+  {/* Icon + teks di sampingnya */}
+  <div
+    style={{
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: "16px",
+      marginBottom: "20px",
+      position: "relative",
+      zIndex: 5,
+      maxWidth: "700px",
+      margin: "0 auto 20px auto",
+    }}
+  >
     <MaleIcon size={48} color="#0D3CFC" />
+    <span
+      style={{
+        fontSize: "15px",
+        fontWeight: 400,
+        color: "#0D3CFC",
+        fontFamily: FONT_FAMILY,
+        letterSpacing: "-0.01em",
+        lineHeight: 1.4,
+        opacity: 0.85,
+        textAlign: "left",
+      }}
+    >
+      Menuru Brand di lahirkan dari manusia yang tidak pernah menyerah
+    </span>
   </div>
 
   {/* Wrapper SVG + konten overlay */}
@@ -2254,7 +2298,7 @@ export default function StoriesPage(): React.JSX.Element {
         stroke="#000000"
         strokeWidth="0"
       />
-      {/* Titik bulat 2 (tengah) - DIPINDAH ke 400 agar sejajar teks */}
+      {/* Titik bulat 2 (tengah) */}
       <circle
         ref={(el) => { timelineDotsRef.current[1] = el; }}
         cx="500"
@@ -2276,14 +2320,14 @@ export default function StoriesPage(): React.JSX.Element {
       />
     </svg>
 
-    {/* ===== KONTEN — sejajar dengan cy=400 (50% dari 800) ===== */}
+    {/* ===== KONTEN ===== */}
 
     {/* Titik bulat 2 - Sisi kiri: Tahun */}
     <div
       style={{
         position: "absolute",
-        top: "50%",                 // = 400/800 → sama dengan cy=400
-        left: "50%",                // = 500/1000 → tepat di garis
+        top: "50%",
+        left: "50%",
         transform: "translate(calc(-100% - 30px), -50%)",
         textAlign: "right",
         lineHeight: 1,
@@ -2302,67 +2346,63 @@ export default function StoriesPage(): React.JSX.Element {
         2019 - 2023
       </span>
     </div>
-    
+
     {/* Titik bulat 2 - Sisi kanan: Universitas, Jurusan, Deskripsi */}
-<div
-  style={{
-    position: "absolute",
-    top: "50%",                 // = 400/800 → sama dengan cy=400
-    left: "50%",                // = 500/1000 → tepat di garis
-    transform: "translate(30px, -22px)",   // geser naik supaya baris judul sejajar
-    textAlign: "left",
-    maxWidth: "360px",
-  }}
->
-  <div
-    style={{
-      fontSize: "22px",
-      fontWeight: 700,
-      color: "#0D3CFC",
-      fontFamily: FONT_FAMILY,
-      letterSpacing: "-0.01em",
-      lineHeight: 1.2,
-      marginBottom: "4px",
-    }}
-  >
-    Universitas Gunadarma
-  </div>
-  <div
-    style={{
-      fontSize: "15px",
-      fontWeight: 500,
-      color: "#0D3CFC",
-      fontFamily: FONT_FAMILY,
-      lineHeight: 1.3,
-      marginBottom: "6px",
-      opacity: 0.85,
-    }}
-  >
-    Graduate - Computer System
-  </div>
-  <div
-    style={{
-      fontSize: "13px",
-      fontWeight: 400,
-      color: "#0D3CFC",
-      fontFamily: FONT_FAMILY,
-      lineHeight: 1.5,
-      opacity: 0.75,
-    }}
-  >
-    Mempelajari pemrograman, jaringan, dan sistem informasi sebagai fondasi karier di dunia teknologi.
-  </div>
-</div>
-
-
-    
-
+    <div
+      style={{
+        position: "absolute",
+        top: "50%",
+        left: "50%",
+        transform: "translate(30px, -22px)",
+        textAlign: "left",
+        maxWidth: "360px",
+      }}
+    >
+      <div
+        style={{
+          fontSize: "22px",
+          fontWeight: 700,
+          color: "#0D3CFC",
+          fontFamily: FONT_FAMILY,
+          letterSpacing: "-0.01em",
+          lineHeight: 1.2,
+          marginBottom: "4px",
+        }}
+      >
+        Universitas Gunadarma
+      </div>
+      <div
+        style={{
+          fontSize: "15px",
+          fontWeight: 500,
+          color: "#0D3CFC",
+          fontFamily: FONT_FAMILY,
+          lineHeight: 1.3,
+          marginBottom: "6px",
+          opacity: 0.85,
+        }}
+      >
+        Graduate - Computer System
+      </div>
+      <div
+        style={{
+          fontSize: "13px",
+          fontWeight: 400,
+          color: "#0D3CFC",
+          fontFamily: FONT_FAMILY,
+          lineHeight: 1.5,
+          opacity: 0.75,
+        }}
+      >
+        Mempelajari pemrograman, jaringan, dan sistem informasi sebagai fondasi karier di dunia teknologi.
+      </div>
+    </div>
 
     {/* Ujung garis bawah - Thank you */}
     <div
       style={{
         position: "absolute",
-        top: "98.75%",              // = 790/800 → sama dengan cy=790
+        top: "98.75%",
         left: "50%",
         transform: "translate(30px, -50%)",
         textAlign: "left",
@@ -2398,6 +2438,8 @@ export default function StoriesPage(): React.JSX.Element {
     </div>
   </div>
 </div>
+            
+  
           </div>
         </div>
 
