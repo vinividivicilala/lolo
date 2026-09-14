@@ -84,10 +84,11 @@ const LogoutIcon = ({ size = 18 }: { size?: number }) => (
   </svg>
 );
 
-// Pesawat / Plane Icon (tanpa bulat)
-const PlaneIcon = ({ size = 32, color = "#0D3CFC" }: { size?: number, color?: string }) => (
+// Manusia Pria Icon (Male / Person Icon)
+const MaleIcon = ({ size = 40, color = "#0D3CFC" }: { size?: number, color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M21 16V14L13 9V3.5C13 2.67 12.33 2 11.5 2C10.67 2 10 2.67 10 3.5V9L2 14V16L10 13.5V19L8 20.5V22L11.5 21L15 22V20.5L13 19V13.5L21 16Z" fill={color}/>
+    <circle cx="12" cy="7" r="4" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M5 21V19C5 16.2386 7.23858 14 10 14H14C16.7614 14 19 16.2386 19 19V21" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
@@ -1545,6 +1546,7 @@ export default function StoriesPage(): React.JSX.Element {
   const timelineSvgRef = useRef<SVGSVGElement>(null);
   const timelineProgressPathRef = useRef<SVGPathElement>(null);
   const timelineDotsRef = useRef<(SVGCircleElement | null)[]>([]);
+  const dotsActivatedRef = useRef<boolean[]>([false, false, false]);
 
   // Register GSAP plugins di dalam useEffect
   useEffect(() => {
@@ -1763,8 +1765,7 @@ export default function StoriesPage(): React.JSX.Element {
     });
 
     // Dapatkan posisi masing-masing dot di sepanjang path (3 titik)
-    // 3 titik: di 25%, 50%, 75% dari total path
-    const dotPositions = [0.25, 0.5, 0.75];
+    const dotPositions = [0.2, 0.5, 0.8];
     const dotPoints: { x: number, y: number }[] = [];
     
     dotPositions.forEach((ratio) => {
@@ -1776,16 +1777,57 @@ export default function StoriesPage(): React.JSX.Element {
       }
     });
 
-    // Set posisi awal dots (hitam)
+    // Set posisi awal dots (hitam) dan scale awal
     dots.forEach((dot, i) => {
       if (dotPoints[i]) {
         gsap.set(dot, {
           attr: { cx: dotPoints[i].x, cy: dotPoints[i].y },
           fill: "#000000",
           stroke: "#000000",
+          transformOrigin: "center center",
         });
       }
     });
+
+    // Reset activated state
+    dotsActivatedRef.current = [false, false, false];
+
+    // Fungsi animasi untuk dot saat terlewati
+    const animateDotActivated = (dot: SVGCircleElement) => {
+      // Animasi GSAP: warna hitam → biru + efek pulse
+      const tl = gsap.timeline();
+      
+      // Perbesar dulu (pop)
+      tl.to(dot, {
+        attr: { r: 9 },
+        duration: 0.25,
+        ease: "back.out(2)"
+      })
+      // Kecilkan kembali ke ukuran normal
+      .to(dot, {
+        attr: { r: 5 },
+        duration: 0.35,
+        ease: "elastic.out(1, 0.5)"
+      });
+      
+      // Ubah warna ke biru
+      gsap.to(dot, {
+        fill: "#0D3CFC",
+        stroke: "#0D3CFC",
+        duration: 0.4,
+        ease: "power2.out"
+      });
+    };
+
+    // Fungsi animasi untuk dot saat kembali ke hitam
+    const animateDotDeactivated = (dot: SVGCircleElement) => {
+      gsap.to(dot, {
+        fill: "#000000",
+        stroke: "#000000",
+        duration: 0.4,
+        ease: "power2.in"
+      });
+    };
 
     // Buat ScrollTrigger untuk mengikuti scroll
     ScrollTrigger.create({
@@ -1800,15 +1842,19 @@ export default function StoriesPage(): React.JSX.Element {
           strokeDashoffset: pathLength * (1 - progress),
         });
 
-        // Ubah warna dots berdasarkan progress
+        // Cek setiap dot
         dots.forEach((dot, i) => {
           const dotRatio = dotPositions[i];
-          if (progress >= dotRatio) {
-            // Sudah terlewati → biru
-            gsap.set(dot, { fill: "#0D3CFC", stroke: "#0D3CFC" });
-          } else {
-            // Belum terlewati → hitam
-            gsap.set(dot, { fill: "#000000", stroke: "#000000" });
+          const isActivated = dotsActivatedRef.current[i];
+          
+          if (progress >= dotRatio && !isActivated) {
+            // Baru terlewati → animasi ke biru
+            dotsActivatedRef.current[i] = true;
+            animateDotActivated(dot);
+          } else if (progress < dotRatio && isActivated) {
+            // Kembali ke hitam (scroll ke atas)
+            dotsActivatedRef.current[i] = false;
+            animateDotDeactivated(dot);
           }
         });
       }
@@ -2160,7 +2206,7 @@ export default function StoriesPage(): React.JSX.Element {
                 minHeight: "800px",
               }}
             >
-              {/* Plane Icon di atas - TANPA BULAT, TIDAK IKUT SCROLL */}
+              {/* Male Icon di atas - TANPA BULAT, TIDAK IKUT SCROLL */}
               <div
                 style={{
                   display: "flex",
@@ -2171,7 +2217,7 @@ export default function StoriesPage(): React.JSX.Element {
                   zIndex: 5,
                 }}
               >
-                <PlaneIcon size={40} color="#0D3CFC" />
+                <MaleIcon size={48} color="#0D3CFC" />
               </div>
 
               {/* SVG Timeline dengan Path Melengkung */}
@@ -2194,7 +2240,7 @@ export default function StoriesPage(): React.JSX.Element {
                     overflow: "visible",
                   }}
                 >
-                  {/* Base path - garis hitam putus-putus kecil, melengkung S, mengarah ke pesawat */}
+                  {/* Base path - garis hitam putus-putus kecil, melengkung S, mengarah ke ikon manusia */}
                   <path
                     d="M 500 10 
                        C 900 100, 900 300, 500 400 
