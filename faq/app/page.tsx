@@ -375,6 +375,14 @@ const CareerIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?: s
   </svg>
 );
 
+// ===== RESOURCES ICON (book) =====
+const ResourcesIcon = ({ size = 24, color = "#000000" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M4 4H10C11.1046 4 12 4.89543 12 6V20C12 18.8954 11.1046 18 10 18H4V4Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M20 4H14C12.8954 4 12 4.89543 12 6V20C12 18.8954 12.8954 18 14 18H20V4Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
 // ===== FOOTER LINKS =====
 const footerLinks = [
   { title: "Get in Touch", links: ["Contact", "Instagram", "Live Chat"] },
@@ -443,8 +451,7 @@ interface TourStep {
 }
 
 // ===== NAVBAR BUTTON COMPONENT =====
-// Panel tetap terbuka saat cursor pindah ke panel (pakai delay)
-// Side kanan: bg tambahan kotak border radius yang meliputi foto + judul + deskripsi
+// Mendukung custom colors untuk tombol & panel
 const NavbarButton = ({
   label,
   panelTitle,
@@ -455,6 +462,17 @@ const NavbarButton = ({
   iconType,
   bigPanelWidth = 850,
   bigPanelHeight = 260,
+  buttonColor = "#0D3CFC",
+  buttonHoverColor = "#000000",
+  panelColor = "#0D3CFC",
+  iconButtonColor = "#000000",
+  iconButtonHoverColor = "#0D3CFC",
+  panelBoxColor = "rgba(255,255,255,0.12)",
+  panelBoxBorder = "rgba(255,255,255,0.25)",
+  labelTextColor = "#ffffff",
+  titleTextColor = "#ffffff",
+  descriptionTextColor = "rgba(255,255,255,0.9)",
+  iconComponent,
 }: {
   label: string;
   panelTitle: string;
@@ -462,9 +480,20 @@ const NavbarButton = ({
   panelImage: string;
   panelRightTitle: string;
   panelRightDescription: string;
-  iconType: "trust" | "career";
+  iconType: "trust" | "career" | "resources";
   bigPanelWidth?: number;
   bigPanelHeight?: number;
+  buttonColor?: string;
+  buttonHoverColor?: string;
+  panelColor?: string;
+  iconButtonColor?: string;
+  iconButtonHoverColor?: string;
+  panelBoxColor?: string;
+  panelBoxBorder?: string;
+  labelTextColor?: string;
+  titleTextColor?: string;
+  descriptionTextColor?: string;
+  iconComponent?: React.ReactNode;
 }) => {
   const [open, setOpen] = useState(false);
   const linesTopRef = useRef<SVGLineElement>(null);
@@ -472,7 +501,6 @@ const NavbarButton = ({
   const panelRef = useRef<HTMLDivElement>(null);
   const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Handler dengan delay untuk close
   const handleEnter = () => {
     if (closeTimeoutRef.current) {
       clearTimeout(closeTimeoutRef.current);
@@ -539,11 +567,11 @@ const NavbarButton = ({
           alignItems: "center",
           gap: "10px",
           padding: "10px 16px",
-          backgroundColor: open ? "#000000" : "#0D3CFC",
+          backgroundColor: open ? buttonHoverColor : buttonColor,
           borderRadius: "10px",
           boxShadow: open
             ? "0 8px 24px rgba(0,0,0,0.35)"
-            : "0 8px 24px rgba(13,60,252,0.35)",
+            : `0 8px 24px ${buttonColor}55`,
           transition: "background-color 0.25s ease, box-shadow 0.25s ease",
           cursor: "pointer",
           position: "relative",
@@ -552,7 +580,7 @@ const NavbarButton = ({
       >
         <span
           style={{
-            color: "#ffffff",
+            color: labelTextColor,
             fontSize: "14px",
             fontWeight: 600,
             letterSpacing: "0.02em",
@@ -570,7 +598,7 @@ const NavbarButton = ({
             justifyContent: "center",
             width: "22px",
             height: "22px",
-            backgroundColor: open ? "#0D3CFC" : "#000000",
+            backgroundColor: open ? iconButtonHoverColor : iconButtonColor,
             borderRadius: "6px",
             transition: "background-color 0.25s ease",
           }}
@@ -589,7 +617,7 @@ const NavbarButton = ({
               y1="7"
               x2="20"
               y2="7"
-              stroke="#ffffff"
+              stroke={labelTextColor}
               strokeWidth="2.5"
               strokeLinecap="round"
             />
@@ -599,7 +627,7 @@ const NavbarButton = ({
               y1="17"
               x2="20"
               y2="17"
-              stroke="#ffffff"
+              stroke={labelTextColor}
               strokeWidth="2.5"
               strokeLinecap="round"
             />
@@ -619,12 +647,12 @@ const NavbarButton = ({
             left: "0px",
             width: `${bigPanelWidth}px`,
             minHeight: `${bigPanelHeight}px`,
-            backgroundColor: "#0D3CFC",
+            backgroundColor: panelColor,
             borderRadius: "10px",
-            boxShadow: "0 8px 24px rgba(13,60,252,0.35)",
+            boxShadow: `0 8px 24px ${panelColor}55`,
             zIndex: 1,
             fontFamily: FONT_FAMILY,
-            color: "#ffffff",
+            color: titleTextColor,
             padding: "22px 26px",
             display: "flex",
             gap: "20px",
@@ -649,10 +677,14 @@ const NavbarButton = ({
                 gap: "12px",
               }}
             >
-              {iconType === "trust" ? (
-                <TrustIcon size={26} color="#ffffff" />
+              {iconComponent ? (
+                iconComponent
+              ) : iconType === "trust" ? (
+                <TrustIcon size={26} color={titleTextColor} />
+              ) : iconType === "career" ? (
+                <CareerIcon size={26} color={titleTextColor} />
               ) : (
-                <CareerIcon size={26} color="#ffffff" />
+                <ResourcesIcon size={26} color={titleTextColor} />
               )}
               <span
                 style={{
@@ -660,20 +692,20 @@ const NavbarButton = ({
                   fontWeight: 700,
                   letterSpacing: "0.02em",
                   fontFamily: FONT_FAMILY,
-                  color: "#ffffff",
+                  color: titleTextColor,
                 }}
               >
                 {panelTitle}
               </span>
             </div>
 
-            {/* Deskripsi max 2 baris, dibatasi lebar supaya tidak panjang ke kanan */}
+            {/* Deskripsi max 2 baris */}
             <p
               style={{
                 fontSize: "13px",
                 fontWeight: 400,
                 lineHeight: 1.5,
-                color: "rgba(255,255,255,0.9)",
+                color: descriptionTextColor,
                 margin: 0,
                 fontFamily: FONT_FAMILY,
                 maxWidth: "340px",
@@ -692,8 +724,8 @@ const NavbarButton = ({
           <div
             style={{
               flex: "0 0 380px",
-              backgroundColor: "rgba(255,255,255,0.12)",
-              border: "1px solid rgba(255,255,255,0.25)",
+              backgroundColor: panelBoxColor,
+              border: `1px solid ${panelBoxBorder}`,
               borderRadius: "12px",
               padding: "14px",
               display: "flex",
@@ -701,7 +733,7 @@ const NavbarButton = ({
               gap: "10px",
             }}
           >
-            {/* Foto besar tanpa bg tambahan, ukuran asli diperbesar */}
+            {/* Foto besar tanpa bg tambahan */}
             <img
               src={panelImage}
               alt={panelTitle}
@@ -714,14 +746,14 @@ const NavbarButton = ({
               }}
             />
 
-            {/* Judul di bawah foto (sisi kanan) */}
+            {/* Judul di bawah foto */}
             <span
               style={{
                 fontSize: "15px",
                 fontWeight: 700,
                 letterSpacing: "0.02em",
                 fontFamily: FONT_FAMILY,
-                color: "#ffffff",
+                color: titleTextColor,
               }}
             >
               {panelRightTitle}
@@ -733,7 +765,7 @@ const NavbarButton = ({
                 fontSize: "12px",
                 fontWeight: 400,
                 lineHeight: 1.5,
-                color: "rgba(255,255,255,0.85)",
+                color: descriptionTextColor,
                 margin: 0,
                 fontFamily: FONT_FAMILY,
                 maxWidth: "340px",
@@ -768,6 +800,7 @@ const LeftNavbar = () => {
         fontFamily: FONT_FAMILY,
       }}
     >
+      {/* TEAMS — default biru */}
       <NavbarButton
         label="Teams"
         panelTitle="Trust"
@@ -779,6 +812,8 @@ const LeftNavbar = () => {
         bigPanelWidth={850}
         bigPanelHeight={260}
       />
+
+      {/* INDIVIDUAL — default biru */}
       <NavbarButton
         label="Individual"
         panelTitle="Careers"
@@ -789,6 +824,29 @@ const LeftNavbar = () => {
         iconType="career"
         bigPanelWidth={850}
         bigPanelHeight={260}
+      />
+
+      {/* RESOURCES — custom warna kuning #F2EA6B, panel oranye #F04E23 */}
+      <NavbarButton
+        label="Resources"
+        panelTitle="Docs & Brand"
+        panelDescription="Akses dokumentasi lengkap dan aset brand Menuru dalam satu tempat."
+        panelImage="/images/p0l.jpg"
+        panelRightTitle="Docs & Brand"
+        panelRightDescription="Panduan, aset visual, dan referensi resmi brand Menuru."
+        iconType="resources"
+        bigPanelWidth={850}
+        bigPanelHeight={260}
+        buttonColor="#F2EA6B"
+        buttonHoverColor="#000000"
+        panelColor="#F04E23"
+        iconButtonColor="#000000"
+        iconButtonHoverColor="#F2EA6B"
+        panelBoxColor="rgba(255,255,255,0.15)"
+        panelBoxBorder="rgba(255,255,255,0.3)"
+        labelTextColor="#000000"
+        titleTextColor="#ffffff"
+        descriptionTextColor="rgba(255,255,255,0.92)"
       />
     </div>
   );
