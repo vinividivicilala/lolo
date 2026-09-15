@@ -447,11 +447,11 @@ interface TourStep {
 }
 
 // ===== NAVBAR BUTTON COMPONENT =====
-// BG BIRU BESAR muncul di ujung sisi KIRI kotak, design SAMA seperti kotak Teams/Individual (hanya diperbesar)
+// BG BIRU BESAR: panjang ke kanan (lebar besar, tinggi kecil)
 const NavbarButton = ({
   label,
-  bigPanelWidth = 420,
-  bigPanelHeight = 260,
+  bigPanelWidth = 720,
+  bigPanelHeight = 120,
 }: {
   label: string;
   bigPanelWidth?: number;
@@ -516,26 +516,27 @@ const NavbarButton = ({
         </button>
       </div>
 
-      {/* BG BIRU BESAR — design SAMA seperti kotak Teams/Individual, hanya diperbesar
-          Muncul di ujung sisi KIRI kotak, posisi di bawah */}
+      {/* BG BIRU BESAR — panjang ke kanan, tinggi kecil
+          Design SAMA seperti kotak Teams/Individual, hanya diperbesar lebarnya */}
       {hovered && (
         <div
           style={{
             position: "absolute",
             top: "calc(100% + 10px)",
-            left: "0px", // menempel di ujung sisi kiri kotak
+            left: "0px",
             width: `${bigPanelWidth}px`,
             height: `${bigPanelHeight}px`,
             backgroundColor: "#0D3CFC",
-            borderRadius: "10px", // sama seperti kotak Teams/Individual
-            boxShadow: "0 8px 24px rgba(13,60,252,0.35)", // sama seperti kotak Teams/Individual
-            padding: "20px 22px",
+            borderRadius: "10px",
+            boxShadow: "0 8px 24px rgba(13,60,252,0.35)",
+            padding: "14px 20px",
             zIndex: 1,
             fontFamily: FONT_FAMILY,
             color: "#ffffff",
             display: "flex",
-            flexDirection: "column",
-            gap: "14px",
+            alignItems: "center",
+            gap: "16px",
+            overflow: "hidden",
           }}
         >
           {/* Header: label + tombol icon hitam, sama seperti kotak utama */}
@@ -543,16 +544,18 @@ const NavbarButton = ({
             style={{
               display: "flex",
               alignItems: "center",
-              justifyContent: "space-between",
+              gap: "10px",
+              flexShrink: 0,
             }}
           >
             <span
               style={{
                 color: "#ffffff",
-                fontSize: "18px",
+                fontSize: "16px",
                 fontWeight: 700,
                 letterSpacing: "0.02em",
                 fontFamily: FONT_FAMILY,
+                whiteSpace: "nowrap",
               }}
             >
               {label}
@@ -562,8 +565,8 @@ const NavbarButton = ({
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                width: "26px",
-                height: "26px",
+                width: "24px",
+                height: "24px",
                 backgroundColor: "#000000",
                 borderRadius: "6px",
               }}
@@ -572,27 +575,60 @@ const NavbarButton = ({
             </div>
           </div>
 
-          {/* Body content placeholder */}
+          {/* Garis pemisah */}
+          <div
+            style={{
+              width: "1px",
+              height: "70%",
+              backgroundColor: "rgba(255,255,255,0.25)",
+              flexShrink: 0,
+            }}
+          />
+
+          {/* Body content horizontal — panjang ke kanan */}
           <div
             style={{
               flex: 1,
-              backgroundColor: "rgba(255,255,255,0.12)",
-              borderRadius: "8px",
-              padding: "14px 16px",
-              fontSize: "13px",
-              fontWeight: 400,
-              lineHeight: 1.6,
-              color: "rgba(255,255,255,0.9)",
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
               overflow: "hidden",
+              whiteSpace: "nowrap",
             }}
           >
-            <div style={{ fontWeight: 600, marginBottom: "8px", fontSize: "14px" }}>
-              {label} Panel
-            </div>
-            <div>
-              This is a larger version of the {label.toLowerCase()} box with the same
-              design — same blue color, same border radius, same shadow — just scaled up.
-            </div>
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div
+                key={i}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  padding: "8px 14px",
+                  backgroundColor: "rgba(255,255,255,0.12)",
+                  borderRadius: "8px",
+                  fontSize: "12px",
+                  fontWeight: 500,
+                  flexShrink: 0,
+                }}
+              >
+                <span
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: "20px",
+                    height: "20px",
+                    backgroundColor: "#000000",
+                    borderRadius: "5px",
+                    fontSize: "11px",
+                    fontWeight: 700,
+                  }}
+                >
+                  {i}
+                </span>
+                <span>{label} Item {i}</span>
+              </div>
+            ))}
           </div>
         </div>
       )}
@@ -615,8 +651,8 @@ const LeftNavbar = () => {
         fontFamily: FONT_FAMILY,
       }}
     >
-      <NavbarButton label="Teams" bigPanelWidth={420} bigPanelHeight={260} />
-      <NavbarButton label="Individual" bigPanelWidth={420} bigPanelHeight={260} />
+      <NavbarButton label="Teams" bigPanelWidth={720} bigPanelHeight={120} />
+      <NavbarButton label="Individual" bigPanelWidth={720} bigPanelHeight={120} />
     </div>
   );
 };
@@ -3724,7 +3760,7 @@ export default function HomePage(): React.JSX.Element {
         <meta name="twitter:image" content="/images/ai.jpg" />
       </Head>
 
-      {/* ===== LEFT NAVBAR (2 kotak biru + BG BIRU BESAR muncul di ujung kiri kotak) ===== */}
+      {/* ===== LEFT NAVBAR ===== */}
       <LeftNavbar />
 
       {/* ===== RIGHT NAVBAR ===== */}
@@ -3738,7 +3774,7 @@ export default function HomePage(): React.JSX.Element {
           fontFamily: FONT_FAMILY, overflow: "visible",
         }}
       >
-        {/* ===== PHYSICS MENURU TITLE (PALING ATAS) ===== */}
+        {/* ===== PHYSICS MENURU TITLE ===== */}
         <PhysicsMenuruTitle />
 
         {/* LIVE CHAT AGENT */}
