@@ -353,22 +353,8 @@ const OnlineDot = ({ color = "#22c55e", size = 8 }: { color?: string; size?: num
 // ===== PEOPLE ICON (1 ORANG SAJA) =====
 const PeopleIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle
-      cx="12"
-      cy="8"
-      r="4"
-      stroke={color}
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M4 21V19C4 16.7909 5.79086 15 8 15H16C18.2091 15 20 16.7909 20 19V21"
-      stroke={color}
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
+    <circle cx="12" cy="8" r="4" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M4 21V19C4 16.7909 5.79086 15 8 15H16C18.2091 15 20 16.7909 20 19V21" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
@@ -376,6 +362,13 @@ const PeopleIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: s
 const PlusIcon = ({ size = 14, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M12 5V19M5 12H19" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+// ===== TRIANGLE ICON (segitiga atas & bawah) =====
+const TriangleIcon = ({ size = 14, color = "#ffffff" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 4L20 18H4L12 4Z" fill={color} />
   </svg>
 );
 
@@ -447,23 +440,57 @@ interface TourStep {
 }
 
 // ===== NAVBAR BUTTON COMPONENT =====
-// BG BIRU BESAR: panjang ke kanan (lebar besar, tinggi kecil)
+// BG BIRU BESAR: 850 lebar, 260 tinggi, kosong (tanpa isi)
+// Icon + diganti segitiga yang berputar dengan GSAP
 const NavbarButton = ({
   label,
-  bigPanelWidth = 720,
-  bigPanelHeight = 120,
+  bigPanelWidth = 850,
+  bigPanelHeight = 260,
 }: {
   label: string;
   bigPanelWidth?: number;
   bigPanelHeight?: number;
 }) => {
-  const [hovered, setHovered] = useState(false);
+  const [open, setOpen] = useState(false);
+  const triangleRef = useRef<SVGSVGElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  // Animasi GSAP untuk segitiga (rotasi 0° ↔ 180°)
+  useEffect(() => {
+    if (!triangleRef.current) return;
+    gsap.to(triangleRef.current, {
+      rotation: open ? 180 : 0,
+      duration: 0.35,
+      ease: "power2.out",
+      transformOrigin: "center center",
+    });
+  }, [open]);
+
+  // Animasi GSAP untuk panel (fade + slide + scale)
+  useEffect(() => {
+    if (!panelRef.current) return;
+    if (open) {
+      gsap.fromTo(
+        panelRef.current,
+        { opacity: 0, y: -20, scale: 0.96 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: "power3.out" }
+      );
+    } else {
+      gsap.to(panelRef.current, {
+        opacity: 0,
+        y: -20,
+        scale: 0.96,
+        duration: 0.25,
+        ease: "power2.in",
+      });
+    }
+  }, [open]);
 
   return (
     <div
       style={{ position: "relative" }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
     >
       {/* Kotak utama: default bg biru, saat hover bg hitam */}
       <div
@@ -472,9 +499,9 @@ const NavbarButton = ({
           alignItems: "center",
           gap: "10px",
           padding: "10px 16px",
-          backgroundColor: hovered ? "#000000" : "#0D3CFC",
+          backgroundColor: open ? "#000000" : "#0D3CFC",
           borderRadius: "10px",
-          boxShadow: hovered
+          boxShadow: open
             ? "0 8px 24px rgba(0,0,0,0.35)"
             : "0 8px 24px rgba(13,60,252,0.35)",
           transition: "background-color 0.25s ease, box-shadow 0.25s ease",
@@ -495,31 +522,38 @@ const NavbarButton = ({
         >
           {label}
         </span>
-        {/* Kotak icon: default bg hitam, saat hover bg biru */}
-        <button
-          aria-label={`Add ${label}`}
+        {/* Kotak icon: default bg hitam, saat hover bg biru
+            Icon diganti segitiga yang berputar dengan GSAP */}
+        <div
           style={{
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             width: "22px",
             height: "22px",
-            backgroundColor: hovered ? "#0D3CFC" : "#000000",
-            border: "none",
+            backgroundColor: open ? "#0D3CFC" : "#000000",
             borderRadius: "6px",
-            cursor: "pointer",
-            padding: 0,
             transition: "background-color 0.25s ease",
           }}
         >
-          <PlusIcon size={12} color="#ffffff" />
-        </button>
+          <svg
+            ref={triangleRef}
+            width="12"
+            height="12"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            style={{ display: "block" }}
+          >
+            <path d="M12 4L20 18H4L12 4Z" fill="#ffffff" />
+          </svg>
+        </div>
       </div>
 
-      {/* BG BIRU BESAR — panjang ke kanan, tinggi kecil
-          Design SAMA seperti kotak Teams/Individual, hanya diperbesar lebarnya */}
-      {hovered && (
+      {/* BG BIRU BESAR — 850 x 260, kosong (tanpa isi) */}
+      {open && (
         <div
+          ref={panelRef}
           style={{
             position: "absolute",
             top: "calc(100% + 10px)",
@@ -529,108 +563,12 @@ const NavbarButton = ({
             backgroundColor: "#0D3CFC",
             borderRadius: "10px",
             boxShadow: "0 8px 24px rgba(13,60,252,0.35)",
-            padding: "14px 20px",
             zIndex: 1,
             fontFamily: FONT_FAMILY,
             color: "#ffffff",
-            display: "flex",
-            alignItems: "center",
-            gap: "16px",
             overflow: "hidden",
           }}
-        >
-          {/* Header: label + tombol icon hitam, sama seperti kotak utama */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              flexShrink: 0,
-            }}
-          >
-            <span
-              style={{
-                color: "#ffffff",
-                fontSize: "16px",
-                fontWeight: 700,
-                letterSpacing: "0.02em",
-                fontFamily: FONT_FAMILY,
-                whiteSpace: "nowrap",
-              }}
-            >
-              {label}
-            </span>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                width: "24px",
-                height: "24px",
-                backgroundColor: "#000000",
-                borderRadius: "6px",
-              }}
-            >
-              <PlusIcon size={14} color="#ffffff" />
-            </div>
-          </div>
-
-          {/* Garis pemisah */}
-          <div
-            style={{
-              width: "1px",
-              height: "70%",
-              backgroundColor: "rgba(255,255,255,0.25)",
-              flexShrink: 0,
-            }}
-          />
-
-          {/* Body content horizontal — panjang ke kanan */}
-          <div
-            style={{
-              flex: 1,
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              overflow: "hidden",
-              whiteSpace: "nowrap",
-            }}
-          >
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div
-                key={i}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  padding: "8px 14px",
-                  backgroundColor: "rgba(255,255,255,0.12)",
-                  borderRadius: "8px",
-                  fontSize: "12px",
-                  fontWeight: 500,
-                  flexShrink: 0,
-                }}
-              >
-                <span
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    width: "20px",
-                    height: "20px",
-                    backgroundColor: "#000000",
-                    borderRadius: "5px",
-                    fontSize: "11px",
-                    fontWeight: 700,
-                  }}
-                >
-                  {i}
-                </span>
-                <span>{label} Item {i}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+        />
       )}
     </div>
   );
@@ -651,8 +589,8 @@ const LeftNavbar = () => {
         fontFamily: FONT_FAMILY,
       }}
     >
-      <NavbarButton label="Teams" bigPanelWidth={720} bigPanelHeight={120} />
-      <NavbarButton label="Individual" bigPanelWidth={720} bigPanelHeight={120} />
+      <NavbarButton label="Teams" bigPanelWidth={850} bigPanelHeight={260} />
+      <NavbarButton label="Individual" bigPanelWidth={850} bigPanelHeight={260} />
     </div>
   );
 };
