@@ -350,6 +350,42 @@ const OnlineDot = ({ color = "#22c55e", size = 8 }: { color?: string; size?: num
   />
 );
 
+// ===== NEW: PEOPLE ICON =====
+const PeopleIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path
+      d="M17 21V19C17 16.7909 15.2091 15 13 15H5C2.79086 15 1 16.7909 1 19V21"
+      stroke={color}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <circle
+      cx="9"
+      cy="7"
+      r="4"
+      stroke={color}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M23 21V19C23 17.1362 21.7252 15.5701 20 15.126"
+      stroke={color}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M16 3.12602C17.7252 3.57006 19 5.13616 19 7C19 8.86384 17.7252 10.4299 16 10.874"
+      stroke={color}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
 // ===== FOOTER LINKS =====
 const footerLinks = [
   { title: "Get in Touch", links: ["Contact", "Instagram", "Live Chat"] },
@@ -417,16 +453,50 @@ interface TourStep {
   isLoginStep?: boolean;
 }
 
+// ===== NEW: RIGHT NAVBAR COMPONENT =====
+const RightNavbar = () => {
+  return (
+    <div
+      style={{
+        position: "fixed",
+        top: "20px",
+        right: "24px",
+        zIndex: 9000,
+        display: "flex",
+        alignItems: "center",
+        gap: "10px",
+        padding: "10px 18px 10px 16px",
+        backgroundColor: "#000000",
+        borderRadius: "999px",
+        boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
+        fontFamily: FONT_FAMILY,
+      }}
+    >
+      <PeopleIcon size={20} color="#ffffff" />
+      <Link
+        href="/signin"
+        style={{
+          textDecoration: "none",
+          color: "#ffffff",
+          fontSize: "14px",
+          fontWeight: 600,
+          letterSpacing: "0.02em",
+          fontFamily: FONT_FAMILY,
+          whiteSpace: "nowrap",
+        }}
+      >
+        Sign In
+      </Link>
+    </div>
+  );
+};
+
 // ===== PHYSICS MENURU TITLE COMPONENT =====
-// Teks "Menuru" 450px warna biru full
-// Huruf jatuh dari atas, berhenti di area di ATAS judul "Live Chat Agent"
-// Setelah jatuh, huruf settle di posisi acak random tanpa menimpa judul
 const PhysicsMenuruTitle = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
   const [containerHeight, setContainerHeight] = useState(650);
 
-  // Measure container height on mount & resize
   useEffect(() => {
     if (typeof window === "undefined") return;
     const updateHeight = () => {
@@ -451,10 +521,6 @@ const PhysicsMenuruTitle = () => {
 
     const chars = split.chars;
     const containerWidth = containerRef.current.offsetWidth;
-
-    // ===== AREA JATUH =====
-    // Batas bawah area jatuh = 80px di atas dasar container
-    // Container diposisikan dengan margin-bottom agar TIDAK menimpa judul Live Chat Agent
     const fallBottomLimit = containerHeight - 80;
 
     chars.forEach((char, i) => {
@@ -470,21 +536,14 @@ const PhysicsMenuruTitle = () => {
     chars.forEach((char, i) => {
       const delay = i * 0.18 + Math.random() * 0.3;
       const fallDuration = 3.2 + Math.random() * 1.2;
-
-      // ===== POSISI X AKHIR =====
       const targetX = (i - chars.length / 2) * 70 + (Math.random() - 0.5) * 260;
       const targetRotation = (Math.random() - 0.5) * 90;
-
-      // ===== POSISI Y AKHIR (ACAK) =====
-      // Huruf berhenti di area antara 60px sampai fallBottomLimit
-      // Sehingga tidak semua huruf rata dan tidak menimpa judul di bawahnya
-      const topBoundary = 80; // margin atas
-      const bottomBoundary = fallBottomLimit - 80; // margin bawah (jaga jarak dari judul)
+      const topBoundary = 80;
+      const bottomBoundary = fallBottomLimit - 80;
       const randomY = topBoundary + Math.random() * (bottomBoundary - topBoundary);
 
       const charTl = gsap.timeline({ delay });
 
-      // 1. VERTICAL FALL pakai physics2D
       charTl.to(
         char,
         {
@@ -499,7 +558,6 @@ const PhysicsMenuruTitle = () => {
         0
       );
 
-      // 2. HORIZONTAL DRIFT
       charTl.to(
         char,
         {
@@ -510,7 +568,6 @@ const PhysicsMenuruTitle = () => {
         0
       );
 
-      // 3. ROTATION
       charTl.to(
         char,
         {
@@ -521,7 +578,6 @@ const PhysicsMenuruTitle = () => {
         0
       );
 
-      // 4. SETTLE di posisi acak (Y random, X random, rotation random)
       charTl.to(
         char,
         {
@@ -533,8 +589,6 @@ const PhysicsMenuruTitle = () => {
         },
         fallDuration - 0.2
       );
-
-      // Tidak ada repeat — huruf diam setelah settle
     });
 
     return () => {
@@ -547,8 +601,8 @@ const PhysicsMenuruTitle = () => {
       ref={containerRef}
       style={{
         width: "100%",
-        height: "650px", // tinggi area jatuh
-        marginBottom: "80px", // jarak aman ke Live Chat Agent di bawahnya
+        height: "650px",
+        marginBottom: "80px",
         overflow: "visible",
         position: "relative",
         backgroundColor: "#ffffff",
@@ -2492,7 +2546,6 @@ const LiveChatAgent = ({
         currentStep={tourStep}
         setCurrentStep={setTourStep}
       />
-      {/* marginTop 80px untuk turunkan judul Live Chat Agent ke bawah — jaga jarak dari huruf Menuru */}
       <div style={{ marginTop: "80px", paddingTop: "30px" }}>
         <div
           style={{
@@ -3502,6 +3555,9 @@ export default function HomePage(): React.JSX.Element {
         <meta name="twitter:description" content="Menuru Brand from Love yourself" />
         <meta name="twitter:image" content="/images/ai.jpg" />
       </Head>
+
+      {/* ===== NEW: RIGHT NAVBAR ===== */}
+      <RightNavbar />
 
       <div
         style={{
