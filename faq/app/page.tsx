@@ -418,15 +418,16 @@ interface TourStep {
 }
 
 // ===== PHYSICS MENURU TITLE COMPONENT =====
-// Teks "Menuru" 450px warna biru full.
-// Huruf jatuh dari atas, MENTOK di lantai (dasar container),
-// lalu slow-motion settle agar terasa seperti menabrak tembok.
-// Container diberi margin-bottom besar supaya tidak menimpa judul di bawah.
+// - Teks "Menuru" 450px warna biru full
+// - Huruf jatuh dari atas ke "lantai" (floorY) yang sudah ditentukan
+// - Saat menyentuh lantai, huruf slow-motion goyang (bounce) seperti mentok tembok
+// - Huruf TIDAK menembus lantai & TIDAK menimpa judul "Live Chat Agent" di bawah
 const PhysicsMenuruTitle = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
-  const [containerHeight, setContainerHeight] = useState(650);
+  const [containerHeight, setContainerHeight] = useState(720);
 
+  // Measure container height on mount & resize
   useEffect(() => {
     if (typeof window === "undefined") return;
     const updateHeight = () => {
@@ -452,122 +453,138 @@ const PhysicsMenuruTitle = () => {
     const chars = split.chars;
     const containerWidth = containerRef.current.offsetWidth;
 
-    // ===== UKURAN HURUF =====
-    // fontSize 450px → tinggi glyph sekitar 450px.
-    // Kita pakai tinggi ini untuk menghitung "floor" (lantai).
-    const FONT_SIZE = 450;
-    const CHAR_HEIGHT = FONT_SIZE * 0.72; // tinggi visual huruf kapital
-    const FLOOR_PADDING = 20; // jarak aman huruf ke dasar container
+    // ===== LANTAI (FLOOR) =====
+    // Lantai berada 40px dari bawah container. Huruf akan duduk DI ATAS lantai ini.
+    // Karena container punya marginBottom besar (di bawah), lantai ini berada JAUH di atas
+    // judul "Live Chat Agent" sehingga tidak akan menimpa.
+    const FLOOR_Y = containerHeight - 40;
 
-    // ===== LANTAI =====
-    // Huruf harus berhenti dengan BASELINE-nya menyentuh lantai.
-    // Karena huruf di-set y (translateY) dari posisi awal (top: 0),
-    // maka y_final = containerHeight - CHAR_HEIGHT - FLOOR_PADDING
-    const floorY = containerHeight - CHAR_HEIGHT - FLOOR_PADDING;
+    // Tinggi huruf kira-kira 450px, jadi titik "duduk" huruf = FLOOR_Y - fontSize
+    // Kita pakai perkiraan tinggi glyph ~ 0.72 * fontSize untuk posisi baseline natural
+    const CHAR_HEIGHT_APPROX = 320;
+    const RESTING_Y = FLOOR_Y - CHAR_HEIGHT_APPROX;
 
+    // Set posisi awal: huruf di atas layar, belum terlihat
     chars.forEach((char, i) => {
       gsap.set(char, {
-        y: -900 - i * 60,
+        y: -900 - i * 80,
         x: (i - chars.length / 2) * 60 + (Math.random() - 0.5) * 250,
         rotation: (Math.random() - 0.5) * 120,
         opacity: 1,
         force3D: true,
+        transformOrigin: "center bottom",
       });
     });
 
+    // Animasikan tiap huruf
     chars.forEach((char, i) => {
-      const delay = i * 0.15 + Math.random() * 0.25;
-      const fallDuration = 2.6 + Math.random() * 0.8;
+      const delay = i * 0.18 + Math.random() * 0.25;
+      const fallDuration = 2.8 + Math.random() * 0.8;
 
-      // ===== POSISI X AKHIR =====
-      // Huruf menyebar horizontal, tidak menumpuk semua di tengah.
-      const spread = Math.min(containerWidth * 0.55, 520);
-      const targetX =
-        (i - (chars.length - 1) / 2) * (spread / chars.length) +
-        (Math.random() - 0.5) * 60;
+      // Posisi X akhir (horizontal spread)
+      const targetX = (i - chars.length / 2) * 70 + (Math.random() - 0.5) * 240;
+      const targetRotation = (Math.random() - 0.5) * 70;
 
-      // ===== ROTASI AKHIR =====
-      // Rotasi kecil saja supaya huruf tetap terbaca "Menuru".
-      const targetRotation = (Math.random() - 0.5) * 25;
-
-      // ===== Y AKHIR =====
-      // Setiap huruf berhenti di lantai, dengan sedikit variasi
-      // (±6px) supaya terlihat natural seperti huruf fisik.
-      const targetY = floorY + (Math.random() - 0.5) * 12;
+      // Posisi Y akhir: sedikit variasi di sekitar RESTING_Y biar natural
+      // Tapi tetap DI ATAS lantai (tidak menembus)
+      const yVariation = (Math.random() - 0.5) * 40;
+      const finalY = RESTING_Y + yVariation;
 
       const charTl = gsap.timeline({ delay });
 
-      // 1. VERTICAL FALL — physics2D
-      //    velocity & gravity besar supaya jatuh cepat.
+      // 1) FALL pakai physics2D — gravity besar biar jatuh cepat
       charTl.to(
         char,
         {
           duration: fallDuration,
           physics2D: {
-            velocity: 900 + Math.random() * 400,
-            angle: 90 + (Math.random() - 0.5) * 15,
-            gravity: 1600 + Math.random() * 500,
+            velocity: 600 + Math.random() * 400,
+            angle: 90 + (Math.random() - 0.5) * 20,
+            gravity: 1400 + Math.random() * 500,
           },
           ease: "none",
         },
         0
       );
 
-      // 2. HORIZONTAL DRIFT — pelan saja
+      // 2) HORIZONTAL DRIFT — pelan mendekati targetX
       charTl.to(
         char,
         {
           duration: fallDuration,
           x: targetX,
-          ease: "power2.inOut",
+          ease: "power1.inOut",
         },
         0
       );
 
-      // 3. ROTATION — berputar saat jatuh
+      // 3) ROTATION — berputar saat jatuh
       charTl.to(
         char,
         {
           duration: fallDuration,
-          rotation: targetRotation * 3,
-          ease: "power2.inOut",
+          rotation: targetRotation,
+          ease: "power1.inOut",
         },
         0
       );
 
-      // 4. IMPACT + SLOW MOTION SETTLE
-      //    Saat huruf menyentuh lantai:
-      //    - Y dikunci ke targetY (lantai) — TIDAK menembus
-      //    - Rotasi diputar balik ke targetRotation (kecil)
-      //    - Scale sedikit "squash" lalu balik → efek impact
-      //    - Durasi settle panjang + ease power4.out → slow motion
-      const impactTime = fallDuration - 0.15;
-
-      // 4a. Squash effect (impact) — sangat singkat
-      charTl.to(
-        char,
-        {
-          duration: 0.12,
-          scaleY: 0.85,
-          scaleX: 1.12,
-          ease: "power2.out",
-        },
-        impactTime
-      );
-
-      // 4b. Settle ke lantai dengan slow motion
+      // 4) SNAP ke lantai + slow-motion bounce (mentok tembok)
+      //    Di sini kita paksa Y ke finalY (duduk di lantai) dengan elastic/back ease
+      //    supaya terlihat seperti "memantul" lalu diam.
       charTl.to(
         char,
         {
           duration: 1.6,
-          y: targetY,          // ← DIKUNCI KE LANTAI, tidak menembus
-          x: targetX,
-          rotation: targetRotation,
-          scaleY: 1,
-          scaleX: 1,
-          ease: "power4.out",  // ← slow motion di akhir
+          y: finalY,
+          x: targetX + (Math.random() - 0.5) * 20,
+          rotation: targetRotation + (Math.random() - 0.5) * 12,
+          ease: "elastic.out(1, 0.35)", // slow-motion bounce, mentok lalu diam
         },
-        impactTime + 0.12
+        fallDuration - 0.25
+      );
+
+      // 5) EXTRA GOYANG slow-motion setelah settle
+      //    Huruf bergoyang halus naik-turun + rotasi kecil, seperti "bergetar" di lantai
+      charTl.to(
+        char,
+        {
+          duration: 0.9,
+          y: finalY - 18,
+          rotation: targetRotation + (Math.random() - 0.5) * 8,
+          ease: "sine.inOut",
+        },
+        fallDuration + 1.35
+      );
+      charTl.to(
+        char,
+        {
+          duration: 1.1,
+          y: finalY,
+          rotation: targetRotation,
+          ease: "sine.inOut",
+        },
+        fallDuration + 2.25
+      );
+      charTl.to(
+        char,
+        {
+          duration: 0.8,
+          y: finalY - 8,
+          rotation: targetRotation + (Math.random() - 0.5) * 5,
+          ease: "sine.inOut",
+        },
+        fallDuration + 3.35
+      );
+      charTl.to(
+        char,
+        {
+          duration: 0.9,
+          y: finalY,
+          rotation: targetRotation,
+          ease: "sine.inOut",
+        },
+        fallDuration + 4.15
       );
     });
 
@@ -581,11 +598,9 @@ const PhysicsMenuruTitle = () => {
       ref={containerRef}
       style={{
         width: "100%",
-        height: "650px",
-        // margin-bottom besar → judul "Live Chat Agent" di bawah
-        // benar-benar aman, tidak tertimpa huruf yang jatuh.
-        marginBottom: "160px",
-        overflow: "visible",
+        height: "720px", // tinggi area jatuh
+        marginBottom: "140px", // jarak aman ke Live Chat Agent di bawahnya
+        overflow: "hidden", // cegah huruf keluar container
         position: "relative",
         backgroundColor: "#ffffff",
         display: "flex",
@@ -593,6 +608,18 @@ const PhysicsMenuruTitle = () => {
         justifyContent: "center",
       }}
     >
+      {/* Garis lantai (opsional, hanya visual halus) */}
+      <div
+        style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          bottom: "40px",
+          height: "2px",
+          backgroundColor: "rgba(13,60,252,0.06)",
+          pointerEvents: "none",
+        }}
+      />
       <div
         ref={textRef}
         style={{
@@ -3779,7 +3806,7 @@ export default function HomePage(): React.JSX.Element {
           display: inline-block;
           will-change: transform, opacity;
           color: #0D3CFC !important;
-          transform-origin: center center;
+          transform-origin: center bottom;
           opacity: 1 !important;
           visibility: visible !important;
         }
