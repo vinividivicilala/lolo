@@ -358,17 +358,28 @@ const PeopleIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: s
   </svg>
 );
 
-// ===== PLUS ICON =====
-const PlusIcon = ({ size = 14, color = "#ffffff" }: { size?: number; color?: string }) => (
+// ===== TRUST ICON (shield + check) =====
+const TrustIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M12 5V19M5 12H19" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M12 2L4 5V11C4 16 8 20 12 22C16 20 20 16 20 11V5L12 2Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M9 12L11 14L15 10" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
-// ===== TRIANGLE ICON (segitiga atas & bawah) =====
-const TriangleIcon = ({ size = 14, color = "#ffffff" }: { size?: number; color?: string }) => (
+// ===== CAREER ICON (briefcase) =====
+const CareerIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M12 4L20 18H4L12 4Z" fill={color} />
+    <rect x="2" y="7" width="20" height="14" rx="2" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M8 7V5C8 3.89543 8.89543 3 10 3H14C15.1046 3 16 3.89543 16 5V7" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M2 13H22" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+// ===== LINES ICON (garis atas & bawah) =====
+const LinesIcon = ({ size = 14, color = "#ffffff" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M4 7H20" stroke={color} strokeWidth="2.5" strokeLinecap="round" />
+    <path d="M4 17H20" stroke={color} strokeWidth="2.5" strokeLinecap="round" />
   </svg>
 );
 
@@ -440,33 +451,59 @@ interface TourStep {
 }
 
 // ===== NAVBAR BUTTON COMPONENT =====
-// BG BIRU BESAR: 850 lebar, 260 tinggi, kosong (tanpa isi)
-// Icon + diganti segitiga yang berputar dengan GSAP
+// Panel dengan konten: judul + icon + deskripsi + foto besar di kanan
+// Icon diganti garis atas & bawah, animasi GSAP
 const NavbarButton = ({
   label,
+  panelTitle,
+  panelDescription,
+  panelImage,
+  iconType,
   bigPanelWidth = 850,
   bigPanelHeight = 260,
 }: {
   label: string;
+  panelTitle: string;
+  panelDescription: string;
+  panelImage: string;
+  iconType: "trust" | "career";
   bigPanelWidth?: number;
   bigPanelHeight?: number;
 }) => {
   const [open, setOpen] = useState(false);
-  const triangleRef = useRef<SVGSVGElement>(null);
+  const linesTopRef = useRef<SVGLineElement>(null);
+  const linesBottomRef = useRef<SVGLineElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
 
-  // Animasi GSAP untuk segitiga (rotasi 0° ↔ 180°)
+  // Animasi GSAP untuk garis atas & bawah (bergerak naik-turun terbalik)
   useEffect(() => {
-    if (!triangleRef.current) return;
-    gsap.to(triangleRef.current, {
-      rotation: open ? 180 : 0,
-      duration: 0.35,
-      ease: "power2.out",
-      transformOrigin: "center center",
-    });
+    if (!linesTopRef.current || !linesBottomRef.current) return;
+    if (open) {
+      gsap.to(linesTopRef.current, {
+        y: 2,
+        duration: 0.35,
+        ease: "power2.out",
+      });
+      gsap.to(linesBottomRef.current, {
+        y: -2,
+        duration: 0.35,
+        ease: "power2.out",
+      });
+    } else {
+      gsap.to(linesTopRef.current, {
+        y: 0,
+        duration: 0.35,
+        ease: "power2.out",
+      });
+      gsap.to(linesBottomRef.current, {
+        y: 0,
+        duration: 0.35,
+        ease: "power2.out",
+      });
+    }
   }, [open]);
 
-  // Animasi GSAP untuk panel (fade + slide + scale)
+  // Animasi GSAP untuk panel
   useEffect(() => {
     if (!panelRef.current) return;
     if (open) {
@@ -492,7 +529,7 @@ const NavbarButton = ({
       onMouseEnter={() => setOpen(true)}
       onMouseLeave={() => setOpen(false)}
     >
-      {/* Kotak utama: default bg biru, saat hover bg hitam */}
+      {/* Kotak utama */}
       <div
         style={{
           display: "flex",
@@ -523,7 +560,7 @@ const NavbarButton = ({
           {label}
         </span>
         {/* Kotak icon: default bg hitam, saat hover bg biru
-            Icon diganti segitiga yang berputar dengan GSAP */}
+            Icon diganti garis atas & bawah */}
         <div
           style={{
             display: "flex",
@@ -537,20 +574,38 @@ const NavbarButton = ({
           }}
         >
           <svg
-            ref={triangleRef}
-            width="12"
-            height="12"
+            width="14"
+            height="14"
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
             style={{ display: "block" }}
           >
-            <path d="M12 4L20 18H4L12 4Z" fill="#ffffff" />
+            <line
+              ref={linesTopRef}
+              x1="4"
+              y1="7"
+              x2="20"
+              y2="7"
+              stroke="#ffffff"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+            />
+            <line
+              ref={linesBottomRef}
+              x1="4"
+              y1="17"
+              x2="20"
+              y2="17"
+              stroke="#ffffff"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+            />
           </svg>
         </div>
       </div>
 
-      {/* BG BIRU BESAR — 850 x 260, kosong (tanpa isi) */}
+      {/* Panel — dengan konten: judul + icon + deskripsi + foto besar di kanan */}
       {open && (
         <div
           ref={panelRef}
@@ -567,8 +622,86 @@ const NavbarButton = ({
             fontFamily: FONT_FAMILY,
             color: "#ffffff",
             overflow: "hidden",
+            display: "flex",
+            padding: "20px 24px",
+            gap: "20px",
           }}
-        />
+        >
+          {/* Sisi kiri: judul + icon + deskripsi */}
+          <div
+            style={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              gap: "12px",
+              minWidth: 0,
+            }}
+          >
+            {/* Judul + icon */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+              }}
+            >
+              {iconType === "trust" ? (
+                <TrustIcon size={28} color="#ffffff" />
+              ) : (
+                <CareerIcon size={28} color="#ffffff" />
+              )}
+              <span
+                style={{
+                  fontSize: "22px",
+                  fontWeight: 700,
+                  letterSpacing: "0.02em",
+                  fontFamily: FONT_FAMILY,
+                  color: "#ffffff",
+                }}
+              >
+                {panelTitle}
+              </span>
+            </div>
+
+            {/* Deskripsi */}
+            <p
+              style={{
+                fontSize: "13px",
+                fontWeight: 400,
+                lineHeight: 1.6,
+                color: "rgba(255,255,255,0.9)",
+                margin: 0,
+                fontFamily: FONT_FAMILY,
+              }}
+            >
+              {panelDescription}
+            </p>
+          </div>
+
+          {/* Sisi kanan: foto besar */}
+          <div
+            style={{
+              width: "300px",
+              height: "100%",
+              borderRadius: "8px",
+              overflow: "hidden",
+              flexShrink: 0,
+              backgroundColor: "rgba(255,255,255,0.1)",
+            }}
+          >
+            <img
+              src={panelImage}
+              alt={panelTitle}
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                display: "block",
+              }}
+            />
+          </div>
+        </div>
       )}
     </div>
   );
@@ -589,8 +722,24 @@ const LeftNavbar = () => {
         fontFamily: FONT_FAMILY,
       }}
     >
-      <NavbarButton label="Teams" bigPanelWidth={850} bigPanelHeight={260} />
-      <NavbarButton label="Individual" bigPanelWidth={850} bigPanelHeight={260} />
+      <NavbarButton
+        label="Teams"
+        panelTitle="Trust"
+        panelDescription="Keamanan dan privasi Anda adalah prioritas utama kami. Kami menggunakan enkripsi AES-256-GCM end-to-end untuk melindungi setiap pesan, data pribadi, dan transaksi Anda. Tim keamanan kami memantau sistem 24/7 untuk memastikan tidak ada akses tidak sah, sehingga Anda dapat berkomunikasi dan berkolaborasi dengan tenang."
+        panelImage="/images/p0l.jpg"
+        iconType="trust"
+        bigPanelWidth={850}
+        bigPanelHeight={260}
+      />
+      <NavbarButton
+        label="Individual"
+        panelTitle="Careers"
+        panelDescription="Bergabunglah dengan tim kami dan bangun karier yang bermakna. Kami mencari individu berbakat yang bersemangat tentang inovasi, kolaborasi, dan dampak nyata. Nikmati lingkungan kerja yang suportif, pengembangan profesional berkelanjutan, dan kesempatan untuk tumbuh bersama kami."
+        panelImage="/images/xxz.jpg"
+        iconType="career"
+        bigPanelWidth={850}
+        bigPanelHeight={260}
+      />
     </div>
   );
 };
@@ -2956,8 +3105,7 @@ const LiveChatAgent = ({
                   )}
                   {resolvedTickets.length > 0 && (
                     <div>
-                      <div
-                        style={{
+                      <div                        style={{
                           padding: "10px 16px",
                           backgroundColor: "#e5e7eb",
                           fontWeight: 600,
