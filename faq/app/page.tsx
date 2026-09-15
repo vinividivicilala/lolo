@@ -376,10 +376,28 @@ const CareerIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?: s
 );
 
 // ===== RESOURCES ICON (book) =====
-const ResourcesIcon = ({ size = 24, color = "#000000" }: { size?: number; color?: string }) => (
+const ResourcesIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M4 4H10C11.1046 4 12 4.89543 12 6V20C12 18.8954 11.1046 18 10 18H4V4Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     <path d="M20 4H14C12.8954 4 12 4.89543 12 6V20C12 18.8954 12.8954 18 14 18H20V4Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+// ===== DOCS ICON (file) =====
+const DocsIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M14 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M14 2V8H20" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M8 13H16" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M8 17H16" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+// ===== BRAND ICON (tag) =====
+const BrandIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M20.59 13.41L11 3.83C10.6 3.43 10.06 3.2 9.5 3.2H4C2.9 3.2 2 4.1 2 5.2V10.7C2 11.26 2.22 11.8 2.63 12.2L12.21 21.79C13 22.57 14.27 22.57 15.06 21.79L20.59 16.26C21.37 15.47 21.37 14.2 20.59 13.41Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <circle cx="7" cy="7" r="1.5" fill={color} />
   </svg>
 );
 
@@ -451,7 +469,7 @@ interface TourStep {
 }
 
 // ===== NAVBAR BUTTON COMPONENT =====
-// Mendukung custom colors untuk tombol & panel
+// Mendukung custom colors + variant "resources" (isi kiri & kanan dipecah 2 section)
 const NavbarButton = ({
   label,
   panelTitle,
@@ -470,9 +488,11 @@ const NavbarButton = ({
   panelBoxColor = "rgba(255,255,255,0.12)",
   panelBoxBorder = "rgba(255,255,255,0.25)",
   labelTextColor = "#ffffff",
+  labelTextHoverColor = "#ffffff",
   titleTextColor = "#ffffff",
   descriptionTextColor = "rgba(255,255,255,0.9)",
   iconComponent,
+  isResources = false,
 }: {
   label: string;
   panelTitle: string;
@@ -491,9 +511,11 @@ const NavbarButton = ({
   panelBoxColor?: string;
   panelBoxBorder?: string;
   labelTextColor?: string;
+  labelTextHoverColor?: string;
   titleTextColor?: string;
   descriptionTextColor?: string;
   iconComponent?: React.ReactNode;
+  isResources?: boolean;
 }) => {
   const [open, setOpen] = useState(false);
   const linesTopRef = useRef<SVGLineElement>(null);
@@ -554,6 +576,9 @@ const NavbarButton = ({
     }
   }, [open]);
 
+  // Warna garis icon: saat default pakai labelTextColor, saat hover juga sama
+  const strokeColor = open ? labelTextHoverColor : labelTextColor;
+
   return (
     <div
       style={{ position: "relative" }}
@@ -580,12 +605,13 @@ const NavbarButton = ({
       >
         <span
           style={{
-            color: labelTextColor,
+            color: open ? labelTextHoverColor : labelTextColor,
             fontSize: "14px",
             fontWeight: 600,
             letterSpacing: "0.02em",
             fontFamily: FONT_FAMILY,
             whiteSpace: "nowrap",
+            transition: "color 0.25s ease",
           }}
         >
           {label}
@@ -617,7 +643,7 @@ const NavbarButton = ({
               y1="7"
               x2="20"
               y2="7"
-              stroke={labelTextColor}
+              stroke={strokeColor}
               strokeWidth="2.5"
               strokeLinecap="round"
             />
@@ -627,7 +653,7 @@ const NavbarButton = ({
               y1="17"
               x2="20"
               y2="17"
-              stroke={labelTextColor}
+              stroke={strokeColor}
               strokeWidth="2.5"
               strokeLinecap="round"
             />
@@ -659,7 +685,7 @@ const NavbarButton = ({
             alignItems: "flex-start",
           }}
         >
-          {/* ===== SISI KIRI: JUDUL + ICON + DESKRIPSI (max 2 baris) ===== */}
+          {/* ===== SISI KIRI ===== */}
           <div
             style={{
               flex: "1 1 0",
@@ -669,115 +695,332 @@ const NavbarButton = ({
               gap: "12px",
             }}
           >
-            {/* Judul + icon */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "12px",
-              }}
-            >
-              {iconComponent ? (
-                iconComponent
-              ) : iconType === "trust" ? (
-                <TrustIcon size={26} color={titleTextColor} />
-              ) : iconType === "career" ? (
-                <CareerIcon size={26} color={titleTextColor} />
-              ) : (
-                <ResourcesIcon size={26} color={titleTextColor} />
-              )}
-              <span
-                style={{
-                  fontSize: "20px",
-                  fontWeight: 700,
-                  letterSpacing: "0.02em",
-                  fontFamily: FONT_FAMILY,
-                  color: titleTextColor,
-                }}
-              >
-                {panelTitle}
-              </span>
-            </div>
+            {isResources ? (
+              /* ===== KHUSUS RESOURCES: Docs & Brand dipisah ===== */
+              <>
+                {/* Docs section */}
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "6px",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                    }}
+                  >
+                    <DocsIcon size={22} color={titleTextColor} />
+                    <span
+                      style={{
+                        fontSize: "16px",
+                        fontWeight: 700,
+                        letterSpacing: "0.02em",
+                        fontFamily: FONT_FAMILY,
+                        color: titleTextColor,
+                      }}
+                    >
+                      Docs
+                    </span>
+                  </div>
+                  <p
+                    style={{
+                      fontSize: "12px",
+                      fontWeight: 400,
+                      lineHeight: 1.5,
+                      color: descriptionTextColor,
+                      margin: 0,
+                      fontFamily: FONT_FAMILY,
+                      maxWidth: "340px",
+                      display: "-webkit-box",
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: "vertical",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    Dokumentasi lengkap panduan produk, API, dan tutorial Menuru.
+                  </p>
+                </div>
 
-            {/* Deskripsi max 2 baris */}
-            <p
-              style={{
-                fontSize: "13px",
-                fontWeight: 400,
-                lineHeight: 1.5,
-                color: descriptionTextColor,
-                margin: 0,
-                fontFamily: FONT_FAMILY,
-                maxWidth: "340px",
-                display: "-webkit-box",
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: "vertical",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-              }}
-            >
-              {panelDescription}
-            </p>
+                {/* Brand section */}
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "6px",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                    }}
+                  >
+                    <BrandIcon size={22} color={titleTextColor} />
+                    <span
+                      style={{
+                        fontSize: "16px",
+                        fontWeight: 700,
+                        letterSpacing: "0.02em",
+                        fontFamily: FONT_FAMILY,
+                        color: titleTextColor,
+                      }}
+                    >
+                      Brand
+                    </span>
+                  </div>
+                  <p
+                    style={{
+                      fontSize: "12px",
+                      fontWeight: 400,
+                      lineHeight: 1.5,
+                      color: descriptionTextColor,
+                      margin: 0,
+                      fontFamily: FONT_FAMILY,
+                      maxWidth: "340px",
+                      display: "-webkit-box",
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: "vertical",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    Aset visual, logo, dan panduan identitas brand Menuru.
+                  </p>
+                </div>
+              </>
+            ) : (
+              /* ===== DEFAULT (Teams & Individual) ===== */
+              <>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "12px",
+                  }}
+                >
+                  {iconComponent ? (
+                    iconComponent
+                  ) : iconType === "trust" ? (
+                    <TrustIcon size={26} color={titleTextColor} />
+                  ) : iconType === "career" ? (
+                    <CareerIcon size={26} color={titleTextColor} />
+                  ) : (
+                    <ResourcesIcon size={26} color={titleTextColor} />
+                  )}
+                  <span
+                    style={{
+                      fontSize: "20px",
+                      fontWeight: 700,
+                      letterSpacing: "0.02em",
+                      fontFamily: FONT_FAMILY,
+                      color: titleTextColor,
+                    }}
+                  >
+                    {panelTitle}
+                  </span>
+                </div>
+
+                <p
+                  style={{
+                    fontSize: "13px",
+                    fontWeight: 400,
+                    lineHeight: 1.5,
+                    color: descriptionTextColor,
+                    margin: 0,
+                    fontFamily: FONT_FAMILY,
+                    maxWidth: "340px",
+                    display: "-webkit-box",
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: "vertical",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  {panelDescription}
+                </p>
+              </>
+            )}
           </div>
 
-          {/* ===== SISI KANAN: BG TAMBAHAN KOTAK BORDER RADIUS ===== */}
+          {/* ===== SISI KANAN ===== */}
           <div
             style={{
               flex: "0 0 380px",
-              backgroundColor: panelBoxColor,
-              border: `1px solid ${panelBoxBorder}`,
-              borderRadius: "12px",
-              padding: "14px",
               display: "flex",
               flexDirection: "column",
-              gap: "10px",
+              gap: "12px",
             }}
           >
-            {/* Foto besar tanpa bg tambahan */}
-            <img
-              src={panelImage}
-              alt={panelTitle}
-              style={{
-                width: "100%",
-                height: "170px",
-                objectFit: "contain",
-                display: "block",
-                borderRadius: "10px",
-              }}
-            />
+            {isResources ? (
+              /* ===== KHUSUS RESOURCES: Docs & Brand dipisah dengan foto ===== */
+              <>
+                {/* Docs box */}
+                <div
+                  style={{
+                    backgroundColor: panelBoxColor,
+                    border: `1px solid ${panelBoxBorder}`,
+                    borderRadius: "12px",
+                    padding: "12px",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "8px",
+                  }}
+                >
+                  <img
+                    src={panelImage}
+                    alt="Docs"
+                    style={{
+                      width: "100%",
+                      height: "120px",
+                      objectFit: "contain",
+                      display: "block",
+                      borderRadius: "8px",
+                    }}
+                  />
+                  <span
+                    style={{
+                      fontSize: "14px",
+                      fontWeight: 700,
+                      letterSpacing: "0.02em",
+                      fontFamily: FONT_FAMILY,
+                      color: titleTextColor,
+                    }}
+                  >
+                    Docs Guide
+                  </span>
+                  <p
+                    style={{
+                      fontSize: "12px",
+                      fontWeight: 400,
+                      lineHeight: 1.5,
+                      color: descriptionTextColor,
+                      margin: 0,
+                      fontFamily: FONT_FAMILY,
+                      display: "-webkit-box",
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: "vertical",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    Panduan lengkap dan referensi teknis.
+                  </p>
+                </div>
 
-            {/* Judul di bawah foto */}
-            <span
-              style={{
-                fontSize: "15px",
-                fontWeight: 700,
-                letterSpacing: "0.02em",
-                fontFamily: FONT_FAMILY,
-                color: titleTextColor,
-              }}
-            >
-              {panelRightTitle}
-            </span>
-
-            {/* Deskripsi max 2 baris */}
-            <p
-              style={{
-                fontSize: "12px",
-                fontWeight: 400,
-                lineHeight: 1.5,
-                color: descriptionTextColor,
-                margin: 0,
-                fontFamily: FONT_FAMILY,
-                maxWidth: "340px",
-                display: "-webkit-box",
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: "vertical",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-              }}
-            >
-              {panelRightDescription}
-            </p>
+                {/* Brand box */}
+                <div
+                  style={{
+                    backgroundColor: panelBoxColor,
+                    border: `1px solid ${panelBoxBorder}`,
+                    borderRadius: "12px",
+                    padding: "12px",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "8px",
+                  }}
+                >
+                  <img
+                    src={panelImage}
+                    alt="Brand"
+                    style={{
+                      width: "100%",
+                      height: "120px",
+                      objectFit: "contain",
+                      display: "block",
+                      borderRadius: "8px",
+                    }}
+                  />
+                  <span
+                    style={{
+                      fontSize: "14px",
+                      fontWeight: 700,
+                      letterSpacing: "0.02em",
+                      fontFamily: FONT_FAMILY,
+                      color: titleTextColor,
+                    }}
+                  >
+                    Brand Assets
+                  </span>
+                  <p
+                    style={{
+                      fontSize: "12px",
+                      fontWeight: 400,
+                      lineHeight: 1.5,
+                      color: descriptionTextColor,
+                      margin: 0,
+                      fontFamily: FONT_FAMILY,
+                      display: "-webkit-box",
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: "vertical",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    Logo, palet warna, dan identitas visual.
+                  </p>
+                </div>
+              </>
+            ) : (
+              /* ===== DEFAULT (Teams & Individual) ===== */
+              <div
+                style={{
+                  backgroundColor: panelBoxColor,
+                  border: `1px solid ${panelBoxBorder}`,
+                  borderRadius: "12px",
+                  padding: "14px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "10px",
+                }}
+              >
+                <img
+                  src={panelImage}
+                  alt={panelTitle}
+                  style={{
+                    width: "100%",
+                    height: "170px",
+                    objectFit: "contain",
+                    display: "block",
+                    borderRadius: "10px",
+                  }}
+                />
+                <span
+                  style={{
+                    fontSize: "15px",
+                    fontWeight: 700,
+                    letterSpacing: "0.02em",
+                    fontFamily: FONT_FAMILY,
+                    color: titleTextColor,
+                  }}
+                >
+                  {panelRightTitle}
+                </span>
+                <p
+                  style={{
+                    fontSize: "12px",
+                    fontWeight: 400,
+                    lineHeight: 1.5,
+                    color: descriptionTextColor,
+                    margin: 0,
+                    fontFamily: FONT_FAMILY,
+                    maxWidth: "340px",
+                    display: "-webkit-box",
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: "vertical",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  {panelRightDescription}
+                </p>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -826,7 +1069,8 @@ const LeftNavbar = () => {
         bigPanelHeight={260}
       />
 
-      {/* RESOURCES — custom warna kuning #F2EA6B, panel oranye #F04E23 */}
+      {/* RESOURCES — tombol kuning #F2EA6B, panel oranye #F04E23
+          Teks & icon tombol terlihat saat hover (bg jadi hitam → teks/icon putih) */}
       <NavbarButton
         label="Resources"
         panelTitle="Docs & Brand"
@@ -836,7 +1080,7 @@ const LeftNavbar = () => {
         panelRightDescription="Panduan, aset visual, dan referensi resmi brand Menuru."
         iconType="resources"
         bigPanelWidth={850}
-        bigPanelHeight={260}
+        bigPanelHeight={340}
         buttonColor="#F2EA6B"
         buttonHoverColor="#000000"
         panelColor="#F04E23"
@@ -845,8 +1089,10 @@ const LeftNavbar = () => {
         panelBoxColor="rgba(255,255,255,0.15)"
         panelBoxBorder="rgba(255,255,255,0.3)"
         labelTextColor="#000000"
+        labelTextHoverColor="#ffffff"
         titleTextColor="#ffffff"
         descriptionTextColor="rgba(255,255,255,0.92)"
+        isResources={true}
       />
     </div>
   );
