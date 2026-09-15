@@ -446,17 +446,16 @@ interface TourStep {
   isLoginStep?: boolean;
 }
 
-// ===== NAVBAR BUTTON COMPONENT (dengan BG BIRU BESAR di bawah, digeser ke kanan) =====
+// ===== NAVBAR BUTTON COMPONENT =====
+// BG BIRU BESAR muncul di ujung sisi KIRI kotak, design SAMA seperti kotak Teams/Individual (hanya diperbesar)
 const NavbarButton = ({
   label,
-  panelTitle,
-  panelItems,
-  offsetLeft,
+  bigPanelWidth = 420,
+  bigPanelHeight = 260,
 }: {
   label: string;
-  panelTitle: string;
-  panelItems: string[];
-  offsetLeft: number;
+  bigPanelWidth?: number;
+  bigPanelHeight?: number;
 }) => {
   const [hovered, setHovered] = useState(false);
 
@@ -517,68 +516,83 @@ const NavbarButton = ({
         </button>
       </div>
 
-      {/* BG BIRU BESAR muncul di bawah, digeser ke kanan */}
+      {/* BG BIRU BESAR — design SAMA seperti kotak Teams/Individual, hanya diperbesar
+          Muncul di ujung sisi KIRI kotak, posisi di bawah */}
       {hovered && (
         <div
           style={{
             position: "absolute",
             top: "calc(100% + 10px)",
-            left: `${offsetLeft}px`,
-            width: "360px",
-            minHeight: "220px",
+            left: "0px", // menempel di ujung sisi kiri kotak
+            width: `${bigPanelWidth}px`,
+            height: `${bigPanelHeight}px`,
             backgroundColor: "#0D3CFC",
-            borderRadius: "14px",
+            borderRadius: "10px", // sama seperti kotak Teams/Individual
+            boxShadow: "0 8px 24px rgba(13,60,252,0.35)", // sama seperti kotak Teams/Individual
             padding: "20px 22px",
             zIndex: 1,
-            boxShadow: "0 20px 50px rgba(13,60,252,0.35)",
             fontFamily: FONT_FAMILY,
             color: "#ffffff",
+            display: "flex",
+            flexDirection: "column",
+            gap: "14px",
           }}
         >
+          {/* Header: label + tombol icon hitam, sama seperti kotak utama */}
           <div
             style={{
-              fontSize: "16px",
-              fontWeight: 700,
-              marginBottom: "14px",
-              letterSpacing: "0.01em",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
             }}
           >
-            {panelTitle}
+            <span
+              style={{
+                color: "#ffffff",
+                fontSize: "18px",
+                fontWeight: 700,
+                letterSpacing: "0.02em",
+                fontFamily: FONT_FAMILY,
+              }}
+            >
+              {label}
+            </span>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "26px",
+                height: "26px",
+                backgroundColor: "#000000",
+                borderRadius: "6px",
+              }}
+            >
+              <PlusIcon size={14} color="#ffffff" />
+            </div>
           </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-            {panelItems.map((item, i) => (
-              <div
-                key={i}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "10px",
-                  padding: "10px 14px",
-                  backgroundColor: "rgba(255,255,255,0.12)",
-                  borderRadius: "10px",
-                  fontSize: "13px",
-                  fontWeight: 500,
-                  cursor: "pointer",
-                }}
-              >
-                <span
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    width: "24px",
-                    height: "24px",
-                    backgroundColor: "#000000",
-                    borderRadius: "6px",
-                    fontSize: "12px",
-                    fontWeight: 700,
-                  }}
-                >
-                  {i + 1}
-                </span>
-                <span>{item}</span>
-              </div>
-            ))}
+
+          {/* Body content placeholder */}
+          <div
+            style={{
+              flex: 1,
+              backgroundColor: "rgba(255,255,255,0.12)",
+              borderRadius: "8px",
+              padding: "14px 16px",
+              fontSize: "13px",
+              fontWeight: 400,
+              lineHeight: 1.6,
+              color: "rgba(255,255,255,0.9)",
+              overflow: "hidden",
+            }}
+          >
+            <div style={{ fontWeight: 600, marginBottom: "8px", fontSize: "14px" }}>
+              {label} Panel
+            </div>
+            <div>
+              This is a larger version of the {label.toLowerCase()} box with the same
+              design — same blue color, same border radius, same shadow — just scaled up.
+            </div>
           </div>
         </div>
       )}
@@ -596,23 +610,13 @@ const LeftNavbar = () => {
         left: "80px",
         zIndex: 9000,
         display: "flex",
-        alignItems: "center",
+        alignItems: "flex-start",
         gap: "12px",
         fontFamily: FONT_FAMILY,
       }}
     >
-      <NavbarButton
-        label="Teams"
-        panelTitle="Your Teams"
-        panelItems={["Marketing Team", "Engineering", "Design Squad", "Support Team"]}
-        offsetLeft={0}
-      />
-      <NavbarButton
-        label="Individual"
-        panelTitle="Individual Workspace"
-        panelItems={["My Tasks", "My Notes", "My Calendar", "Personal Projects"]}
-        offsetLeft={80}
-      />
+      <NavbarButton label="Teams" bigPanelWidth={420} bigPanelHeight={260} />
+      <NavbarButton label="Individual" bigPanelWidth={420} bigPanelHeight={260} />
     </div>
   );
 };
@@ -3720,10 +3724,10 @@ export default function HomePage(): React.JSX.Element {
         <meta name="twitter:image" content="/images/ai.jpg" />
       </Head>
 
-      {/* ===== LEFT NAVBAR (2 kotak biru + BG BIRU BESAR di bawah) ===== */}
+      {/* ===== LEFT NAVBAR (2 kotak biru + BG BIRU BESAR muncul di ujung kiri kotak) ===== */}
       <LeftNavbar />
 
-      {/* ===== RIGHT NAVBAR (kotak hitam, icon 1 orang, Log In) ===== */}
+      {/* ===== RIGHT NAVBAR ===== */}
       <RightNavbar />
 
       <div
