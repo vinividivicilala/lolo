@@ -419,10 +419,10 @@ interface TourStep {
 
 // ===== PHYSICS MENURU TITLE COMPONENT =====
 // - Teks "Menuru" 450px warna biru full
-// - Huruf jatuh dari atas ke LANTAI (floorY) yang sudah ditentukan
-// - Huruf berhenti TEPAT DI ATAS lantai (tidak tenggelam/tembus)
-// - Setelah semua huruf settle di lantai, mereka berguncang/bergetar
-//   seolah saling berdesakan karena lantai sudah penuh (kiri-kanan mentok)
+// - Setiap huruf jatuh dari atas seperti teks biasa (gravitasi normal)
+// - Berhenti TEPAT DI ATAS lantai (lantai = 60px dari bawah container)
+// - Tidak tenggelam, tidak menembus lantai
+// - Setelah settle, huruf DIAM (tidak ada goyangan)
 const PhysicsMenuruTitle = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
@@ -454,163 +454,59 @@ const PhysicsMenuruTitle = () => {
     const containerWidth = containerRef.current.offsetWidth;
 
     // ===== LANTAI =====
-    // Lantai berada 60px dari bawah container.
-    // Huruf duduk DI ATAS lantai (bagian bawah glyph menyentuh lantai).
+    // Lantai = 60px dari bawah container
     const FLOOR_Y = containerHeight - 60;
 
     // Tinggi glyph huruf ~ 0.72 * fontSize (450px) ≈ 324px
+    // Huruf duduk di atas lantai → posisi Y = FLOOR_Y - tinggi glyph
     const CHAR_HEIGHT_APPROX = 324;
     const RESTING_Y = FLOOR_Y - CHAR_HEIGHT_APPROX;
 
-    // ===== POSISI X AKHIR =====
-    // Semua huruf diberi slot horizontal yang merata, tapi ada sedikit variasi
-    // supaya tidak terlihat seperti grid kaku.
-    // Slot ini yang nanti jadi "pusat" goyangan.
-    const slotSpacing = 150; // jarak antar slot huruf
-    const totalWidth = (chars.length - 1) * slotSpacing;
-    const startSlotX = -totalWidth / 2;
+    // Jarak antar huruf (biar tersebar rapi seperti teks normal)
+    const letterSpacing = 150;
+    const totalWidth = (chars.length - 1) * letterSpacing;
+    const startX = -totalWidth / 2;
 
-    const finalXs: number[] = [];
-    const finalYs: number[] = [];
-    const finalRots: number[] = [];
-
+    // Setup posisi awal & animasi jatuh untuk tiap huruf
     chars.forEach((char, i) => {
-      const slotCenter = startSlotX + i * slotSpacing;
-      // Variasi kecil di sekitar slot center
-      const fx = slotCenter + (Math.random() - 0.5) * 30;
-      // Semua huruf duduk di ketinggian SAMA (lantai) dengan variasi ±8px
-      const fy = RESTING_Y + (Math.random() - 0.5) * 16;
-      const fr = (Math.random() - 0.5) * 40;
+      // Posisi X final (seperti teks "Menuru" yang terbaca)
+      const finalX = startX + i * letterSpacing;
 
-      finalXs.push(fx);
-      finalYs.push(fy);
-      finalRots.push(fr);
+      // Posisi Y awal: jauh di atas container
+      const startY = -800 - i * 100;
 
-      // Posisi awal: huruf di atas layar, tersebar horizontal
       gsap.set(char, {
-        y: -900 - i * 80,
-        x: fx + (Math.random() - 0.5) * 200,
-        rotation: (Math.random() - 0.5) * 120,
+        x: finalX,
+        y: startY,
+        rotation: 0,
         opacity: 1,
         force3D: true,
         transformOrigin: "center bottom",
       });
-    });
 
-    // ===== ANIMASI JATUH =====
-    const fallTls: gsap.core.Timeline[] = [];
-
-    chars.forEach((char, i) => {
-      const delay = i * 0.15 + Math.random() * 0.2;
-      const fallDuration = 2.6 + Math.random() * 0.6;
-
-      const charTl = gsap.timeline({ delay });
-      fallTls.push(charTl);
-
-      // 1) FALL pakai physics2D
-      charTl.to(
-        char,
-        {
-          duration: fallDuration,
-          physics2D: {
-            velocity: 700 + Math.random() * 400,
-            angle: 90 + (Math.random() - 0.5) * 15,
-            gravity: 1600 + Math.random() * 500,
-          },
-          ease: "none",
+      // Animasi jatuh ke lantai
+      // physics2D: velocity awal + gravity → gerak parabola jatuh normal
+      gsap.to(char, {
+        duration: 2.6 + i * 0.08,
+        physics2D: {
+          velocity: 200 + Math.random() * 100,
+          angle: 90, // jatuh lurus ke bawah
+          gravity: 1200,
         },
-        0
-      );
-
-      // 2) HORIZONTAL DRIFT menuju slot X akhir
-      charTl.to(
-        char,
-        {
-          duration: fallDuration,
-          x: finalXs[i],
-          ease: "power1.inOut",
-        },
-        0
-      );
-
-      // 3) ROTATION saat jatuh
-      charTl.to(
-        char,
-        {
-          duration: fallDuration,
-          rotation: finalRots[i],
-          ease: "power1.inOut",
-        },
-        0
-      );
-
-      // 4) SNAP ke lantai + slow-motion bounce
-      charTl.to(
-        char,
-        {
-          duration: 1.4,
-          y: finalYs[i],
-          x: finalXs[i],
-          rotation: finalRots[i],
-          ease: "elastic.out(1, 0.4)",
-        },
-        fallDuration - 0.25
-      );
-    });
-
-    // ===== GOYANGAN BERDESAKAN =====
-    // Setelah SEMUA huruf settle di lantai, jalankan loop goyangan
-    // horizontal & rotasi kecil yang saling bertabrakan (fase berbeda).
-    // Efek: huruf-huruf seperti kotak penuh yang saling dorong.
-    const maxDelay = (chars.length - 1) * 0.15 + 0.2;
-    const maxFallDuration = 2.6 + 0.6;
-    const allSettledTime = maxDelay + maxFallDuration + 1.15;
-
-    const shakeTls: gsap.core.Timeline[] = [];
-    let masterTl: gsap.core.Timeline | null = null;
-
-    const startShake = () => {
-      chars.forEach((char, i) => {
-        // Setiap huruf punya "getaran" dengan amplitudo & kecepatan acak
-        // Amplitudo cukup besar supaya terlihat saling dorong
-        const ampX = 10 + Math.random() * 12; // 10-22px horizontal
-        const ampY = 2 + Math.random() * 4; // 2-6px vertikal (subtle, mentok lantai)
-        const ampRot = 3 + Math.random() * 5; // 3-8 deg rotasi
-
-        // Bias arah: setiap huruf punya kecenderungan dorong ke kiri/kanan
-        const biasX = (Math.random() - 0.5) * 10;
-
-        // Fase awal acak supaya tidak bergerak serempak
-        const phaseDelay = Math.random() * 0.5;
-
-        const tl = gsap.timeline({ repeat: -1, yoyo: true, delay: phaseDelay });
-
-        tl.to(char, {
-          x: finalXs[i] + ampX + biasX,
-          y: finalYs[i] - ampY,
-          rotation: finalRots[i] + ampRot,
-          duration: 0.4 + Math.random() * 0.3,
-          ease: "sine.inOut",
-        })
-          .to(char, {
-            x: finalXs[i] - ampX + biasX,
-            y: finalYs[i] + ampY * 0.5,
-            rotation: finalRots[i] - ampRot,
-            duration: 0.4 + Math.random() * 0.3,
-            ease: "sine.inOut",
+        ease: "none",
+        onComplete: () => {
+          // Setelah physics selesai, snap ke posisi Y final yang pas di lantai
+          // (agar tidak tenggelam/tembus dan posisi Y konsisten)
+          gsap.to(char, {
+            duration: 0.5,
+            y: RESTING_Y,
+            ease: "power2.out",
           });
-
-        shakeTls.push(tl);
+        },
       });
-    };
-
-    masterTl = gsap.timeline();
-    masterTl.call(startShake, undefined, allSettledTime);
+    });
 
     return () => {
-      fallTls.forEach((t) => t.kill());
-      shakeTls.forEach((t) => t.kill());
-      if (masterTl) masterTl.kill();
       if (split) split.revert();
     };
   }, [containerHeight]);
@@ -638,7 +534,7 @@ const PhysicsMenuruTitle = () => {
           right: 0,
           bottom: "60px",
           height: "2px",
-          backgroundColor: "rgba(13,60,252,0.10)",
+          backgroundColor: "rgba(13,60,252,0.12)",
           pointerEvents: "none",
         }}
       />
