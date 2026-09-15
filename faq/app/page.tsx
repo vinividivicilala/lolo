@@ -25,9 +25,6 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 import { Physics2DPlugin } from "gsap/Physics2DPlugin";
 
-// ===== IMPORT MATTER.JS =====
-import Matter from "matter-js";
-
 // Register GSAP plugins
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, SplitText, Physics2DPlugin);
@@ -420,14 +417,10 @@ interface TourStep {
   isLoginStep?: boolean;
 }
 
-// ===== MATTER.JS + PHYSICS2D MENURU TITLE COMPONENT =====
-// Karakteristik:
-// - Huruf jatuh dari atas dengan Matter.js (gravity)
-// - Huruf TIDAK saling tabrakan (pakai collisionFilter negative group)
-// - Huruf hanya collision dengan ground/boundary
-// - Setelah jatuh, huruf settle di posisi tersebar merata (tidak menimpa)
-// - Semua huruf terlihat
-// - Tambahan Physics2DPlugin GSAP untuk sentuhan akhir
+// ===== PHYSICS MENURU TITLE COMPONENT =====
+// Teks "Menuru" 450px warna biru full
+// Huruf jatuh dari atas, berhenti di area di ATAS judul "Live Chat Agent"
+// Setelah jatuh, huruf settle di posisi acak random tanpa menimpa judul
 const PhysicsMenuruTitle = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
@@ -451,229 +444,100 @@ const PhysicsMenuruTitle = () => {
     if (!containerRef.current || !textRef.current) return;
     if (containerHeight === 0) return;
 
-    const container = containerRef.current;
-    const containerWidth = container.offsetWidth;
-    const containerHeightValue = container.offsetHeight;
-
-    // Split text into chars
     const split = new SplitText(textRef.current, {
       type: "chars",
       charsClass: "physics-char",
     });
 
     const chars = split.chars;
+    const containerWidth = containerRef.current.offsetWidth;
 
-    // ===== SETUP MATTER.JS =====
-    const { Engine, Runner, Bodies, Composite, Events } = Matter;
-
-    // Create engine dengan gravity
-    const engine = Engine.create({
-      gravity: { x: 0, y: 1.8, scale: 0.001 },
-      enableSleeping: true,
-    });
-
-    const runner = Runner.create();
-
-    // ===== BOUNDARY BODIES =====
-    // Category untuk boundary: 0x0001
-    const BOUNDARY_CATEGORY = 0x0001;
-
-    const wallThickness = 100;
-
-    // Ground di bawah container
-    const ground = Bodies.rectangle(
-      containerWidth / 2,
-      containerHeightValue - 20,
-      containerWidth * 2,
-      wallThickness,
-      {
-        isStatic: true,
-        render: { visible: false },
-        label: "ground",
-        collisionFilter: {
-          category: BOUNDARY_CATEGORY,
-          mask: 0xFFFFFFFF,
-          group: 0,
-        },
-      }
-    );
-
-    // Left wall
-    const leftWall = Bodies.rectangle(
-      -20,
-      containerHeightValue / 2,
-      wallThickness,
-      containerHeightValue * 4,
-      {
-        isStatic: true,
-        render: { visible: false },
-        label: "leftWall",
-        collisionFilter: {
-          category: BOUNDARY_CATEGORY,
-          mask: 0xFFFFFFFF,
-          group: 0,
-        },
-      }
-    );
-
-    // Right wall
-    const rightWall = Bodies.rectangle(
-      containerWidth + 20,
-      containerHeightValue / 2,
-      wallThickness,
-      containerHeightValue * 4,
-      {
-        isStatic: true,
-        render: { visible: false },
-        label: "rightWall",
-        collisionFilter: {
-          category: BOUNDARY_CATEGORY,
-          mask: 0xFFFFFFFF,
-          group: 0,
-        },
-      }
-    );
-
-    Composite.add(engine.world, [ground, leftWall, rightWall]);
-
-    // ===== CREATE LETTER BODIES =====
-    // Setiap huruf punya collision group unik (negatif) agar TIDAK saling bertabrakan
-    // Tapi tetap bertabrakan dengan boundary (karena boundary punya mask 0xFFFFFFFF)
-    const letterBodies: Matter.Body[] = [];
-
-    // Distribusi X merata: bagi container width menjadi N kolom
-    const totalChars = chars.length;
-    const columnWidth = containerWidth / totalChars;
+    // ===== AREA JATUH =====
+    // Batas bawah area jatuh = 80px di atas dasar container
+    // Container diposisikan dengan margin-bottom agar TIDAK menimpa judul Live Chat Agent
+    const fallBottomLimit = containerHeight - 80;
 
     chars.forEach((char, i) => {
-      const rect = char.getBoundingClientRect();
-      const charWidth = rect.width || 200;
-      const charHeight = rect.height || 400;
-
-      // Posisi X tersebar merata di kolom masing-masing
-      const startX = columnWidth * i + columnWidth / 2;
-
-      // Posisi Y di atas container (jatuh dari atas)
-      const startY = -600 - i * 150;
-
-      // UNIQUE NEGATIVE GROUP => tidak collision dengan huruf lain
-      // Negative group: -1, -2, -3, ... (setiap huruf beda group)
-      const uniqueGroup = -(i + 1);
-
-      const body = Bodies.rectangle(startX, startY, charWidth * 0.9, charHeight * 0.9, {
-        restitution: 0.3,
-        friction: 0.4,
-        frictionAir: 0.025,
-        density: 0.0015,
-        angle: (Math.random() - 0.5) * 0.3,
-        render: { visible: false },
-        label: `letter-${i}`,
-        chamfer: { radius: 6 },
-        // COLLISION FILTER: negative group => tidak collision dengan group yang sama
-        // tapi karena setiap huruf group-nya beda, mereka tidak akan bertabrakan
-        // Boundary punya group 0, jadi huruf TETAP bertabrakan dengan boundary
-        collisionFilter: {
-          group: uniqueGroup,
-          category: 0x0002,
-          mask: BOUNDARY_CATEGORY, // hanya collision dengan boundary
-        },
-      });
-
-      letterBodies.push(body);
-      Composite.add(engine.world, body);
-
-      // Set posisi awal untuk GSAP
       gsap.set(char, {
-        x: startX - containerWidth / 2,
-        y: startY - containerHeightValue / 2,
-        rotation: (Math.random() - 0.5) * 20,
+        y: -900 - i * 60,
+        x: (i - chars.length / 2) * 60 + (Math.random() - 0.5) * 250,
+        rotation: (Math.random() - 0.5) * 120,
         opacity: 1,
         force3D: true,
       });
     });
 
-    // ===== UPDATE LOOP: Sinkronisasi Matter.js ke DOM =====
-    let animationFrameId: number;
-    let lastTime = performance.now();
-    let isRunning = true;
+    chars.forEach((char, i) => {
+      const delay = i * 0.18 + Math.random() * 0.3;
+      const fallDuration = 3.2 + Math.random() * 1.2;
 
-    const updateDOM = () => {
-      if (!isRunning) return;
+      // ===== POSISI X AKHIR =====
+      const targetX = (i - chars.length / 2) * 70 + (Math.random() - 0.5) * 260;
+      const targetRotation = (Math.random() - 0.5) * 90;
 
-      const currentTime = performance.now();
-      const delta = Math.min(currentTime - lastTime, 32);
-      lastTime = currentTime;
+      // ===== POSISI Y AKHIR (ACAK) =====
+      // Huruf berhenti di area antara 60px sampai fallBottomLimit
+      // Sehingga tidak semua huruf rata dan tidak menimpa judul di bawahnya
+      const topBoundary = 80; // margin atas
+      const bottomBoundary = fallBottomLimit - 80; // margin bawah (jaga jarak dari judul)
+      const randomY = topBoundary + Math.random() * (bottomBoundary - topBoundary);
 
-      // Update engine
-      Engine.update(engine, delta);
+      const charTl = gsap.timeline({ delay });
 
-      // Update DOM elements
-      letterBodies.forEach((body, i) => {
-        const char = chars[i];
-        if (!char) return;
-
-        const pos = body.position;
-        const angle = body.angle;
-
-        const cssX = pos.x - containerWidth / 2;
-        const cssY = pos.y - containerHeightValue / 2;
-
-        gsap.set(char, {
-          x: cssX,
-          y: cssY,
-          rotation: angle,
-          force3D: true,
-        });
-      });
-
-      animationFrameId = requestAnimationFrame(updateDOM);
-    };
-
-    Runner.run(runner, engine);
-    animationFrameId = requestAnimationFrame(updateDOM);
-
-    // ===== SLEEP DETECTION =====
-    let sleepCheckCount = 0;
-    const sleepCheckInterval = setInterval(() => {
-      const allSleeping = letterBodies.every(
-        (body) => body.isSleeping || body.speed < 0.05
+      // 1. VERTICAL FALL pakai physics2D
+      charTl.to(
+        char,
+        {
+          duration: fallDuration,
+          physics2D: {
+            velocity: 500 + Math.random() * 300,
+            angle: 90 + (Math.random() - 0.5) * 25,
+            gravity: 900 + Math.random() * 400,
+          },
+          ease: "none",
+        },
+        0
       );
 
-      if (allSleeping) {
-        sleepCheckCount++;
-        if (sleepCheckCount >= 3) {
-          isRunning = false;
-          Runner.stop(runner);
-          clearInterval(sleepCheckInterval);
-          cancelAnimationFrame(animationFrameId);
+      // 2. HORIZONTAL DRIFT
+      charTl.to(
+        char,
+        {
+          duration: fallDuration,
+          x: targetX,
+          ease: "power1.inOut",
+        },
+        0
+      );
 
-          // ===== PHYSICS2D FINAL TOUCH =====
-          // Setelah settle, beri sedikit "bounce" kecil dengan Physics2D
-          chars.forEach((char, i) => {
-            gsap.to(char, {
-              duration: 1.5,
-              physics2D: {
-                velocity: 30 + Math.random() * 40,
-                angle: -90 + (Math.random() - 0.5) * 60,
-                gravity: 200,
-              },
-              ease: "none",
-              delay: i * 0.05,
-            });
-          });
-        }
-      } else {
-        sleepCheckCount = 0;
-      }
-    }, 1000);
+      // 3. ROTATION
+      charTl.to(
+        char,
+        {
+          duration: fallDuration,
+          rotation: targetRotation,
+          ease: "power1.inOut",
+        },
+        0
+      );
 
-    // ===== CLEANUP =====
+      // 4. SETTLE di posisi acak (Y random, X random, rotation random)
+      charTl.to(
+        char,
+        {
+          duration: 0.9,
+          y: randomY,
+          x: targetX + (Math.random() - 0.5) * 30,
+          rotation: targetRotation + (Math.random() - 0.5) * 15,
+          ease: "power3.out",
+        },
+        fallDuration - 0.2
+      );
+
+      // Tidak ada repeat — huruf diam setelah settle
+    });
+
     return () => {
-      isRunning = false;
-      clearInterval(sleepCheckInterval);
-      cancelAnimationFrame(animationFrameId);
-      Runner.stop(runner);
-      Engine.clear(engine);
       if (split) split.revert();
     };
   }, [containerHeight]);
@@ -683,8 +547,8 @@ const PhysicsMenuruTitle = () => {
       ref={containerRef}
       style={{
         width: "100%",
-        height: "650px",
-        marginBottom: "40px",
+        height: "650px", // tinggi area jatuh
+        marginBottom: "80px", // jarak aman ke Live Chat Agent di bawahnya
         overflow: "visible",
         position: "relative",
         backgroundColor: "#ffffff",
@@ -2628,6 +2492,7 @@ const LiveChatAgent = ({
         currentStep={tourStep}
         setCurrentStep={setTourStep}
       />
+      {/* marginTop 80px untuk turunkan judul Live Chat Agent ke bawah — jaga jarak dari huruf Menuru */}
       <div style={{ marginTop: "80px", paddingTop: "30px" }}>
         <div
           style={{
@@ -3646,10 +3511,10 @@ export default function HomePage(): React.JSX.Element {
           fontFamily: FONT_FAMILY, overflow: "visible",
         }}
       >
-        {/* ===== PHYSICS MENURU TITLE (MATTER.JS + PHYSICS2D) ===== */}
+        {/* ===== PHYSICS MENURU TITLE (PALING ATAS) ===== */}
         <PhysicsMenuruTitle />
 
-        {/* LIVE CHAT AGENT */}
+        {/* LIVE CHAT AGENT — marginTop 80px ditambah di dalam komponen */}
         <div style={{ padding: "0 40px", maxWidth: "1600px", margin: "0 auto", width: "100%" }}>
           <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} />
         </div>
@@ -3876,7 +3741,7 @@ export default function HomePage(): React.JSX.Element {
         }
         .physics-char {
           display: inline-block;
-          will-change: transform;
+          will-change: transform, opacity;
           color: #0D3CFC !important;
           transform-origin: center center;
           opacity: 1 !important;
