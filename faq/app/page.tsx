@@ -23,11 +23,10 @@ import {
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
-import { Physics2DPlugin } from "gsap/Physics2DPlugin";
 
 // Register GSAP plugins
 if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger, SplitText, Physics2DPlugin);
+  gsap.registerPlugin(ScrollTrigger, SplitText);
 }
 
 // Firebase Config
@@ -417,17 +416,42 @@ interface TourStep {
   isLoginStep?: boolean;
 }
 
-// ===== PHYSICS MENURU TITLE COMPONENT =====
-// - Teks "Menuru" 450px warna biru full
-// - Setiap huruf jatuh dari atas seperti teks biasa (gravitasi normal)
-// - Berhenti TEPAT DI ATAS lantai (lantai = 60px dari bawah container)
-// - Tidak tenggelam, tidak menembus lantai
-// - Setelah settle, huruf DIAM (tidak ada goyangan)
+// ===== MATTER.JS PHYSICS MENURU TITLE COMPONENT =====
+// Menggunakan Matter.js sebagai physics engine untuk simulasi huruf jatuh
+// GSAP tetap digunakan untuk animasi entrance dan kontrol visual
 const PhysicsMenuruTitle = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
-  const [containerHeight, setContainerHeight] = useState(720);
+  const matterRef = useRef<{
+    engine: any;
+    runner: any;
+    render: any;
+  } | null>(null);
+  const [containerHeight, setContainerHeight] = useState(650);
+  const [isReady, setIsReady] = useState(false);
 
+  // Load Matter.js dynamically
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const loadMatter = async () => {
+      try {
+        const Matter = (await import("matter-js")).default;
+        matterRef.current = {
+          engine: Matter.Engine,
+          runner: Matter.Runner,
+          render: Matter.Render,
+        };
+        setIsReady(true);
+      } catch (error) {
+        console.error("Failed to load Matter.js:", error);
+      }
+    };
+
+    loadMatter();
+  }, []);
+
+  // Measure container height
   useEffect(() => {
     if (typeof window === "undefined") return;
     const updateHeight = () => {
@@ -440,85 +464,234 @@ const PhysicsMenuruTitle = () => {
     return () => window.removeEventListener("resize", updateHeight);
   }, []);
 
+  // Main physics animation
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (!containerRef.current || !textRef.current) return;
+    if (!isReady || !matterRef.current) return;
     if (containerHeight === 0) return;
 
+    const Matter = {
+      Engine: matterRef.current.engine,
+      Runner: matterRef.current.runner,
+      Render: matterRef.current.render,
+      Bodies: (await import("matter-js")).Bodies,
+      Composite: (await import("matter-js")).Composite,
+      Mouse: (await import("matter-js")).Mouse,
+      MouseConstraint: (await import("matter-js")).MouseConstraint,
+      Events: (await import("matter-js")).Events,
+      Vector: (await import("matter-js")).Vector,
+      Body: (await import("matter-js")).Body,
+    };
+
+    const container = containerRef.current;
+    const containerWidth = container.offsetWidth;
+    const containerHeightValue = container.offsetHeight;
+
+    // Split text into chars
     const split = new SplitText(textRef.current, {
       type: "chars",
       charsClass: "physics-char",
     });
 
     const chars = split.chars;
-    const containerWidth = containerRef.current.offsetWidth;
 
-    // ===== LANTAI =====
-    // Lantai = 60px dari bawah container
-    const FLOOR_Y = containerHeight - 60;
-
-    // Tinggi glyph huruf ~ 0.72 * fontSize (450px) ≈ 324px
-    // Huruf duduk di atas lantai → posisi Y = FLOOR_Y - tinggi glyph
-    const CHAR_HEIGHT_APPROX = 324;
-    const RESTING_Y = FLOOR_Y - CHAR_HEIGHT_APPROX;
-
-    // Jarak antar huruf (biar tersebar rapi seperti teks normal)
-    const letterSpacing = 150;
-    const totalWidth = (chars.length - 1) * letterSpacing;
-    const startX = -totalWidth / 2;
-
-    // Setup posisi awal & animasi jatuh untuk tiap huruf
-    chars.forEach((char, i) => {
-      // Posisi X final (seperti teks "Menuru" yang terbaca)
-      const finalX = startX + i * letterSpacing;
-
-      // Posisi Y awal: jauh di atas container
-      const startY = -800 - i * 100;
-
-      gsap.set(char, {
-        x: finalX,
-        y: startY,
-        rotation: 0,
-        opacity: 1,
-        force3D: true,
-        transformOrigin: "center bottom",
-      });
-
-      // Animasi jatuh ke lantai
-      // physics2D: velocity awal + gravity → gerak parabola jatuh normal
-      gsap.to(char, {
-        duration: 2.6 + i * 0.08,
-        physics2D: {
-          velocity: 200 + Math.random() * 100,
-          angle: 90, // jatuh lurus ke bawah
-          gravity: 1200,
-        },
-        ease: "none",
-        onComplete: () => {
-          // Setelah physics selesai, snap ke posisi Y final yang pas di lantai
-          // (agar tidak tenggelam/tembus dan posisi Y konsisten)
-          gsap.to(char, {
-            duration: 0.5,
-            y: RESTING_Y,
-            ease: "power2.out",
-          });
-        },
-      });
+    // ===== SETUP MATTER.JS =====
+    // Create engine with gravity
+    const engine = Matter.Engine.create({
+      gravity: { x: 0, y: 1.5, scale: 0.001 },
+      enableSleeping: true,
     });
 
+    // Create runner
+    const runner = Matter.Runner.create();
+
+    // Create renderer (invisible, kita hanya pakai untuk update)
+    const render = Matter.Render.create({
+      element: document.createElement("div"),
+      engine: engine,
+      options: {
+        width: containerWidth,
+        height: containerHeightValue,
+        wireframes: false,
+        background: "transparent",
+        pixelRatio: window.devicePixelRatio || 1,
+      },
+    });
+
+    // ===== CREATE BOUNDARIES =====
+    const wallThickness = 60;
+    const ground = Matter.Bodies.rectangle(
+      containerWidth / 2,
+      containerHeightValue - wallThickness / 2,
+      containerWidth + wallThickness * 2,
+      wallThickness,
+      {
+        isStatic: true,
+        render: { visible: false },
+        label: "ground",
+      }
+    );
+
+    const leftWall = Matter.Bodies.rectangle(
+      -wallThickness / 2,
+      containerHeightValue / 2,
+      wallThickness,
+      containerHeightValue * 2,
+      {
+        isStatic: true,
+        render: { visible: false },
+        label: "leftWall",
+      }
+    );
+
+    const rightWall = Matter.Bodies.rectangle(
+      containerWidth + wallThickness / 2,
+      containerHeightValue / 2,
+      wallThickness,
+      containerHeightValue * 2,
+      {
+        isStatic: true,
+        render: { visible: false },
+        label: "rightWall",
+      }
+    );
+
+    // ===== CREATE LETTER BODIES =====
+    const letterBodies: any[] = [];
+    const originalPositions: { x: number; y: number }[] = [];
+
+    chars.forEach((char, i) => {
+      const rect = char.getBoundingClientRect();
+      const containerRect = container.getBoundingClientRect();
+
+      // Posisi awal huruf relatif terhadap container
+      const charWidth = rect.width || 200;
+      const charHeight = rect.height || 400;
+
+      // Posisi X tersebar di tengah container
+      const startX =
+        containerWidth / 2 +
+        (i - (chars.length - 1) / 2) * (charWidth * 0.9) +
+        (Math.random() - 0.5) * 150;
+
+      // Posisi Y di atas container (jatuh dari atas)
+      const startY = -400 - i * 120 - Math.random() * 200;
+
+      // Buat body untuk huruf
+      const body = Matter.Bodies.rectangle(startX, startY, charWidth, charHeight, {
+        restitution: 0.4, // Bouncing
+        friction: 0.3,
+        frictionAir: 0.02,
+        density: 0.001,
+        angle: (Math.random() - 0.5) * 0.5,
+        render: {
+          visible: false,
+        },
+        label: `letter-${i}`,
+        chamfer: { radius: 4 },
+      });
+
+      // Simpan referensi
+      letterBodies.push(body);
+      originalPositions.push({ x: startX, y: startY });
+
+      // Set posisi awal untuk GSAP (di atas container)
+      gsap.set(char, {
+        x: startX - containerWidth / 2,
+        y: startY,
+        rotation: (Math.random() - 0.5) * 30,
+        opacity: 1,
+        force3D: true,
+      });
+
+      // Tambahkan body ke world
+      Matter.Composite.add(engine.world, body);
+    });
+
+    // Tambahkan boundaries ke world
+    Matter.Composite.add(engine.world, [ground, leftWall, rightWall]);
+
+    // ===== UPDATE LOOP: Sinkronisasi Matter.js ke DOM =====
+    // Gunakan requestAnimationFrame untuk update posisi DOM berdasarkan physics
+    let animationFrameId: number;
+    let lastTime = performance.now();
+
+    const updateDOM = () => {
+      const currentTime = performance.now();
+      const delta = Math.min(currentTime - lastTime, 32); // Cap delta untuk stabilitas
+      lastTime = currentTime;
+
+      // Update engine
+      Matter.Engine.update(engine, delta);
+
+      // Update DOM elements berdasarkan physics bodies
+      letterBodies.forEach((body, i) => {
+        const char = chars[i];
+        if (!char) return;
+
+        const pos = body.position;
+        const angle = body.angle;
+
+        // Konversi posisi Matter.js ke posisi CSS
+        // Matter.js menggunakan center-based coordinates
+        const cssX = pos.x - containerWidth / 2;
+        const cssY = pos.y - containerHeightValue / 2;
+
+        gsap.set(char, {
+          x: cssX,
+          y: cssY,
+          rotation: angle,
+          force3D: true,
+        });
+      });
+
+      animationFrameId = requestAnimationFrame(updateDOM);
+    };
+
+    // Start runner dan animation loop
+    Matter.Runner.run(runner, engine);
+    animationFrameId = requestAnimationFrame(updateDOM);
+
+    // ===== SLEEP DETECTION: Hentikan update setelah semua huruf diam =====
+    let sleepCheckCount = 0;
+    const sleepCheckInterval = setInterval(() => {
+      const allSleeping = letterBodies.every(
+        (body) => body.isSleeping || body.speed < 0.1
+      );
+
+      if (allSleeping) {
+        sleepCheckCount++;
+        if (sleepCheckCount >= 3) {
+          // Semua huruf sudah diam, hentikan runner
+          Matter.Runner.stop(runner);
+          clearInterval(sleepCheckInterval);
+          cancelAnimationFrame(animationFrameId);
+        }
+      } else {
+        sleepCheckCount = 0;
+      }
+    }, 1000);
+
+    // ===== CLEANUP =====
     return () => {
+      clearInterval(sleepCheckInterval);
+      cancelAnimationFrame(animationFrameId);
+      Matter.Runner.stop(runner);
+      Matter.Engine.clear(engine);
+      Matter.Render.stop(render);
       if (split) split.revert();
     };
-  }, [containerHeight]);
+  }, [isReady, containerHeight]);
 
   return (
     <div
       ref={containerRef}
       style={{
         width: "100%",
-        height: "720px",
-        marginBottom: "140px",
-        overflow: "hidden",
+        height: "650px",
+        marginBottom: "80px",
+        overflow: "visible",
         position: "relative",
         backgroundColor: "#ffffff",
         display: "flex",
@@ -526,18 +699,6 @@ const PhysicsMenuruTitle = () => {
         justifyContent: "center",
       }}
     >
-      {/* Garis lantai visual */}
-      <div
-        style={{
-          position: "absolute",
-          left: 0,
-          right: 0,
-          bottom: "60px",
-          height: "2px",
-          backgroundColor: "rgba(13,60,252,0.12)",
-          pointerEvents: "none",
-        }}
-      />
       <div
         ref={textRef}
         style={{
@@ -3491,7 +3652,7 @@ export default function HomePage(): React.JSX.Element {
           fontFamily: FONT_FAMILY, overflow: "visible",
         }}
       >
-        {/* ===== PHYSICS MENURU TITLE (PALING ATAS) ===== */}
+        {/* ===== PHYSICS MENURU TITLE (MATTER.JS) ===== */}
         <PhysicsMenuruTitle />
 
         {/* LIVE CHAT AGENT */}
@@ -3721,9 +3882,9 @@ export default function HomePage(): React.JSX.Element {
         }
         .physics-char {
           display: inline-block;
-          will-change: transform, opacity;
+          will-change: transform;
           color: #0D3CFC !important;
-          transform-origin: center bottom;
+          transform-origin: center center;
           opacity: 1 !important;
           visibility: visible !important;
         }
