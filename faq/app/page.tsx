@@ -419,15 +419,15 @@ interface TourStep {
 
 // ===== PHYSICS MENURU TITLE COMPONENT =====
 // - Teks "Menuru" 450px warna biru full
-// - Huruf jatuh dari atas ke "lantai" (floorY) yang sudah ditentukan
-// - Saat menyentuh lantai, huruf slow-motion goyang (bounce) seperti mentok tembok
-// - Huruf TIDAK menembus lantai & TIDAK menimpa judul "Live Chat Agent" di bawah
+// - Huruf jatuh dari atas ke LANTAI (floorY) yang sudah ditentukan
+// - Huruf berhenti TEPAT DI ATAS lantai (tidak tenggelam/tembus)
+// - Setelah semua huruf settle di lantai, mereka berguncang/bergetar
+//   seolah saling berdesakan karena lantai sudah penuh (kiri-kanan mentok)
 const PhysicsMenuruTitle = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
   const [containerHeight, setContainerHeight] = useState(720);
 
-  // Measure container height on mount & resize
   useEffect(() => {
     if (typeof window === "undefined") return;
     const updateHeight = () => {
@@ -453,22 +453,43 @@ const PhysicsMenuruTitle = () => {
     const chars = split.chars;
     const containerWidth = containerRef.current.offsetWidth;
 
-    // ===== LANTAI (FLOOR) =====
-    // Lantai berada 40px dari bawah container. Huruf akan duduk DI ATAS lantai ini.
-    // Karena container punya marginBottom besar (di bawah), lantai ini berada JAUH di atas
-    // judul "Live Chat Agent" sehingga tidak akan menimpa.
-    const FLOOR_Y = containerHeight - 40;
+    // ===== LANTAI =====
+    // Lantai berada 60px dari bawah container.
+    // Huruf duduk DI ATAS lantai (bagian bawah glyph menyentuh lantai).
+    const FLOOR_Y = containerHeight - 60;
 
-    // Tinggi huruf kira-kira 450px, jadi titik "duduk" huruf = FLOOR_Y - fontSize
-    // Kita pakai perkiraan tinggi glyph ~ 0.72 * fontSize untuk posisi baseline natural
-    const CHAR_HEIGHT_APPROX = 320;
+    // Tinggi glyph huruf ~ 0.72 * fontSize (450px) ≈ 324px
+    const CHAR_HEIGHT_APPROX = 324;
     const RESTING_Y = FLOOR_Y - CHAR_HEIGHT_APPROX;
 
-    // Set posisi awal: huruf di atas layar, belum terlihat
+    // ===== POSISI X AKHIR =====
+    // Semua huruf diberi slot horizontal yang merata, tapi ada sedikit variasi
+    // supaya tidak terlihat seperti grid kaku.
+    // Slot ini yang nanti jadi "pusat" goyangan.
+    const slotSpacing = 150; // jarak antar slot huruf
+    const totalWidth = (chars.length - 1) * slotSpacing;
+    const startSlotX = -totalWidth / 2;
+
+    const finalXs: number[] = [];
+    const finalYs: number[] = [];
+    const finalRots: number[] = [];
+
     chars.forEach((char, i) => {
+      const slotCenter = startSlotX + i * slotSpacing;
+      // Variasi kecil di sekitar slot center
+      const fx = slotCenter + (Math.random() - 0.5) * 30;
+      // Semua huruf duduk di ketinggian SAMA (lantai) dengan variasi ±8px
+      const fy = RESTING_Y + (Math.random() - 0.5) * 16;
+      const fr = (Math.random() - 0.5) * 40;
+
+      finalXs.push(fx);
+      finalYs.push(fy);
+      finalRots.push(fr);
+
+      // Posisi awal: huruf di atas layar, tersebar horizontal
       gsap.set(char, {
         y: -900 - i * 80,
-        x: (i - chars.length / 2) * 60 + (Math.random() - 0.5) * 250,
+        x: fx + (Math.random() - 0.5) * 200,
         rotation: (Math.random() - 0.5) * 120,
         opacity: 1,
         force3D: true,
@@ -476,119 +497,120 @@ const PhysicsMenuruTitle = () => {
       });
     });
 
-    // Animasikan tiap huruf
+    // ===== ANIMASI JATUH =====
+    const fallTls: gsap.core.Timeline[] = [];
+
     chars.forEach((char, i) => {
-      const delay = i * 0.18 + Math.random() * 0.25;
-      const fallDuration = 2.8 + Math.random() * 0.8;
-
-      // Posisi X akhir (horizontal spread)
-      const targetX = (i - chars.length / 2) * 70 + (Math.random() - 0.5) * 240;
-      const targetRotation = (Math.random() - 0.5) * 70;
-
-      // Posisi Y akhir: sedikit variasi di sekitar RESTING_Y biar natural
-      // Tapi tetap DI ATAS lantai (tidak menembus)
-      const yVariation = (Math.random() - 0.5) * 40;
-      const finalY = RESTING_Y + yVariation;
+      const delay = i * 0.15 + Math.random() * 0.2;
+      const fallDuration = 2.6 + Math.random() * 0.6;
 
       const charTl = gsap.timeline({ delay });
+      fallTls.push(charTl);
 
-      // 1) FALL pakai physics2D — gravity besar biar jatuh cepat
+      // 1) FALL pakai physics2D
       charTl.to(
         char,
         {
           duration: fallDuration,
           physics2D: {
-            velocity: 600 + Math.random() * 400,
-            angle: 90 + (Math.random() - 0.5) * 20,
-            gravity: 1400 + Math.random() * 500,
+            velocity: 700 + Math.random() * 400,
+            angle: 90 + (Math.random() - 0.5) * 15,
+            gravity: 1600 + Math.random() * 500,
           },
           ease: "none",
         },
         0
       );
 
-      // 2) HORIZONTAL DRIFT — pelan mendekati targetX
+      // 2) HORIZONTAL DRIFT menuju slot X akhir
       charTl.to(
         char,
         {
           duration: fallDuration,
-          x: targetX,
+          x: finalXs[i],
           ease: "power1.inOut",
         },
         0
       );
 
-      // 3) ROTATION — berputar saat jatuh
+      // 3) ROTATION saat jatuh
       charTl.to(
         char,
         {
           duration: fallDuration,
-          rotation: targetRotation,
+          rotation: finalRots[i],
           ease: "power1.inOut",
         },
         0
       );
 
-      // 4) SNAP ke lantai + slow-motion bounce (mentok tembok)
-      //    Di sini kita paksa Y ke finalY (duduk di lantai) dengan elastic/back ease
-      //    supaya terlihat seperti "memantul" lalu diam.
+      // 4) SNAP ke lantai + slow-motion bounce
       charTl.to(
         char,
         {
-          duration: 1.6,
-          y: finalY,
-          x: targetX + (Math.random() - 0.5) * 20,
-          rotation: targetRotation + (Math.random() - 0.5) * 12,
-          ease: "elastic.out(1, 0.35)", // slow-motion bounce, mentok lalu diam
+          duration: 1.4,
+          y: finalYs[i],
+          x: finalXs[i],
+          rotation: finalRots[i],
+          ease: "elastic.out(1, 0.4)",
         },
         fallDuration - 0.25
       );
-
-      // 5) EXTRA GOYANG slow-motion setelah settle
-      //    Huruf bergoyang halus naik-turun + rotasi kecil, seperti "bergetar" di lantai
-      charTl.to(
-        char,
-        {
-          duration: 0.9,
-          y: finalY - 18,
-          rotation: targetRotation + (Math.random() - 0.5) * 8,
-          ease: "sine.inOut",
-        },
-        fallDuration + 1.35
-      );
-      charTl.to(
-        char,
-        {
-          duration: 1.1,
-          y: finalY,
-          rotation: targetRotation,
-          ease: "sine.inOut",
-        },
-        fallDuration + 2.25
-      );
-      charTl.to(
-        char,
-        {
-          duration: 0.8,
-          y: finalY - 8,
-          rotation: targetRotation + (Math.random() - 0.5) * 5,
-          ease: "sine.inOut",
-        },
-        fallDuration + 3.35
-      );
-      charTl.to(
-        char,
-        {
-          duration: 0.9,
-          y: finalY,
-          rotation: targetRotation,
-          ease: "sine.inOut",
-        },
-        fallDuration + 4.15
-      );
     });
 
+    // ===== GOYANGAN BERDESAKAN =====
+    // Setelah SEMUA huruf settle di lantai, jalankan loop goyangan
+    // horizontal & rotasi kecil yang saling bertabrakan (fase berbeda).
+    // Efek: huruf-huruf seperti kotak penuh yang saling dorong.
+    const maxDelay = (chars.length - 1) * 0.15 + 0.2;
+    const maxFallDuration = 2.6 + 0.6;
+    const allSettledTime = maxDelay + maxFallDuration + 1.15;
+
+    const shakeTls: gsap.core.Timeline[] = [];
+    let masterTl: gsap.core.Timeline | null = null;
+
+    const startShake = () => {
+      chars.forEach((char, i) => {
+        // Setiap huruf punya "getaran" dengan amplitudo & kecepatan acak
+        // Amplitudo cukup besar supaya terlihat saling dorong
+        const ampX = 10 + Math.random() * 12; // 10-22px horizontal
+        const ampY = 2 + Math.random() * 4; // 2-6px vertikal (subtle, mentok lantai)
+        const ampRot = 3 + Math.random() * 5; // 3-8 deg rotasi
+
+        // Bias arah: setiap huruf punya kecenderungan dorong ke kiri/kanan
+        const biasX = (Math.random() - 0.5) * 10;
+
+        // Fase awal acak supaya tidak bergerak serempak
+        const phaseDelay = Math.random() * 0.5;
+
+        const tl = gsap.timeline({ repeat: -1, yoyo: true, delay: phaseDelay });
+
+        tl.to(char, {
+          x: finalXs[i] + ampX + biasX,
+          y: finalYs[i] - ampY,
+          rotation: finalRots[i] + ampRot,
+          duration: 0.4 + Math.random() * 0.3,
+          ease: "sine.inOut",
+        })
+          .to(char, {
+            x: finalXs[i] - ampX + biasX,
+            y: finalYs[i] + ampY * 0.5,
+            rotation: finalRots[i] - ampRot,
+            duration: 0.4 + Math.random() * 0.3,
+            ease: "sine.inOut",
+          });
+
+        shakeTls.push(tl);
+      });
+    };
+
+    masterTl = gsap.timeline();
+    masterTl.call(startShake, undefined, allSettledTime);
+
     return () => {
+      fallTls.forEach((t) => t.kill());
+      shakeTls.forEach((t) => t.kill());
+      if (masterTl) masterTl.kill();
       if (split) split.revert();
     };
   }, [containerHeight]);
@@ -598,9 +620,9 @@ const PhysicsMenuruTitle = () => {
       ref={containerRef}
       style={{
         width: "100%",
-        height: "720px", // tinggi area jatuh
-        marginBottom: "140px", // jarak aman ke Live Chat Agent di bawahnya
-        overflow: "hidden", // cegah huruf keluar container
+        height: "720px",
+        marginBottom: "140px",
+        overflow: "hidden",
         position: "relative",
         backgroundColor: "#ffffff",
         display: "flex",
@@ -608,15 +630,15 @@ const PhysicsMenuruTitle = () => {
         justifyContent: "center",
       }}
     >
-      {/* Garis lantai (opsional, hanya visual halus) */}
+      {/* Garis lantai visual */}
       <div
         style={{
           position: "absolute",
           left: 0,
           right: 0,
-          bottom: "40px",
+          bottom: "60px",
           height: "2px",
-          backgroundColor: "rgba(13,60,252,0.06)",
+          backgroundColor: "rgba(13,60,252,0.10)",
           pointerEvents: "none",
         }}
       />
@@ -2555,7 +2577,6 @@ const LiveChatAgent = ({
         currentStep={tourStep}
         setCurrentStep={setTourStep}
       />
-      {/* marginTop 80px untuk turunkan judul Live Chat Agent ke bawah — jaga jarak dari huruf Menuru */}
       <div style={{ marginTop: "80px", paddingTop: "30px" }}>
         <div
           style={{
@@ -3577,7 +3598,7 @@ export default function HomePage(): React.JSX.Element {
         {/* ===== PHYSICS MENURU TITLE (PALING ATAS) ===== */}
         <PhysicsMenuruTitle />
 
-        {/* LIVE CHAT AGENT — marginTop 80px ditambah di dalam komponen */}
+        {/* LIVE CHAT AGENT */}
         <div style={{ padding: "0 40px", maxWidth: "1600px", margin: "0 auto", width: "100%" }}>
           <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} />
         </div>
