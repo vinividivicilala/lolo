@@ -23,13 +23,11 @@ import {
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
-
-// ===== IMPORT MATTER.JS SECARA STATIS =====
-import Matter from "matter-js";
+import { Physics2DPlugin } from "gsap/Physics2DPlugin";
 
 // Register GSAP plugins
 if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger, SplitText);
+  gsap.registerPlugin(ScrollTrigger, SplitText, Physics2DPlugin);
 }
 
 // Firebase Config
@@ -419,15 +417,19 @@ interface TourStep {
   isLoginStep?: boolean;
 }
 
-// ===== MATTER.JS PHYSICS MENURU TITLE COMPONENT =====
-// Menggunakan Matter.js sebagai physics engine untuk simulasi huruf jatuh
-// GSAP tetap digunakan untuk animasi entrance dan kontrol visual
+// ===== PHYSICS MENURU TITLE COMPONENT (GSAP Physics2D) =====
+// Requirement:
+// - Teks "Menuru" 450px warna biru full
+// - Huruf jatuh dari atas dengan physics2D
+// - Huruf TIDAK saling tabrakan (masing-masing punya jalur X sendiri)
+// - Semua huruf terlihat (tidak ada yang tertutup)
+// - Posisi akhir tersebar merata (grid acak) agar semua terlihat
 const PhysicsMenuruTitle = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
   const [containerHeight, setContainerHeight] = useState(650);
 
-  // Measure container height on mount & resize
+  // Measure container height
   useEffect(() => {
     if (typeof window === "undefined") return;
     const updateHeight = () => {
@@ -440,7 +442,6 @@ const PhysicsMenuruTitle = () => {
     return () => window.removeEventListener("resize", updateHeight);
   }, []);
 
-  // Main physics animation dengan Matter.js
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (!containerRef.current || !textRef.current) return;
@@ -450,184 +451,121 @@ const PhysicsMenuruTitle = () => {
     const containerWidth = container.offsetWidth;
     const containerHeightValue = container.offsetHeight;
 
-    // Split text into chars
+    // Split "Menuru" into chars
     const split = new SplitText(textRef.current, {
       type: "chars",
       charsClass: "physics-char",
     });
 
     const chars = split.chars;
+    const totalChars = chars.length; // "Menuru" = 6 huruf
 
-    // ===== SETUP MATTER.JS =====
-    // Destructure Matter.js modules
-    const { Engine, Runner, Bodies, Composite, Events, Body } = Matter;
+    // ===== AREA JATUH =====
+    // Area tempat huruf berhenti: dari 60px sampai (containerHeight - 80px)
+    // Dibagi rata supaya semua huruf terlihat (tidak menumpuk)
+    const TOP_MARGIN = 60;
+    const BOTTOM_MARGIN = 80; // jarak aman dari judul Live Chat Agent di bawah
+    const fallAreaTop = TOP_MARGIN;
+    const fallAreaBottom = containerHeightValue - BOTTOM_MARGIN;
+    const fallAreaHeight = fallAreaBottom - fallAreaTop;
 
-    // Create engine with gravity
-    const engine = Engine.create({
-      gravity: { x: 0, y: 1.5, scale: 0.001 },
-      enableSleeping: true,
-    });
+    // Bagi area menjadi "slot" vertikal untuk setiap huruf
+    // Setiap huruf dapat slot Y sendiri supaya tidak menumpuk
+    const slotHeight = fallAreaHeight / totalChars;
 
-    // Create runner
-    const runner = Runner.create();
-
-    // ===== CREATE BOUNDARIES =====
-    const wallThickness = 60;
-    const ground = Bodies.rectangle(
-      containerWidth / 2,
-      containerHeightValue - wallThickness / 2,
-      containerWidth + wallThickness * 2,
-      wallThickness,
-      {
-        isStatic: true,
-        render: { visible: false },
-        label: "ground",
-      }
-    );
-
-    const leftWall = Bodies.rectangle(
-      -wallThickness / 2,
-      containerHeightValue / 2,
-      wallThickness,
-      containerHeightValue * 2,
-      {
-        isStatic: true,
-        render: { visible: false },
-        label: "leftWall",
-      }
-    );
-
-    const rightWall = Bodies.rectangle(
-      containerWidth + wallThickness / 2,
-      containerHeightValue / 2,
-      wallThickness,
-      containerHeightValue * 2,
-      {
-        isStatic: true,
-        render: { visible: false },
-        label: "rightWall",
-      }
-    );
-
-    // ===== CREATE LETTER BODIES =====
-    const letterBodies: Matter.Body[] = [];
-
+    // ===== SETUP AWAL: SEMUA HURUF DI ATAS CONTAINER =====
     chars.forEach((char, i) => {
-      const rect = char.getBoundingClientRect();
+      // X tersebar di seluruh lebar container, dengan sedikit random
+      const spreadX = (i - (totalChars - 1) / 2) * 110; // jarak antar huruf
+      const randomOffsetX = (Math.random() - 0.5) * 80;
+      const startX = spreadX + randomOffsetX;
 
-      // Dimensi huruf
-      const charWidth = rect.width || 200;
-      const charHeight = rect.height || 400;
+      // Y awal: di atas container, semakin ke kanan semakin tinggi
+      const startY = -900 - i * 120 - Math.random() * 200;
 
-      // Posisi X tersebar di tengah container
-      const startX =
-        containerWidth / 2 +
-        (i - (chars.length - 1) / 2) * (charWidth * 0.9) +
-        (Math.random() - 0.5) * 150;
-
-      // Posisi Y di atas container (jatuh dari atas)
-      const startY = -400 - i * 120 - Math.random() * 200;
-
-      // Buat body untuk huruf
-      const body = Bodies.rectangle(startX, startY, charWidth, charHeight, {
-        restitution: 0.4, // Bouncing
-        friction: 0.3,
-        frictionAir: 0.02,
-        density: 0.001,
-        angle: (Math.random() - 0.5) * 0.5,
-        render: { visible: false },
-        label: `letter-${i}`,
-        chamfer: { radius: 4 },
-      });
-
-      letterBodies.push(body);
-
-      // Set posisi awal untuk GSAP (di atas container)
       gsap.set(char, {
-        x: startX - containerWidth / 2,
-        y: startY - containerHeightValue / 2,
-        rotation: (Math.random() - 0.5) * 30,
+        x: startX,
+        y: startY,
+        rotation: (Math.random() - 0.5) * 120,
         opacity: 1,
         force3D: true,
       });
-
-      // Tambahkan body ke world
-      Composite.add(engine.world, body);
     });
 
-    // Tambahkan boundaries ke world
-    Composite.add(engine.world, [ground, leftWall, rightWall]);
+    // ===== ANIMASI JATUH DENGAN PHYSICS2D =====
+    chars.forEach((char, i) => {
+      const delay = i * 0.15 + Math.random() * 0.2;
+      const fallDuration = 2.8 + Math.random() * 1.0;
 
-    // ===== UPDATE LOOP: Sinkronisasi Matter.js ke DOM =====
-    let animationFrameId: number;
-    let lastTime = performance.now();
-    let isRunning = true;
+      // X akhir: huruf tersebar di seluruh lebar container
+      // Karena "Menuru" 6 huruf, kita bagi containerWidth menjadi 6 zona
+      const zoneWidth = containerWidth / totalChars;
+      const zoneCenter = zoneWidth * i + zoneWidth / 2;
+      const targetX = zoneCenter - containerWidth / 2 + (Math.random() - 0.5) * (zoneWidth * 0.5);
 
-    const updateDOM = () => {
-      if (!isRunning) return;
+      // Y akhir: setiap huruf dapat slot sendiri, tersebar merata dari atas ke bawah
+      // Huruf ke-i akan berhenti di slot ke-i, dengan sedikit random
+      // Ini menjamin SEMUA huruf terlihat (tidak ada yang tertutup)
+      const slotCenter = fallAreaTop + slotHeight * i + slotHeight / 2;
+      const randomY = slotCenter + (Math.random() - 0.5) * (slotHeight * 0.4);
 
-      const currentTime = performance.now();
-      const delta = Math.min(currentTime - lastTime, 32); // Cap delta untuk stabilitas
-      lastTime = currentTime;
+      const targetRotation = (Math.random() - 0.5) * 90;
 
-      // Update engine
-      Engine.update(engine, delta);
+      const charTl = gsap.timeline({ delay });
 
-      // Update DOM elements berdasarkan physics bodies
-      letterBodies.forEach((body, i) => {
-        const char = chars[i];
-        if (!char) return;
-
-        const pos = body.position;
-        const angle = body.angle;
-
-        // Konversi posisi Matter.js (center-based) ke posisi CSS
-        const cssX = pos.x - containerWidth / 2;
-        const cssY = pos.y - containerHeightValue / 2;
-
-        gsap.set(char, {
-          x: cssX,
-          y: cssY,
-          rotation: angle,
-          force3D: true,
-        });
-      });
-
-      animationFrameId = requestAnimationFrame(updateDOM);
-    };
-
-    // Start runner dan animation loop
-    Runner.run(runner, engine);
-    animationFrameId = requestAnimationFrame(updateDOM);
-
-    // ===== SLEEP DETECTION: Hentikan update setelah semua huruf diam =====
-    let sleepCheckCount = 0;
-    const sleepCheckInterval = setInterval(() => {
-      const allSleeping = letterBodies.every(
-        (body) => body.isSleeping || body.speed < 0.1
+      // 1. VERTICAL FALL pakai Physics2D (jatuh ke bawah)
+      charTl.to(
+        char,
+        {
+          duration: fallDuration,
+          physics2D: {
+            velocity: 600 + Math.random() * 300,
+            angle: 90 + (Math.random() - 0.5) * 15, // hampir vertikal
+            gravity: 1000 + Math.random() * 400,
+          },
+          ease: "none",
+        },
+        0
       );
 
-      if (allSleeping) {
-        sleepCheckCount++;
-        if (sleepCheckCount >= 3) {
-          // Semua huruf sudah diam, hentikan runner
-          isRunning = false;
-          Runner.stop(runner);
-          clearInterval(sleepCheckInterval);
-          cancelAnimationFrame(animationFrameId);
-        }
-      } else {
-        sleepCheckCount = 0;
-      }
-    }, 1000);
+      // 2. HORIZONTAL DRIFT (ke posisi X target)
+      charTl.to(
+        char,
+        {
+          duration: fallDuration,
+          x: targetX,
+          ease: "power1.inOut",
+        },
+        0
+      );
 
-    // ===== CLEANUP =====
+      // 3. ROTATION
+      charTl.to(
+        char,
+        {
+          duration: fallDuration,
+          rotation: targetRotation,
+          ease: "power1.inOut",
+        },
+        0
+      );
+
+      // 4. SETTLE: turun ke posisi Y final yang sudah ditentukan
+      // Pakai physics2D dengan velocity kecil untuk settle halus
+      charTl.to(
+        char,
+        {
+          duration: 0.8,
+          y: randomY,
+          x: targetX + (Math.random() - 0.5) * 20,
+          rotation: targetRotation + (Math.random() - 0.5) * 10,
+          ease: "power3.out",
+        },
+        fallDuration - 0.2
+      );
+    });
+
     return () => {
-      isRunning = false;
-      clearInterval(sleepCheckInterval);
-      cancelAnimationFrame(animationFrameId);
-      Runner.stop(runner);
-      Engine.clear(engine);
       if (split) split.revert();
     };
   }, [containerHeight]);
@@ -637,8 +575,8 @@ const PhysicsMenuruTitle = () => {
       ref={containerRef}
       style={{
         width: "100%",
-        height: "650px",
-        marginBottom: "80px",
+        height: "650px", // tinggi area jatuh
+        marginBottom: "40px", // jarak ke Live Chat Agent
         overflow: "visible",
         position: "relative",
         backgroundColor: "#ffffff",
@@ -2123,7 +2061,7 @@ const LiveChatAgent = ({
 
   if (checkingBan) {
     return (
-      <div style={{ marginTop: "80px", paddingTop: "30px" }}>
+      <div style={{ marginTop: "0px", paddingTop: "30px" }}>
         <h3
           style={{
             fontSize: "80px",
@@ -2162,7 +2100,7 @@ const LiveChatAgent = ({
           currentStep={tourStep}
           setCurrentStep={setTourStep}
         />
-        <div style={{ marginTop: "80px", paddingTop: "30px" }}>
+        <div style={{ marginTop: "0px", paddingTop: "30px" }}>
           <h3
             ref={liveChatTitleRef}
             data-tour="livechat-title"
@@ -2231,7 +2169,7 @@ const LiveChatAgent = ({
 
   if (!isAdmin && isBanned) {
     return (
-      <div style={{ marginTop: "80px", paddingTop: "30px" }}>
+      <div style={{ marginTop: "0px", paddingTop: "30px" }}>
         <div
           style={{
             display: "flex",
@@ -2313,7 +2251,7 @@ const LiveChatAgent = ({
           currentStep={tourStep}
           setCurrentStep={setTourStep}
         />
-        <div style={{ marginTop: "80px", paddingTop: "30px" }}>
+        <div style={{ marginTop: "0px", paddingTop: "30px" }}>
           <div
             style={{
               display: "flex",
@@ -2454,7 +2392,7 @@ const LiveChatAgent = ({
 
   if (!isAdmin && showStartChat) {
     return (
-      <div style={{ marginTop: "80px", paddingTop: "30px" }}>
+      <div style={{ marginTop: "0px", paddingTop: "30px" }}>
         <div
           style={{
             display: "flex",
@@ -2582,7 +2520,7 @@ const LiveChatAgent = ({
         currentStep={tourStep}
         setCurrentStep={setTourStep}
       />
-      <div style={{ marginTop: "80px", paddingTop: "30px" }}>
+      <div style={{ marginTop: "0px", paddingTop: "30px" }}>
         <div
           style={{
             display: "flex",
@@ -3600,7 +3538,7 @@ export default function HomePage(): React.JSX.Element {
           fontFamily: FONT_FAMILY, overflow: "visible",
         }}
       >
-        {/* ===== PHYSICS MENURU TITLE (MATTER.JS) ===== */}
+        {/* ===== PHYSICS MENURU TITLE (GSAP Physics2D) ===== */}
         <PhysicsMenuruTitle />
 
         {/* LIVE CHAT AGENT */}
