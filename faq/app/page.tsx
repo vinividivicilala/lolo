@@ -350,7 +350,7 @@ const OnlineDot = ({ color = "#22c55e", size = 8 }: { color?: string; size?: num
   />
 );
 
-// ===== NEW: PEOPLE ICON =====
+// ===== PEOPLE ICON =====
 const PeopleIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path
@@ -383,6 +383,13 @@ const PeopleIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: s
       strokeLinecap="round"
       strokeLinejoin="round"
     />
+  </svg>
+);
+
+// ===== PLUS ICON (untuk tombol + di navbar kiri) =====
+const PlusIcon = ({ size = 14, color = "#ffffff" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 5V19M5 12H19" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
@@ -453,7 +460,104 @@ interface TourStep {
   isLoginStep?: boolean;
 }
 
-// ===== NEW: RIGHT NAVBAR COMPONENT =====
+// ===== LEFT NAVBAR COMPONENT (Teams & Individual + tombol + hitam) =====
+const LeftNavbar = () => {
+  return (
+    <div
+      style={{
+        position: "fixed",
+        top: "20px",
+        left: "24px",
+        zIndex: 9000,
+        display: "flex",
+        alignItems: "center",
+        gap: "14px",
+        padding: "10px 18px",
+        backgroundColor: "#0D3CFC",
+        borderRadius: "999px",
+        boxShadow: "0 8px 24px rgba(13,60,252,0.35)",
+        fontFamily: FONT_FAMILY,
+      }}
+    >
+      {/* Teams */}
+      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        <span
+          style={{
+            color: "#ffffff",
+            fontSize: "14px",
+            fontWeight: 600,
+            letterSpacing: "0.02em",
+            fontFamily: FONT_FAMILY,
+            whiteSpace: "nowrap",
+          }}
+        >
+          Teams
+        </span>
+        <button
+          aria-label="Add team"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "22px",
+            height: "22px",
+            backgroundColor: "#000000",
+            border: "none",
+            borderRadius: "6px",
+            cursor: "pointer",
+            padding: 0,
+          }}
+        >
+          <PlusIcon size={12} color="#ffffff" />
+        </button>
+      </div>
+
+      {/* Divider */}
+      <div
+        style={{
+          width: "1px",
+          height: "18px",
+          backgroundColor: "rgba(255,255,255,0.35)",
+        }}
+      />
+
+      {/* Individual */}
+      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        <span
+          style={{
+            color: "#ffffff",
+            fontSize: "14px",
+            fontWeight: 600,
+            letterSpacing: "0.02em",
+            fontFamily: FONT_FAMILY,
+            whiteSpace: "nowrap",
+          }}
+        >
+          Individual
+        </span>
+        <button
+          aria-label="Add individual"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "22px",
+            height: "22px",
+            backgroundColor: "#000000",
+            border: "none",
+            borderRadius: "6px",
+            cursor: "pointer",
+            padding: 0,
+          }}
+        >
+          <PlusIcon size={12} color="#ffffff" />
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// ===== RIGHT NAVBAR COMPONENT (Log In) =====
 const RightNavbar = () => {
   return (
     <div
@@ -485,7 +589,7 @@ const RightNavbar = () => {
           whiteSpace: "nowrap",
         }}
       >
-        Sign In
+        Log In
       </Link>
     </div>
   );
@@ -3556,7 +3660,10 @@ export default function HomePage(): React.JSX.Element {
         <meta name="twitter:image" content="/images/ai.jpg" />
       </Head>
 
-      {/* ===== NEW: RIGHT NAVBAR ===== */}
+      {/* ===== LEFT NAVBAR (Teams & Individual + tombol + hitam) ===== */}
+      <LeftNavbar />
+
+      {/* ===== RIGHT NAVBAR (Log In) ===== */}
       <RightNavbar />
 
       <div
