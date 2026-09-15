@@ -444,17 +444,15 @@ interface TourStep {
 
 // ===== NAVBAR BUTTON COMPONENT =====
 // Panel layout:
-// - Judul paling atas (dengan icon)
-// - Deskripsi singkat & pendek
-// - Foto ukuran normal (tidak terpotong)
-// - Di bawah foto: judul + deskripsi singkat lagi
+// KIRI: judul paling atas + icon + deskripsi max 2 baris
+// KANAN: foto besar (kotak border radius, tidak crop) + judul + deskripsi di bawah foto
 const NavbarButton = ({
   label,
   panelTitle,
   panelDescription,
   panelImage,
-  panelBottomTitle,
-  panelBottomDescription,
+  panelRightTitle,
+  panelRightDescription,
   iconType,
   bigPanelWidth = 850,
   bigPanelHeight = 260,
@@ -463,8 +461,8 @@ const NavbarButton = ({
   panelTitle: string;
   panelDescription: string;
   panelImage: string;
-  panelBottomTitle: string;
-  panelBottomDescription: string;
+  panelRightTitle: string;
+  panelRightDescription: string;
   iconType: "trust" | "career";
   bigPanelWidth?: number;
   bigPanelHeight?: number;
@@ -605,92 +603,114 @@ const NavbarButton = ({
             color: "#ffffff",
             padding: "22px 26px",
             display: "flex",
-            flexDirection: "column",
-            gap: "14px",
+            gap: "20px",
+            alignItems: "flex-start",
           }}
         >
-          {/* ===== JUDUL PALING ATAS + ICON ===== */}
+          {/* ===== SISI KIRI: JUDUL + ICON + DESKRIPSI (max 2 baris) ===== */}
           <div
             style={{
+              flex: "1 1 0",
+              minWidth: 0,
               display: "flex",
-              alignItems: "center",
+              flexDirection: "column",
               gap: "12px",
             }}
           >
-            {iconType === "trust" ? (
-              <TrustIcon size={26} color="#ffffff" />
-            ) : (
-              <CareerIcon size={26} color="#ffffff" />
-            )}
-            <span
+            {/* Judul + icon */}
+            <div
               style={{
-                fontSize: "20px",
-                fontWeight: 700,
-                letterSpacing: "0.02em",
-                fontFamily: FONT_FAMILY,
-                color: "#ffffff",
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
               }}
             >
-              {panelTitle}
-            </span>
-          </div>
+              {iconType === "trust" ? (
+                <TrustIcon size={26} color="#ffffff" />
+              ) : (
+                <CareerIcon size={26} color="#ffffff" />
+              )}
+              <span
+                style={{
+                  fontSize: "20px",
+                  fontWeight: 700,
+                  letterSpacing: "0.02em",
+                  fontFamily: FONT_FAMILY,
+                  color: "#ffffff",
+                }}
+              >
+                {panelTitle}
+              </span>
+            </div>
 
-          {/* ===== DESKRIPSI SINGKAT & PENDEK ===== */}
-          <p
-            style={{
-              fontSize: "13px",
-              fontWeight: 400,
-              lineHeight: 1.5,
-              color: "rgba(255,255,255,0.9)",
-              margin: 0,
-              fontFamily: FONT_FAMILY,
-            }}
-          >
-            {panelDescription}
-          </p>
-
-          {/* ===== FOTO UKURAN NORMAL (tidak terpotong) ===== */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              width: "100%",
-            }}
-          >
-            <img
-              src={panelImage}
-              alt={panelTitle}
+            {/* Deskripsi max 2 baris */}
+            <p
               style={{
-                maxWidth: "100%",
-                maxHeight: "140px",
-                width: "auto",
-                height: "auto",
-                objectFit: "contain",
-                display: "block",
-                borderRadius: "8px",
+                fontSize: "13px",
+                fontWeight: 400,
+                lineHeight: 1.5,
+                color: "rgba(255,255,255,0.9)",
+                margin: 0,
+                fontFamily: FONT_FAMILY,
+                display: "-webkit-box",
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: "vertical",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
               }}
-            />
+            >
+              {panelDescription}
+            </p>
           </div>
 
-          {/* ===== DI BAWAH FOTO: JUDUL + DESKRIPSI SINGKAT ===== */}
+          {/* ===== SISI KANAN: FOTO BESAR + JUDUL + DESKRIPSI ===== */}
           <div
             style={{
+              flex: "0 0 380px",
               display: "flex",
               flexDirection: "column",
-              gap: "6px",
+              gap: "10px",
             }}
           >
+            {/* Foto besar, kotak border radius, tidak crop */}
+            <div
+              style={{
+                width: "100%",
+                height: "160px",
+                backgroundColor: "rgba(255,255,255,0.12)",
+                borderRadius: "10px",
+                overflow: "hidden",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <img
+                src={panelImage}
+                alt={panelTitle}
+                style={{
+                  maxWidth: "100%",
+                  maxHeight: "100%",
+                  width: "auto",
+                  height: "auto",
+                  objectFit: "contain",
+                  display: "block",
+                  borderRadius: "10px",
+                }}
+              />
+            </div>
+
+            {/* Judul + deskripsi di bawah foto (sisi kanan) */}
             <span
               style={{
-                fontSize: "15px",
+                fontSize: "14px",
                 fontWeight: 700,
                 letterSpacing: "0.02em",
                 fontFamily: FONT_FAMILY,
                 color: "#ffffff",
               }}
             >
-              {panelBottomTitle}
+              {panelRightTitle}
             </span>
             <p
               style={{
@@ -700,9 +720,14 @@ const NavbarButton = ({
                 color: "rgba(255,255,255,0.85)",
                 margin: 0,
                 fontFamily: FONT_FAMILY,
+                display: "-webkit-box",
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: "vertical",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
               }}
             >
-              {panelBottomDescription}
+              {panelRightDescription}
             </p>
           </div>
         </div>
@@ -731,8 +756,8 @@ const LeftNavbar = () => {
         panelTitle="Trust"
         panelDescription="Keamanan dan privasi Anda adalah prioritas kami dengan enkripsi end-to-end."
         panelImage="/images/p0l.jpg"
-        panelBottomTitle="Why Trust Us"
-        panelBottomDescription="Sistem kami dipantau 24/7 untuk melindungi data Anda."
+        panelRightTitle="Why Trust Us"
+        panelRightDescription="Sistem kami dipantau 24/7 untuk melindungi data Anda."
         iconType="trust"
         bigPanelWidth={850}
         bigPanelHeight={260}
@@ -742,8 +767,8 @@ const LeftNavbar = () => {
         panelTitle="Careers"
         panelDescription="Bergabunglah dengan tim kami dan bangun karier yang bermakna."
         panelImage="/images/xxz.jpg"
-        panelBottomTitle="Join Our Team"
-        panelBottomDescription="Lingkungan suportif dan pengembangan profesional berkelanjutan."
+        panelRightTitle="Join Our Team"
+        panelRightDescription="Lingkungan suportif dan pengembangan profesional berkelanjutan."
         iconType="career"
         bigPanelWidth={850}
         bigPanelHeight={260}
