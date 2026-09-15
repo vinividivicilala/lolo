@@ -375,14 +375,6 @@ const CareerIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?: s
   </svg>
 );
 
-// ===== LINES ICON (garis atas & bawah) =====
-const LinesIcon = ({ size = 14, color = "#ffffff" }: { size?: number; color?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M4 7H20" stroke={color} strokeWidth="2.5" strokeLinecap="round" />
-    <path d="M4 17H20" stroke={color} strokeWidth="2.5" strokeLinecap="round" />
-  </svg>
-);
-
 // ===== FOOTER LINKS =====
 const footerLinks = [
   { title: "Get in Touch", links: ["Contact", "Instagram", "Live Chat"] },
@@ -451,13 +443,18 @@ interface TourStep {
 }
 
 // ===== NAVBAR BUTTON COMPONENT =====
-// Panel dengan konten: judul + icon + deskripsi + foto besar di kanan
-// Icon diganti garis atas & bawah, animasi GSAP
+// Panel layout:
+// - Judul paling atas (dengan icon)
+// - Deskripsi singkat & pendek
+// - Foto ukuran normal (tidak terpotong)
+// - Di bawah foto: judul + deskripsi singkat lagi
 const NavbarButton = ({
   label,
   panelTitle,
   panelDescription,
   panelImage,
+  panelBottomTitle,
+  panelBottomDescription,
   iconType,
   bigPanelWidth = 850,
   bigPanelHeight = 260,
@@ -466,6 +463,8 @@ const NavbarButton = ({
   panelTitle: string;
   panelDescription: string;
   panelImage: string;
+  panelBottomTitle: string;
+  panelBottomDescription: string;
   iconType: "trust" | "career";
   bigPanelWidth?: number;
   bigPanelHeight?: number;
@@ -475,31 +474,15 @@ const NavbarButton = ({
   const linesBottomRef = useRef<SVGLineElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
 
-  // Animasi GSAP untuk garis atas & bawah (bergerak naik-turun terbalik)
+  // Animasi GSAP untuk garis atas & bawah
   useEffect(() => {
     if (!linesTopRef.current || !linesBottomRef.current) return;
     if (open) {
-      gsap.to(linesTopRef.current, {
-        y: 2,
-        duration: 0.35,
-        ease: "power2.out",
-      });
-      gsap.to(linesBottomRef.current, {
-        y: -2,
-        duration: 0.35,
-        ease: "power2.out",
-      });
+      gsap.to(linesTopRef.current, { y: 2, duration: 0.35, ease: "power2.out" });
+      gsap.to(linesBottomRef.current, { y: -2, duration: 0.35, ease: "power2.out" });
     } else {
-      gsap.to(linesTopRef.current, {
-        y: 0,
-        duration: 0.35,
-        ease: "power2.out",
-      });
-      gsap.to(linesBottomRef.current, {
-        y: 0,
-        duration: 0.35,
-        ease: "power2.out",
-      });
+      gsap.to(linesTopRef.current, { y: 0, duration: 0.35, ease: "power2.out" });
+      gsap.to(linesBottomRef.current, { y: 0, duration: 0.35, ease: "power2.out" });
     }
   }, [open]);
 
@@ -559,8 +542,7 @@ const NavbarButton = ({
         >
           {label}
         </span>
-        {/* Kotak icon: default bg hitam, saat hover bg biru
-            Icon diganti garis atas & bawah */}
+        {/* Kotak icon dengan garis atas & bawah */}
         <div
           style={{
             display: "flex",
@@ -605,7 +587,7 @@ const NavbarButton = ({
         </div>
       </div>
 
-      {/* Panel — dengan konten: judul + icon + deskripsi + foto besar di kanan */}
+      {/* Panel */}
       {open && (
         <div
           ref={panelRef}
@@ -614,92 +596,114 @@ const NavbarButton = ({
             top: "calc(100% + 10px)",
             left: "0px",
             width: `${bigPanelWidth}px`,
-            height: `${bigPanelHeight}px`,
+            minHeight: `${bigPanelHeight}px`,
             backgroundColor: "#0D3CFC",
             borderRadius: "10px",
             boxShadow: "0 8px 24px rgba(13,60,252,0.35)",
             zIndex: 1,
             fontFamily: FONT_FAMILY,
             color: "#ffffff",
-            overflow: "hidden",
+            padding: "22px 26px",
             display: "flex",
-            padding: "20px 24px",
-            gap: "20px",
+            flexDirection: "column",
+            gap: "14px",
           }}
         >
-          {/* Sisi kiri: judul + icon + deskripsi */}
+          {/* ===== JUDUL PALING ATAS + ICON ===== */}
           <div
             style={{
-              flex: 1,
               display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
+              alignItems: "center",
               gap: "12px",
-              minWidth: 0,
             }}
           >
-            {/* Judul + icon */}
-            <div
+            {iconType === "trust" ? (
+              <TrustIcon size={26} color="#ffffff" />
+            ) : (
+              <CareerIcon size={26} color="#ffffff" />
+            )}
+            <span
               style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "12px",
-              }}
-            >
-              {iconType === "trust" ? (
-                <TrustIcon size={28} color="#ffffff" />
-              ) : (
-                <CareerIcon size={28} color="#ffffff" />
-              )}
-              <span
-                style={{
-                  fontSize: "22px",
-                  fontWeight: 700,
-                  letterSpacing: "0.02em",
-                  fontFamily: FONT_FAMILY,
-                  color: "#ffffff",
-                }}
-              >
-                {panelTitle}
-              </span>
-            </div>
-
-            {/* Deskripsi */}
-            <p
-              style={{
-                fontSize: "13px",
-                fontWeight: 400,
-                lineHeight: 1.6,
-                color: "rgba(255,255,255,0.9)",
-                margin: 0,
+                fontSize: "20px",
+                fontWeight: 700,
+                letterSpacing: "0.02em",
                 fontFamily: FONT_FAMILY,
+                color: "#ffffff",
               }}
             >
-              {panelDescription}
-            </p>
+              {panelTitle}
+            </span>
           </div>
 
-          {/* Sisi kanan: foto besar */}
+          {/* ===== DESKRIPSI SINGKAT & PENDEK ===== */}
+          <p
+            style={{
+              fontSize: "13px",
+              fontWeight: 400,
+              lineHeight: 1.5,
+              color: "rgba(255,255,255,0.9)",
+              margin: 0,
+              fontFamily: FONT_FAMILY,
+            }}
+          >
+            {panelDescription}
+          </p>
+
+          {/* ===== FOTO UKURAN NORMAL (tidak terpotong) ===== */}
           <div
             style={{
-              width: "300px",
-              height: "100%",
-              borderRadius: "8px",
-              overflow: "hidden",
-              flexShrink: 0,
-              backgroundColor: "rgba(255,255,255,0.1)",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              width: "100%",
             }}
           >
             <img
               src={panelImage}
               alt={panelTitle}
               style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
+                maxWidth: "100%",
+                maxHeight: "140px",
+                width: "auto",
+                height: "auto",
+                objectFit: "contain",
                 display: "block",
+                borderRadius: "8px",
               }}
             />
+          </div>
+
+          {/* ===== DI BAWAH FOTO: JUDUL + DESKRIPSI SINGKAT ===== */}
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "6px",
+            }}
+          >
+            <span
+              style={{
+                fontSize: "15px",
+                fontWeight: 700,
+                letterSpacing: "0.02em",
+                fontFamily: FONT_FAMILY,
+                color: "#ffffff",
+              }}
+            >
+              {panelBottomTitle}
+            </span>
+            <p
+              style={{
+                fontSize: "12px",
+                fontWeight: 400,
+                lineHeight: 1.5,
+                color: "rgba(255,255,255,0.85)",
+                margin: 0,
+                fontFamily: FONT_FAMILY,
+              }}
+            >
+              {panelBottomDescription}
+            </p>
           </div>
         </div>
       )}
@@ -725,8 +729,10 @@ const LeftNavbar = () => {
       <NavbarButton
         label="Teams"
         panelTitle="Trust"
-        panelDescription="Keamanan dan privasi Anda adalah prioritas utama kami. Kami menggunakan enkripsi AES-256-GCM end-to-end untuk melindungi setiap pesan, data pribadi, dan transaksi Anda. Tim keamanan kami memantau sistem 24/7 untuk memastikan tidak ada akses tidak sah, sehingga Anda dapat berkomunikasi dan berkolaborasi dengan tenang."
+        panelDescription="Keamanan dan privasi Anda adalah prioritas kami dengan enkripsi end-to-end."
         panelImage="/images/p0l.jpg"
+        panelBottomTitle="Why Trust Us"
+        panelBottomDescription="Sistem kami dipantau 24/7 untuk melindungi data Anda."
         iconType="trust"
         bigPanelWidth={850}
         bigPanelHeight={260}
@@ -734,8 +740,10 @@ const LeftNavbar = () => {
       <NavbarButton
         label="Individual"
         panelTitle="Careers"
-        panelDescription="Bergabunglah dengan tim kami dan bangun karier yang bermakna. Kami mencari individu berbakat yang bersemangat tentang inovasi, kolaborasi, dan dampak nyata. Nikmati lingkungan kerja yang suportif, pengembangan profesional berkelanjutan, dan kesempatan untuk tumbuh bersama kami."
+        panelDescription="Bergabunglah dengan tim kami dan bangun karier yang bermakna."
         panelImage="/images/xxz.jpg"
+        panelBottomTitle="Join Our Team"
+        panelBottomDescription="Lingkungan suportif dan pengembangan profesional berkelanjutan."
         iconType="career"
         bigPanelWidth={850}
         bigPanelHeight={260}
@@ -3105,7 +3113,8 @@ const LiveChatAgent = ({
                   )}
                   {resolvedTickets.length > 0 && (
                     <div>
-                      <div                        style={{
+                      <div
+                        style={{
                           padding: "10px 16px",
                           backgroundColor: "#e5e7eb",
                           fontWeight: 600,
