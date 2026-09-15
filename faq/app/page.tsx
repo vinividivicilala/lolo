@@ -446,8 +446,81 @@ interface TourStep {
   isLoginStep?: boolean;
 }
 
-// ===== LEFT NAVBAR COMPONENT (2 kotak biru terpisah) =====
+// ===== LEFT NAVBAR COMPONENT (2 kotak biru terpisah + hover effect) =====
 const LeftNavbar = () => {
+  const [hoveredBox, setHoveredBox] = useState<"teams" | "individual" | null>(null);
+  const [hoveredPlus, setHoveredPlus] = useState<"teams" | "individual" | null>(null);
+  const [hoveredText, setHoveredText] = useState<"teams" | "individual" | null>(null);
+
+  const baseBoxStyle: React.CSSProperties = {
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
+    padding: "10px 16px",
+    borderRadius: "10px",
+    transition: "background-color 0.2s ease, color 0.2s ease",
+    cursor: "pointer",
+  };
+
+  const getBoxStyle = (key: "teams" | "individual"): React.CSSProperties => {
+    const isHovered = hoveredBox === key;
+    const isTextHovered = hoveredText === key;
+    // Kalau teks di-hover → bg biru terang; kalau box di-hover → bg biru
+    let bg = "#0D3CFC";
+    if (isTextHovered) bg = "#0D3CFC";
+    else if (isHovered) bg = "#0D3CFC";
+    return {
+      ...baseBoxStyle,
+      backgroundColor: bg,
+      boxShadow: isHovered || isTextHovered
+        ? "0 8px 24px rgba(13,60,252,0.5)"
+        : "0 8px 24px rgba(13,60,252,0.35)",
+    };
+  };
+
+  const getTextStyle = (key: "teams" | "individual"): React.CSSProperties => {
+    const isHovered = hoveredBox === key;
+    const isTextHovered = hoveredText === key;
+    const isPlusHovered = hoveredPlus === key;
+    // ketika cursor ke teks atau ke box → teks jadi hitam
+    const color = isTextHovered || isHovered || isPlusHovered ? "#000000" : "#ffffff";
+    return {
+      color,
+      fontSize: "14px",
+      fontWeight: 600,
+      letterSpacing: "0.02em",
+      fontFamily: FONT_FAMILY,
+      whiteSpace: "nowrap",
+      transition: "color 0.2s ease",
+    };
+  };
+
+  const getPlusButtonStyle = (key: "teams" | "individual"): React.CSSProperties => {
+    const isPlusHovered = hoveredPlus === key;
+    const isTextHovered = hoveredText === key;
+    const isBoxHovered = hoveredBox === key;
+    // Default: bg hitam. Hover: bg biru (kontras dengan teks hitam)
+    const bg = isPlusHovered ? "#0D3CFC" : "#000000";
+    return {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      width: "22px",
+      height: "22px",
+      backgroundColor: bg,
+      border: isPlusHovered ? "1px solid #000000" : "none",
+      borderRadius: "6px",
+      cursor: "pointer",
+      padding: 0,
+      transition: "background-color 0.2s ease, border 0.2s ease",
+    };
+  };
+
+  const getPlusIconColor = (key: "teams" | "individual"): string => {
+    const isPlusHovered = hoveredPlus === key;
+    return isPlusHovered ? "#000000" : "#ffffff";
+  };
+
   return (
     <div
       style={{
@@ -463,87 +536,47 @@ const LeftNavbar = () => {
     >
       {/* Kotak 1: Teams */}
       <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "10px",
-          padding: "10px 16px",
-          backgroundColor: "#0D3CFC",
-          borderRadius: "10px",
-          boxShadow: "0 8px 24px rgba(13,60,252,0.35)",
-        }}
+        style={getBoxStyle("teams")}
+        onMouseEnter={() => setHoveredBox("teams")}
+        onMouseLeave={() => setHoveredBox(null)}
       >
         <span
-          style={{
-            color: "#ffffff",
-            fontSize: "14px",
-            fontWeight: 600,
-            letterSpacing: "0.02em",
-            fontFamily: FONT_FAMILY,
-            whiteSpace: "nowrap",
-          }}
+          style={getTextStyle("teams")}
+          onMouseEnter={() => setHoveredText("teams")}
+          onMouseLeave={() => setHoveredText(null)}
         >
           Teams
         </span>
         <button
           aria-label="Add team"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: "22px",
-            height: "22px",
-            backgroundColor: "#000000",
-            border: "none",
-            borderRadius: "6px",
-            cursor: "pointer",
-            padding: 0,
-          }}
+          style={getPlusButtonStyle("teams")}
+          onMouseEnter={() => setHoveredPlus("teams")}
+          onMouseLeave={() => setHoveredPlus(null)}
         >
-          <PlusIcon size={12} color="#ffffff" />
+          <PlusIcon size={12} color={getPlusIconColor("teams")} />
         </button>
       </div>
 
       {/* Kotak 2: Individual */}
       <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "10px",
-          padding: "10px 16px",
-          backgroundColor: "#0D3CFC",
-          borderRadius: "10px",
-          boxShadow: "0 8px 24px rgba(13,60,252,0.35)",
-        }}
+        style={getBoxStyle("individual")}
+        onMouseEnter={() => setHoveredBox("individual")}
+        onMouseLeave={() => setHoveredBox(null)}
       >
         <span
-          style={{
-            color: "#ffffff",
-            fontSize: "14px",
-            fontWeight: 600,
-            letterSpacing: "0.02em",
-            fontFamily: FONT_FAMILY,
-            whiteSpace: "nowrap",
-          }}
+          style={getTextStyle("individual")}
+          onMouseEnter={() => setHoveredText("individual")}
+          onMouseLeave={() => setHoveredText(null)}
         >
           Individual
         </span>
         <button
           aria-label="Add individual"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: "22px",
-            height: "22px",
-            backgroundColor: "#000000",
-            border: "none",
-            borderRadius: "6px",
-            cursor: "pointer",
-            padding: 0,
-          }}
+          style={getPlusButtonStyle("individual")}
+          onMouseEnter={() => setHoveredPlus("individual")}
+          onMouseLeave={() => setHoveredPlus(null)}
         >
-          <PlusIcon size={12} color="#ffffff" />
+          <PlusIcon size={12} color={getPlusIconColor("individual")} />
         </button>
       </div>
     </div>
@@ -552,8 +585,11 @@ const LeftNavbar = () => {
 
 // ===== RIGHT NAVBAR COMPONENT (kotak hitam, icon 1 orang, Log In) =====
 const RightNavbar = () => {
+  const [hovered, setHovered] = useState(false);
   return (
     <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       style={{
         position: "fixed",
         top: "20px",
@@ -563,10 +599,11 @@ const RightNavbar = () => {
         alignItems: "center",
         gap: "10px",
         padding: "10px 18px 10px 16px",
-        backgroundColor: "#000000",
+        backgroundColor: hovered ? "#0D3CFC" : "#000000",
         borderRadius: "10px",
         boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
         fontFamily: FONT_FAMILY,
+        transition: "background-color 0.2s ease",
       }}
     >
       <PeopleIcon size={20} color="#ffffff" />
@@ -3653,7 +3690,7 @@ export default function HomePage(): React.JSX.Element {
         <meta name="twitter:image" content="/images/ai.jpg" />
       </Head>
 
-      {/* ===== LEFT NAVBAR (2 kotak biru terpisah) ===== */}
+      {/* ===== LEFT NAVBAR (2 kotak biru terpisah + hover effect) ===== */}
       <LeftNavbar />
 
       {/* ===== RIGHT NAVBAR (kotak hitam, icon 1 orang, Log In) ===== */}
