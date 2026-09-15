@@ -24,6 +24,9 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 
+// ===== IMPORT MATTER.JS SECARA STATIS =====
+import Matter from "matter-js";
+
 // Register GSAP plugins
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, SplitText);
@@ -422,36 +425,9 @@ interface TourStep {
 const PhysicsMenuruTitle = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
-  const matterRef = useRef<{
-    engine: any;
-    runner: any;
-    render: any;
-  } | null>(null);
   const [containerHeight, setContainerHeight] = useState(650);
-  const [isReady, setIsReady] = useState(false);
 
-  // Load Matter.js dynamically
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const loadMatter = async () => {
-      try {
-        const Matter = (await import("matter-js")).default;
-        matterRef.current = {
-          engine: Matter.Engine,
-          runner: Matter.Runner,
-          render: Matter.Render,
-        };
-        setIsReady(true);
-      } catch (error) {
-        console.error("Failed to load Matter.js:", error);
-      }
-    };
-
-    loadMatter();
-  }, []);
-
-  // Measure container height
+  // Measure container height on mount & resize
   useEffect(() => {
     if (typeof window === "undefined") return;
     const updateHeight = () => {
@@ -464,25 +440,11 @@ const PhysicsMenuruTitle = () => {
     return () => window.removeEventListener("resize", updateHeight);
   }, []);
 
-  // Main physics animation
+  // Main physics animation dengan Matter.js
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (!containerRef.current || !textRef.current) return;
-    if (!isReady || !matterRef.current) return;
     if (containerHeight === 0) return;
-
-    const Matter = {
-      Engine: matterRef.current.engine,
-      Runner: matterRef.current.runner,
-      Render: matterRef.current.render,
-      Bodies: (await import("matter-js")).Bodies,
-      Composite: (await import("matter-js")).Composite,
-      Mouse: (await import("matter-js")).Mouse,
-      MouseConstraint: (await import("matter-js")).MouseConstraint,
-      Events: (await import("matter-js")).Events,
-      Vector: (await import("matter-js")).Vector,
-      Body: (await import("matter-js")).Body,
-    };
 
     const container = containerRef.current;
     const containerWidth = container.offsetWidth;
@@ -497,31 +459,21 @@ const PhysicsMenuruTitle = () => {
     const chars = split.chars;
 
     // ===== SETUP MATTER.JS =====
+    // Destructure Matter.js modules
+    const { Engine, Runner, Bodies, Composite, Events, Body } = Matter;
+
     // Create engine with gravity
-    const engine = Matter.Engine.create({
+    const engine = Engine.create({
       gravity: { x: 0, y: 1.5, scale: 0.001 },
       enableSleeping: true,
     });
 
     // Create runner
-    const runner = Matter.Runner.create();
-
-    // Create renderer (invisible, kita hanya pakai untuk update)
-    const render = Matter.Render.create({
-      element: document.createElement("div"),
-      engine: engine,
-      options: {
-        width: containerWidth,
-        height: containerHeightValue,
-        wireframes: false,
-        background: "transparent",
-        pixelRatio: window.devicePixelRatio || 1,
-      },
-    });
+    const runner = Runner.create();
 
     // ===== CREATE BOUNDARIES =====
     const wallThickness = 60;
-    const ground = Matter.Bodies.rectangle(
+    const ground = Bodies.rectangle(
       containerWidth / 2,
       containerHeightValue - wallThickness / 2,
       containerWidth + wallThickness * 2,
@@ -533,7 +485,7 @@ const PhysicsMenuruTitle = () => {
       }
     );
 
-    const leftWall = Matter.Bodies.rectangle(
+    const leftWall = Bodies.rectangle(
       -wallThickness / 2,
       containerHeightValue / 2,
       wallThickness,
@@ -545,7 +497,7 @@ const PhysicsMenuruTitle = () => {
       }
     );
 
-    const rightWall = Matter.Bodies.rectangle(
+    const rightWall = Bodies.rectangle(
       containerWidth + wallThickness / 2,
       containerHeightValue / 2,
       wallThickness,
@@ -558,14 +510,12 @@ const PhysicsMenuruTitle = () => {
     );
 
     // ===== CREATE LETTER BODIES =====
-    const letterBodies: any[] = [];
-    const originalPositions: { x: number; y: number }[] = [];
+    const letterBodies: Matter.Body[] = [];
 
     chars.forEach((char, i) => {
       const rect = char.getBoundingClientRect();
-      const containerRect = container.getBoundingClientRect();
 
-      // Posisi awal huruf relatif terhadap container
+      // Dimensi huruf
       const charWidth = rect.width || 200;
       const charHeight = rect.height || 400;
 
@@ -579,51 +529,49 @@ const PhysicsMenuruTitle = () => {
       const startY = -400 - i * 120 - Math.random() * 200;
 
       // Buat body untuk huruf
-      const body = Matter.Bodies.rectangle(startX, startY, charWidth, charHeight, {
+      const body = Bodies.rectangle(startX, startY, charWidth, charHeight, {
         restitution: 0.4, // Bouncing
         friction: 0.3,
         frictionAir: 0.02,
         density: 0.001,
         angle: (Math.random() - 0.5) * 0.5,
-        render: {
-          visible: false,
-        },
+        render: { visible: false },
         label: `letter-${i}`,
         chamfer: { radius: 4 },
       });
 
-      // Simpan referensi
       letterBodies.push(body);
-      originalPositions.push({ x: startX, y: startY });
 
       // Set posisi awal untuk GSAP (di atas container)
       gsap.set(char, {
         x: startX - containerWidth / 2,
-        y: startY,
+        y: startY - containerHeightValue / 2,
         rotation: (Math.random() - 0.5) * 30,
         opacity: 1,
         force3D: true,
       });
 
       // Tambahkan body ke world
-      Matter.Composite.add(engine.world, body);
+      Composite.add(engine.world, body);
     });
 
     // Tambahkan boundaries ke world
-    Matter.Composite.add(engine.world, [ground, leftWall, rightWall]);
+    Composite.add(engine.world, [ground, leftWall, rightWall]);
 
     // ===== UPDATE LOOP: Sinkronisasi Matter.js ke DOM =====
-    // Gunakan requestAnimationFrame untuk update posisi DOM berdasarkan physics
     let animationFrameId: number;
     let lastTime = performance.now();
+    let isRunning = true;
 
     const updateDOM = () => {
+      if (!isRunning) return;
+
       const currentTime = performance.now();
       const delta = Math.min(currentTime - lastTime, 32); // Cap delta untuk stabilitas
       lastTime = currentTime;
 
       // Update engine
-      Matter.Engine.update(engine, delta);
+      Engine.update(engine, delta);
 
       // Update DOM elements berdasarkan physics bodies
       letterBodies.forEach((body, i) => {
@@ -633,8 +581,7 @@ const PhysicsMenuruTitle = () => {
         const pos = body.position;
         const angle = body.angle;
 
-        // Konversi posisi Matter.js ke posisi CSS
-        // Matter.js menggunakan center-based coordinates
+        // Konversi posisi Matter.js (center-based) ke posisi CSS
         const cssX = pos.x - containerWidth / 2;
         const cssY = pos.y - containerHeightValue / 2;
 
@@ -650,7 +597,7 @@ const PhysicsMenuruTitle = () => {
     };
 
     // Start runner dan animation loop
-    Matter.Runner.run(runner, engine);
+    Runner.run(runner, engine);
     animationFrameId = requestAnimationFrame(updateDOM);
 
     // ===== SLEEP DETECTION: Hentikan update setelah semua huruf diam =====
@@ -664,7 +611,8 @@ const PhysicsMenuruTitle = () => {
         sleepCheckCount++;
         if (sleepCheckCount >= 3) {
           // Semua huruf sudah diam, hentikan runner
-          Matter.Runner.stop(runner);
+          isRunning = false;
+          Runner.stop(runner);
           clearInterval(sleepCheckInterval);
           cancelAnimationFrame(animationFrameId);
         }
@@ -675,14 +623,14 @@ const PhysicsMenuruTitle = () => {
 
     // ===== CLEANUP =====
     return () => {
+      isRunning = false;
       clearInterval(sleepCheckInterval);
       cancelAnimationFrame(animationFrameId);
-      Matter.Runner.stop(runner);
-      Matter.Engine.clear(engine);
-      Matter.Render.stop(render);
+      Runner.stop(runner);
+      Engine.clear(engine);
       if (split) split.revert();
     };
-  }, [isReady, containerHeight]);
+  }, [containerHeight]);
 
   return (
     <div
