@@ -443,9 +443,7 @@ interface TourStep {
 }
 
 // ===== NAVBAR BUTTON COMPONENT =====
-// Panel layout:
-// KIRI: judul paling atas + icon + deskripsi max 2 baris
-// KANAN: foto besar (kotak border radius, tidak crop) + judul + deskripsi di bawah foto
+// Panel tetap terbuka saat cursor pindah ke panel (pakai delay)
 const NavbarButton = ({
   label,
   panelTitle,
@@ -471,6 +469,30 @@ const NavbarButton = ({
   const linesTopRef = useRef<SVGLineElement>(null);
   const linesBottomRef = useRef<SVGLineElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+  const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Handler dengan delay untuk close
+  const handleEnter = () => {
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
+      closeTimeoutRef.current = null;
+    }
+    setOpen(true);
+  };
+
+  const handleLeave = () => {
+    if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+    closeTimeoutRef.current = setTimeout(() => {
+      setOpen(false);
+    }, 250); // delay 250ms supaya cursor bisa pindah ke panel
+  };
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+    };
+  }, []);
 
   // Animasi GSAP untuk garis atas & bawah
   useEffect(() => {
@@ -507,8 +529,8 @@ const NavbarButton = ({
   return (
     <div
       style={{ position: "relative" }}
-      onMouseEnter={() => setOpen(true)}
-      onMouseLeave={() => setOpen(false)}
+      onMouseEnter={handleEnter}
+      onMouseLeave={handleLeave}
     >
       {/* Kotak utama */}
       <div
@@ -589,6 +611,8 @@ const NavbarButton = ({
       {open && (
         <div
           ref={panelRef}
+          onMouseEnter={handleEnter}
+          onMouseLeave={handleLeave}
           style={{
             position: "absolute",
             top: "calc(100% + 10px)",
@@ -672,33 +696,18 @@ const NavbarButton = ({
               gap: "10px",
             }}
           >
-            {/* Foto besar, kotak border radius, tidak crop */}
-            <div
+            {/* Foto besar tanpa bg tambahan, ukuran asli diperbesar */}
+            <img
+              src={panelImage}
+              alt={panelTitle}
               style={{
                 width: "100%",
-                height: "160px",
-                backgroundColor: "rgba(255,255,255,0.12)",
+                height: "200px",
+                objectFit: "contain",
+                display: "block",
                 borderRadius: "10px",
-                overflow: "hidden",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
               }}
-            >
-              <img
-                src={panelImage}
-                alt={panelTitle}
-                style={{
-                  maxWidth: "100%",
-                  maxHeight: "100%",
-                  width: "auto",
-                  height: "auto",
-                  objectFit: "contain",
-                  display: "block",
-                  borderRadius: "10px",
-                }}
-              />
-            </div>
+            />
 
             {/* Judul + deskripsi di bawah foto (sisi kanan) */}
             <span
