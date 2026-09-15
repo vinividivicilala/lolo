@@ -350,19 +350,12 @@ const OnlineDot = ({ color = "#22c55e", size = 8 }: { color?: string; size?: num
   />
 );
 
-// ===== PEOPLE ICON =====
+// ===== PEOPLE ICON (1 ORANG SAJA) =====
 const PeopleIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path
-      d="M17 21V19C17 16.7909 15.2091 15 13 15H5C2.79086 15 1 16.7909 1 19V21"
-      stroke={color}
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
     <circle
-      cx="9"
-      cy="7"
+      cx="12"
+      cy="8"
       r="4"
       stroke={color}
       strokeWidth="2"
@@ -370,14 +363,7 @@ const PeopleIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: s
       strokeLinejoin="round"
     />
     <path
-      d="M23 21V19C23 17.1362 21.7252 15.5701 20 15.126"
-      stroke={color}
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M16 3.12602C17.7252 3.57006 19 5.13616 19 7C19 8.86384 17.7252 10.4299 16 10.874"
+      d="M4 21V19C4 16.7909 5.79086 15 8 15H16C18.2091 15 20 16.7909 20 19V21"
       stroke={color}
       strokeWidth="2"
       strokeLinecap="round"
@@ -460,7 +446,7 @@ interface TourStep {
   isLoginStep?: boolean;
 }
 
-// ===== LEFT NAVBAR COMPONENT (Teams & Individual + tombol + hitam) =====
+// ===== LEFT NAVBAR COMPONENT (2 kotak biru terpisah) =====
 const LeftNavbar = () => {
   return (
     <div
@@ -471,16 +457,22 @@ const LeftNavbar = () => {
         zIndex: 9000,
         display: "flex",
         alignItems: "center",
-        gap: "14px",
-        padding: "10px 18px",
-        backgroundColor: "#0D3CFC",
-        borderRadius: "999px",
-        boxShadow: "0 8px 24px rgba(13,60,252,0.35)",
+        gap: "12px",
         fontFamily: FONT_FAMILY,
       }}
     >
-      {/* Teams */}
-      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+      {/* Kotak 1: Teams */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "10px",
+          padding: "10px 16px",
+          backgroundColor: "#0D3CFC",
+          borderRadius: "10px",
+          boxShadow: "0 8px 24px rgba(13,60,252,0.35)",
+        }}
+      >
         <span
           style={{
             color: "#ffffff",
@@ -512,17 +504,18 @@ const LeftNavbar = () => {
         </button>
       </div>
 
-      {/* Divider */}
+      {/* Kotak 2: Individual */}
       <div
         style={{
-          width: "1px",
-          height: "18px",
-          backgroundColor: "rgba(255,255,255,0.35)",
+          display: "flex",
+          alignItems: "center",
+          gap: "10px",
+          padding: "10px 16px",
+          backgroundColor: "#0D3CFC",
+          borderRadius: "10px",
+          boxShadow: "0 8px 24px rgba(13,60,252,0.35)",
         }}
-      />
-
-      {/* Individual */}
-      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+      >
         <span
           style={{
             color: "#ffffff",
@@ -557,7 +550,7 @@ const LeftNavbar = () => {
   );
 };
 
-// ===== RIGHT NAVBAR COMPONENT (Log In) =====
+// ===== RIGHT NAVBAR COMPONENT (kotak hitam, icon 1 orang, Log In) =====
 const RightNavbar = () => {
   return (
     <div
@@ -571,7 +564,7 @@ const RightNavbar = () => {
         gap: "10px",
         padding: "10px 18px 10px 16px",
         backgroundColor: "#000000",
-        borderRadius: "999px",
+        borderRadius: "10px",
         boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
         fontFamily: FONT_FAMILY,
       }}
@@ -3660,10 +3653,10 @@ export default function HomePage(): React.JSX.Element {
         <meta name="twitter:image" content="/images/ai.jpg" />
       </Head>
 
-      {/* ===== LEFT NAVBAR (Teams & Individual + tombol + hitam) ===== */}
+      {/* ===== LEFT NAVBAR (2 kotak biru terpisah) ===== */}
       <LeftNavbar />
 
-      {/* ===== RIGHT NAVBAR (Log In) ===== */}
+      {/* ===== RIGHT NAVBAR (kotak hitam, icon 1 orang, Log In) ===== */}
       <RightNavbar />
 
       <div
