@@ -372,7 +372,7 @@ const PeopleIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: s
   </svg>
 );
 
-// ===== PLUS ICON (untuk tombol + di navbar kiri) =====
+// ===== PLUS ICON =====
 const PlusIcon = ({ size = 14, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M12 5V19M5 12H19" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -446,13 +446,17 @@ interface TourStep {
   isLoginStep?: boolean;
 }
 
-// ===== NAVBAR BUTTON COMPONENT (with tooltip + hover swap) =====
+// ===== NAVBAR BUTTON COMPONENT (dengan BG BIRU BESAR di bawah, digeser ke kanan) =====
 const NavbarButton = ({
   label,
-  tooltip,
+  panelTitle,
+  panelItems,
+  offsetLeft,
 }: {
   label: string;
-  tooltip: string;
+  panelTitle: string;
+  panelItems: string[];
+  offsetLeft: number;
 }) => {
   const [hovered, setHovered] = useState(false);
 
@@ -462,45 +466,6 @@ const NavbarButton = ({
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      {/* Tooltip bg biru, kotak border radius */}
-      {hovered && (
-        <div
-          style={{
-            position: "absolute",
-            top: "calc(100% + 10px)",
-            left: "50%",
-            transform: "translateX(-50%)",
-            backgroundColor: "#0D3CFC",
-            color: "#ffffff",
-            padding: "8px 14px",
-            borderRadius: "10px",
-            fontSize: "12px",
-            fontWeight: 600,
-            fontFamily: FONT_FAMILY,
-            whiteSpace: "nowrap",
-            zIndex: 10000,
-            boxShadow: "0 8px 20px rgba(13,60,252,0.35)",
-            pointerEvents: "none",
-          }}
-        >
-          {tooltip}
-          {/* Panah tooltip */}
-          <div
-            style={{
-              position: "absolute",
-              top: "-6px",
-              left: "50%",
-              transform: "translateX(-50%)",
-              width: 0,
-              height: 0,
-              borderLeft: "6px solid transparent",
-              borderRight: "6px solid transparent",
-              borderBottom: "6px solid #0D3CFC",
-            }}
-          />
-        </div>
-      )}
-
       {/* Kotak utama: default bg biru, saat hover bg hitam */}
       <div
         style={{
@@ -515,6 +480,8 @@ const NavbarButton = ({
             : "0 8px 24px rgba(13,60,252,0.35)",
           transition: "background-color 0.25s ease, box-shadow 0.25s ease",
           cursor: "pointer",
+          position: "relative",
+          zIndex: 2,
         }}
       >
         <span
@@ -549,18 +516,84 @@ const NavbarButton = ({
           <PlusIcon size={12} color="#ffffff" />
         </button>
       </div>
+
+      {/* BG BIRU BESAR muncul di bawah, digeser ke kanan */}
+      {hovered && (
+        <div
+          style={{
+            position: "absolute",
+            top: "calc(100% + 10px)",
+            left: `${offsetLeft}px`,
+            width: "360px",
+            minHeight: "220px",
+            backgroundColor: "#0D3CFC",
+            borderRadius: "14px",
+            padding: "20px 22px",
+            zIndex: 1,
+            boxShadow: "0 20px 50px rgba(13,60,252,0.35)",
+            fontFamily: FONT_FAMILY,
+            color: "#ffffff",
+          }}
+        >
+          <div
+            style={{
+              fontSize: "16px",
+              fontWeight: 700,
+              marginBottom: "14px",
+              letterSpacing: "0.01em",
+            }}
+          >
+            {panelTitle}
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+            {panelItems.map((item, i) => (
+              <div
+                key={i}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                  padding: "10px 14px",
+                  backgroundColor: "rgba(255,255,255,0.12)",
+                  borderRadius: "10px",
+                  fontSize: "13px",
+                  fontWeight: 500,
+                  cursor: "pointer",
+                }}
+              >
+                <span
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: "24px",
+                    height: "24px",
+                    backgroundColor: "#000000",
+                    borderRadius: "6px",
+                    fontSize: "12px",
+                    fontWeight: 700,
+                  }}
+                >
+                  {i + 1}
+                </span>
+                <span>{item}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
-// ===== LEFT NAVBAR COMPONENT (2 kotak biru terpisah) =====
+// ===== LEFT NAVBAR COMPONENT =====
 const LeftNavbar = () => {
   return (
     <div
       style={{
         position: "fixed",
         top: "20px",
-        left: "24px",
+        left: "80px",
         zIndex: 9000,
         display: "flex",
         alignItems: "center",
@@ -568,13 +601,23 @@ const LeftNavbar = () => {
         fontFamily: FONT_FAMILY,
       }}
     >
-      <NavbarButton label="Teams" tooltip="Create or manage your team" />
-      <NavbarButton label="Individual" tooltip="Start a personal workspace" />
+      <NavbarButton
+        label="Teams"
+        panelTitle="Your Teams"
+        panelItems={["Marketing Team", "Engineering", "Design Squad", "Support Team"]}
+        offsetLeft={0}
+      />
+      <NavbarButton
+        label="Individual"
+        panelTitle="Individual Workspace"
+        panelItems={["My Tasks", "My Notes", "My Calendar", "Personal Projects"]}
+        offsetLeft={80}
+      />
     </div>
   );
 };
 
-// ===== RIGHT NAVBAR COMPONENT (kotak hitam, icon 1 orang, Log In) =====
+// ===== RIGHT NAVBAR COMPONENT =====
 const RightNavbar = () => {
   return (
     <div
@@ -3677,7 +3720,7 @@ export default function HomePage(): React.JSX.Element {
         <meta name="twitter:image" content="/images/ai.jpg" />
       </Head>
 
-      {/* ===== LEFT NAVBAR (2 kotak biru terpisah + tooltip + hover swap) ===== */}
+      {/* ===== LEFT NAVBAR (2 kotak biru + BG BIRU BESAR di bawah) ===== */}
       <LeftNavbar />
 
       {/* ===== RIGHT NAVBAR (kotak hitam, icon 1 orang, Log In) ===== */}
@@ -3694,7 +3737,7 @@ export default function HomePage(): React.JSX.Element {
         {/* ===== PHYSICS MENURU TITLE (PALING ATAS) ===== */}
         <PhysicsMenuruTitle />
 
-        {/* LIVE CHAT AGENT — marginTop 80px ditambah di dalam komponen */}
+        {/* LIVE CHAT AGENT */}
         <div style={{ padding: "0 40px", maxWidth: "1600px", margin: "0 auto", width: "100%" }}>
           <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} />
         </div>
