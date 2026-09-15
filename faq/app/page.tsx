@@ -444,6 +444,7 @@ interface TourStep {
 
 // ===== NAVBAR BUTTON COMPONENT =====
 // Panel tetap terbuka saat cursor pindah ke panel (pakai delay)
+// Side kanan: bg tambahan kotak border radius yang meliputi foto + judul + deskripsi
 const NavbarButton = ({
   label,
   panelTitle,
@@ -484,10 +485,9 @@ const NavbarButton = ({
     if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
     closeTimeoutRef.current = setTimeout(() => {
       setOpen(false);
-    }, 250); // delay 250ms supaya cursor bisa pindah ke panel
+    }, 250);
   };
 
-  // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
       if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
@@ -667,7 +667,7 @@ const NavbarButton = ({
               </span>
             </div>
 
-            {/* Deskripsi max 2 baris */}
+            {/* Deskripsi max 2 baris, dibatasi lebar supaya tidak panjang ke kanan */}
             <p
               style={{
                 fontSize: "13px",
@@ -676,6 +676,7 @@ const NavbarButton = ({
                 color: "rgba(255,255,255,0.9)",
                 margin: 0,
                 fontFamily: FONT_FAMILY,
+                maxWidth: "340px",
                 display: "-webkit-box",
                 WebkitLineClamp: 2,
                 WebkitBoxOrient: "vertical",
@@ -687,10 +688,14 @@ const NavbarButton = ({
             </p>
           </div>
 
-          {/* ===== SISI KANAN: FOTO BESAR + JUDUL + DESKRIPSI ===== */}
+          {/* ===== SISI KANAN: BG TAMBAHAN KOTAK BORDER RADIUS ===== */}
           <div
             style={{
               flex: "0 0 380px",
+              backgroundColor: "rgba(255,255,255,0.12)",
+              border: "1px solid rgba(255,255,255,0.25)",
+              borderRadius: "12px",
+              padding: "14px",
               display: "flex",
               flexDirection: "column",
               gap: "10px",
@@ -702,17 +707,17 @@ const NavbarButton = ({
               alt={panelTitle}
               style={{
                 width: "100%",
-                height: "200px",
+                height: "170px",
                 objectFit: "contain",
                 display: "block",
                 borderRadius: "10px",
               }}
             />
 
-            {/* Judul + deskripsi di bawah foto (sisi kanan) */}
+            {/* Judul di bawah foto (sisi kanan) */}
             <span
               style={{
-                fontSize: "14px",
+                fontSize: "15px",
                 fontWeight: 700,
                 letterSpacing: "0.02em",
                 fontFamily: FONT_FAMILY,
@@ -721,6 +726,8 @@ const NavbarButton = ({
             >
               {panelRightTitle}
             </span>
+
+            {/* Deskripsi max 2 baris */}
             <p
               style={{
                 fontSize: "12px",
@@ -729,6 +736,7 @@ const NavbarButton = ({
                 color: "rgba(255,255,255,0.85)",
                 margin: 0,
                 fontFamily: FONT_FAMILY,
+                maxWidth: "340px",
                 display: "-webkit-box",
                 WebkitLineClamp: 2,
                 WebkitBoxOrient: "vertical",
@@ -774,10 +782,10 @@ const LeftNavbar = () => {
       <NavbarButton
         label="Individual"
         panelTitle="Careers"
-        panelDescription="Bergabunglah dengan tim kami dan bangun karier yang bermakna."
+        panelDescription="Bergabunglah dengan tim kami dan bangun karier yang bermakna di lingkungan yang suportif."
         panelImage="/images/xxz.jpg"
-        panelRightTitle="Join Our Team"
-        panelRightDescription="Lingkungan suportif dan pengembangan profesional berkelanjutan."
+        panelRightTitle="Life at Menuru"
+        panelRightDescription="Budaya kerja kolaboratif, fleksibel, dan penuh peluang untuk tumbuh bersama."
         iconType="career"
         bigPanelWidth={850}
         bigPanelHeight={260}
