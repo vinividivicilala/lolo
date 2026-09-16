@@ -2,17 +2,9 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import Head from "next/head";
-import Link from "next/link";
 import gsap from "gsap";
 
 const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
-
-// ===== SVG ICONS =====
-const ArrowLeft = ({ size = 20, color = "#0D3CFC" }: { size?: number; color?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
 
 // ===== CV PAGE =====
 export default function CVPage(): React.JSX.Element {
@@ -53,32 +45,54 @@ export default function CVPage(): React.JSX.Element {
       {/* ===== BACKGROUND ===== */}
       <div
         style={{
-          minHeight: "100vh",
+          minHeight: "200vh",
           width: "100%",
           backgroundColor: "#ffffff",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "flex-start",
-          padding: "80px 24px 80px 24px",
+          position: "relative",
           fontFamily: FONT_FAMILY,
-          boxSizing: "border-box",
         }}
       >
-        {/* ===== BG BIRU KOSONG — seukuran foto tapi lebih lebar & panjang ke bawah ===== */}
+        {/* ===== BG BIRU FIXED DI TENGAH + FOTO FULL ===== */}
         <div
-          ref={cardRef}
           style={{
+            position: "fixed",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
             width: "100%",
             maxWidth: "560px",
-            minHeight: "1400px",
-            backgroundColor: "#0D3CFC",
-            borderRadius: "20px",
-            boxShadow: "0 20px 60px rgba(13,60,252,0.35)",
-            padding: "0",
-            position: "relative",
-            display: "block",
+            height: "800px",
+            zIndex: 1,
+            pointerEvents: "none",
           }}
-        />
+        >
+          {/* Card bg biru + foto */}
+          <div
+            ref={cardRef}
+            style={{
+              width: "100%",
+              height: "100%",
+              backgroundColor: "#0D3CFC",
+              borderRadius: "20px",
+              boxShadow: "0 20px 60px rgba(13,60,252,0.35)",
+              overflow: "hidden",
+              position: "relative",
+            }}
+          >
+            {/* Foto seukuran full bg biru */}
+            <img
+              src="/images/ai.jpg"
+              alt="CV"
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                display: "block",
+                borderRadius: "20px",
+              }}
+            />
+          </div>
+        </div>
       </div>
 
       <style jsx global>{`
