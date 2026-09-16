@@ -8,8 +8,8 @@ const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
 
 // ===== SVG ICON PLUS =====
 const PlusIcon = ({
-  size = 16,
-  color = "#ffffff",
+  size = 14,
+  color = "#000000",
   lineRef1,
   lineRef2,
 }: {
@@ -42,11 +42,19 @@ const PlusIcon = ({
   </svg>
 );
 
+// ===== SVG ICON CLOSE (X) =====
+const CloseIcon = ({ size = 14, color = "#0D3CFC" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M18 6L6 18" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M6 6L18 18" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
 // ===== WORK EXPERIENCE ITEM COMPONENT =====
 const WorkExperienceItem = () => {
   const [expanded, setExpanded] = useState(false);
   const detailRef = useRef<HTMLDivElement>(null);
-  const textRef = useRef<HTMLSpanElement>(null);
+  const plusWrapRef = useRef<HTMLDivElement>(null);
 
   // Animasi GSAP buka/tutup detail
   useEffect(() => {
@@ -71,6 +79,18 @@ const WorkExperienceItem = () => {
         ease: "power2.in",
       });
     }
+  }, [expanded]);
+
+  // Animasi GSAP icon plus → ×
+  useEffect(() => {
+    if (!plusWrapRef.current) return;
+
+    gsap.to(plusWrapRef.current, {
+      rotate: expanded ? 45 : 0,
+      duration: 0.4,
+      ease: "power2.inOut",
+      transformOrigin: "center center",
+    });
   }, [expanded]);
 
   return (
@@ -118,29 +138,64 @@ const WorkExperienceItem = () => {
           </div>
         </div>
 
-        {/* Sisi kanan: tombol More Info */}
-        <button
-          onClick={() => setExpanded((v) => !v)}
+        {/* Sisi kanan: tanggal + tombol More Info */}
+        <div
           style={{
             display: "flex",
-            alignItems: "center",
+            flexDirection: "column",
+            alignItems: "flex-end",
             gap: "8px",
-            padding: "8px 14px",
-            backgroundColor: expanded ? "#ffffff" : "transparent",
-            color: expanded ? "#0D3CFC" : "#ffffff",
-            border: expanded ? "none" : "1px solid rgba(255,255,255,0.5)",
-            borderRadius: "8px",
-            fontSize: "12px",
-            fontWeight: 700,
-            cursor: "pointer",
-            fontFamily: FONT_FAMILY,
-            letterSpacing: "0.02em",
-            transition: "background-color 0.25s ease, color 0.25s ease, border 0.25s ease",
             flexShrink: 0,
           }}
         >
-          <span ref={textRef}>{expanded ? "Close" : "More Info"}</span>
-        </button>
+          {/* Tanggal di bawah tombol close */}
+          <div
+            style={{
+              fontSize: "12px",
+              fontWeight: 600,
+              color: "rgba(255,255,255,0.85)",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "0.01em",
+              whiteSpace: "nowrap",
+            }}
+          >
+            Januari 2024 – Present
+          </div>
+
+          {/* Tombol More Info dengan icon + SVG */}
+          <button
+            onClick={() => setExpanded((v) => !v)}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              padding: "8px 14px",
+              backgroundColor: expanded ? "#ffffff" : "#F2EA6B",
+              color: expanded ? "#0D3CFC" : "#000000",
+              border: "none",
+              borderRadius: "8px",
+              fontSize: "12px",
+              fontWeight: 700,
+              cursor: "pointer",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "0.02em",
+              transition: "background-color 0.25s ease, color 0.25s ease",
+              flexShrink: 0,
+            }}
+          >
+            <div
+              ref={plusWrapRef}
+              style={{ display: "flex", alignItems: "center", transformOrigin: "center center" }}
+            >
+              {expanded ? (
+                <CloseIcon size={14} color="#0D3CFC" />
+              ) : (
+                <PlusIcon size={14} color="#000000" />
+              )}
+            </div>
+            <span>{expanded ? "Close" : "More Info"}</span>
+          </button>
+        </div>
       </div>
 
       {/* Detail expandable */}
@@ -152,25 +207,60 @@ const WorkExperienceItem = () => {
           overflow: "hidden",
         }}
       >
-        <p
+        <div
           style={{
-            fontSize: "13px",
-            fontWeight: 400,
-            lineHeight: 1.6,
-            color: "rgba(255,255,255,0.9)",
-            margin: 0,
-            marginTop: "14px",
-            fontFamily: FONT_FAMILY,
-            textAlign: "left",
+            marginTop: "18px",
+            display: "flex",
+            flexDirection: "column",
+            gap: "10px",
           }}
         >
-          Menuru adalah brand yang saya dirikan sebagai wadah untuk mengeksplorasi
-          ide-ide kreatif di bidang teknologi dan desain. Sebagai Founder and Developer,
-          saya bertanggung jawab penuh atas pengembangan produk, mulai dari riset,
-          desain UI/UX, hingga implementasi teknis menggunakan Next.js, TypeScript,
-          Firebase, dan GSAP. Fokus utama saya adalah menciptakan pengalaman digital
-          yang cepat, aman, dan mudah digunakan.
-        </p>
+          {/* Judul Tanggung Jawab */}
+          <div
+            style={{
+              fontSize: "14px",
+              fontWeight: 800,
+              color: "#ffffff",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "0.01em",
+            }}
+          >
+            Tanggung Jawab :
+          </div>
+
+          {/* Bullet list */}
+          <ul
+            style={{
+              margin: 0,
+              paddingLeft: "20px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "8px",
+            }}
+          >
+            {[
+              "Membangun dan mengembangkan website digital dari tahap perencanaan hingga deployment.",
+              "Mengembangkan fitur menggunakan Next.js, React.js, Firebase, GSAP, Framer Motion.",
+              "Mengelola UI/UX, database, authentication, serta integrasi layanan pihak ketiga.",
+              "Mengelola hosting, deployment, dan maintenance website.",
+              "Mengembangkan strategi digital untuk meningkatkan awareness dan penggunaan platform melalui google search dan instagram stories pribadi.",
+            ].map((item, i) => (
+              <li
+                key={i}
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 400,
+                  lineHeight: 1.6,
+                  color: "rgba(255,255,255,0.9)",
+                  fontFamily: FONT_FAMILY,
+                  textAlign: "left",
+                }}
+              >
+                {item}
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </div>
   );
@@ -210,7 +300,7 @@ export default function CVPage(): React.JSX.Element {
     );
   }, [isMounted]);
 
-  // Animasi GSAP tombol
+  // Animasi GSAP tombol Info/Close
   useEffect(() => {
     if (!isMounted) return;
     if (!buttonRef.current) return;
@@ -542,7 +632,7 @@ export default function CVPage(): React.JSX.Element {
                   )}
                 </div>
 
-                {/* ===== ABOUT + PARAGRAF + WORK EXPERIENCE (MODE OPEN) ===== */}
+                {/* ===== ABOUT + PARAGRAF + WORK EXPERIENCE ===== */}
                 {isOpen && (
                   <div
                     style={{
