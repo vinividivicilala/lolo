@@ -8,8 +8,8 @@ const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
 
 // ===== SVG ICON PLUS =====
 const PlusIcon = ({
-  size = 14,
-  color = "#000000",
+  size = 16,
+  color = "#ffffff",
   lineRef1,
   lineRef2,
 }: {
@@ -19,26 +19,8 @@ const PlusIcon = ({
   lineRef2?: React.RefObject<SVGLineElement>;
 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <line
-      ref={lineRef1}
-      x1="4"
-      y1="12"
-      x2="20"
-      y2="12"
-      stroke={color}
-      strokeWidth="2.5"
-      strokeLinecap="round"
-    />
-    <line
-      ref={lineRef2}
-      x1="12"
-      y1="4"
-      x2="12"
-      y2="20"
-      stroke={color}
-      strokeWidth="2.5"
-      strokeLinecap="round"
-    />
+    <line ref={lineRef1} x1="4" y1="12" x2="20" y2="12" stroke={color} strokeWidth="2.5" strokeLinecap="round" />
+    <line ref={lineRef2} x1="12" y1="4" x2="12" y2="20" stroke={color} strokeWidth="2.5" strokeLinecap="round" />
   </svg>
 );
 
@@ -50,13 +32,20 @@ const CloseIcon = ({ size = 14, color = "#0D3CFC" }: { size?: number; color?: st
   </svg>
 );
 
+// ===== SVG ICON MAIL =====
+const MailIcon = ({ size = 16, color = "#0D3CFC" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="2" y="4" width="20" height="16" rx="2" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M2 7L12 13L22 7" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
 // ===== WORK EXPERIENCE ITEM COMPONENT =====
 const WorkExperienceItem = () => {
   const [expanded, setExpanded] = useState(false);
   const detailRef = useRef<HTMLDivElement>(null);
   const plusWrapRef = useRef<HTMLDivElement>(null);
 
-  // Animasi GSAP buka/tutup detail
   useEffect(() => {
     if (!detailRef.current) return;
 
@@ -64,12 +53,7 @@ const WorkExperienceItem = () => {
       gsap.fromTo(
         detailRef.current,
         { height: 0, opacity: 0 },
-        {
-          height: "auto",
-          opacity: 1,
-          duration: 0.5,
-          ease: "power3.out",
-        }
+        { height: "auto", opacity: 1, duration: 0.5, ease: "power3.out" }
       );
     } else {
       gsap.to(detailRef.current, {
@@ -81,7 +65,6 @@ const WorkExperienceItem = () => {
     }
   }, [expanded]);
 
-  // Animasi GSAP icon plus → ×
   useEffect(() => {
     if (!plusWrapRef.current) return;
 
@@ -94,14 +77,8 @@ const WorkExperienceItem = () => {
   }, [expanded]);
 
   return (
-    <div
-      style={{
-        width: "100%",
-        fontFamily: FONT_FAMILY,
-        color: "#ffffff",
-      }}
-    >
-      {/* Header row: info kiri + tombol More Info kanan */}
+    <div style={{ width: "100%", fontFamily: FONT_FAMILY, color: "#ffffff" }}>
+      {/* Header row */}
       <div
         style={{
           display: "flex",
@@ -111,7 +88,7 @@ const WorkExperienceItem = () => {
           flexWrap: "wrap",
         }}
       >
-        {/* Sisi kiri: 01 Menuru + Founder and Developer */}
+        {/* Sisi kiri */}
         <div style={{ display: "flex", flexDirection: "column", gap: "4px", flex: 1, minWidth: 0 }}>
           <div
             style={{
@@ -138,7 +115,7 @@ const WorkExperienceItem = () => {
           </div>
         </div>
 
-        {/* Sisi kanan: tanggal + tombol More Info */}
+        {/* Sisi kanan */}
         <div
           style={{
             display: "flex",
@@ -148,7 +125,7 @@ const WorkExperienceItem = () => {
             flexShrink: 0,
           }}
         >
-          {/* Tanggal di bawah tombol close */}
+          {/* Tanggal */}
           <div
             style={{
               fontSize: "12px",
@@ -162,7 +139,7 @@ const WorkExperienceItem = () => {
             Januari 2024 – Present
           </div>
 
-          {/* Tombol More Info dengan icon + SVG */}
+          {/* Tombol More Info */}
           <button
             onClick={() => setExpanded((v) => !v)}
             style={{
@@ -199,14 +176,7 @@ const WorkExperienceItem = () => {
       </div>
 
       {/* Detail expandable */}
-      <div
-        ref={detailRef}
-        style={{
-          height: 0,
-          opacity: 0,
-          overflow: "hidden",
-        }}
-      >
+      <div ref={detailRef} style={{ height: 0, opacity: 0, overflow: "hidden" }}>
         <div
           style={{
             marginTop: "18px",
@@ -215,7 +185,6 @@ const WorkExperienceItem = () => {
             gap: "10px",
           }}
         >
-          {/* Judul Tanggung Jawab */}
           <div
             style={{
               fontSize: "14px",
@@ -228,7 +197,6 @@ const WorkExperienceItem = () => {
             Tanggung Jawab :
           </div>
 
-          {/* Bullet list */}
           <ul
             style={{
               margin: 0,
@@ -281,8 +249,12 @@ export default function CVPage(): React.JSX.Element {
   const textAboutRef = useRef<HTMLDivElement>(null);
   const textWorkRef = useRef<HTMLDivElement>(null);
   const workBlockRef = useRef<HTMLDivElement>(null);
+  const contactButtonRef = useRef<HTMLButtonElement>(null);
+  const contactPageRef = useRef<HTMLDivElement>(null);
+  const contactContentRef = useRef<HTMLDivElement>(null);
   const [isMounted, setIsMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [showContact, setShowContact] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
@@ -395,7 +367,7 @@ export default function CVPage(): React.JSX.Element {
     );
   }, [isOpen, isMounted]);
 
-  // Teks About
+  // About
   useEffect(() => {
     if (!isMounted) return;
     if (!textAboutRef.current) return;
@@ -408,7 +380,7 @@ export default function CVPage(): React.JSX.Element {
     );
   }, [isOpen, isMounted]);
 
-  // Paragraf About
+  // Paragraf
   useEffect(() => {
     if (!isMounted) return;
     if (!textParagraphRef.current) return;
@@ -421,7 +393,7 @@ export default function CVPage(): React.JSX.Element {
     );
   }, [isOpen, isMounted]);
 
-  // Work Experience title
+  // Work title
   useEffect(() => {
     if (!isMounted) return;
     if (!textWorkRef.current) return;
@@ -434,7 +406,7 @@ export default function CVPage(): React.JSX.Element {
     );
   }, [isOpen, isMounted]);
 
-  // Work Experience block
+  // Work block
   useEffect(() => {
     if (!isMounted) return;
     if (!workBlockRef.current) return;
@@ -446,6 +418,31 @@ export default function CVPage(): React.JSX.Element {
       { opacity: 1, y: 0, duration: 0.6, ease: "power2.out", delay: 0.6 }
     );
   }, [isOpen, isMounted]);
+
+  // ===== ANIMASI TRANSISI HALAMAN: CV → CONTACT =====
+  useEffect(() => {
+    if (!isMounted) return;
+
+    if (showContact) {
+      // Contact page fade + slide in
+      if (contactPageRef.current) {
+        gsap.fromTo(
+          contactPageRef.current,
+          { opacity: 0, scale: 1.05 },
+          { opacity: 1, scale: 1, duration: 0.5, ease: "power3.out" }
+        );
+      }
+      // Content stagger in
+      if (contactContentRef.current) {
+        const items = contactContentRef.current.querySelectorAll("[data-contact-item]");
+        gsap.fromTo(
+          items,
+          { opacity: 0, y: 30 },
+          { opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease: "power2.out", delay: 0.2 }
+        );
+      }
+    }
+  }, [showContact, isMounted]);
 
   if (!isMounted) {
     return <div style={{ minHeight: "100vh", backgroundColor: "#ffffff" }} />;
@@ -475,9 +472,10 @@ export default function CVPage(): React.JSX.Element {
           alignItems: "center",
           padding: "24px",
           boxSizing: "border-box",
+          overflow: "hidden",
         }}
       >
-        {/* ===== BG BIRU DI TENGAH ===== */}
+        {/* ===== CV CARD (HALAMAN UTAMA) ===== */}
         <div
           style={{
             position: "relative",
@@ -485,6 +483,9 @@ export default function CVPage(): React.JSX.Element {
             maxWidth: "380px",
             height: "760px",
             zIndex: 1,
+            opacity: showContact ? 0 : 1,
+            pointerEvents: showContact ? "none" : "auto",
+            transition: "opacity 0.4s ease",
           }}
         >
           {/* Card bg biru */}
@@ -566,24 +567,10 @@ export default function CVPage(): React.JSX.Element {
                         textAlign: "left",
                       }}
                     >
-                      <div
-                        style={{
-                          fontSize: "30px",
-                          fontWeight: 800,
-                          letterSpacing: "-0.01em",
-                          fontFamily: FONT_FAMILY,
-                        }}
-                      >
+                      <div style={{ fontSize: "30px", fontWeight: 800, letterSpacing: "-0.01em", fontFamily: FONT_FAMILY }}>
                         People
                       </div>
-                      <div
-                        style={{
-                          fontSize: "30px",
-                          fontWeight: 800,
-                          letterSpacing: "-0.01em",
-                          fontFamily: FONT_FAMILY,
-                        }}
-                      >
+                      <div style={{ fontSize: "30px", fontWeight: 800, letterSpacing: "-0.01em", fontFamily: FONT_FAMILY }}>
                         Menuru
                       </div>
                     </div>
@@ -608,24 +595,10 @@ export default function CVPage(): React.JSX.Element {
                         boxSizing: "border-box",
                       }}
                     >
-                      <div
-                        style={{
-                          fontSize: "26px",
-                          fontWeight: 800,
-                          letterSpacing: "-0.01em",
-                          fontFamily: FONT_FAMILY,
-                        }}
-                      >
+                      <div style={{ fontSize: "26px", fontWeight: 800, letterSpacing: "-0.01em", fontFamily: FONT_FAMILY }}>
                         Curriculum Vitae
                       </div>
-                      <div
-                        style={{
-                          fontSize: "26px",
-                          fontWeight: 800,
-                          letterSpacing: "-0.01em",
-                          fontFamily: FONT_FAMILY,
-                        }}
-                      >
+                      <div style={{ fontSize: "26px", fontWeight: 800, letterSpacing: "-0.01em", fontFamily: FONT_FAMILY }}>
                         Actual [ 16.09 ]
                       </div>
                     </div>
@@ -646,7 +619,6 @@ export default function CVPage(): React.JSX.Element {
                       gap: "20px",
                     }}
                   >
-                    {/* About title */}
                     <div
                       ref={textAboutRef}
                       style={{
@@ -661,7 +633,6 @@ export default function CVPage(): React.JSX.Element {
                       About
                     </div>
 
-                    {/* Paragraf About */}
                     <div ref={textParagraphRef}>
                       <p
                         style={{
@@ -679,7 +650,6 @@ export default function CVPage(): React.JSX.Element {
                       </p>
                     </div>
 
-                    {/* Work Experience title */}
                     <div
                       ref={textWorkRef}
                       style={{
@@ -695,10 +665,38 @@ export default function CVPage(): React.JSX.Element {
                       Work Experience
                     </div>
 
-                    {/* Work Experience block */}
                     <div ref={workBlockRef}>
                       <WorkExperienceItem />
                     </div>
+
+                    {/* ===== TOMBOL CONTACT ===== */}
+                    <button
+                      ref={contactButtonRef}
+                      onClick={() => setShowContact(true)}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "10px",
+                        marginTop: "12px",
+                        padding: "14px 24px",
+                        backgroundColor: "#ffffff",
+                        color: "#0D3CFC",
+                        border: "none",
+                        borderRadius: "12px",
+                        fontSize: "15px",
+                        fontWeight: 700,
+                        cursor: "pointer",
+                        fontFamily: FONT_FAMILY,
+                        letterSpacing: "0.02em",
+                        boxShadow: "0 8px 24px rgba(0,0,0,0.2)",
+                        width: "100%",
+                        transition: "transform 0.2s ease",
+                      }}
+                    >
+                      <MailIcon size={18} color="#0D3CFC" />
+                      Contact
+                    </button>
                   </div>
                 )}
               </div>
@@ -744,6 +742,150 @@ export default function CVPage(): React.JSX.Element {
             </button>
           </div>
         </div>
+
+        {/* ===== HALAMAN CONTACT (OVERLAY) ===== */}
+        {showContact && (
+          <div
+            ref={contactPageRef}
+            style={{
+              position: "fixed",
+              inset: 0,
+              backgroundColor: "#F2EA6B",
+              zIndex: 100,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "24px",
+              boxSizing: "border-box",
+              fontFamily: FONT_FAMILY,
+            }}
+          >
+            {/* Konten Contact */}
+            <div
+              ref={contactContentRef}
+              style={{
+                width: "100%",
+                maxWidth: "420px",
+                display: "flex",
+                flexDirection: "column",
+                gap: "24px",
+                color: "#0D3CFC",
+              }}
+            >
+              {/* Judul */}
+              <div
+                data-contact-item
+                style={{
+                  fontSize: "52px",
+                  fontWeight: 800,
+                  letterSpacing: "-0.02em",
+                  color: "#0D3CFC",
+                  lineHeight: 1.05,
+                  fontFamily: FONT_FAMILY,
+                }}
+              >
+                Contact
+              </div>
+
+              {/* Sub-judul */}
+              <div
+                data-contact-item
+                style={{
+                  fontSize: "15px",
+                  fontWeight: 500,
+                  color: "rgba(13,60,252,0.85)",
+                  fontFamily: FONT_FAMILY,
+                  lineHeight: 1.6,
+                }}
+              >
+                Mari terhubung! Saya terbuka untuk kolaborasi, proyek freelance, atau
+                sekadar berdiskusi tentang teknologi dan desain.
+              </div>
+
+              {/* List kontak */}
+              <div
+                data-contact-item
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "12px",
+                }}
+              >
+                {[
+                  { label: "Email", value: "farid@menuru.com" },
+                  { label: "Phone", value: "+62 812-3456-7890" },
+                  { label: "Instagram", value: "@menuru" },
+                  { label: "Website", value: "menuru.com" },
+                ].map((item, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      gap: "16px",
+                      padding: "16px 20px",
+                      backgroundColor: "rgba(255,255,255,0.4)",
+                      border: "1px solid rgba(13,60,252,0.25)",
+                      borderRadius: "12px",
+                      fontFamily: FONT_FAMILY,
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: "13px",
+                        fontWeight: 600,
+                        color: "rgba(13,60,252,0.75)",
+                        letterSpacing: "0.04em",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {item.label}
+                    </span>
+                    <span
+                      style={{
+                        fontSize: "15px",
+                        fontWeight: 700,
+                        color: "#0D3CFC",
+                        textAlign: "right",
+                        wordBreak: "break-all",
+                      }}
+                    >
+                      {item.value}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Tombol Back */}
+              <button
+                data-contact-item
+                onClick={() => setShowContact(false)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "10px",
+                  padding: "14px 24px",
+                  backgroundColor: "#0D3CFC",
+                  color: "#ffffff",
+                  border: "none",
+                  borderRadius: "12px",
+                  fontSize: "15px",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  fontFamily: FONT_FAMILY,
+                  letterSpacing: "0.02em",
+                  boxShadow: "0 8px 24px rgba(13,60,252,0.35)",
+                  marginTop: "8px",
+                }}
+              >
+                ← Back to CV
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       <style jsx global>{`
