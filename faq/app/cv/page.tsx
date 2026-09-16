@@ -52,7 +52,7 @@ export default function CVPage(): React.JSX.Element {
           fontFamily: FONT_FAMILY,
         }}
       >
-        {/* ===== BG BIRU FIXED DI TENGAH + FOTO NYATU ===== */}
+        {/* ===== BG BIRU FIXED DI TENGAH + FOTO FULL ===== */}
         <div
           style={{
             position: "fixed",
@@ -66,7 +66,7 @@ export default function CVPage(): React.JSX.Element {
             pointerEvents: "none",
           }}
         >
-          {/* Card bg biru — foto nyatu dari atas sampai bawah */}
+          {/* Card bg biru — foto full menutupi seluruh card */}
           <div
             ref={cardRef}
             style={{
@@ -79,19 +79,19 @@ export default function CVPage(): React.JSX.Element {
               position: "relative",
             }}
           >
-            {/* Foto full dari atas sampai bawah — tidak di-crop */}
+            {/* Foto FULL menutupi seluruh card dari atas sampai bawah */}
             <img
               src="/images/DSC_0614-min.JPG"
               alt="CV"
               style={{
                 position: "absolute",
-                inset: 0,
+                top: 0,
+                left: 0,
                 width: "100%",
                 height: "100%",
-                objectFit: "contain",
+                objectFit: "cover",
                 objectPosition: "center center",
                 display: "block",
-                backgroundColor: "#0D3CFC",
                 borderRadius: "20px",
               }}
             />
