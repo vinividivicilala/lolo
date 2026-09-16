@@ -53,7 +53,7 @@ export default function CVPage(): React.JSX.Element {
     }
   }, [isOpen, isMounted]);
 
-  // Animasi GSAP foto: dari full menutupi card → ke tengah ukuran lebih besar
+  // Animasi GSAP foto
   useEffect(() => {
     if (!isMounted) return;
     if (!photoRef.current) return;
@@ -87,24 +87,22 @@ export default function CVPage(): React.JSX.Element {
     }
   }, [isOpen, isMounted]);
 
-  // Animasi GSAP teks (fade + slide + warna)
+  // Animasi GSAP teks (fade out → ganti → fade in)
   useEffect(() => {
     if (!isMounted) return;
     if (!textRef.current) return;
 
-    // Fade out dulu
     gsap.to(textRef.current, {
       opacity: 0,
-      y: -14,
-      duration: 0.25,
+      y: -18,
+      duration: 0.28,
       ease: "power2.in",
       onComplete: () => {
         if (!textRef.current) return;
-        // Ganti teks via React state (di-render ulang), lalu fade in
         gsap.fromTo(
           textRef.current,
-          { opacity: 0, y: 14 },
-          { opacity: 1, y: 0, duration: 0.35, ease: "power2.out" }
+          { opacity: 0, y: 18 },
+          { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }
         );
       },
     });
@@ -180,28 +178,73 @@ export default function CVPage(): React.JSX.Element {
               }}
             />
 
-            {/* ===== TEKS DI ATAS FOTO ===== */}
+            {/* ===== TEKS DI ATAS FOTO — 2 BARIS FONT BESAR PUTIH ===== */}
             <div
               ref={textRef}
               style={{
                 position: "absolute",
-                top: "24px",
+                top: "50%",
                 left: "0",
+                transform: "translateY(-50%)",
                 width: "100%",
                 textAlign: "center",
                 zIndex: 9,
                 fontFamily: FONT_FAMILY,
-                fontSize: "18px",
-                fontWeight: 700,
-                letterSpacing: "0.04em",
-                color: isOpen ? "#ffffff" : "#0D3CFC",
+                color: "#ffffff",
                 pointerEvents: "none",
-                textShadow: isOpen
-                  ? "0 2px 8px rgba(0,0,0,0.35)"
-                  : "0 2px 8px rgba(255,255,255,0.5)",
+                lineHeight: 1.05,
+                textShadow: "0 4px 16px rgba(0,0,0,0.55)",
+                padding: "0 16px",
+                boxSizing: "border-box",
               }}
             >
-              {isOpen ? "People Menuru" : "Curriculum Vitae Actual [ 16.09 ]"}
+              {isOpen ? (
+                <>
+                  <div
+                    style={{
+                      fontSize: "54px",
+                      fontWeight: 800,
+                      letterSpacing: "-0.02em",
+                      fontFamily: FONT_FAMILY,
+                    }}
+                  >
+                    People
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "54px",
+                      fontWeight: 800,
+                      letterSpacing: "-0.02em",
+                      fontFamily: FONT_FAMILY,
+                    }}
+                  >
+                    Menuru
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div
+                    style={{
+                      fontSize: "48px",
+                      fontWeight: 800,
+                      letterSpacing: "-0.02em",
+                      fontFamily: FONT_FAMILY,
+                    }}
+                  >
+                    Curriculum Vitae
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "48px",
+                      fontWeight: 800,
+                      letterSpacing: "-0.02em",
+                      fontFamily: FONT_FAMILY,
+                    }}
+                  >
+                    Actual [ 16.09 ]
+                  </div>
+                </>
+              )}
             </div>
 
             {/* ===== TOMBOL INFO / CLOSE DI ATAS KANAN ===== */}
