@@ -1,753 +1,552 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { useRouter } from "next/navigation";
+import React, { useEffect, useRef, useState } from "react";
+import Head from "next/head";
+import Link from "next/link";
 import gsap from "gsap";
 
-export default function HomePage(): React.JSX.Element {
-  const router = useRouter();
-  const [isMobile, setIsMobile] = useState(false);
-  const [loadingText, setLoadingText] = useState("NURU");
-  const [isLoading, setIsLoading] = useState(true);
-  const [isDarkMode, setIsDarkMode] = useState(true);
-  const [cursorType, setCursorType] = useState("default");
-  const [cursorText, setCursorText] = useState("");
-  const [hoveredLink, setHoveredLink] = useState("");
-  const [showDescription, setShowDescription] = useState(true);
-  const headerRef = useRef<HTMLDivElement>(null);
-  const cursorRef = useRef<HTMLDivElement>(null);
-  const topNavRef = useRef<HTMLDivElement>(null);
-  const scrollTextRef = useRef<HTMLDivElement>(null);
-  const descriptionRef = useRef<HTMLDivElement>(null);
+const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
 
-  // Animasi loading text
-  const loadingTexts = [
-    "NURU", "MBACA", "NULIS", "NGEXPLORASI", 
-    "NEMUKAN", "NCIPTA", "NGGALI", "NARIK",
-    "NGAMATI", "NANCANG", "NGEMBANGKAN", "NYUSUN"
-  ];
+// ===== SVG ICONS =====
+const MailIcon = ({ size = 18, color = "#ffffff" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <rect x="2" y="4" width="20" height="16" rx="2" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M2 7L12 13L22 7" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const PhoneIcon = ({ size = 18, color = "#ffffff" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <path d="M22 16.92V19.92C22 20.4704 21.5523 20.9202 21 20.9302C20.35 20.9402 19.7 20.8802 19.06 20.7502C15.35 20.0202 12.13 18.1502 9.75 15.7702C7.37 13.3902 5.5 10.1702 4.77 6.46017C4.64 5.82017 4.58 5.17017 4.59 4.52017C4.6 3.97017 5.05 3.52017 5.6 3.52017H8.6C9.14 3.52017 9.6 3.93017 9.65 4.47017C9.72 5.26017 9.86 6.04017 10.08 6.79017C10.24 7.34017 10.09 7.93017 9.68 8.34017L8.41 9.61017C9.9 12.1502 12.29 14.5402 14.83 16.0302L16.1 14.7602C16.51 14.3502 17.1 14.2002 17.65 14.3602C18.4 14.5802 19.18 14.7202 19.97 14.7902C20.52 14.8402 20.93 15.3102 20.93 15.8502V16.9202Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const MapPinIcon = ({ size = 18, color = "#ffffff" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <path d="M21 10C21 17 12 23 12 23C12 23 3 17 3 10C3 7.61305 3.94821 5.32387 5.63604 3.63604C7.32387 1.94821 9.61305 1 12 1C14.3869 1 16.6761 1.94821 18.364 3.63604C20.0518 5.32387 21 7.61305 21 10Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <circle cx="12" cy="10" r="3" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const LinkIcon = ({ size = 18, color = "#ffffff" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <path d="M10 13C10.4295 13.5741 10.9774 14.0491 11.6066 14.3929C12.2357 14.7367 12.9315 14.9411 13.6467 14.9923C14.3618 15.0435 15.0796 14.9403 15.7513 14.6897C16.4231 14.4392 17.0331 14.047 17.54 13.54L20.54 10.54C21.4508 9.59695 21.9548 8.33394 21.9434 7.02296C21.932 5.71198 21.4061 4.45791 20.4791 3.53087C19.5521 2.60383 18.298 2.07799 16.987 2.0666C15.676 2.0552 14.413 2.55918 13.47 3.47L11.75 5.18" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M14 11C13.5705 10.4259 13.0226 9.95083 12.3934 9.60704C11.7643 9.26325 11.0685 9.05886 10.3533 9.00769C9.63816 8.95652 8.92036 9.05971 8.24867 9.31026C7.57697 9.56081 6.96694 9.953 6.46 10.46L3.46 13.46C2.54918 14.403 2.0452 15.666 2.0566 16.977C2.068 18.288 2.59384 19.5421 3.52087 20.4691C4.44791 21.3962 5.70198 21.922 7.01296 21.9334C8.32394 21.9448 9.58695 21.4408 10.53 20.53L12.24 18.82" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const BriefcaseIcon = ({ size = 18, color = "#ffffff" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <rect x="2" y="7" width="20" height="14" rx="2" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M8 7V5C8 3.89543 8.89543 3 10 3H14C15.1046 3 16 3.89543 16 5V7" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M2 13H22" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const GraduationIcon = ({ size = 18, color = "#ffffff" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <path d="M22 10L12 5L2 10L12 15L22 10Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M6 12V17C6 17 9 20 12 20C15 20 18 17 18 17V12" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const StarIcon = ({ size = 16, color = "#ffffff" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill={color} />
+  </svg>
+);
+
+const DownloadIcon = ({ size = 18, color = "#0D3CFC" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <path d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M7 10L12 15L17 10" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M12 15V3" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const ArrowLeft = ({ size = 20, color = "#0D3CFC" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+// ===== CV PAGE =====
+export default function CVPage(): React.JSX.Element {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
+    setIsMounted(true);
+  }, []);
 
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
+  // Animasi GSAP masuk
+  useEffect(() => {
+    if (!isMounted) return;
+    if (!cardRef.current) return;
 
-    // Animasi loading text
-    let currentIndex = 0;
-    const textInterval = setInterval(() => {
-      currentIndex = (currentIndex + 1) % loadingTexts.length;
-      setLoadingText(loadingTexts[currentIndex]);
-    }, 500);
+    gsap.fromTo(
+      cardRef.current,
+      { opacity: 0, y: 60, scale: 0.96 },
+      { opacity: 1, y: 0, scale: 1, duration: 0.9, ease: "power3.out" }
+    );
 
-    // Hentikan loading setelah selesai
-    const loadingTimeout = setTimeout(() => {
-      setIsLoading(false);
-      clearInterval(textInterval);
-    }, 3000);
-
-    // Animasi teks berjalan dari atas ke bawah
-    const setupAutoScroll = () => {
-      if (scrollTextRef.current) {
-        const itemHeight = isMobile ? 80 : 100;
-        const totalItems = 15;
-        const totalScrollDistance = totalItems * itemHeight - window.innerHeight;
-        
-        // Hapus animasi sebelumnya jika ada
-        gsap.killTweensOf(scrollTextRef.current);
-        
-        // Animasi infinite loop dari atas ke bawah
-        gsap.to(scrollTextRef.current, {
-          y: -totalScrollDistance,
-          duration: 20,
-          ease: "none",
-          repeat: -1,
-          yoyo: false
-        });
-      }
-    };
-
-    // Handle scroll untuk hide/show description
-    const handleScroll = () => {
-      if (descriptionRef.current) {
-        const descriptionRect = descriptionRef.current.getBoundingClientRect();
-        // Jika deskripsi sudah hampir keluar dari viewport (atas), sembunyikan
-        if (descriptionRect.top < -50) {
-          setShowDescription(false);
-        } else {
-          setShowDescription(true);
+    if (containerRef.current) {
+      const sections = containerRef.current.querySelectorAll("[data-cv-section]");
+      gsap.fromTo(
+        sections,
+        { opacity: 0, y: 30 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.6,
+          stagger: 0.08,
+          ease: "power2.out",
+          delay: 0.4,
         }
-      }
-    };
-
-    // Setup auto scroll setelah component mount
-    setTimeout(setupAutoScroll, 100);
-    window.addEventListener('resize', setupAutoScroll);
-    window.addEventListener('scroll', handleScroll);
-
-    // Custom cursor animation
-    const moveCursor = (e: MouseEvent) => {
-      if (cursorRef.current) {
-        gsap.to(cursorRef.current, {
-          x: e.clientX,
-          y: e.clientY,
-          duration: 0.1,
-          ease: "power2.out"
-        });
-      }
-    };
-
-    document.addEventListener('mousemove', moveCursor);
-
-    return () => {
-      window.removeEventListener('resize', checkMobile);
-      window.removeEventListener('resize', setupAutoScroll);
-      window.removeEventListener('scroll', handleScroll);
-      clearInterval(textInterval);
-      clearTimeout(loadingTimeout);
-      document.removeEventListener('mousemove', moveCursor);
-      if (scrollTextRef.current) {
-        gsap.killTweensOf(scrollTextRef.current);
-      }
-    };
-  }, [isMobile]);
-
-  // Fungsi toggle dark/light mode
-  const toggleColorMode = () => {
-    setIsDarkMode(!isDarkMode);
-  };
-
-  // Handler untuk cursor hover
-  const handleLinkHover = (type: string, text: string = "", linkName: string = "") => {
-    setCursorType(type);
-    setCursorText(text);
-    setHoveredLink(linkName);
-  };
-
-  const handleLinkLeave = () => {
-    setCursorType("default");
-    setCursorText("");
-    setHoveredLink("");
-  };
-
-  // Warna cursor
-  const getCursorColors = () => {
-    if (cursorType === "link") {
-      return {
-        dotColor: '#6366F1',
-        textColor: 'white'
-      };
+      );
     }
-    
-    return {
-      dotColor: '#EC4899',
-      textColor: 'white'
-    };
-  };
+  }, [isMounted]);
 
-  const cursorColors = getCursorColors();
+  if (!isMounted) {
+    return <div style={{ minHeight: "100vh", backgroundColor: "#ffffff" }} />;
+  }
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      backgroundColor: isDarkMode ? 'black' : '#ff0028',
-      margin: 0,
-      padding: 0,
-      width: '100%',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'flex-start',
-      alignItems: 'center',
-      position: 'relative',
-      overflow: 'hidden',
-      fontFamily: 'Helvetica, Arial, sans-serif',
-      WebkitFontSmoothing: 'antialiased',
-      MozOsxFontSmoothing: 'grayscale',
-      transition: 'background-color 0.5s ease',
-      cursor: 'none'
-    }}>
+    <>
+      <Head>
+        <title>CV | Menuru Official</title>
+        <meta name="description" content="CV - Menuru Official" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+        <meta name="theme-color" content="#0D3CFC" />
+        <link rel="icon" href="/images/ai.jpg" type="image/jpeg" />
+        <link rel="apple-touch-icon" href="/images/ai.jpg" />
+      </Head>
 
-      {/* Custom Cursor */}
+      {/* ===== BACKGROUND ===== */}
       <div
-        ref={cursorRef}
         style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: cursorType === "link" ? '140px' : '20px',
-          height: cursorType === "link" ? '60px' : '20px',
-          backgroundColor: cursorColors.dotColor,
-          borderRadius: cursorType === "link" ? '30px' : '50%',
-          pointerEvents: 'none',
-          zIndex: 9999,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '14px',
-          fontWeight: '700',
-          color: cursorColors.textColor,
-          textAlign: 'center',
-          transition: 'all 0.2s ease',
-          transform: 'translate(-50%, -50%)',
-          padding: cursorType === "link" ? '0 20px' : '0',
-          boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
-          border: 'none'
+          minHeight: "100vh",
+          width: "100%",
+          backgroundColor: "#ffffff",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "flex-start",
+          padding: "80px 24px 80px 24px",
+          fontFamily: FONT_FAMILY,
+          boxSizing: "border-box",
         }}
       >
-        {cursorType === "link" && (
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
-          }}>
-            <span style={{ 
-              fontSize: '14px', 
-              fontWeight: '700',
-              letterSpacing: '0.5px',
-              whiteSpace: 'nowrap'
-            }}>
-              {cursorText}
-            </span>
-            <svg 
-              width="20" 
-              height="20" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke={cursorColors.textColor}
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M7 17L17 7M17 7H7M17 7V17"/>
-            </svg>
-          </div>
-        )}
-      </div>
-
-      {/* Top Navigation Bar */}
-      <div 
-        ref={topNavRef}
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100%',
-          padding: isMobile ? '0.8rem 1rem' : '1rem 2rem',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 101,
-          boxSizing: 'border-box',
-          opacity: 1
-        }}
-      >
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: isMobile ? '1rem' : '2rem',
-          backgroundColor: 'transparent',
-          backdropFilter: 'blur(10px)',
-          borderRadius: '50px',
-          padding: isMobile ? '0.6rem 1rem' : '0.8rem 1.5rem',
-          border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.3)'}`,
-          boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
-        }}>
-          {/* Docs */}
-          <motion.div
-            onClick={() => router.push('/docs')}
-            onMouseEnter={() => handleLinkHover("link", "VIEW", "docs")}
-            onMouseLeave={handleLinkLeave}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              cursor: 'none',
-              padding: '0.4rem 0.8rem',
-              borderRadius: '25px',
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.95)',
-              border: isDarkMode ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(255,255,255,0.3)',
-              transition: 'all 0.3s ease'
-            }}
-            whileHover={{ 
-              backgroundColor: 'white',
-              scale: 1.05,
-              border: '1px solid white'
-            }}
-          >
-            <svg 
-              width={isMobile ? "18" : "20"} 
-              height={isMobile ? "18" : "20"} 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="#6366F1"
-              strokeWidth="2"
-            >
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-              <polyline points="14,2 14,8 20,8"/>
-              <line x1="16" y1="13" x2="8" y2="13"/>
-              <line x1="16" y1="17" x2="8" y2="17"/>
-              <polyline points="10,9 9,9 8,9"/>
-            </svg>
-            <span style={{
-              color: '#6366F1',
-              fontSize: isMobile ? '0.8rem' : '0.9rem',
-              fontWeight: '600',
-              fontFamily: 'Helvetica, Arial, sans-serif'
-            }}>
-              Docs
-            </span>
-            <div style={{
-              backgroundColor: '#EC4899',
-              color: 'white',
-              fontSize: '0.7rem',
-              fontWeight: '700',
-              padding: '0.1rem 0.4rem',
-              borderRadius: '10px',
-              marginLeft: '0.3rem',
-              border: 'none'
-            }}>
-              NEW
-            </div>
-          </motion.div>
-
-          {/* Chatbot */}
-          <motion.div
-            onClick={() => router.push('/chatbot')}
-            onMouseEnter={() => handleLinkHover("link", "VIEW", "chatbot")}
-            onMouseLeave={handleLinkLeave}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              cursor: 'none',
-              padding: '0.4rem 0.8rem',
-              borderRadius: '25px',
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.95)',
-              border: isDarkMode ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(255,255,255,0.3)',
-              transition: 'all 0.3s ease'
-            }}
-            whileHover={{ 
-              backgroundColor: 'white',
-              scale: 1.05,
-              border: '1px solid white'
-            }}
-          >
-            <svg 
-              width={isMobile ? "18" : "20"} 
-              height={isMobile ? "18" : "20"} 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="#6366F1"
-              strokeWidth="2"
-            >
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-              <line x1="8" y1="7" x2="16" y2="7"/>
-              <line x1="8" y1="11" x2="12" y2="11"/>
-            </svg>
-            <span style={{
-              color: '#6366F1',
-              fontSize: isMobile ? '0.8rem' : '0.9rem',
-              fontWeight: '600',
-              fontFamily: 'Helvetica, Arial, sans-serif'
-            }}>
-              Chatbot
-            </span>
-            <div style={{
-              backgroundColor: '#EC4899',
-              color: 'white',
-              fontSize: '0.7rem',
-              fontWeight: '700',
-              padding: '0.1rem 0.4rem',
-              borderRadius: '10px',
-              marginLeft: '0.3rem',
-              border: 'none'
-            }}>
-              NEW
-            </div>
-          </motion.div>
-
-          {/* Update */}
-          <motion.div
-            onClick={() => router.push('/update')}
-            onMouseEnter={() => handleLinkHover("link", "VIEW", "update")}
-            onMouseLeave={handleLinkLeave}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              cursor: 'none',
-              padding: '0.4rem 0.8rem',
-              borderRadius: '25px',
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.95)',
-              border: isDarkMode ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(255,255,255,0.3)',
-              transition: 'all 0.3s ease'
-            }}
-            whileHover={{ 
-              backgroundColor: 'white',
-              scale: 1.05,
-              border: '1px solid white'
-            }}
-          >
-            <svg 
-              width={isMobile ? "18" : "20"} 
-              height={isMobile ? "18" : "20"} 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="#6366F1"
-              strokeWidth="2"
-            >
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-              <polyline points="14,2 14,8 20,8"/>
-              <line x1="16" y1="13" x2="8" y2="13"/>
-              <line x1="16" y1="17" x2="8" y2="17"/>
-              <polyline points="10,9 9,9 8,9"/>
-            </svg>
-            <span style={{
-              color: '#6366F1',
-              fontSize: isMobile ? '0.8rem' : '0.9rem',
-              fontWeight: '600',
-              fontFamily: 'Helvetica, Arial, sans-serif'
-            }}>
-              Update
-            </span>
-            <div style={{
-              backgroundColor: '#EC4899',
-              color: 'white',
-              fontSize: '0.7rem',
-              fontWeight: '700',
-              padding: '0.1rem 0.4rem',
-              borderRadius: '10px',
-              marginLeft: '0.3rem',
-              border: 'none'
-            }}>
-              NEW
-            </div>
-          </motion.div>
-
-          {/* Timeline */}
-          <motion.div
-            onClick={() => router.push('/timeline')}
-            onMouseEnter={() => handleLinkHover("link", "VIEW", "timeline")}
-            onMouseLeave={handleLinkLeave}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              cursor: 'none',
-              padding: '0.4rem 0.8rem',
-              borderRadius: '25px',
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.95)',
-              border: isDarkMode ? '1px solid rgba(255,255,255,0.2)' : '1px solid rgba(255,255,255,0.3)',
-              transition: 'all 0.3s ease'
-            }}
-            whileHover={{ 
-              backgroundColor: 'white',
-              scale: 1.05,
-              border: '1px solid white'
-            }}
-          >
-            <svg 
-              width={isMobile ? "18" : "20"} 
-              height={isMobile ? "18" : "20"} 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="#6366F1"
-              strokeWidth="2"
-            >
-              <polyline points="1 4 1 10 7 10"/>
-              <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
-              <line x1="12" y1="7" x2="12" y2="13"/>
-              <line x1="16" y1="11" x2="12" y2="7"/>
-            </svg>
-            <span style={{
-              color: '#6366F1',
-              fontSize: isMobile ? '0.8rem' : '0.9rem',
-              fontWeight: '600',
-              fontFamily: 'Helvetica, Arial, sans-serif'
-            }}>
-              Timeline
-            </span>
-            <div style={{
-              backgroundColor: '#EC4899',
-              color: 'white',
-              fontSize: '0.7rem',
-              fontWeight: '700',
-              padding: '0.1rem 0.4rem',
-              borderRadius: '10px',
-              marginLeft: '0.3rem',
-              border: 'none'
-            }}>
-              NEW
-            </div>
-          </motion.div>
-        </div>
-      </div>
-
-      {/* Header Section */}
-      <div 
-        ref={headerRef}
-        style={{
-          position: 'fixed',
-          top: isMobile ? '3.5rem' : '4.5rem',
-          left: 0,
-          width: '100%',
-          padding: isMobile ? '1rem' : '2rem',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          zIndex: 100,
-          boxSizing: 'border-box',
-          opacity: 1
-        }}
-      >
-        {/* Teks "MENURU" dengan animasi loading hanya di bagian NURU */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8, delay: 0.5 }}
-        >
-          <div style={{
-            fontSize: isMobile ? '1.5rem' : '2.5rem',
-            fontWeight: '300',
-            fontFamily: 'Helvetica, Arial, sans-serif',
-            margin: 0,
-            letterSpacing: '2px',
-            lineHeight: 1,
-            textTransform: 'uppercase',
-            color: isDarkMode ? 'white' : 'black',
-            minHeight: isMobile ? '1.8rem' : '2.8rem',
-            display: 'flex',
-            alignItems: 'center',
-            transition: 'color 0.5s ease'
-          }}>
-            ME
-            <AnimatePresence mode="wait">
-              {isLoading ? (
-                <motion.span
-                  key={loadingText}
-                  initial={{ opacity: 0, y: 5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -5 }}
-                  transition={{ duration: 0.3 }}
-                  style={{
-                    display: 'inline-block'
-                  }}
-                >
-                  {loadingText}
-                </motion.span>
-              ) : (
-                <motion.span
-                  key="nuru-final"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  NURU
-                </motion.span>
-              )}
-            </AnimatePresence>
-          </div>
-        </motion.div>
-
-        {/* Right Side Buttons */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: isMobile ? '0.8rem' : '1rem'
-        }}>
-          {/* Color Mode Toggle Button */}
-          <motion.button
-            onClick={toggleColorMode}
-            onMouseEnter={() => handleLinkHover("link", "VIEW", "theme")}
-            onMouseLeave={handleLinkLeave}
-            style={{
-              padding: isMobile ? '0.4rem 0.8rem' : '0.6rem 1rem',
-              fontSize: isMobile ? '0.8rem' : '1rem',
-              fontWeight: '600',
-              color: 'white',
-              backgroundColor: 'transparent',
-              border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.3)'}`,
-              borderRadius: '50px',
-              cursor: 'none',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              backdropFilter: 'blur(10px)',
-              whiteSpace: 'nowrap',
-              display: 'flex',
-              alignItems: 'center',
-              gap: isMobile ? '0.3rem' : '0.5rem',
-              margin: 0,
-              transition: 'all 0.3s ease',
-              boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
-            }}
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1, duration: 0.6 }}
-            whileHover={{ 
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.2)',
-              scale: 1.05,
-              border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.5)'}`,
-              transition: { duration: 0.2 }
-            }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <motion.div
-              animate={{ rotate: isDarkMode ? 0 : 180 }}
-              transition={{ duration: 0.5 }}
-            >
-              {isDarkMode ? '☀️' : '🌙'}
-            </motion.div>
-            {isMobile ? '' : (isDarkMode ? 'LIGHT' : 'DARK')}
-          </motion.button>
-
-          {/* Sign In Button */}
-          <motion.button
-            onClick={() => router.push('/signin')}
-            onMouseEnter={() => handleLinkHover("link", "VIEW", "signin")}
-            onMouseLeave={handleLinkLeave}
-            style={{
-              padding: isMobile ? '0.4rem 1rem' : '0.6rem 1.5rem',
-              fontSize: isMobile ? '0.9rem' : '1.5rem',
-              fontWeight: '600',
-              color: 'white',
-              backgroundColor: 'transparent',
-              border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.3)'}`,
-              borderRadius: '50px',
-              cursor: 'none',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              backdropFilter: 'blur(10px)',
-              whiteSpace: 'nowrap',
-              display: 'flex',
-              alignItems: 'center',
-              gap: isMobile ? '0.3rem' : '0.5rem',
-              margin: 0,
-              maxWidth: isMobile ? '120px' : 'none',
-              transition: 'all 0.3s ease',
-              boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
-            }}
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.2, duration: 0.6 }}
-            whileHover={{ 
-              backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.2)',
-              scale: 1.05,
-              border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.5)'}`,
-              transition: { duration: 0.2 }
-            }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <svg 
-              width={isMobile ? "18" : "30"} 
-              height={isMobile ? "18" : "30"} 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2"
-            >
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-              <circle cx="12" cy="7" r="4"/>
-            </svg>
-            {isMobile ? 'SIGN IN' : 'SIGN IN'}
-          </motion.button>
-        </div>
-      </div>
-
-      {/* Deskripsi MENURU di Body Halaman Utama - DIBUAT HILANG SAAT SCROLL */}
-      <motion.div
-        ref={descriptionRef}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: showDescription ? 1 : 0, y: showDescription ? 0 : -20 }}
-        transition={{ duration: 0.5 }}
-        style={{
-          position: 'absolute',
-          top: isMobile ? '8rem' : '12rem',
-          left: isMobile ? '1rem' : '2rem',
-          width: isMobile ? 'calc(100% - 2rem)' : '800px',
-          maxWidth: '800px',
-          textAlign: 'left',
-          marginBottom: '2rem',
-          zIndex: 20,
-          pointerEvents: showDescription ? 'auto' : 'none'
-        }}
-      >
-        <p style={{
-          color: isDarkMode ? 'white' : 'black',
-          fontSize: isMobile ? '1.8rem' : '3.5rem',
-          fontWeight: '400',
-          fontFamily: 'HelveticaNowDisplay, Arial, sans-serif',
-          lineHeight: 1.1,
-          margin: 0,
-          marginBottom: isMobile ? '1.5rem' : '2rem',
-          transition: 'color 0.5s ease',
-          wordWrap: 'break-word',
-          overflowWrap: 'break-word'
-        }}>
-          Menuru is a branding personal journal life with a experiences of self about happy, sad, angry, etc.
-        </p>
-
-        {/* Foto di bawah teks deskripsi */}
-        <div style={{
-          width: isMobile ? 'calc(100% - 1rem)' : '650px', // Lebar sedikit lebih kecil
-          marginLeft: isMobile ? '0.5rem' : '1.5rem', // Geser ke kiri sedikit
-          overflow: 'hidden',
-          borderRadius: '15px',
-          boxShadow: '0 15px 40px rgba(0,0,0,0.4)',
-          border: `2px solid ${isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
-          marginTop: '1rem' // Jarak dari teks
-        }}>
-          <img 
-            src="images/5.jpg" 
-            alt="Menuru Visual"
-            style={{
-              width: '100%',
-              height: 'auto',
-              display: 'block',
-              objectFit: 'cover',
-              borderRadius: '13px'
-            }}
-            onError={(e) => {
-              console.error("Gambar tidak ditemukan:", e);
-              e.currentTarget.style.backgroundColor = isDarkMode ? '#333' : '#eee';
-              e.currentTarget.style.display = 'flex';
-              e.currentTarget.style.alignItems = 'center';
-              e.currentTarget.style.justifyContent = 'center';
-              e.currentTarget.style.color = isDarkMode ? '#fff' : '#000';
-              e.currentTarget.style.height = '400px';
-              e.currentTarget.innerHTML = '<div style="padding: 2rem; text-align: center;">Image: 5.jpg</div>';
-            }}
-          />
-        </div>
-      </motion.div>
-
-      {/* Content tambahan untuk membuat halaman lebih panjang */}
-      <div style={{
-        height: '150vh',
-        width: '100%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginTop: isMobile ? '90vh' : '80vh', // Disesuaikan agar ada jarak dengan foto
-        zIndex: 10,
-        position: 'relative'
-      }}>
-        <motion.p
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ duration: 0.8 }}
+        {/* ===== BG BIRU KOTAK PANJANG BESAR KE BAWAH DI TENGAH ===== */}
+        <div
+          ref={cardRef}
           style={{
-            color: isDarkMode ? 'white' : 'black',
-            fontSize: isMobile ? '1.5rem' : '2rem',
-            fontWeight: '300',
-            textAlign: 'center',
-            maxWidth: '600px',
-            padding: '0 2rem'
+            width: "100%",
+            maxWidth: "900px",
+            backgroundColor: "#0D3CFC",
+            borderRadius: "20px",
+            boxShadow: "0 20px 60px rgba(13,60,252,0.35)",
+            padding: "48px 48px 56px 48px",
+            color: "#ffffff",
+            display: "flex",
+            flexDirection: "column",
+            gap: "32px",
+            position: "relative",
           }}
         >
-          More content coming soon...
-        </motion.p>
+          {/* ===== TOMBOL BACK ===== */}
+          <Link
+            href="/"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "8px",
+              textDecoration: "none",
+              color: "#ffffff",
+              fontSize: "14px",
+              fontWeight: 600,
+              fontFamily: FONT_FAMILY,
+              alignSelf: "flex-start",
+              padding: "8px 16px",
+              backgroundColor: "rgba(255,255,255,0.15)",
+              border: "1px solid rgba(255,255,255,0.25)",
+              borderRadius: "10px",
+            }}
+          >
+            <ArrowLeft size={16} color="#ffffff" />
+            Back to Home
+          </Link>
+
+          {/* ===== HEADER: FOTO + NAMA + TITLE ===== */}
+          <div
+            data-cv-section
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "28px",
+              flexWrap: "wrap",
+            }}
+          >
+            {/* Foto profil */}
+            <div
+              style={{
+                width: "140px",
+                height: "140px",
+                borderRadius: "20px",
+                overflow: "hidden",
+                border: "4px solid rgba(255,255,255,0.3)",
+                flexShrink: 0,
+                backgroundColor: "rgba(255,255,255,0.1)",
+              }}
+            >
+              <img
+                src="/images/ai.jpg"
+                alt="Profile"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  display: "block",
+                }}
+              />
+            </div>
+
+            {/* Nama + Title + Kontak */}
+            <div style={{ flex: 1, minWidth: "260px" }}>
+              <h1
+                style={{
+                  fontSize: "42px",
+                  fontWeight: 700,
+                  color: "#ffffff",
+                  margin: 0,
+                  letterSpacing: "-0.02em",
+                  lineHeight: 1.1,
+                  fontFamily: FONT_FAMILY,
+                }}
+              >
+                Farid Ardiansyah
+              </h1>
+              <p
+                style={{
+                  fontSize: "18px",
+                  fontWeight: 500,
+                  color: "rgba(255,255,255,0.9)",
+                  margin: "8px 0 16px 0",
+                  letterSpacing: "0.02em",
+                  fontFamily: FONT_FAMILY,
+                }}
+              >
+                Full Stack Developer & UI Designer
+              </p>
+
+              {/* Kontak */}
+              <div
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: "14px",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", color: "rgba(255,255,255,0.9)", fontFamily: FONT_FAMILY }}>
+                  <MailIcon size={16} color="#ffffff" />
+                  farid@menuru.com
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", color: "rgba(255,255,255,0.9)", fontFamily: FONT_FAMILY }}>
+                  <PhoneIcon size={16} color="#ffffff" />
+                  +62 812-3456-7890
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", color: "rgba(255,255,255,0.9)", fontFamily: FONT_FAMILY }}>
+                  <MapPinIcon size={16} color="#ffffff" />
+                  Jakarta, Indonesia
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", color: "rgba(255,255,255,0.9)", fontFamily: FONT_FAMILY }}>
+                  <LinkIcon size={16} color="#ffffff" />
+                  menuru.com
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ===== GARIS PEMISAH ===== */}
+          <div data-cv-section style={{ height: "1px", backgroundColor: "rgba(255,255,255,0.25)", width: "100%" }} />
+
+          {/* ===== TENTANG SAYA ===== */}
+          <div data-cv-section style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+            <h2
+              style={{
+                fontSize: "20px",
+                fontWeight: 700,
+                color: "#ffffff",
+                margin: 0,
+                letterSpacing: "0.02em",
+                fontFamily: FONT_FAMILY,
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+              }}
+            >
+              <StarIcon size={18} color="#ffffff" />
+              About Me
+            </h2>
+            <p
+              style={{
+                fontSize: "14px",
+                fontWeight: 400,
+                lineHeight: 1.7,
+                color: "rgba(255,255,255,0.9)",
+                margin: 0,
+                fontFamily: FONT_FAMILY,
+              }}
+            >
+              Saya adalah seorang Full Stack Developer dengan pengalaman lebih dari 5 tahun dalam
+              membangun aplikasi web modern. Fokus saya adalah menciptakan pengalaman digital yang
+              cepat, aman, dan mudah digunakan. Saya senang bekerja dalam tim kolaboratif dan terus
+              belajar teknologi baru untuk memberikan solusi terbaik.
+            </p>
+          </div>
+
+          {/* ===== PENGALAMAN KERJA ===== */}
+          <div data-cv-section style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            <h2
+              style={{
+                fontSize: "20px",
+                fontWeight: 700,
+                color: "#ffffff",
+                margin: 0,
+                letterSpacing: "0.02em",
+                fontFamily: FONT_FAMILY,
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+              }}
+            >
+              <BriefcaseIcon size={18} color="#ffffff" />
+              Work Experience
+            </h2>
+
+            {[
+              {
+                role: "Senior Full Stack Developer",
+                company: "Menuru Official",
+                period: "2022 - Sekarang",
+                desc: "Memimpin pengembangan platform e-commerce dengan Next.js, Firebase, dan sistem pembayaran terintegrasi.",
+              },
+              {
+                role: "Frontend Developer",
+                company: "Tech Innovate Studio",
+                period: "2020 - 2022",
+                desc: "Membangun UI/UX responsif untuk klien enterprise menggunakan React, TypeScript, dan Tailwind CSS.",
+              },
+              {
+                role: "Junior Web Developer",
+                company: "Digital Kreatif Agency",
+                period: "2019 - 2020",
+                desc: "Mengembangkan website company profile dan landing page untuk berbagai klien UMKM.",
+              },
+            ].map((exp, i) => (
+              <div
+                key={i}
+                style={{
+                  backgroundColor: "rgba(255,255,255,0.1)",
+                  border: "1px solid rgba(255,255,255,0.2)",
+                  borderRadius: "12px",
+                  padding: "16px 20px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "6px",
+                }}
+              >
+                <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: "8px" }}>
+                  <span
+                    style={{
+                      fontSize: "16px",
+                      fontWeight: 700,
+                      color: "#ffffff",
+                      fontFamily: FONT_FAMILY,
+                    }}
+                  >
+                    {exp.role}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: "13px",
+                      fontWeight: 500,
+                      color: "rgba(255,255,255,0.85)",
+                      fontFamily: FONT_FAMILY,
+                    }}
+                  >
+                    {exp.period}
+                  </span>
+                </div>
+                <span
+                  style={{
+                    fontSize: "14px",
+                    fontWeight: 500,
+                    color: "rgba(255,255,255,0.95)",
+                    fontFamily: FONT_FAMILY,
+                  }}
+                >
+                  {exp.company}
+                </span>
+                <p
+                  style={{
+                    fontSize: "13px",
+                    fontWeight: 400,
+                    lineHeight: 1.6,
+                    color: "rgba(255,255,255,0.85)",
+                    margin: 0,
+                    fontFamily: FONT_FAMILY,
+                  }}
+                >
+                  {exp.desc}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          {/* ===== PENDIDIKAN ===== */}
+          <div data-cv-section style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            <h2
+              style={{
+                fontSize: "20px",
+                fontWeight: 700,
+                color: "#ffffff",
+                margin: 0,
+                letterSpacing: "0.02em",
+                fontFamily: FONT_FAMILY,
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+              }}
+            >
+              <GraduationIcon size={18} color="#ffffff" />
+              Education
+            </h2>
+
+            <div
+              style={{
+                backgroundColor: "rgba(255,255,255,0.1)",
+                border: "1px solid rgba(255,255,255,0.2)",
+                borderRadius: "12px",
+                padding: "16px 20px",
+                display: "flex",
+                flexDirection: "column",
+                gap: "6px",
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: "8px" }}>
+                <span style={{ fontSize: "16px", fontWeight: 700, color: "#ffffff", fontFamily: FONT_FAMILY }}>
+                  S1 Teknik Informatika
+                </span>
+                <span style={{ fontSize: "13px", fontWeight: 500, color: "rgba(255,255,255,0.85)", fontFamily: FONT_FAMILY }}>
+                  2015 - 2019
+                </span>
+              </div>
+              <span style={{ fontSize: "14px", fontWeight: 500, color: "rgba(255,255,255,0.95)", fontFamily: FONT_FAMILY }}>
+                Universitas Indonesia
+              </span>
+              <p style={{ fontSize: "13px", fontWeight: 400, lineHeight: 1.6, color: "rgba(255,255,255,0.85)", margin: 0, fontFamily: FONT_FAMILY }}>
+                Fokus pada pengembangan perangkat lunak dan sistem informasi. IPK 3.75/4.00.
+              </p>
+            </div>
+          </div>
+
+          {/* ===== SKILLS ===== */}
+          <div data-cv-section style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            <h2
+              style={{
+                fontSize: "20px",
+                fontWeight: 700,
+                color: "#ffffff",
+                margin: 0,
+                letterSpacing: "0.02em",
+                fontFamily: FONT_FAMILY,
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+              }}
+            >
+              <StarIcon size={18} color="#ffffff" />
+              Skills
+            </h2>
+
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
+              {[
+                "JavaScript", "TypeScript", "React", "Next.js", "Node.js",
+                "Firebase", "Tailwind CSS", "GSAP", "Figma", "Git", "REST API", "MongoDB",
+              ].map((skill, i) => (
+                <span
+                  key={i}
+                  style={{
+                    fontSize: "13px",
+                    fontWeight: 600,
+                    color: "#ffffff",
+                    backgroundColor: "rgba(255,255,255,0.15)",
+                    border: "1px solid rgba(255,255,255,0.3)",
+                    borderRadius: "20px",
+                    padding: "8px 16px",
+                    fontFamily: FONT_FAMILY,
+                  }}
+                >
+                  {skill}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* ===== TOMBOL DOWNLOAD CV ===== */}
+          <div data-cv-section style={{ display: "flex", justifyContent: "flex-start", marginTop: "8px" }}>
+            <button
+              onClick={() => window.print()}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                padding: "12px 24px",
+                backgroundColor: "#ffffff",
+                color: "#0D3CFC",
+                border: "none",
+                borderRadius: "10px",
+                fontSize: "14px",
+                fontWeight: 700,
+                cursor: "pointer",
+                fontFamily: FONT_FAMILY,
+                boxShadow: "0 8px 24px rgba(0,0,0,0.2)",
+              }}
+            >
+              <DownloadIcon size={18} color="#0D3CFC" />
+              Download CV (Print)
+            </button>
+          </div>
+        </div>
       </div>
-    </div>
+
+      <style jsx global>{`
+        html, body {
+          margin: 0;
+          padding: 0;
+          background-color: #ffffff;
+          font-family: ${FONT_FAMILY};
+        }
+        body::-webkit-scrollbar {
+          width: 8px;
+        }
+        body::-webkit-scrollbar-thumb {
+          background-color: #0D3CFC;
+          border-radius: 4px;
+        }
+        body::-webkit-scrollbar-track {
+          background-color: #f1f1f1;
+        }
+        @media print {
+          body {
+            background-color: #ffffff;
+          }
+          a, button {
+            display: none !important;
+          }
+        }
+      `}</style>
+    </>
   );
 }
