@@ -113,14 +113,10 @@ async function encryptMessage(text: string): Promise<string> {
 async function decryptMessage(encrypted: string): Promise<string> {
   try {
     if (typeof window === "undefined" || !window.crypto) {
-      if (encrypted.startsWith("encrypted:")) {
-        return decodeURIComponent(escape(atob(encrypted.substring(10))));
-      }
+      if (encrypted.startsWith("encrypted:")) return decodeURIComponent(escape(atob(encrypted.substring(10))));
       return encrypted;
     }
-    if (encrypted.startsWith("plain:")) {
-      return decodeURIComponent(escape(atob(encrypted.substring(6))));
-    }
+    if (encrypted.startsWith("plain:")) return decodeURIComponent(escape(atob(encrypted.substring(6))));
     if (!encrypted.startsWith("encrypted:")) return encrypted;
     const base64Data = encrypted.substring(10);
     const combined = base64ToUint8Array(base64Data);
@@ -668,7 +664,7 @@ const WorkExperienceItem = () => {
   );
 };
 
-// ===== LIVE CHAT AGENT (FULL DESIGN SAMA SEPERTI HALAMAN UTAMA) =====
+// ===== LIVE CHAT AGENT =====
 const LiveChatAgent = ({ user, isAdmin }: { user: any; isAdmin: boolean }) => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
@@ -685,9 +681,7 @@ const LiveChatAgent = ({ user, isAdmin }: { user: any; isAdmin: boolean }) => {
   const [canSendMessage, setCanSendMessage] = useState(true);
   const [onlineAgents, setOnlineAgents] = useState<any[]>([]);
   const [onlineUsers, setOnlineUsers] = useState<any[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
 
-  const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatMessagesContainerRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -728,7 +722,7 @@ const LiveChatAgent = ({ user, isAdmin }: { user: any; isAdmin: boolean }) => {
     checkBan();
   }, [user, isMounted]);
 
-  // Online users/agents
+  // Online users
   useEffect(() => {
     if (!db || !isMounted) return;
     const q = query(collection(db, "users"), where("online", "==", true));
@@ -773,7 +767,7 @@ const LiveChatAgent = ({ user, isAdmin }: { user: any; isAdmin: boolean }) => {
     return () => unsubscribe();
   }, [db, user, isAdmin, isMounted]);
 
-  // Messages for selected ticket
+  // Messages
   useEffect(() => {
     if (!db || !selectedTicket || !isMounted) return;
     const q = query(collection(db, "livechat_tickets", selectedTicket.id, "messages"), orderBy("timestamp", "asc"));
@@ -945,7 +939,6 @@ const LiveChatAgent = ({ user, isAdmin }: { user: any; isAdmin: boolean }) => {
     );
   };
 
-  // Not logged in
   if (!user) {
     return (
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", gap: "16px", padding: "40px 20px", textAlign: "center", fontFamily: FONT_FAMILY }}>
@@ -975,19 +968,26 @@ const LiveChatAgent = ({ user, isAdmin }: { user: any; isAdmin: boolean }) => {
 
   return (
     <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", fontFamily: FONT_FAMILY, overflow: "hidden" }}>
-      {/* Header title */}
-      <div style={{ padding: "14px 16px", borderBottom: "1px solid #e8e8e8", flexShrink: 0 }}>
-        <div style={{ fontSize: "16px", fontWeight: 700, color: "#0D3CFC" }}>Live Chat Agent</div>
+      {/* Header */}
+      <div style={{ padding: "14px 20px", borderBottom: "1px solid #e8e8e8", flexShrink: 0, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div style={{ fontSize: "18px", fontWeight: 700, color: "#0D3CFC" }}>Live Chat Agent</div>
+        {!isAdmin && (
+          <button
+            onClick={() => setShowStartChat(true)}
+            style={{ padding: "8px 14px", backgroundColor: "#0D3CFC", color: "#ffffff", border: "none", borderRadius: "8px", fontSize: "12px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY }}
+          >
+            + New Chat
+          </button>
+        )}
       </div>
 
-      {/* Chat layout: list + area */}
-      <div style={{ flex: 1, display: "flex", gap: "10px", padding: "10px", minHeight: 0, overflow: "hidden" }}>
-        {/* CHAT LIST — warna biru seperti halaman utama */}
+      {/* Layout: chat list (kiri) + chat area (kanan) */}
+      <div style={{ flex: 1, display: "flex", minHeight: 0, overflow: "hidden" }}>
+        {/* CHAT LIST — warna biru */}
         <div
           style={{
-            width: "140px",
+            width: "200px",
             backgroundColor: "#0D3CFC",
-            borderRadius: "10px",
             overflowY: "auto",
             flexShrink: 0,
             color: "#fff",
@@ -996,39 +996,13 @@ const LiveChatAgent = ({ user, isAdmin }: { user: any; isAdmin: boolean }) => {
           }}
           className="cv-scroll-inner"
         >
-          {/* Header chat list */}
-          <div style={{ padding: "10px", borderBottom: "1px solid rgba(255,255,255,0.15)", fontWeight: 600, fontSize: "11px", color: "#fff", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span>Chats</span>
-            <span style={{ fontSize: "9px", backgroundColor: "rgba(255,255,255,0.2)", padding: "1px 6px", borderRadius: "6px" }}>{tickets.length}</span>
+          <div style={{ padding: "12px 14px", borderBottom: "1px solid rgba(255,255,255,0.15)", fontWeight: 600, fontSize: "12px", color: "#fff", display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0 }}>
+            <span>Chat History</span>
+            <span style={{ fontSize: "10px", backgroundColor: "rgba(255,255,255,0.2)", padding: "2px 8px", borderRadius: "6px" }}>{tickets.length}</span>
           </div>
-
-          {/* New chat button */}
-          {!isAdmin && (
-            <div style={{ padding: "8px" }}>
-              <button
-                onClick={() => setShowStartChat(true)}
-                style={{
-                  width: "100%",
-                  padding: "8px",
-                  backgroundColor: "rgba(255,255,255,0.15)",
-                  color: "#fff",
-                  border: "none",
-                  borderRadius: "8px",
-                  fontSize: "11px",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                  fontFamily: FONT_FAMILY,
-                }}
-              >
-                + New Chat
-              </button>
-            </div>
-          )}
-
-          {/* Ticket items */}
           <div style={{ flex: 1, overflowY: "auto" }} className="cv-scroll-inner">
             {tickets.length === 0 ? (
-              <div style={{ padding: "16px 10px", textAlign: "center", color: "#fff", fontSize: "10px", opacity: 0.85 }}>
+              <div style={{ padding: "20px 14px", textAlign: "center", color: "#fff", fontSize: "11px", opacity: 0.85 }}>
                 No chats yet
               </div>
             ) : (
@@ -1037,17 +1011,17 @@ const LiveChatAgent = ({ user, isAdmin }: { user: any; isAdmin: boolean }) => {
                   key={t.id}
                   onClick={() => setSelectedTicket(t)}
                   style={{
-                    padding: "10px",
+                    padding: "12px 14px",
                     cursor: "pointer",
                     borderBottom: "1px solid rgba(255,255,255,0.06)",
                     backgroundColor: selectedTicket?.id === t.id ? "rgba(255,255,255,0.12)" : "transparent",
-                    borderLeft: selectedTicket?.id === t.id ? "3px solid #fff" : "3px solid transparent",
+                    borderLeft: selectedTicket?.id === t.id ? "4px solid #fff" : "4px solid transparent",
                   }}
                 >
-                  <div style={{ fontSize: "11px", fontWeight: 600, color: "#fff", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  <div style={{ fontSize: "12px", fontWeight: 600, color: "#fff", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                     {t.userName}
                   </div>
-                  <div style={{ fontSize: "9px", color: "rgba(255,255,255,0.85)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.85)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginTop: "2px" }}>
                     {t.topic}
                   </div>
                 </div>
@@ -1056,15 +1030,15 @@ const LiveChatAgent = ({ user, isAdmin }: { user: any; isAdmin: boolean }) => {
           </div>
         </div>
 
-        {/* CHAT AREA — warna putih seperti halaman utama */}
-        <div style={{ flex: 1, backgroundColor: "#ffffff", borderRadius: "10px", border: "1px solid #e8e8e8", display: "flex", flexDirection: "column", overflow: "hidden", minWidth: 0 }}>
+        {/* CHAT AREA — warna putih */}
+        <div style={{ flex: 1, backgroundColor: "#ffffff", display: "flex", flexDirection: "column", overflow: "hidden", minWidth: 0 }}>
           {selectedTicket ? (
             <>
               {/* Header chat */}
-              <div style={{ padding: "10px 14px", backgroundColor: "#0D3CFC", flexShrink: 0 }}>
-                <div style={{ fontWeight: 600, fontSize: "12px", color: "#fff", fontFamily: FONT_FAMILY }}>
+              <div style={{ padding: "12px 18px", backgroundColor: "#0D3CFC", flexShrink: 0 }}>
+                <div style={{ fontWeight: 600, fontSize: "13px", color: "#fff", fontFamily: FONT_FAMILY }}>
                   {selectedTicket.userName}
-                  <span style={{ fontSize: "10px", fontWeight: 400, color: "rgba(255,255,255,0.8)", marginLeft: "6px" }}>
+                  <span style={{ fontSize: "11px", fontWeight: 400, color: "rgba(255,255,255,0.8)", marginLeft: "6px" }}>
                     {selectedTicket.topic}
                   </span>
                 </div>
@@ -1074,35 +1048,35 @@ const LiveChatAgent = ({ user, isAdmin }: { user: any; isAdmin: boolean }) => {
               <div
                 ref={chatMessagesContainerRef}
                 className="cv-scroll-inner"
-                style={{ flex: 1, overflowY: "auto", padding: "12px", display: "flex", flexDirection: "column", gap: "8px", minHeight: 0 }}
+                style={{ flex: 1, overflowY: "auto", padding: "16px", display: "flex", flexDirection: "column", gap: "10px", minHeight: 0 }}
               >
                 {messages.length === 0 ? (
-                  <div style={{ textAlign: "center", color: "#999", fontSize: "11px", padding: "20px 0" }}>No messages yet</div>
+                  <div style={{ textAlign: "center", color: "#999", fontSize: "12px", padding: "20px 0" }}>No messages yet</div>
                 ) : (
                   messages.map((msg, idx) => {
                     const isMine = msg.senderId === user.uid;
                     return (
-                      <div key={idx} style={{ alignSelf: isMine ? "flex-end" : "flex-start", maxWidth: "80%" }}>
+                      <div key={idx} style={{ alignSelf: isMine ? "flex-end" : "flex-start", maxWidth: "75%" }}>
                         <div
                           style={{
-                            padding: "8px 10px",
-                            borderRadius: "10px",
+                            padding: "10px 14px",
+                            borderRadius: "12px",
                             backgroundColor: isMine ? "#0D3CFC" : "#f0f0f0",
                             color: isMine ? "#fff" : "#000",
-                            fontSize: "11px",
+                            fontSize: "12px",
                             fontFamily: FONT_FAMILY,
                             wordBreak: "break-word",
                           }}
                         >
                           {!isMine && (
-                            <div style={{ fontSize: "9px", fontWeight: 600, color: "#0D3CFC", marginBottom: "3px" }}>
+                            <div style={{ fontSize: "10px", fontWeight: 600, color: "#0D3CFC", marginBottom: "3px" }}>
                               {msg.senderName}
                             </div>
                           )}
                           <div>{msg.text}</div>
-                          <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "4px", marginTop: "3px" }}>
+                          <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "4px", marginTop: "4px" }}>
                             {renderDeliveryStatus(msg, isMine)}
-                            <span style={{ fontSize: "8px", color: isMine ? "#fff" : "#999", opacity: 0.85 }}>
+                            <span style={{ fontSize: "9px", color: isMine ? "#fff" : "#999", opacity: 0.85 }}>
                               {formatTime(msg.timestamp)}
                             </span>
                           </div>
@@ -1113,9 +1087,9 @@ const LiveChatAgent = ({ user, isAdmin }: { user: any; isAdmin: boolean }) => {
                 )}
               </div>
 
-              {/* Input */}
+              {/* Input — tombol kirim */}
               {selectedTicket.status !== "resolved" && selectedTicket.status !== "closed" && (
-                <div style={{ padding: "8px 10px", borderTop: "1px solid #e8e8e8", display: "flex", gap: "6px", flexShrink: 0 }}>
+                <div style={{ padding: "12px 18px", borderTop: "1px solid #e8e8e8", display: "flex", gap: "10px", flexShrink: 0 }}>
                   <input
                     type="text"
                     value={messageText}
@@ -1129,10 +1103,10 @@ const LiveChatAgent = ({ user, isAdmin }: { user: any; isAdmin: boolean }) => {
                     placeholder="Type a message..."
                     style={{
                       flex: 1,
-                      padding: "8px 10px",
+                      padding: "10px 14px",
                       border: "1px solid #e8e8e8",
-                      borderRadius: "8px",
-                      fontSize: "11px",
+                      borderRadius: "10px",
+                      fontSize: "12px",
                       outline: "none",
                       fontFamily: FONT_FAMILY,
                     }}
@@ -1141,14 +1115,14 @@ const LiveChatAgent = ({ user, isAdmin }: { user: any; isAdmin: boolean }) => {
                     onClick={sendMessage}
                     disabled={!messageText.trim()}
                     style={{
-                      padding: "8px 12px",
+                      padding: "10px 20px",
                       backgroundColor: messageText.trim() ? "#0D3CFC" : "#ccc",
                       color: "#fff",
                       border: "none",
-                      borderRadius: "8px",
+                      borderRadius: "10px",
                       cursor: messageText.trim() ? "pointer" : "not-allowed",
                       fontFamily: FONT_FAMILY,
-                      fontSize: "11px",
+                      fontSize: "12px",
                       fontWeight: 600,
                     }}
                   >
@@ -1158,7 +1132,7 @@ const LiveChatAgent = ({ user, isAdmin }: { user: any; isAdmin: boolean }) => {
               )}
             </>
           ) : (
-            <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", color: "#999", fontSize: "11px", fontFamily: FONT_FAMILY, padding: "20px", textAlign: "center" }}>
+            <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", color: "#999", fontSize: "12px", fontFamily: FONT_FAMILY, padding: "20px", textAlign: "center" }}>
               Select a chat or start a new one
             </div>
           )}
@@ -1167,13 +1141,13 @@ const LiveChatAgent = ({ user, isAdmin }: { user: any; isAdmin: boolean }) => {
 
       {/* Modal start chat */}
       {showStartChat && (
-        <div style={{ position: "absolute", inset: 0, backgroundColor: "rgba(0,0,0,0.5)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: "16px" }}>
-          <div style={{ backgroundColor: "#fff", padding: "20px", borderRadius: "12px", width: "100%", maxWidth: "280px", fontFamily: FONT_FAMILY }}>
-            <h4 style={{ margin: 0, marginBottom: "12px", color: "#0D3CFC", fontSize: "14px", fontWeight: 700 }}>Select Topic</h4>
+        <div style={{ position: "absolute", inset: 0, backgroundColor: "rgba(0,0,0,0.5)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: "20px" }}>
+          <div style={{ backgroundColor: "#fff", padding: "24px", borderRadius: "12px", width: "100%", maxWidth: "320px", fontFamily: FONT_FAMILY }}>
+            <h4 style={{ margin: 0, marginBottom: "14px", color: "#0D3CFC", fontSize: "16px", fontWeight: 700 }}>Select Topic</h4>
             <select
               value={selectedTopic}
               onChange={(e) => setSelectedTopic(e.target.value)}
-              style={{ width: "100%", padding: "8px", border: "2px solid #0D3CFC", borderRadius: "8px", marginBottom: "12px", fontFamily: FONT_FAMILY, fontSize: "12px", color: "#0D3CFC", outline: "none" }}
+              style={{ width: "100%", padding: "10px", border: "2px solid #0D3CFC", borderRadius: "8px", marginBottom: "14px", fontFamily: FONT_FAMILY, fontSize: "13px", color: "#0D3CFC", outline: "none" }}
             >
               <option value="">-- Select --</option>
               {topics.map((t) => (
@@ -1181,13 +1155,13 @@ const LiveChatAgent = ({ user, isAdmin }: { user: any; isAdmin: boolean }) => {
               ))}
             </select>
             <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
-              <button onClick={() => setShowStartChat(false)} style={{ padding: "6px 12px", background: "transparent", border: "1px solid #ccc", borderRadius: "8px", cursor: "pointer", fontFamily: FONT_FAMILY, fontSize: "11px", color: "#666" }}>
+              <button onClick={() => setShowStartChat(false)} style={{ padding: "8px 16px", background: "transparent", border: "1px solid #ccc", borderRadius: "8px", cursor: "pointer", fontFamily: FONT_FAMILY, fontSize: "12px", color: "#666" }}>
                 Cancel
               </button>
               <button
                 onClick={startChat}
                 disabled={!selectedTopic}
-                style={{ padding: "6px 14px", background: selectedTopic ? "#0D3CFC" : "#ccc", color: "#fff", border: "none", borderRadius: "8px", cursor: selectedTopic ? "pointer" : "not-allowed", fontFamily: FONT_FAMILY, fontSize: "11px", fontWeight: 600 }}
+                style={{ padding: "8px 18px", background: selectedTopic ? "#0D3CFC" : "#ccc", color: "#fff", border: "none", borderRadius: "8px", cursor: selectedTopic ? "pointer" : "not-allowed", fontFamily: FONT_FAMILY, fontSize: "12px", fontWeight: 600 }}
               >
                 Start
               </button>
@@ -1206,6 +1180,7 @@ export default function CVPage(): React.JSX.Element {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  const cardWrapperRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const photoRef = useRef<HTMLImageElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -1230,7 +1205,7 @@ export default function CVPage(): React.JSX.Element {
     setIsMounted(true);
   }, []);
 
-  // Auth
+  // Auth state
   useEffect(() => {
     if (!auth || !isMounted) return;
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -1250,8 +1225,8 @@ export default function CVPage(): React.JSX.Element {
 
   // Card entrance
   useEffect(() => {
-    if (!isMounted || !cardRef.current) return;
-    gsap.fromTo(cardRef.current, { opacity: 0, y: 60, scale: 0.96 }, { opacity: 1, y: 0, scale: 1, duration: 0.9, ease: "power3.out" });
+    if (!isMounted || !cardWrapperRef.current) return;
+    gsap.fromTo(cardWrapperRef.current, { opacity: 0, y: 60, scale: 0.96 }, { opacity: 1, y: 0, scale: 1, duration: 0.9, ease: "power3.out" });
   }, [isMounted]);
 
   // MENURU footer animation
@@ -1269,7 +1244,7 @@ export default function CVPage(): React.JSX.Element {
     return () => { ScrollTrigger.getAll().forEach((t) => t.kill()); };
   }, [isMounted]);
 
-  // Info button
+  // Info button toggle
   useEffect(() => {
     if (!buttonRef.current || !plusWrapRef.current) return;
     if (isOpen) {
@@ -1305,11 +1280,29 @@ export default function CVPage(): React.JSX.Element {
     if (workBlockRef.current) gsap.fromTo(workBlockRef.current, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out", delay: 0.6 });
   }, [isOpen]);
 
-  // Contact overlay
+  // ===== CONTACT OVERLAY + CARD WIDTH TRANSITION =====
   useEffect(() => {
     if (showContact) {
       setContactMounted(true);
+      // Perbesar card ke kanan (width bertambah) supaya live chat terlihat
+      if (cardWrapperRef.current) {
+        gsap.to(cardWrapperRef.current, {
+          maxWidth: "780px",
+          duration: 0.6,
+          ease: "power3.inOut",
+        });
+      }
     } else if (contactMounted && contactOverlayRef.current) {
+      // Kecilkan card kembali ke ukuran semula
+      if (cardWrapperRef.current) {
+        gsap.to(cardWrapperRef.current, {
+          maxWidth: "380px",
+          duration: 0.5,
+          ease: "power3.inOut",
+          delay: 0.1,
+        });
+      }
+      // Overlay keluar ke kiri
       gsap.to(contactOverlayRef.current, {
         x: "-100%",
         duration: 0.5,
@@ -1335,10 +1328,6 @@ export default function CVPage(): React.JSX.Element {
       duration: 0.55,
       ease: "power3.inOut",
       onComplete: () => {
-        if (contactContentRef.current) {
-          const items = contactContentRef.current.querySelectorAll("[data-contact-item]");
-          gsap.fromTo(items, { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.5, stagger: 0.08, ease: "power2.out" });
-        }
         if (contactCloseRef.current) {
           gsap.fromTo(contactCloseRef.current, { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.5)" });
         }
@@ -1380,8 +1369,18 @@ export default function CVPage(): React.JSX.Element {
           boxSizing: "border-box",
         }}
       >
-        <div style={{ position: "relative", width: "100%", maxWidth: "380px", height: "760px", zIndex: 1 }}>
-          {/* CARD — tanpa shadow */}
+        {/* CARD WRAPPER — maxWidth akan dianimasikan oleh GSAP */}
+        <div
+          ref={cardWrapperRef}
+          style={{
+            position: "relative",
+            width: "100%",
+            maxWidth: "380px",
+            height: "760px",
+            zIndex: 1,
+          }}
+        >
+          {/* CARD */}
           <div
             ref={cardRef}
             style={{
@@ -1395,9 +1394,18 @@ export default function CVPage(): React.JSX.Element {
           >
             <div className="cv-scroll-inner" style={{ width: "100%", height: "100%", overflowY: "auto", overflowX: "hidden", scrollbarWidth: "none", msOverflowStyle: "none" }}>
               <div style={{ position: "relative", width: "100%", minHeight: "100%", display: "flex", flexDirection: "column" }}>
-                {/* PHOTO */}
+                {/* PHOTO AREA */}
                 <div style={{ position: "relative", width: "100%", height: "760px", flexShrink: 0 }}>
-                  <img ref={photoRef} src="/images/DSC_0614-min.JPG" alt="CV" style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "center center", display: "block", borderRadius: "20px" }} />
+                  <img
+                    ref={photoRef}
+                    src="/images/DSC_0614-min.JPG"
+                    alt="CV"
+                    style={{
+                      position: "absolute", top: 0, left: 0, width: "100%", height: "100%",
+                      objectFit: "cover", objectPosition: "center center",
+                      display: "block", borderRadius: "20px",
+                    }}
+                  />
 
                   {isOpen && (
                     <div ref={textTopRef} style={{ position: "absolute", top: "28px", left: "24px", zIndex: 9, fontFamily: FONT_FAMILY, color: "#ffffff", pointerEvents: "none", lineHeight: 1.1, textAlign: "left" }}>
@@ -1461,7 +1469,7 @@ export default function CVPage(): React.JSX.Element {
               <span>{isOpen ? "Close" : "Info"}</span>
             </button>
 
-            {/* CONTACT OVERLAY — BERISI LIVE CHAT AGENT */}
+            {/* CONTACT OVERLAY — LIVE CHAT AGENT */}
             {contactMounted && (
               <div
                 ref={contactOverlayRef}
@@ -1492,13 +1500,12 @@ export default function CVPage(): React.JSX.Element {
                   ref={contactContentRef}
                   style={{
                     width: "100%", height: "100%",
-                    padding: "72px 12px 12px 12px",
+                    padding: "72px 16px 16px 16px",
                     boxSizing: "border-box",
                     display: "flex", flexDirection: "column",
                   }}
                 >
                   <div
-                    data-contact-item
                     style={{
                       flex: 1, width: "100%",
                       backgroundColor: "#ffffff",
