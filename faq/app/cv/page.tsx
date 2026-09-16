@@ -73,7 +73,7 @@ export default function CVPage(): React.JSX.Element {
     );
   }, [isMounted]);
 
-  // Animasi GSAP tombol (bg + teks)
+  // Animasi GSAP tombol
   useEffect(() => {
     if (!isMounted) return;
     if (!buttonRef.current) return;
@@ -95,7 +95,7 @@ export default function CVPage(): React.JSX.Element {
     }
   }, [isOpen, isMounted]);
 
-  // Animasi GSAP icon plus → jadi ×
+  // Animasi GSAP icon plus → ×
   useEffect(() => {
     if (!isMounted) return;
     if (!plusWrapRef.current) return;
@@ -168,7 +168,7 @@ export default function CVPage(): React.JSX.Element {
     );
   }, [isOpen, isMounted]);
 
-  // Paragraf baru (open) — fade in
+  // Paragraf baru (open) — fade in dari bawah
   useEffect(() => {
     if (!isMounted) return;
     if (!textParagraphRef.current) return;
@@ -179,18 +179,6 @@ export default function CVPage(): React.JSX.Element {
       { opacity: 0, y: 30 },
       { opacity: 1, y: 0, duration: 0.6, ease: "power2.out", delay: 0.35 }
     );
-  }, [isOpen, isMounted]);
-
-  // Saat toggle, scroll card ke atas biar teks atas kelihatan
-  useEffect(() => {
-    if (!isMounted) return;
-    if (!scrollRef.current) return;
-
-    gsap.to(scrollRef.current, {
-      scrollTo: { y: 0 },
-      duration: 0.4,
-      ease: "power2.out",
-    });
   }, [isOpen, isMounted]);
 
   if (!isMounted) {
@@ -223,7 +211,7 @@ export default function CVPage(): React.JSX.Element {
           boxSizing: "border-box",
         }}
       >
-        {/* ===== BG BIRU DI TENGAH + FOTO + SCROLL DI DALAM ===== */}
+        {/* ===== BG BIRU DI TENGAH ===== */}
         <div
           style={{
             position: "relative",
@@ -249,6 +237,7 @@ export default function CVPage(): React.JSX.Element {
             {/* ===== AREA SCROLL DI DALAM CARD ===== */}
             <div
               ref={scrollRef}
+              className="cv-scroll-inner"
               style={{
                 width: "100%",
                 height: "100%",
@@ -258,9 +247,8 @@ export default function CVPage(): React.JSX.Element {
                 scrollbarWidth: "none",
                 msOverflowStyle: "none",
               }}
-              className="cv-scroll-inner"
             >
-              {/* Wrapper isi scroll */}
+              {/* ===== WRAPPER ISI ===== */}
               <div
                 style={{
                   position: "relative",
@@ -270,131 +258,138 @@ export default function CVPage(): React.JSX.Element {
                   flexDirection: "column",
                 }}
               >
-                {/* Foto di dalam card */}
-                <img
-                  ref={photoRef}
-                  src="/images/DSC_0614-min.JPG"
-                  alt="CV"
+                {/* ===== AREA FOTO (relative, tinggi 760px seperti card) ===== */}
+                <div
                   style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
+                    position: "relative",
                     width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                    objectPosition: "center center",
-                    display: "block",
-                    borderRadius: "20px",
+                    height: "760px",
+                    flexShrink: 0,
                   }}
-                />
-
-                {/* ===== TEKS DI ATAS FOTO (MODE OPEN) — SISI KIRI, PUTIH ===== */}
-                {isOpen && (
-                  <div
-                    ref={textTopRef}
+                >
+                  {/* Foto di dalam area */}
+                  <img
+                    ref={photoRef}
+                    src="/images/DSC_0614-min.JPG"
+                    alt="CV"
                     style={{
                       position: "absolute",
-                      top: "28px",
-                      left: "24px",
-                      zIndex: 9,
-                      fontFamily: FONT_FAMILY,
-                      color: "#ffffff",
-                      pointerEvents: "none",
-                      lineHeight: 1.1,
-                      textAlign: "left",
-                    }}
-                  >
-                    <div
-                      style={{
-                        fontSize: "30px",
-                        fontWeight: 800,
-                        letterSpacing: "-0.01em",
-                        fontFamily: FONT_FAMILY,
-                      }}
-                    >
-                      People
-                    </div>
-                    <div
-                      style={{
-                        fontSize: "30px",
-                        fontWeight: 800,
-                        letterSpacing: "-0.01em",
-                        fontFamily: FONT_FAMILY,
-                      }}
-                    >
-                      Menuru
-                    </div>
-                  </div>
-                )}
-
-                {/* ===== TEKS DI BAWAH FOTO (MODE DEFAULT) — TENGAH, PUTIH ===== */}
-                {!isOpen && (
-                  <div
-                    ref={textBottomRef}
-                    style={{
-                      position: "absolute",
-                      bottom: "28px",
-                      left: "0",
+                      top: 0,
+                      left: 0,
                       width: "100%",
-                      textAlign: "center",
-                      zIndex: 9,
-                      fontFamily: FONT_FAMILY,
-                      color: "#ffffff",
-                      pointerEvents: "none",
-                      lineHeight: 1.1,
-                      padding: "0 16px",
-                      boxSizing: "border-box",
+                      height: "100%",
+                      objectFit: "cover",
+                      objectPosition: "center center",
+                      display: "block",
+                      borderRadius: "20px",
                     }}
-                  >
-                    <div
-                      style={{
-                        fontSize: "26px",
-                        fontWeight: 800,
-                        letterSpacing: "-0.01em",
-                        fontFamily: FONT_FAMILY,
-                      }}
-                    >
-                      Curriculum Vitae
-                    </div>
-                    <div
-                      style={{
-                        fontSize: "26px",
-                        fontWeight: 800,
-                        letterSpacing: "-0.01em",
-                        fontFamily: FONT_FAMILY,
-                      }}
-                    >
-                      Actual [ 16.09 ]
-                    </div>
-                  </div>
-                )}
+                  />
 
-                {/* ===== PARAGRAF BARU (MODE OPEN) — DI BAWAH FOTO ===== */}
+                  {/* ===== TEKS DI ATAS FOTO (MODE OPEN) — SISI KIRI, PUTIH ===== */}
+                  {isOpen && (
+                    <div
+                      ref={textTopRef}
+                      style={{
+                        position: "absolute",
+                        top: "28px",
+                        left: "24px",
+                        zIndex: 9,
+                        fontFamily: FONT_FAMILY,
+                        color: "#ffffff",
+                        pointerEvents: "none",
+                        lineHeight: 1.1,
+                        textAlign: "left",
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontSize: "30px",
+                          fontWeight: 800,
+                          letterSpacing: "-0.01em",
+                          fontFamily: FONT_FAMILY,
+                        }}
+                      >
+                        People
+                      </div>
+                      <div
+                        style={{
+                          fontSize: "30px",
+                          fontWeight: 800,
+                          letterSpacing: "-0.01em",
+                          fontFamily: FONT_FAMILY,
+                        }}
+                      >
+                        Menuru
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ===== TEKS DI BAWAH FOTO (MODE DEFAULT) — TENGAH, PUTIH ===== */}
+                  {!isOpen && (
+                    <div
+                      ref={textBottomRef}
+                      style={{
+                        position: "absolute",
+                        bottom: "28px",
+                        left: "0",
+                        width: "100%",
+                        textAlign: "center",
+                        zIndex: 9,
+                        fontFamily: FONT_FAMILY,
+                        color: "#ffffff",
+                        pointerEvents: "none",
+                        lineHeight: 1.1,
+                        padding: "0 16px",
+                        boxSizing: "border-box",
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontSize: "26px",
+                          fontWeight: 800,
+                          letterSpacing: "-0.01em",
+                          fontFamily: FONT_FAMILY,
+                        }}
+                      >
+                        Curriculum Vitae
+                      </div>
+                      <div
+                        style={{
+                          fontSize: "26px",
+                          fontWeight: 800,
+                          letterSpacing: "-0.01em",
+                          fontFamily: FONT_FAMILY,
+                        }}
+                      >
+                        Actual [ 16.09 ]
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* ===== PARAGRAF BARU (MODE OPEN) — DI BAWAH AREA FOTO ===== */}
                 {isOpen && (
                   <div
                     ref={textParagraphRef}
                     style={{
-                      position: "absolute",
-                      bottom: "24px",
-                      left: "0",
                       width: "100%",
-                      padding: "0 24px",
+                      padding: "24px 24px 32px 24px",
                       boxSizing: "border-box",
                       zIndex: 9,
                       fontFamily: FONT_FAMILY,
                       color: "#ffffff",
-                      pointerEvents: "none",
                     }}
                   >
                     <p
                       style={{
-                        fontSize: "12px",
-                        fontWeight: 400,
-                        lineHeight: 1.6,
+                        fontSize: "16px",
+                        fontWeight: 700,
+                        lineHeight: 1.5,
                         color: "#ffffff",
                         margin: 0,
                         fontFamily: FONT_FAMILY,
                         textAlign: "left",
+                        letterSpacing: "-0.01em",
                       }}
                     >
                       Lulusan S1 Sistem Komputer Universitas Gunadarma dengan IPK 3,54. Memiliki minat di bidang pengembangan web dan terus mengembangkan kemampuan melalui pembelajaran mandiri menggunakan JavaScript, React.js, Next.js, TypeScript, dan Astro. Memiliki pengalaman mengerjakan proyek berbasis Arduino selama perkuliahan serta memahami dasar penggunaan Firebase. Disiplin, cepat belajar, bertanggung jawab, dan mampu bekerja secara individu maupun dalam tim.
@@ -404,7 +399,7 @@ export default function CVPage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* ===== TOMBOL INFO / CLOSE DI ATAS KANAN ===== */}
+            {/* ===== TOMBOL INFO / CLOSE ===== */}
             <button
               ref={buttonRef}
               onClick={() => setIsOpen((v) => !v)}
@@ -456,14 +451,12 @@ export default function CVPage(): React.JSX.Element {
           height: 100%;
           width: 100%;
         }
-        /* Sembunyikan scrollbar di body & html */
         html::-webkit-scrollbar,
         body::-webkit-scrollbar {
           display: none;
           width: 0;
           height: 0;
         }
-        /* Sembunyikan scrollbar di dalam card */
         .cv-scroll-inner::-webkit-scrollbar {
           display: none;
           width: 0;
