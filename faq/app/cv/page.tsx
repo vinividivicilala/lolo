@@ -63,17 +63,13 @@ const IV_LENGTH = 12;
 function base64ToUint8Array(base64: string): Uint8Array {
   const binaryString = atob(base64);
   const bytes = new Uint8Array(binaryString.length);
-  for (let i = 0; i < binaryString.length; i++) {
-    bytes[i] = binaryString.charCodeAt(i);
-  }
+  for (let i = 0; i < binaryString.length; i++) bytes[i] = binaryString.charCodeAt(i);
   return bytes;
 }
 
 function uint8ArrayToBase64(uint8Array: Uint8Array): string {
   let binary = "";
-  for (let i = 0; i < uint8Array.length; i++) {
-    binary += String.fromCharCode(uint8Array[i]);
-  }
+  for (let i = 0; i < uint8Array.length; i++) binary += String.fromCharCode(uint8Array[i]);
   return btoa(binary);
 }
 
@@ -102,11 +98,7 @@ async function encryptMessage(text: string): Promise<string> {
     const encoder = new TextEncoder();
     const data = encoder.encode(text);
     const iv = window.crypto.getRandomValues(new Uint8Array(IV_LENGTH));
-    const encrypted = await window.crypto.subtle.encrypt(
-      { name: "AES-GCM", iv: iv, tagLength: 128 },
-      key,
-      data
-    );
+    const encrypted = await window.crypto.subtle.encrypt({ name: "AES-GCM", iv, tagLength: 128 }, key, data);
     const encryptedArray = new Uint8Array(encrypted);
     const combined = new Uint8Array(iv.length + encryptedArray.length);
     combined.set(iv, 0);
@@ -122,37 +114,26 @@ async function decryptMessage(encrypted: string): Promise<string> {
   try {
     if (typeof window === "undefined" || !window.crypto) {
       if (encrypted.startsWith("encrypted:")) {
-        const encoded = encrypted.substring("encrypted:".length);
-        return decodeURIComponent(escape(atob(encoded)));
+        return decodeURIComponent(escape(atob(encrypted.substring(10))));
       }
       return encrypted;
     }
     if (encrypted.startsWith("plain:")) {
-      const encoded = encrypted.substring("plain:".length);
-      return decodeURIComponent(escape(atob(encoded)));
+      return decodeURIComponent(escape(atob(encrypted.substring(6))));
     }
-    if (!encrypted.startsWith("encrypted:")) {
-      return encrypted;
-    }
-    const base64Data = encrypted.substring("encrypted:".length);
+    if (!encrypted.startsWith("encrypted:")) return encrypted;
+    const base64Data = encrypted.substring(10);
     const combined = base64ToUint8Array(base64Data);
     const iv = combined.slice(0, IV_LENGTH);
     const encryptedData = combined.slice(IV_LENGTH);
     const key = await getCryptoKey();
-    const decrypted = await window.crypto.subtle.decrypt(
-      { name: "AES-GCM", iv: iv, tagLength: 128 },
-      key,
-      encryptedData
-    );
-    const decoder = new TextDecoder();
-    return decoder.decode(decrypted);
+    const decrypted = await window.crypto.subtle.decrypt({ name: "AES-GCM", iv, tagLength: 128 }, key, encryptedData);
+    return new TextDecoder().decode(decrypted);
   } catch (error) {
     console.error("Decryption error:", error);
     if (encrypted.startsWith("encrypted:") || encrypted.startsWith("plain:")) {
       try {
-        const encoded = encrypted.includes(":")
-          ? encrypted.split(":")[1]
-          : encrypted;
+        const encoded = encrypted.includes(":") ? encrypted.split(":")[1] : encrypted;
         return decodeURIComponent(escape(atob(encoded)));
       } catch {
         return "[Message cannot be decrypted]";
@@ -215,40 +196,26 @@ function containsBannedContent(text: string): { isBanned: boolean; reason: strin
   for (const keyword of BAN_KEYWORDS.SUSPICIOUS_LINKS) {
     if (lowerText.includes(keyword)) return { isBanned: true, reason: `Suspicious Link (${keyword})` };
   }
-  const ipPattern = /[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+/;
-  if (ipPattern.test(lowerText)) return { isBanned: true, reason: "Suspicious IP Address" };
-  const repeatedNumber = /[0-9]{10,}/;
-  if (repeatedNumber.test(lowerText)) return { isBanned: true, reason: "Suspicious Number" };
-  const transferPatterns = [
-    /kirim ke rek/i, /transfer ke/i, /bayar ke/i, /setor ke/i,
-    /minta kirim/i, /mohon kirim/i, /tolong kirim/i,
-  ];
-  for (const pattern of transferPatterns) {
+  if (/[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+/.test(lowerText)) return { isBanned: true, reason: "Suspicious IP Address" };
+  if (/[0-9]{10,}/.test(lowerText)) return { isBanned: true, reason: "Suspicious Number" };
+  for (const pattern of [/kirim ke rek/i, /transfer ke/i, /bayar ke/i, /setor ke/i, /minta kirim/i, /mohon kirim/i, /tolong kirim/i]) {
     if (pattern.test(lowerText)) return { isBanned: true, reason: "Transfer/Payment Request" };
   }
   return { isBanned: false, reason: "" };
 }
 
-async function banUserPermanent(
-  userId: string,
-  userEmail: string,
-  userName: string,
-  reason: string,
-  message: string
-) {
+async function banUserPermanent(userId: string, userEmail: string, userName: string, reason: string, message: string) {
   if (!db) return;
   try {
     const now = new Date().toISOString();
     await setDoc(doc(db, "bot_blocks", userId), {
-      userId, userEmail, userName,
-      isBlocked: true, blockedAt: now, blockedReason: reason, blockedMessage: message,
+      userId, userEmail, userName, isBlocked: true, blockedAt: now, blockedReason: reason, blockedMessage: message,
       canCreateTicket: false, canSendMessage: false,
       violations: [{ type: "BANNED", reason, timestamp: now, message, confidence: 100 }],
       totalViolations: 1, warningCount: 0, firstViolation: now, lastViolation: now,
     });
     await updateDoc(doc(db, "users", userId), {
-      botBlocked: true, botBlockedAt: serverTimestamp(),
-      botBlockedReason: reason, botBlockedMessage: message,
+      botBlocked: true, botBlockedAt: serverTimestamp(), botBlockedReason: reason, botBlockedMessage: message,
       canCreateTicket: false, canSendMessage: false,
     });
     await addDoc(collection(db, "bot_violations_log"), {
@@ -261,11 +228,8 @@ async function banUserPermanent(
   }
 }
 
-async function checkBanStatus(userId: string): Promise<{
-  isBanned: boolean; reason: string; message: string;
-  canCreateTicket: boolean; canSendMessage: boolean;
-}> {
-  if (!db) return { isBanned: false, reason: "", message: "", canCreateTicket: true, canSendMessage: true };
+async function checkBanStatus(userId: string) {
+  if (!db) return { isBanned: false, reason: "", canCreateTicket: true, canSendMessage: true };
   try {
     const botDoc = await getDoc(doc(db, "bot_blocks", userId));
     if (botDoc.exists()) {
@@ -273,7 +237,6 @@ async function checkBanStatus(userId: string): Promise<{
       return {
         isBanned: data.isBlocked || false,
         reason: data.blockedReason || "",
-        message: data.blockedMessage || "",
         canCreateTicket: data.canCreateTicket !== false,
         canSendMessage: data.canSendMessage !== false,
       };
@@ -285,23 +248,51 @@ async function checkBanStatus(userId: string): Promise<{
         return {
           isBanned: true,
           reason: userData.botBlockedReason || "Blocked by system",
-          message: userData.botBlockedMessage || "",
           canCreateTicket: userData.canCreateTicket !== false,
           canSendMessage: userData.canSendMessage !== false,
         };
       }
     }
-    return { isBanned: false, reason: "", message: "", canCreateTicket: true, canSendMessage: true };
+    return { isBanned: false, reason: "", canCreateTicket: true, canSendMessage: true };
   } catch (error) {
     console.error("Error checking ban status:", error);
-    return { isBanned: false, reason: "", message: "", canCreateTicket: true, canSendMessage: true };
+    return { isBanned: false, reason: "", canCreateTicket: true, canSendMessage: true };
   }
 }
 
 // ===== SVG ICONS =====
-const ArrowRight = ({ size = 20, color = "currentColor" }: { size?: number; color?: string }) => (
+const CheckIcon = ({ size = 12, color = "currentColor" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M20 6L9 17L4 12" stroke={color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const DoubleCheckIcon = ({ size = 12, color = "currentColor" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <path d="M1 12L5 16L13 8" stroke={color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M11 12L15 16L23 8" stroke={color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const ClockIcon = ({ size = 12, color = "currentColor" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <circle cx="12" cy="12" r="10" stroke={color} strokeWidth="2.5" />
+    <path d="M12 6V12L16 14" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const ErrorIcon = ({ size = 12, color = "currentColor" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <circle cx="12" cy="12" r="10" stroke={color} strokeWidth="2.5" />
+    <path d="M12 8V12" stroke={color} strokeWidth="2.5" strokeLinecap="round" />
+    <circle cx="12" cy="16" r="1" fill={color} />
+  </svg>
+);
+
+const SearchIcon = ({ size = 16, color = "currentColor" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <circle cx="11" cy="11" r="8" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M21 21L16.65 16.65" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
@@ -371,13 +362,6 @@ const MailIcon = ({ size = 16, color = "#0D3CFC" }: { size?: number; color?: str
   </svg>
 );
 
-const SendIcon = ({ size = 16, color = "#ffffff" }: { size?: number; color?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <path d="M22 2L11 13" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-
 // ===== FOOTER LINKS =====
 const footerLinks = [
   { title: "Get in Touch", links: ["Contact", "Instagram", "Live Chat"] },
@@ -406,8 +390,6 @@ interface Ticket {
   typing: boolean;
   typingUserId?: string | null;
   typingUserName?: string | null;
-  isAnnouncement?: boolean;
-  isBroadcast?: boolean;
 }
 
 interface ChatMessage {
@@ -418,7 +400,6 @@ interface ChatMessage {
   timestamp: any;
   read: boolean;
   isEncrypted?: boolean;
-  isBotDetected?: boolean;
   deliveryStatus?: "sending" | "sent" | "delivered" | "read" | "failed";
 }
 
@@ -504,17 +485,12 @@ const NavbarButton = ({
     <div style={{ position: "relative" }} onMouseEnter={handleEnter} onMouseLeave={handleLeave}>
       <div
         style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "10px",
-          padding: "10px 16px",
+          display: "flex", alignItems: "center", gap: "10px", padding: "10px 16px",
           backgroundColor: open ? buttonHoverColor : buttonColor,
           borderRadius: "10px",
           boxShadow: open ? "0 8px 24px rgba(0,0,0,0.35)" : `0 8px 24px ${buttonColor}55`,
           transition: "background-color 0.25s ease, box-shadow 0.25s ease",
-          cursor: "pointer",
-          position: "relative",
-          zIndex: 2,
+          cursor: "pointer", position: "relative", zIndex: 2,
         }}
       >
         <span style={{ color: open ? labelTextHoverColor : labelTextColor, fontSize: "14px", fontWeight: 600, letterSpacing: "0.02em", fontFamily: FONT_FAMILY, whiteSpace: "nowrap", transition: "color 0.25s ease" }}>
@@ -522,14 +498,10 @@ const NavbarButton = ({
         </span>
         <div
           style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: "22px",
-            height: "22px",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            width: "22px", height: "22px",
             backgroundColor: open ? iconButtonHoverColor : iconButtonColor,
-            borderRadius: "6px",
-            transition: "background-color 0.25s ease",
+            borderRadius: "6px", transition: "background-color 0.25s ease",
           }}
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
@@ -545,21 +517,12 @@ const NavbarButton = ({
           onMouseEnter={handleEnter}
           onMouseLeave={handleLeave}
           style={{
-            position: "absolute",
-            top: "calc(100% + 10px)",
-            left: "0px",
-            width: `${bigPanelWidth}px`,
-            minHeight: `${bigPanelHeight}px`,
-            backgroundColor: panelColor,
-            borderRadius: "10px",
+            position: "absolute", top: "calc(100% + 10px)", left: "0px",
+            width: `${bigPanelWidth}px`, minHeight: `${bigPanelHeight}px`,
+            backgroundColor: panelColor, borderRadius: "10px",
             boxShadow: `0 8px 24px ${panelColor}55`,
-            zIndex: 1,
-            fontFamily: FONT_FAMILY,
-            color: titleTextColor,
-            padding: "22px 26px",
-            display: "flex",
-            gap: "20px",
-            alignItems: "flex-start",
+            zIndex: 1, fontFamily: FONT_FAMILY, color: titleTextColor,
+            padding: "22px 26px", display: "flex", gap: "20px", alignItems: "flex-start",
           }}
         >
           <div style={{ flex: "1 1 0", minWidth: 0, display: "flex", flexDirection: "column", gap: "12px" }}>
@@ -570,7 +533,7 @@ const NavbarButton = ({
                     <DocsIcon size={22} color={titleTextColor} />
                     <span style={{ fontSize: "16px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>Docs</span>
                   </div>
-                  <p style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY, maxWidth: "340px", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", textOverflow: "ellipsis" }}>
+                  <p style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY, maxWidth: "340px" }}>
                     Dokumentasi lengkap panduan produk, API, dan tutorial Menuru.
                   </p>
                 </div>
@@ -579,7 +542,7 @@ const NavbarButton = ({
                     <BrandIcon size={22} color={titleTextColor} />
                     <span style={{ fontSize: "16px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>Brand</span>
                   </div>
-                  <p style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY, maxWidth: "340px", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", textOverflow: "ellipsis" }}>
+                  <p style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY, maxWidth: "340px" }}>
                     Aset visual, logo, dan panduan identitas brand Menuru.
                   </p>
                 </div>
@@ -590,38 +553,31 @@ const NavbarButton = ({
                   {iconType === "trust" ? <TrustIcon size={26} color={titleTextColor} /> : iconType === "career" ? <CareerIcon size={26} color={titleTextColor} /> : <ResourcesIcon size={26} color={titleTextColor} />}
                   <span style={{ fontSize: "20px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>{panelTitle}</span>
                 </div>
-                <p style={{ fontSize: "13px", fontWeight: 400, lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY, maxWidth: "340px", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", textOverflow: "ellipsis" }}>
+                <p style={{ fontSize: "13px", fontWeight: 400, lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY, maxWidth: "340px" }}>
                   {panelDescription}
                 </p>
               </>
             )}
           </div>
-
           <div style={{ flex: "0 0 380px", display: "flex", flexDirection: "column", gap: "12px" }}>
             {isResources ? (
               <>
                 <div style={{ backgroundColor: panelBoxColor, border: `1px solid ${panelBoxBorder}`, borderRadius: "12px", padding: "12px", display: "flex", flexDirection: "column", gap: "8px" }}>
                   <img src={panelImage} alt="Docs" style={{ width: "100%", height: "120px", objectFit: "contain", display: "block", borderRadius: "8px" }} />
                   <span style={{ fontSize: "14px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>Docs Guide</span>
-                  <p style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", textOverflow: "ellipsis" }}>
-                    Panduan lengkap dan referensi teknis.
-                  </p>
+                  <p style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY }}>Panduan lengkap dan referensi teknis.</p>
                 </div>
                 <div style={{ backgroundColor: panelBoxColor, border: `1px solid ${panelBoxBorder}`, borderRadius: "12px", padding: "12px", display: "flex", flexDirection: "column", gap: "8px" }}>
                   <img src={panelImage} alt="Brand" style={{ width: "100%", height: "120px", objectFit: "contain", display: "block", borderRadius: "8px" }} />
                   <span style={{ fontSize: "14px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>Brand Assets</span>
-                  <p style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", textOverflow: "ellipsis" }}>
-                    Logo, palet warna, dan identitas visual.
-                  </p>
+                  <p style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY }}>Logo, palet warna, dan identitas visual.</p>
                 </div>
               </>
             ) : (
               <div style={{ backgroundColor: panelBoxColor, border: `1px solid ${panelBoxBorder}`, borderRadius: "12px", padding: "14px", display: "flex", flexDirection: "column", gap: "10px" }}>
                 <img src={panelImage} alt={panelTitle} style={{ width: "100%", height: "170px", objectFit: "contain", display: "block", borderRadius: "10px" }} />
                 <span style={{ fontSize: "15px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>{panelRightTitle}</span>
-                <p style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY, maxWidth: "340px", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", textOverflow: "ellipsis" }}>
-                  {panelRightDescription}
-                </p>
+                <p style={{ fontSize: "12px", fontWeight: 400, lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY }}>{panelRightDescription}</p>
               </div>
             )}
           </div>
@@ -674,14 +630,14 @@ const WorkExperienceItem = () => {
     <div style={{ width: "100%", fontFamily: FONT_FAMILY, color: "#ffffff" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12px", flexWrap: "wrap" }}>
         <div style={{ display: "flex", flexDirection: "column", gap: "4px", flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: "22px", fontWeight: 800, letterSpacing: "-0.01em", color: "#ffffff", lineHeight: 1.1, fontFamily: FONT_FAMILY }}>01 Menuru</div>
-          <div style={{ fontSize: "14px", fontWeight: 500, color: "rgba(255,255,255,0.85)", fontFamily: FONT_FAMILY }}>Founder and Developer</div>
+          <div style={{ fontSize: "22px", fontWeight: 800, color: "#ffffff", lineHeight: 1.1 }}>01 Menuru</div>
+          <div style={{ fontSize: "14px", fontWeight: 500, color: "rgba(255,255,255,0.85)" }}>Founder and Developer</div>
         </div>
         <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "8px", flexShrink: 0 }}>
-          <div style={{ fontSize: "12px", fontWeight: 600, color: "rgba(255,255,255,0.85)", fontFamily: FONT_FAMILY, whiteSpace: "nowrap" }}>Januari 2024 – Present</div>
+          <div style={{ fontSize: "12px", fontWeight: 600, color: "rgba(255,255,255,0.85)", whiteSpace: "nowrap" }}>Januari 2024 – Present</div>
           <button
             onClick={() => setExpanded((v) => !v)}
-            style={{ display: "flex", alignItems: "center", gap: "8px", padding: "8px 14px", backgroundColor: expanded ? "#ffffff" : "#F2EA6B", color: expanded ? "#0D3CFC" : "#000000", border: "none", borderRadius: "8px", fontSize: "12px", fontWeight: 700, cursor: "pointer", fontFamily: FONT_FAMILY, transition: "background-color 0.25s ease, color 0.25s ease", flexShrink: 0 }}
+            style={{ display: "flex", alignItems: "center", gap: "8px", padding: "8px 14px", backgroundColor: expanded ? "#ffffff" : "#F2EA6B", color: expanded ? "#0D3CFC" : "#000000", border: "none", borderRadius: "8px", fontSize: "12px", fontWeight: 700, cursor: "pointer", fontFamily: FONT_FAMILY, flexShrink: 0 }}
           >
             <div ref={plusWrapRef} style={{ display: "flex", alignItems: "center", transformOrigin: "center center" }}>
               {expanded ? <CloseIcon size={14} color="#0D3CFC" /> : <PlusIcon size={14} color="#000000" />}
@@ -692,7 +648,7 @@ const WorkExperienceItem = () => {
       </div>
       <div ref={detailRef} style={{ height: 0, opacity: 0, overflow: "hidden" }}>
         <div style={{ marginTop: "18px", display: "flex", flexDirection: "column", gap: "10px" }}>
-          <div style={{ fontSize: "14px", fontWeight: 800, color: "#ffffff", fontFamily: FONT_FAMILY }}>Tanggung Jawab :</div>
+          <div style={{ fontSize: "14px", fontWeight: 800, color: "#ffffff" }}>Tanggung Jawab :</div>
           <ul style={{ margin: 0, paddingLeft: "20px", display: "flex", flexDirection: "column", gap: "8px" }}>
             {[
               "Membangun dan mengembangkan website digital dari tahap perencanaan hingga deployment.",
@@ -701,7 +657,7 @@ const WorkExperienceItem = () => {
               "Mengelola hosting, deployment, dan maintenance website.",
               "Mengembangkan strategi digital untuk meningkatkan awareness dan penggunaan platform melalui google search dan instagram stories pribadi.",
             ].map((item, i) => (
-              <li key={i} style={{ fontSize: "13px", fontWeight: 400, lineHeight: 1.6, color: "rgba(255,255,255,0.9)", fontFamily: FONT_FAMILY, textAlign: "left" }}>
+              <li key={i} style={{ fontSize: "13px", fontWeight: 400, lineHeight: 1.6, color: "rgba(255,255,255,0.9)", textAlign: "left" }}>
                 {item}
               </li>
             ))}
@@ -712,8 +668,8 @@ const WorkExperienceItem = () => {
   );
 };
 
-// ===== LIVE CHAT AGENT (COMPACT VERSION — untuk di dalam card contact) =====
-const LiveChatAgentInline = ({ user, isAdmin }: { user: any; isAdmin: boolean }) => {
+// ===== LIVE CHAT AGENT (FULL DESIGN SAMA SEPERTI HALAMAN UTAMA) =====
+const LiveChatAgent = ({ user, isAdmin }: { user: any; isAdmin: boolean }) => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -727,7 +683,11 @@ const LiveChatAgentInline = ({ user, isAdmin }: { user: any; isAdmin: boolean })
   const [checkingBan, setCheckingBan] = useState(true);
   const [canCreateTicket, setCanCreateTicket] = useState(true);
   const [canSendMessage, setCanSendMessage] = useState(true);
+  const [onlineAgents, setOnlineAgents] = useState<any[]>([]);
+  const [onlineUsers, setOnlineUsers] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
 
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatMessagesContainerRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -738,7 +698,7 @@ const LiveChatAgentInline = ({ user, isAdmin }: { user: any; isAdmin: boolean })
     getCryptoKey().then(() => setEncryptionReady(true)).catch(() => setEncryptionReady(true));
   }, []);
 
-  // Check ban status
+  // Check ban
   useEffect(() => {
     if (!user || !isMounted) {
       setCheckingBan(false);
@@ -768,7 +728,33 @@ const LiveChatAgentInline = ({ user, isAdmin }: { user: any; isAdmin: boolean })
     checkBan();
   }, [user, isMounted]);
 
-  // Load tickets
+  // Online users/agents
+  useEffect(() => {
+    if (!db || !isMounted) return;
+    const q = query(collection(db, "users"), where("online", "==", true));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const agents: any[] = [];
+      const users: any[] = [];
+      snapshot.forEach((docSnap) => {
+        const data = docSnap.data();
+        const item = {
+          uid: docSnap.id,
+          displayName: data.displayName || data.name || data.email || "User",
+          email: data.email || "",
+          photoURL: data.photoURL || "",
+          online: data.online || false,
+          isAgent: data.email === ADMIN_EMAIL,
+        };
+        if (item.isAgent) agents.push(item);
+        else users.push(item);
+      });
+      setOnlineAgents(agents);
+      setOnlineUsers(users);
+    });
+    return () => unsubscribe();
+  }, [db, isMounted]);
+
+  // Tickets
   useEffect(() => {
     if (!db || !user || !isMounted) return;
     let q;
@@ -783,18 +769,11 @@ const LiveChatAgentInline = ({ user, isAdmin }: { user: any; isAdmin: boolean })
         ticketList.push({ id: docSnap.id, ...docSnap.data() } as Ticket);
       });
       setTickets(ticketList);
-      if (selectedTicket) {
-        const stillExists = ticketList.some((t) => t.id === selectedTicket.id);
-        if (!stillExists) {
-          setSelectedTicket(null);
-          setMessages([]);
-        }
-      }
     });
     return () => unsubscribe();
-  }, [db, user, isAdmin, selectedTicket, isMounted]);
+  }, [db, user, isAdmin, isMounted]);
 
-  // Load messages for selected ticket
+  // Messages for selected ticket
   useEffect(() => {
     if (!db || !selectedTicket || !isMounted) return;
     const q = query(collection(db, "livechat_tickets", selectedTicket.id, "messages"), orderBy("timestamp", "asc"));
@@ -834,11 +813,7 @@ const LiveChatAgentInline = ({ user, isAdmin }: { user: any; isAdmin: boolean })
     if (!selectedTicket || !user || !db || isBanned) return;
     const ticketRef = doc(db, "livechat_tickets", selectedTicket.id);
     if (value.length > 0) {
-      await updateDoc(ticketRef, {
-        typing: true,
-        typingUserId: user.uid,
-        typingUserName: user.displayName || user.email || "User",
-      });
+      await updateDoc(ticketRef, { typing: true, typingUserId: user.uid, typingUserName: user.displayName || user.email || "User" });
     } else {
       await updateDoc(ticketRef, { typing: false, typingUserId: null, typingUserName: null });
     }
@@ -856,7 +831,7 @@ const LiveChatAgentInline = ({ user, isAdmin }: { user: any; isAdmin: boolean })
       return;
     }
     const hasActiveTicket = tickets.some(
-      (t) => t.userId === user.uid && (t.status === "waiting" || t.status === "active") && !t.isAnnouncement && !t.isBroadcast
+      (t) => t.userId === user.uid && (t.status === "waiting" || t.status === "active")
     );
     if (hasActiveTicket) {
       alert("You still have an active chat with an agent.");
@@ -875,8 +850,6 @@ const LiveChatAgentInline = ({ user, isAdmin }: { user: any; isAdmin: boolean })
         typing: false,
         typingUserId: null,
         typingUserName: null,
-        isAnnouncement: false,
-        isBroadcast: false,
       });
       const initialMessage = `Hello, I would like to ask about: ${selectedTopic}`;
       const encryptedMessage = await encryptMessage(initialMessage);
@@ -887,14 +860,12 @@ const LiveChatAgentInline = ({ user, isAdmin }: { user: any; isAdmin: boolean })
         timestamp: serverTimestamp(),
         read: false,
         isEncrypted: true,
-        isBotDetected: false,
         deliveryStatus: "sent",
       });
       setSelectedTopic("");
       setShowStartChat(false);
     } catch (error) {
       console.error("Error starting chat:", error);
-      alert("An error occurred.");
     }
   };
 
@@ -929,12 +900,11 @@ const LiveChatAgentInline = ({ user, isAdmin }: { user: any; isAdmin: boolean })
       const encryptedMessage = await encryptMessage(messageText.trim());
       await addDoc(collection(db, "livechat_tickets", selectedTicket.id, "messages"), {
         senderId: user.uid,
-        senderName: senderName,
+        senderName,
         text: encryptedMessage,
         timestamp: serverTimestamp(),
         read: false,
         isEncrypted: true,
-        isBotDetected: false,
         deliveryStatus: "sent",
       });
       await updateDoc(ticketRef, {
@@ -945,23 +915,44 @@ const LiveChatAgentInline = ({ user, isAdmin }: { user: any; isAdmin: boolean })
         agentName: isAdmin ? AGENT_NAME : selectedTicket.agentName,
       });
       setMessageText("");
-      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     } catch (error) {
       console.error("Error sending message:", error);
-      alert("An error occurred.");
     }
   };
 
-  // Not logged in state
+  const renderDeliveryStatus = (msg: ChatMessage, isMine: boolean) => {
+    if (!isMine) return null;
+    let label = "Sent";
+    let icon = <CheckIcon size={11} color="#ffffff" />;
+    if (msg.read) {
+      label = "Read";
+      icon = <DoubleCheckIcon size={11} color="#ffffff" />;
+    } else if (msg.deliveryStatus === "delivered") {
+      label = "Delivered";
+      icon = <DoubleCheckIcon size={11} color="#ffffff" />;
+    } else if (msg.deliveryStatus === "sending") {
+      label = "Sending";
+      icon = <ClockIcon size={11} color="#ffffff" />;
+    } else if (msg.deliveryStatus === "failed") {
+      label = "Failed";
+      icon = <ErrorIcon size={11} color="#ffffff" />;
+    }
+    return (
+      <span style={{ display: "inline-flex", alignItems: "center", gap: "3px", fontSize: "10px", color: "#ffffff", fontWeight: 500 }}>
+        {label}
+        {icon}
+      </span>
+    );
+  };
+
+  // Not logged in
   if (!user) {
     return (
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", gap: "16px", padding: "40px 20px", textAlign: "center" }}>
-        <div style={{ fontSize: "22px", fontWeight: 800, color: "#0D3CFC", fontFamily: FONT_FAMILY }}>Live Chat Agent</div>
-        <p style={{ fontSize: "13px", color: "rgba(13,60,252,0.85)", fontFamily: FONT_FAMILY, margin: 0 }}>
-          Please login to start chatting with our agent
-        </p>
-        <Link href="/signin" style={{ textDecoration: "none" }}>
-          <button style={{ padding: "10px 24px", backgroundColor: "#0D3CFC", color: "#ffffff", border: "none", borderRadius: "10px", fontSize: "14px", fontWeight: 700, cursor: "pointer", fontFamily: FONT_FAMILY }}>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", gap: "16px", padding: "40px 20px", textAlign: "center", fontFamily: FONT_FAMILY }}>
+        <div style={{ fontSize: "28px", fontWeight: 700, color: "#0D3CFC", letterSpacing: "-0.02em" }}>Live Chat Agent</div>
+        <p style={{ fontSize: "13px", color: "#666", margin: 0 }}>Please login to use Live Chat Agent</p>
+        <Link href="/" style={{ textDecoration: "none" }}>
+          <button style={{ padding: "8px 20px", backgroundColor: "#0D3CFC", color: "#fff", border: "none", borderRadius: "6px", fontSize: "14px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY }}>
             Login
           </button>
         </Link>
@@ -969,174 +960,216 @@ const LiveChatAgentInline = ({ user, isAdmin }: { user: any; isAdmin: boolean })
     );
   }
 
-  // Banned state
   if (!isAdmin && isBanned) {
     return (
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", gap: "12px", padding: "40px 20px", textAlign: "center" }}>
-        <div style={{ fontSize: "18px", fontWeight: 800, color: "#0D3CFC", fontFamily: FONT_FAMILY }}>ACCOUNT BANNED</div>
-        <p style={{ fontSize: "12px", color: "rgba(13,60,252,0.85)", fontFamily: FONT_FAMILY, margin: 0 }}>
-          Reason: {banReason || "Suspicious Activity"}
-        </p>
+      <div style={{ padding: "40px 20px", textAlign: "center", fontFamily: FONT_FAMILY }}>
+        <div style={{ color: "#0D3CFC", fontSize: "22px", fontWeight: 700, marginBottom: "8px" }}>YOUR ACCOUNT HAS BEEN PERMANENTLY BANNED</div>
+        <div style={{ color: "#0D3CFC", fontSize: "14px" }}>REASON: {banReason || "SUSPICIOUS ACTIVITY"}</div>
       </div>
     );
   }
 
   if (checkingBan) {
-    return (
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: "#0D3CFC", fontFamily: FONT_FAMILY, fontSize: "13px" }}>
-        Checking account status...
-      </div>
-    );
+    return <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: "#666", fontFamily: FONT_FAMILY, fontSize: "13px" }}>Checking account status...</div>;
   }
 
   return (
-    <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", fontFamily: FONT_FAMILY }}>
-      {/* Header */}
-      <div style={{ padding: "16px 20px", borderBottom: "1px solid rgba(13,60,252,0.2)", display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0 }}>
-        <div style={{ fontSize: "18px", fontWeight: 800, color: "#0D3CFC", letterSpacing: "-0.01em" }}>Live Chat Agent</div>
-        {!isAdmin && (
-          <button
-            onClick={() => setShowStartChat(true)}
-            style={{ padding: "8px 14px", backgroundColor: "#0D3CFC", color: "#ffffff", border: "none", borderRadius: "8px", fontSize: "12px", fontWeight: 700, cursor: "pointer", fontFamily: FONT_FAMILY, display: "flex", alignItems: "center", gap: "6px" }}
-          >
-            <PlusIcon size={12} color="#ffffff" />
-            New Chat
-          </button>
-        )}
+    <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", fontFamily: FONT_FAMILY, overflow: "hidden" }}>
+      {/* Header title */}
+      <div style={{ padding: "14px 16px", borderBottom: "1px solid #e8e8e8", flexShrink: 0 }}>
+        <div style={{ fontSize: "16px", fontWeight: 700, color: "#0D3CFC" }}>Live Chat Agent</div>
       </div>
 
-      {/* Chat list */}
-      <div style={{ maxHeight: "140px", overflowY: "auto", borderBottom: "1px solid rgba(13,60,252,0.15)", flexShrink: 0 }} className="cv-scroll-inner">
-        {tickets.length === 0 ? (
-          <div style={{ padding: "16px", textAlign: "center", color: "rgba(13,60,252,0.7)", fontSize: "12px" }}>
-            No chats yet
+      {/* Chat layout: list + area */}
+      <div style={{ flex: 1, display: "flex", gap: "10px", padding: "10px", minHeight: 0, overflow: "hidden" }}>
+        {/* CHAT LIST — warna biru seperti halaman utama */}
+        <div
+          style={{
+            width: "140px",
+            backgroundColor: "#0D3CFC",
+            borderRadius: "10px",
+            overflowY: "auto",
+            flexShrink: 0,
+            color: "#fff",
+            display: "flex",
+            flexDirection: "column",
+          }}
+          className="cv-scroll-inner"
+        >
+          {/* Header chat list */}
+          <div style={{ padding: "10px", borderBottom: "1px solid rgba(255,255,255,0.15)", fontWeight: 600, fontSize: "11px", color: "#fff", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span>Chats</span>
+            <span style={{ fontSize: "9px", backgroundColor: "rgba(255,255,255,0.2)", padding: "1px 6px", borderRadius: "6px" }}>{tickets.length}</span>
           </div>
-        ) : (
-          tickets.map((t) => (
-            <div
-              key={t.id}
-              onClick={() => setSelectedTicket(t)}
-              style={{
-                padding: "10px 16px",
-                cursor: "pointer",
-                borderBottom: "1px solid rgba(13,60,252,0.1)",
-                background: selectedTicket?.id === t.id ? "rgba(13,60,252,0.12)" : "transparent",
-                borderRadius: "6px",
-                margin: "4px 8px",
-              }}
-            >
-              <div style={{ fontSize: "12px", fontWeight: 700, color: "#0D3CFC" }}>{t.userName}</div>
-              <div style={{ fontSize: "10px", color: "rgba(13,60,252,0.75)" }}>{t.topic}</div>
-            </div>
-          ))
-        )}
-      </div>
 
-      {/* Chat area */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0, overflow: "hidden" }}>
-        {selectedTicket ? (
-          <>
-            {/* Messages */}
-            <div
-              ref={chatMessagesContainerRef}
-              className="cv-scroll-inner"
-              style={{ flex: 1, overflowY: "auto", padding: "14px", display: "flex", flexDirection: "column", gap: "10px", minHeight: 0 }}
-            >
-              {messages.length === 0 ? (
-                <div style={{ textAlign: "center", color: "rgba(13,60,252,0.6)", fontSize: "12px", padding: "20px 0" }}>
-                  No messages yet
-                </div>
-              ) : (
-                messages.map((msg, idx) => {
-                  const isMine = msg.senderId === user.uid;
-                  return (
-                    <div key={idx} style={{ alignSelf: isMine ? "flex-end" : "flex-start", maxWidth: "80%" }}>
-                      <div
-                        style={{
-                          padding: "8px 12px",
-                          borderRadius: "10px",
-                          backgroundColor: isMine ? "#0D3CFC" : "rgba(13,60,252,0.12)",
-                          color: isMine ? "#ffffff" : "#0D3CFC",
-                          fontSize: "12px",
-                          fontFamily: FONT_FAMILY,
-                          wordBreak: "break-word",
-                        }}
-                      >
-                        {!isMine && (
-                          <div style={{ fontSize: "10px", fontWeight: 700, marginBottom: "2px", opacity: 0.85 }}>
-                            {msg.senderName}
-                          </div>
-                        )}
-                        <div>{msg.text}</div>
-                        <div style={{ fontSize: "9px", textAlign: "right", opacity: 0.7, marginTop: "3px" }}>
-                          {formatTime(msg.timestamp)}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })
-              )}
+          {/* New chat button */}
+          {!isAdmin && (
+            <div style={{ padding: "8px" }}>
+              <button
+                onClick={() => setShowStartChat(true)}
+                style={{
+                  width: "100%",
+                  padding: "8px",
+                  backgroundColor: "rgba(255,255,255,0.15)",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "8px",
+                  fontSize: "11px",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  fontFamily: FONT_FAMILY,
+                }}
+              >
+                + New Chat
+              </button>
             </div>
+          )}
 
-            {/* Input */}
-            {selectedTicket.status !== "resolved" && selectedTicket.status !== "closed" && (
-              <div style={{ padding: "10px 14px", borderTop: "1px solid rgba(13,60,252,0.2)", display: "flex", gap: "8px", flexShrink: 0 }}>
-                <input
-                  type="text"
-                  value={messageText}
-                  onChange={handleTyping}
-                  onKeyPress={(e) => {
-                    if (e.key === "Enter" && messageText.trim()) {
-                      e.preventDefault();
-                      sendMessage();
-                    }
-                  }}
-                  placeholder="Type a message..."
+          {/* Ticket items */}
+          <div style={{ flex: 1, overflowY: "auto" }} className="cv-scroll-inner">
+            {tickets.length === 0 ? (
+              <div style={{ padding: "16px 10px", textAlign: "center", color: "#fff", fontSize: "10px", opacity: 0.85 }}>
+                No chats yet
+              </div>
+            ) : (
+              tickets.map((t) => (
+                <div
+                  key={t.id}
+                  onClick={() => setSelectedTicket(t)}
                   style={{
-                    flex: 1,
-                    padding: "8px 12px",
-                    border: "1px solid rgba(13,60,252,0.3)",
-                    borderRadius: "8px",
-                    fontSize: "12px",
-                    outline: "none",
-                    fontFamily: FONT_FAMILY,
-                    color: "#0D3CFC",
-                    backgroundColor: "rgba(255,255,255,0.6)",
-                  }}
-                />
-                <button
-                  onClick={sendMessage}
-                  disabled={!messageText.trim()}
-                  style={{
-                    padding: "8px 14px",
-                    backgroundColor: messageText.trim() ? "#0D3CFC" : "rgba(13,60,252,0.3)",
-                    color: "#ffffff",
-                    border: "none",
-                    borderRadius: "8px",
-                    cursor: messageText.trim() ? "pointer" : "not-allowed",
-                    fontFamily: FONT_FAMILY,
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "6px",
+                    padding: "10px",
+                    cursor: "pointer",
+                    borderBottom: "1px solid rgba(255,255,255,0.06)",
+                    backgroundColor: selectedTicket?.id === t.id ? "rgba(255,255,255,0.12)" : "transparent",
+                    borderLeft: selectedTicket?.id === t.id ? "3px solid #fff" : "3px solid transparent",
                   }}
                 >
-                  <SendIcon size={14} color="#ffffff" />
-                </button>
-              </div>
+                  <div style={{ fontSize: "11px", fontWeight: 600, color: "#fff", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {t.userName}
+                  </div>
+                  <div style={{ fontSize: "9px", color: "rgba(255,255,255,0.85)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {t.topic}
+                  </div>
+                </div>
+              ))
             )}
-          </>
-        ) : (
-          <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", color: "rgba(13,60,252,0.6)", fontSize: "12px", padding: "20px", textAlign: "center" }}>
-            Select a chat or start a new one
           </div>
-        )}
+        </div>
+
+        {/* CHAT AREA — warna putih seperti halaman utama */}
+        <div style={{ flex: 1, backgroundColor: "#ffffff", borderRadius: "10px", border: "1px solid #e8e8e8", display: "flex", flexDirection: "column", overflow: "hidden", minWidth: 0 }}>
+          {selectedTicket ? (
+            <>
+              {/* Header chat */}
+              <div style={{ padding: "10px 14px", backgroundColor: "#0D3CFC", flexShrink: 0 }}>
+                <div style={{ fontWeight: 600, fontSize: "12px", color: "#fff", fontFamily: FONT_FAMILY }}>
+                  {selectedTicket.userName}
+                  <span style={{ fontSize: "10px", fontWeight: 400, color: "rgba(255,255,255,0.8)", marginLeft: "6px" }}>
+                    {selectedTicket.topic}
+                  </span>
+                </div>
+              </div>
+
+              {/* Messages */}
+              <div
+                ref={chatMessagesContainerRef}
+                className="cv-scroll-inner"
+                style={{ flex: 1, overflowY: "auto", padding: "12px", display: "flex", flexDirection: "column", gap: "8px", minHeight: 0 }}
+              >
+                {messages.length === 0 ? (
+                  <div style={{ textAlign: "center", color: "#999", fontSize: "11px", padding: "20px 0" }}>No messages yet</div>
+                ) : (
+                  messages.map((msg, idx) => {
+                    const isMine = msg.senderId === user.uid;
+                    return (
+                      <div key={idx} style={{ alignSelf: isMine ? "flex-end" : "flex-start", maxWidth: "80%" }}>
+                        <div
+                          style={{
+                            padding: "8px 10px",
+                            borderRadius: "10px",
+                            backgroundColor: isMine ? "#0D3CFC" : "#f0f0f0",
+                            color: isMine ? "#fff" : "#000",
+                            fontSize: "11px",
+                            fontFamily: FONT_FAMILY,
+                            wordBreak: "break-word",
+                          }}
+                        >
+                          {!isMine && (
+                            <div style={{ fontSize: "9px", fontWeight: 600, color: "#0D3CFC", marginBottom: "3px" }}>
+                              {msg.senderName}
+                            </div>
+                          )}
+                          <div>{msg.text}</div>
+                          <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "4px", marginTop: "3px" }}>
+                            {renderDeliveryStatus(msg, isMine)}
+                            <span style={{ fontSize: "8px", color: isMine ? "#fff" : "#999", opacity: 0.85 }}>
+                              {formatTime(msg.timestamp)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+
+              {/* Input */}
+              {selectedTicket.status !== "resolved" && selectedTicket.status !== "closed" && (
+                <div style={{ padding: "8px 10px", borderTop: "1px solid #e8e8e8", display: "flex", gap: "6px", flexShrink: 0 }}>
+                  <input
+                    type="text"
+                    value={messageText}
+                    onChange={handleTyping}
+                    onKeyPress={(e) => {
+                      if (e.key === "Enter" && messageText.trim()) {
+                        e.preventDefault();
+                        sendMessage();
+                      }
+                    }}
+                    placeholder="Type a message..."
+                    style={{
+                      flex: 1,
+                      padding: "8px 10px",
+                      border: "1px solid #e8e8e8",
+                      borderRadius: "8px",
+                      fontSize: "11px",
+                      outline: "none",
+                      fontFamily: FONT_FAMILY,
+                    }}
+                  />
+                  <button
+                    onClick={sendMessage}
+                    disabled={!messageText.trim()}
+                    style={{
+                      padding: "8px 12px",
+                      backgroundColor: messageText.trim() ? "#0D3CFC" : "#ccc",
+                      color: "#fff",
+                      border: "none",
+                      borderRadius: "8px",
+                      cursor: messageText.trim() ? "pointer" : "not-allowed",
+                      fontFamily: FONT_FAMILY,
+                      fontSize: "11px",
+                      fontWeight: 600,
+                    }}
+                  >
+                    Send
+                  </button>
+                </div>
+              )}
+            </>
+          ) : (
+            <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", color: "#999", fontSize: "11px", fontFamily: FONT_FAMILY, padding: "20px", textAlign: "center" }}>
+              Select a chat or start a new one
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Modal start chat */}
       {showStartChat && (
-        <div style={{ position: "absolute", inset: 0, backgroundColor: "rgba(0,0,0,0.5)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: "20px", borderRadius: "20px" }}>
-          <div style={{ backgroundColor: "#ffffff", padding: "20px", borderRadius: "12px", width: "100%", maxWidth: "320px", fontFamily: FONT_FAMILY }}>
-            <h4 style={{ margin: 0, marginBottom: "12px", color: "#0D3CFC", fontSize: "15px", fontWeight: 800 }}>Select Topic</h4>
+        <div style={{ position: "absolute", inset: 0, backgroundColor: "rgba(0,0,0,0.5)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: "16px" }}>
+          <div style={{ backgroundColor: "#fff", padding: "20px", borderRadius: "12px", width: "100%", maxWidth: "280px", fontFamily: FONT_FAMILY }}>
+            <h4 style={{ margin: 0, marginBottom: "12px", color: "#0D3CFC", fontSize: "14px", fontWeight: 700 }}>Select Topic</h4>
             <select
               value={selectedTopic}
               onChange={(e) => setSelectedTopic(e.target.value)}
@@ -1144,22 +1177,17 @@ const LiveChatAgentInline = ({ user, isAdmin }: { user: any; isAdmin: boolean })
             >
               <option value="">-- Select --</option>
               {topics.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
+                <option key={t} value={t}>{t}</option>
               ))}
             </select>
             <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
-              <button
-                onClick={() => setShowStartChat(false)}
-                style={{ padding: "6px 12px", background: "transparent", border: "1px solid #ccc", borderRadius: "8px", cursor: "pointer", fontFamily: FONT_FAMILY, fontSize: "12px", color: "#666" }}
-              >
+              <button onClick={() => setShowStartChat(false)} style={{ padding: "6px 12px", background: "transparent", border: "1px solid #ccc", borderRadius: "8px", cursor: "pointer", fontFamily: FONT_FAMILY, fontSize: "11px", color: "#666" }}>
                 Cancel
               </button>
               <button
                 onClick={startChat}
                 disabled={!selectedTopic}
-                style={{ padding: "6px 14px", background: selectedTopic ? "#0D3CFC" : "#ccc", color: "#fff", border: "none", borderRadius: "8px", cursor: selectedTopic ? "pointer" : "not-allowed", fontFamily: FONT_FAMILY, fontSize: "12px", fontWeight: 700 }}
+                style={{ padding: "6px 14px", background: selectedTopic ? "#0D3CFC" : "#ccc", color: "#fff", border: "none", borderRadius: "8px", cursor: selectedTopic ? "pointer" : "not-allowed", fontFamily: FONT_FAMILY, fontSize: "11px", fontWeight: 600 }}
               >
                 Start
               </button>
@@ -1202,7 +1230,7 @@ export default function CVPage(): React.JSX.Element {
     setIsMounted(true);
   }, []);
 
-  // Auth state
+  // Auth
   useEffect(() => {
     if (!auth || !isMounted) return;
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -1211,10 +1239,7 @@ export default function CVPage(): React.JSX.Element {
       if (currentUser) {
         setIsAdmin(currentUser.email === ADMIN_EMAIL);
         try {
-          await updateDoc(doc(db, "users", currentUser.uid), {
-            online: true,
-            lastSeen: serverTimestamp(),
-          });
+          await updateDoc(doc(db, "users", currentUser.uid), { online: true, lastSeen: serverTimestamp() });
         } catch (error) {
           console.error("Error updating online status:", error);
         }
@@ -1223,7 +1248,7 @@ export default function CVPage(): React.JSX.Element {
     return () => unsubscribe();
   }, [isMounted]);
 
-  // Card entrance animation
+  // Card entrance
   useEffect(() => {
     if (!isMounted || !cardRef.current) return;
     gsap.fromTo(cardRef.current, { opacity: 0, y: 60, scale: 0.96 }, { opacity: 1, y: 0, scale: 1, duration: 0.9, ease: "power3.out" });
@@ -1237,22 +1262,14 @@ export default function CVPage(): React.JSX.Element {
     ScrollTrigger.create({
       trigger: menuruFooterRef.current,
       start: "top 85%",
-      onEnter: () => {
-        gsap.to(split.chars, { opacity: 1, y: 0, scale: 1, rotationX: 0, duration: 1.2, stagger: 0.03, ease: "back.out(1.7)", overwrite: true });
-      },
-      onLeave: () => {
-        gsap.to(split.chars, { opacity: 0, y: 100, scale: 0.5, rotationX: 90, duration: 0.8, stagger: 0.02, ease: "power2.in", overwrite: true });
-      },
-      onEnterBack: () => {
-        gsap.to(split.chars, { opacity: 1, y: 0, scale: 1, rotationX: 0, duration: 1.2, stagger: 0.03, ease: "back.out(1.7)", overwrite: true });
-      },
+      onEnter: () => { gsap.to(split.chars, { opacity: 1, y: 0, scale: 1, rotationX: 0, duration: 1.2, stagger: 0.03, ease: "back.out(1.7)", overwrite: true }); },
+      onLeave: () => { gsap.to(split.chars, { opacity: 0, y: 100, scale: 0.5, rotationX: 90, duration: 0.8, stagger: 0.02, ease: "power2.in", overwrite: true }); },
+      onEnterBack: () => { gsap.to(split.chars, { opacity: 1, y: 0, scale: 1, rotationX: 0, duration: 1.2, stagger: 0.03, ease: "back.out(1.7)", overwrite: true }); },
     });
-    return () => {
-      ScrollTrigger.getAll().forEach((t) => t.kill());
-    };
+    return () => { ScrollTrigger.getAll().forEach((t) => t.kill()); };
   }, [isMounted]);
 
-  // Info button toggle animation
+  // Info button
   useEffect(() => {
     if (!buttonRef.current || !plusWrapRef.current) return;
     if (isOpen) {
@@ -1288,7 +1305,7 @@ export default function CVPage(): React.JSX.Element {
     if (workBlockRef.current) gsap.fromTo(workBlockRef.current, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out", delay: 0.6 });
   }, [isOpen]);
 
-  // Contact overlay transition
+  // Contact overlay
   useEffect(() => {
     if (showContact) {
       setContactMounted(true);
@@ -1344,11 +1361,11 @@ export default function CVPage(): React.JSX.Element {
         <link rel="apple-touch-icon" href="/images/ai.jpg" />
       </Head>
 
-      {/* ===== NAVBAR ===== */}
+      {/* NAVBAR */}
       <LeftNavbar />
       <RightNavbar />
 
-      {/* ===== CV SECTION ===== */}
+      {/* CV SECTION */}
       <div
         style={{
           minHeight: "100vh",
@@ -1364,7 +1381,7 @@ export default function CVPage(): React.JSX.Element {
         }}
       >
         <div style={{ position: "relative", width: "100%", maxWidth: "380px", height: "760px", zIndex: 1 }}>
-          {/* CARD — tanpa shadow / hover */}
+          {/* CARD — tanpa shadow */}
           <div
             ref={cardRef}
             style={{
@@ -1376,74 +1393,46 @@ export default function CVPage(): React.JSX.Element {
               position: "relative",
             }}
           >
-            {/* SCROLL AREA */}
             <div className="cv-scroll-inner" style={{ width: "100%", height: "100%", overflowY: "auto", overflowX: "hidden", scrollbarWidth: "none", msOverflowStyle: "none" }}>
               <div style={{ position: "relative", width: "100%", minHeight: "100%", display: "flex", flexDirection: "column" }}>
-                {/* PHOTO AREA */}
+                {/* PHOTO */}
                 <div style={{ position: "relative", width: "100%", height: "760px", flexShrink: 0 }}>
-                  <img
-                    ref={photoRef}
-                    src="/images/DSC_0614-min.JPG"
-                    alt="CV"
-                    style={{
-                      position: "absolute",
-                      top: 0,
-                      left: 0,
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                      objectPosition: "center center",
-                      display: "block",
-                      borderRadius: "20px",
-                    }}
-                  />
+                  <img ref={photoRef} src="/images/DSC_0614-min.JPG" alt="CV" style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "center center", display: "block", borderRadius: "20px" }} />
 
                   {isOpen && (
                     <div ref={textTopRef} style={{ position: "absolute", top: "28px", left: "24px", zIndex: 9, fontFamily: FONT_FAMILY, color: "#ffffff", pointerEvents: "none", lineHeight: 1.1, textAlign: "left" }}>
-                      <div style={{ fontSize: "30px", fontWeight: 800, letterSpacing: "-0.01em" }}>People</div>
-                      <div style={{ fontSize: "30px", fontWeight: 800, letterSpacing: "-0.01em" }}>Menuru</div>
+                      <div style={{ fontSize: "30px", fontWeight: 800 }}>People</div>
+                      <div style={{ fontSize: "30px", fontWeight: 800 }}>Menuru</div>
                     </div>
                   )}
 
                   {!isOpen && (
                     <div ref={textBottomRef} style={{ position: "absolute", bottom: "28px", left: "0", width: "100%", textAlign: "center", zIndex: 9, fontFamily: FONT_FAMILY, color: "#ffffff", pointerEvents: "none", lineHeight: 1.1, padding: "0 16px", boxSizing: "border-box" }}>
-                      <div style={{ fontSize: "26px", fontWeight: 800, letterSpacing: "-0.01em" }}>Curriculum Vitae</div>
-                      <div style={{ fontSize: "26px", fontWeight: 800, letterSpacing: "-0.01em" }}>Actual [ 16.09 ]</div>
+                      <div style={{ fontSize: "26px", fontWeight: 800 }}>Curriculum Vitae</div>
+                      <div style={{ fontSize: "26px", fontWeight: 800 }}>Actual [ 16.09 ]</div>
                     </div>
                   )}
                 </div>
 
-                {/* ABOUT + WORK + CONTACT BTN */}
+                {/* ABOUT + WORK + CONTACT */}
                 {isOpen && (
                   <div style={{ width: "100%", padding: "24px 24px 60px 24px", boxSizing: "border-box", fontFamily: FONT_FAMILY, color: "#ffffff", display: "flex", flexDirection: "column", gap: "20px" }}>
-                    <div ref={textAboutRef} style={{ fontSize: "30px", fontWeight: 800, letterSpacing: "-0.01em", color: "#ffffff" }}>About</div>
+                    <div ref={textAboutRef} style={{ fontSize: "30px", fontWeight: 800, color: "#ffffff" }}>About</div>
                     <div ref={textParagraphRef}>
-                      <p style={{ fontSize: "16px", fontWeight: 700, lineHeight: 1.5, color: "#ffffff", margin: 0, fontFamily: FONT_FAMILY, letterSpacing: "-0.01em" }}>
+                      <p style={{ fontSize: "16px", fontWeight: 700, lineHeight: 1.5, color: "#ffffff", margin: 0, letterSpacing: "-0.01em" }}>
                         Lulusan S1 Sistem Komputer Universitas Gunadarma dengan IPK 3,54. Memiliki minat di bidang pengembangan web dan terus mengembangkan kemampuan melalui pembelajaran mandiri menggunakan JavaScript, React.js, Next.js, TypeScript, dan Astro. Memiliki pengalaman mengerjakan proyek berbasis Arduino selama perkuliahan serta memahami dasar penggunaan Firebase. Disiplin, cepat belajar, bertanggung jawab, dan mampu bekerja secara individu maupun dalam tim.
                       </p>
                     </div>
-                    <div ref={textWorkRef} style={{ fontSize: "30px", fontWeight: 800, letterSpacing: "-0.01em", color: "#ffffff", marginTop: "8px" }}>Work Experience</div>
+                    <div ref={textWorkRef} style={{ fontSize: "30px", fontWeight: 800, color: "#ffffff", marginTop: "8px" }}>Work Experience</div>
                     <div ref={workBlockRef}><WorkExperienceItem /></div>
 
                     <button
                       onClick={() => setShowContact(true)}
                       style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: "10px",
-                        marginTop: "12px",
-                        padding: "14px 24px",
-                        backgroundColor: "#ffffff",
-                        color: "#0D3CFC",
-                        border: "none",
-                        borderRadius: "12px",
-                        fontSize: "15px",
-                        fontWeight: 700,
-                        cursor: "pointer",
-                        fontFamily: FONT_FAMILY,
-                        letterSpacing: "0.02em",
-                        width: "100%",
+                        display: "flex", alignItems: "center", justifyContent: "center", gap: "10px",
+                        marginTop: "12px", padding: "14px 24px", backgroundColor: "#ffffff", color: "#0D3CFC",
+                        border: "none", borderRadius: "12px", fontSize: "15px", fontWeight: 700,
+                        cursor: "pointer", fontFamily: FONT_FAMILY, width: "100%",
                       }}
                     >
                       <MailIcon size={18} color="#0D3CFC" />
@@ -1459,22 +1448,11 @@ export default function CVPage(): React.JSX.Element {
               ref={buttonRef}
               onClick={() => setIsOpen((v) => !v)}
               style={{
-                position: "absolute",
-                top: "16px",
-                right: "16px",
-                zIndex: 20,
-                padding: "10px 18px",
-                backgroundColor: "#0D3CFC",
-                color: "#ffffff",
-                border: "none",
-                borderRadius: "10px",
-                fontSize: "14px",
-                fontWeight: 700,
-                cursor: "pointer",
-                fontFamily: FONT_FAMILY,
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
+                position: "absolute", top: "16px", right: "16px", zIndex: 20,
+                padding: "10px 18px", backgroundColor: "#0D3CFC", color: "#ffffff",
+                border: "none", borderRadius: "10px", fontSize: "14px", fontWeight: 700,
+                cursor: "pointer", fontFamily: FONT_FAMILY,
+                display: "flex", alignItems: "center", gap: "8px",
               }}
             >
               <div ref={plusWrapRef} style={{ display: "flex", alignItems: "center", transformOrigin: "center center" }}>
@@ -1488,17 +1466,9 @@ export default function CVPage(): React.JSX.Element {
               <div
                 ref={contactOverlayRef}
                 style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  width: "100%",
-                  height: "100%",
-                  backgroundColor: "#F2EA6B",
-                  zIndex: 30,
-                  borderRadius: "20px",
-                  overflow: "hidden",
-                  display: "flex",
-                  flexDirection: "column",
+                  position: "absolute", top: 0, left: 0, width: "100%", height: "100%",
+                  backgroundColor: "#F2EA6B", zIndex: 30, borderRadius: "20px",
+                  overflow: "hidden", display: "flex", flexDirection: "column",
                 }}
               >
                 {/* CLOSE BUTTON */}
@@ -1506,22 +1476,11 @@ export default function CVPage(): React.JSX.Element {
                   ref={contactCloseRef}
                   onClick={() => setShowContact(false)}
                   style={{
-                    position: "absolute",
-                    top: "16px",
-                    right: "16px",
-                    zIndex: 40,
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    padding: "10px 18px",
-                    backgroundColor: "#0D3CFC",
-                    color: "#ffffff",
-                    border: "none",
-                    borderRadius: "10px",
-                    fontSize: "14px",
-                    fontWeight: 700,
-                    cursor: "pointer",
-                    fontFamily: FONT_FAMILY,
+                    position: "absolute", top: "16px", right: "16px", zIndex: 40,
+                    display: "flex", alignItems: "center", gap: "8px",
+                    padding: "10px 18px", backgroundColor: "#0D3CFC", color: "#ffffff",
+                    border: "none", borderRadius: "10px", fontSize: "14px", fontWeight: 700,
+                    cursor: "pointer", fontFamily: FONT_FAMILY,
                   }}
                 >
                   <CloseIcon size={16} color="#ffffff" />
@@ -1532,29 +1491,25 @@ export default function CVPage(): React.JSX.Element {
                 <div
                   ref={contactContentRef}
                   style={{
-                    width: "100%",
-                    height: "100%",
-                    padding: "72px 16px 16px 16px",
+                    width: "100%", height: "100%",
+                    padding: "72px 12px 12px 12px",
                     boxSizing: "border-box",
-                    display: "flex",
-                    flexDirection: "column",
+                    display: "flex", flexDirection: "column",
                   }}
                 >
                   <div
                     data-contact-item
                     style={{
-                      flex: 1,
-                      width: "100%",
-                      backgroundColor: "rgba(255,255,255,0.4)",
-                      borderRadius: "14px",
+                      flex: 1, width: "100%",
+                      backgroundColor: "#ffffff",
+                      borderRadius: "12px",
                       overflow: "hidden",
                       position: "relative",
-                      display: "flex",
-                      flexDirection: "column",
+                      display: "flex", flexDirection: "column",
                       minHeight: 0,
                     }}
                   >
-                    <LiveChatAgentInline user={user} isAdmin={isAdmin} />
+                    <LiveChatAgent user={user} isAdmin={isAdmin} />
                   </div>
                 </div>
               </div>
@@ -1563,29 +1518,26 @@ export default function CVPage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* ===== FOOTER (design tetap sama seperti halaman utama) ===== */}
+      {/* FOOTER */}
       <div
         style={{
-          width: "100%",
-          padding: "60px 40px 40px 40px",
+          width: "100%", padding: "60px 40px 40px 40px",
           backgroundColor: "#ffffff",
           borderTop: "1px solid rgba(0,0,0,0.05)",
-          marginTop: "20px",
-          position: "relative",
-          overflow: "hidden",
+          marginTop: "20px", position: "relative", overflow: "hidden",
         }}
       >
-        <div style={{ position: "absolute", left: "40px", top: "50%", transform: "translateY(-50%)", width: "200px", height: "auto", opacity: 0.8 }}>
+        <div style={{ position: "absolute", left: "40px", top: "50%", transform: "translateY(-50%)", width: "200px", opacity: 0.8 }}>
           <img src="/images/p0l.jpg" alt="" style={{ width: "100%", height: "auto", display: "block", objectFit: "cover" }} />
         </div>
-        <div style={{ position: "absolute", right: "40px", top: "50%", transform: "translateY(-50%)", width: "200px", height: "auto", opacity: 0.8 }}>
+        <div style={{ position: "absolute", right: "40px", top: "50%", transform: "translateY(-50%)", width: "200px", opacity: 0.8 }}>
           <img src="/images/xxz.jpg" alt="" style={{ width: "100%", height: "auto", display: "block", objectFit: "cover" }} />
         </div>
 
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", maxWidth: "1400px", margin: "0 auto", gap: "40px", flexWrap: "wrap", position: "relative", zIndex: 1 }}>
           {footerLinks.map((section, idx) => (
             <div key={idx} style={{ flex: "1", minWidth: "200px" }}>
-              <h3 style={{ fontFamily: FONT_FAMILY, fontSize: "28px", fontWeight: 600, color: "#000000", margin: 0, marginBottom: "16px", letterSpacing: "-0.01em", textTransform: "none" }}>
+              <h3 style={{ fontFamily: FONT_FAMILY, fontSize: "28px", fontWeight: 600, color: "#000000", margin: 0, marginBottom: "16px", letterSpacing: "-0.01em" }}>
                 {section.title}
               </h3>
               <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
@@ -1614,17 +1566,17 @@ export default function CVPage(): React.JSX.Element {
                   return (
                     <div key={linkIdx} style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                       <Link href={linkHref} style={{ textDecoration: "none" }}>
-                        <span style={{ fontFamily: FONT_FAMILY, fontSize: "20px", fontWeight: 400, color: "#0D3CFC", letterSpacing: "-0.01em", cursor: "pointer", textTransform: "none" }}>
+                        <span style={{ fontFamily: FONT_FAMILY, fontSize: "20px", fontWeight: 400, color: "#0D3CFC", letterSpacing: "-0.01em", cursor: "pointer" }}>
                           {link}
                         </span>
                       </Link>
                       {isAttention && (
-                        <span style={{ backgroundColor: "#0D3CFC", color: "#ffffff", padding: "2px 10px", borderRadius: "4px", fontSize: "11px", fontWeight: 600, fontFamily: FONT_FAMILY, letterSpacing: "0.3px", display: "inline-block" }}>
+                        <span style={{ backgroundColor: "#0D3CFC", color: "#ffffff", padding: "2px 10px", borderRadius: "4px", fontSize: "11px", fontWeight: 600, fontFamily: FONT_FAMILY }}>
                           Updated
                         </span>
                       )}
                       {isStories && (
-                        <span style={{ backgroundColor: "#0D3CFC", color: "#ffffff", padding: "2px 10px", borderRadius: "4px", fontSize: "11px", fontWeight: 600, fontFamily: FONT_FAMILY, letterSpacing: "0.3px", display: "inline-block" }}>
+                        <span style={{ backgroundColor: "#0D3CFC", color: "#ffffff", padding: "2px 10px", borderRadius: "4px", fontSize: "11px", fontWeight: 600, fontFamily: FONT_FAMILY }}>
                           New
                         </span>
                       )}
@@ -1637,92 +1589,47 @@ export default function CVPage(): React.JSX.Element {
         </div>
 
         <div style={{ maxWidth: "1400px", margin: "40px auto 0 auto", paddingTop: "20px", borderTop: "1px solid rgba(0,0,0,0.05)", position: "relative", zIndex: 1 }}>
-          <p style={{ fontFamily: FONT_FAMILY, fontSize: "14px", fontWeight: 400, color: "#666", margin: 0, textAlign: "center", letterSpacing: "0.01em" }}>
+          <p style={{ fontFamily: FONT_FAMILY, fontSize: "14px", fontWeight: 400, color: "#666", margin: 0, textAlign: "center" }}>
             Terms and conditions apply. By using this website, you agree to our Terms of Use and Privacy Policy.
           </p>
         </div>
       </div>
 
-      {/* ===== MENURU FOOTER TEXT ===== */}
+      {/* MENURU FOOTER TEXT */}
       <div
         ref={menuruFooterRef}
         style={{
-          width: "100%",
-          padding: "20px 40px 80px 40px",
-          backgroundColor: "#ffffff",
-          overflow: "hidden",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "flex-start",
-          minHeight: "300px",
+          width: "100%", padding: "20px 40px 80px 40px",
+          backgroundColor: "#ffffff", overflow: "hidden",
+          display: "flex", flexDirection: "column", minHeight: "300px",
         }}
       >
         <span
           ref={menuruTextRef}
           style={{
-            fontFamily: FONT_FAMILY,
-            fontSize: "450px",
-            fontWeight: 700,
-            color: "#0D3CFC",
-            letterSpacing: "-0.02em",
-            textTransform: "none",
-            lineHeight: "0.8",
-            display: "block",
-            textAlign: "left",
-            WebkitFontSmoothing: "antialiased",
-            MozOsxFontSmoothing: "grayscale",
+            fontFamily: FONT_FAMILY, fontSize: "450px", fontWeight: 700,
+            color: "#0D3CFC", letterSpacing: "-0.02em", lineHeight: "0.8",
+            display: "block", textAlign: "left",
           }}
         >
           Menuru
         </span>
         <div style={{ marginTop: "30px", width: "100%", display: "flex", justifyContent: "flex-start" }}>
-          <span style={{ fontFamily: FONT_FAMILY, fontSize: "16px", fontWeight: 400, color: "#0D3CFC", letterSpacing: "0.01em", opacity: 0.8 }}>
+          <span style={{ fontFamily: FONT_FAMILY, fontSize: "16px", fontWeight: 400, color: "#0D3CFC", opacity: 0.8 }}>
             2024 - 2026 Menuru. All rights reserved.
           </span>
         </div>
       </div>
 
       <style jsx global>{`
-        html {
-          overflow: auto !important;
-          -ms-overflow-style: none !important;
-          scrollbar-width: none !important;
-          height: 100% !important;
-        }
-        html::-webkit-scrollbar {
-          display: none !important;
-          width: 0 !important;
-          height: 0 !important;
-        }
-        body {
-          overflow: auto !important;
-          -ms-overflow-style: none !important;
-          scrollbar-width: none !important;
-          margin: 0;
-          padding: 0;
-          background-color: #ffffff !important;
-          min-height: 100% !important;
-          height: auto !important;
-        }
-        body::-webkit-scrollbar {
-          display: none !important;
-          width: 0 !important;
-          height: 0 !important;
-        }
+        html { overflow: auto !important; -ms-overflow-style: none !important; scrollbar-width: none !important; height: 100% !important; }
+        html::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
+        body { overflow: auto !important; -ms-overflow-style: none !important; scrollbar-width: none !important; margin: 0; padding: 0; background-color: #ffffff !important; min-height: 100% !important; height: auto !important; }
+        body::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
         * { background-color: transparent; }
-        .menuru-char {
-          display: inline-block;
-          will-change: transform, opacity;
-        }
-        .cv-scroll-inner::-webkit-scrollbar {
-          display: none !important;
-          width: 0 !important;
-          height: 0 !important;
-        }
-        .cv-scroll-inner {
-          scrollbar-width: none !important;
-          -ms-overflow-style: none !important;
-        }
+        .menuru-char { display: inline-block; will-change: transform, opacity; }
+        .cv-scroll-inner::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
+        .cv-scroll-inner { scrollbar-width: none !important; -ms-overflow-style: none !important; }
       `}</style>
     </>
   );
