@@ -249,8 +249,7 @@ export default function CVPage(): React.JSX.Element {
   const textAboutRef = useRef<HTMLDivElement>(null);
   const textWorkRef = useRef<HTMLDivElement>(null);
   const workBlockRef = useRef<HTMLDivElement>(null);
-  const contactButtonRef = useRef<HTMLButtonElement>(null);
-  const contactPageRef = useRef<HTMLDivElement>(null);
+  const cvContentRef = useRef<HTMLDivElement>(null);
   const contactContentRef = useRef<HTMLDivElement>(null);
   const [isMounted, setIsMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -419,26 +418,60 @@ export default function CVPage(): React.JSX.Element {
     );
   }, [isOpen, isMounted]);
 
-  // ===== ANIMASI TRANSISI HALAMAN: CV → CONTACT =====
+  // ===== ANIMASI TRANSISI HALAMAN CV → CONTACT =====
   useEffect(() => {
     if (!isMounted) return;
 
+    // Ubah warna background card
+    if (cardRef.current) {
+      gsap.to(cardRef.current, {
+        backgroundColor: showContact ? "#F2EA6B" : "#0D3CFC",
+        duration: 0.6,
+        ease: "power2.inOut",
+      });
+    }
+
     if (showContact) {
-      // Contact page fade + slide in
-      if (contactPageRef.current) {
-        gsap.fromTo(
-          contactPageRef.current,
-          { opacity: 0, scale: 1.05 },
-          { opacity: 1, scale: 1, duration: 0.5, ease: "power3.out" }
-        );
+      // Sembunyikan konten CV
+      if (cvContentRef.current) {
+        gsap.to(cvContentRef.current, {
+          opacity: 0,
+          y: -20,
+          duration: 0.35,
+          ease: "power2.in",
+        });
       }
-      // Content stagger in
+      // Tampilkan konten Contact
       if (contactContentRef.current) {
+        gsap.fromTo(
+          contactContentRef.current,
+          { opacity: 0, y: 30 },
+          { opacity: 1, y: 0, duration: 0.5, ease: "power3.out", delay: 0.15 }
+        );
+
         const items = contactContentRef.current.querySelectorAll("[data-contact-item]");
         gsap.fromTo(
           items,
-          { opacity: 0, y: 30 },
-          { opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease: "power2.out", delay: 0.2 }
+          { opacity: 0, y: 24 },
+          { opacity: 1, y: 0, duration: 0.5, stagger: 0.08, ease: "power2.out", delay: 0.25 }
+        );
+      }
+    } else {
+      // Sembunyikan konten Contact
+      if (contactContentRef.current) {
+        gsap.to(contactContentRef.current, {
+          opacity: 0,
+          y: -20,
+          duration: 0.3,
+          ease: "power2.in",
+        });
+      }
+      // Tampilkan kembali konten CV
+      if (cvContentRef.current) {
+        gsap.fromTo(
+          cvContentRef.current,
+          { opacity: 0, y: 20 },
+          { opacity: 1, y: 0, duration: 0.5, ease: "power3.out", delay: 0.15 }
         );
       }
     }
@@ -475,7 +508,7 @@ export default function CVPage(): React.JSX.Element {
           overflow: "hidden",
         }}
       >
-        {/* ===== CV CARD (HALAMAN UTAMA) ===== */}
+        {/* ===== CARD BIRU (BISA BERUBAH JADI CONTACT) ===== */}
         <div
           style={{
             position: "relative",
@@ -483,12 +516,8 @@ export default function CVPage(): React.JSX.Element {
             maxWidth: "380px",
             height: "760px",
             zIndex: 1,
-            opacity: showContact ? 0 : 1,
-            pointerEvents: showContact ? "none" : "auto",
-            transition: "opacity 0.4s ease",
           }}
         >
-          {/* Card bg biru */}
           <div
             ref={cardRef}
             style={{
@@ -515,14 +544,17 @@ export default function CVPage(): React.JSX.Element {
                 msOverflowStyle: "none",
               }}
             >
-              {/* Wrapper isi */}
+              {/* ===== KONTEN CV (WRAPPER) ===== */}
               <div
+                ref={cvContentRef}
                 style={{
                   position: "relative",
                   width: "100%",
                   minHeight: "100%",
                   display: "flex",
                   flexDirection: "column",
+                  opacity: showContact ? 0 : 1,
+                  pointerEvents: showContact ? "none" : "auto",
                 }}
               >
                 {/* Area foto */}
@@ -551,7 +583,6 @@ export default function CVPage(): React.JSX.Element {
                     }}
                   />
 
-                  {/* Teks atas (open) */}
                   {isOpen && (
                     <div
                       ref={textTopRef}
@@ -576,7 +607,6 @@ export default function CVPage(): React.JSX.Element {
                     </div>
                   )}
 
-                  {/* Teks bawah (default) */}
                   {!isOpen && (
                     <div
                       ref={textBottomRef}
@@ -671,7 +701,6 @@ export default function CVPage(): React.JSX.Element {
 
                     {/* ===== TOMBOL CONTACT ===== */}
                     <button
-                      ref={contactButtonRef}
                       onClick={() => setShowContact(true)}
                       style={{
                         display: "flex",
@@ -691,7 +720,6 @@ export default function CVPage(): React.JSX.Element {
                         letterSpacing: "0.02em",
                         boxShadow: "0 8px 24px rgba(0,0,0,0.2)",
                         width: "100%",
-                        transition: "transform 0.2s ease",
                       }}
                     >
                       <MailIcon size={18} color="#0D3CFC" />
@@ -700,6 +728,139 @@ export default function CVPage(): React.JSX.Element {
                   </div>
                 )}
               </div>
+
+              {/* ===== KONTEN CONTACT (DI DALAM CARD YANG SAMA) ===== */}
+              {showContact && (
+                <div
+                  ref={contactContentRef}
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    minHeight: "100%",
+                    padding: "40px 24px",
+                    boxSizing: "border-box",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "20px",
+                    color: "#0D3CFC",
+                    zIndex: 15,
+                  }}
+                >
+                  {/* Judul Contact */}
+                  <div
+                    data-contact-item
+                    style={{
+                      fontSize: "48px",
+                      fontWeight: 800,
+                      letterSpacing: "-0.02em",
+                      color: "#0D3CFC",
+                      lineHeight: 1.05,
+                      fontFamily: FONT_FAMILY,
+                      marginTop: "60px",
+                    }}
+                  >
+                    Contact
+                  </div>
+
+                  {/* Sub-judul */}
+                  <div
+                    data-contact-item
+                    style={{
+                      fontSize: "14px",
+                      fontWeight: 500,
+                      color: "rgba(13,60,252,0.85)",
+                      fontFamily: FONT_FAMILY,
+                      lineHeight: 1.6,
+                    }}
+                  >
+                    Mari terhubung! Saya terbuka untuk kolaborasi, proyek freelance, atau
+                    sekadar berdiskusi tentang teknologi dan desain.
+                  </div>
+
+                  {/* List kontak */}
+                  <div
+                    data-contact-item
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "12px",
+                    }}
+                  >
+                    {[
+                      { label: "Email", value: "farid@menuru.com" },
+                      { label: "Phone", value: "+62 812-3456-7890" },
+                      { label: "Instagram", value: "@menuru" },
+                      { label: "Website", value: "menuru.com" },
+                    ].map((item, i) => (
+                      <div
+                        key={i}
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          gap: "16px",
+                          padding: "14px 18px",
+                          backgroundColor: "rgba(255,255,255,0.45)",
+                          border: "1px solid rgba(13,60,252,0.25)",
+                          borderRadius: "12px",
+                          fontFamily: FONT_FAMILY,
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontSize: "12px",
+                            fontWeight: 600,
+                            color: "rgba(13,60,252,0.75)",
+                            letterSpacing: "0.04em",
+                            textTransform: "uppercase",
+                          }}
+                        >
+                          {item.label}
+                        </span>
+                        <span
+                          style={{
+                            fontSize: "14px",
+                            fontWeight: 700,
+                            color: "#0D3CFC",
+                            textAlign: "right",
+                            wordBreak: "break-all",
+                          }}
+                        >
+                          {item.value}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Tombol Back */}
+                  <button
+                    data-contact-item
+                    onClick={() => setShowContact(false)}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "10px",
+                      padding: "14px 24px",
+                      backgroundColor: "#0D3CFC",
+                      color: "#ffffff",
+                      border: "none",
+                      borderRadius: "12px",
+                      fontSize: "15px",
+                      fontWeight: 700,
+                      cursor: "pointer",
+                      fontFamily: FONT_FAMILY,
+                      letterSpacing: "0.02em",
+                      boxShadow: "0 8px 24px rgba(13,60,252,0.35)",
+                      marginTop: "8px",
+                    }}
+                  >
+                    ← Back to CV
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* ===== TOMBOL INFO / CLOSE ===== */}
@@ -725,6 +886,9 @@ export default function CVPage(): React.JSX.Element {
                 display: "flex",
                 alignItems: "center",
                 gap: "8px",
+                opacity: showContact ? 0 : 1,
+                pointerEvents: showContact ? "none" : "auto",
+                transition: "opacity 0.3s ease",
               }}
             >
               <div
@@ -742,150 +906,6 @@ export default function CVPage(): React.JSX.Element {
             </button>
           </div>
         </div>
-
-        {/* ===== HALAMAN CONTACT (OVERLAY) ===== */}
-        {showContact && (
-          <div
-            ref={contactPageRef}
-            style={{
-              position: "fixed",
-              inset: 0,
-              backgroundColor: "#F2EA6B",
-              zIndex: 100,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: "24px",
-              boxSizing: "border-box",
-              fontFamily: FONT_FAMILY,
-            }}
-          >
-            {/* Konten Contact */}
-            <div
-              ref={contactContentRef}
-              style={{
-                width: "100%",
-                maxWidth: "420px",
-                display: "flex",
-                flexDirection: "column",
-                gap: "24px",
-                color: "#0D3CFC",
-              }}
-            >
-              {/* Judul */}
-              <div
-                data-contact-item
-                style={{
-                  fontSize: "52px",
-                  fontWeight: 800,
-                  letterSpacing: "-0.02em",
-                  color: "#0D3CFC",
-                  lineHeight: 1.05,
-                  fontFamily: FONT_FAMILY,
-                }}
-              >
-                Contact
-              </div>
-
-              {/* Sub-judul */}
-              <div
-                data-contact-item
-                style={{
-                  fontSize: "15px",
-                  fontWeight: 500,
-                  color: "rgba(13,60,252,0.85)",
-                  fontFamily: FONT_FAMILY,
-                  lineHeight: 1.6,
-                }}
-              >
-                Mari terhubung! Saya terbuka untuk kolaborasi, proyek freelance, atau
-                sekadar berdiskusi tentang teknologi dan desain.
-              </div>
-
-              {/* List kontak */}
-              <div
-                data-contact-item
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "12px",
-                }}
-              >
-                {[
-                  { label: "Email", value: "farid@menuru.com" },
-                  { label: "Phone", value: "+62 812-3456-7890" },
-                  { label: "Instagram", value: "@menuru" },
-                  { label: "Website", value: "menuru.com" },
-                ].map((item, i) => (
-                  <div
-                    key={i}
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      gap: "16px",
-                      padding: "16px 20px",
-                      backgroundColor: "rgba(255,255,255,0.4)",
-                      border: "1px solid rgba(13,60,252,0.25)",
-                      borderRadius: "12px",
-                      fontFamily: FONT_FAMILY,
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontSize: "13px",
-                        fontWeight: 600,
-                        color: "rgba(13,60,252,0.75)",
-                        letterSpacing: "0.04em",
-                        textTransform: "uppercase",
-                      }}
-                    >
-                      {item.label}
-                    </span>
-                    <span
-                      style={{
-                        fontSize: "15px",
-                        fontWeight: 700,
-                        color: "#0D3CFC",
-                        textAlign: "right",
-                        wordBreak: "break-all",
-                      }}
-                    >
-                      {item.value}
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-              {/* Tombol Back */}
-              <button
-                data-contact-item
-                onClick={() => setShowContact(false)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "10px",
-                  padding: "14px 24px",
-                  backgroundColor: "#0D3CFC",
-                  color: "#ffffff",
-                  border: "none",
-                  borderRadius: "12px",
-                  fontSize: "15px",
-                  fontWeight: 700,
-                  cursor: "pointer",
-                  fontFamily: FONT_FAMILY,
-                  letterSpacing: "0.02em",
-                  boxShadow: "0 8px 24px rgba(13,60,252,0.35)",
-                  marginTop: "8px",
-                }}
-              >
-                ← Back to CV
-              </button>
-            </div>
-          </div>
-        )}
       </div>
 
       <style jsx global>{`
