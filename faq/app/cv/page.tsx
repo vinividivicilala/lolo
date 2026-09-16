@@ -6,19 +6,39 @@ import gsap from "gsap";
 
 const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
 
-// ===== SVG ICONS =====
-const InfoIcon = ({ size = 16, color = "#ffffff" }: { size?: number; color?: string }) => (
+// ===== SVG ICON PLUS (dengan 2 garis yang bisa dianimasikan) =====
+const PlusIcon = ({
+  size = 16,
+  color = "#ffffff",
+  lineRef1,
+  lineRef2,
+}: {
+  size?: number;
+  color?: string;
+  lineRef1?: React.RefObject<SVGLineElement>;
+  lineRef2?: React.RefObject<SVGLineElement>;
+}) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="12" cy="12" r="10" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M12 16V12" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    <circle cx="12" cy="8" r="1" fill={color} />
-  </svg>
-);
-
-const CloseIcon = ({ size = 16, color = "#0D3CFC" }: { size?: number; color?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M18 6L6 18" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M6 6L18 18" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+    <line
+      ref={lineRef1}
+      x1="4"
+      y1="12"
+      x2="20"
+      y2="12"
+      stroke={color}
+      strokeWidth="2.5"
+      strokeLinecap="round"
+    />
+    <line
+      ref={lineRef2}
+      x1="12"
+      y1="4"
+      x2="12"
+      y2="20"
+      stroke={color}
+      strokeWidth="2.5"
+      strokeLinecap="round"
+    />
   </svg>
 );
 
@@ -27,9 +47,11 @@ export default function CVPage(): React.JSX.Element {
   const cardRef = useRef<HTMLDivElement>(null);
   const photoRef = useRef<HTMLImageElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const iconRef = useRef<HTMLDivElement>(null);
-  const textInsideRef = useRef<HTMLDivElement>(null);
-  const textAboveRef = useRef<HTMLDivElement>(null);
+  const plusWrapRef = useRef<HTMLDivElement>(null);
+  const plusLine1Ref = useRef<SVGLineElement>(null);
+  const plusLine2Ref = useRef<SVGLineElement>(null);
+  const textTopRef = useRef<HTMLDivElement>(null);
+  const textBottomRef = useRef<HTMLDivElement>(null);
   const [isMounted, setIsMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -71,16 +93,17 @@ export default function CVPage(): React.JSX.Element {
     }
   }, [isOpen, isMounted]);
 
-  // Animasi GSAP icon di dalam tombol (rotate + scale saat toggle)
+  // Animasi GSAP icon plus → jadi × (rotate 45°) saat open
   useEffect(() => {
     if (!isMounted) return;
-    if (!iconRef.current) return;
+    if (!plusWrapRef.current) return;
 
-    gsap.fromTo(
-      iconRef.current,
-      { rotate: isOpen ? -90 : 90, scale: 0.5, opacity: 0 },
-      { rotate: 0, scale: 1, opacity: 1, duration: 0.4, ease: "back.out(1.6)" }
-    );
+    gsap.to(plusWrapRef.current, {
+      rotate: isOpen ? 45 : 0,
+      duration: 0.4,
+      ease: "power2.inOut",
+      transformOrigin: "center center",
+    });
   }, [isOpen, isMounted]);
 
   // Animasi GSAP foto
@@ -117,27 +140,27 @@ export default function CVPage(): React.JSX.Element {
     }
   }, [isOpen, isMounted]);
 
-  // Animasi GSAP teks di bawah foto (mode default)
+  // Animasi GSAP teks bawah (mode default) — warna putih di dalam card
   useEffect(() => {
     if (!isMounted) return;
-    if (!textInsideRef.current) return;
+    if (!textBottomRef.current) return;
     if (isOpen) return;
 
     gsap.fromTo(
-      textInsideRef.current,
+      textBottomRef.current,
       { opacity: 0, y: 24 },
       { opacity: 1, y: 0, duration: 0.6, ease: "power2.out", delay: 0.3 }
     );
   }, [isOpen, isMounted]);
 
-  // Animasi GSAP teks di atas foto (mode open)
+  // Animasi GSAP teks atas (mode open) — tetap DI DALAM card, warna putih
   useEffect(() => {
     if (!isMounted) return;
-    if (!textAboveRef.current) return;
+    if (!textTopRef.current) return;
     if (!isOpen) return;
 
     gsap.fromTo(
-      textAboveRef.current,
+      textTopRef.current,
       { opacity: 0, y: -24 },
       { opacity: 1, y: 0, duration: 0.6, ease: "power2.out", delay: 0.15 }
     );
@@ -213,10 +236,53 @@ export default function CVPage(): React.JSX.Element {
               }}
             />
 
-            {/* ===== TEKS DI BAWAH FOTO (MODE DEFAULT) — 2 BARIS ===== */}
+            {/* ===== TEKS DI ATAS (MODE OPEN) — DI DALAM CARD, WARNA PUTIH ===== */}
+            {isOpen && (
+              <div
+                ref={textTopRef}
+                style={{
+                  position: "absolute",
+                  top: "28px",
+                  left: "0",
+                  width: "100%",
+                  textAlign: "center",
+                  zIndex: 9,
+                  fontFamily: FONT_FAMILY,
+                  color: "#ffffff",
+                  pointerEvents: "none",
+                  lineHeight: 1.1,
+                  textShadow: "0 4px 16px rgba(0,0,0,0.55)",
+                  padding: "0 16px",
+                  boxSizing: "border-box",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: "30px",
+                    fontWeight: 800,
+                    letterSpacing: "-0.01em",
+                    fontFamily: FONT_FAMILY,
+                  }}
+                >
+                  People
+                </div>
+                <div
+                  style={{
+                    fontSize: "30px",
+                    fontWeight: 800,
+                    letterSpacing: "-0.01em",
+                    fontFamily: FONT_FAMILY,
+                  }}
+                >
+                  Menuru
+                </div>
+              </div>
+            )}
+
+            {/* ===== TEKS DI BAWAH (MODE DEFAULT) — DI DALAM CARD, WARNA PUTIH ===== */}
             {!isOpen && (
               <div
-                ref={textInsideRef}
+                ref={textBottomRef}
                 style={{
                   position: "absolute",
                   bottom: "28px",
@@ -256,7 +322,7 @@ export default function CVPage(): React.JSX.Element {
               </div>
             )}
 
-            {/* ===== TOMBOL INFO / CLOSE DI ATAS KANAN DENGAN ICON SVG ===== */}
+            {/* ===== TOMBOL INFO / CLOSE DI ATAS KANAN DENGAN ICON PLUS ===== */}
             <button
               ref={buttonRef}
               onClick={() => setIsOpen((v) => !v)}
@@ -281,61 +347,21 @@ export default function CVPage(): React.JSX.Element {
                 gap: "8px",
               }}
             >
-              <div ref={iconRef} style={{ display: "flex", alignItems: "center" }}>
-                {isOpen ? (
-                  <CloseIcon size={16} color="#0D3CFC" />
-                ) : (
-                  <InfoIcon size={16} color="#ffffff" />
-                )}
+              <div
+                ref={plusWrapRef}
+                style={{ display: "flex", alignItems: "center", transformOrigin: "center center" }}
+              >
+                <PlusIcon
+                  size={16}
+                  color={isOpen ? "#0D3CFC" : "#ffffff"}
+                  lineRef1={plusLine1Ref}
+                  lineRef2={plusLine2Ref}
+                />
               </div>
               <span>{isOpen ? "Close" : "Info"}</span>
             </button>
           </div>
         </div>
-
-        {/* ===== TEKS DI ATAS FOTO (MODE OPEN) — DI LUAR CARD ===== */}
-        {isOpen && (
-          <div
-            ref={textAboveRef}
-            style={{
-              position: "fixed",
-              top: "calc(50% - 380px - 40px)",
-              left: "50%",
-              transform: "translateX(-50%)",
-              width: "100%",
-              maxWidth: "380px",
-              textAlign: "center",
-              zIndex: 2,
-              fontFamily: FONT_FAMILY,
-              color: "#0D3CFC",
-              pointerEvents: "none",
-              lineHeight: 1.1,
-              padding: "0 16px",
-              boxSizing: "border-box",
-            }}
-          >
-            <div
-              style={{
-                fontSize: "30px",
-                fontWeight: 800,
-                letterSpacing: "-0.01em",
-                fontFamily: FONT_FAMILY,
-              }}
-            >
-              People
-            </div>
-            <div
-              style={{
-                fontSize: "30px",
-                fontWeight: 800,
-                letterSpacing: "-0.01em",
-                fontFamily: FONT_FAMILY,
-              }}
-            >
-              Menuru
-            </div>
-          </div>
-        )}
       </div>
 
       <style jsx global>{`
