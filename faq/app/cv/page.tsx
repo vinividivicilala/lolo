@@ -52,23 +52,22 @@ export default function CVPage(): React.JSX.Element {
     }
   }, [isOpen, isMounted]);
 
-  // Animasi GSAP foto: dari full menutupi card → ke tengah ukuran normal
+  // Animasi GSAP foto: dari full menutupi card → ke tengah ukuran lebih besar
   useEffect(() => {
     if (!isMounted) return;
     if (!photoRef.current) return;
 
     if (isOpen) {
-      // Foto jadi di tengah ukuran normal
+      // Foto pindah ke tengah, lebih besar (tanpa bg/shadow tambahan)
       gsap.to(photoRef.current, {
         top: "50%",
         left: "50%",
         xPercent: -50,
         yPercent: -50,
-        width: "70%",
-        height: "70%",
+        width: "92%",
+        height: "92%",
         objectFit: "contain",
-        borderRadius: "14px",
-        boxShadow: "0 12px 40px rgba(0,0,0,0.35)",
+        borderRadius: "12px",
         duration: 0.55,
         ease: "power3.inOut",
       });
@@ -83,7 +82,6 @@ export default function CVPage(): React.JSX.Element {
         height: "100%",
         objectFit: "cover",
         borderRadius: "20px",
-        boxShadow: "0 0px 0px rgba(0,0,0,0)",
         duration: 0.55,
         ease: "power3.inOut",
       });
