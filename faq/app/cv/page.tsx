@@ -6,13 +6,30 @@ import gsap from "gsap";
 
 const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
 
+// ===== SVG ICONS =====
+const InfoIcon = ({ size = 16, color = "#ffffff" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="12" cy="12" r="10" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M12 16V12" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <circle cx="12" cy="8" r="1" fill={color} />
+  </svg>
+);
+
+const CloseIcon = ({ size = 16, color = "#0D3CFC" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M18 6L6 18" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M6 6L18 18" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
 // ===== CV PAGE =====
 export default function CVPage(): React.JSX.Element {
   const cardRef = useRef<HTMLDivElement>(null);
   const photoRef = useRef<HTMLImageElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const textInsideRef = useRef<HTMLDivElement>(null); // teks di dalam/bawah foto (mode default)
-  const textAboveRef = useRef<HTMLDivElement>(null);  // teks di atas foto (mode open)
+  const iconRef = useRef<HTMLDivElement>(null);
+  const textInsideRef = useRef<HTMLDivElement>(null);
+  const textAboveRef = useRef<HTMLDivElement>(null);
   const [isMounted, setIsMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -32,7 +49,7 @@ export default function CVPage(): React.JSX.Element {
     );
   }, [isMounted]);
 
-  // Animasi GSAP tombol
+  // Animasi GSAP tombol (bg + teks)
   useEffect(() => {
     if (!isMounted) return;
     if (!buttonRef.current) return;
@@ -52,6 +69,18 @@ export default function CVPage(): React.JSX.Element {
         ease: "power2.out",
       });
     }
+  }, [isOpen, isMounted]);
+
+  // Animasi GSAP icon di dalam tombol (rotate + scale saat toggle)
+  useEffect(() => {
+    if (!isMounted) return;
+    if (!iconRef.current) return;
+
+    gsap.fromTo(
+      iconRef.current,
+      { rotate: isOpen ? -90 : 90, scale: 0.5, opacity: 0 },
+      { rotate: 0, scale: 1, opacity: 1, duration: 0.4, ease: "back.out(1.6)" }
+    );
   }, [isOpen, isMounted]);
 
   // Animasi GSAP foto
@@ -88,11 +117,11 @@ export default function CVPage(): React.JSX.Element {
     }
   }, [isOpen, isMounted]);
 
-  // Animasi GSAP teks di bawah foto (mode default) — 2 baris
+  // Animasi GSAP teks di bawah foto (mode default)
   useEffect(() => {
     if (!isMounted) return;
     if (!textInsideRef.current) return;
-    if (isOpen) return; // hanya muncul saat mode default
+    if (isOpen) return;
 
     gsap.fromTo(
       textInsideRef.current,
@@ -105,7 +134,7 @@ export default function CVPage(): React.JSX.Element {
   useEffect(() => {
     if (!isMounted) return;
     if (!textAboveRef.current) return;
-    if (!isOpen) return; // hanya muncul saat mode open
+    if (!isOpen) return;
 
     gsap.fromTo(
       textAboveRef.current,
@@ -226,6 +255,41 @@ export default function CVPage(): React.JSX.Element {
                 </div>
               </div>
             )}
+
+            {/* ===== TOMBOL INFO / CLOSE DI ATAS KANAN DENGAN ICON SVG ===== */}
+            <button
+              ref={buttonRef}
+              onClick={() => setIsOpen((v) => !v)}
+              style={{
+                position: "absolute",
+                top: "16px",
+                right: "16px",
+                zIndex: 10,
+                padding: "10px 18px",
+                backgroundColor: "#0D3CFC",
+                color: "#ffffff",
+                border: "none",
+                borderRadius: "10px",
+                fontSize: "14px",
+                fontWeight: 700,
+                cursor: "pointer",
+                fontFamily: FONT_FAMILY,
+                letterSpacing: "0.02em",
+                boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+              }}
+            >
+              <div ref={iconRef} style={{ display: "flex", alignItems: "center" }}>
+                {isOpen ? (
+                  <CloseIcon size={16} color="#0D3CFC" />
+                ) : (
+                  <InfoIcon size={16} color="#ffffff" />
+                )}
+              </div>
+              <span>{isOpen ? "Close" : "Info"}</span>
+            </button>
           </div>
         </div>
 
