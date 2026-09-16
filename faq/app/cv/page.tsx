@@ -52,7 +52,7 @@ export default function CVPage(): React.JSX.Element {
           fontFamily: FONT_FAMILY,
         }}
       >
-        {/* ===== BG BIRU FIXED DI TENGAH + FOTO FULL ===== */}
+        {/* ===== BG BIRU FIXED DI TENGAH — foto & biru nyatu ===== */}
         <div
           style={{
             position: "fixed",
@@ -66,28 +66,31 @@ export default function CVPage(): React.JSX.Element {
             pointerEvents: "none",
           }}
         >
-          {/* Card bg biru + foto */}
+          {/* Card: foto jadi background, bg biru overlay di belakang foto
+              Keduanya nyatu — foto full card, bg biru sebagai lapisan dasar */}
           <div
             ref={cardRef}
             style={{
               width: "100%",
               height: "100%",
               backgroundColor: "#0D3CFC",
+              backgroundImage: "url('/images/ai.jpg')",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              backgroundRepeat: "no-repeat",
               borderRadius: "20px",
               boxShadow: "0 20px 60px rgba(13,60,252,0.35)",
               overflow: "hidden",
               position: "relative",
             }}
           >
-            {/* Foto seukuran full bg biru */}
-            <img
-              src="/images/ai.jpg"
-              alt="CV"
+            {/* Overlay biru transparan supaya foto & biru benar-benar nyatu */}
+            <div
               style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-                display: "block",
+                position: "absolute",
+                inset: 0,
+                backgroundColor: "rgba(13,60,252,0.55)",
+                mixBlendMode: "multiply",
                 borderRadius: "20px",
               }}
             />
