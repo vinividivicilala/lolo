@@ -11,7 +11,8 @@ export default function CVPage(): React.JSX.Element {
   const cardRef = useRef<HTMLDivElement>(null);
   const photoRef = useRef<HTMLImageElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const textRef = useRef<HTMLDivElement>(null);
+  const textInsideRef = useRef<HTMLDivElement>(null); // teks di dalam/bawah foto (mode default)
+  const textAboveRef = useRef<HTMLDivElement>(null);  // teks di atas foto (mode open)
   const [isMounted, setIsMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -31,7 +32,7 @@ export default function CVPage(): React.JSX.Element {
     );
   }, [isMounted]);
 
-  // Animasi GSAP tombol (warna transisi)
+  // Animasi GSAP tombol
   useEffect(() => {
     if (!isMounted) return;
     if (!buttonRef.current) return;
@@ -87,25 +88,30 @@ export default function CVPage(): React.JSX.Element {
     }
   }, [isOpen, isMounted]);
 
-  // Animasi GSAP teks (fade out → ganti → fade in)
+  // Animasi GSAP teks di bawah foto (mode default) — 2 baris
   useEffect(() => {
     if (!isMounted) return;
-    if (!textRef.current) return;
+    if (!textInsideRef.current) return;
+    if (isOpen) return; // hanya muncul saat mode default
 
-    gsap.to(textRef.current, {
-      opacity: 0,
-      y: -18,
-      duration: 0.28,
-      ease: "power2.in",
-      onComplete: () => {
-        if (!textRef.current) return;
-        gsap.fromTo(
-          textRef.current,
-          { opacity: 0, y: 18 },
-          { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" }
-        );
-      },
-    });
+    gsap.fromTo(
+      textInsideRef.current,
+      { opacity: 0, y: 24 },
+      { opacity: 1, y: 0, duration: 0.6, ease: "power2.out", delay: 0.3 }
+    );
+  }, [isOpen, isMounted]);
+
+  // Animasi GSAP teks di atas foto (mode open)
+  useEffect(() => {
+    if (!isMounted) return;
+    if (!textAboveRef.current) return;
+    if (!isOpen) return; // hanya muncul saat mode open
+
+    gsap.fromTo(
+      textAboveRef.current,
+      { opacity: 0, y: -24 },
+      { opacity: 1, y: 0, duration: 0.6, ease: "power2.out", delay: 0.15 }
+    );
   }, [isOpen, isMounted]);
 
   if (!isMounted) {
@@ -178,101 +184,94 @@ export default function CVPage(): React.JSX.Element {
               }}
             />
 
-            {/* ===== TEKS DI ATAS FOTO — 2 BARIS FONT BESAR PUTIH ===== */}
-            <div
-              ref={textRef}
-              style={{
-                position: "absolute",
-                top: "50%",
-                left: "0",
-                transform: "translateY(-50%)",
-                width: "100%",
-                textAlign: "center",
-                zIndex: 9,
-                fontFamily: FONT_FAMILY,
-                color: "#ffffff",
-                pointerEvents: "none",
-                lineHeight: 1.05,
-                textShadow: "0 4px 16px rgba(0,0,0,0.55)",
-                padding: "0 16px",
-                boxSizing: "border-box",
-              }}
-            >
-              {isOpen ? (
-                <>
-                  <div
-                    style={{
-                      fontSize: "54px",
-                      fontWeight: 800,
-                      letterSpacing: "-0.02em",
-                      fontFamily: FONT_FAMILY,
-                    }}
-                  >
-                    People
-                  </div>
-                  <div
-                    style={{
-                      fontSize: "54px",
-                      fontWeight: 800,
-                      letterSpacing: "-0.02em",
-                      fontFamily: FONT_FAMILY,
-                    }}
-                  >
-                    Menuru
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div
-                    style={{
-                      fontSize: "48px",
-                      fontWeight: 800,
-                      letterSpacing: "-0.02em",
-                      fontFamily: FONT_FAMILY,
-                    }}
-                  >
-                    Curriculum Vitae
-                  </div>
-                  <div
-                    style={{
-                      fontSize: "48px",
-                      fontWeight: 800,
-                      letterSpacing: "-0.02em",
-                      fontFamily: FONT_FAMILY,
-                    }}
-                  >
-                    Actual [ 16.09 ]
-                  </div>
-                </>
-              )}
-            </div>
-
-            {/* ===== TOMBOL INFO / CLOSE DI ATAS KANAN ===== */}
-            <button
-              ref={buttonRef}
-              onClick={() => setIsOpen((v) => !v)}
-              style={{
-                position: "absolute",
-                top: "16px",
-                right: "16px",
-                zIndex: 10,
-                padding: "10px 20px",
-                backgroundColor: "#0D3CFC",
-                color: "#ffffff",
-                border: "none",
-                borderRadius: "10px",
-                fontSize: "14px",
-                fontWeight: 700,
-                cursor: "pointer",
-                fontFamily: FONT_FAMILY,
-                letterSpacing: "0.02em",
-                boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
-              }}
-            >
-              {isOpen ? "Close" : "Info"}
-            </button>
+            {/* ===== TEKS DI BAWAH FOTO (MODE DEFAULT) — 2 BARIS ===== */}
+            {!isOpen && (
+              <div
+                ref={textInsideRef}
+                style={{
+                  position: "absolute",
+                  bottom: "28px",
+                  left: "0",
+                  width: "100%",
+                  textAlign: "center",
+                  zIndex: 9,
+                  fontFamily: FONT_FAMILY,
+                  color: "#ffffff",
+                  pointerEvents: "none",
+                  lineHeight: 1.1,
+                  textShadow: "0 4px 16px rgba(0,0,0,0.55)",
+                  padding: "0 16px",
+                  boxSizing: "border-box",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: "26px",
+                    fontWeight: 800,
+                    letterSpacing: "-0.01em",
+                    fontFamily: FONT_FAMILY,
+                  }}
+                >
+                  Curriculum Vitae
+                </div>
+                <div
+                  style={{
+                    fontSize: "26px",
+                    fontWeight: 800,
+                    letterSpacing: "-0.01em",
+                    fontFamily: FONT_FAMILY,
+                  }}
+                >
+                  Actual [ 16.09 ]
+                </div>
+              </div>
+            )}
           </div>
         </div>
+
+        {/* ===== TEKS DI ATAS FOTO (MODE OPEN) — DI LUAR CARD ===== */}
+        {isOpen && (
+          <div
+            ref={textAboveRef}
+            style={{
+              position: "fixed",
+              top: "calc(50% - 380px - 40px)",
+              left: "50%",
+              transform: "translateX(-50%)",
+              width: "100%",
+              maxWidth: "380px",
+              textAlign: "center",
+              zIndex: 2,
+              fontFamily: FONT_FAMILY,
+              color: "#0D3CFC",
+              pointerEvents: "none",
+              lineHeight: 1.1,
+              padding: "0 16px",
+              boxSizing: "border-box",
+            }}
+          >
+            <div
+              style={{
+                fontSize: "30px",
+                fontWeight: 800,
+                letterSpacing: "-0.01em",
+                fontFamily: FONT_FAMILY,
+              }}
+            >
+              People
+            </div>
+            <div
+              style={{
+                fontSize: "30px",
+                fontWeight: 800,
+                letterSpacing: "-0.01em",
+                fontFamily: FONT_FAMILY,
+              }}
+            >
+              Menuru
+            </div>
+          </div>
+        )}
       </div>
 
       <style jsx global>{`
