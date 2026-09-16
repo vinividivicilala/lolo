@@ -251,9 +251,12 @@ export default function CVPage(): React.JSX.Element {
   const workBlockRef = useRef<HTMLDivElement>(null);
   const cvContentRef = useRef<HTMLDivElement>(null);
   const contactContentRef = useRef<HTMLDivElement>(null);
+  const contactOverlayRef = useRef<HTMLDivElement>(null);
+  const contactCloseRef = useRef<HTMLButtonElement>(null);
   const [isMounted, setIsMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [showContact, setShowContact] = useState(false);
+  const [contactMounted, setContactMounted] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
@@ -418,64 +421,80 @@ export default function CVPage(): React.JSX.Element {
     );
   }, [isOpen, isMounted]);
 
-  // ===== ANIMASI TRANSISI HALAMAN CV → CONTACT =====
+  // ===== ANIMASI OVERLAY CONTACT — MASUK DARI KIRI KE KANAN =====
   useEffect(() => {
     if (!isMounted) return;
 
-    // Ubah warna background card
+    if (showContact) {
+      // Mount overlay dulu
+      setContactMounted(true);
+    } else if (contactMounted) {
+      // Keluar dari kanan ke kiri
+      if (contactOverlayRef.current) {
+        gsap.to(contactOverlayRef.current, {
+          x: "-100%",
+          duration: 0.5,
+          ease: "power3.inOut",
+          onComplete: () => {
+            setContactMounted(false);
+            if (cardRef.current) {
+              gsap.to(cardRef.current, {
+                backgroundColor: "#0D3CFC",
+                duration: 0.4,
+                ease: "power2.inOut",
+              });
+            }
+          },
+        });
+      } else {
+        setContactMounted(false);
+      }
+    }
+  }, [showContact, contactMounted, isMounted]);
+
+  // Saat overlay sudah ter-mount, jalankan animasi masuk dari kiri
+  useEffect(() => {
+    if (!contactMounted) return;
+    if (!contactOverlayRef.current) return;
+
+    // Set posisi awal di kiri luar card
+    gsap.set(contactOverlayRef.current, { x: "-100%" });
+
+    // Ubah warna card jadi kuning
     if (cardRef.current) {
       gsap.to(cardRef.current, {
-        backgroundColor: showContact ? "#F2EA6B" : "#0D3CFC",
-        duration: 0.6,
+        backgroundColor: "#F2EA6B",
+        duration: 0.4,
         ease: "power2.inOut",
       });
     }
 
-    if (showContact) {
-      // Sembunyikan konten CV
-      if (cvContentRef.current) {
-        gsap.to(cvContentRef.current, {
-          opacity: 0,
-          y: -20,
-          duration: 0.35,
-          ease: "power2.in",
-        });
-      }
-      // Tampilkan konten Contact
-      if (contactContentRef.current) {
-        gsap.fromTo(
-          contactContentRef.current,
-          { opacity: 0, y: 30 },
-          { opacity: 1, y: 0, duration: 0.5, ease: "power3.out", delay: 0.15 }
-        );
-
-        const items = contactContentRef.current.querySelectorAll("[data-contact-item]");
-        gsap.fromTo(
-          items,
-          { opacity: 0, y: 24 },
-          { opacity: 1, y: 0, duration: 0.5, stagger: 0.08, ease: "power2.out", delay: 0.25 }
-        );
-      }
-    } else {
-      // Sembunyikan konten Contact
-      if (contactContentRef.current) {
-        gsap.to(contactContentRef.current, {
-          opacity: 0,
-          y: -20,
-          duration: 0.3,
-          ease: "power2.in",
-        });
-      }
-      // Tampilkan kembali konten CV
-      if (cvContentRef.current) {
-        gsap.fromTo(
-          cvContentRef.current,
-          { opacity: 0, y: 20 },
-          { opacity: 1, y: 0, duration: 0.5, ease: "power3.out", delay: 0.15 }
-        );
-      }
-    }
-  }, [showContact, isMounted]);
+    // Overlay masuk dari kiri ke kanan
+    gsap.to(contactOverlayRef.current, {
+      x: "0%",
+      duration: 0.55,
+      ease: "power3.inOut",
+      onComplete: () => {
+        // Konten Contact stagger in
+        if (contactContentRef.current) {
+          const items = contactContentRef.current.querySelectorAll("[data-contact-item]");
+          gsap.fromTo(
+            items,
+            { opacity: 0, y: 24 },
+            { opacity: 1, y: 0, duration: 0.5, stagger: 0.08, ease: "power2.out" }
+          );
+        }
+        // Tombol close fade in
+        if (contactCloseRef.current) {
+          gsap.fromTo(
+            contactCloseRef.current,
+            { opacity: 0, scale: 0.9 },
+            { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.5)" }
+          );
+        }
+      },
+    });
+  }, [contactMounted]);
 
   if (!isMounted) {
     return <div style={{ minHeight: "100vh", backgroundColor: "#ffffff" }} />;
@@ -508,7 +527,7 @@ export default function CVPage(): React.JSX.Element {
           overflow: "hidden",
         }}
       >
-        {/* ===== CARD BIRU (BISA BERUBAH JADI CONTACT) ===== */}
+        {/* ===== CARD BIRU ===== */}
         <div
           style={{
             position: "relative",
@@ -544,7 +563,7 @@ export default function CVPage(): React.JSX.Element {
                 msOverflowStyle: "none",
               }}
             >
-              {/* ===== KONTEN CV (WRAPPER) ===== */}
+              {/* ===== KONTEN CV ===== */}
               <div
                 ref={cvContentRef}
                 style={{
@@ -553,8 +572,6 @@ export default function CVPage(): React.JSX.Element {
                   minHeight: "100%",
                   display: "flex",
                   flexDirection: "column",
-                  opacity: showContact ? 0 : 1,
-                  pointerEvents: showContact ? "none" : "auto",
                 }}
               >
                 {/* Area foto */}
@@ -728,24 +745,109 @@ export default function CVPage(): React.JSX.Element {
                   </div>
                 )}
               </div>
+            </div>
 
-              {/* ===== KONTEN CONTACT (DI DALAM CARD YANG SAMA) ===== */}
-              {showContact && (
-                <div
-                  ref={contactContentRef}
+            {/* ===== TOMBOL INFO / CLOSE ===== */}
+            <button
+              ref={buttonRef}
+              onClick={() => setIsOpen((v) => !v)}
+              style={{
+                position: "absolute",
+                top: "16px",
+                right: "16px",
+                zIndex: 20,
+                padding: "10px 18px",
+                backgroundColor: "#0D3CFC",
+                color: "#ffffff",
+                border: "none",
+                borderRadius: "10px",
+                fontSize: "14px",
+                fontWeight: 700,
+                cursor: "pointer",
+                fontFamily: FONT_FAMILY,
+                letterSpacing: "0.02em",
+                boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+              }}
+            >
+              <div
+                ref={plusWrapRef}
+                style={{ display: "flex", alignItems: "center", transformOrigin: "center center" }}
+              >
+                <PlusIcon
+                  size={16}
+                  color={isOpen ? "#0D3CFC" : "#ffffff"}
+                  lineRef1={plusLine1Ref}
+                  lineRef2={plusLine2Ref}
+                />
+              </div>
+              <span>{isOpen ? "Close" : "Info"}</span>
+            </button>
+
+            {/* ===== OVERLAY HALAMAN CONTACT — DI DALAM CARD ===== */}
+            {contactMounted && (
+              <div
+                ref={contactOverlayRef}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                  backgroundColor: "#F2EA6B",
+                  zIndex: 30,
+                  display: "flex",
+                  flexDirection: "column",
+                  overflow: "hidden",
+                  borderRadius: "20px",
+                }}
+              >
+                {/* ===== TOMBOL CLOSE (kanan atas) ===== */}
+                <button
+                  ref={contactCloseRef}
+                  onClick={() => setShowContact(false)}
                   style={{
                     position: "absolute",
-                    top: 0,
-                    left: 0,
+                    top: "16px",
+                    right: "16px",
+                    zIndex: 40,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    padding: "10px 18px",
+                    backgroundColor: "#0D3CFC",
+                    color: "#ffffff",
+                    border: "none",
+                    borderRadius: "10px",
+                    fontSize: "14px",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    fontFamily: FONT_FAMILY,
+                    letterSpacing: "0.02em",
+                    boxShadow: "0 8px 24px rgba(13,60,252,0.35)",
+                  }}
+                >
+                  <CloseIcon size={16} color="#ffffff" />
+                  <span>Close</span>
+                </button>
+
+                {/* ===== KONTEN CONTACT ===== */}
+                <div
+                  ref={contactContentRef}
+                  className="cv-scroll-inner"
+                  style={{
                     width: "100%",
-                    minHeight: "100%",
-                    padding: "40px 24px",
+                    height: "100%",
+                    overflowY: "auto",
+                    overflowX: "hidden",
+                    padding: "80px 24px 40px 24px",
                     boxSizing: "border-box",
                     display: "flex",
                     flexDirection: "column",
                     gap: "20px",
                     color: "#0D3CFC",
-                    zIndex: 15,
                   }}
                 >
                   {/* Judul Contact */}
@@ -758,7 +860,6 @@ export default function CVPage(): React.JSX.Element {
                       color: "#0D3CFC",
                       lineHeight: 1.05,
                       fontFamily: FONT_FAMILY,
-                      marginTop: "60px",
                     }}
                   >
                     Contact
@@ -833,77 +934,9 @@ export default function CVPage(): React.JSX.Element {
                       </div>
                     ))}
                   </div>
-
-                  {/* Tombol Back */}
-                  <button
-                    data-contact-item
-                    onClick={() => setShowContact(false)}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: "10px",
-                      padding: "14px 24px",
-                      backgroundColor: "#0D3CFC",
-                      color: "#ffffff",
-                      border: "none",
-                      borderRadius: "12px",
-                      fontSize: "15px",
-                      fontWeight: 700,
-                      cursor: "pointer",
-                      fontFamily: FONT_FAMILY,
-                      letterSpacing: "0.02em",
-                      boxShadow: "0 8px 24px rgba(13,60,252,0.35)",
-                      marginTop: "8px",
-                    }}
-                  >
-                    ← Back to CV
-                  </button>
                 </div>
-              )}
-            </div>
-
-            {/* ===== TOMBOL INFO / CLOSE ===== */}
-            <button
-              ref={buttonRef}
-              onClick={() => setIsOpen((v) => !v)}
-              style={{
-                position: "absolute",
-                top: "16px",
-                right: "16px",
-                zIndex: 20,
-                padding: "10px 18px",
-                backgroundColor: "#0D3CFC",
-                color: "#ffffff",
-                border: "none",
-                borderRadius: "10px",
-                fontSize: "14px",
-                fontWeight: 700,
-                cursor: "pointer",
-                fontFamily: FONT_FAMILY,
-                letterSpacing: "0.02em",
-                boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                opacity: showContact ? 0 : 1,
-                pointerEvents: showContact ? "none" : "auto",
-                transition: "opacity 0.3s ease",
-              }}
-            >
-              <div
-                ref={plusWrapRef}
-                style={{ display: "flex", alignItems: "center", transformOrigin: "center center" }}
-              >
-                <PlusIcon
-                  size={16}
-                  color={isOpen ? "#0D3CFC" : "#ffffff"}
-                  lineRef1={plusLine1Ref}
-                  lineRef2={plusLine2Ref}
-                />
               </div>
-              <span>{isOpen ? "Close" : "Info"}</span>
-            </button>
+            )}
           </div>
         </div>
       </div>
