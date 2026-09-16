@@ -42,6 +42,140 @@ const PlusIcon = ({
   </svg>
 );
 
+// ===== WORK EXPERIENCE ITEM COMPONENT =====
+const WorkExperienceItem = () => {
+  const [expanded, setExpanded] = useState(false);
+  const detailRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLSpanElement>(null);
+
+  // Animasi GSAP buka/tutup detail
+  useEffect(() => {
+    if (!detailRef.current) return;
+
+    if (expanded) {
+      gsap.fromTo(
+        detailRef.current,
+        { height: 0, opacity: 0 },
+        {
+          height: "auto",
+          opacity: 1,
+          duration: 0.5,
+          ease: "power3.out",
+        }
+      );
+    } else {
+      gsap.to(detailRef.current, {
+        height: 0,
+        opacity: 0,
+        duration: 0.35,
+        ease: "power2.in",
+      });
+    }
+  }, [expanded]);
+
+  return (
+    <div
+      style={{
+        width: "100%",
+        fontFamily: FONT_FAMILY,
+        color: "#ffffff",
+      }}
+    >
+      {/* Header row: info kiri + tombol More Info kanan */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+          gap: "12px",
+          flexWrap: "wrap",
+        }}
+      >
+        {/* Sisi kiri: 01 Menuru + Founder and Developer */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "4px", flex: 1, minWidth: 0 }}>
+          <div
+            style={{
+              fontSize: "22px",
+              fontWeight: 800,
+              letterSpacing: "-0.01em",
+              color: "#ffffff",
+              lineHeight: 1.1,
+              fontFamily: FONT_FAMILY,
+            }}
+          >
+            01 Menuru
+          </div>
+          <div
+            style={{
+              fontSize: "14px",
+              fontWeight: 500,
+              color: "rgba(255,255,255,0.85)",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "0.01em",
+            }}
+          >
+            Founder and Developer
+          </div>
+        </div>
+
+        {/* Sisi kanan: tombol More Info */}
+        <button
+          onClick={() => setExpanded((v) => !v)}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            padding: "8px 14px",
+            backgroundColor: expanded ? "#ffffff" : "transparent",
+            color: expanded ? "#0D3CFC" : "#ffffff",
+            border: expanded ? "none" : "1px solid rgba(255,255,255,0.5)",
+            borderRadius: "8px",
+            fontSize: "12px",
+            fontWeight: 700,
+            cursor: "pointer",
+            fontFamily: FONT_FAMILY,
+            letterSpacing: "0.02em",
+            transition: "background-color 0.25s ease, color 0.25s ease, border 0.25s ease",
+            flexShrink: 0,
+          }}
+        >
+          <span ref={textRef}>{expanded ? "Close" : "More Info"}</span>
+        </button>
+      </div>
+
+      {/* Detail expandable */}
+      <div
+        ref={detailRef}
+        style={{
+          height: 0,
+          opacity: 0,
+          overflow: "hidden",
+        }}
+      >
+        <p
+          style={{
+            fontSize: "13px",
+            fontWeight: 400,
+            lineHeight: 1.6,
+            color: "rgba(255,255,255,0.9)",
+            margin: 0,
+            marginTop: "14px",
+            fontFamily: FONT_FAMILY,
+            textAlign: "left",
+          }}
+        >
+          Menuru adalah brand yang saya dirikan sebagai wadah untuk mengeksplorasi
+          ide-ide kreatif di bidang teknologi dan desain. Sebagai Founder and Developer,
+          saya bertanggung jawab penuh atas pengembangan produk, mulai dari riset,
+          desain UI/UX, hingga implementasi teknis menggunakan Next.js, TypeScript,
+          Firebase, dan GSAP. Fokus utama saya adalah menciptakan pengalaman digital
+          yang cepat, aman, dan mudah digunakan.
+        </p>
+      </div>
+    </div>
+  );
+};
+
 // ===== CV PAGE =====
 export default function CVPage(): React.JSX.Element {
   const cardRef = useRef<HTMLDivElement>(null);
@@ -55,6 +189,8 @@ export default function CVPage(): React.JSX.Element {
   const textBottomRef = useRef<HTMLDivElement>(null);
   const textParagraphRef = useRef<HTMLDivElement>(null);
   const textAboutRef = useRef<HTMLDivElement>(null);
+  const textWorkRef = useRef<HTMLDivElement>(null);
+  const workBlockRef = useRef<HTMLDivElement>(null);
   const [isMounted, setIsMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -143,7 +279,7 @@ export default function CVPage(): React.JSX.Element {
     }
   }, [isOpen, isMounted]);
 
-  // Teks bawah (default) — fade in
+  // Teks bawah (default)
   useEffect(() => {
     if (!isMounted) return;
     if (!textBottomRef.current) return;
@@ -156,7 +292,7 @@ export default function CVPage(): React.JSX.Element {
     );
   }, [isOpen, isMounted]);
 
-  // Teks atas (open) — fade in
+  // Teks atas (open)
   useEffect(() => {
     if (!isMounted) return;
     if (!textTopRef.current) return;
@@ -169,7 +305,7 @@ export default function CVPage(): React.JSX.Element {
     );
   }, [isOpen, isMounted]);
 
-  // Teks "About" — fade in
+  // Teks About
   useEffect(() => {
     if (!isMounted) return;
     if (!textAboutRef.current) return;
@@ -182,7 +318,7 @@ export default function CVPage(): React.JSX.Element {
     );
   }, [isOpen, isMounted]);
 
-  // Paragraf — fade in
+  // Paragraf About
   useEffect(() => {
     if (!isMounted) return;
     if (!textParagraphRef.current) return;
@@ -192,6 +328,32 @@ export default function CVPage(): React.JSX.Element {
       textParagraphRef.current,
       { opacity: 0, y: 30 },
       { opacity: 1, y: 0, duration: 0.6, ease: "power2.out", delay: 0.4 }
+    );
+  }, [isOpen, isMounted]);
+
+  // Work Experience title
+  useEffect(() => {
+    if (!isMounted) return;
+    if (!textWorkRef.current) return;
+    if (!isOpen) return;
+
+    gsap.fromTo(
+      textWorkRef.current,
+      { opacity: 0, y: 30 },
+      { opacity: 1, y: 0, duration: 0.6, ease: "power2.out", delay: 0.5 }
+    );
+  }, [isOpen, isMounted]);
+
+  // Work Experience block
+  useEffect(() => {
+    if (!isMounted) return;
+    if (!workBlockRef.current) return;
+    if (!isOpen) return;
+
+    gsap.fromTo(
+      workBlockRef.current,
+      { opacity: 0, y: 30 },
+      { opacity: 1, y: 0, duration: 0.6, ease: "power2.out", delay: 0.6 }
     );
   }, [isOpen, isMounted]);
 
@@ -248,7 +410,7 @@ export default function CVPage(): React.JSX.Element {
               position: "relative",
             }}
           >
-            {/* ===== AREA SCROLL DI DALAM CARD ===== */}
+            {/* ===== AREA SCROLL ===== */}
             <div
               ref={scrollRef}
               className="cv-scroll-inner"
@@ -262,7 +424,7 @@ export default function CVPage(): React.JSX.Element {
                 msOverflowStyle: "none",
               }}
             >
-              {/* ===== WRAPPER ISI ===== */}
+              {/* Wrapper isi */}
               <div
                 style={{
                   position: "relative",
@@ -272,7 +434,7 @@ export default function CVPage(): React.JSX.Element {
                   flexDirection: "column",
                 }}
               >
-                {/* ===== AREA FOTO ===== */}
+                {/* Area foto */}
                 <div
                   style={{
                     position: "relative",
@@ -281,7 +443,6 @@ export default function CVPage(): React.JSX.Element {
                     flexShrink: 0,
                   }}
                 >
-                  {/* Foto */}
                   <img
                     ref={photoRef}
                     src="/images/DSC_0614-min.JPG"
@@ -299,7 +460,7 @@ export default function CVPage(): React.JSX.Element {
                     }}
                   />
 
-                  {/* Teks atas (open) — kiri, putih */}
+                  {/* Teks atas (open) */}
                   {isOpen && (
                     <div
                       ref={textTopRef}
@@ -338,7 +499,7 @@ export default function CVPage(): React.JSX.Element {
                     </div>
                   )}
 
-                  {/* Teks bawah (default) — tengah, putih */}
+                  {/* Teks bawah (default) */}
                   {!isOpen && (
                     <div
                       ref={textBottomRef}
@@ -381,21 +542,21 @@ export default function CVPage(): React.JSX.Element {
                   )}
                 </div>
 
-                {/* ===== TEKS "ABOUT" + PARAGRAF (MODE OPEN) ===== */}
+                {/* ===== ABOUT + PARAGRAF + WORK EXPERIENCE (MODE OPEN) ===== */}
                 {isOpen && (
                   <div
                     style={{
                       width: "100%",
-                      padding: "24px 24px 40px 24px",
+                      padding: "24px 24px 60px 24px",
                       boxSizing: "border-box",
                       fontFamily: FONT_FAMILY,
                       color: "#ffffff",
                       display: "flex",
                       flexDirection: "column",
-                      gap: "14px",
+                      gap: "20px",
                     }}
                   >
-                    {/* Teks besar "About" */}
+                    {/* About title */}
                     <div
                       ref={textAboutRef}
                       style={{
@@ -410,7 +571,7 @@ export default function CVPage(): React.JSX.Element {
                       About
                     </div>
 
-                    {/* Paragraf */}
+                    {/* Paragraf About */}
                     <div ref={textParagraphRef}>
                       <p
                         style={{
@@ -426,6 +587,27 @@ export default function CVPage(): React.JSX.Element {
                       >
                         Lulusan S1 Sistem Komputer Universitas Gunadarma dengan IPK 3,54. Memiliki minat di bidang pengembangan web dan terus mengembangkan kemampuan melalui pembelajaran mandiri menggunakan JavaScript, React.js, Next.js, TypeScript, dan Astro. Memiliki pengalaman mengerjakan proyek berbasis Arduino selama perkuliahan serta memahami dasar penggunaan Firebase. Disiplin, cepat belajar, bertanggung jawab, dan mampu bekerja secara individu maupun dalam tim.
                       </p>
+                    </div>
+
+                    {/* Work Experience title */}
+                    <div
+                      ref={textWorkRef}
+                      style={{
+                        fontSize: "30px",
+                        fontWeight: 800,
+                        letterSpacing: "-0.01em",
+                        color: "#ffffff",
+                        fontFamily: FONT_FAMILY,
+                        lineHeight: 1.1,
+                        marginTop: "8px",
+                      }}
+                    >
+                      Work Experience
+                    </div>
+
+                    {/* Work Experience block */}
+                    <div ref={workBlockRef}>
+                      <WorkExperienceItem />
                     </div>
                   </div>
                 )}
