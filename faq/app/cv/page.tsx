@@ -66,7 +66,7 @@ export default function CVPage(): React.JSX.Element {
             pointerEvents: "none",
           }}
         >
-          {/* Card bg biru — foto jadi background nyatu */}
+          {/* Card bg biru — foto nyatu dari atas sampai bawah */}
           <div
             ref={cardRef}
             style={{
@@ -79,9 +79,9 @@ export default function CVPage(): React.JSX.Element {
               position: "relative",
             }}
           >
-            {/* Foto sebagai background full card — tidak di-crop */}
+            {/* Foto full dari atas sampai bawah — tidak di-crop */}
             <img
-              src="/images/ai.jpg"
+              src="/images/DSC_0614-min.JPG"
               alt="CV"
               style={{
                 position: "absolute",
