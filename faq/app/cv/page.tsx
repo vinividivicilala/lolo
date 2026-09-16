@@ -11,6 +11,7 @@ export default function CVPage(): React.JSX.Element {
   const cardRef = useRef<HTMLDivElement>(null);
   const photoRef = useRef<HTMLImageElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const textRef = useRef<HTMLDivElement>(null);
   const [isMounted, setIsMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -58,7 +59,6 @@ export default function CVPage(): React.JSX.Element {
     if (!photoRef.current) return;
 
     if (isOpen) {
-      // Foto pindah ke tengah, lebih besar (tanpa bg/shadow tambahan)
       gsap.to(photoRef.current, {
         top: "50%",
         left: "50%",
@@ -72,7 +72,6 @@ export default function CVPage(): React.JSX.Element {
         ease: "power3.inOut",
       });
     } else {
-      // Foto full menutupi card
       gsap.to(photoRef.current, {
         top: 0,
         left: 0,
@@ -86,6 +85,29 @@ export default function CVPage(): React.JSX.Element {
         ease: "power3.inOut",
       });
     }
+  }, [isOpen, isMounted]);
+
+  // Animasi GSAP teks (fade + slide + warna)
+  useEffect(() => {
+    if (!isMounted) return;
+    if (!textRef.current) return;
+
+    // Fade out dulu
+    gsap.to(textRef.current, {
+      opacity: 0,
+      y: -14,
+      duration: 0.25,
+      ease: "power2.in",
+      onComplete: () => {
+        if (!textRef.current) return;
+        // Ganti teks via React state (di-render ulang), lalu fade in
+        gsap.fromTo(
+          textRef.current,
+          { opacity: 0, y: 14 },
+          { opacity: 1, y: 0, duration: 0.35, ease: "power2.out" }
+        );
+      },
+    });
   }, [isOpen, isMounted]);
 
   if (!isMounted) {
@@ -157,6 +179,30 @@ export default function CVPage(): React.JSX.Element {
                 borderRadius: "20px",
               }}
             />
+
+            {/* ===== TEKS DI ATAS FOTO ===== */}
+            <div
+              ref={textRef}
+              style={{
+                position: "absolute",
+                top: "24px",
+                left: "0",
+                width: "100%",
+                textAlign: "center",
+                zIndex: 9,
+                fontFamily: FONT_FAMILY,
+                fontSize: "18px",
+                fontWeight: 700,
+                letterSpacing: "0.04em",
+                color: isOpen ? "#ffffff" : "#0D3CFC",
+                pointerEvents: "none",
+                textShadow: isOpen
+                  ? "0 2px 8px rgba(0,0,0,0.35)"
+                  : "0 2px 8px rgba(255,255,255,0.5)",
+              }}
+            >
+              {isOpen ? "People Menuru" : "Curriculum Vitae Actual [ 16.09 ]"}
+            </div>
 
             {/* ===== TOMBOL INFO / CLOSE DI ATAS KANAN ===== */}
             <button
