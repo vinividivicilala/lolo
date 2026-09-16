@@ -9,13 +9,16 @@ const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
 // ===== CV PAGE =====
 export default function CVPage(): React.JSX.Element {
   const cardRef = useRef<HTMLDivElement>(null);
+  const photoRef = useRef<HTMLImageElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
   const [isMounted, setIsMounted] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  // Animasi GSAP masuk
+  // Animasi GSAP masuk card
   useEffect(() => {
     if (!isMounted) return;
     if (!cardRef.current) return;
@@ -26,6 +29,66 @@ export default function CVPage(): React.JSX.Element {
       { opacity: 1, y: 0, scale: 1, duration: 0.9, ease: "power3.out" }
     );
   }, [isMounted]);
+
+  // Animasi GSAP tombol (warna transisi)
+  useEffect(() => {
+    if (!isMounted) return;
+    if (!buttonRef.current) return;
+
+    if (isOpen) {
+      gsap.to(buttonRef.current, {
+        backgroundColor: "#ffffff",
+        color: "#0D3CFC",
+        duration: 0.35,
+        ease: "power2.out",
+      });
+    } else {
+      gsap.to(buttonRef.current, {
+        backgroundColor: "#0D3CFC",
+        color: "#ffffff",
+        duration: 0.35,
+        ease: "power2.out",
+      });
+    }
+  }, [isOpen, isMounted]);
+
+  // Animasi GSAP foto: dari full menutupi card → ke tengah ukuran normal
+  useEffect(() => {
+    if (!isMounted) return;
+    if (!photoRef.current) return;
+
+    if (isOpen) {
+      // Foto jadi di tengah ukuran normal
+      gsap.to(photoRef.current, {
+        top: "50%",
+        left: "50%",
+        xPercent: -50,
+        yPercent: -50,
+        width: "70%",
+        height: "70%",
+        objectFit: "contain",
+        borderRadius: "14px",
+        boxShadow: "0 12px 40px rgba(0,0,0,0.35)",
+        duration: 0.55,
+        ease: "power3.inOut",
+      });
+    } else {
+      // Foto full menutupi card
+      gsap.to(photoRef.current, {
+        top: 0,
+        left: 0,
+        xPercent: 0,
+        yPercent: 0,
+        width: "100%",
+        height: "100%",
+        objectFit: "cover",
+        borderRadius: "20px",
+        boxShadow: "0 0px 0px rgba(0,0,0,0)",
+        duration: 0.55,
+        ease: "power3.inOut",
+      });
+    }
+  }, [isOpen, isMounted]);
 
   if (!isMounted) {
     return <div style={{ minHeight: "100vh", backgroundColor: "#ffffff" }} />;
@@ -52,7 +115,7 @@ export default function CVPage(): React.JSX.Element {
           fontFamily: FONT_FAMILY,
         }}
       >
-        {/* ===== BG BIRU FIXED DI TENGAH + FOTO FULL ===== */}
+        {/* ===== BG BIRU FIXED DI TENGAH + FOTO ===== */}
         <div
           style={{
             position: "fixed",
@@ -63,10 +126,10 @@ export default function CVPage(): React.JSX.Element {
             maxWidth: "380px",
             height: "760px",
             zIndex: 1,
-            pointerEvents: "none",
+            pointerEvents: "auto",
           }}
         >
-          {/* Card bg biru — foto full menutupi seluruh card */}
+          {/* Card bg biru */}
           <div
             ref={cardRef}
             style={{
@@ -79,8 +142,9 @@ export default function CVPage(): React.JSX.Element {
               position: "relative",
             }}
           >
-            {/* Foto FULL menutupi seluruh card dari atas sampai bawah */}
+            {/* Foto di dalam card */}
             <img
+              ref={photoRef}
               src="/images/DSC_0614-min.JPG"
               alt="CV"
               style={{
@@ -95,6 +159,31 @@ export default function CVPage(): React.JSX.Element {
                 borderRadius: "20px",
               }}
             />
+
+            {/* ===== TOMBOL INFO / CLOSE DI ATAS KANAN ===== */}
+            <button
+              ref={buttonRef}
+              onClick={() => setIsOpen((v) => !v)}
+              style={{
+                position: "absolute",
+                top: "16px",
+                right: "16px",
+                zIndex: 10,
+                padding: "10px 20px",
+                backgroundColor: "#0D3CFC",
+                color: "#ffffff",
+                border: "none",
+                borderRadius: "10px",
+                fontSize: "14px",
+                fontWeight: 700,
+                cursor: "pointer",
+                fontFamily: FONT_FAMILY,
+                letterSpacing: "0.02em",
+                boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
+              }}
+            >
+              {isOpen ? "Close" : "Info"}
+            </button>
           </div>
         </div>
       </div>
