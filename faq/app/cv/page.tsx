@@ -54,6 +54,7 @@ export default function CVPage(): React.JSX.Element {
   const textTopRef = useRef<HTMLDivElement>(null);
   const textBottomRef = useRef<HTMLDivElement>(null);
   const textParagraphRef = useRef<HTMLDivElement>(null);
+  const textAboutRef = useRef<HTMLDivElement>(null);
   const [isMounted, setIsMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -168,7 +169,20 @@ export default function CVPage(): React.JSX.Element {
     );
   }, [isOpen, isMounted]);
 
-  // Paragraf baru (open) — fade in dari bawah
+  // Teks "About" — fade in
+  useEffect(() => {
+    if (!isMounted) return;
+    if (!textAboutRef.current) return;
+    if (!isOpen) return;
+
+    gsap.fromTo(
+      textAboutRef.current,
+      { opacity: 0, y: 30 },
+      { opacity: 1, y: 0, duration: 0.6, ease: "power2.out", delay: 0.3 }
+    );
+  }, [isOpen, isMounted]);
+
+  // Paragraf — fade in
   useEffect(() => {
     if (!isMounted) return;
     if (!textParagraphRef.current) return;
@@ -177,7 +191,7 @@ export default function CVPage(): React.JSX.Element {
     gsap.fromTo(
       textParagraphRef.current,
       { opacity: 0, y: 30 },
-      { opacity: 1, y: 0, duration: 0.6, ease: "power2.out", delay: 0.35 }
+      { opacity: 1, y: 0, duration: 0.6, ease: "power2.out", delay: 0.4 }
     );
   }, [isOpen, isMounted]);
 
@@ -258,7 +272,7 @@ export default function CVPage(): React.JSX.Element {
                   flexDirection: "column",
                 }}
               >
-                {/* ===== AREA FOTO (relative, tinggi 760px seperti card) ===== */}
+                {/* ===== AREA FOTO ===== */}
                 <div
                   style={{
                     position: "relative",
@@ -267,7 +281,7 @@ export default function CVPage(): React.JSX.Element {
                     flexShrink: 0,
                   }}
                 >
-                  {/* Foto di dalam area */}
+                  {/* Foto */}
                   <img
                     ref={photoRef}
                     src="/images/DSC_0614-min.JPG"
@@ -285,7 +299,7 @@ export default function CVPage(): React.JSX.Element {
                     }}
                   />
 
-                  {/* ===== TEKS DI ATAS FOTO (MODE OPEN) — SISI KIRI, PUTIH ===== */}
+                  {/* Teks atas (open) — kiri, putih */}
                   {isOpen && (
                     <div
                       ref={textTopRef}
@@ -324,7 +338,7 @@ export default function CVPage(): React.JSX.Element {
                     </div>
                   )}
 
-                  {/* ===== TEKS DI BAWAH FOTO (MODE DEFAULT) — TENGAH, PUTIH ===== */}
+                  {/* Teks bawah (default) — tengah, putih */}
                   {!isOpen && (
                     <div
                       ref={textBottomRef}
@@ -367,33 +381,52 @@ export default function CVPage(): React.JSX.Element {
                   )}
                 </div>
 
-                {/* ===== PARAGRAF BARU (MODE OPEN) — DI BAWAH AREA FOTO ===== */}
+                {/* ===== TEKS "ABOUT" + PARAGRAF (MODE OPEN) ===== */}
                 {isOpen && (
                   <div
-                    ref={textParagraphRef}
                     style={{
                       width: "100%",
-                      padding: "24px 24px 32px 24px",
+                      padding: "24px 24px 40px 24px",
                       boxSizing: "border-box",
-                      zIndex: 9,
                       fontFamily: FONT_FAMILY,
                       color: "#ffffff",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "14px",
                     }}
                   >
-                    <p
+                    {/* Teks besar "About" */}
+                    <div
+                      ref={textAboutRef}
                       style={{
-                        fontSize: "16px",
-                        fontWeight: 700,
-                        lineHeight: 1.5,
-                        color: "#ffffff",
-                        margin: 0,
-                        fontFamily: FONT_FAMILY,
-                        textAlign: "left",
+                        fontSize: "30px",
+                        fontWeight: 800,
                         letterSpacing: "-0.01em",
+                        color: "#ffffff",
+                        fontFamily: FONT_FAMILY,
+                        lineHeight: 1.1,
                       }}
                     >
-                      Lulusan S1 Sistem Komputer Universitas Gunadarma dengan IPK 3,54. Memiliki minat di bidang pengembangan web dan terus mengembangkan kemampuan melalui pembelajaran mandiri menggunakan JavaScript, React.js, Next.js, TypeScript, dan Astro. Memiliki pengalaman mengerjakan proyek berbasis Arduino selama perkuliahan serta memahami dasar penggunaan Firebase. Disiplin, cepat belajar, bertanggung jawab, dan mampu bekerja secara individu maupun dalam tim.
-                    </p>
+                      About
+                    </div>
+
+                    {/* Paragraf */}
+                    <div ref={textParagraphRef}>
+                      <p
+                        style={{
+                          fontSize: "16px",
+                          fontWeight: 700,
+                          lineHeight: 1.5,
+                          color: "#ffffff",
+                          margin: 0,
+                          fontFamily: FONT_FAMILY,
+                          textAlign: "left",
+                          letterSpacing: "-0.01em",
+                        }}
+                      >
+                        Lulusan S1 Sistem Komputer Universitas Gunadarma dengan IPK 3,54. Memiliki minat di bidang pengembangan web dan terus mengembangkan kemampuan melalui pembelajaran mandiri menggunakan JavaScript, React.js, Next.js, TypeScript, dan Astro. Memiliki pengalaman mengerjakan proyek berbasis Arduino selama perkuliahan serta memahami dasar penggunaan Firebase. Disiplin, cepat belajar, bertanggung jawab, dan mampu bekerja secara individu maupun dalam tim.
+                      </p>
+                    </div>
                   </div>
                 )}
               </div>
