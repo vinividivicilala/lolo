@@ -52,7 +52,7 @@ export default function CVPage(): React.JSX.Element {
           fontFamily: FONT_FAMILY,
         }}
       >
-        {/* ===== BG BIRU FIXED DI TENGAH — foto & biru nyatu ===== */}
+        {/* ===== BG BIRU FIXED DI TENGAH + FOTO NYATU ===== */}
         <div
           style={{
             position: "fixed",
@@ -60,37 +60,38 @@ export default function CVPage(): React.JSX.Element {
             left: "50%",
             transform: "translate(-50%, -50%)",
             width: "100%",
-            maxWidth: "560px",
-            height: "800px",
+            maxWidth: "380px",
+            height: "760px",
             zIndex: 1,
             pointerEvents: "none",
           }}
         >
-          {/* Card: foto jadi background, bg biru overlay di belakang foto
-              Keduanya nyatu — foto full card, bg biru sebagai lapisan dasar */}
+          {/* Card bg biru — foto jadi background nyatu */}
           <div
             ref={cardRef}
             style={{
               width: "100%",
               height: "100%",
               backgroundColor: "#0D3CFC",
-              backgroundImage: "url('/images/ai.jpg')",
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              backgroundRepeat: "no-repeat",
               borderRadius: "20px",
               boxShadow: "0 20px 60px rgba(13,60,252,0.35)",
               overflow: "hidden",
               position: "relative",
             }}
           >
-            {/* Overlay biru transparan supaya foto & biru benar-benar nyatu */}
-            <div
+            {/* Foto sebagai background full card — tidak di-crop */}
+            <img
+              src="/images/ai.jpg"
+              alt="CV"
               style={{
                 position: "absolute",
                 inset: 0,
-                backgroundColor: "rgba(13,60,252,0.55)",
-                mixBlendMode: "multiply",
+                width: "100%",
+                height: "100%",
+                objectFit: "contain",
+                objectPosition: "center center",
+                display: "block",
+                backgroundColor: "#0D3CFC",
                 borderRadius: "20px",
               }}
             />
