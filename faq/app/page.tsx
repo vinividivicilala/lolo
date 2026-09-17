@@ -483,11 +483,13 @@ const CookieConsentPopup = ({
   const [saving, setSaving] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
+  // Cek status consent: Firebase (kalau login) → fallback localStorage
   useEffect(() => {
     if (!isMounted) return;
     let cancelled = false;
 
     const checkConsent = async () => {
+      // 1) Kalau user login, cek Firestore dulu
       if (user && db) {
         try {
           const userRef = doc(db, "users", user.uid);
@@ -505,6 +507,7 @@ const CookieConsentPopup = ({
         }
       }
 
+      // 2) Fallback localStorage
       try {
         const local = localStorage.getItem(COOKIE_CONSENT_STORAGE_KEY);
         if (local === "accepted") {
@@ -524,6 +527,7 @@ const CookieConsentPopup = ({
     };
   }, [user, db, isMounted]);
 
+  // Animasi masuk
   useEffect(() => {
     if (visible && cardRef.current) {
       gsap.fromTo(
@@ -546,9 +550,11 @@ const CookieConsentPopup = ({
       userAgent: typeof navigator !== "undefined" ? navigator.userAgent : "",
     };
 
+    // 1) Simpan permanent di Firebase kalau user login
     if (user && db) {
       try {
         const userRef = doc(db, "users", user.uid);
+        // Pakai setDoc + merge supaya aman kalau dokumen belum ada
         await setDoc(
           userRef,
           {
@@ -558,6 +564,7 @@ const CookieConsentPopup = ({
           { merge: true }
         );
 
+        // Log terpisah untuk audit (opsional, permanent)
         try {
           await addDoc(collection(db, "cookie_consents_log"), {
             userId: user.uid,
@@ -574,12 +581,14 @@ const CookieConsentPopup = ({
       }
     }
 
+    // 2) Simpan juga di localStorage sebagai fallback
     try {
       localStorage.setItem(COOKIE_CONSENT_STORAGE_KEY, "accepted");
     } catch (e) {
       // ignore
     }
 
+    // 3) Animasi keluar
     if (cardRef.current) {
       gsap.to(cardRef.current, {
         opacity: 0,
@@ -629,6 +638,7 @@ const CookieConsentPopup = ({
             gap: "10px",
           }}
         >
+          {/* Cookie icon */}
           <div
             style={{
               width: "34px",
@@ -717,6 +727,7 @@ const CookieConsentPopup = ({
 };
 
 // ===== NAVBAR BUTTON COMPONENT =====
+// Mendukung custom colors + variant "resources" (isi kiri & kanan dipecah 2 section)
 const NavbarButton = ({
   label,
   panelTitle,
@@ -791,6 +802,7 @@ const NavbarButton = ({
     };
   }, []);
 
+  // Animasi GSAP untuk garis atas & bawah
   useEffect(() => {
     if (!linesTopRef.current || !linesBottomRef.current) return;
     if (open) {
@@ -802,6 +814,7 @@ const NavbarButton = ({
     }
   }, [open]);
 
+  // Animasi GSAP untuk panel
   useEffect(() => {
     if (!panelRef.current) return;
     if (open) {
@@ -821,6 +834,7 @@ const NavbarButton = ({
     }
   }, [open]);
 
+  // Warna garis icon: saat default pakai labelTextColor, saat hover juga sama
   const strokeColor = open ? labelTextHoverColor : labelTextColor;
 
   return (
@@ -829,6 +843,7 @@ const NavbarButton = ({
       onMouseEnter={handleEnter}
       onMouseLeave={handleLeave}
     >
+      {/* Kotak utama */}
       <div
         style={{
           display: "flex",
@@ -859,6 +874,7 @@ const NavbarButton = ({
         >
           {label}
         </span>
+        {/* Kotak icon dengan garis atas & bawah */}
         <div
           style={{
             display: "flex",
@@ -903,6 +919,7 @@ const NavbarButton = ({
         </div>
       </div>
 
+      {/* Panel */}
       {open && (
         <div
           ref={panelRef}
@@ -926,6 +943,7 @@ const NavbarButton = ({
             alignItems: "flex-start",
           }}
         >
+          {/* ===== SISI KIRI ===== */}
           <div
             style={{
               flex: "1 1 0",
@@ -936,7 +954,9 @@ const NavbarButton = ({
             }}
           >
             {isResources ? (
+              /* ===== KHUSUS RESOURCES: Docs & Brand dipisah ===== */
               <>
+                {/* Docs section */}
                 <div
                   style={{
                     display: "flex",
@@ -984,6 +1004,7 @@ const NavbarButton = ({
                   </p>
                 </div>
 
+                {/* Brand section */}
                 <div
                   style={{
                     display: "flex",
@@ -1032,6 +1053,7 @@ const NavbarButton = ({
                 </div>
               </>
             ) : (
+              /* ===== DEFAULT (Teams & Individual) ===== */
               <>
                 <div
                   style={{
@@ -1084,6 +1106,7 @@ const NavbarButton = ({
             )}
           </div>
 
+          {/* ===== SISI KANAN ===== */}
           <div
             style={{
               flex: "0 0 380px",
@@ -1093,7 +1116,9 @@ const NavbarButton = ({
             }}
           >
             {isResources ? (
+              /* ===== KHUSUS RESOURCES: Docs & Brand dipisah dengan foto ===== */
               <>
+                {/* Docs box */}
                 <div
                   style={{
                     backgroundColor: panelBoxColor,
@@ -1146,6 +1171,7 @@ const NavbarButton = ({
                   </p>
                 </div>
 
+                {/* Brand box */}
                 <div
                   style={{
                     backgroundColor: panelBoxColor,
@@ -1199,6 +1225,7 @@ const NavbarButton = ({
                 </div>
               </>
             ) : (
+              /* ===== DEFAULT (Teams & Individual) ===== */
               <div
                 style={{
                   backgroundColor: panelBoxColor,
@@ -1274,6 +1301,7 @@ const LeftNavbar = () => {
         fontFamily: FONT_FAMILY,
       }}
     >
+      {/* TEAMS — default biru */}
       <NavbarButton
         label="Teams"
         panelTitle="Trust"
@@ -1286,6 +1314,7 @@ const LeftNavbar = () => {
         bigPanelHeight={260}
       />
 
+      {/* INDIVIDUAL — default biru */}
       <NavbarButton
         label="Individual"
         panelTitle="Careers"
@@ -1298,6 +1327,8 @@ const LeftNavbar = () => {
         bigPanelHeight={260}
       />
 
+      {/* RESOURCES — tombol kuning #F2EA6B, panel oranye #F04E23
+          Teks & icon tombol terlihat saat hover (bg jadi hitam → teks/icon putih) */}
       <NavbarButton
         label="Resources"
         panelTitle="Docs & Brand"
@@ -1504,6 +1535,109 @@ const PhysicsMenuruTitle = () => {
         }}
       >
         Menuru
+      </div>
+    </div>
+  );
+};
+
+// ===== PARALLAX NOTE TITLE COMPONENT =====
+// Teks "Note" biru 250px muncul dari sisi kanan layar dengan animasi parallax GSAP
+const ParallaxNoteTitle = () => {
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const noteTextRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!sectionRef.current || !noteTextRef.current) return;
+
+    const ctx = gsap.context(() => {
+      // Set posisi awal: di luar kanan layar, sedikit miring & blur
+      gsap.set(noteTextRef.current, {
+        xPercent: 120,
+        opacity: 0,
+        rotate: 8,
+        filter: "blur(14px)",
+      });
+
+      // Animasi masuk saat section masuk viewport (scroll ke bawah)
+      gsap.to(noteTextRef.current, {
+        xPercent: 0,
+        opacity: 1,
+        rotate: 0,
+        filter: "blur(0px)",
+        duration: 1.4,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top 85%",
+          end: "bottom 20%",
+          toggleActions: "play none none reverse",
+        },
+      });
+
+      // Parallax: teks bergerak horizontal saat scroll
+      gsap.to(noteTextRef.current, {
+        xPercent: -18,
+        ease: "none",
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top bottom",
+          end: "bottom top",
+          scrub: 1,
+        },
+      });
+
+      // Parallax tambahan: sedikit naik-turun halus
+      gsap.to(noteTextRef.current, {
+        y: -60,
+        ease: "none",
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top bottom",
+          end: "bottom top",
+          scrub: 1.2,
+        },
+      });
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, []);
+
+  return (
+    <div
+      ref={sectionRef}
+      style={{
+        width: "100%",
+        height: "380px",
+        marginTop: "-40px",
+        marginBottom: "20px",
+        position: "relative",
+        overflow: "hidden",
+        backgroundColor: "#ffffff",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "flex-start",
+        paddingLeft: "80px",
+      }}
+    >
+      <div
+        ref={noteTextRef}
+        style={{
+          fontFamily: FONT_FAMILY,
+          fontSize: "250px",
+          fontWeight: 700,
+          color: "#0D3CFC",
+          letterSpacing: "-0.04em",
+          lineHeight: 1,
+          userSelect: "none",
+          whiteSpace: "nowrap",
+          display: "inline-block",
+          willChange: "transform, opacity, filter",
+          WebkitFontSmoothing: "antialiased",
+          MozOsxFontSmoothing: "grayscale",
+        }}
+      >
+        Note
       </div>
     </div>
   );
@@ -4226,7 +4360,6 @@ export default function HomePage(): React.JSX.Element {
   const textRef = useRef<HTMLSpanElement>(null);
   const menuruFooterRef = useRef<HTMLDivElement>(null);
   const menuruTextRef = useRef<HTMLSpanElement>(null);
-  const noteTextRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     setIsMounted(true);
@@ -4257,7 +4390,6 @@ export default function HomePage(): React.JSX.Element {
     setTimeout(() => startPreloaderAnimation(), 500);
   }, [isMounted, loading]);
 
-  // ===== ANIMASI MENURU (footer besar) =====
   useEffect(() => {
     if (!showMain || !isMounted) return;
     const menuruElement = menuruFooterRef.current;
@@ -4291,64 +4423,6 @@ export default function HomePage(): React.JSX.Element {
     return () => {
       ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
     };
-  }, [showMain, isMounted]);
-
-  // ===== ANIMASI NOTE (parallax dari kanan) =====
-  useEffect(() => {
-    if (!showMain || !isMounted) return;
-    const noteEl = noteTextRef.current;
-    if (!noteEl) return;
-
-    // Set posisi awal: di luar layar kanan (relatif ke container)
-    gsap.set(noteEl, {
-      x: "100%",
-      opacity: 0,
-      willChange: "transform, opacity",
-    });
-
-    // Animasi masuk dari kanan + parallax saat scroll
-    const noteTween = gsap.fromTo(
-      noteEl,
-      { x: "100%", opacity: 0 },
-      {
-        x: "0%",
-        opacity: 1,
-        ease: "none",
-        scrollTrigger: {
-          trigger: noteEl,
-          start: "top 100%",
-          end: "top 40%",
-          scrub: 1,
-          toggleActions: "play none none reverse",
-        },
-      }
-    );
-
-    // Parallax tambahan: geser sedikit ke kiri saat scroll melewati
-    const noteParallax = gsap.to(noteEl, {
-      xPercent: -15,
-      ease: "none",
-      scrollTrigger: {
-        trigger: noteEl,
-        start: "top bottom",
-        end: "bottom top",
-        scrub: 1.5,
-      },
-    });
-
-    return () => {
-      if (noteTween.scrollTrigger) noteTween.scrollTrigger.kill();
-      if (noteParallax.scrollTrigger) noteParallax.scrollTrigger.kill();
-      noteTween.kill();
-      noteParallax.kill();
-    };
-  }, [showMain, isMounted]);
-
-  // Refresh ScrollTrigger setelah semua mount
-  useEffect(() => {
-    if (!showMain || !isMounted) return;
-    const t = setTimeout(() => ScrollTrigger.refresh(), 300);
-    return () => clearTimeout(t);
   }, [showMain, isMounted]);
 
   const startPreloaderAnimation = () => {
@@ -4508,6 +4582,9 @@ export default function HomePage(): React.JSX.Element {
         {/* ===== PHYSICS MENURU TITLE ===== */}
         <PhysicsMenuruTitle />
 
+        {/* ===== PARALLAX NOTE TITLE ===== */}
+        <ParallaxNoteTitle />
+
         {/* LIVE CHAT AGENT */}
         <div style={{ padding: "0 40px", maxWidth: "1600px", margin: "0 auto", width: "100%" }}>
           <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} />
@@ -4656,7 +4733,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* MENURU Text + Note + Copyright */}
+        {/* MENURU Text + Copyright */}
         <div
           ref={menuruFooterRef}
           style={{
@@ -4680,41 +4757,6 @@ export default function HomePage(): React.JSX.Element {
           >
             Menuru
           </span>
-
-          {/* ===== TEKS "Note" — 250px, biru, parallax dari kanan ===== */}
-          <div
-            style={{
-              width: "100%",
-              minHeight: "320px",
-              marginTop: "60px",
-              position: "relative",
-              overflow: "hidden",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "flex-end",
-            }}
-          >
-            <span
-              ref={noteTextRef}
-              style={{
-                fontFamily: FONT_FAMILY,
-                fontSize: "250px",
-                fontWeight: 700,
-                color: "#0D3CFC",
-                letterSpacing: "-0.02em",
-                lineHeight: 1,
-                display: "inline-block",
-                whiteSpace: "nowrap",
-                willChange: "transform, opacity",
-                userSelect: "none",
-                transform: "translateX(100%)",
-                opacity: 0,
-              }}
-            >
-              Note
-            </span>
-          </div>
-
           <div
             style={{
               marginTop: "30px", width: "100%",
