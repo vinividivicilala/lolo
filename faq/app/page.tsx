@@ -469,13 +469,10 @@ interface TourStep {
   isLoginStep?: boolean;
 }
 
-// ===== NOTE SCROLL ANIMATION COMPONENT =====
-// Teks "Note" 450px biru, bergerak mengikuti arah scroll:
-// - Scroll ke bawah: masuk dari KANAN → bergerak ke KIRI
-// - Scroll ke atas: masuk dari KIRI → bergerak ke KANAN
-const NoteScrollSection = () => {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const textRef = useRef<HTMLSpanElement>(null);
+// ===== HERO MENURU TITLE (SplitText) =====
+// Teks "Menuru" besar di bawah navbar, warna biru, fontSize 600px, GSAP SplitText
+const HeroMenuruTitle = () => {
+  const titleRef = useRef<HTMLHeadingElement>(null);
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -484,68 +481,72 @@ const NoteScrollSection = () => {
 
   useEffect(() => {
     if (!isMounted) return;
-    if (!sectionRef.current || !textRef.current) return;
+    if (!titleRef.current) return;
 
-    const ctx = gsap.context(() => {
-      // Set posisi awal: DI LUAR layar kanan
-      gsap.set(textRef.current, {
-        x: "100vw",
-        opacity: 1,
-        force3D: true,
-      });
+    const split = new SplitText(titleRef.current, {
+      type: "chars",
+      charsClass: "hero-menuru-char",
+    });
 
-      // Animasi scrub mengikuti scroll:
-      // Saat scroll turun → x dari 100vw ke 0 (masuk dari kanan)
-      // Saat scroll naik  → x dari 0 ke 100vw (keluar ke kanan / masuk dari kiri)
-      gsap.to(textRef.current, {
-        x: 0,
-        ease: "none",
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top bottom",
-          end: "top top",
-          scrub: 1,
-          invalidateOnRefresh: true,
-        },
-      });
-    }, sectionRef);
+    gsap.set(split.chars, {
+      opacity: 0,
+      y: 220,
+      rotationX: -90,
+      scale: 0.4,
+      transformOrigin: "50% 100%",
+      force3D: true,
+    });
 
-    return () => ctx.revert();
+    gsap.to(split.chars, {
+      opacity: 1,
+      y: 0,
+      rotationX: 0,
+      scale: 1,
+      duration: 1.4,
+      stagger: 0.09,
+      ease: "back.out(1.8)",
+      delay: 0.2,
+    });
+
+    return () => {
+      if (split) split.revert();
+    };
   }, [isMounted]);
 
   return (
     <div
-      ref={sectionRef}
       style={{
         width: "100%",
-        height: "520px",
-        position: "relative",
-        overflow: "hidden",
+        paddingTop: "110px",
+        paddingBottom: "0px",
         backgroundColor: "#ffffff",
-        pointerEvents: "none",
+        overflow: "hidden",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        position: "relative",
       }}
     >
-      <span
-        ref={textRef}
+      <h1
+        ref={titleRef}
         style={{
-          position: "absolute",
-          top: "50%",
-          left: 0,
-          transform: "translateY(-50%)",
           fontFamily: FONT_FAMILY,
-          fontSize: "450px",
+          fontSize: "600px",
           fontWeight: 700,
           color: "#0D3CFC",
-          letterSpacing: "-0.04em",
-          lineHeight: 1,
+          letterSpacing: "-0.05em",
+          lineHeight: 0.85,
+          margin: 0,
+          textAlign: "center",
+          userSelect: "none",
           whiteSpace: "nowrap",
           display: "inline-block",
-          userSelect: "none",
-          willChange: "transform",
+          WebkitFontSmoothing: "antialiased",
+          MozOsxFontSmoothing: "grayscale",
         }}
       >
-        Note
-      </span>
+        Menuru
+      </h1>
     </div>
   );
 };
@@ -1440,152 +1441,6 @@ const RightNavbar = () => {
       >
         Log In
       </Link>
-    </div>
-  );
-};
-
-// ===== PHYSICS MENURU TITLE COMPONENT =====
-const PhysicsMenuruTitle = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const textRef = useRef<HTMLDivElement>(null);
-  const [containerHeight, setContainerHeight] = useState(650);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const updateHeight = () => {
-      if (containerRef.current) {
-        setContainerHeight(containerRef.current.offsetHeight);
-      }
-    };
-    updateHeight();
-    window.addEventListener("resize", updateHeight);
-    return () => window.removeEventListener("resize", updateHeight);
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (!containerRef.current || !textRef.current) return;
-    if (containerHeight === 0) return;
-
-    const split = new SplitText(textRef.current, {
-      type: "chars",
-      charsClass: "physics-char",
-    });
-
-    const chars = split.chars;
-    const containerWidth = containerRef.current.offsetWidth;
-    const fallBottomLimit = containerHeight - 80;
-
-    chars.forEach((char, i) => {
-      gsap.set(char, {
-        y: -900 - i * 60,
-        x: (i - chars.length / 2) * 60 + (Math.random() - 0.5) * 250,
-        rotation: (Math.random() - 0.5) * 120,
-        opacity: 1,
-        force3D: true,
-      });
-    });
-
-    chars.forEach((char, i) => {
-      const delay = i * 0.18 + Math.random() * 0.3;
-      const fallDuration = 3.2 + Math.random() * 1.2;
-      const targetX = (i - chars.length / 2) * 70 + (Math.random() - 0.5) * 260;
-      const targetRotation = (Math.random() - 0.5) * 90;
-      const topBoundary = 80;
-      const bottomBoundary = fallBottomLimit - 80;
-      const randomY = topBoundary + Math.random() * (bottomBoundary - topBoundary);
-
-      const charTl = gsap.timeline({ delay });
-
-      charTl.to(
-        char,
-        {
-          duration: fallDuration,
-          physics2D: {
-            velocity: 500 + Math.random() * 300,
-            angle: 90 + (Math.random() - 0.5) * 25,
-            gravity: 900 + Math.random() * 400,
-          },
-          ease: "none",
-        },
-        0
-      );
-
-      charTl.to(
-        char,
-        {
-          duration: fallDuration,
-          x: targetX,
-          ease: "power1.inOut",
-        },
-        0
-      );
-
-      charTl.to(
-        char,
-        {
-          duration: fallDuration,
-          rotation: targetRotation,
-          ease: "power1.inOut",
-        },
-        0
-      );
-
-      charTl.to(
-        char,
-        {
-          duration: 0.9,
-          y: randomY,
-          x: targetX + (Math.random() - 0.5) * 30,
-          rotation: targetRotation + (Math.random() - 0.5) * 15,
-          ease: "power3.out",
-        },
-        fallDuration - 0.2
-      );
-    });
-
-    return () => {
-      if (split) split.revert();
-    };
-  }, [containerHeight]);
-
-  return (
-    <div
-      ref={containerRef}
-      style={{
-        width: "100%",
-        height: "650px",
-        marginBottom: "80px",
-        overflow: "visible",
-        position: "relative",
-        backgroundColor: "#ffffff",
-        display: "flex",
-        alignItems: "flex-start",
-        justifyContent: "center",
-      }}
-    >
-      <div
-        ref={textRef}
-        style={{
-          fontFamily: FONT_FAMILY,
-          fontSize: "450px",
-          fontWeight: 700,
-          color: "#0D3CFC",
-          letterSpacing: "-0.04em",
-          lineHeight: 1,
-          textAlign: "center",
-          userSelect: "none",
-          whiteSpace: "nowrap",
-          display: "inline-block",
-          position: "absolute",
-          top: 0,
-          left: "50%",
-          transform: "translateX(-50%)",
-          pointerEvents: "none",
-        }}
-      >
-        Menuru
-      </div>
     </div>
   );
 };
@@ -4523,11 +4378,8 @@ export default function HomePage(): React.JSX.Element {
           fontFamily: FONT_FAMILY, overflow: "visible",
         }}
       >
-        {/* ===== PHYSICS MENURU TITLE ===== */}
-        <PhysicsMenuruTitle />
-
-        {/* ===== NOTE SCROLL SECTION (bergerak mengikuti scroll) ===== */}
-        <NoteScrollSection />
+        {/* ===== HERO MENURU TITLE (SplitText) ===== */}
+        <HeroMenuruTitle />
 
         {/* LIVE CHAT AGENT */}
         <div style={{ padding: "0 40px", maxWidth: "1600px", margin: "0 auto", width: "100%" }}>
@@ -4753,6 +4605,12 @@ export default function HomePage(): React.JSX.Element {
         .split-char-livechat {
           display: inline-block;
           will-change: transform, opacity, filter;
+        }
+        .hero-menuru-char {
+          display: inline-block;
+          will-change: transform, opacity;
+          color: #0D3CFC !important;
+          transform-origin: 50% 100%;
         }
         .physics-char {
           display: inline-block;
