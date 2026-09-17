@@ -469,10 +469,12 @@ interface TourStep {
   isLoginStep?: boolean;
 }
 
-// ===== NOTE SLIDE-IN COMPONENT =====
-// Teks "Note" 450px warna biru, slide in dari kanan menggunakan GSAP ScrollTrigger
-const NoteSlideIn = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
+// ===== NOTE SCROLL ANIMATION COMPONENT =====
+// Teks "Note" 450px biru, bergerak mengikuti arah scroll:
+// - Scroll ke bawah: masuk dari KANAN → bergerak ke KIRI
+// - Scroll ke atas: masuk dari KIRI → bergerak ke KANAN
+const NoteScrollSection = () => {
+  const sectionRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
   const [isMounted, setIsMounted] = useState(false);
 
@@ -482,54 +484,54 @@ const NoteSlideIn = () => {
 
   useEffect(() => {
     if (!isMounted) return;
-    if (!containerRef.current || !textRef.current) return;
+    if (!sectionRef.current || !textRef.current) return;
 
     const ctx = gsap.context(() => {
-      // Set posisi awal: di luar layar kanan
+      // Set posisi awal: DI LUAR layar kanan
       gsap.set(textRef.current, {
         x: "100vw",
-        opacity: 0,
+        opacity: 1,
         force3D: true,
       });
 
-      // Slide in dari kanan saat di-scroll
+      // Animasi scrub mengikuti scroll:
+      // Saat scroll turun → x dari 100vw ke 0 (masuk dari kanan)
+      // Saat scroll naik  → x dari 0 ke 100vw (keluar ke kanan / masuk dari kiri)
       gsap.to(textRef.current, {
         x: 0,
-        opacity: 1,
-        ease: "power3.out",
-        duration: 1.2,
+        ease: "none",
         scrollTrigger: {
-          trigger: containerRef.current,
-          start: "top 90%",
-          end: "top 20%",
-          scrub: 0.6,
-          toggleActions: "play none none reverse",
+          trigger: sectionRef.current,
+          start: "top bottom",
+          end: "top top",
+          scrub: 1,
+          invalidateOnRefresh: true,
         },
       });
-    }, containerRef);
+    }, sectionRef);
 
     return () => ctx.revert();
   }, [isMounted]);
 
   return (
     <div
-      ref={containerRef}
+      ref={sectionRef}
       style={{
         width: "100%",
         height: "520px",
         position: "relative",
         overflow: "hidden",
         backgroundColor: "#ffffff",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "flex-start",
-        marginBottom: "40px",
-        marginTop: "0",
+        pointerEvents: "none",
       }}
     >
       <span
         ref={textRef}
         style={{
+          position: "absolute",
+          top: "50%",
+          left: 0,
+          transform: "translateY(-50%)",
           fontFamily: FONT_FAMILY,
           fontSize: "450px",
           fontWeight: 700,
@@ -539,8 +541,7 @@ const NoteSlideIn = () => {
           whiteSpace: "nowrap",
           display: "inline-block",
           userSelect: "none",
-          willChange: "transform, opacity",
-          paddingLeft: "40px",
+          willChange: "transform",
         }}
       >
         Note
@@ -3051,7 +3052,8 @@ const LiveChatAgent = ({
             lineHeight: 1.1,
           }}
         >
-          Live Chat Agent        </h3>
+          Live Chat Agent
+        </h3>
         <div
           style={{
             padding: "20px",
@@ -4524,8 +4526,8 @@ export default function HomePage(): React.JSX.Element {
         {/* ===== PHYSICS MENURU TITLE ===== */}
         <PhysicsMenuruTitle />
 
-        {/* ===== NOTE SLIDE IN FROM RIGHT ===== */}
-        <NoteSlideIn />
+        {/* ===== NOTE SCROLL SECTION (bergerak mengikuti scroll) ===== */}
+        <NoteScrollSection />
 
         {/* LIVE CHAT AGENT */}
         <div style={{ padding: "0 40px", maxWidth: "1600px", margin: "0 auto", width: "100%" }}>
