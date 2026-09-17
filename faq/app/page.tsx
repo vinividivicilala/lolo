@@ -351,7 +351,6 @@ const OnlineDot = ({ color = "#22c55e", size = 8 }: { color?: string; size?: num
   />
 );
 
-// ===== PEOPLE ICON (1 ORANG SAJA) =====
 const PeopleIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <circle cx="12" cy="8" r="4" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -359,7 +358,6 @@ const PeopleIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: s
   </svg>
 );
 
-// ===== TRUST ICON (shield + check) =====
 const TrustIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M12 2L4 5V11C4 16 8 20 12 22C16 20 20 16 20 11V5L12 2Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -367,7 +365,6 @@ const TrustIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?: st
   </svg>
 );
 
-// ===== CAREER ICON (briefcase) =====
 const CareerIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <rect x="2" y="7" width="20" height="14" rx="2" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -376,7 +373,6 @@ const CareerIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?: s
   </svg>
 );
 
-// ===== RESOURCES ICON (book) =====
 const ResourcesIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M4 4H10C11.1046 4 12 4.89543 12 6V20C12 18.8954 11.1046 18 10 18H4V4Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -384,7 +380,6 @@ const ResourcesIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?
   </svg>
 );
 
-// ===== DOCS ICON (file) =====
 const DocsIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M14 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -394,7 +389,6 @@ const DocsIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: str
   </svg>
 );
 
-// ===== BRAND ICON (tag) =====
 const BrandIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M20.59 13.41L11 3.83C10.6 3.43 10.06 3.2 9.5 3.2H4C2.9 3.2 2 4.1 2 5.2V10.7C2 11.26 2.22 11.8 2.63 12.2L12.21 21.79C13 22.57 14.27 22.57 15.06 21.79L20.59 16.26C21.37 15.47 21.37 14.2 20.59 13.41Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -460,7 +454,6 @@ interface LastMessagePreview {
   isFromAgent: boolean;
 }
 
-// ===== TOUR STEP INTERFACE =====
 interface TourStep {
   target: string;
   title: string;
@@ -483,13 +476,11 @@ const CookieConsentPopup = ({
   const [saving, setSaving] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
-  // Cek status consent: Firebase (kalau login) → fallback localStorage
   useEffect(() => {
     if (!isMounted) return;
     let cancelled = false;
 
     const checkConsent = async () => {
-      // 1) Kalau user login, cek Firestore dulu
       if (user && db) {
         try {
           const userRef = doc(db, "users", user.uid);
@@ -507,7 +498,6 @@ const CookieConsentPopup = ({
         }
       }
 
-      // 2) Fallback localStorage
       try {
         const local = localStorage.getItem(COOKIE_CONSENT_STORAGE_KEY);
         if (local === "accepted") {
@@ -527,7 +517,6 @@ const CookieConsentPopup = ({
     };
   }, [user, db, isMounted]);
 
-  // Animasi masuk
   useEffect(() => {
     if (visible && cardRef.current) {
       gsap.fromTo(
@@ -550,11 +539,9 @@ const CookieConsentPopup = ({
       userAgent: typeof navigator !== "undefined" ? navigator.userAgent : "",
     };
 
-    // 1) Simpan permanent di Firebase kalau user login
     if (user && db) {
       try {
         const userRef = doc(db, "users", user.uid);
-        // Pakai setDoc + merge supaya aman kalau dokumen belum ada
         await setDoc(
           userRef,
           {
@@ -564,7 +551,6 @@ const CookieConsentPopup = ({
           { merge: true }
         );
 
-        // Log terpisah untuk audit (opsional, permanent)
         try {
           await addDoc(collection(db, "cookie_consents_log"), {
             userId: user.uid,
@@ -581,14 +567,12 @@ const CookieConsentPopup = ({
       }
     }
 
-    // 2) Simpan juga di localStorage sebagai fallback
     try {
       localStorage.setItem(COOKIE_CONSENT_STORAGE_KEY, "accepted");
     } catch (e) {
       // ignore
     }
 
-    // 3) Animasi keluar
     if (cardRef.current) {
       gsap.to(cardRef.current, {
         opacity: 0,
@@ -638,7 +622,6 @@ const CookieConsentPopup = ({
             gap: "10px",
           }}
         >
-          {/* Cookie icon */}
           <div
             style={{
               width: "34px",
@@ -727,7 +710,6 @@ const CookieConsentPopup = ({
 };
 
 // ===== NAVBAR BUTTON COMPONENT =====
-// Mendukung custom colors + variant "resources" (isi kiri & kanan dipecah 2 section)
 const NavbarButton = ({
   label,
   panelTitle,
@@ -802,7 +784,6 @@ const NavbarButton = ({
     };
   }, []);
 
-  // Animasi GSAP untuk garis atas & bawah
   useEffect(() => {
     if (!linesTopRef.current || !linesBottomRef.current) return;
     if (open) {
@@ -814,7 +795,6 @@ const NavbarButton = ({
     }
   }, [open]);
 
-  // Animasi GSAP untuk panel
   useEffect(() => {
     if (!panelRef.current) return;
     if (open) {
@@ -834,7 +814,6 @@ const NavbarButton = ({
     }
   }, [open]);
 
-  // Warna garis icon: saat default pakai labelTextColor, saat hover juga sama
   const strokeColor = open ? labelTextHoverColor : labelTextColor;
 
   return (
@@ -843,7 +822,6 @@ const NavbarButton = ({
       onMouseEnter={handleEnter}
       onMouseLeave={handleLeave}
     >
-      {/* Kotak utama */}
       <div
         style={{
           display: "flex",
@@ -874,7 +852,6 @@ const NavbarButton = ({
         >
           {label}
         </span>
-        {/* Kotak icon dengan garis atas & bawah */}
         <div
           style={{
             display: "flex",
@@ -919,7 +896,6 @@ const NavbarButton = ({
         </div>
       </div>
 
-      {/* Panel */}
       {open && (
         <div
           ref={panelRef}
@@ -943,7 +919,6 @@ const NavbarButton = ({
             alignItems: "flex-start",
           }}
         >
-          {/* ===== SISI KIRI ===== */}
           <div
             style={{
               flex: "1 1 0",
@@ -954,9 +929,7 @@ const NavbarButton = ({
             }}
           >
             {isResources ? (
-              /* ===== KHUSUS RESOURCES: Docs & Brand dipisah ===== */
               <>
-                {/* Docs section */}
                 <div
                   style={{
                     display: "flex",
@@ -1004,7 +977,6 @@ const NavbarButton = ({
                   </p>
                 </div>
 
-                {/* Brand section */}
                 <div
                   style={{
                     display: "flex",
@@ -1053,7 +1025,6 @@ const NavbarButton = ({
                 </div>
               </>
             ) : (
-              /* ===== DEFAULT (Teams & Individual) ===== */
               <>
                 <div
                   style={{
@@ -1106,7 +1077,6 @@ const NavbarButton = ({
             )}
           </div>
 
-          {/* ===== SISI KANAN ===== */}
           <div
             style={{
               flex: "0 0 380px",
@@ -1116,9 +1086,7 @@ const NavbarButton = ({
             }}
           >
             {isResources ? (
-              /* ===== KHUSUS RESOURCES: Docs & Brand dipisah dengan foto ===== */
               <>
-                {/* Docs box */}
                 <div
                   style={{
                     backgroundColor: panelBoxColor,
@@ -1171,7 +1139,6 @@ const NavbarButton = ({
                   </p>
                 </div>
 
-                {/* Brand box */}
                 <div
                   style={{
                     backgroundColor: panelBoxColor,
@@ -1225,7 +1192,6 @@ const NavbarButton = ({
                 </div>
               </>
             ) : (
-              /* ===== DEFAULT (Teams & Individual) ===== */
               <div
                 style={{
                   backgroundColor: panelBoxColor,
@@ -1301,7 +1267,6 @@ const LeftNavbar = () => {
         fontFamily: FONT_FAMILY,
       }}
     >
-      {/* TEAMS — default biru */}
       <NavbarButton
         label="Teams"
         panelTitle="Trust"
@@ -1314,7 +1279,6 @@ const LeftNavbar = () => {
         bigPanelHeight={260}
       />
 
-      {/* INDIVIDUAL — default biru */}
       <NavbarButton
         label="Individual"
         panelTitle="Careers"
@@ -1327,8 +1291,6 @@ const LeftNavbar = () => {
         bigPanelHeight={260}
       />
 
-      {/* RESOURCES — tombol kuning #F2EA6B, panel oranye #F04E23
-          Teks & icon tombol terlihat saat hover (bg jadi hitam → teks/icon putih) */}
       <NavbarButton
         label="Resources"
         panelTitle="Docs & Brand"
@@ -1541,7 +1503,8 @@ const PhysicsMenuruTitle = () => {
 };
 
 // ===== PARALLAX NOTE TITLE COMPONENT =====
-// Teks "Note" biru 250px muncul dari sisi kanan layar dengan animasi parallax GSAP
+// Teks "Note" biru 250px muncul dari sisi kanan layar (seperti teks berjalan)
+// saat scroll ke bawah, dengan animasi parallax GSAP.
 const ParallaxNoteTitle = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const noteTextRef = useRef<HTMLDivElement>(null);
@@ -1551,52 +1514,56 @@ const ParallaxNoteTitle = () => {
     if (!sectionRef.current || !noteTextRef.current) return;
 
     const ctx = gsap.context(() => {
-      // Set posisi awal: di luar kanan layar, sedikit miring & blur
+      // Posisi awal: teks benar-benar di luar layar kanan
       gsap.set(noteTextRef.current, {
-        xPercent: 120,
+        x: window.innerWidth,
         opacity: 0,
-        rotate: 8,
-        filter: "blur(14px)",
       });
 
-      // Animasi masuk saat section masuk viewport (scroll ke bawah)
-      gsap.to(noteTextRef.current, {
-        xPercent: 0,
-        opacity: 1,
-        rotate: 0,
-        filter: "blur(0px)",
-        duration: 1.4,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top 85%",
-          end: "bottom 20%",
-          toggleActions: "play none none reverse",
-        },
-      });
-
-      // Parallax: teks bergerak horizontal saat scroll
-      gsap.to(noteTextRef.current, {
-        xPercent: -18,
-        ease: "none",
+      // Timeline yang dikontrol ScrollTrigger (scrub = smooth mengikuti scroll)
+      const tl = gsap.timeline({
         scrollTrigger: {
           trigger: sectionRef.current,
           start: "top bottom",
           end: "bottom top",
           scrub: 1,
+          invalidateOnRefresh: true,
         },
       });
 
-      // Parallax tambahan: sedikit naik-turun halus
+      // 1) Teks masuk dari kanan ke tengah layar
+      tl.to(noteTextRef.current, {
+        x: 0,
+        opacity: 1,
+        ease: "power2.out",
+        duration: 1,
+      });
+
+      // 2) Setelah masuk, teks berjalan terus ke kiri (efek marquee)
+      tl.to(noteTextRef.current, {
+        x: () => -window.innerWidth * 0.6,
+        ease: "none",
+        duration: 1.5,
+      });
+
+      // Parallax tambahan: sedikit naik saat scroll
       gsap.to(noteTextRef.current, {
-        y: -60,
+        y: -40,
         ease: "none",
         scrollTrigger: {
           trigger: sectionRef.current,
           start: "top bottom",
           end: "bottom top",
           scrub: 1.2,
+          invalidateOnRefresh: true,
         },
+      });
+
+      // Refresh saat resize supaya nilai window.innerWidth akurat
+      ScrollTrigger.addEventListener("refreshInit", () => {
+        if (noteTextRef.current) {
+          gsap.set(noteTextRef.current, { x: window.innerWidth });
+        }
       });
     }, sectionRef);
 
@@ -1608,7 +1575,7 @@ const ParallaxNoteTitle = () => {
       ref={sectionRef}
       style={{
         width: "100%",
-        height: "380px",
+        height: "420px",
         marginTop: "-40px",
         marginBottom: "20px",
         position: "relative",
@@ -1617,7 +1584,6 @@ const ParallaxNoteTitle = () => {
         display: "flex",
         alignItems: "center",
         justifyContent: "flex-start",
-        paddingLeft: "80px",
       }}
     >
       <div
@@ -1632,7 +1598,8 @@ const ParallaxNoteTitle = () => {
           userSelect: "none",
           whiteSpace: "nowrap",
           display: "inline-block",
-          willChange: "transform, opacity, filter",
+          paddingLeft: "60px",
+          willChange: "transform, opacity",
           WebkitFontSmoothing: "antialiased",
           MozOsxFontSmoothing: "grayscale",
         }}
