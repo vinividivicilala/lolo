@@ -4257,6 +4257,7 @@ export default function HomePage(): React.JSX.Element {
   const textRef = useRef<HTMLSpanElement>(null);
   const menuruFooterRef = useRef<HTMLDivElement>(null);
   const menuruTextRef = useRef<HTMLSpanElement>(null);
+  const noteTextRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     setIsMounted(true);
@@ -4287,6 +4288,7 @@ export default function HomePage(): React.JSX.Element {
     setTimeout(() => startPreloaderAnimation(), 500);
   }, [isMounted, loading]);
 
+  // ===== ANIMASI MENURU (footer besar) =====
   useEffect(() => {
     if (!showMain || !isMounted) return;
     const menuruElement = menuruFooterRef.current;
@@ -4319,6 +4321,53 @@ export default function HomePage(): React.JSX.Element {
     }
     return () => {
       ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+    };
+  }, [showMain, isMounted]);
+
+  // ===== ANIMASI NOTE (parallax dari kanan) =====
+  useEffect(() => {
+    if (!showMain || !isMounted) return;
+    const noteEl = noteTextRef.current;
+    if (!noteEl) return;
+
+    // Set posisi awal: di luar layar kanan
+    gsap.set(noteEl, {
+      x: "120vw",
+      opacity: 0,
+      willChange: "transform, opacity",
+    });
+
+    // Animasi parallax + ScrollTrigger
+    const noteTween = gsap.to(noteEl, {
+      x: "0vw",
+      opacity: 1,
+      ease: "none",
+      scrollTrigger: {
+        trigger: noteEl,
+        start: "top 95%",
+        end: "top 35%",
+        scrub: 1.2,
+        toggleActions: "play none none reverse",
+      },
+    });
+
+    // Animasi tambahan: parallax bergerak sedikit ke kiri saat scroll
+    const noteParallax = gsap.to(noteEl, {
+      xPercent: -10,
+      ease: "none",
+      scrollTrigger: {
+        trigger: noteEl,
+        start: "top bottom",
+        end: "bottom top",
+        scrub: 1.5,
+      },
+    });
+
+    return () => {
+      if (noteTween.scrollTrigger) noteTween.scrollTrigger.kill();
+      if (noteParallax.scrollTrigger) noteParallax.scrollTrigger.kill();
+      noteTween.kill();
+      noteParallax.kill();
     };
   }, [showMain, isMounted]);
 
@@ -4651,6 +4700,37 @@ export default function HomePage(): React.JSX.Element {
           >
             Menuru
           </span>
+
+          {/* ===== TEKS "Note" — 250px, biru, parallax dari kanan ===== */}
+          <div
+            style={{
+              width: "100%",
+              overflow: "hidden",
+              marginTop: "40px",
+              display: "flex",
+              justifyContent: "flex-end",
+              position: "relative",
+            }}
+          >
+            <span
+              ref={noteTextRef}
+              style={{
+                fontFamily: FONT_FAMILY,
+                fontSize: "250px",
+                fontWeight: 700,
+                color: "#0D3CFC",
+                letterSpacing: "-0.02em",
+                lineHeight: 0.9,
+                display: "inline-block",
+                whiteSpace: "nowrap",
+                willChange: "transform, opacity",
+                userSelect: "none",
+              }}
+            >
+              Note
+            </span>
+          </div>
+
           <div
             style={{
               marginTop: "30px", width: "100%",
