@@ -351,6 +351,7 @@ const OnlineDot = ({ color = "#22c55e", size = 8 }: { color?: string; size?: num
   />
 );
 
+// ===== PEOPLE ICON (1 ORANG SAJA) =====
 const PeopleIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <circle cx="12" cy="8" r="4" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -358,6 +359,7 @@ const PeopleIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: s
   </svg>
 );
 
+// ===== TRUST ICON (shield + check) =====
 const TrustIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M12 2L4 5V11C4 16 8 20 12 22C16 20 20 16 20 11V5L12 2Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -365,6 +367,7 @@ const TrustIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?: st
   </svg>
 );
 
+// ===== CAREER ICON (briefcase) =====
 const CareerIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <rect x="2" y="7" width="20" height="14" rx="2" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -373,6 +376,7 @@ const CareerIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?: s
   </svg>
 );
 
+// ===== RESOURCES ICON (book) =====
 const ResourcesIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M4 4H10C11.1046 4 12 4.89543 12 6V20C12 18.8954 11.1046 18 10 18H4V4Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -380,6 +384,7 @@ const ResourcesIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?
   </svg>
 );
 
+// ===== DOCS ICON (file) =====
 const DocsIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M14 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -389,6 +394,7 @@ const DocsIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: str
   </svg>
 );
 
+// ===== BRAND ICON (tag) =====
 const BrandIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M20.59 13.41L11 3.83C10.6 3.43 10.06 3.2 9.5 3.2H4C2.9 3.2 2 4.1 2 5.2V10.7C2 11.26 2.22 11.8 2.63 12.2L12.21 21.79C13 22.57 14.27 22.57 15.06 21.79L20.59 16.26C21.37 15.47 21.37 14.2 20.59 13.41Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -454,6 +460,7 @@ interface LastMessagePreview {
   isFromAgent: boolean;
 }
 
+// ===== TOUR STEP INTERFACE =====
 interface TourStep {
   target: string;
   title: string;
@@ -461,6 +468,86 @@ interface TourStep {
   position?: "top" | "bottom" | "left" | "right";
   isLoginStep?: boolean;
 }
+
+// ===== NOTE SLIDE-IN COMPONENT =====
+// Teks "Note" 450px warna biru, slide in dari kanan menggunakan GSAP ScrollTrigger
+const NoteSlideIn = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLSpanElement>(null);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isMounted) return;
+    if (!containerRef.current || !textRef.current) return;
+
+    const ctx = gsap.context(() => {
+      // Set posisi awal: di luar layar kanan
+      gsap.set(textRef.current, {
+        x: "100vw",
+        opacity: 0,
+        force3D: true,
+      });
+
+      // Slide in dari kanan saat di-scroll
+      gsap.to(textRef.current, {
+        x: 0,
+        opacity: 1,
+        ease: "power3.out",
+        duration: 1.2,
+        scrollTrigger: {
+          trigger: containerRef.current,
+          start: "top 90%",
+          end: "top 20%",
+          scrub: 0.6,
+          toggleActions: "play none none reverse",
+        },
+      });
+    }, containerRef);
+
+    return () => ctx.revert();
+  }, [isMounted]);
+
+  return (
+    <div
+      ref={containerRef}
+      style={{
+        width: "100%",
+        height: "520px",
+        position: "relative",
+        overflow: "hidden",
+        backgroundColor: "#ffffff",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "flex-start",
+        marginBottom: "40px",
+        marginTop: "0",
+      }}
+    >
+      <span
+        ref={textRef}
+        style={{
+          fontFamily: FONT_FAMILY,
+          fontSize: "450px",
+          fontWeight: 700,
+          color: "#0D3CFC",
+          letterSpacing: "-0.04em",
+          lineHeight: 1,
+          whiteSpace: "nowrap",
+          display: "inline-block",
+          userSelect: "none",
+          willChange: "transform, opacity",
+          paddingLeft: "40px",
+        }}
+      >
+        Note
+      </span>
+    </div>
+  );
+};
 
 // ===== COOKIE CONSENT POPUP =====
 const CookieConsentPopup = ({
@@ -1497,114 +1584,6 @@ const PhysicsMenuruTitle = () => {
         }}
       >
         Menuru
-      </div>
-    </div>
-  );
-};
-
-// ===== PARALLAX NOTE TITLE COMPONENT =====
-// Teks "Note" biru 250px muncul dari sisi kanan layar (seperti teks berjalan)
-// saat scroll ke bawah, dengan animasi parallax GSAP.
-const ParallaxNoteTitle = () => {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const noteTextRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (!sectionRef.current || !noteTextRef.current) return;
-
-    const ctx = gsap.context(() => {
-      // Posisi awal: teks benar-benar di luar layar kanan
-      gsap.set(noteTextRef.current, {
-        x: window.innerWidth,
-        opacity: 0,
-      });
-
-      // Timeline yang dikontrol ScrollTrigger (scrub = smooth mengikuti scroll)
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top bottom",
-          end: "bottom top",
-          scrub: 1,
-          invalidateOnRefresh: true,
-        },
-      });
-
-      // 1) Teks masuk dari kanan ke tengah layar
-      tl.to(noteTextRef.current, {
-        x: 0,
-        opacity: 1,
-        ease: "power2.out",
-        duration: 1,
-      });
-
-      // 2) Setelah masuk, teks berjalan terus ke kiri (efek marquee)
-      tl.to(noteTextRef.current, {
-        x: () => -window.innerWidth * 0.6,
-        ease: "none",
-        duration: 1.5,
-      });
-
-      // Parallax tambahan: sedikit naik saat scroll
-      gsap.to(noteTextRef.current, {
-        y: -40,
-        ease: "none",
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top bottom",
-          end: "bottom top",
-          scrub: 1.2,
-          invalidateOnRefresh: true,
-        },
-      });
-
-      // Refresh saat resize supaya nilai window.innerWidth akurat
-      ScrollTrigger.addEventListener("refreshInit", () => {
-        if (noteTextRef.current) {
-          gsap.set(noteTextRef.current, { x: window.innerWidth });
-        }
-      });
-    }, sectionRef);
-
-    return () => ctx.revert();
-  }, []);
-
-  return (
-    <div
-      ref={sectionRef}
-      style={{
-        width: "100%",
-        height: "420px",
-        marginTop: "-40px",
-        marginBottom: "20px",
-        position: "relative",
-        overflow: "hidden",
-        backgroundColor: "#ffffff",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "flex-start",
-      }}
-    >
-      <div
-        ref={noteTextRef}
-        style={{
-          fontFamily: FONT_FAMILY,
-          fontSize: "250px",
-          fontWeight: 700,
-          color: "#0D3CFC",
-          letterSpacing: "-0.04em",
-          lineHeight: 1,
-          userSelect: "none",
-          whiteSpace: "nowrap",
-          display: "inline-block",
-          paddingLeft: "60px",
-          willChange: "transform, opacity",
-          WebkitFontSmoothing: "antialiased",
-          MozOsxFontSmoothing: "grayscale",
-        }}
-      >
-        Note
       </div>
     </div>
   );
@@ -3072,8 +3051,7 @@ const LiveChatAgent = ({
             lineHeight: 1.1,
           }}
         >
-          Live Chat Agent
-        </h3>
+          Live Chat Agent        </h3>
         <div
           style={{
             padding: "20px",
@@ -4529,10 +4507,7 @@ export default function HomePage(): React.JSX.Element {
         <meta name="twitter:image" content="/images/ai.jpg" />
       </Head>
 
-      {/* ===== LEFT NAVBAR ===== */}
       <LeftNavbar />
-
-      {/* ===== RIGHT NAVBAR ===== */}
       <RightNavbar />
 
       {/* ===== COOKIE CONSENT POPUP ===== */}
@@ -4549,8 +4524,8 @@ export default function HomePage(): React.JSX.Element {
         {/* ===== PHYSICS MENURU TITLE ===== */}
         <PhysicsMenuruTitle />
 
-        {/* ===== PARALLAX NOTE TITLE ===== */}
-        <ParallaxNoteTitle />
+        {/* ===== NOTE SLIDE IN FROM RIGHT ===== */}
+        <NoteSlideIn />
 
         {/* LIVE CHAT AGENT */}
         <div style={{ padding: "0 40px", maxWidth: "1600px", margin: "0 auto", width: "100%" }}>
