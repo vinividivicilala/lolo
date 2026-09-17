@@ -300,6 +300,7 @@ const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
 const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 const AGENT_NAME = "Farid Ardiansyah";
 const TOUR_STORAGE_KEY = "menuru_livechat_tour_completed_v1";
+const COOKIE_CONSENT_STORAGE_KEY = "menuru_cookie_consent_v1";
 
 // ===== SVG ICONS =====
 const ArrowRight = ({ size = 20, color = "currentColor" }: { size?: number; color?: string }) => (
@@ -467,6 +468,263 @@ interface TourStep {
   position?: "top" | "bottom" | "left" | "right";
   isLoginStep?: boolean;
 }
+
+// ===== COOKIE CONSENT POPUP =====
+const CookieConsentPopup = ({
+  user,
+  db,
+  isMounted,
+}: {
+  user: any;
+  db: any;
+  isMounted: boolean;
+}) => {
+  const [visible, setVisible] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  // Cek status consent: Firebase (kalau login) → fallback localStorage
+  useEffect(() => {
+    if (!isMounted) return;
+    let cancelled = false;
+
+    const checkConsent = async () => {
+      // 1) Kalau user login, cek Firestore dulu
+      if (user && db) {
+        try {
+          const userRef = doc(db, "users", user.uid);
+          const snap = await getDoc(userRef);
+          if (!cancelled && snap.exists()) {
+            const data = snap.data();
+            const consent = data?.cookieConsent;
+            if (consent?.accepted === true) {
+              setVisible(false);
+              return;
+            }
+          }
+        } catch (err) {
+          console.error("Error checking cookie consent in Firestore:", err);
+        }
+      }
+
+      // 2) Fallback localStorage
+      try {
+        const local = localStorage.getItem(COOKIE_CONSENT_STORAGE_KEY);
+        if (local === "accepted") {
+          if (!cancelled) setVisible(false);
+          return;
+        }
+      } catch (e) {
+        // ignore
+      }
+
+      if (!cancelled) setVisible(true);
+    };
+
+    checkConsent();
+    return () => {
+      cancelled = true;
+    };
+  }, [user, db, isMounted]);
+
+  // Animasi masuk
+  useEffect(() => {
+    if (visible && cardRef.current) {
+      gsap.fromTo(
+        cardRef.current,
+        { opacity: 0, y: 40, scale: 0.96 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: "power3.out" }
+      );
+    }
+  }, [visible]);
+
+  const handleAccept = async () => {
+    if (saving) return;
+    setSaving(true);
+
+    const nowIso = new Date().toISOString();
+    const consentPayload = {
+      accepted: true,
+      acceptedAt: nowIso,
+      policyVersion: "v1",
+      userAgent: typeof navigator !== "undefined" ? navigator.userAgent : "",
+    };
+
+    // 1) Simpan permanent di Firebase kalau user login
+    if (user && db) {
+      try {
+        const userRef = doc(db, "users", user.uid);
+        // Pakai setDoc + merge supaya aman kalau dokumen belum ada
+        await setDoc(
+          userRef,
+          {
+            cookieConsent: consentPayload,
+            cookieConsentUpdatedAt: serverTimestamp(),
+          },
+          { merge: true }
+        );
+
+        // Log terpisah untuk audit (opsional, permanent)
+        try {
+          await addDoc(collection(db, "cookie_consents_log"), {
+            userId: user.uid,
+            userEmail: user.email || "",
+            userName: user.displayName || "",
+            ...consentPayload,
+            timestamp: serverTimestamp(),
+          });
+        } catch (logErr) {
+          console.error("Error writing cookie consent log:", logErr);
+        }
+      } catch (err) {
+        console.error("Error saving cookie consent to Firestore:", err);
+      }
+    }
+
+    // 2) Simpan juga di localStorage sebagai fallback
+    try {
+      localStorage.setItem(COOKIE_CONSENT_STORAGE_KEY, "accepted");
+    } catch (e) {
+      // ignore
+    }
+
+    // 3) Animasi keluar
+    if (cardRef.current) {
+      gsap.to(cardRef.current, {
+        opacity: 0,
+        y: 40,
+        scale: 0.96,
+        duration: 0.35,
+        ease: "power2.in",
+        onComplete: () => setVisible(false),
+      });
+    } else {
+      setVisible(false);
+    }
+    setSaving(false);
+  };
+
+  if (!visible) return null;
+
+  return (
+    <div
+      style={{
+        position: "fixed",
+        right: "24px",
+        bottom: "24px",
+        zIndex: 9500,
+        maxWidth: "380px",
+        width: "calc(100% - 48px)",
+        fontFamily: FONT_FAMILY,
+      }}
+    >
+      <div
+        ref={cardRef}
+        style={{
+          backgroundColor: "#ffffff",
+          borderRadius: "16px",
+          border: "1px solid #e8e8e8",
+          boxShadow: "0 12px 40px rgba(0,0,0,0.15)",
+          padding: "20px 22px",
+          display: "flex",
+          flexDirection: "column",
+          gap: "14px",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+          }}
+        >
+          {/* Cookie icon */}
+          <div
+            style={{
+              width: "34px",
+              height: "34px",
+              borderRadius: "50%",
+              backgroundColor: "#0D3CFC",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="9" stroke="#ffffff" strokeWidth="2" />
+              <circle cx="9" cy="10" r="1.4" fill="#ffffff" />
+              <circle cx="15" cy="9" r="1.2" fill="#ffffff" />
+              <circle cx="14" cy="15" r="1.4" fill="#ffffff" />
+              <circle cx="9.5" cy="15.5" r="1" fill="#ffffff" />
+            </svg>
+          </div>
+          <span
+            style={{
+              fontSize: "15px",
+              fontWeight: 700,
+              color: "#000000",
+              letterSpacing: "-0.01em",
+            }}
+          >
+            Cookies
+          </span>
+        </div>
+
+        <p
+          style={{
+            fontSize: "13px",
+            lineHeight: 1.55,
+            color: "#333333",
+            margin: 0,
+          }}
+        >
+          We use cookies to improve your experience and analyse site usage.{" "}
+          <Link
+            href="/cookie-policy"
+            style={{
+              color: "#0D3CFC",
+              textDecoration: "underline",
+              fontWeight: 600,
+            }}
+          >
+            Cookie Policy
+          </Link>
+        </p>
+
+        <button
+          onClick={handleAccept}
+          disabled={saving}
+          style={{
+            alignSelf: "flex-end",
+            padding: "10px 24px",
+            backgroundColor: saving ? "#7d97f7" : "#0D3CFC",
+            color: "#ffffff",
+            border: "none",
+            borderRadius: "10px",
+            fontSize: "14px",
+            fontWeight: 700,
+            cursor: saving ? "not-allowed" : "pointer",
+            fontFamily: FONT_FAMILY,
+            transition: "background-color 0.2s ease, transform 0.15s ease",
+          }}
+          onMouseEnter={(e) => {
+            if (!saving) {
+              (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#000000";
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (!saving) {
+              (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#0D3CFC";
+            }
+          }}
+        >
+          {saving ? "Saving..." : "Accept"}
+        </button>
+      </div>
+    </div>
+  );
+};
 
 // ===== NAVBAR BUTTON COMPONENT =====
 // Mendukung custom colors + variant "resources" (isi kiri & kanan dipecah 2 section)
@@ -4206,6 +4464,9 @@ export default function HomePage(): React.JSX.Element {
 
       {/* ===== RIGHT NAVBAR ===== */}
       <RightNavbar />
+
+      {/* ===== COOKIE CONSENT POPUP ===== */}
+      <CookieConsentPopup user={user} db={db} isMounted={isMounted} />
 
       <div
         style={{
