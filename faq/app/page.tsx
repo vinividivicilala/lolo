@@ -469,12 +469,12 @@ interface TourStep {
   isLoginStep?: boolean;
 }
 
-// ===== HERO MENURU TITLE (SplitText) =====
-// Teks "Menuru" besar di bawah navbar, warna biru, fontSize 600px, GSAP SplitText
-// + subtitle "Brand non profit" (profit pudar) & "features case"
+// ===== HERO MENURU TITLE (SplitText + ScrollTrigger fly to navbar left) =====
+// Teks "Menuru" besar di hero. Saat scroll ke bawah, teks naik ke navbar kiri
+// (fixed di bawah tombol navbar) dengan ukuran mengecil. Saat scroll ke atas, kembali.
 const HeroMenuruTitle = () => {
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
-  const subtitleRef = useRef<HTMLDivElement>(null);
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -483,13 +483,19 @@ const HeroMenuruTitle = () => {
 
   useEffect(() => {
     if (!isMounted) return;
-    if (!titleRef.current) return;
+    if (!wrapperRef.current || !titleRef.current) return;
 
-    const split = new SplitText(titleRef.current, {
+    // Simpan referensi elemen
+    const wrapper = wrapperRef.current;
+    const title = titleRef.current;
+
+    // 1. SplitText untuk animasi masuk
+    const split = new SplitText(title, {
       type: "chars",
       charsClass: "hero-menuru-char",
     });
 
+    // 2. Animasi entrance karakter
     gsap.set(split.chars, {
       opacity: 0,
       y: 220,
@@ -510,38 +516,98 @@ const HeroMenuruTitle = () => {
       delay: 0.2,
     });
 
-    if (subtitleRef.current) {
-      gsap.fromTo(
-        subtitleRef.current,
-        { opacity: 0, y: 30 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 1,
-          ease: "power3.out",
-          delay: 0.9,
-        }
-      );
-    }
+    // 3. ScrollTrigger: fly to navbar kiri
+    //    - Target akhir: di bawah tombol navbar kiri (posisi fixed)
+    //    - Ukuran mengecil agar muat di navbar
+    const ctx = gsap.context(() => {
+      // Ukuran awal (600px) -> ukuran kecil (40px) saat menempel di navbar
+      const startFontSize = 600;
+      const endFontSize = 40;
+
+      // Hitung posisi awal wrapper (tempat hero berada di dokumen)
+      const wrapperRect = wrapper.getBoundingClientRect();
+      const startTop = wrapperRect.top + window.scrollY;
+      const startLeft = wrapperRect.left + window.scrollX;
+      const wrapperWidth = wrapperRect.width;
+      const wrapperHeight = wrapperRect.height;
+
+      // Posisi tujuan: di bawah navbar kiri
+      // Navbar kiri ada di top: 20px, left: 80px, tinggi tombol ~44px
+      const targetFixedTop = 76; // 20 + 44 + 12 gap
+      const targetFixedLeft = 80;
+
+      // Karena wrapper awalnya di dokumen (bukan fixed), kita gunakan
+      // pin + transform untuk memindahkan ke posisi fixed.
+      // Pendekatan: buat ScrollTrigger dengan pin pada wrapper, lalu animasi
+      // sebuah clone "visual" (title) dari posisi awal ke posisi target fixed.
+      //
+      // Simpler: gunakan ScrollTrigger dengan `pin: wrapper` dan animasi
+      // transformasi title ke posisi fixed menggunakan `position: fixed`.
+      //
+      // Kita pakai trik: saat scroll melewati trigger, set title ke
+      // `position: fixed` di navbar kiri.
+
+      ScrollTrigger.create({
+        trigger: wrapper,
+        start: "top top",
+        end: "bottom top",
+        scrub: false,
+        onEnter: () => {
+          // Teks sudah mencapai atas: pindahkan ke navbar kiri
+          gsap.to(title, {
+            position: "fixed",
+            top: `${targetFixedTop}px`,
+            left: `${targetFixedLeft}px`,
+            fontSize: `${endFontSize}px`,
+            letterSpacing: "-0.02em",
+            zIndex: 9500,
+            duration: 0.5,
+            ease: "power3.out",
+            onStart: () => {
+              // Pastikan transform reset supaya posisi fixed akurat
+              gsap.set(title, { x: 0, y: 0, scale: 1, rotation: 0 });
+            },
+          });
+        },
+        onLeaveBack: () => {
+          // Scroll kembali ke atas: kembalikan ke posisi semula
+          gsap.to(title, {
+            position: "relative",
+            top: "auto",
+            left: "auto",
+            fontSize: `${startFontSize}px`,
+            letterSpacing: "-0.05em",
+            zIndex: 1,
+            duration: 0.5,
+            ease: "power3.out",
+            onComplete: () => {
+              gsap.set(title, { clearProps: "position,top,left,zIndex" });
+            },
+          });
+        },
+      });
+    }, wrapper);
 
     return () => {
+      ctx.revert();
       if (split) split.revert();
     };
   }, [isMounted]);
 
   return (
     <div
+      ref={wrapperRef}
       style={{
         width: "100%",
         paddingTop: "110px",
-        paddingBottom: "40px",
+        paddingBottom: "0px",
         backgroundColor: "#ffffff",
-        overflow: "hidden",
+        overflow: "visible",
         display: "flex",
-        flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
         position: "relative",
+        minHeight: "700px",
       }}
     >
       <h1
@@ -560,58 +626,11 @@ const HeroMenuruTitle = () => {
           display: "inline-block",
           WebkitFontSmoothing: "antialiased",
           MozOsxFontSmoothing: "grayscale",
+          willChange: "font-size, position, top, left",
         }}
       >
         Menuru
       </h1>
-
-      {/* Subtitle */}
-      <div
-        ref={subtitleRef}
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: "10px",
-          marginTop: "30px",
-          fontFamily: FONT_FAMILY,
-          textAlign: "center",
-        }}
-      >
-        {/* Brand non profit — "profit" pudar */}
-        <span
-          style={{
-            fontSize: "28px",
-            fontWeight: 500,
-            color: "#0D3CFC",
-            letterSpacing: "-0.01em",
-            lineHeight: 1.2,
-          }}
-        >
-          Brand non{" "}
-          <span
-            style={{
-              color: "#0D3CFC",
-              opacity: 0.35,
-            }}
-          >
-            profit
-          </span>
-        </span>
-
-        {/* Features case — tanpa design, hanya teks */}
-        <span
-          style={{
-            fontSize: "20px",
-            fontWeight: 400,
-            color: "#0D3CFC",
-            letterSpacing: "0.01em",
-            lineHeight: 1.2,
-          }}
-        >
-          features case
-        </span>
-      </div>
     </div>
   );
 };
@@ -1410,6 +1429,7 @@ const NavbarButton = ({
 const LeftNavbar = () => {
   return (
     <div
+      data-navbar-left
       style={{
         position: "fixed",
         top: "20px",
@@ -4443,7 +4463,7 @@ export default function HomePage(): React.JSX.Element {
           fontFamily: FONT_FAMILY, overflow: "visible",
         }}
       >
-        {/* ===== HERO MENURU TITLE (SplitText) + Subtitle ===== */}
+        {/* ===== HERO MENURU TITLE (SplitText + fly to navbar left) ===== */}
         <HeroMenuruTitle />
 
         {/* LIVE CHAT AGENT */}
