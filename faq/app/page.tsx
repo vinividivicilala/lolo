@@ -470,6 +470,7 @@ interface TourStep {
 }
 
 // ===== HERO MENURU TITLE =====
+// Judul digeser sedikit ke kiri (NAV_LEFT = 40px) supaya tidak mentok dengan 3 tombol navbar.
 const HeroMenuruTitle = ({
   onNavbarShiftChange,
 }: {
@@ -490,9 +491,9 @@ const HeroMenuruTitle = ({
     const container = containerRef.current;
     const title = titleRef.current;
 
-    // Judul digeser ke kiri sedikit
+    // Judul digeser ke kiri sedikit (NAV_LEFT = 40px) agar ada jarak dengan 3 tombol navbar
     const NAV_TOP = 10;
-    const NAV_LEFT = 60;
+    const NAV_LEFT = 40;
     const NAV_FONT_SIZE = 70;
     const NAV_HEIGHT = 60;
 
@@ -1336,14 +1337,14 @@ const NavbarButton = ({
 };
 
 // ===== LEFT NAVBAR COMPONENT =====
-// shifted left = 380px (jarak ~30px dari ujung judul di 60px)
+// shifted left = 340px (judul sudah digeser ke kiri 40px, jadi jarak tetap nyaman)
 const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
   return (
     <div
       style={{
         position: "fixed",
         top: "20px",
-        left: shifted ? "380px" : "60px",
+        left: shifted ? "340px" : "60px",
         zIndex: 9000,
         display: "flex",
         alignItems: "center",
