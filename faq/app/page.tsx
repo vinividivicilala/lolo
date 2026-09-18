@@ -351,7 +351,7 @@ const OnlineDot = ({ color = "#22c55e", size = 8 }: { color?: string; size?: num
   />
 );
 
-// ===== PEOPLE ICON (1 ORANG SAJA) =====
+// ===== PEOPLE ICON =====
 const PeopleIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <circle cx="12" cy="8" r="4" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -359,7 +359,7 @@ const PeopleIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: s
   </svg>
 );
 
-// ===== TRUST ICON (shield + check) =====
+// ===== TRUST ICON =====
 const TrustIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M12 2L4 5V11C4 16 8 20 12 22C16 20 20 16 20 11V5L12 2Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -367,7 +367,7 @@ const TrustIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?: st
   </svg>
 );
 
-// ===== CAREER ICON (briefcase) =====
+// ===== CAREER ICON =====
 const CareerIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <rect x="2" y="7" width="20" height="14" rx="2" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -376,7 +376,7 @@ const CareerIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?: s
   </svg>
 );
 
-// ===== RESOURCES ICON (book) =====
+// ===== RESOURCES ICON =====
 const ResourcesIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M4 4H10C11.1046 4 12 4.89543 12 6V20C12 18.8954 11.1046 18 10 18H4V4Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -384,7 +384,7 @@ const ResourcesIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?
   </svg>
 );
 
-// ===== DOCS ICON (file) =====
+// ===== DOCS ICON =====
 const DocsIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M14 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -394,7 +394,7 @@ const DocsIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: str
   </svg>
 );
 
-// ===== BRAND ICON (tag) =====
+// ===== BRAND ICON =====
 const BrandIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M20.59 13.41L11 3.83C10.6 3.43 10.06 3.2 9.5 3.2H4C2.9 3.2 2 4.1 2 5.2V10.7C2 11.26 2.22 11.8 2.63 12.2L12.21 21.79C13 22.57 14.27 22.57 15.06 21.79L20.59 16.26C21.37 15.47 21.37 14.2 20.59 13.41Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -615,9 +615,9 @@ const HeroMenuruTitle = ({
   );
 };
 
-// ===== FOOTER MENURU TITLE =====
-// Teks "Menuru" besar 600px muncul dengan animasi GSAP dari bawah.
-// Tinggi halaman compact — langsung diikuti copyright.
+// ===== FOOTER MENURU TITLE (SplitText GSAP) =====
+// Teks "Menuru" 600px muncul per karakter pakai SplitText GSAP.
+// Trigger ScrollTrigger dari containerRef agar muncul saat scroll bawah.
 const FooterMenuruTitle = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLSpanElement>(null);
@@ -634,68 +634,71 @@ const FooterMenuruTitle = () => {
     const container = containerRef.current;
     const title = titleRef.current;
 
-    const ctx = gsap.context(() => {
-      // Posisi awal: tersembunyi di bawah
-      gsap.set(title, {
-        y: 500,
-        opacity: 0,
-        scale: 0.6,
-        rotationX: -60,
-        transformOrigin: "50% 100%",
-        force3D: true,
-      });
+    let split: SplitText | null = null;
+    let ctx: gsap.Context | null = null;
 
-      // Animasi utama: muncul dari bawah saat scroll
-      gsap.to(title, {
-        y: 0,
-        opacity: 1,
-        scale: 1,
-        rotationX: 0,
-        ease: "power3.out",
-        duration: 1.6,
-        scrollTrigger: {
-          trigger: container,
-          start: "top 98%",
-          end: "top 55%",
-          scrub: 1,
-          toggleActions: "play none none reverse",
-        },
-      });
+    // Delay sedikit supaya layout & font sudah siap
+    const timer = setTimeout(() => {
+      ctx = gsap.context(() => {
+        // SplitText per karakter
+        split = new SplitText(title, {
+          type: "chars",
+          charsClass: "footer-menuru-char",
+        });
 
-      // Animasi per-karakter
-      const split = new SplitText(title, {
-        type: "chars",
-        charsClass: "footer-menuru-char",
-      });
+        // Set posisi awal tiap karakter: tersembunyi di bawah
+        gsap.set(split.chars, {
+          yPercent: 120,
+          opacity: 0,
+          rotationX: -90,
+          transformOrigin: "50% 100%",
+          force3D: true,
+        });
 
-      gsap.set(split.chars, {
-        y: 500,
-        opacity: 0,
-        rotationX: -90,
-        transformOrigin: "50% 100%",
-      });
+        // Animasi utama: karakter muncul satu per satu dari bawah
+        gsap.to(split.chars, {
+          yPercent: 0,
+          opacity: 1,
+          rotationX: 0,
+          duration: 1.2,
+          stagger: 0.08,
+          ease: "back.out(1.7)",
+          scrollTrigger: {
+            trigger: container,
+            start: "top 95%",
+            end: "top 45%",
+            scrub: 1,
+            toggleActions: "play none none reverse",
+          },
+        });
 
-      gsap.to(split.chars, {
-        y: 0,
-        opacity: 1,
-        rotationX: 0,
-        duration: 1.4,
-        stagger: 0.08,
-        ease: "back.out(1.7)",
-        scrollTrigger: {
-          trigger: container,
-          start: "top 98%",
-          end: "top 50%",
-          scrub: 1,
-        },
-      });
+        // Fade-in untuk container
+        gsap.fromTo(
+          container,
+          { opacity: 0.4 },
+          {
+            opacity: 1,
+            duration: 1,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: container,
+              start: "top 95%",
+              end: "top 60%",
+              scrub: 1,
+            },
+          }
+        );
 
-      return () => {
-        if (split) split.revert();
-      };
-    }, containerRef);
+        // Refresh ScrollTrigger setelah split
+        ScrollTrigger.refresh();
+      }, containerRef);
+    }, 150);
 
-    return () => ctx.revert();
+    return () => {
+      clearTimeout(timer);
+      if (ctx) ctx.revert();
+      if (split) split.revert();
+    };
   }, [isMounted]);
 
   return (
@@ -703,7 +706,7 @@ const FooterMenuruTitle = () => {
       ref={containerRef}
       style={{
         width: "100%",
-        padding: "0 40px 30px 40px",
+        padding: "0 40px 20px 40px",
         backgroundColor: "#ffffff",
         overflow: "hidden",
         display: "flex",
@@ -727,7 +730,6 @@ const FooterMenuruTitle = () => {
           textAlign: "left",
           WebkitFontSmoothing: "antialiased",
           MozOsxFontSmoothing: "grayscale",
-          willChange: "transform, opacity",
           whiteSpace: "nowrap",
           margin: 0,
           padding: 0,
@@ -1009,7 +1011,7 @@ const CookieConsentPopup = ({
   );
 };
 
-// ===== NAVBAR BUTTON COMPONENT (DENGAN BLUR) =====
+// ===== NAVBAR BUTTON COMPONENT (BLUR) =====
 const NavbarButton = ({
   label,
   panelTitle,
@@ -1236,20 +1238,8 @@ const NavbarButton = ({
           >
             {isResources ? (
               <>
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "6px",
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "10px",
-                    }}
-                  >
+                <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                     <DocsIcon size={22} color={titleTextColor} />
                     <span
                       style={{
@@ -1283,20 +1273,8 @@ const NavbarButton = ({
                   </p>
                 </div>
 
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "6px",
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "10px",
-                    }}
-                  >
+                <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                     <BrandIcon size={22} color={titleTextColor} />
                     <span
                       style={{
@@ -1332,13 +1310,7 @@ const NavbarButton = ({
               </>
             ) : (
               <>
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "12px",
-                  }}
-                >
+                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                   {iconComponent ? (
                     iconComponent
                   ) : iconType === "trust" ? (
@@ -1558,7 +1530,7 @@ const NavbarButton = ({
   );
 };
 
-// ===== LEFT NAVBAR COMPONENT (DENGAN BLUR) =====
+// ===== LEFT NAVBAR COMPONENT (BLUR) =====
 const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
   return (
     <div
@@ -1626,7 +1598,7 @@ const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
   );
 };
 
-// ===== RIGHT NAVBAR COMPONENT (DENGAN BLUR) =====
+// ===== RIGHT NAVBAR COMPONENT (BLUR) =====
 const RightNavbar = () => {
   return (
     <div
@@ -4553,7 +4525,6 @@ export default function HomePage(): React.JSX.Element {
       <LeftNavbar shifted={navbarShifted} />
       <RightNavbar />
 
-      {/* ===== COOKIE CONSENT POPUP ===== */}
       <CookieConsentPopup user={user} db={db} isMounted={isMounted} />
 
       <div
@@ -4564,10 +4535,8 @@ export default function HomePage(): React.JSX.Element {
           fontFamily: FONT_FAMILY, overflow: "visible",
         }}
       >
-        {/* ===== HERO MENURU TITLE ===== */}
         <HeroMenuruTitle onNavbarShiftChange={setNavbarShifted} />
 
-        {/* LIVE CHAT AGENT */}
         <div style={{ padding: "0 40px", maxWidth: "1600px", margin: "0 auto", width: "100%" }}>
           <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} />
         </div>
@@ -4715,7 +4684,6 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* ===== FOOTER MENURU TITLE (muncul dari bawah) ===== */}
         <FooterMenuruTitle />
       </div>
 
