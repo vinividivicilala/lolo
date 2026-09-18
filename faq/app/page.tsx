@@ -615,90 +615,93 @@ const HeroMenuruTitle = ({
   );
 };
 
-// ===== FOOTER MENURU TITLE (SplitText GSAP) =====
-// Teks "Menuru" 600px muncul per karakter pakai SplitText GSAP.
-// Trigger ScrollTrigger dari containerRef agar muncul saat scroll bawah.
+// ===== FOOTER MENURU TITLE =====
+// Pakai SplitText GSAP per karakter, muncul dari bawah.
+// Tidak ada blur. Container tidak pakai overflow hidden & minHeight.
 const FooterMenuruTitle = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLSpanElement>(null);
   const [isMounted, setIsMounted] = useState(false);
+  const [splitReady, setSplitReady] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
+  // Effect 1: SplitText dulu, baru animasi
   useEffect(() => {
     if (!isMounted) return;
+    if (!titleRef.current) return;
+
+    // Tunggu font & layout stabil
+    const timer = setTimeout(() => {
+      setSplitReady(true);
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [isMounted]);
+
+  // Effect 2: Animasi setelah SplitText siap
+  useEffect(() => {
+    if (!isMounted || !splitReady) return;
     if (!containerRef.current || !titleRef.current) return;
 
     const container = containerRef.current;
     const title = titleRef.current;
 
-    let split: SplitText | null = null;
-    let ctx: gsap.Context | null = null;
+    // SplitText per karakter
+    const split = new SplitText(title, {
+      type: "chars,words",
+      charsClass: "footer-menuru-char",
+    });
 
-    // Delay sedikit supaya layout & font sudah siap
-    const timer = setTimeout(() => {
-      ctx = gsap.context(() => {
-        // SplitText per karakter
-        split = new SplitText(title, {
-          type: "chars",
-          charsClass: "footer-menuru-char",
-        });
+    // Set posisi awal tiap karakter: tersembunyi di bawah, rotasi X
+    gsap.set(split.chars, {
+      yPercent: 120,
+      opacity: 0,
+      rotationX: -90,
+      transformOrigin: "50% 100%",
+      force3D: true,
+    });
 
-        // Set posisi awal tiap karakter: tersembunyi di bawah
-        gsap.set(split.chars, {
-          yPercent: 120,
-          opacity: 0,
-          rotationX: -90,
-          transformOrigin: "50% 100%",
-          force3D: true,
-        });
+    // Timeline animasi dengan ScrollTrigger
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: container,
+        start: "top 90%",
+        end: "top 30%",
+        scrub: 1,
+        toggleActions: "play none none reverse",
+        invalidateOnRefresh: true,
+      },
+    });
 
-        // Animasi utama: karakter muncul satu per satu dari bawah
-        gsap.to(split.chars, {
-          yPercent: 0,
-          opacity: 1,
-          rotationX: 0,
-          duration: 1.2,
-          stagger: 0.08,
-          ease: "back.out(1.7)",
-          scrollTrigger: {
-            trigger: container,
-            start: "top 95%",
-            end: "top 45%",
-            scrub: 1,
-            toggleActions: "play none none reverse",
-          },
-        });
+    tl.to(split.chars, {
+      yPercent: 0,
+      opacity: 1,
+      rotationX: 0,
+      duration: 1,
+      stagger: 0.08,
+      ease: "back.out(1.7)",
+    });
 
-        // Fade-in untuk container
-        gsap.fromTo(
-          container,
-          { opacity: 0.4 },
-          {
-            opacity: 1,
-            duration: 1,
-            ease: "power2.out",
-            scrollTrigger: {
-              trigger: container,
-              start: "top 95%",
-              end: "top 60%",
-              scrub: 1,
-            },
-          }
-        );
-
-        // Refresh ScrollTrigger setelah split
-        ScrollTrigger.refresh();
-      }, containerRef);
-    }, 150);
+    // Refresh ScrollTrigger setelah SplitText
+    ScrollTrigger.refresh();
 
     return () => {
-      clearTimeout(timer);
-      if (ctx) ctx.revert();
       if (split) split.revert();
+      tl.scrollTrigger?.kill();
+      tl.kill();
     };
+  }, [isMounted, splitReady]);
+
+  // Refresh ScrollTrigger setelah preloader selesai
+  useEffect(() => {
+    if (!isMounted) return;
+    const t = setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 800);
+    return () => clearTimeout(t);
   }, [isMounted]);
 
   return (
@@ -708,12 +711,11 @@ const FooterMenuruTitle = () => {
         width: "100%",
         padding: "0 40px 20px 40px",
         backgroundColor: "#ffffff",
-        overflow: "hidden",
+        overflow: "visible",
         display: "flex",
         flexDirection: "column",
         justifyContent: "flex-start",
         position: "relative",
-        marginTop: "0px",
       }}
     >
       <span
@@ -723,16 +725,18 @@ const FooterMenuruTitle = () => {
           fontSize: "600px",
           fontWeight: 700,
           color: "#0D3CFC",
-          letterSpacing: "-0.04em",
+          letterSpacing: "-0.05em",
           textTransform: "none",
-          lineHeight: "0.78",
+          lineHeight: "0.85",
           display: "block",
           textAlign: "left",
           WebkitFontSmoothing: "antialiased",
           MozOsxFontSmoothing: "grayscale",
+          willChange: "transform, opacity",
           whiteSpace: "nowrap",
           margin: 0,
           padding: 0,
+          overflow: "visible",
         }}
       >
         Menuru
@@ -1011,7 +1015,7 @@ const CookieConsentPopup = ({
   );
 };
 
-// ===== NAVBAR BUTTON COMPONENT (BLUR) =====
+// ===== NAVBAR BUTTON COMPONENT =====
 const NavbarButton = ({
   label,
   panelTitle,
@@ -1022,11 +1026,11 @@ const NavbarButton = ({
   iconType,
   bigPanelWidth = 850,
   bigPanelHeight = 260,
-  buttonColor = "rgba(13, 60, 252, 0.75)",
-  buttonHoverColor = "rgba(0, 0, 0, 0.85)",
-  panelColor = "rgba(13, 60, 252, 0.85)",
-  iconButtonColor = "rgba(0, 0, 0, 0.8)",
-  iconButtonHoverColor = "rgba(13, 60, 252, 0.9)",
+  buttonColor = "#0D3CFC",
+  buttonHoverColor = "#000000",
+  panelColor = "#0D3CFC",
+  iconButtonColor = "#000000",
+  iconButtonHoverColor = "#0D3CFC",
   panelBoxColor = "rgba(255,255,255,0.12)",
   panelBoxBorder = "rgba(255,255,255,0.25)",
   labelTextColor = "#ffffff",
@@ -1137,7 +1141,7 @@ const NavbarButton = ({
           border: "1px solid rgba(255,255,255,0.18)",
           boxShadow: open
             ? "0 8px 24px rgba(0,0,0,0.35)"
-            : `0 8px 24px rgba(13,60,252,0.35)`,
+            : `0 8px 24px ${buttonColor}55`,
           transition: "background-color 0.25s ease, box-shadow 0.25s ease",
           cursor: "pointer",
           position: "relative",
@@ -1217,7 +1221,7 @@ const NavbarButton = ({
             WebkitBackdropFilter: "blur(24px)",
             borderRadius: "10px",
             border: "1px solid rgba(255,255,255,0.2)",
-            boxShadow: `0 8px 32px rgba(13,60,252,0.4)`,
+            boxShadow: `0 8px 32px ${panelColor}55`,
             zIndex: 1,
             fontFamily: FONT_FAMILY,
             color: titleTextColor,
@@ -1241,34 +1245,11 @@ const NavbarButton = ({
                 <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                     <DocsIcon size={22} color={titleTextColor} />
-                    <span
-                      style={{
-                        fontSize: "16px",
-                        fontWeight: 700,
-                        letterSpacing: "0.02em",
-                        fontFamily: FONT_FAMILY,
-                        color: titleTextColor,
-                      }}
-                    >
+                    <span style={{ fontSize: "16px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>
                       Docs
                     </span>
                   </div>
-                  <p
-                    style={{
-                      fontSize: "12px",
-                      fontWeight: 400,
-                      lineHeight: 1.5,
-                      color: descriptionTextColor,
-                      margin: 0,
-                      fontFamily: FONT_FAMILY,
-                      maxWidth: "340px",
-                      display: "-webkit-box",
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: "vertical",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
+                  <p style={{ fontSize: "12px", lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY, maxWidth: "340px" }}>
                     Dokumentasi lengkap panduan produk, API, dan tutorial Menuru.
                   </p>
                 </div>
@@ -1276,34 +1257,11 @@ const NavbarButton = ({
                 <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                     <BrandIcon size={22} color={titleTextColor} />
-                    <span
-                      style={{
-                        fontSize: "16px",
-                        fontWeight: 700,
-                        letterSpacing: "0.02em",
-                        fontFamily: FONT_FAMILY,
-                        color: titleTextColor,
-                      }}
-                    >
+                    <span style={{ fontSize: "16px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>
                       Brand
                     </span>
                   </div>
-                  <p
-                    style={{
-                      fontSize: "12px",
-                      fontWeight: 400,
-                      lineHeight: 1.5,
-                      color: descriptionTextColor,
-                      margin: 0,
-                      fontFamily: FONT_FAMILY,
-                      maxWidth: "340px",
-                      display: "-webkit-box",
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: "vertical",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
+                  <p style={{ fontSize: "12px", lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY, maxWidth: "340px" }}>
                     Aset visual, logo, dan panduan identitas brand Menuru.
                   </p>
                 </div>
@@ -1311,214 +1269,55 @@ const NavbarButton = ({
             ) : (
               <>
                 <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                  {iconComponent ? (
-                    iconComponent
-                  ) : iconType === "trust" ? (
+                  {iconComponent ? iconComponent : iconType === "trust" ? (
                     <TrustIcon size={26} color={titleTextColor} />
                   ) : iconType === "career" ? (
                     <CareerIcon size={26} color={titleTextColor} />
                   ) : (
                     <ResourcesIcon size={26} color={titleTextColor} />
                   )}
-                  <span
-                    style={{
-                      fontSize: "20px",
-                      fontWeight: 700,
-                      letterSpacing: "0.02em",
-                      fontFamily: FONT_FAMILY,
-                      color: titleTextColor,
-                    }}
-                  >
+                  <span style={{ fontSize: "20px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>
                     {panelTitle}
                   </span>
                 </div>
 
-                <p
-                  style={{
-                    fontSize: "13px",
-                    fontWeight: 400,
-                    lineHeight: 1.5,
-                    color: descriptionTextColor,
-                    margin: 0,
-                    fontFamily: FONT_FAMILY,
-                    maxWidth: "340px",
-                    display: "-webkit-box",
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: "vertical",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                  }}
-                >
+                <p style={{ fontSize: "13px", lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY, maxWidth: "340px" }}>
                   {panelDescription}
                 </p>
               </>
             )}
           </div>
 
-          <div
-            style={{
-              flex: "0 0 380px",
-              display: "flex",
-              flexDirection: "column",
-              gap: "12px",
-            }}
-          >
+          <div style={{ flex: "0 0 380px", display: "flex", flexDirection: "column", gap: "12px" }}>
             {isResources ? (
               <>
-                <div
-                  style={{
-                    backgroundColor: panelBoxColor,
-                    border: `1px solid ${panelBoxBorder}`,
-                    borderRadius: "12px",
-                    padding: "12px",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "8px",
-                  }}
-                >
-                  <img
-                    src={panelImage}
-                    alt="Docs"
-                    style={{
-                      width: "100%",
-                      height: "120px",
-                      objectFit: "contain",
-                      display: "block",
-                      borderRadius: "8px",
-                    }}
-                  />
-                  <span
-                    style={{
-                      fontSize: "14px",
-                      fontWeight: 700,
-                      letterSpacing: "0.02em",
-                      fontFamily: FONT_FAMILY,
-                      color: titleTextColor,
-                    }}
-                  >
+                <div style={{ backgroundColor: panelBoxColor, border: `1px solid ${panelBoxBorder}`, borderRadius: "12px", padding: "12px", display: "flex", flexDirection: "column", gap: "8px" }}>
+                  <img src={panelImage} alt="Docs" style={{ width: "100%", height: "120px", objectFit: "contain", display: "block", borderRadius: "8px" }} />
+                  <span style={{ fontSize: "14px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>
                     Docs Guide
                   </span>
-                  <p
-                    style={{
-                      fontSize: "12px",
-                      fontWeight: 400,
-                      lineHeight: 1.5,
-                      color: descriptionTextColor,
-                      margin: 0,
-                      fontFamily: FONT_FAMILY,
-                      display: "-webkit-box",
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: "vertical",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
+                  <p style={{ fontSize: "12px", lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY }}>
                     Panduan lengkap dan referensi teknis.
                   </p>
                 </div>
 
-                <div
-                  style={{
-                    backgroundColor: panelBoxColor,
-                    border: `1px solid ${panelBoxBorder}`,
-                    borderRadius: "12px",
-                    padding: "12px",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "8px",
-                  }}
-                >
-                  <img
-                    src={panelImage}
-                    alt="Brand"
-                    style={{
-                      width: "100%",
-                      height: "120px",
-                      objectFit: "contain",
-                      display: "block",
-                      borderRadius: "8px",
-                    }}
-                  />
-                  <span
-                    style={{
-                      fontSize: "14px",
-                      fontWeight: 700,
-                      letterSpacing: "0.02em",
-                      fontFamily: FONT_FAMILY,
-                      color: titleTextColor,
-                    }}
-                  >
+                <div style={{ backgroundColor: panelBoxColor, border: `1px solid ${panelBoxBorder}`, borderRadius: "12px", padding: "12px", display: "flex", flexDirection: "column", gap: "8px" }}>
+                  <img src={panelImage} alt="Brand" style={{ width: "100%", height: "120px", objectFit: "contain", display: "block", borderRadius: "8px" }} />
+                  <span style={{ fontSize: "14px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>
                     Brand Assets
                   </span>
-                  <p
-                    style={{
-                      fontSize: "12px",
-                      fontWeight: 400,
-                      lineHeight: 1.5,
-                      color: descriptionTextColor,
-                      margin: 0,
-                      fontFamily: FONT_FAMILY,
-                      display: "-webkit-box",
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: "vertical",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
+                  <p style={{ fontSize: "12px", lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY }}>
                     Logo, palet warna, dan identitas visual.
                   </p>
                 </div>
               </>
             ) : (
-              <div
-                style={{
-                  backgroundColor: panelBoxColor,
-                  border: `1px solid ${panelBoxBorder}`,
-                  borderRadius: "12px",
-                  padding: "14px",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "10px",
-                }}
-              >
-                <img
-                  src={panelImage}
-                  alt={panelTitle}
-                  style={{
-                    width: "100%",
-                    height: "170px",
-                    objectFit: "contain",
-                    display: "block",
-                    borderRadius: "10px",
-                  }}
-                />
-                <span
-                  style={{
-                    fontSize: "15px",
-                    fontWeight: 700,
-                    letterSpacing: "0.02em",
-                    fontFamily: FONT_FAMILY,
-                    color: titleTextColor,
-                  }}
-                >
+              <div style={{ backgroundColor: panelBoxColor, border: `1px solid ${panelBoxBorder}`, borderRadius: "12px", padding: "14px", display: "flex", flexDirection: "column", gap: "10px" }}>
+                <img src={panelImage} alt={panelTitle} style={{ width: "100%", height: "170px", objectFit: "contain", display: "block", borderRadius: "10px" }} />
+                <span style={{ fontSize: "15px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>
                   {panelRightTitle}
                 </span>
-                <p
-                  style={{
-                    fontSize: "12px",
-                    fontWeight: 400,
-                    lineHeight: 1.5,
-                    color: descriptionTextColor,
-                    margin: 0,
-                    fontFamily: FONT_FAMILY,
-                    maxWidth: "340px",
-                    display: "-webkit-box",
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: "vertical",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                  }}
-                >
+                <p style={{ fontSize: "12px", lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY }}>
                   {panelRightDescription}
                 </p>
               </div>
@@ -1530,7 +1329,7 @@ const NavbarButton = ({
   );
 };
 
-// ===== LEFT NAVBAR COMPONENT (BLUR) =====
+// ===== LEFT NAVBAR COMPONENT =====
 const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
   return (
     <div
@@ -1581,11 +1380,11 @@ const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
         iconType="resources"
         bigPanelWidth={850}
         bigPanelHeight={340}
-        buttonColor="rgba(242, 234, 107, 0.8)"
-        buttonHoverColor="rgba(0, 0, 0, 0.85)"
-        panelColor="rgba(240, 78, 35, 0.88)"
-        iconButtonColor="rgba(0, 0, 0, 0.8)"
-        iconButtonHoverColor="rgba(242, 234, 107, 0.9)"
+        buttonColor="#F2EA6B"
+        buttonHoverColor="#000000"
+        panelColor="#F04E23"
+        iconButtonColor="#000000"
+        iconButtonHoverColor="#F2EA6B"
         panelBoxColor="rgba(255,255,255,0.15)"
         panelBoxBorder="rgba(255,255,255,0.3)"
         labelTextColor="#000000"
@@ -1598,7 +1397,7 @@ const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
   );
 };
 
-// ===== RIGHT NAVBAR COMPONENT (BLUR) =====
+// ===== RIGHT NAVBAR COMPONENT =====
 const RightNavbar = () => {
   return (
     <div
@@ -2018,8 +1817,7 @@ const OnboardingTour = ({
           }}
         >
           {steps.map((_, i) => (
-            <div
-              key={i}
+            <div              key={i}
               style={{
                 width: i === currentStep ? "18px" : "6px",
                 height: "6px",
@@ -4525,6 +4323,7 @@ export default function HomePage(): React.JSX.Element {
       <LeftNavbar shifted={navbarShifted} />
       <RightNavbar />
 
+      {/* ===== COOKIE CONSENT POPUP ===== */}
       <CookieConsentPopup user={user} db={db} isMounted={isMounted} />
 
       <div
@@ -4535,8 +4334,10 @@ export default function HomePage(): React.JSX.Element {
           fontFamily: FONT_FAMILY, overflow: "visible",
         }}
       >
+        {/* ===== HERO MENURU TITLE ===== */}
         <HeroMenuruTitle onNavbarShiftChange={setNavbarShifted} />
 
+        {/* LIVE CHAT AGENT */}
         <div style={{ padding: "0 40px", maxWidth: "1600px", margin: "0 auto", width: "100%" }}>
           <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} />
         </div>
@@ -4684,6 +4485,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
+        {/* ===== FOOTER MENURU TITLE (muncul dari bawah) ===== */}
         <FooterMenuruTitle />
       </div>
 
