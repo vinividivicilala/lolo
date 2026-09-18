@@ -616,93 +616,106 @@ const HeroMenuruTitle = ({
 };
 
 // ===== FOOTER MENURU TITLE =====
-// Pakai SplitText GSAP per karakter, muncul dari bawah.
-// Tidak ada blur. Container tidak pakai overflow hidden & minHeight.
+// SplitText GSAP per karakter, muncul dari bawah saat scroll.
+// Pakai gsap.fromTo + ScrollTrigger pada span (position: relative).
+// Tidak pakai blur.
 const FooterMenuruTitle = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLSpanElement>(null);
-  const [isMounted, setIsMounted] = useState(false);
-  const [splitReady, setSplitReady] = useState(false);
+  const animDoneRef = useRef(false);
 
   useEffect(() => {
-    setIsMounted(true);
-  }, []);
+    if (typeof window === "undefined") return;
+    if (!titleRef.current || !containerRef.current) return;
 
-  // Effect 1: SplitText dulu, baru animasi
-  useEffect(() => {
-    if (!isMounted) return;
-    if (!titleRef.current) return;
-
-    // Tunggu font & layout stabil
-    const timer = setTimeout(() => {
-      setSplitReady(true);
-    }, 100);
-
-    return () => clearTimeout(timer);
-  }, [isMounted]);
-
-  // Effect 2: Animasi setelah SplitText siap
-  useEffect(() => {
-    if (!isMounted || !splitReady) return;
-    if (!containerRef.current || !titleRef.current) return;
-
-    const container = containerRef.current;
     const title = titleRef.current;
+    const container = containerRef.current;
 
-    // SplitText per karakter
-    const split = new SplitText(title, {
-      type: "chars,words",
-      charsClass: "footer-menuru-char",
-    });
+    let split: any = null;
+    let tl: any = null;
 
-    // Set posisi awal tiap karakter: tersembunyi di bawah, rotasi X
-    gsap.set(split.chars, {
-      yPercent: 120,
-      opacity: 0,
-      rotationX: -90,
-      transformOrigin: "50% 100%",
-      force3D: true,
-    });
+    const setup = () => {
+      if (animDoneRef.current) return;
+      animDoneRef.current = true;
 
-    // Timeline animasi dengan ScrollTrigger
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: container,
-        start: "top 90%",
-        end: "top 30%",
-        scrub: 1,
-        toggleActions: "play none none reverse",
-        invalidateOnRefresh: true,
-      },
-    });
+      // Set warna & posisi awal dulu biar tidak flash
+      gsap.set(title, { opacity: 1, visibility: "visible" });
 
-    tl.to(split.chars, {
-      yPercent: 0,
-      opacity: 1,
-      rotationX: 0,
-      duration: 1,
-      stagger: 0.08,
-      ease: "back.out(1.7)",
-    });
+      // SplitText per karakter
+      try {
+        split = new SplitText(title, {
+          type: "chars,words",
+          charsClass: "footer-menuru-char",
+        });
+      } catch (e) {
+        console.warn("SplitText failed, fallback to whole title:", e);
+      }
 
-    // Refresh ScrollTrigger setelah SplitText
-    ScrollTrigger.refresh();
+      const targets = split && split.chars && split.chars.length ? split.chars : title;
+
+      // Set posisi awal: karakter di bawah, rotasi X, transparan
+      gsap.set(targets, {
+        yPercent: 120,
+        opacity: 0,
+        rotationX: -90,
+        transformOrigin: "50% 100%",
+        force3D: true,
+      });
+
+      // Timeline animasi dengan ScrollTrigger
+      tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: container,
+          start: "top 95%",
+          end: "top 40%",
+          scrub: 1,
+          toggleActions: "play none none reverse",
+          invalidateOnRefresh: true,
+        },
+      });
+
+      tl.to(targets, {
+        yPercent: 0,
+        opacity: 1,
+        rotationX: 0,
+        duration: 1,
+        stagger: 0.08,
+        ease: "back.out(1.7)",
+      });
+
+      // Refresh supaya posisi scroll akurat
+      ScrollTrigger.refresh();
+    };
+
+    // Tunggu font siap dulu supaya SplitText akurat
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => {
+        setTimeout(setup, 100);
+      });
+    } else {
+      setTimeout(setup, 300);
+    }
 
     return () => {
-      if (split) split.revert();
-      tl.scrollTrigger?.kill();
-      tl.kill();
+      if (tl) {
+        tl.scrollTrigger?.kill();
+        tl.kill();
+      }
+      if (split && split.revert) split.revert();
     };
-  }, [isMounted, splitReady]);
+  }, []);
 
-  // Refresh ScrollTrigger setelah preloader selesai
+  // Refresh ScrollTrigger setelah mount & setelah window load
   useEffect(() => {
-    if (!isMounted) return;
-    const t = setTimeout(() => {
-      ScrollTrigger.refresh();
-    }, 800);
-    return () => clearTimeout(t);
-  }, [isMounted]);
+    if (typeof window === "undefined") return;
+    const onLoad = () => ScrollTrigger.refresh();
+    window.addEventListener("load", onLoad);
+    const t = setTimeout(() => ScrollTrigger.refresh(), 1200);
+    return () => {
+      window.removeEventListener("load", onLoad);
+      clearTimeout(t);
+    };
+  }, []);
 
   return (
     <div
@@ -737,6 +750,7 @@ const FooterMenuruTitle = () => {
           margin: 0,
           padding: 0,
           overflow: "visible",
+          position: "relative",
         }}
       >
         Menuru
@@ -1330,17 +1344,18 @@ const NavbarButton = ({
 };
 
 // ===== LEFT NAVBAR COMPONENT =====
+// Jarak judul & tombol dirapatkan: shifted left = 320px (bukan 440px)
 const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
   return (
     <div
       style={{
         position: "fixed",
         top: "20px",
-        left: shifted ? "440px" : "80px",
+        left: shifted ? "320px" : "80px",
         zIndex: 9000,
         display: "flex",
         alignItems: "center",
-        gap: "12px",
+        gap: "8px",
         fontFamily: FONT_FAMILY,
         transition: "left 0.6s cubic-bezier(0.65, 0, 0.35, 1)",
         willChange: "left",
@@ -1817,7 +1832,8 @@ const OnboardingTour = ({
           }}
         >
           {steps.map((_, i) => (
-            <div              key={i}
+            <div
+              key={i}
               style={{
                 width: i === currentStep ? "18px" : "6px",
                 height: "6px",
@@ -4193,7 +4209,7 @@ export default function HomePage(): React.JSX.Element {
             ease: "power2.inOut",
             onComplete: () => {
               setShowMain(true);
-              setTimeout(() => ScrollTrigger.refresh(), 200);
+              setTimeout(() => ScrollTrigger.refresh(), 300);
             },
           });
         }
