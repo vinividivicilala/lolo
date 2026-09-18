@@ -495,10 +495,10 @@ const HeroMenuruTitle = ({
     const title = titleRef.current;
 
     // Ukuran & posisi navbar
-    const NAV_TOP = 20;         // px, sejajar dengan top navbar
-    const NAV_LEFT = 80;        // px, sejajar dengan left navbar
-    const NAV_FONT_SIZE = 40;   // px, ukuran teks Menuru di navbar
-    const NAV_HEIGHT = 42;      // px, tinggi sama dengan tombol navbar
+    const NAV_TOP = 20;
+    const NAV_LEFT = 80;
+    const NAV_FONT_SIZE = 40;
+    const NAV_HEIGHT = 42;
 
     const ctx = gsap.context(() => {
       // SplitText untuk animasi masuk per karakter
@@ -543,7 +543,7 @@ const HeroMenuruTitle = ({
         },
       });
 
-      // Pindah ke navbar kiri + fixed (ukuran tetap 40px, tidak mengecil mengikuti scroll)
+      // Pindah ke navbar kiri + fixed (ukuran tetap 40px)
       scrollTl.to(
         title,
         {
@@ -620,6 +620,137 @@ const HeroMenuruTitle = ({
       >
         Menuru
       </h1>
+    </div>
+  );
+};
+
+// ===== FOOTER MENURU TITLE (muncul dari bawah saat scroll ke bawah) =====
+// Teks "Menuru" besar di footer.
+// Saat scroll sampai bawah, teks muncul dari bawah (slide up) pakai GSAP ScrollTrigger.
+const FooterMenuruTitle = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLSpanElement>(null);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isMounted) return;
+    if (!containerRef.current || !titleRef.current) return;
+
+    const container = containerRef.current;
+    const title = titleRef.current;
+
+    const ctx = gsap.context(() => {
+      // Set posisi awal: di bawah layar (tersembunyi)
+      gsap.set(title, {
+        y: 400,
+        opacity: 0,
+        scale: 0.85,
+        rotationX: -35,
+        transformOrigin: "50% 100%",
+        force3D: true,
+      });
+
+      // Animasi muncul dari bawah saat container masuk viewport
+      ScrollTrigger.create({
+        trigger: container,
+        start: "top 90%",
+        end: "bottom 40%",
+        scrub: 0.8,
+        onUpdate: (self) => {
+          const p = self.progress;
+          // Interpolasi nilai berdasarkan progress
+          gsap.set(title, {
+            y: 400 * (1 - p),
+            opacity: Math.min(p * 1.5, 1),
+            scale: 0.85 + 0.15 * p,
+            rotationX: -35 * (1 - p),
+          });
+        },
+      });
+
+      // Tambahan animasi masuk saat pertama kali terlihat
+      ScrollTrigger.create({
+        trigger: container,
+        start: "top 85%",
+        once: true,
+        onEnter: () => {
+          gsap.fromTo(
+            title,
+            { y: 400, opacity: 0, scale: 0.85, rotationX: -35 },
+            {
+              y: 0,
+              opacity: 1,
+              scale: 1,
+              rotationX: 0,
+              duration: 1.6,
+              ease: "back.out(1.6)",
+            }
+          );
+        },
+      });
+    }, containerRef);
+
+    return () => ctx.revert();
+  }, [isMounted]);
+
+  return (
+    <div
+      ref={containerRef}
+      style={{
+        width: "100%",
+        padding: "20px 40px 80px 40px",
+        backgroundColor: "#ffffff",
+        overflow: "hidden",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "flex-start",
+        minHeight: "300px",
+      }}
+    >
+      <span
+        ref={titleRef}
+        style={{
+          fontFamily: FONT_FAMILY,
+          fontSize: "450px",
+          fontWeight: 700,
+          color: "#0D3CFC",
+          letterSpacing: "-0.02em",
+          textTransform: "none",
+          lineHeight: "0.8",
+          display: "block",
+          textAlign: "left",
+          WebkitFontSmoothing: "antialiased",
+          MozOsxFontSmoothing: "grayscale",
+          willChange: "transform, opacity",
+        }}
+      >
+        Menuru
+      </span>
+      <div
+        style={{
+          marginTop: "30px",
+          width: "100%",
+          display: "flex",
+          justifyContent: "flex-start",
+        }}
+      >
+        <span
+          style={{
+            fontFamily: FONT_FAMILY,
+            fontSize: "16px",
+            fontWeight: 400,
+            color: "#0D3CFC",
+            letterSpacing: "0.01em",
+            opacity: 0.8,
+          }}
+        >
+          2024 - 2026 Menuru. All rights reserved.
+        </span>
+      </div>
     </div>
   );
 };
@@ -1415,15 +1546,12 @@ const NavbarButton = ({
 };
 
 // ===== LEFT NAVBAR COMPONENT =====
-// 3 tombol bergeser ke kanan saat teks Menuru naik ke navbar.
-// Teks Menuru fixed di left:80px, tombol navbar digeser ke kanan supaya tidak menumpuk.
 const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
   return (
     <div
       style={{
         position: "fixed",
         top: "20px",
-        // Saat shifted, geser ke kanan supaya teks Menuru (40px, left:80px) tidak mentok
         left: shifted ? "260px" : "80px",
         zIndex: 9000,
         display: "flex",
@@ -4239,8 +4367,6 @@ export default function HomePage(): React.JSX.Element {
 
   const preloaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
-  const menuruFooterRef = useRef<HTMLDivElement>(null);
-  const menuruTextRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     setIsMounted(true);
@@ -4270,41 +4396,6 @@ export default function HomePage(): React.JSX.Element {
     if (!isMounted || loading) return;
     setTimeout(() => startPreloaderAnimation(), 500);
   }, [isMounted, loading]);
-
-  useEffect(() => {
-    if (!showMain || !isMounted) return;
-    const menuruElement = menuruFooterRef.current;
-    const menuruText = menuruTextRef.current;
-    if (menuruElement && menuruText) {
-      const split = new SplitText(menuruText, { type: "chars", charsClass: "menuru-char" });
-      gsap.set(split.chars, { opacity: 0, y: 100, scale: 0.5, rotationX: 90 });
-      ScrollTrigger.create({
-        trigger: menuruElement,
-        start: "top 85%",
-        onEnter: () => {
-          gsap.to(split.chars, {
-            opacity: 1, y: 0, scale: 1, rotationX: 0,
-            duration: 1.2, stagger: 0.03, ease: "back.out(1.7)", overwrite: true,
-          });
-        },
-        onLeave: () => {
-          gsap.to(split.chars, {
-            opacity: 0, y: 100, scale: 0.5, rotationX: 90,
-            duration: 0.8, stagger: 0.02, ease: "power2.in", overwrite: true,
-          });
-        },
-        onEnterBack: () => {
-          gsap.to(split.chars, {
-            opacity: 1, y: 0, scale: 1, rotationX: 0,
-            duration: 1.2, stagger: 0.03, ease: "back.out(1.7)", overwrite: true,
-          });
-        },
-      });
-    }
-    return () => {
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
-    };
-  }, [showMain, isMounted]);
 
   const startPreloaderAnimation = () => {
     const tl = gsap.timeline({
@@ -4465,7 +4556,7 @@ export default function HomePage(): React.JSX.Element {
           <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} />
         </div>
 
-        {/* FOOTER (TETAP ADA) */}
+        {/* FOOTER */}
         <div
           style={{
             width: "100%", padding: "60px 40px 40px 40px",
@@ -4608,46 +4699,8 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* MENURU Text + Copyright (TETAP ADA) */}
-        <div
-          ref={menuruFooterRef}
-          style={{
-            width: "100%", padding: "20px 40px 80px 40px",
-            backgroundColor: "#ffffff", overflow: "hidden",
-            display: "flex", flexDirection: "column",
-            justifyContent: "flex-start", minHeight: "300px",
-          }}
-        >
-          <span
-            ref={menuruTextRef}
-            style={{
-              fontFamily: FONT_FAMILY, fontSize: "450px",
-              fontWeight: 700, color: "#0D3CFC",
-              letterSpacing: "-0.02em", textTransform: "none",
-              lineHeight: "0.8", display: "block",
-              textAlign: "left",
-              WebkitFontSmoothing: "antialiased",
-              MozOsxFontSmoothing: "grayscale",
-            }}
-          >
-            Menuru
-          </span>
-          <div
-            style={{
-              marginTop: "30px", width: "100%",
-              display: "flex", justifyContent: "flex-start",
-            }}
-          >
-            <span
-              style={{
-                fontFamily: FONT_FAMILY, fontSize: "16px", fontWeight: 400,
-                color: "#0D3CFC", letterSpacing: "0.01em", opacity: 0.8,
-              }}
-            >
-              2024 - 2026 Menuru. All rights reserved.
-            </span>
-          </div>
-        </div>
+        {/* ===== FOOTER MENURU TITLE (muncul dari bawah saat scroll ke bawah) ===== */}
+        <FooterMenuruTitle />
       </div>
 
       <style jsx global>{`
