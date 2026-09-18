@@ -469,8 +469,8 @@ interface TourStep {
   isLoginStep?: boolean;
 }
 
-// ===== HERO MENURU TITLE + SUBTITLE =====
-// Teks "Menuru" besar di bawah navbar + subtitle "Brand non profit"
+// ===== HERO MENURU TITLE + SUBTITLE (KIRI) =====
+// Teks "Menuru" besar + subtitle "Brand non profit" di sisi KIRI, font 150px
 const HeroMenuruTitle = () => {
   const titleRef = useRef<HTMLHeadingElement>(null);
   const subtitleRef = useRef<HTMLParagraphElement>(null);
@@ -512,12 +512,12 @@ const HeroMenuruTitle = () => {
     if (subtitleRef.current) {
       gsap.fromTo(
         subtitleRef.current,
-        { opacity: 0, y: 40, filter: "blur(6px)" },
+        { opacity: 0, x: -100, filter: "blur(6px)" },
         {
           opacity: 1,
-          y: 0,
+          x: 0,
           filter: "blur(0px)",
-          duration: 1,
+          duration: 1.1,
           delay: 0.9,
           ease: "power3.out",
         }
@@ -535,13 +535,16 @@ const HeroMenuruTitle = () => {
         width: "100%",
         paddingTop: "110px",
         paddingBottom: "20px",
+        paddingLeft: "80px",
+        paddingRight: "80px",
         backgroundColor: "#ffffff",
         overflow: "hidden",
         display: "flex",
         flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
+        alignItems: "flex-start",
+        justifyContent: "flex-start",
         position: "relative",
+        boxSizing: "border-box",
       }}
     >
       <h1
@@ -554,7 +557,7 @@ const HeroMenuruTitle = () => {
           letterSpacing: "-0.05em",
           lineHeight: 0.85,
           margin: 0,
-          textAlign: "center",
+          textAlign: "left",
           userSelect: "none",
           whiteSpace: "nowrap",
           display: "inline-block",
@@ -569,16 +572,17 @@ const HeroMenuruTitle = () => {
         ref={subtitleRef}
         style={{
           fontFamily: FONT_FAMILY,
-          fontSize: "34px",
+          fontSize: "150px",
           fontWeight: 600,
           color: "#0D3CFC",
-          letterSpacing: "-0.01em",
+          letterSpacing: "-0.03em",
           margin: 0,
           marginTop: "10px",
-          textAlign: "center",
+          textAlign: "left",
           userSelect: "none",
           whiteSpace: "nowrap",
           opacity: 0,
+          lineHeight: 1,
         }}
       >
         Brand non <span style={{ color: "rgba(13, 60, 252, 0.35)" }}>profit</span>
@@ -4414,7 +4418,7 @@ export default function HomePage(): React.JSX.Element {
           fontFamily: FONT_FAMILY, overflow: "visible",
         }}
       >
-        {/* ===== HERO MENURU TITLE + SUBTITLE ===== */}
+        {/* ===== HERO MENURU TITLE + SUBTITLE (KIRI) ===== */}
         <HeroMenuruTitle />
 
         {/* LIVE CHAT AGENT */}
