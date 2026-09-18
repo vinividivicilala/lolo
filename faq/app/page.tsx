@@ -624,7 +624,7 @@ const HeroMenuruTitle = ({
 };
 
 // ===== FOOTER MENURU TITLE =====
-// Teks "Menuru" besar di footer (450px).
+// Teks "Menuru" besar 600px di footer.
 // Saat scroll sampai bawah, teks muncul dari bawah pakai GSAP ScrollTrigger.
 const FooterMenuruTitle = () => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -645,10 +645,10 @@ const FooterMenuruTitle = () => {
     const ctx = gsap.context(() => {
       // Posisi awal: tersembunyi di bawah layar
       gsap.set(title, {
-        y: 500,
+        y: 700,
         opacity: 0,
-        scale: 0.7,
-        rotationX: -45,
+        scale: 0.6,
+        rotationX: -60,
         transformOrigin: "50% 100%",
         force3D: true,
       });
@@ -660,12 +660,12 @@ const FooterMenuruTitle = () => {
         scale: 1,
         rotationX: 0,
         ease: "power3.out",
-        duration: 1.6,
+        duration: 1.8,
         scrollTrigger: {
           trigger: container,
           start: "top 95%",
-          end: "top 40%",
-          scrub: 0.8,
+          end: "top 35%",
+          scrub: 1,
           toggleActions: "play none none reverse",
         },
       });
@@ -677,7 +677,7 @@ const FooterMenuruTitle = () => {
       });
 
       gsap.set(split.chars, {
-        y: 500,
+        y: 700,
         opacity: 0,
         rotationX: -90,
         transformOrigin: "50% 100%",
@@ -687,14 +687,14 @@ const FooterMenuruTitle = () => {
         y: 0,
         opacity: 1,
         rotationX: 0,
-        duration: 1.4,
-        stagger: 0.08,
-        ease: "back.out(1.6)",
+        duration: 1.6,
+        stagger: 0.1,
+        ease: "back.out(1.8)",
         scrollTrigger: {
           trigger: container,
           start: "top 95%",
           end: "top 30%",
-          scrub: 0.8,
+          scrub: 1,
         },
       });
 
@@ -711,13 +711,13 @@ const FooterMenuruTitle = () => {
       ref={containerRef}
       style={{
         width: "100%",
-        padding: "20px 40px 80px 40px",
+        padding: "20px 40px 100px 40px",
         backgroundColor: "#ffffff",
         overflow: "hidden",
         display: "flex",
         flexDirection: "column",
         justifyContent: "flex-start",
-        minHeight: "320px",
+        minHeight: "700px",
         position: "relative",
       }}
     >
@@ -725,10 +725,10 @@ const FooterMenuruTitle = () => {
         ref={titleRef}
         style={{
           fontFamily: FONT_FAMILY,
-          fontSize: "450px",
+          fontSize: "600px",
           fontWeight: 700,
           color: "#0D3CFC",
-          letterSpacing: "-0.02em",
+          letterSpacing: "-0.04em",
           textTransform: "none",
           lineHeight: "0.8",
           display: "block",
@@ -736,13 +736,14 @@ const FooterMenuruTitle = () => {
           WebkitFontSmoothing: "antialiased",
           MozOsxFontSmoothing: "grayscale",
           willChange: "transform, opacity",
+          whiteSpace: "nowrap",
         }}
       >
         Menuru
       </span>
       <div
         style={{
-          marginTop: "30px",
+          marginTop: "40px",
           width: "100%",
           display: "flex",
           justifyContent: "flex-start",
