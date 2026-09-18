@@ -469,13 +469,12 @@ interface TourStep {
   isLoginStep?: boolean;
 }
 
-// ===== HERO MENURU TITLE + SUBTITLE + FEATURES/CASE =====
-// Hero tetap sama: "Menuru" 600px + "Brand non profit" 150px di kiri
-// Tambahan: "Features" & "Case" dengan garis biru
+// ===== HERO MENURU TITLE (SplitText) =====
+// Teks "Menuru" besar di bawah navbar, warna biru, fontSize 600px, GSAP SplitText
+// + subtitle "Brand non profit" (profit pudar) & "features case"
 const HeroMenuruTitle = () => {
   const titleRef = useRef<HTMLHeadingElement>(null);
-  const subtitleRef = useRef<HTMLParagraphElement>(null);
-  const featuresRef = useRef<HTMLDivElement>(null);
+  const subtitleRef = useRef<HTMLDivElement>(null);
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -514,44 +513,13 @@ const HeroMenuruTitle = () => {
     if (subtitleRef.current) {
       gsap.fromTo(
         subtitleRef.current,
-        { opacity: 0, x: -100, filter: "blur(6px)" },
-        {
-          opacity: 1,
-          x: 0,
-          filter: "blur(0px)",
-          duration: 1.1,
-          delay: 0.9,
-          ease: "power3.out",
-        }
-      );
-    }
-
-    if (featuresRef.current) {
-      const featureItems = featuresRef.current.querySelectorAll(".feature-item");
-      const featureLines = featuresRef.current.querySelectorAll(".feature-line");
-
-      gsap.fromTo(
-        featureItems,
         { opacity: 0, y: 30 },
         {
           opacity: 1,
           y: 0,
-          duration: 0.9,
-          stagger: 0.15,
-          delay: 1.3,
+          duration: 1,
           ease: "power3.out",
-        }
-      );
-
-      gsap.fromTo(
-        featureLines,
-        { scaleX: 0, transformOrigin: "left center" },
-        {
-          scaleX: 1,
-          duration: 1.0,
-          stagger: 0.15,
-          delay: 1.4,
-          ease: "power3.out",
+          delay: 0.9,
         }
       );
     }
@@ -566,17 +534,14 @@ const HeroMenuruTitle = () => {
       style={{
         width: "100%",
         paddingTop: "110px",
-        paddingBottom: "20px",
-        paddingLeft: "80px",
-        paddingRight: "80px",
+        paddingBottom: "40px",
         backgroundColor: "#ffffff",
         overflow: "hidden",
         display: "flex",
         flexDirection: "column",
-        alignItems: "flex-start",
-        justifyContent: "flex-start",
+        alignItems: "center",
+        justifyContent: "center",
         position: "relative",
-        boxSizing: "border-box",
       }}
     >
       <h1
@@ -589,7 +554,7 @@ const HeroMenuruTitle = () => {
           letterSpacing: "-0.05em",
           lineHeight: 0.85,
           margin: 0,
-          textAlign: "left",
+          textAlign: "center",
           userSelect: "none",
           whiteSpace: "nowrap",
           display: "inline-block",
@@ -600,101 +565,52 @@ const HeroMenuruTitle = () => {
         Menuru
       </h1>
 
-      <p
-        ref={subtitleRef}
-        style={{
-          fontFamily: FONT_FAMILY,
-          fontSize: "150px",
-          fontWeight: 600,
-          color: "#0D3CFC",
-          letterSpacing: "-0.03em",
-          margin: 0,
-          marginTop: "10px",
-          textAlign: "left",
-          userSelect: "none",
-          whiteSpace: "nowrap",
-          opacity: 0,
-          lineHeight: 1,
-        }}
-      >
-        Brand non <span style={{ color: "rgba(13, 60, 252, 0.35)" }}>profit</span>
-      </p>
-
-      {/* ===== FEATURES & CASE ===== */}
+      {/* Subtitle */}
       <div
-        ref={featuresRef}
+        ref={subtitleRef}
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: "18px",
-          marginTop: "50px",
-          width: "100%",
-          maxWidth: "900px",
+          alignItems: "center",
+          gap: "10px",
+          marginTop: "30px",
+          fontFamily: FONT_FAMILY,
+          textAlign: "center",
         }}
       >
-        {/* Features */}
-        <div
-          className="feature-item"
+        {/* Brand non profit — "profit" pudar */}
+        <span
           style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "8px",
+            fontSize: "28px",
+            fontWeight: 500,
+            color: "#0D3CFC",
+            letterSpacing: "-0.01em",
+            lineHeight: 1.2,
           }}
         >
+          Brand non{" "}
           <span
             style={{
-              fontFamily: FONT_FAMILY,
-              fontSize: "20px",
-              fontWeight: 600,
               color: "#0D3CFC",
-              letterSpacing: "0.15em",
-              textTransform: "uppercase",
+              opacity: 0.35,
             }}
           >
-            Features
+            profit
           </span>
-          <div
-            className="feature-line"
-            style={{
-              width: "100%",
-              height: "2px",
-              backgroundColor: "#0D3CFC",
-              borderRadius: "2px",
-            }}
-          />
-        </div>
+        </span>
 
-        {/* Case */}
-        <div
-          className="feature-item"
+        {/* Features case — tanpa design, hanya teks */}
+        <span
           style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "8px",
+            fontSize: "20px",
+            fontWeight: 400,
+            color: "#0D3CFC",
+            letterSpacing: "0.01em",
+            lineHeight: 1.2,
           }}
         >
-          <span
-            style={{
-              fontFamily: FONT_FAMILY,
-              fontSize: "20px",
-              fontWeight: 600,
-              color: "#0D3CFC",
-              letterSpacing: "0.15em",
-              textTransform: "uppercase",
-            }}
-          >
-            Case
-          </span>
-          <div
-            className="feature-line"
-            style={{
-              width: "100%",
-              height: "2px",
-              backgroundColor: "#0D3CFC",
-              borderRadius: "2px",
-            }}
-          />
-        </div>
+          features case
+        </span>
       </div>
     </div>
   );
@@ -4527,7 +4443,7 @@ export default function HomePage(): React.JSX.Element {
           fontFamily: FONT_FAMILY, overflow: "visible",
         }}
       >
-        {/* ===== HERO MENURU TITLE + SUBTITLE + FEATURES/CASE ===== */}
+        {/* ===== HERO MENURU TITLE (SplitText) + Subtitle ===== */}
         <HeroMenuruTitle />
 
         {/* LIVE CHAT AGENT */}
