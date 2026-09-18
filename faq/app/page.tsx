@@ -469,10 +469,11 @@ interface TourStep {
   isLoginStep?: boolean;
 }
 
-// ===== HERO MENURU TITLE (SplitText + smooth scroll-follow to navbar left) =====
-// Teks "Menuru" besar di hero. Saat scroll ke bawah, teks bergerak perlahan
-// (mengikuti scroll) menuju samping tombol Teams di navbar kiri, ukuran mengecil
-// dengan halus. Saat scroll ke atas, kembali perlahan ke posisi semula.
+// ===== HERO MENURU TITLE =====
+// Teks "Menuru" besar di hero. Saat scroll ke bawah:
+// - Mengecil perlahan (slow motion) dari 600px ke 40px
+// - Berpindah ke samping tombol Teams (navbar kiri), menjadi fixed di sana
+// Saat scroll ke atas: kembali ke posisi semula.
 const HeroMenuruTitle = () => {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -516,65 +517,52 @@ const HeroMenuruTitle = () => {
       delay: 0.2,
     });
 
-    // ScrollTrigger dengan scrub: animasi mengikuti posisi scroll secara halus
+    // ScrollTrigger untuk mengubah posisi dan ukuran teks
     const ctx = gsap.context(() => {
-      // Ukuran & posisi awal (hero besar di tengah)
-      const startFontSize = 600;
-      const endFontSize = 38; // kecil, sejajar tombol navbar
-
-      // Target posisi di navbar kiri: sejajar dengan tombol Teams
-      // Tombol Teams ada di top: 20px, left: 80px, tinggi ~44px
-      const navbarTop = 20;
-      const navbarLeft = 80;
-      const navbarButtonHeight = 44;
-
-      // Hitung posisi target relatif terhadap wrapper
-      // Karena kita gunakan transform (bukan position:fixed), kita hitung delta.
-      const wrapperRect = wrapper.getBoundingClientRect();
-      const titleRect = title.getBoundingClientRect();
-
-      // Posisi awal title relatif ke wrapper
-      const titleStartLeft = titleRect.left - wrapperRect.left;
-      const titleStartTop = titleRect.top - wrapperRect.top;
-
-      // Target posisi (relatif ke viewport) -> convert ke delta transform
-      // Kita mau title berakhir di (navbarLeft, navbarTop + sedikit offset)
-      // Karena wrapper akan di-pin selama animasi, gunakan posisi viewport.
-      const targetViewportLeft = navbarLeft;
-      const targetViewportTop = navbarTop + (navbarButtonHeight - endFontSize) / 2;
-
-      // Delta dari posisi awal ke target
-      const deltaX = targetViewportLeft - titleRect.left;
-      const deltaY = targetViewportTop - titleRect.top;
-
-      // Scale factor (600px -> 38px)
-      const targetScale = endFontSize / startFontSize;
-
-      // Gunakan ScrollTrigger dengan scrub supaya animasi mengikuti scroll
       ScrollTrigger.create({
         trigger: wrapper,
-        start: "top top",
-        end: "+=600", // jarak scroll untuk menyelesaikan animasi
-        scrub: 1.2, // smooth slow-motion (semakin besar semakin lambat)
-        onUpdate: (self) => {
-          const progress = self.progress; // 0 -> 1
-          // Interpolasi font size
-          const currentFontSize =
-            startFontSize + (endFontSize - startFontSize) * progress;
-          // Interpolasi posisi
-          const currentX = deltaX * progress;
-          const currentY = deltaY * progress;
-          // Interpolasi scale
-          const currentScale = 1 + (targetScale - 1) * progress;
+        start: "top 120px", // mulai saat wrapper hampir menyentuh navbar
+        end: "bottom 120px",
+        onEnter: () => {
+          // Simpan posisi & ukuran awal
+          const startFontSize = 600;
+          const endFontSize = 40;
 
-          gsap.set(title, {
-            fontSize: `${currentFontSize}px`,
-            x: currentX,
-            y: currentY,
-            scale: currentScale,
+          // Target: di samping tombol Teams
+          // Tombol Teams ada di top: 20px, left: 80px, tinggi ~44px
+          const targetTop = 20;
+          const targetLeft = 80; // sejajar dengan navbar kiri
+
+          // Animasi SLOW MOTION: font-size mengecil perlahan
+          gsap.to(title, {
+            position: "fixed",
+            top: `${targetTop}px`,
+            left: `${targetLeft}px`,
+            fontSize: `${endFontSize}px`,
+            letterSpacing: "-0.02em",
+            zIndex: 9500,
+            duration: 2.5, // slow motion
+            ease: "power3.inOut",
             transformOrigin: "top left",
-            letterSpacing: `${-0.05 + 0.03 * progress}em`,
-            force3D: true,
+            onStart: () => {
+              gsap.set(title, { x: 0, y: 0, scale: 1, rotation: 0 });
+            },
+          });
+        },
+        onLeaveBack: () => {
+          // Kembali ke posisi semula (slow motion)
+          gsap.to(title, {
+            position: "relative",
+            top: "auto",
+            left: "auto",
+            fontSize: "600px",
+            letterSpacing: "-0.05em",
+            zIndex: 1,
+            duration: 2.5, // slow motion
+            ease: "power3.inOut",
+            onComplete: () => {
+              gsap.set(title, { clearProps: "position,top,left,zIndex" });
+            },
           });
         },
       });
@@ -618,7 +606,7 @@ const HeroMenuruTitle = () => {
           display: "inline-block",
           WebkitFontSmoothing: "antialiased",
           MozOsxFontSmoothing: "grayscale",
-          willChange: "transform, font-size",
+          willChange: "font-size, position, top, left",
         }}
       >
         Menuru
@@ -4455,7 +4443,7 @@ export default function HomePage(): React.JSX.Element {
           fontFamily: FONT_FAMILY, overflow: "visible",
         }}
       >
-        {/* ===== HERO MENURU TITLE (smooth scroll-follow to navbar left) ===== */}
+        {/* ===== HERO MENURU TITLE ===== */}
         <HeroMenuruTitle />
 
         {/* LIVE CHAT AGENT */}
