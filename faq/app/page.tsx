@@ -471,9 +471,8 @@ interface TourStep {
 
 // ===== HERO MENURU TITLE =====
 // Teks "Menuru" besar di hero.
-// Saat scroll ke bawah: naik ke navbar kiri, ukuran 40px, fixed, sejajar dengan 3 tombol.
+// Saat scroll ke bawah: naik ke navbar kiri, ukuran 70px, fixed, sejajar dengan 3 tombol.
 // Saat scroll ke atas: balik ke posisi semula.
-// 3 tombol navbar otomatis bergeser ke kanan saat teks Menuru naik.
 const HeroMenuruTitle = ({
   onNavbarShiftChange,
 }: {
@@ -495,10 +494,10 @@ const HeroMenuruTitle = ({
     const title = titleRef.current;
 
     // Ukuran & posisi navbar
-    const NAV_TOP = 20;
-    const NAV_LEFT = 80;
-    const NAV_FONT_SIZE = 40;
-    const NAV_HEIGHT = 42;
+    const NAV_TOP = 10;          // px
+    const NAV_LEFT = 80;         // px
+    const NAV_FONT_SIZE = 70;    // px ← diubah dari 40 menjadi 70
+    const NAV_HEIGHT = 60;       // px
 
     const ctx = gsap.context(() => {
       // SplitText untuk animasi masuk per karakter
@@ -543,7 +542,7 @@ const HeroMenuruTitle = ({
         },
       });
 
-      // Pindah ke navbar kiri + fixed (ukuran tetap 40px)
+      // Pindah ke navbar kiri + fixed (ukuran 70px, tidak mengecil mengikuti scroll)
       scrollTl.to(
         title,
         {
@@ -552,7 +551,7 @@ const HeroMenuruTitle = ({
           left: `${NAV_LEFT}px`,
           fontSize: `${NAV_FONT_SIZE}px`,
           fontWeight: 700,
-          letterSpacing: "-0.02em",
+          letterSpacing: "-0.03em",
           lineHeight: 1,
           height: `${NAV_HEIGHT}px`,
           display: "flex",
@@ -568,7 +567,7 @@ const HeroMenuruTitle = ({
       scrollTl.to(
         container,
         {
-          height: "60px",
+          height: "80px",
           duration: 1,
           ease: "power2.inOut",
         },
@@ -624,9 +623,9 @@ const HeroMenuruTitle = ({
   );
 };
 
-// ===== FOOTER MENURU TITLE (muncul dari bawah saat scroll ke bawah) =====
-// Teks "Menuru" besar di footer.
-// Saat scroll sampai bawah, teks muncul dari bawah (slide up) pakai GSAP ScrollTrigger.
+// ===== FOOTER MENURU TITLE =====
+// Teks "Menuru" besar di footer (450px).
+// Saat scroll sampai bawah, teks muncul dari bawah pakai GSAP ScrollTrigger.
 const FooterMenuruTitle = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLSpanElement>(null);
@@ -644,54 +643,64 @@ const FooterMenuruTitle = () => {
     const title = titleRef.current;
 
     const ctx = gsap.context(() => {
-      // Set posisi awal: di bawah layar (tersembunyi)
+      // Posisi awal: tersembunyi di bawah layar
       gsap.set(title, {
-        y: 400,
+        y: 500,
         opacity: 0,
-        scale: 0.85,
-        rotationX: -35,
+        scale: 0.7,
+        rotationX: -45,
         transformOrigin: "50% 100%",
         force3D: true,
       });
 
-      // Animasi muncul dari bawah saat container masuk viewport
-      ScrollTrigger.create({
-        trigger: container,
-        start: "top 90%",
-        end: "bottom 40%",
-        scrub: 0.8,
-        onUpdate: (self) => {
-          const p = self.progress;
-          // Interpolasi nilai berdasarkan progress
-          gsap.set(title, {
-            y: 400 * (1 - p),
-            opacity: Math.min(p * 1.5, 1),
-            scale: 0.85 + 0.15 * p,
-            rotationX: -35 * (1 - p),
-          });
+      // Animasi utama: muncul dari bawah saat scroll
+      gsap.to(title, {
+        y: 0,
+        opacity: 1,
+        scale: 1,
+        rotationX: 0,
+        ease: "power3.out",
+        duration: 1.6,
+        scrollTrigger: {
+          trigger: container,
+          start: "top 95%",
+          end: "top 40%",
+          scrub: 0.8,
+          toggleActions: "play none none reverse",
         },
       });
 
-      // Tambahan animasi masuk saat pertama kali terlihat
-      ScrollTrigger.create({
-        trigger: container,
-        start: "top 85%",
-        once: true,
-        onEnter: () => {
-          gsap.fromTo(
-            title,
-            { y: 400, opacity: 0, scale: 0.85, rotationX: -35 },
-            {
-              y: 0,
-              opacity: 1,
-              scale: 1,
-              rotationX: 0,
-              duration: 1.6,
-              ease: "back.out(1.6)",
-            }
-          );
+      // Animasi per-karakter: huruf muncul satu per satu dari bawah
+      const split = new SplitText(title, {
+        type: "chars",
+        charsClass: "footer-menuru-char",
+      });
+
+      gsap.set(split.chars, {
+        y: 500,
+        opacity: 0,
+        rotationX: -90,
+        transformOrigin: "50% 100%",
+      });
+
+      gsap.to(split.chars, {
+        y: 0,
+        opacity: 1,
+        rotationX: 0,
+        duration: 1.4,
+        stagger: 0.08,
+        ease: "back.out(1.6)",
+        scrollTrigger: {
+          trigger: container,
+          start: "top 95%",
+          end: "top 30%",
+          scrub: 0.8,
         },
       });
+
+      return () => {
+        if (split) split.revert();
+      };
     }, containerRef);
 
     return () => ctx.revert();
@@ -708,7 +717,8 @@ const FooterMenuruTitle = () => {
         display: "flex",
         flexDirection: "column",
         justifyContent: "flex-start",
-        minHeight: "300px",
+        minHeight: "320px",
+        position: "relative",
       }}
     >
       <span
@@ -1552,7 +1562,7 @@ const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
       style={{
         position: "fixed",
         top: "20px",
-        left: shifted ? "260px" : "80px",
+        left: shifted ? "440px" : "80px",
         zIndex: 9000,
         display: "flex",
         alignItems: "center",
@@ -4699,7 +4709,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* ===== FOOTER MENURU TITLE (muncul dari bawah saat scroll ke bawah) ===== */}
+        {/* ===== FOOTER MENURU TITLE (muncul dari bawah) ===== */}
         <FooterMenuruTitle />
       </div>
 
@@ -4739,6 +4749,12 @@ export default function HomePage(): React.JSX.Element {
           will-change: transform, opacity, filter;
         }
         .hero-menuru-char {
+          display: inline-block;
+          will-change: transform, opacity;
+          color: #0D3CFC !important;
+          transform-origin: 50% 100%;
+        }
+        .footer-menuru-char {
           display: inline-block;
           will-change: transform, opacity;
           color: #0D3CFC !important;
