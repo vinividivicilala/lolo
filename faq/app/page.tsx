@@ -469,11 +469,13 @@ interface TourStep {
   isLoginStep?: boolean;
 }
 
-// ===== HERO MENURU TITLE + SUBTITLE (KIRI) =====
-// Teks "Menuru" besar + subtitle "Brand non profit" di sisi KIRI, font 150px
+// ===== HERO MENURU TITLE + SUBTITLE + FEATURES/CASE =====
+// Hero tetap sama: "Menuru" 600px + "Brand non profit" 150px di kiri
+// Tambahan: "Features" & "Case" dengan garis biru
 const HeroMenuruTitle = () => {
   const titleRef = useRef<HTMLHeadingElement>(null);
   const subtitleRef = useRef<HTMLParagraphElement>(null);
+  const featuresRef = useRef<HTMLDivElement>(null);
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -519,6 +521,36 @@ const HeroMenuruTitle = () => {
           filter: "blur(0px)",
           duration: 1.1,
           delay: 0.9,
+          ease: "power3.out",
+        }
+      );
+    }
+
+    if (featuresRef.current) {
+      const featureItems = featuresRef.current.querySelectorAll(".feature-item");
+      const featureLines = featuresRef.current.querySelectorAll(".feature-line");
+
+      gsap.fromTo(
+        featureItems,
+        { opacity: 0, y: 30 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.9,
+          stagger: 0.15,
+          delay: 1.3,
+          ease: "power3.out",
+        }
+      );
+
+      gsap.fromTo(
+        featureLines,
+        { scaleX: 0, transformOrigin: "left center" },
+        {
+          scaleX: 1,
+          duration: 1.0,
+          stagger: 0.15,
+          delay: 1.4,
           ease: "power3.out",
         }
       );
@@ -587,6 +619,83 @@ const HeroMenuruTitle = () => {
       >
         Brand non <span style={{ color: "rgba(13, 60, 252, 0.35)" }}>profit</span>
       </p>
+
+      {/* ===== FEATURES & CASE ===== */}
+      <div
+        ref={featuresRef}
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "18px",
+          marginTop: "50px",
+          width: "100%",
+          maxWidth: "900px",
+        }}
+      >
+        {/* Features */}
+        <div
+          className="feature-item"
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "8px",
+          }}
+        >
+          <span
+            style={{
+              fontFamily: FONT_FAMILY,
+              fontSize: "20px",
+              fontWeight: 600,
+              color: "#0D3CFC",
+              letterSpacing: "0.15em",
+              textTransform: "uppercase",
+            }}
+          >
+            Features
+          </span>
+          <div
+            className="feature-line"
+            style={{
+              width: "100%",
+              height: "2px",
+              backgroundColor: "#0D3CFC",
+              borderRadius: "2px",
+            }}
+          />
+        </div>
+
+        {/* Case */}
+        <div
+          className="feature-item"
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "8px",
+          }}
+        >
+          <span
+            style={{
+              fontFamily: FONT_FAMILY,
+              fontSize: "20px",
+              fontWeight: 600,
+              color: "#0D3CFC",
+              letterSpacing: "0.15em",
+              textTransform: "uppercase",
+            }}
+          >
+            Case
+          </span>
+          <div
+            className="feature-line"
+            style={{
+              width: "100%",
+              height: "2px",
+              backgroundColor: "#0D3CFC",
+              borderRadius: "2px",
+            }}
+          />
+        </div>
+      </div>
     </div>
   );
 };
@@ -4418,7 +4527,7 @@ export default function HomePage(): React.JSX.Element {
           fontFamily: FONT_FAMILY, overflow: "visible",
         }}
       >
-        {/* ===== HERO MENURU TITLE + SUBTITLE (KIRI) ===== */}
+        {/* ===== HERO MENURU TITLE + SUBTITLE + FEATURES/CASE ===== */}
         <HeroMenuruTitle />
 
         {/* LIVE CHAT AGENT */}
