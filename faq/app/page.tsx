@@ -617,45 +617,33 @@ const HeroMenuruTitle = ({
   );
 };
 
-// ===== FOOTER MENURU TITLE (TANPA SCROLLTRIGGER) =====
-// Teks "Menuru" besar 600px di footer.
-// Pakai GSAP SplitText murni — animasi entrance saat komponen mount.
-// Tidak pakai ScrollTrigger. Tidak reversible.
-// Karakter muncul dari bawah dengan efek 3D rotation + stagger.
+// ===== FOOTER MENURU TITLE =====
+// Teks "Menuru" besar di footer muncul DI ATAS tulisan "2024 - 2026".
+// Menggunakan GSAP SplitText per karakter + ScrollTrigger.
+// Animasi reversible: muncul saat scroll ke bawah, hilang saat scroll ke atas.
 const FooterMenuruTitle = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLSpanElement>(null);
-  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!isMounted) return;
     if (typeof window === "undefined") return;
     if (!titleRef.current || !containerRef.current) return;
 
     const title = titleRef.current;
+
     let split: any = null;
     let ctx: any = null;
 
-    const runAnimation = () => {
-      try {
-        split = new SplitText(title, {
-          type: "chars,words",
-          charsClass: "footer-menuru-char",
-        });
-      } catch (e) {
-        console.warn("SplitText footer gagal, fallback ke span:", e);
-      }
-
-      const targets: any =
-        split && split.chars && split.chars.length > 0 ? split.chars : title;
+    const setup = () => {
+      // SplitText per karakter
+      split = new SplitText(title, {
+        type: "chars",
+        charsClass: "footer-menuru-char",
+      });
 
       ctx = gsap.context(() => {
-        // Set posisi awal: karakter tersembunyi di bawah + rotasi 3D
-        gsap.set(targets, {
+        // Set posisi awal: karakter tersembunyi di bawah
+        gsap.set(split.chars, {
           yPercent: 120,
           opacity: 0,
           rotationX: -90,
@@ -663,15 +651,22 @@ const FooterMenuruTitle = () => {
           force3D: true,
         });
 
-        // Animasi entrance murni GSAP SplitText (tanpa ScrollTrigger)
-        gsap.to(targets, {
+        // Muncul saat scroll ke bawah, reversible
+        gsap.to(split.chars, {
           yPercent: 0,
           opacity: 1,
           rotationX: 0,
           duration: 1,
           stagger: 0.08,
           ease: "back.out(1.7)",
-          delay: 0.2,
+          scrollTrigger: {
+            trigger: containerRef.current,
+            start: "top 90%",
+            end: "top 40%",
+            scrub: 1,
+            toggleActions: "play none none reverse",
+            invalidateOnRefresh: true,
+          },
         });
       }, containerRef);
     };
@@ -679,17 +674,31 @@ const FooterMenuruTitle = () => {
     // Tunggu font siap supaya SplitText akurat
     if (document.fonts && document.fonts.ready) {
       document.fonts.ready.then(() => {
-        setTimeout(runAnimation, 80);
+        setTimeout(setup, 50);
       });
     } else {
-      setTimeout(runAnimation, 300);
+      setTimeout(setup, 200);
     }
 
     return () => {
       if (ctx) ctx.revert();
       if (split && split.revert) split.revert();
     };
-  }, [isMounted]);
+  }, []);
+
+  // Refresh ScrollTrigger setelah window load & beberapa delay
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const onLoad = () => ScrollTrigger.refresh();
+    window.addEventListener("load", onLoad);
+    const t1 = setTimeout(() => ScrollTrigger.refresh(), 600);
+    const t2 = setTimeout(() => ScrollTrigger.refresh(), 1500);
+    return () => {
+      window.removeEventListener("load", onLoad);
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
+  }, []);
 
   return (
     <div
@@ -705,6 +714,7 @@ const FooterMenuruTitle = () => {
         position: "relative",
       }}
     >
+      {/* ===== TEKS "MENURU" BESAR (muncul di atas) ===== */}
       <span
         ref={titleRef}
         style={{
@@ -729,6 +739,8 @@ const FooterMenuruTitle = () => {
       >
         Menuru
       </span>
+
+      {/* ===== COPYRIGHT DI BAWAH ===== */}
       <div
         style={{
           width: "100%",
