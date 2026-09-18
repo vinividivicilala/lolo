@@ -617,26 +617,30 @@ const HeroMenuruTitle = ({
   );
 };
 
-// ===== FOOTER MENURU TITLE =====
-// Teks "Menuru" besar 600px muncul saat scroll ke bawah.
-// Pakai SplitText GSAP per karakter + ScrollTrigger.
-// Animasi reversible (muncul saat scroll ke bawah, hilang saat scroll ke atas).
+// ===== FOOTER MENURU TITLE (TANPA SCROLLTRIGGER) =====
+// Teks "Menuru" besar 600px di footer.
+// Pakai GSAP SplitText murni — animasi entrance saat komponen mount.
+// Tidak pakai ScrollTrigger. Tidak reversible.
+// Karakter muncul dari bawah dengan efek 3D rotation + stagger.
 const FooterMenuruTitle = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLSpanElement>(null);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isMounted) return;
     if (typeof window === "undefined") return;
     if (!titleRef.current || !containerRef.current) return;
 
     const title = titleRef.current;
-    const container = containerRef.current;
-
     let split: any = null;
     let ctx: any = null;
 
-    const setup = () => {
-      // SplitText per karakter
+    const runAnimation = () => {
       try {
         split = new SplitText(title, {
           type: "chars,words",
@@ -650,7 +654,7 @@ const FooterMenuruTitle = () => {
         split && split.chars && split.chars.length > 0 ? split.chars : title;
 
       ctx = gsap.context(() => {
-        // Set posisi awal: karakter tersembunyi di bawah
+        // Set posisi awal: karakter tersembunyi di bawah + rotasi 3D
         gsap.set(targets, {
           yPercent: 120,
           opacity: 0,
@@ -659,7 +663,7 @@ const FooterMenuruTitle = () => {
           force3D: true,
         });
 
-        // Timeline utama: muncul saat scroll ke bawah
+        // Animasi entrance murni GSAP SplitText (tanpa ScrollTrigger)
         gsap.to(targets, {
           yPercent: 0,
           opacity: 1,
@@ -667,48 +671,25 @@ const FooterMenuruTitle = () => {
           duration: 1,
           stagger: 0.08,
           ease: "back.out(1.7)",
-          scrollTrigger: {
-            trigger: title,
-            start: "top 95%",
-            end: "top 40%",
-            scrub: 1,
-            toggleActions: "play none none reverse",
-            invalidateOnRefresh: true,
-          },
+          delay: 0.2,
         });
       }, containerRef);
-
-      ScrollTrigger.refresh();
     };
 
     // Tunggu font siap supaya SplitText akurat
     if (document.fonts && document.fonts.ready) {
       document.fonts.ready.then(() => {
-        setTimeout(setup, 80);
+        setTimeout(runAnimation, 80);
       });
     } else {
-      setTimeout(setup, 300);
+      setTimeout(runAnimation, 300);
     }
 
     return () => {
       if (ctx) ctx.revert();
       if (split && split.revert) split.revert();
     };
-  }, []);
-
-  // Refresh ScrollTrigger setelah window load & beberapa delay
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const onLoad = () => ScrollTrigger.refresh();
-    window.addEventListener("load", onLoad);
-    const t1 = setTimeout(() => ScrollTrigger.refresh(), 600);
-    const t2 = setTimeout(() => ScrollTrigger.refresh(), 1500);
-    return () => {
-      window.removeEventListener("load", onLoad);
-      clearTimeout(t1);
-      clearTimeout(t2);
-    };
-  }, []);
+  }, [isMounted]);
 
   return (
     <div
