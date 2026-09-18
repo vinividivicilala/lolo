@@ -471,19 +471,16 @@ interface TourStep {
 
 // ===== HERO MENURU TITLE =====
 // Teks "Menuru" besar di hero.
-// Saat scroll ke bawah: naik ke navbar kiri dengan ukuran sama seperti tombol navbar (14px font)
-// sejajar dengan 3 tombol navbar, jarak dekat.
+// Saat scroll ke bawah: naik ke navbar kiri, ukuran 40px, fixed, sejajar dengan 3 tombol.
 // Saat scroll ke atas: balik ke posisi semula.
+// 3 tombol navbar otomatis bergeser ke kanan saat teks Menuru naik.
 const HeroMenuruTitle = ({
   onNavbarShiftChange,
-  titleRef: externalTitleRef,
 }: {
   onNavbarShiftChange: (shifted: boolean) => void;
-  titleRef?: React.RefObject<HTMLHeadingElement>;
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const internalTitleRef = useRef<HTMLHeadingElement>(null);
-  const titleRef = externalTitleRef || internalTitleRef;
+  const titleRef = useRef<HTMLHeadingElement>(null);
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -497,8 +494,11 @@ const HeroMenuruTitle = ({
     const container = containerRef.current;
     const title = titleRef.current;
 
-    // Ukuran font hero awal (besar)
-    const HERO_FONT_SIZE = 600;
+    // Ukuran & posisi navbar
+    const NAV_TOP = 20;         // px, sejajar dengan top navbar
+    const NAV_LEFT = 80;        // px, sejajar dengan left navbar
+    const NAV_FONT_SIZE = 40;   // px, ukuran teks Menuru di navbar
+    const NAV_HEIGHT = 42;      // px, tinggi sama dengan tombol navbar
 
     const ctx = gsap.context(() => {
       // SplitText untuk animasi masuk per karakter
@@ -528,14 +528,6 @@ const HeroMenuruTitle = ({
       });
 
       // ===== SCROLL TRIGGER: PIN KE NAVBAR KIRI =====
-      // Hitung posisi target supaya teks "Menuru" sejajar dengan tombol navbar.
-      // Navbar tombol tinggi ~42px (padding 10px + font 14px). Teks "Menuru"
-      // harus punya tinggi & font yang sama supaya sejajar.
-      const NAV_TOP = 20; // px, sama dengan top navbar
-      const NAV_LEFT = 80; // px, sama dengan left navbar
-      const NAV_FONT_SIZE = 14; // px, sama dengan font tombol navbar
-      const NAV_HEIGHT = 42; // px, tinggi tombol navbar
-
       const scrollTl = gsap.timeline({
         scrollTrigger: {
           trigger: container,
@@ -544,52 +536,33 @@ const HeroMenuruTitle = ({
           scrub: 0.8,
           pin: false,
           onUpdate: (self) => {
-            onNavbarShiftChange(self.progress > 0.4);
+            onNavbarShiftChange(self.progress > 0.35);
           },
           onLeave: () => onNavbarShiftChange(true),
           onEnterBack: () => onNavbarShiftChange(false),
         },
       });
 
-      // Animasi teks mengecil + pindah ke navbar kiri
+      // Pindah ke navbar kiri + fixed (ukuran tetap 40px, tidak mengecil mengikuti scroll)
       scrollTl.to(
         title,
         {
+          position: "fixed",
           top: `${NAV_TOP}px`,
           left: `${NAV_LEFT}px`,
           fontSize: `${NAV_FONT_SIZE}px`,
-          fontWeight: 600,
-          letterSpacing: "0.02em",
+          fontWeight: 700,
+          letterSpacing: "-0.02em",
           lineHeight: 1,
           height: `${NAV_HEIGHT}px`,
-          paddingTop: "0px",
+          display: "flex",
+          alignItems: "center",
           transform: "translateX(0px) translateY(0px)",
           duration: 1,
           ease: "power2.inOut",
         },
         0
       );
-
-      // Set styling fixed saat animasi mulai
-      ScrollTrigger.create({
-        trigger: container,
-        start: "top top",
-        end: "+=500",
-        onEnter: () => {
-          title.style.position = "fixed";
-          title.style.zIndex = "8999";
-          title.style.display = "flex";
-          title.style.alignItems = "center";
-          title.style.transformOrigin = "left center";
-        },
-        onLeaveBack: () => {
-          title.style.position = "";
-          title.style.zIndex = "";
-          title.style.display = "";
-          title.style.alignItems = "";
-          title.style.transformOrigin = "";
-        },
-      });
 
       // Container height menyusut
       scrollTl.to(
@@ -608,7 +581,7 @@ const HeroMenuruTitle = ({
     }, containerRef);
 
     return () => ctx.revert();
-  }, [isMounted, onNavbarShiftChange, titleRef]);
+  }, [isMounted, onNavbarShiftChange]);
 
   return (
     <div
@@ -617,7 +590,7 @@ const HeroMenuruTitle = ({
         width: "100%",
         height: "650px",
         backgroundColor: "#ffffff",
-        overflow: "hidden",
+        overflow: "visible",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -642,6 +615,7 @@ const HeroMenuruTitle = ({
           WebkitFontSmoothing: "antialiased",
           MozOsxFontSmoothing: "grayscale",
           willChange: "transform, font-size, top, left",
+          zIndex: 8999,
         }}
       >
         Menuru
@@ -1441,23 +1415,23 @@ const NavbarButton = ({
 };
 
 // ===== LEFT NAVBAR COMPONENT =====
-// 3 tombol bergeser ke kanan saat teks Menuru naik ke navbar
-// Teks "Menuru" yang fixed di navbar akan muncul di sebelah kiri tombol
+// 3 tombol bergeser ke kanan saat teks Menuru naik ke navbar.
+// Teks Menuru fixed di left:80px, tombol navbar digeser ke kanan supaya tidak menumpuk.
 const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
   return (
     <div
       style={{
         position: "fixed",
         top: "20px",
-        left: "80px",
+        // Saat shifted, geser ke kanan supaya teks Menuru (40px, left:80px) tidak mentok
+        left: shifted ? "260px" : "80px",
         zIndex: 9000,
         display: "flex",
         alignItems: "center",
         gap: "12px",
         fontFamily: FONT_FAMILY,
-        transform: shifted ? "translateX(80px)" : "translateX(0px)",
-        transition: "transform 0.6s cubic-bezier(0.65, 0, 0.35, 1)",
-        willChange: "transform",
+        transition: "left 0.6s cubic-bezier(0.65, 0, 0.35, 1)",
+        willChange: "left",
       }}
     >
       <NavbarButton
@@ -4267,7 +4241,6 @@ export default function HomePage(): React.JSX.Element {
   const textRef = useRef<HTMLSpanElement>(null);
   const menuruFooterRef = useRef<HTMLDivElement>(null);
   const menuruTextRef = useRef<HTMLSpanElement>(null);
-  const heroTitleRef = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => {
     setIsMounted(true);
@@ -4485,17 +4458,14 @@ export default function HomePage(): React.JSX.Element {
         }}
       >
         {/* ===== HERO MENURU TITLE ===== */}
-        <HeroMenuruTitle
-          onNavbarShiftChange={setNavbarShifted}
-          titleRef={heroTitleRef}
-        />
+        <HeroMenuruTitle onNavbarShiftChange={setNavbarShifted} />
 
         {/* LIVE CHAT AGENT */}
         <div style={{ padding: "0 40px", maxWidth: "1600px", margin: "0 auto", width: "100%" }}>
           <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} />
         </div>
 
-        {/* FOOTER */}
+        {/* FOOTER (TETAP ADA) */}
         <div
           style={{
             width: "100%", padding: "60px 40px 40px 40px",
@@ -4638,7 +4608,7 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* MENURU Text + Copyright (TETAP ADA, TIDAK DIHAPUS) */}
+        {/* MENURU Text + Copyright (TETAP ADA) */}
         <div
           ref={menuruFooterRef}
           style={{
