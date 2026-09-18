@@ -469,9 +469,10 @@ interface TourStep {
   isLoginStep?: boolean;
 }
 
-// ===== HERO MENURU TITLE (SplitText + ScrollTrigger fly to navbar left) =====
-// Teks "Menuru" besar di hero. Saat scroll ke bawah, teks naik ke navbar kiri
-// (fixed di bawah tombol navbar) dengan ukuran mengecil. Saat scroll ke atas, kembali.
+// ===== HERO MENURU TITLE (SplitText + smooth scroll-follow to navbar left) =====
+// Teks "Menuru" besar di hero. Saat scroll ke bawah, teks bergerak perlahan
+// (mengikuti scroll) menuju samping tombol Teams di navbar kiri, ukuran mengecil
+// dengan halus. Saat scroll ke atas, kembali perlahan ke posisi semula.
 const HeroMenuruTitle = () => {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -485,22 +486,21 @@ const HeroMenuruTitle = () => {
     if (!isMounted) return;
     if (!wrapperRef.current || !titleRef.current) return;
 
-    // Simpan referensi elemen
     const wrapper = wrapperRef.current;
     const title = titleRef.current;
 
-    // 1. SplitText untuk animasi masuk
+    // SplitText untuk entrance animation
     const split = new SplitText(title, {
       type: "chars",
       charsClass: "hero-menuru-char",
     });
 
-    // 2. Animasi entrance karakter
+    // Entrance animation per karakter
     gsap.set(split.chars, {
       opacity: 0,
-      y: 220,
+      y: 200,
       rotationX: -90,
-      scale: 0.4,
+      scale: 0.5,
       transformOrigin: "50% 100%",
       force3D: true,
     });
@@ -511,78 +511,70 @@ const HeroMenuruTitle = () => {
       rotationX: 0,
       scale: 1,
       duration: 1.4,
-      stagger: 0.09,
+      stagger: 0.08,
       ease: "back.out(1.8)",
       delay: 0.2,
     });
 
-    // 3. ScrollTrigger: fly to navbar kiri
-    //    - Target akhir: di bawah tombol navbar kiri (posisi fixed)
-    //    - Ukuran mengecil agar muat di navbar
+    // ScrollTrigger dengan scrub: animasi mengikuti posisi scroll secara halus
     const ctx = gsap.context(() => {
-      // Ukuran awal (600px) -> ukuran kecil (40px) saat menempel di navbar
+      // Ukuran & posisi awal (hero besar di tengah)
       const startFontSize = 600;
-      const endFontSize = 40;
+      const endFontSize = 38; // kecil, sejajar tombol navbar
 
-      // Hitung posisi awal wrapper (tempat hero berada di dokumen)
+      // Target posisi di navbar kiri: sejajar dengan tombol Teams
+      // Tombol Teams ada di top: 20px, left: 80px, tinggi ~44px
+      const navbarTop = 20;
+      const navbarLeft = 80;
+      const navbarButtonHeight = 44;
+
+      // Hitung posisi target relatif terhadap wrapper
+      // Karena kita gunakan transform (bukan position:fixed), kita hitung delta.
       const wrapperRect = wrapper.getBoundingClientRect();
-      const startTop = wrapperRect.top + window.scrollY;
-      const startLeft = wrapperRect.left + window.scrollX;
-      const wrapperWidth = wrapperRect.width;
-      const wrapperHeight = wrapperRect.height;
+      const titleRect = title.getBoundingClientRect();
 
-      // Posisi tujuan: di bawah navbar kiri
-      // Navbar kiri ada di top: 20px, left: 80px, tinggi tombol ~44px
-      const targetFixedTop = 76; // 20 + 44 + 12 gap
-      const targetFixedLeft = 80;
+      // Posisi awal title relatif ke wrapper
+      const titleStartLeft = titleRect.left - wrapperRect.left;
+      const titleStartTop = titleRect.top - wrapperRect.top;
 
-      // Karena wrapper awalnya di dokumen (bukan fixed), kita gunakan
-      // pin + transform untuk memindahkan ke posisi fixed.
-      // Pendekatan: buat ScrollTrigger dengan pin pada wrapper, lalu animasi
-      // sebuah clone "visual" (title) dari posisi awal ke posisi target fixed.
-      //
-      // Simpler: gunakan ScrollTrigger dengan `pin: wrapper` dan animasi
-      // transformasi title ke posisi fixed menggunakan `position: fixed`.
-      //
-      // Kita pakai trik: saat scroll melewati trigger, set title ke
-      // `position: fixed` di navbar kiri.
+      // Target posisi (relatif ke viewport) -> convert ke delta transform
+      // Kita mau title berakhir di (navbarLeft, navbarTop + sedikit offset)
+      // Karena wrapper akan di-pin selama animasi, gunakan posisi viewport.
+      const targetViewportLeft = navbarLeft;
+      const targetViewportTop = navbarTop + (navbarButtonHeight - endFontSize) / 2;
 
+      // Delta dari posisi awal ke target
+      const deltaX = targetViewportLeft - titleRect.left;
+      const deltaY = targetViewportTop - titleRect.top;
+
+      // Scale factor (600px -> 38px)
+      const targetScale = endFontSize / startFontSize;
+
+      // Gunakan ScrollTrigger dengan scrub supaya animasi mengikuti scroll
       ScrollTrigger.create({
         trigger: wrapper,
         start: "top top",
-        end: "bottom top",
-        scrub: false,
-        onEnter: () => {
-          // Teks sudah mencapai atas: pindahkan ke navbar kiri
-          gsap.to(title, {
-            position: "fixed",
-            top: `${targetFixedTop}px`,
-            left: `${targetFixedLeft}px`,
-            fontSize: `${endFontSize}px`,
-            letterSpacing: "-0.02em",
-            zIndex: 9500,
-            duration: 0.5,
-            ease: "power3.out",
-            onStart: () => {
-              // Pastikan transform reset supaya posisi fixed akurat
-              gsap.set(title, { x: 0, y: 0, scale: 1, rotation: 0 });
-            },
-          });
-        },
-        onLeaveBack: () => {
-          // Scroll kembali ke atas: kembalikan ke posisi semula
-          gsap.to(title, {
-            position: "relative",
-            top: "auto",
-            left: "auto",
-            fontSize: `${startFontSize}px`,
-            letterSpacing: "-0.05em",
-            zIndex: 1,
-            duration: 0.5,
-            ease: "power3.out",
-            onComplete: () => {
-              gsap.set(title, { clearProps: "position,top,left,zIndex" });
-            },
+        end: "+=600", // jarak scroll untuk menyelesaikan animasi
+        scrub: 1.2, // smooth slow-motion (semakin besar semakin lambat)
+        onUpdate: (self) => {
+          const progress = self.progress; // 0 -> 1
+          // Interpolasi font size
+          const currentFontSize =
+            startFontSize + (endFontSize - startFontSize) * progress;
+          // Interpolasi posisi
+          const currentX = deltaX * progress;
+          const currentY = deltaY * progress;
+          // Interpolasi scale
+          const currentScale = 1 + (targetScale - 1) * progress;
+
+          gsap.set(title, {
+            fontSize: `${currentFontSize}px`,
+            x: currentX,
+            y: currentY,
+            scale: currentScale,
+            transformOrigin: "top left",
+            letterSpacing: `${-0.05 + 0.03 * progress}em`,
+            force3D: true,
           });
         },
       });
@@ -626,7 +618,7 @@ const HeroMenuruTitle = () => {
           display: "inline-block",
           WebkitFontSmoothing: "antialiased",
           MozOsxFontSmoothing: "grayscale",
-          willChange: "font-size, position, top, left",
+          willChange: "transform, font-size",
         }}
       >
         Menuru
@@ -4463,7 +4455,7 @@ export default function HomePage(): React.JSX.Element {
           fontFamily: FONT_FAMILY, overflow: "visible",
         }}
       >
-        {/* ===== HERO MENURU TITLE (SplitText + fly to navbar left) ===== */}
+        {/* ===== HERO MENURU TITLE (smooth scroll-follow to navbar left) ===== */}
         <HeroMenuruTitle />
 
         {/* LIVE CHAT AGENT */}
