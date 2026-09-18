@@ -469,13 +469,17 @@ interface TourStep {
   isLoginStep?: boolean;
 }
 
-// ===== HERO MENURU TITLE =====
-// Teks "Menuru" besar di hero. Saat scroll ke bawah:
-// - Mengecil perlahan (slow motion) dari 600px ke 40px
-// - Berpindah ke samping tombol Teams (navbar kiri), menjadi fixed di sana
-// Saat scroll ke atas: kembali ke posisi semula.
-const HeroMenuruTitle = () => {
-  const wrapperRef = useRef<HTMLDivElement>(null);
+// ===== HERO MENURU TITLE (SplitText + ScrollTrigger pin ke navbar kiri) =====
+// Teks "Menuru" besar di bawah navbar.
+// Saat scroll ke bawah: teks naik ke navbar kiri & fixed di posisi bawah scroll.
+// Saat scroll ke atas: teks balik ke posisi semula.
+// Navbar kiri (3 tombol) otomatis bergeser ke kanan saat teks naik.
+const HeroMenuruTitle = ({
+  onNavbarShiftChange,
+}: {
+  onNavbarShiftChange: (shifted: boolean) => void;
+}) => {
+  const containerRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const [isMounted, setIsMounted] = useState(false);
 
@@ -485,109 +489,120 @@ const HeroMenuruTitle = () => {
 
   useEffect(() => {
     if (!isMounted) return;
-    if (!wrapperRef.current || !titleRef.current) return;
+    if (!containerRef.current || !titleRef.current) return;
 
-    const wrapper = wrapperRef.current;
+    const container = containerRef.current;
     const title = titleRef.current;
 
-    // SplitText untuk entrance animation
-    const split = new SplitText(title, {
-      type: "chars",
-      charsClass: "hero-menuru-char",
-    });
-
-    // Entrance animation per karakter
-    gsap.set(split.chars, {
-      opacity: 0,
-      y: 200,
-      rotationX: -90,
-      scale: 0.5,
-      transformOrigin: "50% 100%",
-      force3D: true,
-    });
-
-    gsap.to(split.chars, {
-      opacity: 1,
-      y: 0,
-      rotationX: 0,
-      scale: 1,
-      duration: 1.4,
-      stagger: 0.08,
-      ease: "back.out(1.8)",
-      delay: 0.2,
-    });
-
-    // ScrollTrigger untuk mengubah posisi dan ukuran teks
     const ctx = gsap.context(() => {
-      ScrollTrigger.create({
-        trigger: wrapper,
-        start: "top 120px", // mulai saat wrapper hampir menyentuh navbar
-        end: "bottom 120px",
-        onEnter: () => {
-          // Simpan posisi & ukuran awal
-          const startFontSize = 600;
-          const endFontSize = 40;
+      // SplitText untuk animasi masuk per karakter
+      const split = new SplitText(title, {
+        type: "chars",
+        charsClass: "hero-menuru-char",
+      });
 
-          // Target: di samping tombol Teams
-          // Tombol Teams ada di top: 20px, left: 80px, tinggi ~44px
-          const targetTop = 20;
-          const targetLeft = 80; // sejajar dengan navbar kiri
+      // Set awal karakter
+      gsap.set(split.chars, {
+        opacity: 0,
+        y: 220,
+        rotationX: -90,
+        scale: 0.4,
+        transformOrigin: "50% 100%",
+        force3D: true,
+      });
 
-          // Animasi SLOW MOTION: font-size mengecil perlahan
-          gsap.to(title, {
-            position: "fixed",
-            top: `${targetTop}px`,
-            left: `${targetLeft}px`,
-            fontSize: `${endFontSize}px`,
-            letterSpacing: "-0.02em",
-            zIndex: 9500,
-            duration: 2.5, // slow motion
-            ease: "power3.inOut",
-            transformOrigin: "top left",
-            onStart: () => {
-              gsap.set(title, { x: 0, y: 0, scale: 1, rotation: 0 });
-            },
-          });
-        },
-        onLeaveBack: () => {
-          // Kembali ke posisi semula (slow motion)
-          gsap.to(title, {
-            position: "relative",
-            top: "auto",
-            left: "auto",
-            fontSize: "600px",
-            letterSpacing: "-0.05em",
-            zIndex: 1,
-            duration: 2.5, // slow motion
-            ease: "power3.inOut",
-            onComplete: () => {
-              gsap.set(title, { clearProps: "position,top,left,zIndex" });
-            },
-          });
+      // Animasi masuk per karakter
+      gsap.to(split.chars, {
+        opacity: 1,
+        y: 0,
+        rotationX: 0,
+        scale: 1,
+        duration: 1.4,
+        stagger: 0.09,
+        ease: "back.out(1.8)",
+        delay: 0.2,
+      });
+
+      // ===== SCROLL TRIGGER: PIN KE NAVBAR KIRI =====
+      // Saat scroll, teks Menuru naik ke kiri atas dan mengecil
+      const scrollTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: container,
+          start: "top top",
+          end: "+=600",
+          scrub: 0.8,
+          pin: false,
+          onUpdate: (self) => {
+            const p = self.progress;
+            // Beri tahu parent kalau sudah melewati threshold 0.5
+            onNavbarShiftChange(p > 0.5);
+          },
+          onLeave: () => {
+            onNavbarShiftChange(true);
+          },
+          onEnterBack: () => {
+            onNavbarShiftChange(false);
+          },
         },
       });
-    }, wrapper);
 
-    return () => {
-      ctx.revert();
-      if (split) split.revert();
-    };
-  }, [isMounted]);
+      // Hitung posisi target: navbar kiri (top: 20px, left: 80px)
+      // Kita animasikan teks dari posisi hero (center) ke kiri atas
+      scrollTl.to(
+        title,
+        {
+          position: "fixed",
+          top: "16px",
+          left: "80px",
+          fontSize: "28px",
+          letterSpacing: "-0.02em",
+          duration: 1,
+          ease: "power2.inOut",
+          onStart: () => {
+            // Pastikan styling fixed hanya setelah animasi mulai
+            title.style.position = "fixed";
+            title.style.zIndex = "8999";
+          },
+          onReverseComplete: () => {
+            title.style.position = "";
+            title.style.zIndex = "";
+          },
+        },
+        0
+      );
+
+      // Fade container height supaya tidak mengganggu layout saat teks fixed
+      scrollTl.to(
+        container,
+        {
+          height: "60px",
+          duration: 1,
+          ease: "power2.inOut",
+        },
+        0
+      );
+
+      return () => {
+        if (split) split.revert();
+      };
+    }, containerRef);
+
+    return () => ctx.revert();
+  }, [isMounted, onNavbarShiftChange]);
 
   return (
     <div
-      ref={wrapperRef}
+      ref={containerRef}
       style={{
         width: "100%",
-        paddingTop: "110px",
-        paddingBottom: "0px",
+        height: "650px",
         backgroundColor: "#ffffff",
-        overflow: "visible",
+        overflow: "hidden",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         position: "relative",
-        minHeight: "700px",
+        paddingTop: "110px",
       }}
     >
       <h1
@@ -606,7 +621,7 @@ const HeroMenuruTitle = () => {
           display: "inline-block",
           WebkitFontSmoothing: "antialiased",
           MozOsxFontSmoothing: "grayscale",
-          willChange: "font-size, position, top, left",
+          willChange: "transform, font-size",
         }}
       >
         Menuru
@@ -1406,10 +1421,10 @@ const NavbarButton = ({
 };
 
 // ===== LEFT NAVBAR COMPONENT =====
-const LeftNavbar = () => {
+// 3 tombol bergeser ke kanan saat teks Menuru naik ke navbar
+const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
   return (
     <div
-      data-navbar-left
       style={{
         position: "fixed",
         top: "20px",
@@ -1419,6 +1434,9 @@ const LeftNavbar = () => {
         alignItems: "flex-start",
         gap: "12px",
         fontFamily: FONT_FAMILY,
+        transform: shifted ? "translateX(220px)" : "translateX(0px)",
+        transition: "transform 0.6s cubic-bezier(0.65, 0, 0.35, 1)",
+        willChange: "transform",
       }}
     >
       <NavbarButton
@@ -4222,6 +4240,7 @@ export default function HomePage(): React.JSX.Element {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isMounted, setIsMounted] = useState(false);
+  const [navbarShifted, setNavbarShifted] = useState(false);
 
   const preloaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
@@ -4429,7 +4448,7 @@ export default function HomePage(): React.JSX.Element {
         <meta name="twitter:image" content="/images/ai.jpg" />
       </Head>
 
-      <LeftNavbar />
+      <LeftNavbar shifted={navbarShifted} />
       <RightNavbar />
 
       {/* ===== COOKIE CONSENT POPUP ===== */}
@@ -4443,8 +4462,8 @@ export default function HomePage(): React.JSX.Element {
           fontFamily: FONT_FAMILY, overflow: "visible",
         }}
       >
-        {/* ===== HERO MENURU TITLE ===== */}
-        <HeroMenuruTitle />
+        {/* ===== HERO MENURU TITLE (SplitText + ScrollTrigger) ===== */}
+        <HeroMenuruTitle onNavbarShiftChange={setNavbarShifted} />
 
         {/* LIVE CHAT AGENT */}
         <div style={{ padding: "0 40px", maxWidth: "1600px", margin: "0 auto", width: "100%" }}>
