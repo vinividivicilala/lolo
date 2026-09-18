@@ -470,9 +470,6 @@ interface TourStep {
 }
 
 // ===== HERO MENURU TITLE =====
-// Teks "Menuru" besar di hero.
-// Saat scroll ke bawah: naik ke navbar kiri, ukuran 70px, fixed, sejajar dengan 3 tombol.
-// Saat scroll ke atas: balik ke posisi semula.
 const HeroMenuruTitle = ({
   onNavbarShiftChange,
 }: {
@@ -493,14 +490,12 @@ const HeroMenuruTitle = ({
     const container = containerRef.current;
     const title = titleRef.current;
 
-    // Ukuran & posisi navbar
-    const NAV_TOP = 10;          // px
-    const NAV_LEFT = 80;         // px
-    const NAV_FONT_SIZE = 70;    // px ← diubah dari 40 menjadi 70
-    const NAV_HEIGHT = 60;       // px
+    const NAV_TOP = 10;
+    const NAV_LEFT = 80;
+    const NAV_FONT_SIZE = 70;
+    const NAV_HEIGHT = 60;
 
     const ctx = gsap.context(() => {
-      // SplitText untuk animasi masuk per karakter
       const split = new SplitText(title, {
         type: "chars",
         charsClass: "hero-menuru-char",
@@ -526,7 +521,6 @@ const HeroMenuruTitle = ({
         delay: 0.2,
       });
 
-      // ===== SCROLL TRIGGER: PIN KE NAVBAR KIRI =====
       const scrollTl = gsap.timeline({
         scrollTrigger: {
           trigger: container,
@@ -542,7 +536,6 @@ const HeroMenuruTitle = ({
         },
       });
 
-      // Pindah ke navbar kiri + fixed (ukuran 70px, tidak mengecil mengikuti scroll)
       scrollTl.to(
         title,
         {
@@ -563,7 +556,6 @@ const HeroMenuruTitle = ({
         0
       );
 
-      // Container height menyusut
       scrollTl.to(
         container,
         {
@@ -624,8 +616,8 @@ const HeroMenuruTitle = ({
 };
 
 // ===== FOOTER MENURU TITLE =====
-// Teks "Menuru" besar 600px di footer.
-// Saat scroll sampai bawah, teks muncul dari bawah pakai GSAP ScrollTrigger.
+// Teks "Menuru" besar 600px muncul dengan animasi GSAP dari bawah.
+// Tinggi halaman compact — langsung diikuti copyright.
 const FooterMenuruTitle = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLSpanElement>(null);
@@ -643,9 +635,9 @@ const FooterMenuruTitle = () => {
     const title = titleRef.current;
 
     const ctx = gsap.context(() => {
-      // Posisi awal: tersembunyi di bawah layar
+      // Posisi awal: tersembunyi di bawah
       gsap.set(title, {
-        y: 700,
+        y: 500,
         opacity: 0,
         scale: 0.6,
         rotationX: -60,
@@ -660,24 +652,24 @@ const FooterMenuruTitle = () => {
         scale: 1,
         rotationX: 0,
         ease: "power3.out",
-        duration: 1.8,
+        duration: 1.6,
         scrollTrigger: {
           trigger: container,
-          start: "top 95%",
-          end: "top 35%",
+          start: "top 98%",
+          end: "top 55%",
           scrub: 1,
           toggleActions: "play none none reverse",
         },
       });
 
-      // Animasi per-karakter: huruf muncul satu per satu dari bawah
+      // Animasi per-karakter
       const split = new SplitText(title, {
         type: "chars",
         charsClass: "footer-menuru-char",
       });
 
       gsap.set(split.chars, {
-        y: 700,
+        y: 500,
         opacity: 0,
         rotationX: -90,
         transformOrigin: "50% 100%",
@@ -687,13 +679,13 @@ const FooterMenuruTitle = () => {
         y: 0,
         opacity: 1,
         rotationX: 0,
-        duration: 1.6,
-        stagger: 0.1,
-        ease: "back.out(1.8)",
+        duration: 1.4,
+        stagger: 0.08,
+        ease: "back.out(1.7)",
         scrollTrigger: {
           trigger: container,
-          start: "top 95%",
-          end: "top 30%",
+          start: "top 98%",
+          end: "top 50%",
           scrub: 1,
         },
       });
@@ -711,14 +703,14 @@ const FooterMenuruTitle = () => {
       ref={containerRef}
       style={{
         width: "100%",
-        padding: "20px 40px 100px 40px",
+        padding: "0 40px 30px 40px",
         backgroundColor: "#ffffff",
         overflow: "hidden",
         display: "flex",
         flexDirection: "column",
         justifyContent: "flex-start",
-        minHeight: "700px",
         position: "relative",
+        marginTop: "0px",
       }}
     >
       <span
@@ -730,23 +722,25 @@ const FooterMenuruTitle = () => {
           color: "#0D3CFC",
           letterSpacing: "-0.04em",
           textTransform: "none",
-          lineHeight: "0.8",
+          lineHeight: "0.78",
           display: "block",
           textAlign: "left",
           WebkitFontSmoothing: "antialiased",
           MozOsxFontSmoothing: "grayscale",
           willChange: "transform, opacity",
           whiteSpace: "nowrap",
+          margin: 0,
+          padding: 0,
         }}
       >
         Menuru
       </span>
       <div
         style={{
-          marginTop: "40px",
           width: "100%",
           display: "flex",
           justifyContent: "flex-start",
+          marginTop: "10px",
         }}
       >
         <span
@@ -909,9 +903,11 @@ const CookieConsentPopup = ({
       <div
         ref={cardRef}
         style={{
-          backgroundColor: "#ffffff",
+          backgroundColor: "rgba(255,255,255,0.85)",
+          backdropFilter: "blur(20px)",
+          WebkitBackdropFilter: "blur(20px)",
           borderRadius: "16px",
-          border: "1px solid #e8e8e8",
+          border: "1px solid rgba(255,255,255,0.5)",
           boxShadow: "0 12px 40px rgba(0,0,0,0.15)",
           padding: "20px 22px",
           display: "flex",
@@ -1013,7 +1009,7 @@ const CookieConsentPopup = ({
   );
 };
 
-// ===== NAVBAR BUTTON COMPONENT =====
+// ===== NAVBAR BUTTON COMPONENT (DENGAN BLUR) =====
 const NavbarButton = ({
   label,
   panelTitle,
@@ -1024,11 +1020,11 @@ const NavbarButton = ({
   iconType,
   bigPanelWidth = 850,
   bigPanelHeight = 260,
-  buttonColor = "#0D3CFC",
-  buttonHoverColor = "#000000",
-  panelColor = "#0D3CFC",
-  iconButtonColor = "#000000",
-  iconButtonHoverColor = "#0D3CFC",
+  buttonColor = "rgba(13, 60, 252, 0.75)",
+  buttonHoverColor = "rgba(0, 0, 0, 0.85)",
+  panelColor = "rgba(13, 60, 252, 0.85)",
+  iconButtonColor = "rgba(0, 0, 0, 0.8)",
+  iconButtonHoverColor = "rgba(13, 60, 252, 0.9)",
   panelBoxColor = "rgba(255,255,255,0.12)",
   panelBoxBorder = "rgba(255,255,255,0.25)",
   labelTextColor = "#ffffff",
@@ -1133,10 +1129,13 @@ const NavbarButton = ({
           gap: "10px",
           padding: "10px 16px",
           backgroundColor: open ? buttonHoverColor : buttonColor,
+          backdropFilter: "blur(20px)",
+          WebkitBackdropFilter: "blur(20px)",
           borderRadius: "10px",
+          border: "1px solid rgba(255,255,255,0.18)",
           boxShadow: open
             ? "0 8px 24px rgba(0,0,0,0.35)"
-            : `0 8px 24px ${buttonColor}55`,
+            : `0 8px 24px rgba(13,60,252,0.35)`,
           transition: "background-color 0.25s ease, box-shadow 0.25s ease",
           cursor: "pointer",
           position: "relative",
@@ -1212,8 +1211,11 @@ const NavbarButton = ({
             width: `${bigPanelWidth}px`,
             minHeight: `${bigPanelHeight}px`,
             backgroundColor: panelColor,
+            backdropFilter: "blur(24px)",
+            WebkitBackdropFilter: "blur(24px)",
             borderRadius: "10px",
-            boxShadow: `0 8px 24px ${panelColor}55`,
+            border: "1px solid rgba(255,255,255,0.2)",
+            boxShadow: `0 8px 32px rgba(13,60,252,0.4)`,
             zIndex: 1,
             fontFamily: FONT_FAMILY,
             color: titleTextColor,
@@ -1556,7 +1558,7 @@ const NavbarButton = ({
   );
 };
 
-// ===== LEFT NAVBAR COMPONENT =====
+// ===== LEFT NAVBAR COMPONENT (DENGAN BLUR) =====
 const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
   return (
     <div
@@ -1607,11 +1609,11 @@ const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
         iconType="resources"
         bigPanelWidth={850}
         bigPanelHeight={340}
-        buttonColor="#F2EA6B"
-        buttonHoverColor="#000000"
-        panelColor="#F04E23"
-        iconButtonColor="#000000"
-        iconButtonHoverColor="#F2EA6B"
+        buttonColor="rgba(242, 234, 107, 0.8)"
+        buttonHoverColor="rgba(0, 0, 0, 0.85)"
+        panelColor="rgba(240, 78, 35, 0.88)"
+        iconButtonColor="rgba(0, 0, 0, 0.8)"
+        iconButtonHoverColor="rgba(242, 234, 107, 0.9)"
         panelBoxColor="rgba(255,255,255,0.15)"
         panelBoxBorder="rgba(255,255,255,0.3)"
         labelTextColor="#000000"
@@ -1624,7 +1626,7 @@ const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
   );
 };
 
-// ===== RIGHT NAVBAR COMPONENT =====
+// ===== RIGHT NAVBAR COMPONENT (DENGAN BLUR) =====
 const RightNavbar = () => {
   return (
     <div
@@ -1637,8 +1639,11 @@ const RightNavbar = () => {
         alignItems: "center",
         gap: "10px",
         padding: "10px 18px 10px 16px",
-        backgroundColor: "#000000",
+        backgroundColor: "rgba(0, 0, 0, 0.75)",
+        backdropFilter: "blur(20px)",
+        WebkitBackdropFilter: "blur(20px)",
         borderRadius: "10px",
+        border: "1px solid rgba(255,255,255,0.15)",
         boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
         fontFamily: FONT_FAMILY,
       }}
