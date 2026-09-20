@@ -470,7 +470,6 @@ interface TourStep {
 }
 
 // ===== HERO MENURU TITLE =====
-// Judul digeser sedikit ke kiri (NAV_LEFT = 40px) supaya tidak mentok dengan 3 tombol navbar.
 const HeroMenuruTitle = ({
   onNavbarShiftChange,
 }: {
@@ -491,7 +490,6 @@ const HeroMenuruTitle = ({
     const container = containerRef.current;
     const title = titleRef.current;
 
-    // Judul digeser ke kiri sedikit (NAV_LEFT = 40px) agar ada jarak dengan 3 tombol navbar
     const NAV_TOP = 10;
     const NAV_LEFT = 40;
     const NAV_FONT_SIZE = 70;
@@ -618,9 +616,6 @@ const HeroMenuruTitle = ({
 };
 
 // ===== FOOTER MENURU TITLE =====
-// Teks "Menuru" besar di footer muncul DI ATAS tulisan "2024 - 2026".
-// Menggunakan GSAP SplitText per karakter + ScrollTrigger.
-// Animasi reversible: muncul saat scroll ke bawah, hilang saat scroll ke atas.
 const FooterMenuruTitle = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLSpanElement>(null);
@@ -635,14 +630,12 @@ const FooterMenuruTitle = () => {
     let ctx: any = null;
 
     const setup = () => {
-      // SplitText per karakter
       split = new SplitText(title, {
         type: "chars",
         charsClass: "footer-menuru-char",
       });
 
       ctx = gsap.context(() => {
-        // Set posisi awal: karakter tersembunyi di bawah
         gsap.set(split.chars, {
           yPercent: 120,
           opacity: 0,
@@ -651,7 +644,6 @@ const FooterMenuruTitle = () => {
           force3D: true,
         });
 
-        // Muncul saat scroll ke bawah, reversible
         gsap.to(split.chars, {
           yPercent: 0,
           opacity: 1,
@@ -671,7 +663,6 @@ const FooterMenuruTitle = () => {
       }, containerRef);
     };
 
-    // Tunggu font siap supaya SplitText akurat
     if (document.fonts && document.fonts.ready) {
       document.fonts.ready.then(() => {
         setTimeout(setup, 50);
@@ -686,7 +677,6 @@ const FooterMenuruTitle = () => {
     };
   }, []);
 
-  // Refresh ScrollTrigger setelah window load & beberapa delay
   useEffect(() => {
     if (typeof window === "undefined") return;
     const onLoad = () => ScrollTrigger.refresh();
@@ -714,7 +704,6 @@ const FooterMenuruTitle = () => {
         position: "relative",
       }}
     >
-      {/* ===== TEKS "MENURU" BESAR (muncul di atas) ===== */}
       <span
         ref={titleRef}
         style={{
@@ -740,7 +729,6 @@ const FooterMenuruTitle = () => {
         Menuru
       </span>
 
-      {/* ===== COPYRIGHT DI BAWAH ===== */}
       <div
         style={{
           width: "100%",
@@ -1330,7 +1318,6 @@ const NavbarButton = ({
 };
 
 // ===== LEFT NAVBAR COMPONENT =====
-// shifted left = 340px (judul sudah digeser ke kiri 40px, jadi jarak tetap nyaman)
 const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
   return (
     <div
@@ -2113,6 +2100,7 @@ const LiveChatAgent = ({
     return () => unsubscribe();
   }, [db, user, isAdmin, selectedTicket, isMounted]);
 
+  // Fetch last 3 messages preview per ticket with rolling text animation
   useEffect(() => {
     if (!db || !tickets.length || !isMounted) return;
     const unsubscribes: (() => void)[] = [];
@@ -2626,49 +2614,111 @@ const LiveChatAgent = ({
     );
   };
 
-  const renderTicketPreview = (ticketId: string) => {
+  // ===== NEW ROLLING TEXT PREVIEW COMPONENT =====
+  const RollingMessagePreview = ({ ticketId, isAdmin }: { ticketId: string; isAdmin: boolean }) => {
+    const containerRef = useRef<HTMLDivElement>(null);
+    const textRef = useRef<HTMLDivElement>(null);
+    const lastMessageRef = useRef<string>("");
     const previews = ticketPreviews[ticketId] || [];
-    if (previews.length === 0) return null;
-    const ordered = [...previews].reverse();
-    const userTextColor = "#ffffff";
-    const agentTextColor = isAdmin ? "#0D3CFC" : "#ffffff";
-    const labelUserColor = isAdmin ? "#888" : "#ffffff";
-    const labelAgentColor = isAdmin ? "#0D3CFC" : "#ffffff";
+    const orderedPreviews = [...previews].reverse(); // oldest to newest
+
+    const latestPreview = orderedPreviews.length > 0 ? orderedPreviews[orderedPreviews.length - 1] : null;
+
+    useEffect(() => {
+      if (!latestPreview || !containerRef.current || !textRef.current) return;
+
+      const messageKey = latestPreview.text + latestPreview.senderName;
+      if (messageKey === lastMessageRef.current) return;
+      lastMessageRef.current = messageKey;
+
+      const container = containerRef.current;
+      const el = textRef.current;
+
+      // Format message based on whether it's from agent or user
+      let displayText = "";
+      if (latestPreview.isFromAgent) {
+        displayText = `Agent ${latestPreview.senderName}: ${latestPreview.text}`;
+      } else {
+        // For user messages, check if it's a group or individual
+        const ticket = tickets.find((t) => t.id === ticketId);
+        if (ticket?.isAnnouncement || ticket?.isBroadcast) {
+          displayText = `${latestPreview.senderName} from group: ${latestPreview.text}`;
+        } else {
+          displayText = `${latestPreview.senderName} from: ${latestPreview.text}`;
+        }
+      }
+
+      // Clear and rebuild text for rolling animation
+      el.innerHTML = "";
+      const chars = displayText.split("");
+      chars.forEach((char) => {
+        const span = document.createElement("span");
+        span.textContent = char;
+        span.style.display = "inline-block";
+        span.style.opacity = "0";
+        span.style.transform = "translateY(20px)";
+        el.appendChild(span);
+      });
+
+      const charElements = el.querySelectorAll("span");
+      gsap.to(charElements, {
+        opacity: 1,
+        y: 0,
+        duration: 0.5,
+        stagger: 0.02,
+        ease: "back.out(1.7)",
+        overwrite: true,
+      });
+
+      // Animate container slide in
+      gsap.fromTo(
+        container,
+        { opacity: 0, y: 15 },
+        { opacity: 1, y: 0, duration: 0.6, ease: "power3.out", overwrite: true }
+      );
+    }, [latestPreview, ticketId, isAdmin, tickets]);
+
+    if (!latestPreview) return null;
+
+    const isFromAgent = latestPreview.isFromAgent;
+    const textColor = isAdmin ? (isFromAgent ? "#0D3CFC" : "#333") : "#ffffff";
+    const bgColor = isAdmin ? "#f0f4ff" : "rgba(255,255,255,0.12)";
+    const borderColor = isAdmin ? "#0D3CFC" : "rgba(255,255,255,0.3)";
+
     return (
-      <div style={{ marginTop: "6px", display: "flex", flexDirection: "column", gap: "3px" }}>
-        {ordered.map((p, i) => (
-          <div
-            key={i}
-            style={{
-              fontSize: "11px",
-              color: p.isFromAgent ? agentTextColor : userTextColor,
-              fontStyle: "italic",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-              fontFamily: FONT_FAMILY,
-              display: "flex",
-              alignItems: "center",
-              gap: "4px",
-            }}
-          >
-            <span
-              style={{
-                fontWeight: 600,
-                color: p.isFromAgent ? labelAgentColor : labelUserColor,
-                flexShrink: 0,
-              }}
-            >
-              {p.isFromAgent ? "Agent:" : "User:"}
-            </span>
-            <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>
-              {p.text.length > 30 ? p.text.substring(0, 30) + "..." : p.text}
-            </span>
-          </div>
-        ))}
+      <div
+        ref={containerRef}
+        style={{
+          marginTop: "8px",
+          padding: "6px 10px",
+          backgroundColor: bgColor,
+          borderRadius: "8px",
+          border: `1px solid ${borderColor}`,
+          overflow: "hidden",
+          minHeight: "28px",
+          display: "flex",
+          alignItems: "center",
+        }}
+      >
+        <div
+          ref={textRef}
+          style={{
+            fontSize: "11px",
+            color: textColor,
+            fontFamily: FONT_FAMILY,
+            fontWeight: 500,
+            lineHeight: 1.3,
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            width: "100%",
+          }}
+        />
       </div>
     );
   };
+
+  // ===== END ROLLING TEXT PREVIEW =====
 
   const renderSearchBar = () => {
     const isDark = !isAdmin;
@@ -2706,7 +2756,7 @@ const LiveChatAgent = ({
               background: "transparent",
               border: "none",
               outline: "none",
-              color: textColor,
+              color: "#ffffff",
               fontSize: "12px",
               fontFamily: FONT_FAMILY,
               padding: 0,
@@ -3494,7 +3544,7 @@ const LiveChatAgent = ({
 
             {renderSearchBar()}
 
-            <div style={{ overflowY: "auto", flex: 1 }}>
+            <div style={{ overflowY: "auto", flex: 1, minHeight: 0 }}>
               {isAdmin ? (
                 <>
                   {waitingTickets.length > 0 && (
@@ -3552,7 +3602,8 @@ const LiveChatAgent = ({
                           >
                             {ticket.topic}
                           </div>
-                          {renderTicketPreview(ticket.id)}
+                          {/* Rolling text preview */}
+                          <RollingMessagePreview ticketId={ticket.id} isAdmin={true} />
                         </div>
                       ))}
                     </div>
@@ -3609,7 +3660,8 @@ const LiveChatAgent = ({
                           >
                             {ticket.topic}
                           </div>
-                          {renderTicketPreview(ticket.id)}
+                          {/* Rolling text preview */}
+                          <RollingMessagePreview ticketId={ticket.id} isAdmin={true} />
                         </div>
                       ))}
                     </div>
@@ -3667,7 +3719,8 @@ const LiveChatAgent = ({
                           >
                             {ticket.topic}
                           </div>
-                          {renderTicketPreview(ticket.id)}
+                          {/* Rolling text preview */}
+                          <RollingMessagePreview ticketId={ticket.id} isAdmin={true} />
                         </div>
                       ))}
                     </div>
@@ -3736,7 +3789,8 @@ const LiveChatAgent = ({
                           >
                             {ticket.topic}
                           </div>
-                          {renderTicketPreview(ticket.id)}
+                          {/* Rolling text preview */}
+                          <RollingMessagePreview ticketId={ticket.id} isAdmin={false} />
                           <div
                             style={{
                               display: "flex",
