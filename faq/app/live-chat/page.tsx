@@ -1131,16 +1131,6 @@ interface ChatGroup {
   createdAt: any;
 }
 
-interface GroupMessage {
-  id: string;
-  senderId: string;
-  senderName: string;
-  text: string;
-  timestamp: any;
-  read: boolean;
-  isEncrypted?: boolean;
-}
-
 // ===== LIVE CHAT COMPONENT =====
 const LiveChat = ({
   user,
@@ -1171,8 +1161,15 @@ const LiveChat = ({
   const [groups, setGroups] = useState<ChatGroup[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [messagePreviews, setMessagePreviews] = useState<{ [contactId: string]: string }>({});
+  const [contactMsgCounts, setContactMsgCounts] = useState<{ [contactId: string]: number }>({});
 
-  // Add Group inline form
+  // ===== ADD USER (INLINE, NO MODAL) =====
+  const [showAddUserForm, setShowAddUserForm] = useState(false);
+  const [allUsers, setAllUsers] = useState<ChatContact[]>([]);
+  const [userSearchQuery, setUserSearchQuery] = useState("");
+  const [addingUserId, setAddingUserId] = useState<string | null>(null);
+
+  // ===== ADD GROUP (INLINE, NO MODAL) =====
   const [showAddGroupForm, setShowAddGroupForm] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
   const [newGroupDesc, setNewGroupDesc] = useState("");
@@ -1185,10 +1182,13 @@ const LiveChat = ({
   const chatMessagesContainerRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const liveChatTitleRef = useRef<HTMLHeadingElement>(null);
+  const addUserBtnRef = useRef<HTMLButtonElement>(null);
   const addGroupBtnRef = useRef<HTMLButtonElement>(null);
+  const addUserFormRef = useRef<HTMLDivElement>(null);
   const addGroupFormRef = useRef<HTMLDivElement>(null);
   const contactItemRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const groupItemRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+  const userPickerItemRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
   useEffect(() => {
     setIsMounted(true);
@@ -1223,6 +1223,25 @@ const LiveChat = ({
     }
   }, [isMounted]);
 
+  // GSAP Add User button animation
+  useEffect(() => {
+    if (!isMounted) return;
+    if (addUserBtnRef.current) {
+      gsap.fromTo(
+        addUserBtnRef.current,
+        { scale: 0, rotation: -180, opacity: 0 },
+        {
+          scale: 1,
+          rotation: 0,
+          opacity: 1,
+          duration: 0.8,
+          ease: "back.out(1.7)",
+          delay: 0.4,
+        }
+      );
+    }
+  }, [isMounted]);
+
   // GSAP Add Group button animation
   useEffect(() => {
     if (!isMounted) return;
@@ -1241,6 +1260,30 @@ const LiveChat = ({
       );
     }
   }, [isMounted]);
+
+  // GSAP Add User form open/close
+  useEffect(() => {
+    if (!addUserFormRef.current) return;
+    if (showAddUserForm) {
+      gsap.set(addUserFormRef.current, { display: "block" });
+      gsap.fromTo(
+        addUserFormRef.current,
+        { height: 0, opacity: 0, y: -20 },
+        { height: "auto", opacity: 1, y: 0, duration: 0.5, ease: "back.out(1.4)" }
+      );
+    } else {
+      gsap.to(addUserFormRef.current, {
+        height: 0,
+        opacity: 0,
+        y: -20,
+        duration: 0.3,
+        ease: "power2.in",
+        onComplete: () => {
+          if (addUserFormRef.current) gsap.set(addUserFormRef.current, { display: "none" });
+        },
+      });
+    }
+  }, [showAddUserForm]);
 
   // GSAP Add Group form open/close
   useEffect(() => {
@@ -1265,6 +1308,22 @@ const LiveChat = ({
       });
     }
   }, [showAddGroupForm]);
+
+  // GSAP animate user picker items
+  useEffect(() => {
+    if (!isMounted || !showAddUserForm) return;
+    allUsers.forEach((u) => {
+      const el = userPickerItemRefs.current[u.id];
+      if (el && !el.dataset.animated) {
+        el.dataset.animated = "true";
+        gsap.fromTo(
+          el,
+          { x: -30, opacity: 0 },
+          { x: 0, opacity: 1, duration: 0.4, ease: "back.out(1.4)" }
+        );
+      }
+    });
+  }, [allUsers, showAddUserForm, isMounted]);
 
   // GSAP animate contacts on change
   useEffect(() => {
@@ -1322,7 +1381,7 @@ const LiveChat = ({
     checkBan();
   }, [user, isMounted]);
 
-  // ===== LOAD REGISTERED USERS (CONTACTS) FROM FIREBASE =====
+  // ===== LOAD ALL REGISTERED USERS (untuk Add User picker) =====
   useEffect(() => {
     if (!db || !user || !isMounted) return;
     const q = query(collection(db, "users"), orderBy("displayName", "asc"));
@@ -1330,7 +1389,7 @@ const LiveChat = ({
       const userList: ChatContact[] = [];
       snapshot.forEach((docSnap: any) => {
         const data = docSnap.data();
-        if (data.uid !== user.uid) {
+        if (docSnap.id !== user.uid) {
           userList.push({
             id: docSnap.id,
             userId: docSnap.id,
@@ -1342,7 +1401,34 @@ const LiveChat = ({
           });
         }
       });
-      setContacts(userList);
+      setAllUsers(userList);
+    });
+    return () => unsubscribe();
+  }, [db, user, isMounted]);
+
+  // ===== LOAD MY CONTACTS (yang sudah di-add user) =====
+  useEffect(() => {
+    if (!db || !user || !isMounted) return;
+    const q = query(
+      collection(db, "user_contacts"),
+      where("ownerId", "==", user.uid),
+      orderBy("addedAt", "desc")
+    );
+    const unsubscribe = onSnapshot(q, (snapshot: any) => {
+      const contactList: ChatContact[] = [];
+      snapshot.forEach((docSnap: any) => {
+        const data = docSnap.data();
+        contactList.push({
+          id: docSnap.id,
+          userId: data.contactId,
+          userName: data.contactName,
+          userEmail: data.contactEmail,
+          userPhoto: data.contactPhoto || "",
+          online: data.online || false,
+          lastSeen: data.lastSeen,
+        });
+      });
+      setContacts(contactList);
     });
     return () => unsubscribe();
   }, [db, user, isMounted]);
@@ -1374,9 +1460,10 @@ const LiveChat = ({
       const q = query(
         collection(db, "direct_messages", chatId, "messages"),
         orderBy("timestamp", "desc"),
-        limit(1)
+        limit(3)
       );
       const unsub = onSnapshot(q, async (snapshot: any) => {
+        setContactMsgCounts((prev) => ({ ...prev, [contact.id]: snapshot.size }));
         if (!snapshot.empty) {
           const data = snapshot.docs[0].data();
           let text = data.text || "";
@@ -1479,6 +1566,34 @@ const LiveChat = ({
     });
   }, [messages, selectedContact, selectedGroup, db, user, isMounted]);
 
+  // ===== ADD USER TO MY CONTACTS (langsung dari picker) =====
+  const handleAddUserToContacts = async (pickedUser: ChatContact) => {
+    if (!db || !user) return;
+    setAddingUserId(pickedUser.id);
+    try {
+      // Cek apakah sudah ada
+      const existing = contacts.find((c) => c.userId === pickedUser.userId);
+      if (!existing) {
+        await addDoc(collection(db, "user_contacts"), {
+          ownerId: user.uid,
+          contactId: pickedUser.userId,
+          contactName: pickedUser.userName,
+          contactEmail: pickedUser.userEmail,
+          contactPhoto: pickedUser.userPhoto || "",
+          addedAt: serverTimestamp(),
+        });
+      }
+      setSelectedContact(pickedUser);
+      setSelectedGroup(null);
+      setShowAddUserForm(false);
+      setUserSearchQuery("");
+    } catch (error) {
+      console.error("Error adding user to contacts:", error);
+    } finally {
+      setAddingUserId(null);
+    }
+  };
+
   // ===== ADD GROUP (INLINE, NO MODAL) =====
   const handleAddGroup = async () => {
     if (!db || !user) return;
@@ -1527,7 +1642,6 @@ const LiveChat = ({
   const sendMessage = async () => {
     if (!db || !messageText.trim() || !user) return;
 
-    // Check ban
     if (user) {
       try {
         const status = await checkBanStatus(user.uid);
@@ -1545,7 +1659,6 @@ const LiveChat = ({
       setMessageText("");
       return;
     }
-    // Check banned content
     const checkResult = containsBannedContent(messageText);
     if (checkResult.isBanned) {
       await banUserPermanent(
@@ -1673,6 +1786,13 @@ const LiveChat = ({
     (g) =>
       g.groupName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       g.description.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Filter untuk user picker (Add User)
+  const filteredAllUsers = allUsers.filter(
+    (u) =>
+      u.userName.toLowerCase().includes(userSearchQuery.toLowerCase()) ||
+      u.userEmail.toLowerCase().includes(userSearchQuery.toLowerCase())
   );
 
   if (checkingBan) {
@@ -1827,6 +1947,118 @@ const LiveChat = ({
     );
   }
 
+  // ===== RENDER CHAT LIST ITEM (contact/group) =====
+  const renderChatListItem = (item: ChatContact | ChatGroup, type: "contact" | "group") => {
+    const isContact = type === "contact";
+    const contact = item as ChatContact;
+    const group = item as ChatGroup;
+    const isActive = isContact
+      ? selectedContact?.id === contact.id
+      : selectedGroup?.id === group.id;
+    const preview = isContact ? messagePreviews[contact.id] : "";
+    const msgCount = isContact ? contactMsgCounts[contact.id] || 0 : 0;
+    const displayName = isContact ? contact.userName : group.groupName;
+    const subInfo = isContact
+      ? contact.userEmail
+      : `${group.members.length} members · ${group.description}`;
+
+    return (
+      <motion.div
+        key={isContact ? contact.id : group.id}
+        ref={(el) => {
+          if (isContact) contactItemRefs.current[contact.id] = el;
+          else groupItemRefs.current[group.id] = el;
+        }}
+        layout
+        initial={{ opacity: 0, x: -40 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -40 }}
+        transition={{ duration: 0.35, ease: "easeOut" }}
+        onClick={() => {
+          if (isContact) {
+            setSelectedContact(contact);
+            setSelectedGroup(null);
+          } else {
+            setSelectedGroup(group);
+            setSelectedContact(null);
+          }
+        }}
+        style={{
+          padding: "14px 16px",
+          borderLeft: isActive ? `3px solid ${WHITE}` : "3px solid transparent",
+          backgroundColor: isActive ? "rgba(255,255,255,0.14)" : "transparent",
+          cursor: "pointer",
+          borderBottom: "1px solid rgba(255,255,255,0.08)",
+          transition: "background-color 0.2s ease",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "6px",
+            gap: "8px",
+            flexWrap: "wrap",
+          }}
+        >
+          <div
+            style={{
+              fontWeight: 700,
+              fontSize: "14px",
+              color: WHITE,
+              minWidth: 0,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              flex: "1 1 auto",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+            }}
+          >
+            {displayName}
+            {isContact && contact.online && (
+              <span
+                style={{
+                  display: "inline-block",
+                  width: "8px",
+                  height: "8px",
+                  borderRadius: "50%",
+                  backgroundColor: "#4CAF50",
+                  flexShrink: 0,
+                }}
+              />
+            )}
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px", flexShrink: 0 }}>
+            <span
+              style={{
+                fontSize: "10px",
+                color: "rgba(255,255,255,0.75)",
+                fontWeight: 700,
+              }}
+            >
+              {isContact ? `${msgCount} msgs` : `${group.members.length} members`}
+            </span>
+          </div>
+        </div>
+        <div
+          style={{
+            fontSize: "11px",
+            color: "rgba(255,255,255,0.65)",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            fontFamily: FONT_FAMILY,
+          }}
+        >
+          {isContact ? (preview ? preview : subInfo) : subInfo}
+        </div>
+      </motion.div>
+    );
+  };
+
   return (
     <div style={{ marginTop: "80px", paddingTop: "30px" }}>
       <div
@@ -1894,7 +2126,7 @@ const LiveChat = ({
           borderRadius: "12px",
         }}
       >
-        {/* ===== LEFT SIDEBAR: CONTACTS + GROUPS ===== */}
+        {/* ===== LEFT SIDEBAR: CHAT LIST (CONTACTS + GROUPS) ===== */}
         <div
           className="chat-list-container"
           style={{
@@ -1926,7 +2158,7 @@ const LiveChat = ({
               flexShrink: 0,
             }}
           >
-            <span style={{ color: WHITE, letterSpacing: "0.3px" }}>Chats</span>
+            <span style={{ color: WHITE, letterSpacing: "0.3px" }}>Chat History</span>
             <span
               style={{
                 fontSize: "11px",
@@ -1967,7 +2199,7 @@ const LiveChat = ({
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search contacts or groups..."
+                placeholder="Search chats..."
                 style={{
                   flex: 1,
                   background: "transparent",
@@ -1981,14 +2213,31 @@ const LiveChat = ({
                   fontWeight: 600,
                 }}
               />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  style={{
+                    background: "transparent",
+                    border: "none",
+                    color: "#ffffff",
+                    cursor: "pointer",
+                    fontSize: "14px",
+                    padding: 0,
+                    lineHeight: 1,
+                    fontFamily: FONT_FAMILY,
+                    fontWeight: 700,
+                  }}
+                >
+                  ×
+                </button>
+              )}
             </div>
           </div>
 
-          {/* Contacts & Groups List */}
+          {/* Chat List */}
           <div style={{ overflowY: "auto", flex: 1, minHeight: 0 }}>
-            {/* Groups Section */}
             {filteredGroups.length > 0 && (
-              <div>
+              <>
                 <div
                   style={{
                     padding: "10px 16px 6px",
@@ -2001,78 +2250,14 @@ const LiveChat = ({
                 >
                   Groups
                 </div>
-                {filteredGroups.map((group) => {
-                  const isSelected = selectedGroup?.id === group.id;
-                  return (
-                    <div
-                      key={group.id}
-                      ref={(el) => { groupItemRefs.current[group.id] = el; }}
-                      onClick={() => {
-                        setSelectedGroup(group);
-                        setSelectedContact(null);
-                      }}
-                      style={{
-                        padding: "12px 16px",
-                        borderLeft: isSelected ? `3px solid ${WHITE}` : "3px solid transparent",
-                        backgroundColor: isSelected ? "rgba(255,255,255,0.14)" : "transparent",
-                        cursor: "pointer",
-                        borderBottom: "1px solid rgba(255,255,255,0.06)",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "10px",
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: "36px",
-                          height: "36px",
-                          borderRadius: "8px",
-                          backgroundColor: WHITE,
-                          color: BLUE,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          fontWeight: 800,
-                          fontSize: "14px",
-                          flexShrink: 0,
-                        }}
-                      >
-                        {group.groupName.charAt(0).toUpperCase()}
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div
-                          style={{
-                            fontSize: "13px",
-                            fontWeight: 700,
-                            color: WHITE,
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
-                          }}
-                        >
-                          {group.groupName}
-                        </div>
-                        <div
-                          style={{
-                            fontSize: "10px",
-                            color: "rgba(255,255,255,0.6)",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
-                          }}
-                        >
-                          {group.members.length} members
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+                <AnimatePresence>
+                  {filteredGroups.map((group) => renderChatListItem(group, "group"))}
+                </AnimatePresence>
+              </>
             )}
 
-            {/* Contacts Section */}
             {filteredContacts.length > 0 && (
-              <div>
+              <>
                 <div
                   style={{
                     padding: "10px 16px 6px",
@@ -2085,104 +2270,10 @@ const LiveChat = ({
                 >
                   Contacts
                 </div>
-                {filteredContacts.map((contact) => {
-                  const isSelected = selectedContact?.id === contact.id;
-                  const preview = messagePreviews[contact.id];
-                  return (
-                    <div
-                      key={contact.id}
-                      ref={(el) => { contactItemRefs.current[contact.id] = el; }}
-                      onClick={() => {
-                        setSelectedContact(contact);
-                        setSelectedGroup(null);
-                      }}
-                      style={{
-                        padding: "12px 16px",
-                        borderLeft: isSelected ? `3px solid ${WHITE}` : "3px solid transparent",
-                        backgroundColor: isSelected ? "rgba(255,255,255,0.14)" : "transparent",
-                        cursor: "pointer",
-                        borderBottom: "1px solid rgba(255,255,255,0.06)",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "10px",
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: "36px",
-                          height: "36px",
-                          borderRadius: "8px",
-                          backgroundColor: WHITE,
-                          color: BLUE,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          fontWeight: 800,
-                          fontSize: "14px",
-                          flexShrink: 0,
-                          overflow: "hidden",
-                          position: "relative",
-                        }}
-                      >
-                        {contact.userPhoto ? (
-                          <img
-                            src={contact.userPhoto}
-                            alt={contact.userName}
-                            style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                          />
-                        ) : (
-                          contact.userName.charAt(0).toUpperCase()
-                        )}
-                        {contact.online && (
-                          <span
-                            style={{
-                              position: "absolute",
-                              bottom: 0,
-                              right: 0,
-                              width: "10px",
-                              height: "10px",
-                              borderRadius: "50%",
-                              backgroundColor: "#4CAF50",
-                              border: `2px solid ${BLUE}`,
-                            }}
-                          />
-                        )}
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div
-                          style={{
-                            fontSize: "13px",
-                            fontWeight: 700,
-                            color: WHITE,
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
-                          }}
-                        >
-                          {contact.userName}
-                        </div>
-                        <div
-                          style={{
-                            fontSize: "10px",
-                            color: "rgba(255,255,255,0.6)",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
-                          }}
-                        >
-                          {preview
-                            ? preview.length > 28
-                              ? preview.substring(0, 28) + "..."
-                              : preview
-                            : contact.online
-                            ? "Online"
-                            : "Offline"}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+                <AnimatePresence>
+                  {filteredContacts.map((contact) => renderChatListItem(contact, "contact"))}
+                </AnimatePresence>
+              </>
             )}
 
             {filteredContacts.length === 0 && filteredGroups.length === 0 && (
@@ -2194,12 +2285,12 @@ const LiveChat = ({
                   fontSize: "13px",
                 }}
               >
-                {searchQuery ? "No results found" : "No contacts or groups"}
+                {searchQuery ? "No results found" : "No contacts yet. Add a user to start chatting."}
               </div>
             )}
           </div>
 
-          {/* Add Group Button + Inline Form */}
+          {/* Add User + Add Group Buttons + Inline Forms */}
           <div
             style={{
               padding: "12px 16px",
@@ -2208,52 +2299,311 @@ const LiveChat = ({
               backgroundColor: BLUE,
             }}
           >
-            <button
-              ref={addGroupBtnRef}
-              onClick={() => setShowAddGroupForm(!showAddGroupForm)}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "8px",
-                width: "100%",
-                padding: "10px",
-                backgroundColor: WHITE,
-                color: BLUE,
-                border: `1.5px solid ${WHITE}`,
-                borderRadius: "8px",
-                fontSize: "13px",
-                fontWeight: 800,
-                cursor: "pointer",
-                fontFamily: FONT_FAMILY,
-                letterSpacing: "0.5px",
-                textTransform: "uppercase",
-              }}
-              onMouseEnter={(e) => {
-                gsap.to(e.currentTarget, {
-                  scale: 1.03,
-                  boxShadow: "0 0 20px rgba(255,255,255,0.3)",
-                  duration: 0.3,
-                });
-              }}
-              onMouseLeave={(e) => {
-                gsap.to(e.currentTarget, {
-                  scale: 1,
-                  boxShadow: "0 0 0px rgba(255,255,255,0)",
-                  duration: 0.3,
-                });
-              }}
-            >
-              <PlusIcon size={16} color={BLUE} />
-              Add Group
-            </button>
+            <div style={{ display: "flex", gap: "8px", marginBottom: "10px" }}>
+              <button
+                ref={addUserBtnRef}
+                onClick={() => {
+                  setShowAddUserForm(!showAddUserForm);
+                  setShowAddGroupForm(false);
+                }}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "6px",
+                  flex: 1,
+                  padding: "10px 8px",
+                  backgroundColor: WHITE,
+                  color: BLUE,
+                  border: `1.5px solid ${WHITE}`,
+                  borderRadius: "8px",
+                  fontSize: "12px",
+                  fontWeight: 800,
+                  cursor: "pointer",
+                  fontFamily: FONT_FAMILY,
+                  letterSpacing: "0.5px",
+                  textTransform: "uppercase",
+                }}
+                onMouseEnter={(e) => {
+                  gsap.to(e.currentTarget, {
+                    scale: 1.03,
+                    boxShadow: "0 0 20px rgba(255,255,255,0.3)",
+                    duration: 0.3,
+                  });
+                }}
+                onMouseLeave={(e) => {
+                  gsap.to(e.currentTarget, {
+                    scale: 1,
+                    boxShadow: "0 0 0px rgba(255,255,255,0)",
+                    duration: 0.3,
+                  });
+                }}
+              >
+                <PlusIcon size={14} color={BLUE} />
+                Add User
+              </button>
 
-            {/* Inline Add Group Form (No Modal) */}
+              <button
+                ref={addGroupBtnRef}
+                onClick={() => {
+                  setShowAddGroupForm(!showAddGroupForm);
+                  setShowAddUserForm(false);
+                }}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "6px",
+                  flex: 1,
+                  padding: "10px 8px",
+                  backgroundColor: "transparent",
+                  color: WHITE,
+                  border: `1.5px solid ${WHITE}`,
+                  borderRadius: "8px",
+                  fontSize: "12px",
+                  fontWeight: 800,
+                  cursor: "pointer",
+                  fontFamily: FONT_FAMILY,
+                  letterSpacing: "0.5px",
+                  textTransform: "uppercase",
+                }}
+                onMouseEnter={(e) => {
+                  gsap.to(e.currentTarget, {
+                    scale: 1.03,
+                    backgroundColor: "rgba(255,255,255,0.15)",
+                    duration: 0.3,
+                  });
+                }}
+                onMouseLeave={(e) => {
+                  gsap.to(e.currentTarget, {
+                    scale: 1,
+                    backgroundColor: "transparent",
+                    duration: 0.3,
+                  });
+                }}
+              >
+                <PlusIcon size={14} color={WHITE} />
+                Add Group
+              </button>
+            </div>
+
+            {/* ===== INLINE ADD USER FORM (NO MODAL) ===== */}
+            {showAddUserForm && (
+              <div
+                ref={addUserFormRef}
+                style={{
+                  backgroundColor: "rgba(255,255,255,0.1)",
+                  borderRadius: "10px",
+                  padding: "12px",
+                  border: "1px solid rgba(255,255,255,0.2)",
+                  overflow: "hidden",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: "11px",
+                    color: "rgba(255,255,255,0.8)",
+                    marginBottom: "8px",
+                    fontWeight: 800,
+                    letterSpacing: "0.5px",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Select User ({allUsers.length} available)
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    padding: "6px 10px",
+                    backgroundColor: "rgba(255,255,255,0.15)",
+                    border: "1px solid rgba(255,255,255,0.25)",
+                    borderRadius: "6px",
+                    marginBottom: "8px",
+                  }}
+                >
+                  <SearchIcon size={12} color="#ffffff" />
+                  <input
+                    type="text"
+                    value={userSearchQuery}
+                    onChange={(e) => setUserSearchQuery(e.target.value)}
+                    placeholder="Search user..."
+                    style={{
+                      flex: 1,
+                      background: "transparent",
+                      border: "none",
+                      outline: "none",
+                      color: "#ffffff",
+                      fontSize: "12px",
+                      fontFamily: FONT_FAMILY,
+                      padding: 0,
+                      caretColor: "#ffffff",
+                      fontWeight: 600,
+                    }}
+                  />
+                </div>
+                <div
+                  style={{
+                    maxHeight: "200px",
+                    overflowY: "auto",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "4px",
+                  }}
+                >
+                  {filteredAllUsers.length === 0 ? (
+                    <div
+                      style={{
+                        padding: "14px",
+                        textAlign: "center",
+                        color: "rgba(255,255,255,0.6)",
+                        fontSize: "12px",
+                      }}
+                    >
+                      No users found
+                    </div>
+                  ) : (
+                    filteredAllUsers.map((u) => {
+                      const alreadyAdded = contacts.some((c) => c.userId === u.userId);
+                      return (
+                        <div
+                          key={u.id}
+                          ref={(el) => { userPickerItemRefs.current[u.id] = el; }}
+                          onClick={() => {
+                            if (addingUserId) return;
+                            handleAddUserToContacts(u);
+                          }}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "10px",
+                            padding: "8px 10px",
+                            borderRadius: "6px",
+                            cursor: addingUserId ? "wait" : "pointer",
+                            backgroundColor: alreadyAdded
+                              ? "rgba(76,175,80,0.2)"
+                              : "rgba(255,255,255,0.05)",
+                            transition: "background-color 0.2s",
+                          }}
+                          onMouseEnter={(e) => {
+                            if (!alreadyAdded)
+                              (e.currentTarget as HTMLDivElement).style.backgroundColor =
+                                "rgba(255,255,255,0.15)";
+                          }}
+                          onMouseLeave={(e) => {
+                            if (!alreadyAdded)
+                              (e.currentTarget as HTMLDivElement).style.backgroundColor =
+                                "rgba(255,255,255,0.05)";
+                          }}
+                        >
+                          <div
+                            style={{
+                              width: "30px",
+                              height: "30px",
+                              borderRadius: "6px",
+                              backgroundColor: WHITE,
+                              color: BLUE,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              fontWeight: 800,
+                              fontSize: "12px",
+                              flexShrink: 0,
+                              overflow: "hidden",
+                              position: "relative",
+                            }}
+                          >
+                            {u.userPhoto ? (
+                              <img
+                                src={u.userPhoto}
+                                alt={u.userName}
+                                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                              />
+                            ) : (
+                              u.userName.charAt(0).toUpperCase()
+                            )}
+                            {u.online && (
+                              <span
+                                style={{
+                                  position: "absolute",
+                                  bottom: -1,
+                                  right: -1,
+                                  width: "8px",
+                                  height: "8px",
+                                  borderRadius: "50%",
+                                  backgroundColor: "#4CAF50",
+                                  border: `1.5px solid ${BLUE}`,
+                                }}
+                              />
+                            )}
+                          </div>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div
+                              style={{
+                                fontSize: "12px",
+                                fontWeight: 700,
+                                color: WHITE,
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              {u.userName}
+                            </div>
+                            <div
+                              style={{
+                                fontSize: "10px",
+                                color: "rgba(255,255,255,0.6)",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              {u.userEmail}
+                            </div>
+                          </div>
+                          {alreadyAdded && (
+                            <span
+                              style={{
+                                fontSize: "9px",
+                                fontWeight: 800,
+                                color: WHITE,
+                                backgroundColor: "rgba(76,175,80,0.9)",
+                                padding: "2px 6px",
+                                borderRadius: "4px",
+                                letterSpacing: "0.5px",
+                                textTransform: "uppercase",
+                                flexShrink: 0,
+                              }}
+                            >
+                              Added
+                            </span>
+                          )}
+                          {addingUserId === u.id && (
+                            <span
+                              style={{
+                                fontSize: "10px",
+                                color: WHITE,
+                                flexShrink: 0,
+                              }}
+                            >
+                              ...
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* ===== INLINE ADD GROUP FORM (NO MODAL) ===== */}
             {showAddGroupForm && (
               <div
                 ref={addGroupFormRef}
                 style={{
-                  marginTop: "12px",
                   backgroundColor: "rgba(255,255,255,0.1)",
                   borderRadius: "10px",
                   padding: "14px",
@@ -2324,7 +2674,7 @@ const LiveChat = ({
                     gap: "4px",
                   }}
                 >
-                  {contacts.map((c) => (
+                  {allUsers.map((c) => (
                     <label
                       key={c.id}
                       style={{
@@ -2444,9 +2794,28 @@ const LiveChat = ({
                       color: WHITE,
                       fontFamily: FONT_FAMILY,
                       marginBottom: "4px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
                     }}
                   >
                     {selectedContact ? selectedContact.userName : selectedGroup?.groupName}
+                    {selectedContact && selectedContact.online && (
+                      <span
+                        style={{
+                          fontSize: "10px",
+                          fontWeight: 800,
+                          color: WHITE,
+                          backgroundColor: "rgba(76,175,80,0.9)",
+                          padding: "2px 8px",
+                          borderRadius: "4px",
+                          letterSpacing: "0.5px",
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        Online
+                      </span>
+                    )}
                   </div>
                   <div
                     style={{
@@ -2456,9 +2825,7 @@ const LiveChat = ({
                     }}
                   >
                     {selectedContact
-                      ? selectedContact.online
-                        ? "Online"
-                        : "Offline"
+                      ? selectedContact.userEmail
                       : `${selectedGroup?.members.length} members · ${selectedGroup?.description}`}
                   </div>
                 </div>
@@ -2489,7 +2856,7 @@ const LiveChat = ({
                       fontFamily: FONT_FAMILY,
                     }}
                   >
-                    No messages yet. Start the conversation!
+                    No messages yet
                   </div>
                 ) : (
                   <AnimatePresence initial={false}>
@@ -2626,7 +2993,7 @@ const LiveChat = ({
                 fontFamily: FONT_FAMILY,
               }}
             >
-              Select a contact or group to start chatting
+              Select a chat from the list on the left
             </div>
           )}
         </div>
