@@ -25,12 +25,16 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 
-// ===== REGISTER GSAP PLUGINS =====
+// ================================================================
+// GSAP PLUGINS
+// ================================================================
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, SplitText);
 }
 
-// ===== FIREBASE CONFIG =====
+// ================================================================
+// FIREBASE CONFIG
+// ================================================================
 const firebaseConfig = {
   apiKey: "AIzaSyD_htQZ1TClnXKZGRJ4izbMQ02y6V3aNAQ",
   authDomain: "wawa44-58d1e.firebaseapp.com",
@@ -52,14 +56,19 @@ if (typeof window !== "undefined") {
   db = getFirestore(app);
 }
 
-// ===== CONSTANTS =====
+// ================================================================
+// CONSTANTS
+// ================================================================
 const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
 const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
+const BROADCAST_SENDER_NAME = "Menuru";
 const BLUE = "#0D3CFC";
 const WHITE = "#FFFFFF";
 const BLACK = "#000000";
 
-// ===== ENCRYPTION (AES-256-GCM) =====
+// ================================================================
+// ENCRYPTION (AES-256-GCM)
+// ================================================================
 const ENCRYPTION_KEY_BASE64 = "bWVudXJ1LXNlY3JldC1rZXktMjAyNi0zMmJ5dGVzISEh";
 const IV_LENGTH = 12;
 
@@ -125,20 +134,15 @@ async function decryptMessage(encrypted: string): Promise<string> {
   try {
     if (typeof window === "undefined" || !window.crypto) {
       if (encrypted.startsWith("encrypted:")) {
-        const encoded = encrypted.substring("encrypted:".length);
-        return decodeURIComponent(escape(atob(encoded)));
+        return decodeURIComponent(escape(atob(encrypted.substring("encrypted:".length))));
       }
       return encrypted;
     }
     if (encrypted.startsWith("plain:")) {
-      const encoded = encrypted.substring("plain:".length);
-      return decodeURIComponent(escape(atob(encoded)));
+      return decodeURIComponent(escape(atob(encrypted.substring("plain:".length))));
     }
-    if (!encrypted.startsWith("encrypted:")) {
-      return encrypted;
-    }
-    const base64Data = encrypted.substring("encrypted:".length);
-    const combined = base64ToUint8Array(base64Data);
+    if (!encrypted.startsWith("encrypted:")) return encrypted;
+    const combined = base64ToUint8Array(encrypted.substring("encrypted:".length));
     const iv = combined.slice(0, IV_LENGTH);
     const encryptedData = combined.slice(IV_LENGTH);
     const key = await getCryptoKey();
@@ -152,9 +156,7 @@ async function decryptMessage(encrypted: string): Promise<string> {
     console.error("Decryption error:", error);
     if (encrypted.startsWith("encrypted:") || encrypted.startsWith("plain:")) {
       try {
-        const encoded = encrypted.includes(":")
-          ? encrypted.split(":")[1]
-          : encrypted;
+        const encoded = encrypted.includes(":") ? encrypted.split(":")[1] : encrypted;
         return decodeURIComponent(escape(atob(encoded)));
       } catch {
         return "[Message cannot be decrypted]";
@@ -164,7 +166,9 @@ async function decryptMessage(encrypted: string): Promise<string> {
   }
 }
 
-// ===== ANTI-BOT KEYWORDS =====
+// ================================================================
+// ANTI-BOT KEYWORDS
+// ================================================================
 const BAN_KEYWORDS = {
   JUDOL: [
     "judi", "slot", "poker", "casino", "roulette", "blackjack", "baccarat",
@@ -225,12 +229,10 @@ function containsBannedContent(text: string): { isBanned: boolean; reason: strin
       return { isBanned: true, reason: `Suspicious Link (${keyword})` };
     }
   }
-  const ipPattern = /[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+/;
-  if (ipPattern.test(lowerText)) {
+  if (/[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+/.test(lowerText)) {
     return { isBanned: true, reason: "Suspicious IP Address" };
   }
-  const repeatedNumber = /[0-9]{10,}/;
-  if (repeatedNumber.test(lowerText)) {
+  if (/[0-9]{10,}/.test(lowerText)) {
     return { isBanned: true, reason: "Suspicious Number" };
   }
   const transferPatterns = [
@@ -250,7 +252,9 @@ function containsBannedContent(text: string): { isBanned: boolean; reason: strin
   return { isBanned: false, reason: "" };
 }
 
-// ===== BAN USER PERMANENT =====
+// ================================================================
+// BAN USER PERMANENT
+// ================================================================
 async function banUserPermanent(
   userId: string,
   userEmail: string,
@@ -299,7 +303,9 @@ async function banUserPermanent(
   }
 }
 
-// ===== CHECK BAN STATUS =====
+// ================================================================
+// CHECK BAN STATUS
+// ================================================================
 async function checkBanStatus(userId: string): Promise<{
   isBanned: boolean;
   reason: string;
@@ -360,7 +366,9 @@ async function checkBanStatus(userId: string): Promise<{
   }
 }
 
-// ===== TYPES / INTERFACES =====
+// ================================================================
+// TYPES / INTERFACES
+// ================================================================
 interface ChatMessage {
   id: string;
   senderId: string;
@@ -431,60 +439,32 @@ interface BroadcastItem {
   isEncrypted?: boolean;
 }
 
-// ===== SVG ICONS =====
+// ================================================================
+// SVG ICONS
+// ================================================================
 const ArrowRight = ({ size = 20, color = "currentColor" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <path
-      d="M5 12H19M19 12L12 5M19 12L12 19"
-      stroke={color}
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
+    <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
 const CheckIcon = ({ size = 12, color = "currentColor" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <path
-      d="M20 6L9 17L4 12"
-      stroke={color}
-      strokeWidth="3"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
+    <path d="M20 6L9 17L4 12" stroke={color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
 const DoubleCheckIcon = ({ size = 12, color = "currentColor" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <path
-      d="M1 12L5 16L13 8"
-      stroke={color}
-      strokeWidth="3"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M11 12L15 16L23 8"
-      stroke={color}
-      strokeWidth="3"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
+    <path d="M1 12L5 16L13 8" stroke={color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M11 12L15 16L23 8" stroke={color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
 const ClockIcon = ({ size = 12, color = "currentColor" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <circle cx="12" cy="12" r="10" stroke={color} strokeWidth="2.5" />
-    <path
-      d="M12 6V12L16 14"
-      stroke={color}
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
+    <path d="M12 6V12L16 14" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
@@ -505,119 +485,57 @@ const SearchIcon = ({ size = 16, color = "currentColor" }: { size?: number; colo
 
 const CloseIcon = ({ size = 18, color = "currentColor" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <path
-      d="M6 6L18 18M18 6L6 18"
-      stroke={color}
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
+    <path d="M6 6L18 18M18 6L6 18" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
 const PlusIcon = ({ size = 20, color = "currentColor" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <path
-      d="M12 5V19M5 12H19"
-      stroke={color}
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
+    <path d="M12 5V19M5 12H19" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const MegaphoneIcon = ({ size = 20, color = "currentColor" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <path d="M3 11V13C3 13.5523 3.44772 14 4 14H6L11 19V5L6 10H4C3.44772 10 3 10.4477 3 11Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M15 8C16.6569 9.65685 16.6569 14.3431 15 16" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M18 5C21.5 8.5 21.5 15.5 18 19" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
 const PeopleIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <circle cx="12" cy="8" r="4" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    <path
-      d="M4 21V19C4 16.7909 5.79086 15 8 15H16C18.2091 15 20 16.7909 20 19V21"
-      stroke={color}
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
+    <path d="M4 21V19C4 16.7909 5.79086 15 8 15H16C18.2091 15 20 16.7909 20 19V21" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
 const TrustIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <path
-      d="M12 2L4 5V11C4 16 8 20 12 22C16 20 20 16 20 11V5L12 2Z"
-      stroke={color}
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M9 12L11 14L15 10"
-      stroke={color}
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
+    <path d="M12 2L4 5V11C4 16 8 20 12 22C16 20 20 16 20 11V5L12 2Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M9 12L11 14L15 10" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
 const CareerIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <rect
-      x="2"
-      y="7"
-      width="20"
-      height="14"
-      rx="2"
-      stroke={color}
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M8 7V5C8 3.89543 8.89543 3 10 3H14C15.1046 3 16 3.89543 16 5V7"
-      stroke={color}
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
+    <rect x="2" y="7" width="20" height="14" rx="2" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M8 7V5C8 3.89543 8.89543 3 10 3H14C15.1046 3 16 3.89543 16 5V7" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     <path d="M2 13H22" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
 const ResourcesIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <path
-      d="M4 4H10C11.1046 4 12 4.89543 12 6V20C12 18.8954 11.1046 18 10 18H4V4Z"
-      stroke={color}
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M20 4H14C12.8954 4 12 4.89543 12 6V20C12 18.8954 12.8954 18 14 18H20V4Z"
-      stroke={color}
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
+    <path d="M4 4H10C11.1046 4 12 4.89543 12 6V20C12 18.8954 11.1046 18 10 18H4V4Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M20 4H14C12.8954 4 12 4.89543 12 6V20C12 18.8954 12.8954 18 14 18H20V4Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
 const DocsIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <path
-      d="M14 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2Z"
-      stroke={color}
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M14 2V8H20"
-      stroke={color}
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
+    <path d="M14 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M14 2V8H20" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     <path d="M8 13H16" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     <path d="M8 17H16" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
@@ -625,18 +543,14 @@ const DocsIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: str
 
 const BrandIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <path
-      d="M20.59 13.41L11 3.83C10.6 3.43 10.06 3.2 9.5 3.2H4C2.9 3.2 2 4.1 2 5.2V10.7C2 11.26 2.22 11.8 2.63 12.2L12.21 21.79C13 22.57 14.27 22.57 15.06 21.79L20.59 16.26C21.37 15.47 21.37 14.2 20.59 13.41Z"
-      stroke={color}
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
+    <path d="M20.59 13.41L11 3.83C10.6 3.43 10.06 3.2 9.5 3.2H4C2.9 3.2 2 4.1 2 5.2V10.7C2 11.26 2.22 11.8 2.63 12.2L12.21 21.79C13 22.57 14.27 22.57 15.06 21.79L20.59 16.26C21.37 15.47 21.37 14.2 20.59 13.41Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     <circle cx="7" cy="7" r="1.5" fill={color} />
   </svg>
 );
 
-// ===== FOOTER LINKS =====
+// ================================================================
+// FOOTER LINKS
+// ================================================================
 const footerLinks = [
   { title: "Get in Touch", links: ["Contact", "Instagram", "Live Chat"] },
   {
@@ -649,12 +563,10 @@ const footerLinks = [
   },
 ];
 
-// ===== HERO MENURU TITLE =====
-const HeroMenuruTitle = ({
-  onNavbarShiftChange,
-}: {
-  onNavbarShiftChange: (shifted: boolean) => void;
-}) => {
+// ================================================================
+// HERO MENURU TITLE
+// ================================================================
+const HeroMenuruTitle = ({ onNavbarShiftChange }: { onNavbarShiftChange: (shifted: boolean) => void }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const [isMounted, setIsMounted] = useState(false);
@@ -666,16 +578,11 @@ const HeroMenuruTitle = ({
   useEffect(() => {
     if (!isMounted) return;
     if (!containerRef.current || !titleRef.current) return;
-
     const container = containerRef.current;
     const title = titleRef.current;
 
     const ctx = gsap.context(() => {
-      const split = new SplitText(title, {
-        type: "chars",
-        charsClass: "hero-menuru-char",
-      });
-
+      const split = new SplitText(title, { type: "chars", charsClass: "hero-menuru-char" });
       gsap.set(split.chars, {
         opacity: 0,
         y: 220,
@@ -684,7 +591,6 @@ const HeroMenuruTitle = ({
         transformOrigin: "50% 100%",
         force3D: true,
       });
-
       gsap.to(split.chars, {
         opacity: 1,
         y: 0,
@@ -780,7 +686,9 @@ const HeroMenuruTitle = ({
   );
 };
 
-// ===== FOOTER MENURU TITLE =====
+// ================================================================
+// FOOTER MENURU TITLE
+// ================================================================
 const FooterMenuruTitle = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLSpanElement>(null);
@@ -788,17 +696,12 @@ const FooterMenuruTitle = () => {
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (!titleRef.current || !containerRef.current) return;
-
     const title = titleRef.current;
     let split: any = null;
     let ctx: any = null;
 
     const setup = () => {
-      split = new SplitText(title, {
-        type: "chars",
-        charsClass: "footer-menuru-char",
-      });
-
+      split = new SplitText(title, { type: "chars", charsClass: "footer-menuru-char" });
       ctx = gsap.context(() => {
         gsap.set(split.chars, {
           yPercent: 120,
@@ -807,7 +710,6 @@ const FooterMenuruTitle = () => {
           transformOrigin: "50% 100%",
           force3D: true,
         });
-
         gsap.to(split.chars, {
           yPercent: 0,
           opacity: 1,
@@ -889,15 +791,7 @@ const FooterMenuruTitle = () => {
       >
         Menuru
       </span>
-
-      <div
-        style={{
-          width: "100%",
-          display: "flex",
-          justifyContent: "flex-start",
-          marginTop: "10px",
-        }}
-      >
+      <div style={{ width: "100%", display: "flex", justifyContent: "flex-start", marginTop: "10px" }}>
         <span
           style={{
             fontFamily: FONT_FAMILY,
@@ -915,7 +809,9 @@ const FooterMenuruTitle = () => {
   );
 };
 
-// ===== NAVBAR BUTTON =====
+// ================================================================
+// NAVBAR BUTTON
+// ================================================================
 const NavbarButton = ({
   label,
   panelTitle,
@@ -1064,26 +960,8 @@ const NavbarButton = ({
           }}
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{ display: "block" }}>
-            <line
-              ref={linesTopRef}
-              x1="4"
-              y1="7"
-              x2="20"
-              y2="7"
-              stroke={strokeColor}
-              strokeWidth="2.5"
-              strokeLinecap="round"
-            />
-            <line
-              ref={linesBottomRef}
-              x1="4"
-              y1="17"
-              x2="20"
-              y2="17"
-              stroke={strokeColor}
-              strokeWidth="2.5"
-              strokeLinecap="round"
-            />
+            <line ref={linesTopRef} x1="4" y1="7" x2="20" y2="7" stroke={strokeColor} strokeWidth="2.5" strokeLinecap="round" />
+            <line ref={linesBottomRef} x1="4" y1="17" x2="20" y2="17" stroke={strokeColor} strokeWidth="2.5" strokeLinecap="round" />
           </svg>
         </div>
       </div>
@@ -1128,7 +1006,6 @@ const NavbarButton = ({
                     Dokumentasi lengkap panduan produk, API, dan tutorial Menuru.
                   </p>
                 </div>
-
                 <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                     <BrandIcon size={22} color={titleTextColor} />
@@ -1188,7 +1065,6 @@ const NavbarButton = ({
                     Panduan lengkap dan referensi teknis.
                   </p>
                 </div>
-
                 <div
                   style={{
                     backgroundColor: panelBoxColor,
@@ -1245,123 +1121,117 @@ const NavbarButton = ({
   );
 };
 
-// ===== LEFT NAVBAR =====
-const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
-  return (
-    <div
+// ================================================================
+// LEFT NAVBAR
+// ================================================================
+const LeftNavbar = ({ shifted }: { shifted: boolean }) => (
+  <div
+    style={{
+      position: "fixed",
+      top: "20px",
+      left: shifted ? "340px" : "60px",
+      zIndex: 9000,
+      display: "flex",
+      alignItems: "center",
+      gap: "8px",
+      fontFamily: FONT_FAMILY,
+      transition: "left 0.6s cubic-bezier(0.65, 0, 0.35, 1)",
+      willChange: "left",
+    }}
+  >
+    <NavbarButton
+      label="Teams"
+      panelTitle="Trust"
+      panelDescription="Keamanan dan privasi Anda adalah prioritas kami dengan enkripsi end-to-end."
+      panelImage="/images/p0l.jpg"
+      panelRightTitle="Why Trust Us"
+      panelRightDescription="Sistem kami dipantau 24/7 untuk melindungi data Anda."
+      iconType="trust"
+      bigPanelWidth={850}
+      bigPanelHeight={260}
+    />
+    <NavbarButton
+      label="Individual"
+      panelTitle="Careers"
+      panelDescription="Bergabunglah dengan tim kami dan bangun karier yang bermakna di lingkungan yang suportif."
+      panelImage="/images/xxz.jpg"
+      panelRightTitle="Life at Menuru"
+      panelRightDescription="Budaya kerja kolaboratif, fleksibel, dan penuh peluang untuk tumbuh bersama."
+      iconType="career"
+      bigPanelWidth={850}
+      bigPanelHeight={260}
+    />
+    <NavbarButton
+      label="Resources"
+      panelTitle="Docs & Brand"
+      panelDescription="Akses dokumentasi lengkap dan aset brand Menuru dalam satu tempat."
+      panelImage="/images/p0l.jpg"
+      panelRightTitle="Docs & Brand"
+      panelRightDescription="Panduan, aset visual, dan referensi resmi brand Menuru."
+      iconType="resources"
+      bigPanelWidth={850}
+      bigPanelHeight={340}
+      buttonColor="#F2EA6B"
+      buttonHoverColor="#000000"
+      panelColor="#F04E23"
+      iconButtonColor="#000000"
+      iconButtonHoverColor="#F2EA6B"
+      panelBoxColor="rgba(255,255,255,0.15)"
+      panelBoxBorder="rgba(255,255,255,0.3)"
+      labelTextColor="#000000"
+      labelTextHoverColor="#ffffff"
+      titleTextColor="#ffffff"
+      descriptionTextColor="rgba(255,255,255,0.92)"
+      isResources={true}
+    />
+  </div>
+);
+
+// ================================================================
+// RIGHT NAVBAR
+// ================================================================
+const RightNavbar = () => (
+  <div
+    style={{
+      position: "fixed",
+      top: "20px",
+      right: "24px",
+      zIndex: 9000,
+      display: "flex",
+      alignItems: "center",
+      gap: "10px",
+      padding: "10px 18px 10px 16px",
+      backgroundColor: "rgba(0, 0, 0, 0.75)",
+      backdropFilter: "blur(20px)",
+      WebkitBackdropFilter: "blur(20px)",
+      borderRadius: "10px",
+      border: "1px solid rgba(255,255,255,0.15)",
+      boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
+      fontFamily: FONT_FAMILY,
+    }}
+  >
+    <PeopleIcon size={20} color="#ffffff" />
+    <Link
+      href="/signin"
       style={{
-        position: "fixed",
-        top: "20px",
-        left: shifted ? "340px" : "60px",
-        zIndex: 9000,
-        display: "flex",
-        alignItems: "center",
-        gap: "8px",
+        textDecoration: "none",
+        color: "#ffffff",
+        fontSize: "14px",
+        fontWeight: 600,
+        letterSpacing: "0.02em",
         fontFamily: FONT_FAMILY,
-        transition: "left 0.6s cubic-bezier(0.65, 0, 0.35, 1)",
-        willChange: "left",
+        whiteSpace: "nowrap",
       }}
     >
-      <NavbarButton
-        label="Teams"
-        panelTitle="Trust"
-        panelDescription="Keamanan dan privasi Anda adalah prioritas kami dengan enkripsi end-to-end."
-        panelImage="/images/p0l.jpg"
-        panelRightTitle="Why Trust Us"
-        panelRightDescription="Sistem kami dipantau 24/7 untuk melindungi data Anda."
-        iconType="trust"
-        bigPanelWidth={850}
-        bigPanelHeight={260}
-      />
+      Log In
+    </Link>
+  </div>
+);
 
-      <NavbarButton
-        label="Individual"
-        panelTitle="Careers"
-        panelDescription="Bergabunglah dengan tim kami dan bangun karier yang bermakna di lingkungan yang suportif."
-        panelImage="/images/xxz.jpg"
-        panelRightTitle="Life at Menuru"
-        panelRightDescription="Budaya kerja kolaboratif, fleksibel, dan penuh peluang untuk tumbuh bersama."
-        iconType="career"
-        bigPanelWidth={850}
-        bigPanelHeight={260}
-      />
-
-      <NavbarButton
-        label="Resources"
-        panelTitle="Docs & Brand"
-        panelDescription="Akses dokumentasi lengkap dan aset brand Menuru dalam satu tempat."
-        panelImage="/images/p0l.jpg"
-        panelRightTitle="Docs & Brand"
-        panelRightDescription="Panduan, aset visual, dan referensi resmi brand Menuru."
-        iconType="resources"
-        bigPanelWidth={850}
-        bigPanelHeight={340}
-        buttonColor="#F2EA6B"
-        buttonHoverColor="#000000"
-        panelColor="#F04E23"
-        iconButtonColor="#000000"
-        iconButtonHoverColor="#F2EA6B"
-        panelBoxColor="rgba(255,255,255,0.15)"
-        panelBoxBorder="rgba(255,255,255,0.3)"
-        labelTextColor="#000000"
-        labelTextHoverColor="#ffffff"
-        titleTextColor="#ffffff"
-        descriptionTextColor="rgba(255,255,255,0.92)"
-        isResources={true}
-      />
-    </div>
-  );
-};
-
-// ===== RIGHT NAVBAR =====
-const RightNavbar = () => {
-  return (
-    <div
-      style={{
-        position: "fixed",
-        top: "20px",
-        right: "24px",
-        zIndex: 9000,
-        display: "flex",
-        alignItems: "center",
-        gap: "10px",
-        padding: "10px 18px 10px 16px",
-        backgroundColor: "rgba(0, 0, 0, 0.75)",
-        backdropFilter: "blur(20px)",
-        WebkitBackdropFilter: "blur(20px)",
-        borderRadius: "10px",
-        border: "1px solid rgba(255,255,255,0.15)",
-        boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
-        fontFamily: FONT_FAMILY,
-      }}
-    >
-      <PeopleIcon size={20} color="#ffffff" />
-      <Link
-        href="/signin"
-        style={{
-          textDecoration: "none",
-          color: "#ffffff",
-          fontSize: "14px",
-          fontWeight: 600,
-          letterSpacing: "0.02em",
-          fontFamily: FONT_FAMILY,
-          whiteSpace: "nowrap",
-        }}
-      >
-        Log In
-      </Link>
-    </div>
-  );
-};
-
-// ===== CLOSE ROOM BUTTON (BG BIRU, ICON PUTIH) =====
-const CloseRoomButton = ({
-  onConfirm,
-  disabled,
-}: {
-  onConfirm: () => void;
-  disabled?: boolean;
-}) => {
+// ================================================================
+// CLOSE ROOM BUTTON (BG BIRU, ICON PUTIH)
+// ================================================================
+const CloseRoomButton = ({ onConfirm, disabled }: { onConfirm: () => void; disabled?: boolean }) => {
   const btnRef = useRef<HTMLButtonElement>(null);
   const iconRef = useRef<HTMLDivElement>(null);
 
@@ -1377,19 +1247,13 @@ const CloseRoomButton = ({
 
   const handleEnter = () => {
     if (disabled) return;
-    if (btnRef.current) {
-      gsap.to(btnRef.current, { scale: 1.08, duration: 0.25, ease: "power2.out" });
-    }
-    if (iconRef.current) {
-      gsap.to(iconRef.current, { rotate: "+=90", duration: 0.35, ease: "power2.out" });
-    }
+    if (btnRef.current) gsap.to(btnRef.current, { scale: 1.08, duration: 0.25, ease: "power2.out" });
+    if (iconRef.current) gsap.to(iconRef.current, { rotate: "+=90", duration: 0.35, ease: "power2.out" });
   };
 
   const handleLeave = () => {
     if (disabled) return;
-    if (btnRef.current) {
-      gsap.to(btnRef.current, { scale: 1, duration: 0.25, ease: "power2.out" });
-    }
+    if (btnRef.current) gsap.to(btnRef.current, { scale: 1, duration: 0.25, ease: "power2.out" });
   };
 
   const handleClick = () => {
@@ -1434,7 +1298,9 @@ const CloseRoomButton = ({
   );
 };
 
-// ===== ROLLING MESSAGE ITEM =====
+// ================================================================
+// ROLLING MESSAGE ITEM
+// ================================================================
 const RollingMessageItemComponent = ({ item }: { item: RollingMessageItem; index: number }) => {
   const itemRef = useRef<HTMLDivElement>(null);
   const senderRef = useRef<HTMLSpanElement>(null);
@@ -1543,7 +1409,451 @@ const RollingMessageItemComponent = ({ item }: { item: RollingMessageItem; index
   );
 };
 
-// ===== LIVE CHAT COMPONENT =====
+// ================================================================
+// ADMIN COMPOSER — Buat Announcement / Broadcast
+// ================================================================
+const AdminComposer = ({
+  user,
+  db,
+  isAdmin,
+}: {
+  user: any;
+  db: any;
+  isAdmin: boolean;
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [mode, setMode] = useState<"announcement" | "broadcast">("announcement");
+  const [title, setTitle] = useState("");
+  const [message, setMessage] = useState("");
+  const [topic, setTopic] = useState("General");
+  const [isSending, setIsSending] = useState(false);
+  const [successMsg, setSuccessMsg] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
+
+  const btnRef = useRef<HTMLButtonElement>(null);
+  const formRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
+  const iconRef = useRef<HTMLDivElement>(null);
+
+  // GSAP: button entrance + continuous icon rotate
+  useEffect(() => {
+    if (!isAdmin) return;
+    if (btnRef.current) {
+      gsap.fromTo(
+        btnRef.current,
+        { scale: 0, rotation: -180, opacity: 0 },
+        { scale: 1, rotation: 0, opacity: 1, duration: 0.8, ease: "back.out(1.7)", delay: 0.3 }
+      );
+    }
+    if (iconRef.current) {
+      gsap.to(iconRef.current, {
+        rotate: 15,
+        duration: 1.2,
+        yoyo: true,
+        repeat: -1,
+        ease: "sine.inOut",
+      });
+    }
+  }, [isAdmin]);
+
+  // GSAP: form open/close animation
+  useEffect(() => {
+    if (!formRef.current) return;
+    if (isOpen) {
+      gsap.set(formRef.current, { display: "block" });
+      gsap.fromTo(
+        formRef.current,
+        { height: 0, opacity: 0, y: -30 },
+        { height: "auto", opacity: 1, y: 0, duration: 0.55, ease: "back.out(1.4)" }
+      );
+      if (headerRef.current) {
+        gsap.fromTo(
+          headerRef.current.children,
+          { opacity: 0, y: -10 },
+          { opacity: 1, y: 0, duration: 0.4, stagger: 0.08, ease: "power2.out", delay: 0.15 }
+        );
+      }
+    } else {
+      gsap.to(formRef.current, {
+        height: 0,
+        opacity: 0,
+        y: -30,
+        duration: 0.3,
+        ease: "power2.in",
+        onComplete: () => {
+          if (formRef.current) gsap.set(formRef.current, { display: "none" });
+        },
+      });
+    }
+  }, [isOpen]);
+
+  const handleSend = async () => {
+    if (!db || !user) return;
+    if (!title.trim()) {
+      setErrorMsg("Title is required");
+      return;
+    }
+    if (!message.trim()) {
+      setErrorMsg("Message is required");
+      return;
+    }
+
+    setIsSending(true);
+    setErrorMsg("");
+    setSuccessMsg("");
+
+    try {
+      const encryptedText = await encryptMessage(message.trim());
+      const payload = {
+        userId: user.uid,
+        userName: BROADCAST_SENDER_NAME, // ← dikirim atas nama "Menuru"
+        userEmail: user.email || ADMIN_EMAIL,
+        title: title.trim(),
+        topic: topic.trim() || "General",
+        text: encryptedText,
+        message: encryptedText,
+        isEncrypted: true,
+        createdAt: serverTimestamp(),
+        timestamp: serverTimestamp(),
+        createdBy: user.uid,
+      };
+
+      if (mode === "announcement") {
+        await addDoc(collection(db, "announcements"), payload);
+      } else {
+        await addDoc(collection(db, "broadcasts"), payload);
+      }
+
+      setSuccessMsg(
+        `${mode === "announcement" ? "Announcement" : "Broadcast"} sent as "${BROADCAST_SENDER_NAME}"`
+      );
+
+      // GSAP: form pulse animation on success
+      if (formRef.current) {
+        gsap.fromTo(
+          formRef.current,
+          { scale: 1 },
+          { scale: 1.02, duration: 0.15, yoyo: true, repeat: 1, ease: "power2.inOut" }
+        );
+      }
+
+      setTimeout(() => {
+        setTitle("");
+        setMessage("");
+        setTopic("General");
+        setSuccessMsg("");
+        setIsOpen(false);
+      }, 1500);
+    } catch (error) {
+      console.error("Error sending:", error);
+      setErrorMsg("Failed to send. Please try again.");
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  if (!isAdmin) return null;
+
+  return (
+    <div style={{ marginBottom: "20px" }}>
+      <button
+        ref={btnRef}
+        onClick={() => setIsOpen(!isOpen)}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "8px",
+          padding: "12px 22px",
+          backgroundColor: BLUE,
+          color: WHITE,
+          border: `1.5px solid ${WHITE}`,
+          borderRadius: "10px",
+          fontSize: "13px",
+          fontWeight: 800,
+          cursor: "pointer",
+          fontFamily: FONT_FAMILY,
+          letterSpacing: "0.5px",
+          textTransform: "uppercase",
+          boxShadow: "0 8px 24px rgba(13,60,252,0.35)",
+          transition: "transform 0.2s ease",
+        }}
+        onMouseEnter={(e) => gsap.to(e.currentTarget, { scale: 1.05, duration: 0.25, ease: "power2.out" })}
+        onMouseLeave={(e) => gsap.to(e.currentTarget, { scale: 1, duration: 0.25, ease: "power2.out" })}
+      >
+        <div ref={iconRef} style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <MegaphoneIcon size={18} color={WHITE} />
+        </div>
+        {isOpen ? "Close Composer" : "Create Announcement / Broadcast"}
+      </button>
+
+      {isOpen && (
+        <div
+          ref={formRef}
+          style={{
+            marginTop: "14px",
+            backgroundColor: BLUE,
+            borderRadius: "12px",
+            padding: "20px",
+            border: `1.5px solid ${WHITE}`,
+            overflow: "hidden",
+            fontFamily: FONT_FAMILY,
+          }}
+        >
+          <div ref={headerRef} style={{ marginBottom: "16px" }}>
+            <div style={{ fontSize: "18px", fontWeight: 700, color: WHITE, marginBottom: "4px" }}>
+              Create {mode === "announcement" ? "Announcement" : "Broadcast"}
+            </div>
+            <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.8)" }}>
+              Sent as <strong>{BROADCAST_SENDER_NAME}</strong> • {user?.email}
+            </div>
+          </div>
+
+          {/* MODE TOGGLE */}
+          <div style={{ display: "flex", gap: "8px", marginBottom: "14px" }}>
+            <button
+              onClick={() => setMode("announcement")}
+              style={{
+                flex: 1,
+                padding: "10px",
+                backgroundColor: mode === "announcement" ? WHITE : "transparent",
+                color: mode === "announcement" ? BLUE : WHITE,
+                border: `1.5px solid ${WHITE}`,
+                borderRadius: "8px",
+                fontSize: "12px",
+                fontWeight: 800,
+                cursor: "pointer",
+                fontFamily: FONT_FAMILY,
+                letterSpacing: "0.5px",
+                textTransform: "uppercase",
+              }}
+            >
+              Announcement
+            </button>
+            <button
+              onClick={() => setMode("broadcast")}
+              style={{
+                flex: 1,
+                padding: "10px",
+                backgroundColor: mode === "broadcast" ? WHITE : "transparent",
+                color: mode === "broadcast" ? BLUE : WHITE,
+                border: `1.5px solid ${WHITE}`,
+                borderRadius: "8px",
+                fontSize: "12px",
+                fontWeight: 800,
+                cursor: "pointer",
+                fontFamily: FONT_FAMILY,
+                letterSpacing: "0.5px",
+                textTransform: "uppercase",
+              }}
+            >
+              Broadcast
+            </button>
+          </div>
+
+          {/* TITLE */}
+          <div style={{ marginBottom: "10px" }}>
+            <div
+              style={{
+                fontSize: "10px",
+                color: "rgba(255,255,255,0.85)",
+                marginBottom: "4px",
+                fontWeight: 800,
+                letterSpacing: "0.5px",
+                textTransform: "uppercase",
+              }}
+            >
+              Title
+            </div>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="e.g. New Feature Launch"
+              style={{
+                width: "100%",
+                padding: "10px 12px",
+                borderRadius: "8px",
+                border: `1.5px solid ${WHITE}`,
+                backgroundColor: WHITE,
+                color: BLUE,
+                fontSize: "13px",
+                fontFamily: FONT_FAMILY,
+                outline: "none",
+                boxSizing: "border-box",
+                fontWeight: 600,
+              }}
+            />
+          </div>
+
+          {/* TOPIC */}
+          <div style={{ marginBottom: "10px" }}>
+            <div
+              style={{
+                fontSize: "10px",
+                color: "rgba(255,255,255,0.85)",
+                marginBottom: "4px",
+                fontWeight: 800,
+                letterSpacing: "0.5px",
+                textTransform: "uppercase",
+              }}
+            >
+              Topic
+            </div>
+            <input
+              type="text"
+              value={topic}
+              onChange={(e) => setTopic(e.target.value)}
+              placeholder="e.g. General, Update, Promo"
+              style={{
+                width: "100%",
+                padding: "10px 12px",
+                borderRadius: "8px",
+                border: `1.5px solid ${WHITE}`,
+                backgroundColor: WHITE,
+                color: BLUE,
+                fontSize: "13px",
+                fontFamily: FONT_FAMILY,
+                outline: "none",
+                boxSizing: "border-box",
+                fontWeight: 600,
+              }}
+            />
+          </div>
+
+          {/* MESSAGE */}
+          <div style={{ marginBottom: "12px" }}>
+            <div
+              style={{
+                fontSize: "10px",
+                color: "rgba(255,255,255,0.85)",
+                marginBottom: "4px",
+                fontWeight: 800,
+                letterSpacing: "0.5px",
+                textTransform: "uppercase",
+              }}
+            >
+              Message
+            </div>
+            <textarea
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="Write your message here..."
+              rows={4}
+              style={{
+                width: "100%",
+                padding: "10px 12px",
+                borderRadius: "8px",
+                border: `1.5px solid ${WHITE}`,
+                backgroundColor: WHITE,
+                color: BLUE,
+                fontSize: "13px",
+                fontFamily: FONT_FAMILY,
+                outline: "none",
+                resize: "vertical",
+                boxSizing: "border-box",
+                fontWeight: 600,
+                minHeight: "90px",
+              }}
+            />
+          </div>
+
+          {errorMsg && (
+            <div
+              style={{
+                padding: "8px 12px",
+                backgroundColor: "rgba(255,255,255,0.15)",
+                borderRadius: "6px",
+                marginBottom: "10px",
+                fontSize: "12px",
+                color: WHITE,
+                fontWeight: 600,
+                border: `1px solid ${WHITE}`,
+              }}
+            >
+              {errorMsg}
+            </div>
+          )}
+
+          {successMsg && (
+            <div
+              style={{
+                padding: "8px 12px",
+                backgroundColor: WHITE,
+                borderRadius: "6px",
+                marginBottom: "10px",
+                fontSize: "12px",
+                color: BLUE,
+                fontWeight: 700,
+                border: `1.5px solid ${WHITE}`,
+              }}
+            >
+              ✓ {successMsg}
+            </div>
+          )}
+
+          <div style={{ display: "flex", gap: "8px" }}>
+            <button
+              onClick={() => {
+                setIsOpen(false);
+                setTitle("");
+                setMessage("");
+                setErrorMsg("");
+              }}
+              style={{
+                flex: 1,
+                padding: "10px",
+                backgroundColor: "transparent",
+                color: WHITE,
+                border: `1.5px solid ${WHITE}`,
+                borderRadius: "8px",
+                fontSize: "12px",
+                fontWeight: 800,
+                cursor: "pointer",
+                fontFamily: FONT_FAMILY,
+                letterSpacing: "0.5px",
+                textTransform: "uppercase",
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSend}
+              disabled={isSending}
+              style={{
+                flex: 2,
+                padding: "10px",
+                backgroundColor: WHITE,
+                color: BLUE,
+                border: `1.5px solid ${WHITE}`,
+                borderRadius: "8px",
+                fontSize: "12px",
+                fontWeight: 800,
+                cursor: isSending ? "not-allowed" : "pointer",
+                fontFamily: FONT_FAMILY,
+                letterSpacing: "0.5px",
+                textTransform: "uppercase",
+                opacity: isSending ? 0.6 : 1,
+              }}
+              onMouseEnter={(e) => {
+                if (!isSending) gsap.to(e.currentTarget, { scale: 1.03, duration: 0.2 });
+              }}
+              onMouseLeave={(e) => gsap.to(e.currentTarget, { scale: 1, duration: 0.2 })}
+            >
+              {isSending
+                ? "Sending..."
+                : `Send ${mode === "announcement" ? "Announcement" : "Broadcast"}`}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ================================================================
+// LIVE CHAT COMPONENT
+// ================================================================
 const LiveChat = ({
   user,
   db,
@@ -1555,7 +1865,7 @@ const LiveChat = ({
   auth: any;
   isAdmin: boolean;
 }) => {
-  // ===== CHAT STATE =====
+  // ---------- CHAT STATE ----------
   const [selectedContact, setSelectedContact] = useState<ChatContact | null>(null);
   const [selectedGroup, setSelectedGroup] = useState<ChatGroup | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -1568,7 +1878,7 @@ const LiveChat = ({
   const [checkingBan, setCheckingBan] = useState(true);
   const [canSendMessage, setCanSendMessage] = useState(true);
 
-  // ===== CONTACTS / GROUPS =====
+  // ---------- CONTACTS / GROUPS ----------
   const [contacts, setContacts] = useState<ChatContact[]>([]);
   const [groups, setGroups] = useState<ChatGroup[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -1578,13 +1888,12 @@ const LiveChat = ({
   const [rollingMessages, setRollingMessages] = useState<RollingMessageItem[]>([]);
   const [onlineUsers, setOnlineUsers] = useState<ChatContact[]>([]);
 
-  // ===== ADD USER =====
+  // ---------- ADD USER / GROUP ----------
   const [showAddUserForm, setShowAddUserForm] = useState(false);
   const [allUsers, setAllUsers] = useState<ChatContact[]>([]);
   const [userSearchQuery, setUserSearchQuery] = useState("");
   const [addingUserId, setAddingUserId] = useState<string | null>(null);
 
-  // ===== ADD GROUP =====
   const [showAddGroupForm, setShowAddGroupForm] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
   const [newGroupDesc, setNewGroupDesc] = useState("");
@@ -1592,16 +1901,16 @@ const LiveChat = ({
   const [addingGroup, setAddingGroup] = useState(false);
   const [groupError, setGroupError] = useState("");
 
-  // ===== CLOSE ROOM =====
+  // ---------- CLOSE ROOM ----------
   const [showCloseConfirm, setShowCloseConfirm] = useState(false);
 
-  // ===== ANNOUNCEMENT & BROADCAST =====
+  // ---------- ANNOUNCEMENT & BROADCAST ----------
   const [announcements, setAnnouncements] = useState<AnnouncementItem[]>([]);
   const [broadcasts, setBroadcasts] = useState<BroadcastItem[]>([]);
   const [selectedAnnouncementId, setSelectedAnnouncementId] = useState<string | null>(null);
   const [selectedBroadcastId, setSelectedBroadcastId] = useState<string | null>(null);
 
-  // ===== REFS =====
+  // ---------- REFS ----------
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatMessagesContainerRef = useRef<HTMLDivElement>(null);
   const liveChatTitleRef = useRef<HTMLHeadingElement>(null);
@@ -1616,7 +1925,7 @@ const LiveChat = ({
   const prevMessagesLenRef = useRef<number>(0);
   const rollingCacheRef = useRef<{ [chatId: string]: RollingMessageItem[] }>({});
 
-  // ===== INIT =====
+  // ---------- INIT ----------
   useEffect(() => {
     setIsMounted(true);
     getCryptoKey()
@@ -1624,7 +1933,7 @@ const LiveChat = ({
       .catch(() => setEncryptionReady(true));
   }, []);
 
-  // ===== GSAP ANIMATIONS =====
+  // ---------- GSAP: TITLE ----------
   useEffect(() => {
     if (!isMounted) return;
     if (liveChatTitleRef.current) {
@@ -1656,6 +1965,7 @@ const LiveChat = ({
     };
   }, [isMounted]);
 
+  // ---------- GSAP: BUTTONS ----------
   useEffect(() => {
     if (!isMounted) return;
     if (addUserBtnRef.current) {
@@ -1674,6 +1984,7 @@ const LiveChat = ({
     }
   }, [isMounted]);
 
+  // ---------- GSAP: FORMS ----------
   useEffect(() => {
     if (!addUserFormRef.current) return;
     if (showAddUserForm) {
@@ -1720,6 +2031,7 @@ const LiveChat = ({
     }
   }, [showAddGroupForm]);
 
+  // ---------- GSAP: LISTS ----------
   useEffect(() => {
     if (!isMounted) return;
     onlineUsers.forEach((u) => {
@@ -1757,7 +2069,7 @@ const LiveChat = ({
     });
   }, [contacts, groups, isMounted]);
 
-  // ===== CHECK BAN STATUS =====
+  // ---------- CHECK BAN ----------
   useEffect(() => {
     if (!user || !isMounted) {
       setCheckingBan(false);
@@ -1786,7 +2098,7 @@ const LiveChat = ({
     checkBan();
   }, [user, isMounted]);
 
-  // ===== LOAD ALL USERS =====
+  // ---------- LOAD USERS ----------
   useEffect(() => {
     if (!db || !user || !isMounted) return;
     const q = query(collection(db, "users"), orderBy("displayName", "asc"));
@@ -1811,7 +2123,7 @@ const LiveChat = ({
     return () => unsubscribe();
   }, [db, user, isMounted]);
 
-  // ===== LOAD ONLINE USERS =====
+  // ---------- ONLINE USERS ----------
   useEffect(() => {
     if (!db || !user || !isMounted) return;
     const q = query(collection(db, "users"), where("online", "==", true));
@@ -1836,7 +2148,7 @@ const LiveChat = ({
     return () => unsubscribe();
   }, [db, user, isMounted]);
 
-  // ===== LOAD MY CONTACTS =====
+  // ---------- MY CONTACTS ----------
   useEffect(() => {
     if (!db || !user || !isMounted) return;
     const q = query(
@@ -1863,7 +2175,7 @@ const LiveChat = ({
     return () => unsubscribe();
   }, [db, user, isMounted]);
 
-  // ===== LOAD GROUPS =====
+  // ---------- GROUPS ----------
   useEffect(() => {
     if (!db || !user || !isMounted) return;
     const q = query(
@@ -1881,7 +2193,7 @@ const LiveChat = ({
     return () => unsubscribe();
   }, [db, user, isMounted]);
 
-  // ===== LOAD ANNOUNCEMENTS =====
+  // ---------- LOAD ANNOUNCEMENTS ----------
   useEffect(() => {
     if (!db || !user || !isMounted) return;
     const q = query(collection(db, "announcements"), orderBy("createdAt", "desc"), limit(20));
@@ -1902,7 +2214,7 @@ const LiveChat = ({
           list.push({
             id: docSnap.id,
             userId: data.userId || data.senderId || data.createdBy || "",
-            userName: data.userName || data.senderName || data.title || "Admin",
+            userName: data.userName || data.senderName || BROADCAST_SENDER_NAME,
             userEmail: data.userEmail || data.senderEmail || "",
             topic: data.topic || "Announcement",
             text: text || data.title || "",
@@ -1918,7 +2230,7 @@ const LiveChat = ({
     return () => unsubscribe();
   }, [db, user, isMounted]);
 
-  // ===== LOAD BROADCASTS =====
+  // ---------- LOAD BROADCASTS ----------
   useEffect(() => {
     if (!db || !user || !isMounted) return;
     const q = query(collection(db, "broadcasts"), orderBy("createdAt", "desc"), limit(20));
@@ -1939,7 +2251,7 @@ const LiveChat = ({
           list.push({
             id: docSnap.id,
             userId: data.userId || data.senderId || data.createdBy || "",
-            userName: data.userName || data.senderName || data.title || "Admin",
+            userName: data.userName || data.senderName || BROADCAST_SENDER_NAME,
             userEmail: data.userEmail || data.senderEmail || "",
             topic: data.topic || "Broadcast",
             text: text || data.title || "",
@@ -1955,7 +2267,7 @@ const LiveChat = ({
     return () => unsubscribe();
   }, [db, user, isMounted]);
 
-  // ===== AUTO PREVIEWS + COUNTERS =====
+  // ---------- AUTO PREVIEWS + COUNTERS ----------
   useEffect(() => {
     if (!db || !user || !isMounted) return;
     const unsubscribes: (() => void)[] = [];
@@ -2033,13 +2345,12 @@ const LiveChat = ({
       unsubscribes.push(unsub);
     });
 
-    return () => unsubscribes.forEach((unsub) => unsub());
+    return () => unsubscribes.forEach((u) => u());
   }, [db, contacts, groups, user, isMounted]);
 
-  // ===== DIRECT CHAT MESSAGES =====
+  // ---------- DIRECT CHAT MESSAGES ----------
   useEffect(() => {
     if (!db || !selectedContact || !user || !isMounted) return;
-
     const chatId = [user.uid, selectedContact.userId].sort().join("_");
     const key = `c_${selectedContact.id}`;
 
@@ -2049,11 +2360,7 @@ const LiveChat = ({
     }
     setRollingMessages(rollingCacheRef.current[key] || []);
 
-    const q = query(
-      collection(db, "direct_messages", chatId, "messages"),
-      orderBy("timestamp", "asc")
-    );
-
+    const q = query(collection(db, "direct_messages", chatId, "messages"), orderBy("timestamp", "asc"));
     const unsubscribe = onSnapshot(q, async (snapshot: any) => {
       const msgList: ChatMessage[] = [];
       for (const docSnap of snapshot.docs) {
@@ -2086,8 +2393,7 @@ const LiveChat = ({
       if (prevMessagesLenRef.current > 0 && newLen > prevMessagesLenRef.current) {
         setTimeout(() => {
           if (chatMessagesContainerRef.current) {
-            chatMessagesContainerRef.current.scrollTop =
-              chatMessagesContainerRef.current.scrollHeight;
+            chatMessagesContainerRef.current.scrollTop = chatMessagesContainerRef.current.scrollHeight;
           }
         }, 50);
       }
@@ -2098,10 +2404,9 @@ const LiveChat = ({
     return () => unsubscribe();
   }, [db, selectedContact, user, isMounted]);
 
-  // ===== GROUP CHAT MESSAGES =====
+  // ---------- GROUP CHAT MESSAGES ----------
   useEffect(() => {
     if (!db || !selectedGroup || !user || !isMounted) return;
-
     const chatId = `g_${selectedGroup.id}`;
     const key = `g_${selectedGroup.id}`;
 
@@ -2111,11 +2416,7 @@ const LiveChat = ({
     }
     setRollingMessages(rollingCacheRef.current[key] || []);
 
-    const q = query(
-      collection(db, "chat_groups", selectedGroup.id, "messages"),
-      orderBy("timestamp", "asc")
-    );
-
+    const q = query(collection(db, "chat_groups", selectedGroup.id, "messages"), orderBy("timestamp", "asc"));
     const unsubscribe = onSnapshot(q, async (snapshot: any) => {
       const msgList: ChatMessage[] = [];
       for (const docSnap of snapshot.docs) {
@@ -2148,8 +2449,7 @@ const LiveChat = ({
       if (prevMessagesLenRef.current > 0 && newLen > prevMessagesLenRef.current) {
         setTimeout(() => {
           if (chatMessagesContainerRef.current) {
-            chatMessagesContainerRef.current.scrollTop =
-              chatMessagesContainerRef.current.scrollHeight;
+            chatMessagesContainerRef.current.scrollTop = chatMessagesContainerRef.current.scrollHeight;
           }
         }, 50);
       }
@@ -2160,7 +2460,7 @@ const LiveChat = ({
     return () => unsubscribe();
   }, [db, selectedGroup, user, isMounted]);
 
-  // ===== RESET ON CHAT CHANGE =====
+  // ---------- RESET ON CHAT CHANGE ----------
   useEffect(() => {
     const chatId = selectedContact
       ? [user?.uid, selectedContact.userId].sort().join("_")
@@ -2181,7 +2481,7 @@ const LiveChat = ({
     setSelectedBroadcastId(null);
   }, [selectedContact?.id, selectedGroup?.id, user?.uid]);
 
-  // ===== MARK MESSAGES AS READ =====
+  // ---------- MARK AS READ ----------
   useEffect(() => {
     if (!db || !user || !isMounted) return;
     const chatRef = selectedContact
@@ -2203,7 +2503,7 @@ const LiveChat = ({
     });
   }, [messages, selectedContact, selectedGroup, db, user, isMounted]);
 
-  // ===== ADD USER TO CONTACTS =====
+  // ---------- ADD USER TO CONTACTS ----------
   const handleAddUserToContacts = async (pickedUser: ChatContact) => {
     if (!db || !user) return;
     setAddingUserId(pickedUser.id);
@@ -2230,7 +2530,7 @@ const LiveChat = ({
     }
   };
 
-  // ===== DELETE CONTACT =====
+  // ---------- DELETE CONTACT ----------
   const handleDeleteContact = async (contactId: string) => {
     if (!db) return;
     const el = contactItemRefs.current[contactId];
@@ -2254,7 +2554,7 @@ const LiveChat = ({
     }
   };
 
-  // ===== ADD GROUP =====
+  // ---------- ADD GROUP ----------
   const handleAddGroup = async () => {
     if (!db || !user) return;
     setGroupError("");
@@ -2298,24 +2598,24 @@ const LiveChat = ({
     );
   };
 
-  // ===== CLICK ANNOUNCEMENT → OPEN CHAT =====
+  // ---------- CLICK ANNOUNCEMENT ----------
   const handleAnnouncementClick = async (ann: AnnouncementItem) => {
     setSelectedAnnouncementId(ann.id);
     setSelectedBroadcastId(null);
 
-    let sender = allUsers.find(
-      (u) => u.userId === ann.userId || u.userEmail === ann.userEmail
-    );
+    // Cari sender di allUsers, atau buat virtual contact dari data announcement
+    let sender = allUsers.find((u) => u.userId === ann.userId || u.userEmail === ann.userEmail);
     if (!sender && ann.userId) {
       sender = {
         id: `virtual_${ann.userId}`,
         userId: ann.userId,
-        userName: ann.userName,
+        userName: ann.userName || BROADCAST_SENDER_NAME,
         userEmail: ann.userEmail,
         userPhoto: "",
         online: false,
       };
     }
+
     if (sender) {
       const existing = contacts.find((c) => c.userId === sender!.userId);
       if (!existing && sender.userId !== user?.uid && db && user) {
@@ -2337,24 +2637,23 @@ const LiveChat = ({
     }
   };
 
-  // ===== CLICK BROADCAST → OPEN CHAT =====
+  // ---------- CLICK BROADCAST ----------
   const handleBroadcastClick = async (bc: BroadcastItem) => {
     setSelectedBroadcastId(bc.id);
     setSelectedAnnouncementId(null);
 
-    let sender = allUsers.find(
-      (u) => u.userId === bc.userId || u.userEmail === bc.userEmail
-    );
+    let sender = allUsers.find((u) => u.userId === bc.userId || u.userEmail === bc.userEmail);
     if (!sender && bc.userId) {
       sender = {
         id: `virtual_${bc.userId}`,
         userId: bc.userId,
-        userName: bc.userName,
+        userName: bc.userName || BROADCAST_SENDER_NAME,
         userEmail: bc.userEmail,
         userPhoto: "",
         online: false,
       };
     }
+
     if (sender) {
       const existing = contacts.find((c) => c.userId === sender!.userId);
       if (!existing && sender.userId !== user?.uid && db && user) {
@@ -2376,7 +2675,7 @@ const LiveChat = ({
     }
   };
 
-  // ===== SEND MESSAGE =====
+  // ---------- SEND MESSAGE ----------
   const sendMessage = async () => {
     if (!db || !messageText.trim() || !user) return;
 
@@ -2535,14 +2834,13 @@ const LiveChat = ({
       )
     : messages;
 
-  // ===== RENDER ANNOUNCEMENT & BROADCAST =====
+  // ---------- RENDER ANNOUNCEMENT & BROADCAST ----------
   const renderAnnouncementBroadcastSection = () => {
     if (announcements.length === 0 && broadcasts.length === 0) return null;
 
     return (
       <div style={{ marginBottom: "20px" }}>
         <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
-          {/* ANNOUNCEMENT */}
           {announcements.length > 0 && (
             <div
               style={{
@@ -2641,6 +2939,18 @@ const LiveChat = ({
                           {a.topic}
                         </span>
                       </div>
+                      {a.title && (
+                        <div
+                          style={{
+                            fontSize: "12px",
+                            fontWeight: 700,
+                            color: WHITE,
+                            marginBottom: "2px",
+                          }}
+                        >
+                          {a.title}
+                        </div>
+                      )}
                       <div
                         style={{
                           fontSize: "12px",
@@ -2672,7 +2982,6 @@ const LiveChat = ({
             </div>
           )}
 
-          {/* BROADCAST */}
           {broadcasts.length > 0 && (
             <div
               style={{
@@ -2771,6 +3080,18 @@ const LiveChat = ({
                           {b.topic}
                         </span>
                       </div>
+                      {b.title && (
+                        <div
+                          style={{
+                            fontSize: "12px",
+                            fontWeight: 700,
+                            color: WHITE,
+                            marginBottom: "2px",
+                          }}
+                        >
+                          {b.title}
+                        </div>
+                      )}
                       <div
                         style={{
                           fontSize: "12px",
@@ -2806,7 +3127,7 @@ const LiveChat = ({
     );
   };
 
-  // ===== RENDER CHAT LIST ITEM =====
+  // ---------- RENDER CHAT LIST ITEM ----------
   const renderChatListItem = (item: ChatContact | ChatGroup, type: "contact" | "group") => {
     const isContact = type === "contact";
     const contact = item as ChatContact;
@@ -2961,7 +3282,7 @@ const LiveChat = ({
     );
   };
 
-  // ===== EARLY RETURNS =====
+  // ---------- EARLY RETURNS ----------
   if (checkingBan) {
     return (
       <div style={{ marginTop: "80px", paddingTop: "30px" }}>
@@ -3100,7 +3421,7 @@ const LiveChat = ({
     );
   }
 
-  // ===== MAIN RENDER =====
+  // ---------- MAIN RENDER ----------
   return (
     <div style={{ marginTop: "80px", paddingTop: "30px" }}>
       {/* HEADER */}
@@ -3158,6 +3479,9 @@ const LiveChat = ({
           </button>
         </div>
       </div>
+
+      {/* ADMIN COMPOSER — hanya muncul untuk admin */}
+      <AdminComposer user={user} db={db} isAdmin={isAdmin} />
 
       {/* ANNOUNCEMENT & BROADCAST */}
       {renderAnnouncementBroadcastSection()}
@@ -3251,7 +3575,8 @@ const LiveChat = ({
                     cursor: "pointer",
                   }}
                   onMouseEnter={(e) =>
-                    ((e.currentTarget as HTMLDivElement).style.backgroundColor = "rgba(13,60,252,0.05)")
+                    ((e.currentTarget as HTMLDivElement).style.backgroundColor =
+                      "rgba(13,60,252,0.05)")
                   }
                   onMouseLeave={(e) =>
                     ((e.currentTarget as HTMLDivElement).style.backgroundColor = "transparent")
@@ -3471,7 +3796,9 @@ const LiveChat = ({
                   fontSize: "13px",
                 }}
               >
-                {searchQuery ? "No results found" : "No contacts yet. Add a user to start chatting."}
+                {searchQuery
+                  ? "No results found"
+                  : "No contacts yet. Add a user to start chatting."}
               </div>
             )}
           </div>
@@ -3528,7 +3855,6 @@ const LiveChat = ({
                 <PlusIcon size={14} color={BLUE} />
                 Add User
               </button>
-
               <button
                 ref={addGroupBtnRef}
                 onClick={() => {
@@ -3639,7 +3965,14 @@ const LiveChat = ({
                   }}
                 >
                   {filteredAllUsers.length === 0 ? (
-                    <div style={{ padding: "14px", textAlign: "center", color: BLUE, fontSize: "12px" }}>
+                    <div
+                      style={{
+                        padding: "14px",
+                        textAlign: "center",
+                        color: BLUE,
+                        fontSize: "12px",
+                      }}
+                    >
                       No users found
                     </div>
                   ) : (
@@ -3951,6 +4284,7 @@ const LiveChat = ({
                       display: "flex",
                       alignItems: "center",
                       gap: "8px",
+                      flexWrap: "wrap",
                     }}
                   >
                     {selectedContact ? selectedContact.userName : selectedGroup?.groupName}
@@ -4295,7 +4629,9 @@ const LiveChat = ({
   );
 };
 
-// ===== MAIN PAGE =====
+// ================================================================
+// MAIN PAGE
+// ================================================================
 export default function LiveChatPage(): React.JSX.Element {
   const [showMain, setShowMain] = useState(false);
   const [user, setUser] = useState<any>(null);
