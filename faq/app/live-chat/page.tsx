@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { initializeApp, getApps } from "firebase/app";
@@ -20,6 +20,7 @@ import {
   setDoc,
   limit,
   deleteDoc,
+  getDocs,
 } from "firebase/firestore";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -382,25 +383,15 @@ const CloseIcon = ({ size = 18, color = "currentColor" }: { size?: number; color
     <path d="M6 6L18 18M18 6L6 18" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
+const PlusIcon = ({ size = 20, color = "currentColor" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <path d="M12 5V19M5 12H19" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
 const PeopleIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <circle cx="12" cy="8" r="4" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     <path d="M4 21V19C4 16.7909 5.79086 15 8 15H16C18.2091 15 20 16.7909 20 19V21" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-const TrashIcon = ({ size = 14, color = "currentColor" }: { size?: number; color?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <path d="M3 6H5H21" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M8 6V4C8 2.89543 8.89543 2 10 2H14C15.1046 2 16 2.89543 16 4V6" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M19 6L18 20C18 21.1046 17.1046 22 16 22H8C6.89543 22 6 21.1046 6 20L5 6" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-const UserPlusIcon = ({ size = 20, color = "currentColor" }: { size?: number; color?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <path d="M16 21V19C16 16.7909 14.2091 15 12 15H5C2.79086 15 1 16.7909 1 19V21" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    <circle cx="8.5" cy="7" r="4" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M20 8V14" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M23 11H17" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 const TrustIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?: string }) => (
@@ -1142,6 +1133,25 @@ const footerLinks = [
 ];
 
 // ===== INTERFACES =====
+interface Ticket {
+  id: string;
+  userId: string;
+  userName: string;
+  userEmail: string;
+  userPhoto?: string;
+  status: "waiting" | "active" | "resolved" | "closed";
+  createdAt: any;
+  lastMessage?: string;
+  lastMessageTime?: any;
+  lastMessageSender?: string;
+  unreadCount: number;
+  typing: boolean;
+  typingUserId?: string | null;
+  typingUserName?: string | null;
+  isAnnouncement?: boolean;
+  isBroadcast?: boolean;
+}
+
 interface ChatMessage {
   id: string;
   senderId: string;
@@ -1154,64 +1164,163 @@ interface ChatMessage {
   deliveryStatus?: "sending" | "sent" | "delivered" | "read" | "failed";
 }
 
-interface ChatContact {
-  id: string;
-  ownerId: string;
-  userId: string;
-  userName: string;
-  userEmail: string;
-  userPhoto?: string;
-  addedAt: any;
+interface FirebaseUser {
+  uid: string;
+  displayName: string;
+  email: string;
+  photoURL?: string;
+  online?: boolean;
+  lastSeen?: any;
+  bio?: string;
+  createdAt?: any;
 }
 
-// ===== LIVE CHAT VIEW COMPONENT =====
-function LiveChatView({
+interface LastMessagePreview {
+  text: string;
+  senderName: string;
+  timestamp: any;
+  isFromMe: boolean;
+}
+
+// ===== LIVE CHAT COMPONENT (BIASA) =====
+const LiveChat = ({
   user,
-  isAdmin,
   db,
   auth,
 }: {
   user: any;
-  isAdmin: boolean;
   db: any;
   auth: any;
-}) {
-  const [contacts, setContacts] = useState<ChatContact[]>([]);
-  const [selectedContact, setSelectedContact] = useState<ChatContact | null>(null);
+}) => {
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [messageText, setMessageText] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
   const [isMounted, setIsMounted] = useState(false);
-  const [encryptionReady, setEncryptionReady] = useState(false);
-  const [checkingBan, setCheckingBan] = useState(true);
+  const [banMessage, setBanMessage] = useState<string | null>(null);
   const [isBanned, setIsBanned] = useState(false);
   const [banReason, setBanReason] = useState("");
+  const [encryptionReady, setEncryptionReady] = useState(false);
+  const [checkingBan, setCheckingBan] = useState(true);
+  const [canCreateTicket, setCanCreateTicket] = useState(true);
   const [canSendMessage, setCanSendMessage] = useState(true);
 
-  // Add user form (inline)
-  const [newName, setNewName] = useState("");
-  const [newEmail, setNewEmail] = useState("");
-  const [addError, setAddError] = useState("");
-  const [addSuccess, setAddSuccess] = useState(false);
-  const [addingUser, setAddingUser] = useState(false);
+  const [ticketPreviews, setTicketPreviews] = useState<{ [ticketId: string]: LastMessagePreview[] }>({});
+  const [ticketMsgCounts, setTicketMsgCounts] = useState<{ [ticketId: string]: number }>({});
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const [showCloseConfirm, setShowCloseConfirm] = useState(false);
+
+  // ===== ALL FIREBASE USERS =====
+  const [allUsers, setAllUsers] = useState<FirebaseUser[]>([]);
+  const [showUserPicker, setShowUserPicker] = useState(false);
+  const [userSearchQuery, setUserSearchQuery] = useState("");
+
+  // GSAP refs
+  const addButtonRef = useRef<HTMLButtonElement>(null);
+  const plusIconRef = useRef<SVGSVGElement>(null);
+  const userPickerRef = useRef<HTMLDivElement>(null);
+  const userItemRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const chatContainerRef = useRef<HTMLDivElement>(null);
+  const chatMessagesContainerRef = useRef<HTMLDivElement>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const liveChatTitleRef = useRef<HTMLHeadingElement>(null);
   const prevMessagesLenRef = useRef<number>(0);
-  const messagesCacheRef = useRef<{ [contactId: string]: ChatMessage[] }>({});
 
-  const addFormRef = useRef<HTMLDivElement>(null);
-  const addButtonRef = useRef<HTMLButtonElement>(null);
-  const contactItemRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+  const messagesCacheRef = useRef<{ [ticketId: string]: ChatMessage[] }>({});
 
   useEffect(() => {
     setIsMounted(true);
     getCryptoKey()
       .then(() => setEncryptionReady(true))
-      .catch(() => setEncryptionReady(true));
+      .catch((err) => {
+        console.error("Failed to initialize encryption:", err);
+        setEncryptionReady(true);
+      });
   }, []);
 
-  // Check ban
+  useEffect(() => {
+    if (!isMounted) return;
+    if (liveChatTitleRef.current) {
+      const splitTitle = new SplitText(liveChatTitleRef.current, {
+        type: "chars",
+        charsClass: "split-char-livechat",
+      });
+      gsap.fromTo(
+        splitTitle.chars,
+        { opacity: 0, y: 30, filter: "blur(8px)" },
+        {
+          opacity: 1,
+          y: 0,
+          filter: "blur(0px)",
+          duration: 0.8,
+          stagger: 0.05,
+          ease: "back.out(1.2)",
+          scrollTrigger: {
+            trigger: liveChatTitleRef.current,
+            start: "top 85%",
+            end: "bottom 70%",
+            toggleActions: "play none none reverse",
+          },
+        }
+      );
+    }
+    return () => {
+      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+    };
+  }, [isMounted]);
+
+  // GSAP: Add User button animation
+  useEffect(() => {
+    if (!isMounted) return;
+    if (addButtonRef.current) {
+      gsap.fromTo(
+        addButtonRef.current,
+        { scale: 0, rotation: -180, opacity: 0 },
+        {
+          scale: 1,
+          rotation: 0,
+          opacity: 1,
+          duration: 0.8,
+          ease: "back.out(1.7)",
+          delay: 0.5,
+        }
+      );
+    }
+    if (plusIconRef.current) {
+      gsap.to(plusIconRef.current, {
+        rotation: 360,
+        duration: 20,
+        repeat: -1,
+        ease: "none",
+      });
+    }
+  }, [isMounted]);
+
+  // GSAP: User picker open/close
+  useEffect(() => {
+    if (!userPickerRef.current) return;
+    if (showUserPicker) {
+      gsap.set(userPickerRef.current, { display: "flex" });
+      gsap.fromTo(
+        userPickerRef.current,
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.35, ease: "power2.out" }
+      );
+    } else {
+      gsap.to(userPickerRef.current, {
+        opacity: 0,
+        y: 20,
+        duration: 0.25,
+        ease: "power2.in",
+        onComplete: () => {
+          if (userPickerRef.current) gsap.set(userPickerRef.current, { display: "none" });
+        },
+      });
+    }
+  }, [showUserPicker]);
+
   useEffect(() => {
     if (!user || !isMounted) {
       setCheckingBan(false);
@@ -1224,13 +1333,18 @@ function LiveChatView({
         if (status.isBanned) {
           setIsBanned(true);
           setBanReason(status.reason);
+          setCanCreateTicket(status.canCreateTicket);
           setCanSendMessage(status.canSendMessage);
+          setBanMessage(`YOUR ACCOUNT HAS BEEN PERMANENTLY BANNED\n\nReason: ${status.reason}`);
         } else {
           setIsBanned(false);
+          setBanReason("");
+          setCanCreateTicket(true);
           setCanSendMessage(true);
+          setBanMessage(null);
         }
-      } catch (e) {
-        console.error(e);
+      } catch (error) {
+        console.error("Error checking ban:", error);
       } finally {
         setCheckingBan(false);
       }
@@ -1238,66 +1352,132 @@ function LiveChatView({
     checkBan();
   }, [user, isMounted]);
 
-  // GSAP: animate add user form on mount
-  useEffect(() => {
-    if (!isMounted || !addFormRef.current) return;
-    gsap.fromTo(
-      addFormRef.current,
-      { y: 40, opacity: 0, scale: 0.95 },
-      { y: 0, opacity: 1, scale: 1, duration: 0.9, ease: "back.out(1.4)", delay: 0.3 }
-    );
-  }, [isMounted]);
-
-  // GSAP: animate contacts when added
-  useEffect(() => {
-    if (!isMounted) return;
-    contacts.forEach((c) => {
-      const el = contactItemRefs.current[c.id];
-      if (el && !el.dataset.animated) {
-        el.dataset.animated = "true";
-        gsap.fromTo(
-          el,
-          { x: -60, opacity: 0, scale: 0.9 },
-          { x: 0, opacity: 1, scale: 1, duration: 0.6, ease: "back.out(1.4)" }
-        );
+  const checkBanBeforeAction = async (): Promise<boolean> => {
+    if (!user) return true;
+    try {
+      const status = await checkBanStatus(user.uid);
+      if (status.isBanned) {
+        setIsBanned(true);
+        setBanReason(status.reason);
+        setCanCreateTicket(status.canCreateTicket);
+        setCanSendMessage(status.canSendMessage);
+        setBanMessage(`YOUR ACCOUNT HAS BEEN PERMANENTLY BANNED\n\nReason: ${status.reason}`);
+        return true;
       }
-    });
-  }, [contacts, isMounted]);
+      return false;
+    } catch (error) {
+      console.error("Error checking ban before action:", error);
+      return false;
+    }
+  };
 
-  // Load contacts from Firebase
+  // ===== LOAD ALL FIREBASE USERS =====
   useEffect(() => {
     if (!db || !user || !isMounted) return;
-    const q = query(
-      collection(db, "chat_contacts"),
-      where("ownerId", "==", user.uid),
-      orderBy("addedAt", "desc")
-    );
+    const q = query(collection(db, "users"), limit(100));
     const unsubscribe = onSnapshot(q, (snapshot: any) => {
-      const list: ChatContact[] = [];
+      const users: FirebaseUser[] = [];
       snapshot.forEach((docSnap: any) => {
-        list.push({ id: docSnap.id, ...docSnap.data() } as ChatContact);
+        const data = docSnap.data();
+        if (docSnap.id !== user.uid) {
+          users.push({
+            uid: docSnap.id,
+            displayName: data.displayName || data.name || data.email || "User",
+            email: data.email || "",
+            photoURL: data.photoURL || "",
+            online: data.online || false,
+            lastSeen: data.lastSeen,
+            bio: data.bio || "",
+            createdAt: data.createdAt,
+          });
+        }
       });
-      setContacts(list);
+      setAllUsers(users);
     });
     return () => unsubscribe();
   }, [db, user, isMounted]);
 
-  // Load messages for selected contact
+  // ===== TICKETS LISTENER =====
   useEffect(() => {
-    if (!db || !selectedContact || !user || !isMounted) return;
+    if (!db || !user || !isMounted) return;
 
-    const chatId = [user.uid, selectedContact.userId].sort().join("_");
+    const q = query(
+      collection(db, "livechat_tickets"),
+      where("userId", "==", user.uid),
+      orderBy("createdAt", "desc")
+    );
 
-    if (messagesCacheRef.current[chatId]) {
-      setMessages(messagesCacheRef.current[chatId]);
-      prevMessagesLenRef.current = messagesCacheRef.current[chatId].length;
+    const unsubscribe = onSnapshot(q, (snapshot: any) => {
+      const ticketList: Ticket[] = [];
+      snapshot.forEach((docSnap: any) => {
+        const data = docSnap.data();
+        ticketList.push({ id: docSnap.id, ...data } as Ticket);
+      });
+      setTickets(ticketList);
+      setSelectedTicket((prev) => {
+        if (!prev) return prev;
+        const updated = ticketList.find((t) => t.id === prev.id);
+        return updated || prev;
+      });
+    });
+    return () => unsubscribe();
+  }, [db, user, isMounted]);
+
+  // ===== TICKET PREVIEWS LISTENER =====
+  useEffect(() => {
+    if (!db || !tickets.length || !isMounted) return;
+    const unsubscribes: (() => void)[] = [];
+    tickets.forEach((ticket) => {
+      const q = query(
+        collection(db, "livechat_tickets", ticket.id, "messages"),
+        orderBy("timestamp", "desc"),
+        limit(3)
+      );
+      const unsub = onSnapshot(q, async (snapshot: any) => {
+        const count = snapshot.size;
+        setTicketMsgCounts((prev) => ({ ...prev, [ticket.id]: count }));
+        const previews: LastMessagePreview[] = [];
+        for (const docSnap of snapshot.docs) {
+          const data = docSnap.data();
+          let text = data.text || "";
+          if (data.isEncrypted) {
+            try {
+              text = await decryptMessage(text);
+            } catch {
+              text = "[Encrypted]";
+            }
+          }
+          previews.push({
+            text,
+            senderName: data.senderName || "User",
+            timestamp: data.timestamp,
+            isFromMe: data.senderId === user.uid,
+          });
+        }
+        setTicketPreviews((prev) => ({ ...prev, [ticket.id]: previews }));
+      });
+      unsubscribes.push(unsub);
+    });
+    return () => {
+      unsubscribes.forEach((unsub) => unsub());
+    };
+  }, [db, tickets, isMounted, user]);
+
+  // ===== MESSAGES LISTENER =====
+  useEffect(() => {
+    if (!db || !selectedTicket || !isMounted) return;
+
+    const ticketId = selectedTicket.id;
+
+    if (messagesCacheRef.current[ticketId]) {
+      setMessages(messagesCacheRef.current[ticketId]);
+      prevMessagesLenRef.current = messagesCacheRef.current[ticketId].length;
     }
 
     const q = query(
-      collection(db, "direct_messages", chatId, "messages"),
+      collection(db, "livechat_tickets", ticketId, "messages"),
       orderBy("timestamp", "asc")
     );
-
     const unsubscribe = onSnapshot(q, async (snapshot: any) => {
       const msgList: ChatMessage[] = [];
       for (const docSnap of snapshot.docs) {
@@ -1306,8 +1486,9 @@ function LiveChatView({
         if (data.isEncrypted) {
           try {
             text = await decryptMessage(text);
-          } catch {
-            text = "[Encrypted]";
+          } catch (e) {
+            console.error("Failed to decrypt message:", e);
+            text = "[Encrypted message]";
           }
         }
         msgList.push({ id: docSnap.id, ...data, text } as ChatMessage);
@@ -1316,251 +1497,510 @@ function LiveChatView({
       const newLen = msgList.length;
       if (prevMessagesLenRef.current > 0 && newLen > prevMessagesLenRef.current) {
         setTimeout(() => {
-          const els = chatContainerRef.current?.querySelectorAll("[data-msg-id]");
-          if (els && els.length > 0) {
-            const last = els[els.length - 1];
+          const msgElements = chatMessagesContainerRef.current?.querySelectorAll("[data-msg-id]");
+          if (msgElements && msgElements.length > 0) {
+            const lastEl = msgElements[msgElements.length - 1];
             gsap.fromTo(
-              last,
+              lastEl,
               { y: 30, opacity: 0, scale: 0.95 },
-              { y: 0, opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.4)" }
+              { y: 0, opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.5)" }
             );
           }
         }, 50);
       }
       prevMessagesLenRef.current = newLen;
 
-      messagesCacheRef.current[chatId] = msgList;
+      messagesCacheRef.current[ticketId] = msgList;
       setMessages(msgList);
 
       requestAnimationFrame(() => {
-        if (chatContainerRef.current) {
-          chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+        if (chatMessagesContainerRef.current) {
+          chatMessagesContainerRef.current.scrollTop = chatMessagesContainerRef.current.scrollHeight;
         }
       });
     });
-
     return () => unsubscribe();
-  }, [db, selectedContact, user, isMounted]);
+  }, [db, selectedTicket, isMounted]);
 
-  // Mark messages as read
   useEffect(() => {
-    if (!db || !selectedContact || !user || !isMounted) return;
-    const chatId = [user.uid, selectedContact.userId].sort().join("_");
+    prevMessagesLenRef.current = messagesCacheRef.current[selectedTicket?.id || ""]?.length || 0;
+    setShowCloseConfirm(false);
+  }, [selectedTicket?.id]);
+
+  // ===== MARK MESSAGES AS READ =====
+  useEffect(() => {
+    if (!db || !selectedTicket || !user || !isMounted) return;
     const unread = messages.filter((m) => m.senderId !== user.uid && !m.read);
     unread.forEach(async (msg) => {
-      try {
-        await updateDoc(doc(db, "direct_messages", chatId, "messages", msg.id), {
-          read: true,
-          deliveryStatus: "read",
-        });
-      } catch (e) {
-        console.error(e);
-      }
+      const msgRef = doc(db, "livechat_tickets", selectedTicket.id, "messages", msg.id);
+      await updateDoc(msgRef, { read: true, deliveryStatus: "read" });
     });
-  }, [messages, selectedContact, db, user, isMounted]);
+  }, [messages, selectedTicket, db, user, isMounted]);
 
-  // Add contact
-  const handleAddContact = async () => {
-    if (!db || !user) return;
-    setAddError("");
-    if (!newName.trim()) {
-      setAddError("Name is required");
+  const hasAutoSelectedRef = useRef(false);
+  useEffect(() => {
+    if (!user || !isMounted) return;
+    if (hasAutoSelectedRef.current) return;
+    if (selectedTicket) {
+      hasAutoSelectedRef.current = true;
       return;
     }
-    if (!newEmail.trim() || !newEmail.includes("@")) {
-      setAddError("Valid email is required");
-      return;
+    const userTickets = tickets.filter((t) => t.userId === user.uid);
+    if (userTickets.length === 0) return;
+    const activeTicket = userTickets.find((t) => t.status === "waiting" || t.status === "active");
+    if (activeTicket) {
+      setSelectedTicket(activeTicket);
+      hasAutoSelectedRef.current = true;
+    } else if (userTickets.length > 0) {
+      setSelectedTicket(userTickets[0]);
+      hasAutoSelectedRef.current = true;
     }
-    const existing = contacts.find(
-      (c) => c.userEmail.toLowerCase() === newEmail.trim().toLowerCase()
-    );
-    if (existing) {
-      setAddError("This contact already exists");
-      return;
-    }
-    setAddingUser(true);
+  }, [tickets, user, selectedTicket, isMounted]);
+
+  const generateTicketId = useCallback((createdAt: any): string => {
+    if (!createdAt) return "#TICKET-0000";
+    const date = createdAt.toDate ? createdAt.toDate() : new Date(createdAt);
+    const year = date.getFullYear().toString().slice(-2);
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    return `#TICKET-${year}${month}${day}${hours}${minutes}`;
+  }, []);
+
+  const formatTime = useCallback((timestamp: any) => {
+    if (!timestamp) return "";
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    return date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+  }, []);
+
+  const getTypingText = (ticket: Ticket | null) => {
+    if (!ticket || !ticket.typing) return null;
+    const name = ticket.typingUserName || "Someone";
+    return `${name} is typing...`;
+  };
+
+  const handleLogout = async () => {
+    if (!auth) return;
     try {
-      // Try to find registered user by email
-      const usersQ = query(
-        collection(db, "users"),
-        where("email", "==", newEmail.trim().toLowerCase()),
-        limit(1)
-      );
-      const usersSnap = await new Promise<any>((resolve) => {
-        const unsub = onSnapshot(usersQ, (s: any) => {
-          unsub();
-          resolve(s);
-        });
+      await updateDoc(doc(db, "users", user.uid), {
+        online: false,
+        lastSeen: serverTimestamp(),
+        typing: false,
       });
-
-      let targetUserId = `guest_${newEmail.trim().toLowerCase()}`;
-      let targetPhoto = "";
-
-      if (usersSnap && !usersSnap.empty) {
-        const uDoc = usersSnap.docs[0];
-        targetUserId = uDoc.id;
-        targetPhoto = uDoc.data().photoURL || "";
-      }
-
-      await addDoc(collection(db, "chat_contacts"), {
-        ownerId: user.uid,
-        userId: targetUserId,
-        userName: newName.trim(),
-        userEmail: newEmail.trim().toLowerCase(),
-        userPhoto: targetPhoto,
-        addedAt: serverTimestamp(),
-      });
-
-      setAddSuccess(true);
-      setNewName("");
-      setNewEmail("");
-      setTimeout(() => setAddSuccess(false), 1500);
-
-      if (addButtonRef.current) {
-        gsap.fromTo(
-          addButtonRef.current,
-          { scale: 0.95 },
-          { scale: 1, duration: 0.5, ease: "elastic.out(1, 0.5)" }
-        );
-      }
-    } catch (e) {
-      console.error("Error adding contact:", e);
-      setAddError("Failed to add user. Try again.");
-    } finally {
-      setAddingUser(false);
+      await signOut(auth);
+    } catch (error) {
+      console.error("Logout error:", error);
     }
   };
 
-  // Delete contact
-  const handleDeleteContact = async (contact: ChatContact) => {
-    if (!db) return;
-    const el = contactItemRefs.current[contact.id];
-    const remove = async () => {
-      try {
-        await deleteDoc(doc(db, "chat_contacts", contact.id));
-        if (selectedContact?.id === contact.id) setSelectedContact(null);
-      } catch (e) {
-        console.error(e);
-      }
-    };
-    if (el) {
-      gsap.to(el, {
-        x: 120,
-        opacity: 0,
-        scale: 0.85,
-        duration: 0.4,
-        ease: "power2.in",
-        onComplete: remove,
+  const filterTicketsBySearch = useCallback(
+    (list: Ticket[]) => {
+      const q = searchQuery.trim().toLowerCase();
+      if (!q) return list;
+      return list.filter((ticket) => {
+        if (ticket.userName?.toLowerCase().includes(q)) return true;
+        if (ticket.userEmail?.toLowerCase().includes(q)) return true;
+        if (generateTicketId(ticket.createdAt).toLowerCase().includes(q)) return true;
+        const previews = ticketPreviews[ticket.id] || [];
+        for (const p of previews) {
+          if (p.text.toLowerCase().includes(q)) return true;
+        }
+        return false;
+      });
+    },
+    [searchQuery, ticketPreviews, generateTicketId]
+  );
+
+  const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setMessageText(value);
+    if (!selectedTicket || !user || !db || isBanned) return;
+    const ticketRef = doc(db, "livechat_tickets", selectedTicket.id);
+    if (value.length > 0) {
+      await updateDoc(ticketRef, {
+        typing: true,
+        typingUserId: user.uid,
+        typingUserName: user.displayName || user.email || "User",
       });
     } else {
-      remove();
+      await updateDoc(ticketRef, {
+        typing: false,
+        typingUserId: null,
+        typingUserName: null,
+      });
     }
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    typingTimeoutRef.current = setTimeout(async () => {
+      await updateDoc(ticketRef, {
+        typing: false,
+        typingUserId: null,
+        typingUserName: null,
+      });
+    }, 2000);
   };
 
-  // Send message
-  const handleSendMessage = async () => {
-    if (!db || !selectedContact || !user || !messageText.trim()) return;
-    if (isBanned) return;
-    if (!canSendMessage) return;
-
-    const check = containsBannedContent(messageText);
-    if (check.isBanned) {
-      await banUserPermanent(user.uid, user.email || "", user.displayName || "User", check.reason, messageText);
-      setIsBanned(true);
-      setBanReason(check.reason);
-      setCanSendMessage(false);
-      setMessageText("");
+  // ===== START CHAT WITH FIREBASE USER =====
+  const startChatWithUser = async (targetUser: FirebaseUser) => {
+    if (!db || !user || !encryptionReady) return;
+    const isBannedNow = await checkBanBeforeAction();
+    if (isBannedNow) {
+      setShowUserPicker(false);
+      return;
+    }
+    if (!canCreateTicket) {
+      setBanMessage("YOU DO NOT HAVE PERMISSION TO CREATE A NEW TICKET");
+      setShowUserPicker(false);
       return;
     }
 
-    if (!encryptionReady) {
-      alert("Encryption initializing, please wait.");
+    // Check if there's already an active ticket with this user
+    const existingTicket = tickets.find(
+      (t) =>
+        t.userId === user.uid &&
+        (t.status === "waiting" || t.status === "active") &&
+        t.userEmail === targetUser.email
+    );
+
+    if (existingTicket) {
+      setSelectedTicket(existingTicket);
+      setShowUserPicker(false);
       return;
     }
-
-    const text = messageText.trim();
-    setMessageText("");
 
     try {
-      const chatId = [user.uid, selectedContact.userId].sort().join("_");
-      const encrypted = await encryptMessage(text);
+      const ticketRef = await addDoc(collection(db, "livechat_tickets"), {
+        userId: user.uid,
+        userName: targetUser.displayName,
+        userEmail: targetUser.email,
+        userPhoto: targetUser.photoURL || "",
+        status: "active",
+        createdAt: serverTimestamp(),
+        unreadCount: 0,
+        typing: false,
+        typingUserId: null,
+        typingUserName: null,
+        isAnnouncement: false,
+        isBroadcast: false,
+        targetUserId: targetUser.uid,
+      });
 
-      // ensure chat room doc exists
-      await setDoc(
-        doc(db, "direct_messages", chatId),
-        {
-          participants: [user.uid, selectedContact.userId],
-          participantNames: {
-            [user.uid]: user.displayName || user.email || "User",
-            [selectedContact.userId]: selectedContact.userName,
-          },
-          lastMessage: text,
-          lastMessageTime: serverTimestamp(),
-          lastMessageSender: user.uid,
-        },
-        { merge: true }
-      );
-
-      await addDoc(collection(db, "direct_messages", chatId, "messages"), {
+      const initialMessage = `Hello ${targetUser.displayName}, let's start a conversation!`;
+      const encryptedMessage = await encryptMessage(initialMessage);
+      await addDoc(collection(db, "livechat_tickets", ticketRef.id, "messages"), {
         senderId: user.uid,
         senderName: user.displayName || user.email || "User",
-        text: encrypted,
+        text: encryptedMessage,
         timestamp: serverTimestamp(),
         read: false,
         isEncrypted: true,
+        isBotDetected: false,
         deliveryStatus: "sent",
       });
-    } catch (e) {
-      console.error("Send error:", e);
-      alert("Failed to send message.");
-      setMessageText(text);
+
+      await updateDoc(ticketRef, {
+        lastMessage: initialMessage,
+        lastMessageTime: serverTimestamp(),
+        lastMessageSender: user.displayName || user.email || "User",
+      });
+
+      setShowUserPicker(false);
+      setBanMessage(null);
+      hasAutoSelectedRef.current = false;
+    } catch (error) {
+      console.error("Error starting chat:", error);
+      alert("An error occurred while starting the chat. Please try again.");
     }
   };
 
-  const formatTime = (ts: any) => {
-    if (!ts) return "";
-    const d = ts.toDate ? ts.toDate() : new Date(ts);
-    return d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+  const sendMessage = async () => {
+    if (!db || !selectedTicket || !messageText.trim() || !user) return;
+    const isBannedNow = await checkBanBeforeAction();
+    if (isBannedNow) {
+      setMessageText("");
+      return;
+    }
+    if (!canSendMessage) {
+      setBanMessage("YOU DO NOT HAVE PERMISSION TO SEND MESSAGES");
+      setMessageText("");
+      return;
+    }
+    const checkResult = containsBannedContent(messageText);
+    if (checkResult.isBanned) {
+      await banUserPermanent(
+        user.uid,
+        user.email || "",
+        user.displayName || "User",
+        checkResult.reason,
+        messageText
+      );
+      setIsBanned(true);
+      setBanReason(checkResult.reason);
+      setCanCreateTicket(false);
+      setCanSendMessage(false);
+      setBanMessage(
+        `YOUR ACCOUNT HAS BEEN PERMANENTLY BANNED\n\nReason: ${checkResult.reason}\n\nMessage sent: "${messageText}"`
+      );
+      setMessageText("");
+      return;
+    }
+    if (!encryptionReady) {
+      alert("Encryption is being initialized, please wait a moment.");
+      return;
+    }
+    if (selectedTicket.status === "resolved" || selectedTicket.status === "closed") {
+      alert("This chat is finished. Please create a new ticket.");
+      return;
+    }
+    try {
+      const ticketRef = doc(db, "livechat_tickets", selectedTicket.id);
+      await updateDoc(ticketRef, { typing: false, typingUserId: null, typingUserName: null });
+      const senderName = user.displayName || user.email || "User";
+      const encryptedMessage = await encryptMessage(messageText.trim());
+      await addDoc(collection(db, "livechat_tickets", selectedTicket.id, "messages"), {
+        senderId: user.uid,
+        senderName: senderName,
+        text: encryptedMessage,
+        timestamp: serverTimestamp(),
+        read: false,
+        isEncrypted: true,
+        isBotDetected: false,
+        deliveryStatus: "sent",
+      });
+      await updateDoc(ticketRef, {
+        lastMessage: messageText.trim(),
+        lastMessageTime: serverTimestamp(),
+        lastMessageSender: senderName,
+        status: "active",
+      });
+      setMessageText("");
+      setBanMessage(null);
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    } catch (error) {
+      console.error("Error sending message:", error);
+      alert("An error occurred while sending the message. Please try again.");
+    }
   };
 
-  const filteredContacts = contacts.filter((c) => {
-    const q = searchQuery.trim().toLowerCase();
-    if (!q) return true;
-    return (
-      c.userName.toLowerCase().includes(q) ||
-      c.userEmail.toLowerCase().includes(q)
-    );
-  });
+  const handleCloseRoom = async () => {
+    if (!db || !selectedTicket) return;
+    try {
+      await updateDoc(doc(db, "livechat_tickets", selectedTicket.id), { status: "closed" });
+      setShowCloseConfirm(true);
+      setTimeout(() => setShowCloseConfirm(false), 2200);
+    } catch (error) {
+      console.error("Error closing ticket:", error);
+    }
+  };
 
-  if (!isMounted || checkingBan) {
+  const renderDeliveryStatus = (msg: ChatMessage, isMine: boolean) => {
+    if (!isMine) return null;
+    let label = "Sent";
+    let icon = <CheckIcon size={11} color="#ffffff" />;
+    if (msg.read) {
+      label = "Read";
+      icon = <DoubleCheckIcon size={11} color="#ffffff" />;
+    } else if (msg.deliveryStatus === "delivered") {
+      label = "Delivered";
+      icon = <DoubleCheckIcon size={11} color="#ffffff" />;
+    } else if (msg.deliveryStatus === "sending") {
+      label = "Sending";
+      icon = <ClockIcon size={11} color="#ffffff" />;
+    } else if (msg.deliveryStatus === "failed") {
+      label = "Failed";
+      icon = <ErrorIcon size={11} color="#ffffff" />;
+    }
     return (
-      <div style={{ paddingTop: "120px", minHeight: "100vh", fontFamily: FONT_FAMILY }}>
-        <div style={{ textAlign: "center", color: "#666", fontSize: "16px" }}>
-          {checkingBan ? "Checking account status..." : "Loading..."}
+      <span
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: "3px",
+          fontSize: "10px",
+          color: "#ffffff",
+          fontFamily: FONT_FAMILY,
+          fontWeight: 500,
+        }}
+      >
+        {label}
+        {icon}
+      </span>
+    );
+  };
+
+  const renderTicketPreview = (ticketId: string) => {
+    const previews = ticketPreviews[ticketId] || [];
+    if (previews.length === 0) return null;
+    const ordered = [...previews].reverse();
+    return (
+      <div style={{ marginTop: "6px", display: "flex", flexDirection: "column", gap: "3px" }}>
+        {ordered.map((p, i) => (
+          <div
+            key={i}
+            style={{
+              fontSize: "11px",
+              color: "#ffffff",
+              fontStyle: "italic",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              fontFamily: FONT_FAMILY,
+              display: "flex",
+              alignItems: "center",
+              gap: "4px",
+            }}
+          >
+            <span style={{ fontWeight: 700, color: "#ffffff", flexShrink: 0 }}>{p.senderName}:</span>
+            <span style={{ overflow: "hidden", textOverflow: "ellipsis", color: "#ffffff" }}>
+              {p.text.length > 30 ? p.text.substring(0, 30) + "..." : p.text}
+            </span>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  const renderSearchBar = () => {
+    return (
+      <div
+        style={{
+          padding: "10px 14px",
+          borderBottom: "1px solid rgba(255,255,255,0.15)",
+          flexShrink: 0,
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            padding: "8px 12px",
+            backgroundColor: "rgba(255,255,255,0.15)",
+            border: "1px solid rgba(255,255,255,0.25)",
+            borderRadius: "8px",
+          }}
+        >
+          <SearchIcon size={14} color="#ffffff" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search chats..."
+            style={{
+              flex: 1,
+              background: "transparent",
+              border: "none",
+              outline: "none",
+              color: "#ffffff",
+              fontSize: "12px",
+              fontFamily: FONT_FAMILY,
+              padding: 0,
+              caretColor: "#ffffff",
+              fontWeight: 600,
+            }}
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              style={{
+                background: "transparent",
+                border: "none",
+                color: "#ffffff",
+                cursor: "pointer",
+                fontSize: "14px",
+                padding: 0,
+                lineHeight: 1,
+                fontFamily: FONT_FAMILY,
+                fontWeight: 700,
+              }}
+            >
+              ×
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const filteredUsers = useMemo(() => {
+    const q = userSearchQuery.trim().toLowerCase();
+    if (!q) return allUsers;
+    return allUsers.filter(
+      (u) =>
+        u.displayName.toLowerCase().includes(q) ||
+        u.email.toLowerCase().includes(q)
+    );
+  }, [allUsers, userSearchQuery]);
+
+  if (checkingBan) {
+    return (
+      <div style={{ marginTop: "80px", paddingTop: "30px" }}>
+        <h3
+          style={{
+            fontSize: "80px",
+            fontWeight: 700,
+            color: BLUE,
+            fontFamily: FONT_FAMILY,
+            letterSpacing: "-0.03em",
+            margin: 0,
+            lineHeight: 1.1,
+          }}
+        >
+          Live Chat
+        </h3>
+        <div
+          style={{
+            padding: "20px",
+            textAlign: "center",
+            color: "#666",
+            fontFamily: FONT_FAMILY,
+          }}
+        >
+          Checking account status...
         </div>
       </div>
     );
   }
+  if (!isMounted) return <div style={{ minHeight: "100px" }} />;
 
   if (!user) {
     return (
-      <div style={{ paddingTop: "120px", minHeight: "100vh", fontFamily: FONT_FAMILY, maxWidth: "1200px", margin: "0 auto", padding: "120px 40px 60px" }}>
-        <h1 style={{ fontSize: "72px", fontWeight: 700, color: BLUE, letterSpacing: "-0.03em", margin: 0, marginBottom: "20px", lineHeight: 1.05 }}>
+      <div style={{ marginTop: "80px", paddingTop: "30px" }}>
+        <h3
+          ref={liveChatTitleRef}
+          style={{
+            fontSize: "80px",
+            fontWeight: 700,
+            color: BLUE,
+            fontFamily: FONT_FAMILY,
+            letterSpacing: "-0.03em",
+            margin: 0,
+            lineHeight: 1.1,
+            marginBottom: "20px",
+          }}
+        >
           Live Chat
-        </h1>
-        <p style={{ fontSize: "16px", color: "#666", marginBottom: "20px" }}>
-          Please login to use Live Chat.
+        </h3>
+        <p
+          style={{
+            fontSize: "15px",
+            color: "#666",
+            fontFamily: FONT_FAMILY,
+            marginBottom: "10px",
+          }}
+        >
+          Please login to use Live Chat
         </p>
-        <Link href="/signin" style={{ textDecoration: "none" }}>
+        <Link href="/" style={{ textDecoration: "none" }}>
           <button
             style={{
-              padding: "12px 28px",
+              padding: "8px 20px",
               backgroundColor: BLUE,
               color: WHITE,
               border: "none",
-              borderRadius: "10px",
-              fontSize: "15px",
-              fontWeight: 700,
+              borderRadius: "6px",
+              fontSize: "14px",
+              fontWeight: 600,
               cursor: "pointer",
               fontFamily: FONT_FAMILY,
             }}
@@ -1574,350 +2014,485 @@ function LiveChatView({
 
   if (isBanned) {
     return (
-      <div style={{ paddingTop: "120px", minHeight: "100vh", fontFamily: FONT_FAMILY, maxWidth: "1200px", margin: "0 auto", padding: "120px 40px 60px" }}>
-        <h1 style={{ fontSize: "72px", fontWeight: 700, color: BLUE, letterSpacing: "-0.03em", margin: 0, marginBottom: "20px", lineHeight: 1.05 }}>
-          Live Chat
-        </h1>
-        <div style={{ color: BLUE, fontSize: "40px", fontWeight: 700, marginBottom: "12px", letterSpacing: "-0.02em" }}>
-          YOUR ACCOUNT HAS BEEN BANNED
+      <div style={{ marginTop: "80px", paddingTop: "30px" }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+            marginBottom: "20px",
+          }}
+        >
+          <h3
+            style={{
+              fontSize: "80px",
+              fontWeight: 700,
+              color: BLUE,
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "-0.03em",
+              margin: 0,
+              lineHeight: 1.1,
+            }}
+          >
+            Live Chat
+          </h3>
+          <button
+            onClick={handleLogout}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              padding: "0",
+              backgroundColor: "transparent",
+              color: BLUE,
+              border: "none",
+              fontSize: "20px",
+              fontWeight: 700,
+              cursor: "pointer",
+              fontFamily: FONT_FAMILY,
+            }}
+          >
+            <span>Logout</span>
+            <ArrowRight size={20} color={BLUE} />
+          </button>
         </div>
-        <div style={{ color: BLUE, fontSize: "18px", fontWeight: 400 }}>
-          Reason: {banReason || "Suspicious activity"}
+        <div
+          style={{
+            color: BLUE,
+            fontSize: "50px",
+            fontWeight: 700,
+            fontFamily: FONT_FAMILY,
+            lineHeight: 1.2,
+            marginBottom: "12px",
+            letterSpacing: "-0.02em",
+          }}
+        >
+          YOUR ACCOUNT HAS BEEN PERMANENTLY BANNED
+        </div>
+        <div
+          style={{
+            color: BLUE,
+            fontSize: "22px",
+            fontWeight: 400,
+            fontFamily: FONT_FAMILY,
+            marginBottom: "6px",
+          }}
+        >
+          REASON: {banReason || "SUSPICIOUS ACTIVITY"}
         </div>
       </div>
     );
   }
 
-  return (
-    <div style={{ paddingTop: "100px", paddingBottom: "60px", minHeight: "100vh" }}>
-      {/* HEADER */}
-      <div style={{ marginBottom: "32px" }}>
-        <h1
+  const typingText = selectedTicket ? getTypingText(selectedTicket) : null;
+
+  const renderChatListItem = (ticket: Ticket) => {
+    const isActive = selectedTicket?.id === ticket.id;
+    const ticketId = generateTicketId(ticket.createdAt);
+    const statusStyle = STATUS_STYLES[ticket.status] || STATUS_STYLES.active;
+
+    return (
+      <motion.div
+        key={ticket.id}
+        layout
+        initial={{ opacity: 0, x: -40 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -40 }}
+        transition={{ duration: 0.35, ease: "easeOut" }}
+        onClick={() => setSelectedTicket(ticket)}
+        style={{
+          padding: "14px 16px",
+          borderLeft: isActive ? `3px solid ${WHITE}` : "3px solid transparent",
+          backgroundColor: isActive ? "rgba(255,255,255,0.14)" : "transparent",
+          cursor: "pointer",
+          borderBottom: "1px solid rgba(255,255,255,0.08)",
+          transition: "background-color 0.2s ease",
+        }}
+      >
+        <div
           style={{
-            fontSize: "72px",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "6px",
+            gap: "8px",
+            flexWrap: "wrap",
+          }}
+        >
+          <div
+            style={{
+              fontWeight: 700,
+              fontSize: "14px",
+              color: WHITE,
+              minWidth: 0,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              flex: "1 1 auto",
+            }}
+          >
+            {ticket.userName}
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px", flexShrink: 0 }}>
+            <StabiloBadge
+              label={statusStyle.label}
+              bg={statusStyle.bg}
+              text={statusStyle.text}
+              border={statusStyle.border}
+              size="sm"
+            />
+          </div>
+        </div>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+            marginBottom: "8px",
+            flexWrap: "wrap",
+          }}
+        >
+          <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.75)", fontWeight: 700 }}>
+            {ticketMsgCounts[ticket.id] || 0} msgs
+          </span>
+        </div>
+        {renderTicketPreview(ticket.id)}
+        <div style={{ marginTop: "6px" }}>
+          <span
+            style={{
+              fontSize: "9px",
+              color: "rgba(255,255,255,0.65)",
+              fontWeight: 700,
+              letterSpacing: "0.3px",
+            }}
+          >
+            {ticketId}
+          </span>
+        </div>
+      </motion.div>
+    );
+  };
+
+  return (
+    <div style={{ marginTop: "80px", paddingTop: "30px" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+          marginBottom: "20px",
+          flexWrap: "wrap",
+          gap: "16px",
+        }}
+      >
+        <h3
+          ref={liveChatTitleRef}
+          style={{
+            fontSize: "80px",
             fontWeight: 700,
             color: BLUE,
+            fontFamily: FONT_FAMILY,
             letterSpacing: "-0.03em",
             margin: 0,
-            lineHeight: 1.05,
+            lineHeight: 1.1,
           }}
         >
           Live Chat
-        </h1>
-        <p style={{ fontSize: "16px", color: "#666", marginTop: "8px", margin: 0 }}>
-          Chat with anyone. Add users by name and email.
-        </p>
-      </div>
-
-      {/* ADD USER FORM - INLINE, IN PAGE BODY */}
-      <div
-        ref={addFormRef}
-        style={{
-          backgroundColor: WHITE,
-          border: `2px solid ${BLUE}`,
-          borderRadius: "16px",
-          padding: "28px 32px",
-          marginBottom: "32px",
-          position: "relative",
-          overflow: "hidden",
-        }}
-      >
+        </h3>
         <div
           style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            height: "4px",
-            background: `linear-gradient(90deg, ${BLUE}, #6B8CFF, ${BLUE})`,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-end",
+            gap: "10px",
+            paddingTop: "10px",
           }}
-        />
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" }}>
-          <div
-            style={{
-              width: "40px",
-              height: "40px",
-              borderRadius: "10px",
-              backgroundColor: BLUE,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <UserPlusIcon size={22} color={WHITE} />
-          </div>
-          <div>
-            <h2 style={{ fontSize: "22px", fontWeight: 700, color: BLUE, margin: 0, letterSpacing: "-0.02em" }}>
-              Add User
-            </h2>
-            <p style={{ fontSize: "13px", color: "#666", margin: 0 }}>
-              Save user to your contact list.
-            </p>
-          </div>
-        </div>
-
-        <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", alignItems: "flex-end" }}>
-          <div style={{ flex: "1 1 200px", minWidth: "180px" }}>
-            <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: BLUE, textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "6px" }}>
-              Name
-            </label>
-            <input
-              type="text"
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              placeholder="Enter full name"
-              style={{
-                width: "100%",
-                padding: "12px 14px",
-                border: `1.5px solid rgba(13,60,252,0.2)`,
-                borderRadius: "10px",
-                fontSize: "15px",
-                fontFamily: FONT_FAMILY,
-                outline: "none",
-                color: BLUE,
-                boxSizing: "border-box",
-              }}
-              onFocus={(e) => {
-                e.target.style.borderColor = BLUE;
-                e.target.style.boxShadow = `0 0 0 3px rgba(13,60,252,0.1)`;
-              }}
-              onBlur={(e) => {
-                e.target.style.borderColor = "rgba(13,60,252,0.2)";
-                e.target.style.boxShadow = "none";
-              }}
-            />
-          </div>
-
-          <div style={{ flex: "1 1 260px", minWidth: "220px" }}>
-            <label style={{ display: "block", fontSize: "12px", fontWeight: 700, color: BLUE, textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "6px" }}>
-              Email
-            </label>
-            <input
-              type="email"
-              value={newEmail}
-              onChange={(e) => setNewEmail(e.target.value)}
-              placeholder="user@example.com"
-              style={{
-                width: "100%",
-                padding: "12px 14px",
-                border: `1.5px solid rgba(13,60,252,0.2)`,
-                borderRadius: "10px",
-                fontSize: "15px",
-                fontFamily: FONT_FAMILY,
-                outline: "none",
-                color: BLUE,
-                boxSizing: "border-box",
-              }}
-              onFocus={(e) => {
-                e.target.style.borderColor = BLUE;
-                e.target.style.boxShadow = `0 0 0 3px rgba(13,60,252,0.1)`;
-              }}
-              onBlur={(e) => {
-                e.target.style.borderColor = "rgba(13,60,252,0.2)";
-                e.target.style.boxShadow = "none";
-              }}
-            />
-          </div>
-
+        >
           <button
-            ref={addButtonRef}
-            onClick={handleAddContact}
-            disabled={addingUser}
+            onClick={handleLogout}
             style={{
-              padding: "12px 28px",
-              backgroundColor: addingUser ? "#ccc" : BLUE,
-              color: WHITE,
-              border: "none",
-              borderRadius: "10px",
-              fontSize: "14px",
-              fontWeight: 800,
-              cursor: addingUser ? "not-allowed" : "pointer",
-              fontFamily: FONT_FAMILY,
-              letterSpacing: "0.5px",
-              textTransform: "uppercase",
-              whiteSpace: "nowrap",
-              height: "46px",
-            }}
-          >
-            {addingUser ? "Adding..." : "Add User"}
-          </button>
-        </div>
-
-        {addError && (
-          <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            style={{
-              marginTop: "14px",
-              padding: "10px 14px",
-              backgroundColor: "rgba(255,0,0,0.06)",
-              border: "1px solid rgba(255,0,0,0.2)",
-              borderRadius: "8px",
-              fontSize: "13px",
-              color: "#d32f2f",
-              fontWeight: 600,
-            }}
-          >
-            {addError}
-          </motion.div>
-        )}
-
-        {addSuccess && (
-          <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            style={{
-              marginTop: "14px",
-              padding: "10px 14px",
-              backgroundColor: "rgba(13,60,252,0.06)",
-              border: `1px solid ${BLUE}`,
-              borderRadius: "8px",
-              fontSize: "13px",
-              color: BLUE,
-              fontWeight: 700,
               display: "flex",
               alignItems: "center",
               gap: "8px",
+              padding: "0",
+              backgroundColor: "transparent",
+              color: BLUE,
+              border: "none",
+              fontSize: "20px",
+              fontWeight: 700,
+              cursor: "pointer",
+              fontFamily: FONT_FAMILY,
             }}
           >
-            <CheckIcon size={14} color={BLUE} />
-            User added successfully!
-          </motion.div>
-        )}
+            <span>Logout</span>
+            <ArrowRight size={20} color={BLUE} />
+          </button>
+        </div>
       </div>
 
-      {/* TWO COLUMN: CONTACTS + CHAT */}
       <div
         style={{
-          display: "grid",
-          gridTemplateColumns: "340px 1fr",
-          gap: "20px",
-          height: "640px",
+          display: "flex",
+          gap: "16px",
+          height: "700px",
+          width: "100%",
+          overflow: "hidden",
+          borderRadius: "12px",
         }}
       >
-        {/* CONTACTS LIST */}
+        {/* ===== CHAT LIST ===== */}
         <div
+          className="chat-list-container"
           style={{
-            backgroundColor: WHITE,
-            border: "1px solid rgba(0,0,0,0.08)",
-            borderRadius: "16px",
+            width: "360px",
+            backgroundColor: BLUE,
+            borderRadius: "12px",
+            border: "none",
+            overflow: "hidden",
+            flexShrink: 0,
+            height: "700px",
+            color: WHITE,
+            fontFamily: FONT_FAMILY,
             display: "flex",
             flexDirection: "column",
-            overflow: "hidden",
+            position: "relative",
           }}
         >
           <div
             style={{
-              padding: "16px 18px",
-              backgroundColor: BLUE,
-              color: WHITE,
+              padding: "14px 16px",
+              borderBottom: "1px solid rgba(255,255,255,0.15)",
+              fontWeight: 700,
+              fontSize: "14px",
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
+              backgroundColor: BLUE,
+              flexShrink: 0,
             }}
           >
-            <span style={{ fontWeight: 700, fontSize: "15px" }}>Contacts</span>
+            <span style={{ color: WHITE, letterSpacing: "0.3px" }}>Chat History</span>
             <span
               style={{
                 fontSize: "11px",
+                color: WHITE,
                 padding: "2px 8px",
                 borderRadius: "4px",
                 border: `1.5px solid ${WHITE}`,
+                backgroundColor: "rgba(255,255,255,0.12)",
                 fontWeight: 800,
+                letterSpacing: "0.5px",
               }}
             >
-              {contacts.length}
+              {tickets.length}
             </span>
           </div>
 
-          <div style={{ padding: "10px 12px", borderBottom: "1px solid #f0f0f0" }}>
-            <div
+          {renderSearchBar()}
+
+          <div style={{ overflowY: "auto", flex: 1, minHeight: 0 }}>
+            <AnimatePresence>
+              {filterTicketsBySearch(tickets).map((ticket) => renderChatListItem(ticket))}
+            </AnimatePresence>
+            {filterTicketsBySearch(tickets).length === 0 && (
+              <div
+                style={{
+                  padding: "30px 16px",
+                  textAlign: "center",
+                  color: WHITE,
+                  fontSize: "13px",
+                }}
+              >
+                {searchQuery ? "No results found" : "No chats yet"}
+              </div>
+            )}
+          </div>
+
+          {/* ===== ADD USER BUTTON (GSAP) ===== */}
+          <div
+            style={{
+              padding: "12px 16px",
+              borderTop: "1px solid rgba(255,255,255,0.1)",
+              flexShrink: 0,
+              backgroundColor: BLUE,
+              position: "relative",
+            }}
+          >
+            <button
+              ref={addButtonRef}
+              onClick={() => setShowUserPicker((prev) => !prev)}
               style={{
                 display: "flex",
                 alignItems: "center",
+                justifyContent: "center",
                 gap: "8px",
-                padding: "8px 12px",
-                backgroundColor: "#f5f7ff",
+                width: "100%",
+                padding: "10px",
+                backgroundColor: WHITE,
+                color: BLUE,
+                border: `1.5px solid ${WHITE}`,
                 borderRadius: "8px",
+                fontSize: "13px",
+                fontWeight: 800,
+                cursor: "pointer",
+                fontFamily: FONT_FAMILY,
+                letterSpacing: "0.5px",
+                textTransform: "uppercase",
+                position: "relative",
+                overflow: "hidden",
+              }}
+              onMouseEnter={(e) => {
+                gsap.to(e.currentTarget, {
+                  scale: 1.03,
+                  boxShadow: "0 0 20px rgba(255,255,255,0.3)",
+                  duration: 0.3,
+                  ease: "power2.out",
+                });
+              }}
+              onMouseLeave={(e) => {
+                gsap.to(e.currentTarget, {
+                  scale: 1,
+                  boxShadow: "0 0 0px rgba(255,255,255,0)",
+                  duration: 0.3,
+                  ease: "power2.out",
+                });
               }}
             >
-              <SearchIcon size={14} color={BLUE} />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search contacts..."
-                style={{
-                  flex: 1,
-                  background: "transparent",
-                  border: "none",
-                  outline: "none",
-                  color: BLUE,
-                  fontSize: "13px",
-                  fontFamily: FONT_FAMILY,
-                  fontWeight: 600,
-                }}
-              />
-            </div>
-          </div>
+              <svg
+                ref={plusIconRef}
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                style={{ display: "block" }}
+              >
+                <path
+                  d="M12 5V19M5 12H19"
+                  stroke={BLUE}
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              Add User
+            </button>
 
-          <div className="chat-scroll" style={{ flex: 1, overflowY: "auto" }}>
-            {filteredContacts.length === 0 ? (
-              <div style={{ padding: "40px 20px", textAlign: "center", color: "#999", fontSize: "13px" }}>
-                {searchQuery ? "No results" : "No contacts yet. Add one above."}
+            {/* ===== USER PICKER (DROPDOWN) ===== */}
+            <div
+              ref={userPickerRef}
+              style={{
+                display: "none",
+                position: "absolute",
+                bottom: "calc(100% + 10px)",
+                left: "12px",
+                right: "12px",
+                backgroundColor: WHITE,
+                borderRadius: "12px",
+                boxShadow: "0 8px 32px rgba(0,0,0,0.25)",
+                overflow: "hidden",
+                zIndex: 100,
+                flexDirection: "column",
+                maxHeight: "400px",
+              }}
+            >
+              <div
+                style={{
+                  padding: "12px 14px",
+                  borderBottom: `1px solid rgba(13,60,252,0.1)`,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                }}
+              >
+                <SearchIcon size={14} color={BLUE} />
+                <input
+                  type="text"
+                  value={userSearchQuery}
+                  onChange={(e) => setUserSearchQuery(e.target.value)}
+                  placeholder="Search users..."
+                  style={{
+                    flex: 1,
+                    background: "transparent",
+                    border: "none",
+                    outline: "none",
+                    color: BLUE,
+                    fontSize: "13px",
+                    fontFamily: FONT_FAMILY,
+                    padding: 0,
+                    caretColor: BLUE,
+                    fontWeight: 600,
+                  }}
+                />
               </div>
-            ) : (
-              <AnimatePresence>
-                {filteredContacts.map((c) => {
-                  const isActive = selectedContact?.id === c.id;
-                  return (
+              <div style={{ overflowY: "auto", flex: 1, maxHeight: "340px" }}>
+                {filteredUsers.length === 0 ? (
+                  <div
+                    style={{
+                      padding: "24px 14px",
+                      textAlign: "center",
+                      color: "#999",
+                      fontSize: "12px",
+                      fontFamily: FONT_FAMILY,
+                    }}
+                  >
+                    No users found
+                  </div>
+                ) : (
+                  filteredUsers.map((u, idx) => (
                     <motion.div
-                      key={c.id}
-                      ref={(el) => {
-                        contactItemRefs.current[c.id] = el as HTMLDivElement | null;
-                      }}
-                      initial={{ opacity: 0, x: -40 }}
+                      key={u.uid}
+                      initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 60 }}
-                      transition={{ duration: 0.3, ease: "easeOut" }}
-                      onClick={() => setSelectedContact(c)}
+                      transition={{ duration: 0.25, delay: idx * 0.03 }}
+                      onClick={() => startChatWithUser(u)}
                       style={{
-                        padding: "12px 16px",
+                        padding: "10px 14px",
                         display: "flex",
                         alignItems: "center",
-                        gap: "12px",
+                        gap: "10px",
                         cursor: "pointer",
-                        borderLeft: isActive ? `3px solid ${BLUE}` : "3px solid transparent",
-                        backgroundColor: isActive ? "rgba(13,60,252,0.06)" : "transparent",
-                        borderBottom: "1px solid #f5f5f5",
+                        borderBottom: "1px solid rgba(0,0,0,0.04)",
+                        transition: "background-color 0.2s",
+                      }}
+                      onMouseEnter={(e) => {
+                        (e.currentTarget as HTMLDivElement).style.backgroundColor =
+                          "rgba(13,60,252,0.06)";
+                      }}
+                      onMouseLeave={(e) => {
+                        (e.currentTarget as HTMLDivElement).style.backgroundColor =
+                          "transparent";
                       }}
                     >
                       <div
                         style={{
-                          width: "40px",
-                          height: "40px",
-                          borderRadius: "10px",
+                          width: "36px",
+                          height: "36px",
+                          borderRadius: "8px",
                           backgroundColor: BLUE,
                           color: WHITE,
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
                           fontWeight: 800,
-                          fontSize: "15px",
-                          flexShrink: 0,
+                          fontSize: "14px",
                           overflow: "hidden",
+                          flexShrink: 0,
                         }}
                       >
-                        {c.userPhoto ? (
-                          <img src={c.userPhoto} alt={c.userName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        {u.photoURL ? (
+                          <img
+                            src={u.photoURL}
+                            alt={u.displayName}
+                            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                          />
                         ) : (
-                          c.userName.charAt(0).toUpperCase()
+                          u.displayName.charAt(0).toUpperCase()
                         )}
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div
                           style={{
-                            fontSize: "14px",
+                            fontSize: "13px",
                             fontWeight: 700,
                             color: BLACK,
                             overflow: "hidden",
@@ -1926,270 +2501,397 @@ function LiveChatView({
                             marginBottom: "2px",
                           }}
                         >
-                          {c.userName}
+                          {u.displayName}
                         </div>
                         <div
                           style={{
                             fontSize: "11px",
-                            color: "#888",
+                            color: "#666",
                             overflow: "hidden",
                             textOverflow: "ellipsis",
                             whiteSpace: "nowrap",
                           }}
                         >
-                          {c.userEmail}
+                          {u.email}
                         </div>
                       </div>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteContact(c);
-                        }}
-                        style={{
-                          background: "transparent",
-                          border: "none",
-                          cursor: "pointer",
-                          padding: "6px",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          borderRadius: "6px",
-                          opacity: 0.5,
-                        }}
-                        onMouseEnter={(e) => (e.currentTarget.style.opacity = "1")}
-                        onMouseLeave={(e) => (e.currentTarget.style.opacity = "0.5")}
-                      >
-                        <TrashIcon size={14} color={BLUE} />
-                      </button>
+                      {u.online && (
+                        <span
+                          style={{
+                            width: "8px",
+                            height: "8px",
+                            borderRadius: "50%",
+                            backgroundColor: "#22c55e",
+                            flexShrink: 0,
+                          }}
+                        />
+                      )}
                     </motion.div>
-                  );
-                })}
-              </AnimatePresence>
-            )}
+                  ))
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* CHAT VIEW */}
+        {/* ===== CHAT VIEW ===== */}
         <div
           style={{
+            flex: 1,
             backgroundColor: WHITE,
-            border: "1px solid rgba(0,0,0,0.08)",
-            borderRadius: "16px",
+            borderRadius: "12px",
+            border: "1px solid rgba(0,0,0,0.06)",
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
+            height: "700px",
+            minWidth: 0,
           }}
         >
-          {selectedContact ? (
+          {selectedTicket ? (
             <>
               <div
                 style={{
                   padding: "16px 20px",
                   backgroundColor: BLUE,
-                  color: WHITE,
                   display: "flex",
+                  justifyContent: "space-between",
                   alignItems: "center",
+                  flexShrink: 0,
                   gap: "12px",
                 }}
               >
-                <div
-                  style={{
-                    width: "42px",
-                    height: "42px",
-                    borderRadius: "10px",
-                    backgroundColor: WHITE,
-                    color: BLUE,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontWeight: 800,
-                    fontSize: "16px",
-                    overflow: "hidden",
-                  }}
-                >
-                  {selectedContact.userPhoto ? (
-                    <img src={selectedContact.userPhoto} alt={selectedContact.userName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                  ) : (
-                    selectedContact.userName.charAt(0).toUpperCase()
-                  )}
+                <div style={{ minWidth: 0, flex: 1 }}>
+                  <div
+                    style={{
+                      fontWeight: 700,
+                      fontSize: "17px",
+                      color: WHITE,
+                      fontFamily: FONT_FAMILY,
+                      marginBottom: "6px",
+                    }}
+                  >
+                    {selectedTicket.userName}
+                  </div>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      flexWrap: "wrap",
+                    }}
+                  >
+                    <StabiloBadge
+                      label={
+                        (STATUS_STYLES[selectedTicket.status] || STATUS_STYLES.active).label
+                      }
+                      bg={
+                        (STATUS_STYLES[selectedTicket.status] || STATUS_STYLES.active).bg
+                      }
+                      text={
+                        (STATUS_STYLES[selectedTicket.status] || STATUS_STYLES.active).text
+                      }
+                      border={
+                        (STATUS_STYLES[selectedTicket.status] || STATUS_STYLES.active)
+                          .border
+                      }
+                      size="sm"
+                    />
+                    {selectedTicket.typing && selectedTicket.status !== "resolved" && (
+                      <span
+                        style={{
+                          fontSize: "12px",
+                          color: WHITE,
+                          fontStyle: "italic",
+                          fontWeight: 700,
+                        }}
+                      >
+                        {selectedTicket.typingUserName} is typing...
+                      </span>
+                    )}
+                    <span
+                      style={{
+                        fontSize: "10px",
+                        color: "rgba(255,255,255,0.75)",
+                        fontWeight: 700,
+                        letterSpacing: "0.3px",
+                      }}
+                    >
+                      {generateTicketId(selectedTicket.createdAt)}
+                    </span>
+                  </div>
                 </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: "16px", fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                    {selectedContact.userName}
-                  </div>
-                  <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.8)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                    {selectedContact.userEmail}
-                  </div>
+
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
+                  {selectedTicket.status !== "closed" && (
+                    <button
+                      onClick={handleCloseRoom}
+                      style={{
+                        width: "36px",
+                        height: "36px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        backgroundColor: WHITE,
+                        border: `1.5px solid ${WHITE}`,
+                        borderRadius: "8px",
+                        cursor: "pointer",
+                        padding: 0,
+                      }}
+                    >
+                      <CloseIcon size={16} color={BLUE} />
+                    </button>
+                  )}
                 </div>
               </div>
 
+              {showCloseConfirm && (
+                <div
+                  style={{
+                    padding: "10px 20px",
+                    backgroundColor: WHITE,
+                    borderBottom: `1.5px solid ${BLUE}`,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    fontFamily: FONT_FAMILY,
+                    flexShrink: 0,
+                  }}
+                >
+                  <span
+                    style={{
+                      display: "inline-block",
+                      padding: "3px 9px",
+                      border: `1.5px solid ${BLUE}`,
+                      backgroundColor: WHITE,
+                      color: BLUE,
+                      fontSize: "10px",
+                      fontWeight: 800,
+                      letterSpacing: "0.5px",
+                      borderRadius: "4px",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    Info
+                  </span>
+                  <span style={{ fontSize: "13px", color: BLUE, fontWeight: 600 }}>
+                    Room chat berhasil ditutup. Buat room baru untuk melanjutkan.
+                  </span>
+                </div>
+              )}
+
               <div
-                ref={chatContainerRef}
-                className="chat-scroll"
+                ref={chatMessagesContainerRef}
+                className="chat-messages-container"
                 style={{
                   flex: 1,
                   overflowY: "auto",
+                  overflowX: "hidden",
                   padding: "24px",
                   display: "flex",
                   flexDirection: "column",
-                  gap: "10px",
-                  backgroundColor: "#fafbff",
+                  gap: "12px",
+                  minHeight: 0,
                 }}
               >
                 {messages.length === 0 ? (
-                  <div style={{ textAlign: "center", color: "#999", fontSize: "14px", padding: "40px 0" }}>
-                    Start the conversation with {selectedContact.userName}
+                  <div
+                    style={{
+                      textAlign: "center",
+                      color: "#999",
+                      fontSize: "15px",
+                      padding: "30px 0",
+                      fontFamily: FONT_FAMILY,
+                    }}
+                  >
+                    No messages yet
                   </div>
                 ) : (
-                  messages.map((msg, idx) => {
-                    const isMine = msg.senderId === user.uid;
-                    return (
-                      <div
-                        key={msg.id || idx}
-                        data-msg-id={msg.id || idx}
-                        style={{
-                          alignSelf: isMine ? "flex-end" : "flex-start",
-                          maxWidth: "70%",
-                        }}
-                      >
-                        <div
+                  <AnimatePresence initial={false}>
+                    {messages.map((msg, idx) => {
+                      const isMine = msg.senderId === user.uid;
+                      return (
+                        <motion.div
+                          key={msg.id || idx}
+                          data-msg-id={msg.id || idx}
+                          initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          transition={{ duration: 0.3, ease: "easeOut" }}
                           style={{
-                            padding: "12px 16px",
-                            borderRadius: "14px",
-                            backgroundColor: isMine ? BLUE : WHITE,
-                            color: isMine ? WHITE : BLACK,
-                            fontSize: "15px",
-                            fontFamily: FONT_FAMILY,
-                            wordBreak: "break-word",
-                            border: isMine ? "none" : "1px solid rgba(0,0,0,0.06)",
-                            boxShadow: isMine ? "0 2px 8px rgba(13,60,252,0.25)" : "0 1px 3px rgba(0,0,0,0.04)",
+                            alignSelf: isMine ? "flex-end" : "flex-start",
+                            maxWidth: "70%",
                           }}
                         >
-                          <div>{msg.text}</div>
                           <div
                             style={{
-                              display: "flex",
-                              justifyContent: "flex-end",
-                              alignItems: "center",
-                              gap: "5px",
-                              marginTop: "5px",
+                              padding: "12px 16px",
+                              borderRadius: "12px",
+                              backgroundColor: isMine ? BLUE : "#f4f4f5",
+                              color: isMine ? WHITE : BLACK,
+                              fontSize: "15px",
+                              fontFamily: FONT_FAMILY,
+                              wordBreak: "break-word",
+                              border: isMine ? "none" : "1px solid rgba(0,0,0,0.05)",
                             }}
                           >
-                            {isMine && (
-                              <span style={{ display: "inline-flex", alignItems: "center", gap: "3px", fontSize: "10px", color: WHITE, fontWeight: 500 }}>
-                                {msg.read ? (
-                                  <>
-                                    Read <DoubleCheckIcon size={11} color={WHITE} />
-                                  </>
-                                ) : msg.deliveryStatus === "delivered" ? (
-                                  <>
-                                    Delivered <DoubleCheckIcon size={11} color={WHITE} />
-                                  </>
-                                ) : msg.deliveryStatus === "sending" ? (
-                                  <>
-                                    Sending <ClockIcon size={11} color={WHITE} />
-                                  </>
-                                ) : msg.deliveryStatus === "failed" ? (
-                                  <>
-                                    Failed <ErrorIcon size={11} color={WHITE} />
-                                  </>
-                                ) : (
-                                  <>
-                                    Sent <CheckIcon size={11} color={WHITE} />
-                                  </>
-                                )}
-                              </span>
+                            {!isMine && (
+                              <div
+                                style={{
+                                  fontSize: "12px",
+                                  fontWeight: 700,
+                                  color: BLUE,
+                                  marginBottom: "5px",
+                                }}
+                              >
+                                {msg.senderName}
+                              </div>
                             )}
-                            <span style={{ fontSize: "10px", color: isMine ? "rgba(255,255,255,0.85)" : "#999" }}>
-                              {formatTime(msg.timestamp)}
-                            </span>
+                            <div>{msg.text}</div>
+                            <div
+                              style={{
+                                display: "flex",
+                                justifyContent: "flex-end",
+                                alignItems: "center",
+                                gap: "6px",
+                                marginTop: "5px",
+                              }}
+                            >
+                              {renderDeliveryStatus(msg, isMine)}
+                              <span
+                                style={{
+                                  fontSize: "10px",
+                                  color: isMine ? WHITE : "#999",
+                                }}
+                              >
+                                {formatTime(msg.timestamp)}
+                              </span>
+                            </div>
                           </div>
-                        </div>
-                      </div>
-                    );
-                  })
+                        </motion.div>
+                      );
+                    })}
+                  </AnimatePresence>
                 )}
+                {typingText && selectedTicket.status !== "resolved" && (
+                  <div
+                    style={{
+                      alignSelf: "flex-start",
+                      fontSize: "14px",
+                      color: "#666",
+                      fontStyle: "italic",
+                      padding: "5px 10px",
+                      fontFamily: FONT_FAMILY,
+                    }}
+                  >
+                    {typingText}
+                  </div>
+                )}
+
                 <div ref={messagesEndRef} />
               </div>
 
-              <div
-                style={{
-                  padding: "14px 18px",
-                  borderTop: "1px solid rgba(0,0,0,0.06)",
-                  display: "flex",
-                  gap: "10px",
-                  backgroundColor: WHITE,
-                }}
-              >
-                <input
-                  type="text"
-                  value={messageText}
-                  onChange={(e) => setMessageText(e.target.value)}
-                  onKeyPress={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey && messageText.trim()) {
-                      e.preventDefault();
-                      handleSendMessage();
-                    }
-                  }}
-                  placeholder="Type a message..."
+              {selectedTicket.status !== "resolved" && selectedTicket.status !== "closed" ? (
+                <div
                   style={{
-                    flex: 1,
-                    padding: "12px 16px",
-                    border: "1px solid rgba(0,0,0,0.1)",
-                    borderRadius: "10px",
-                    fontSize: "15px",
-                    outline: "none",
-                    fontFamily: FONT_FAMILY,
-                    color: BLACK,
-                  }}
-                />
-                <button
-                  onClick={handleSendMessage}
-                  disabled={!messageText.trim()}
-                  style={{
-                    padding: "12px 24px",
-                    backgroundColor: !messageText.trim() ? "#ccc" : BLUE,
-                    color: WHITE,
-                    border: "none",
-                    borderRadius: "10px",
-                    cursor: !messageText.trim() ? "not-allowed" : "pointer",
-                    fontFamily: FONT_FAMILY,
-                    fontSize: "14px",
-                    fontWeight: 800,
-                    letterSpacing: "0.5px",
-                    textTransform: "uppercase",
+                    padding: "16px 24px",
+                    borderTop: "1px solid rgba(0,0,0,0.06)",
+                    display: "flex",
+                    gap: "12px",
+                    backgroundColor: WHITE,
+                    flexShrink: 0,
                   }}
                 >
-                  Send
-                </button>
-              </div>
+                  <input
+                    type="text"
+                    value={messageText}
+                    onChange={handleTyping}
+                    onKeyPress={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey && messageText.trim()) {
+                        e.preventDefault();
+                        sendMessage();
+                      }
+                    }}
+                    placeholder="Type a message..."
+                    style={{
+                      flex: 1,
+                      padding: "12px 16px",
+                      border: "1px solid rgba(0,0,0,0.1)",
+                      borderRadius: "10px",
+                      fontSize: "15px",
+                      outline: "none",
+                      fontFamily: FONT_FAMILY,
+                      backgroundColor: WHITE,
+                    }}
+                  />
+                  <button
+                    onClick={sendMessage}
+                    disabled={!messageText.trim()}
+                    style={{
+                      padding: "12px 24px",
+                      backgroundColor: !messageText.trim() ? "#ccc" : BLUE,
+                      color: WHITE,
+                      border: "none",
+                      borderRadius: "10px",
+                      cursor: !messageText.trim() ? "not-allowed" : "pointer",
+                      fontFamily: FONT_FAMILY,
+                      fontSize: "14px",
+                      fontWeight: 800,
+                      letterSpacing: "0.5px",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    Send
+                  </button>
+                </div>
+              ) : (
+                <div
+                  style={{
+                    padding: "14px 24px",
+                    borderTop: "1px solid rgba(0,0,0,0.06)",
+                    backgroundColor: "#fafafa",
+                    textAlign: "center",
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "13px",
+                    color: BLUE,
+                    flexShrink: 0,
+                    fontWeight: 700,
+                  }}
+                >
+                  Room ini telah{" "}
+                  {selectedTicket.status === "closed" ? "ditutup" : "diselesaikan"}.
+                  Buat room baru untuk melanjutkan.
+                </div>
+              )}
             </>
           ) : (
             <div
               style={{
                 flex: 1,
                 display: "flex",
+                flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
                 color: "#999",
                 fontSize: "15px",
-                textAlign: "center",
-                padding: "40px",
+                fontFamily: FONT_FAMILY,
+                gap: "16px",
               }}
             >
-              Select a contact to start chatting
+              <span>Select a chat from the list on the left</span>
+              <span style={{ fontSize: "13px", color: "#bbb" }}>
+                or click "Add User" to start a new conversation
+              </span>
             </div>
           )}
         </div>
       </div>
     </div>
   );
-}
+};
 
 // ===== MAIN PAGE =====
-export default function LiveChatMain(): React.JSX.Element {
+export default function LiveChatPage(): React.JSX.Element {
   const [user, setUser] = useState<any>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isMounted, setIsMounted] = useState(false);
   const [showMain, setShowMain] = useState(false);
@@ -2208,7 +2910,6 @@ export default function LiveChatMain(): React.JSX.Element {
       setUser(currentUser);
       setLoading(false);
       if (currentUser) {
-        setIsAdmin(currentUser.email === ADMIN_EMAIL);
         try {
           await updateDoc(doc(db, "users", currentUser.uid), {
             online: true,
@@ -2299,8 +3000,23 @@ export default function LiveChatMain(): React.JSX.Element {
           fontFamily: FONT_FAMILY,
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "40px", overflow: "hidden" }}>
-          <span style={{ fontSize: "100px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em" }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "40px",
+            overflow: "hidden",
+          }}
+        >
+          <span
+            style={{
+              fontSize: "100px",
+              fontWeight: 700,
+              color: BLUE,
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "-0.03em",
+            }}
+          >
             Menuru
           </span>
           <span
@@ -2340,8 +3056,23 @@ export default function LiveChatMain(): React.JSX.Element {
           fontFamily: FONT_FAMILY,
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "40px", overflow: "hidden" }}>
-          <span style={{ fontSize: "100px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em" }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "40px",
+            overflow: "hidden",
+          }}
+        >
+          <span
+            style={{
+              fontSize: "100px",
+              fontWeight: 700,
+              color: BLUE,
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "-0.03em",
+            }}
+          >
             Menuru
           </span>
           <span
@@ -2368,10 +3099,16 @@ export default function LiveChatMain(): React.JSX.Element {
       <Head>
         <title>Live Chat | Menuru Official</title>
         <meta name="description" content="Live Chat Menuru" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+        />
         <meta name="theme-color" content={BLUE} />
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta
+          name="apple-mobile-web-app-status-bar-style"
+          content="black-translucent"
+        />
         <meta name="apple-mobile-web-app-title" content="Menuru" />
         <meta name="mobile-web-app-capable" content="yes" />
         <link rel="icon" href="/images/ai.jpg" type="image/jpeg" />
@@ -2403,8 +3140,15 @@ export default function LiveChatMain(): React.JSX.Element {
         <HeroMenuruTitle onNavbarShiftChange={setNavbarShifted} />
 
         {/* KONTEN — LIVE CHAT */}
-        <div style={{ padding: "0 40px", maxWidth: "1600px", margin: "0 auto", width: "100%" }}>
-          <LiveChatView user={user} isAdmin={isAdmin} db={db} auth={auth} />
+        <div
+          style={{
+            padding: "0 40px",
+            maxWidth: "1600px",
+            margin: "0 auto",
+            width: "100%",
+          }}
+        >
+          <LiveChat user={user} db={db} auth={auth} />
         </div>
 
         {/* FOOTER */}
@@ -2419,11 +3163,49 @@ export default function LiveChatMain(): React.JSX.Element {
             overflow: "hidden",
           }}
         >
-          <div style={{ position: "absolute", left: "40px", top: "50%", transform: "translateY(-50%)", width: "200px", height: "auto", opacity: 0.8 }}>
-            <img src="/images/p0l.jpg" alt="" style={{ width: "100%", height: "auto", display: "block", objectFit: "cover" }} />
+          <div
+            style={{
+              position: "absolute",
+              left: "40px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              width: "200px",
+              height: "auto",
+              opacity: 0.8,
+            }}
+          >
+            <img
+              src="/images/p0l.jpg"
+              alt=""
+              style={{
+                width: "100%",
+                height: "auto",
+                display: "block",
+                objectFit: "cover",
+              }}
+            />
           </div>
-          <div style={{ position: "absolute", right: "40px", top: "50%", transform: "translateY(-50%)", width: "200px", height: "auto", opacity: 0.8 }}>
-            <img src="/images/xxz.jpg" alt="" style={{ width: "100%", height: "auto", display: "block", objectFit: "cover" }} />
+          <div
+            style={{
+              position: "absolute",
+              right: "40px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              width: "200px",
+              height: "auto",
+              opacity: 0.8,
+            }}
+          >
+            <img
+              src="/images/xxz.jpg"
+              alt=""
+              style={{
+                width: "100%",
+                height: "auto",
+                display: "block",
+                objectFit: "cover",
+              }}
+            />
           </div>
 
           <div
@@ -2455,30 +3237,55 @@ export default function LiveChatMain(): React.JSX.Element {
                 >
                   {section.title}
                 </h3>
-                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "8px",
+                  }}
+                >
                   {section.links.map((link, linkIdx) => {
                     let linkHref = "#";
                     let isAttention = false;
                     let isStories = false;
                     if (link === "Contact") linkHref = "/contact";
                     else if (link === "Live Chat") linkHref = "/live-chat";
-                    else if (link === "Live Chat Agent") linkHref = "/live-chat-agent";
+                    else if (link === "Live Chat Agent")
+                      linkHref = "/live-chat-agent";
                     else if (link === "Help Center") linkHref = "/pusat-bantuan";
-                    else if (link === "About Us") { linkHref = "/profile"; isAttention = true; }
-                    else if (link === "Privacy Policy") { linkHref = "/privacy-policy"; isAttention = true; }
-                    else if (link === "Terms & Conditions") { linkHref = "/terms-of-services"; isAttention = true; }
-                    else if (link === "Terms of Use") { linkHref = "/terms-of-use"; isAttention = true; }
-                    else if (link === "Stories") { linkHref = "/stories"; isStories = true; }
-                    else if (link === "Shop") linkHref = "/shop";
+                    else if (link === "About Us") {
+                      linkHref = "/profile";
+                      isAttention = true;
+                    } else if (link === "Privacy Policy") {
+                      linkHref = "/privacy-policy";
+                      isAttention = true;
+                    } else if (link === "Terms & Conditions") {
+                      linkHref = "/terms-of-services";
+                      isAttention = true;
+                    } else if (link === "Terms of Use") {
+                      linkHref = "/terms-of-use";
+                      isAttention = true;
+                    } else if (link === "Stories") {
+                      linkHref = "/stories";
+                      isStories = true;
+                    } else if (link === "Shop") linkHref = "/shop";
                     else if (link === "Note") linkHref = "/note";
                     else if (link === "Calendar") linkHref = "/calendar";
                     else if (link === "Blog") linkHref = "/blog";
                     else if (link === "Donation") linkHref = "/donation";
                     else if (link === "Community") linkHref = "/community";
-                    else if (link === "Instagram") linkHref = "https://instagram.com/menuru";
+                    else if (link === "Instagram")
+                      linkHref = "https://instagram.com/menuru";
 
                     return (
-                      <div key={linkIdx} style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                      <div
+                        key={linkIdx}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "10px",
+                        }}
+                      >
                         <Link href={linkHref} style={{ textDecoration: "none" }}>
                           <span
                             style={{
@@ -2561,7 +3368,8 @@ export default function LiveChatMain(): React.JSX.Element {
                 letterSpacing: "0.01em",
               }}
             >
-              Terms and conditions apply. By using this website, you agree to our Terms of Use and Privacy Policy.
+              Terms and conditions apply. By using this website, you agree to
+              our Terms of Use and Privacy Policy.
             </p>
           </div>
         </div>
@@ -2619,21 +3427,16 @@ export default function LiveChatMain(): React.JSX.Element {
           display: inline-block;
           will-change: transform, opacity, filter;
         }
-        .chat-scroll::-webkit-scrollbar,
+        .chat-messages-container::-webkit-scrollbar,
         .chat-list-container::-webkit-scrollbar,
-        .chat-list-container > div::-webkit-scrollbar,
-        .online-panel-container::-webkit-scrollbar,
-        .online-panel-container > div::-webkit-scrollbar {
+        .chat-list-container > div::-webkit-scrollbar {
           display: none !important;
           width: 0 !important;
           height: 0 !important;
         }
-        .chat-scroll,
         .chat-messages-container,
         .chat-list-container,
-        .chat-list-container > div,
-        .online-panel-container,
-        .online-panel-container > div {
+        .chat-list-container > div {
           scrollbar-width: none !important;
           -ms-overflow-style: none !important;
         }
