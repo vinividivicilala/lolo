@@ -1160,8 +1160,12 @@ const LiveChat = ({
   const [contacts, setContacts] = useState<ChatContact[]>([]);
   const [groups, setGroups] = useState<ChatGroup[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [messageSearchQuery, setMessageSearchQuery] = useState("");
   const [messagePreviews, setMessagePreviews] = useState<{ [contactId: string]: string }>({});
   const [contactMsgCounts, setContactMsgCounts] = useState<{ [contactId: string]: number }>({});
+
+  // ===== ONLINE USERS PANEL =====
+  const [onlineUsers, setOnlineUsers] = useState<ChatContact[]>([]);
 
   // ===== ADD USER (INLINE, NO MODAL) =====
   const [showAddUserForm, setShowAddUserForm] = useState(false);
@@ -1189,6 +1193,7 @@ const LiveChat = ({
   const contactItemRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const groupItemRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const userPickerItemRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+  const onlineUserItemRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
   useEffect(() => {
     setIsMounted(true);
@@ -1325,6 +1330,22 @@ const LiveChat = ({
     });
   }, [allUsers, showAddUserForm, isMounted]);
 
+  // GSAP animate online users
+  useEffect(() => {
+    if (!isMounted) return;
+    onlineUsers.forEach((u) => {
+      const el = onlineUserItemRefs.current[u.id];
+      if (el && !el.dataset.animated) {
+        el.dataset.animated = "true";
+        gsap.fromTo(
+          el,
+          { x: -40, opacity: 0 },
+          { x: 0, opacity: 1, duration: 0.5, ease: "back.out(1.4)" }
+        );
+      }
+    });
+  }, [onlineUsers, isMounted]);
+
   // GSAP animate contacts on change
   useEffect(() => {
     if (!isMounted) return;
@@ -1406,7 +1427,32 @@ const LiveChat = ({
     return () => unsubscribe();
   }, [db, user, isMounted]);
 
-  // ===== LOAD MY CONTACTS (yang sudah di-add user) =====
+  // ===== LOAD ONLINE USERS (Panel kiri) =====
+  useEffect(() => {
+    if (!db || !user || !isMounted) return;
+    const q = query(collection(db, "users"), where("online", "==", true));
+    const unsubscribe = onSnapshot(q, (snapshot: any) => {
+      const list: ChatContact[] = [];
+      snapshot.forEach((docSnap: any) => {
+        const data = docSnap.data();
+        if (docSnap.id !== user.uid) {
+          list.push({
+            id: docSnap.id,
+            userId: docSnap.id,
+            userName: data.displayName || data.name || data.email || "User",
+            userEmail: data.email || "",
+            userPhoto: data.photoURL || "",
+            online: true,
+            lastSeen: data.lastSeen,
+          });
+        }
+      });
+      setOnlineUsers(list);
+    });
+    return () => unsubscribe();
+  }, [db, user, isMounted]);
+
+  // ===== LOAD MY CONTACTS =====
   useEffect(() => {
     if (!db || !user || !isMounted) return;
     const q = query(
@@ -1566,7 +1612,7 @@ const LiveChat = ({
     });
   }, [messages, selectedContact, selectedGroup, db, user, isMounted]);
 
-  // ===== ADD USER TO MY CONTACTS (langsung dari picker) =====
+  // ===== ADD USER TO MY CONTACTS =====
   const handleAddUserToContacts = async (pickedUser: ChatContact) => {
     if (!db || !user) return;
     setAddingUserId(pickedUser.id);
@@ -1621,7 +1667,7 @@ const LiveChat = ({
     }
   };
 
-  // ===== ADD GROUP (INLINE, NO MODAL) =====
+  // ===== ADD GROUP =====
   const handleAddGroup = async () => {
     if (!db || !user) return;
     setGroupError("");
@@ -1815,12 +1861,19 @@ const LiveChat = ({
       g.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Filter untuk user picker (Add User)
   const filteredAllUsers = allUsers.filter(
     (u) =>
       u.userName.toLowerCase().includes(userSearchQuery.toLowerCase()) ||
       u.userEmail.toLowerCase().includes(userSearchQuery.toLowerCase())
   );
+
+  // Filter pesan di dalam chat
+  const filteredMessages = messageSearchQuery.trim()
+    ? messages.filter((m) =>
+        m.text.toLowerCase().includes(messageSearchQuery.toLowerCase()) ||
+        m.senderName.toLowerCase().includes(messageSearchQuery.toLowerCase())
+      )
+    : messages;
 
   if (checkingBan) {
     return (
@@ -1974,7 +2027,7 @@ const LiveChat = ({
     );
   }
 
-  // ===== RENDER CHAT LIST ITEM (contact/group) =====
+  // ===== RENDER CHAT LIST ITEM =====
   const renderChatListItem = (item: ChatContact | ChatGroup, type: "contact" | "group") => {
     const isContact = type === "contact";
     const contact = item as ChatContact;
@@ -2177,7 +2230,161 @@ const LiveChat = ({
           borderRadius: "12px",
         }}
       >
-        {/* ===== LEFT SIDEBAR: CHAT LIST (CONTACTS + GROUPS) ===== */}
+        {/* ===== PANEL USER ONLINE (KIRI) ===== */}
+        <div
+          className="online-panel-container"
+          style={{
+            width: "240px",
+            backgroundColor: WHITE,
+            borderRadius: "12px",
+            border: "1px solid rgba(0,0,0,0.08)",
+            flexShrink: 0,
+            height: "700px",
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              padding: "14px 16px",
+              backgroundColor: BLUE,
+              color: WHITE,
+              fontWeight: 700,
+              fontSize: "14px",
+              fontFamily: FONT_FAMILY,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              flexShrink: 0,
+            }}
+          >
+            <span>Online Users</span>
+            <span
+              style={{
+                fontSize: "11px",
+                color: WHITE,
+                padding: "2px 8px",
+                borderRadius: "4px",
+                border: `1.5px solid ${WHITE}`,
+                fontWeight: 700,
+                letterSpacing: "0.5px",
+              }}
+            >
+              {onlineUsers.length}
+            </span>
+          </div>
+          <div style={{ overflowY: "auto", flex: 1, minHeight: 0 }}>
+            {onlineUsers.length === 0 ? (
+              <div
+                style={{
+                  padding: "30px 16px",
+                  textAlign: "center",
+                  color: "#999",
+                  fontSize: "13px",
+                  fontFamily: FONT_FAMILY,
+                }}
+              >
+                No users online
+              </div>
+            ) : (
+              onlineUsers.map((u) => (
+                <div
+                  key={u.id}
+                  ref={(el) => { onlineUserItemRefs.current[u.id] = el; }}
+                  onClick={() => {
+                    setSelectedContact(u);
+                    setSelectedGroup(null);
+                  }}
+                  style={{
+                    padding: "12px 16px",
+                    borderBottom: "1px solid #f0f0f0",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    fontFamily: FONT_FAMILY,
+                    cursor: "pointer",
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLDivElement).style.backgroundColor = "rgba(13,60,252,0.05)";
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLDivElement).style.backgroundColor = "transparent";
+                  }}
+                >
+                  <div
+                    style={{
+                      width: "36px",
+                      height: "36px",
+                      borderRadius: "8px",
+                      backgroundColor: BLUE,
+                      color: WHITE,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontWeight: 800,
+                      fontSize: "14px",
+                      overflow: "hidden",
+                      flexShrink: 0,
+                      position: "relative",
+                    }}
+                  >
+                    {u.userPhoto ? (
+                      <img
+                        src={u.userPhoto}
+                        alt={u.userName}
+                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                      />
+                    ) : (
+                      u.userName.charAt(0).toUpperCase()
+                    )}
+                    <span
+                      style={{
+                        position: "absolute",
+                        bottom: -2,
+                        right: -2,
+                        width: "10px",
+                        height: "10px",
+                        borderRadius: "50%",
+                        backgroundColor: "#4CAF50",
+                        border: `2px solid ${WHITE}`,
+                      }}
+                    />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div
+                      style={{
+                        fontSize: "13px",
+                        fontWeight: 700,
+                        color: BLACK,
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                        marginBottom: "3px",
+                      }}
+                    >
+                      {u.userName}
+                    </div>
+                    <span
+                      style={{
+                        display: "inline-block",
+                        fontSize: "10px",
+                        fontWeight: 800,
+                        color: BLUE,
+                        letterSpacing: "0.5px",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      Online
+                    </span>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* ===== SIDEBAR: CHAT LIST (CONTACTS + GROUPS) ===== */}
         <div
           className="chat-list-container"
           style={{
@@ -2226,7 +2433,7 @@ const LiveChat = ({
             </span>
           </div>
 
-          {/* Search */}
+          {/* Search chat — bg putih, teks biru */}
           <div
             style={{
               padding: "10px 14px",
@@ -2240,12 +2447,12 @@ const LiveChat = ({
                 alignItems: "center",
                 gap: "8px",
                 padding: "8px 12px",
-                backgroundColor: "rgba(255,255,255,0.15)",
-                border: "1px solid rgba(255,255,255,0.25)",
+                backgroundColor: WHITE,
+                border: `1.5px solid ${WHITE}`,
                 borderRadius: "8px",
               }}
             >
-              <SearchIcon size={14} color="#ffffff" />
+              <SearchIcon size={14} color={BLUE} />
               <input
                 type="text"
                 value={searchQuery}
@@ -2256,11 +2463,11 @@ const LiveChat = ({
                   background: "transparent",
                   border: "none",
                   outline: "none",
-                  color: "#ffffff",
+                  color: BLUE,
                   fontSize: "12px",
                   fontFamily: FONT_FAMILY,
                   padding: 0,
-                  caretColor: "#ffffff",
+                  caretColor: BLUE,
                   fontWeight: 600,
                 }}
               />
@@ -2270,7 +2477,7 @@ const LiveChat = ({
                   style={{
                     background: "transparent",
                     border: "none",
-                    color: "#ffffff",
+                    color: BLUE,
                     cursor: "pointer",
                     fontSize: "14px",
                     padding: 0,
@@ -2438,7 +2645,7 @@ const LiveChat = ({
               </button>
             </div>
 
-            {/* ===== INLINE ADD USER FORM (NO MODAL) ===== */}
+            {/* INLINE ADD USER FORM */}
             {showAddUserForm && (
               <div
                 ref={addUserFormRef}
@@ -2532,18 +2739,16 @@ const LiveChat = ({
                             padding: "8px 10px",
                             borderRadius: "6px",
                             cursor: addingUserId ? "wait" : "pointer",
-                            backgroundColor: alreadyAdded ? "rgba(76,175,80,0.15)" : WHITE,
+                            backgroundColor: WHITE,
                             border: `1px solid ${BLUE}`,
                             transition: "background-color 0.2s",
                           }}
                           onMouseEnter={(e) => {
-                            if (!alreadyAdded)
-                              (e.currentTarget as HTMLDivElement).style.backgroundColor =
-                                "rgba(13,60,252,0.08)";
+                            (e.currentTarget as HTMLDivElement).style.backgroundColor =
+                              "rgba(13,60,252,0.08)";
                           }}
                           onMouseLeave={(e) => {
-                            if (!alreadyAdded)
-                              (e.currentTarget as HTMLDivElement).style.backgroundColor = WHITE;
+                            (e.currentTarget as HTMLDivElement).style.backgroundColor = WHITE;
                           }}
                         >
                           <div
@@ -2619,7 +2824,7 @@ const LiveChat = ({
                                 fontSize: "9px",
                                 fontWeight: 800,
                                 color: WHITE,
-                                backgroundColor: "#4CAF50",
+                                backgroundColor: BLUE,
                                 padding: "2px 6px",
                                 borderRadius: "4px",
                                 letterSpacing: "0.5px",
@@ -2649,7 +2854,7 @@ const LiveChat = ({
               </div>
             )}
 
-            {/* ===== INLINE ADD GROUP FORM (NO MODAL) ===== */}
+            {/* INLINE ADD GROUP FORM */}
             {showAddGroupForm && (
               <div
                 ref={addGroupFormRef}
@@ -2839,6 +3044,7 @@ const LiveChat = ({
                   alignItems: "center",
                   flexShrink: 0,
                   gap: "12px",
+                  flexWrap: "wrap",
                 }}
               >
                 <div style={{ minWidth: 0, flex: 1 }}>
@@ -2884,6 +3090,58 @@ const LiveChat = ({
                       : `${selectedGroup?.members.length} members · ${selectedGroup?.description}`}
                   </div>
                 </div>
+
+                {/* Search dalam chat — bg biru, teks putih */}
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    padding: "8px 12px",
+                    backgroundColor: BLUE,
+                    border: `1.5px solid ${WHITE}`,
+                    borderRadius: "8px",
+                    minWidth: "220px",
+                  }}
+                >
+                  <SearchIcon size={14} color={WHITE} />
+                  <input
+                    type="text"
+                    value={messageSearchQuery}
+                    onChange={(e) => setMessageSearchQuery(e.target.value)}
+                    placeholder="Search in chat..."
+                    style={{
+                      flex: 1,
+                      background: "transparent",
+                      border: "none",
+                      outline: "none",
+                      color: WHITE,
+                      fontSize: "12px",
+                      fontFamily: FONT_FAMILY,
+                      padding: 0,
+                      caretColor: WHITE,
+                      fontWeight: 600,
+                    }}
+                  />
+                  {messageSearchQuery && (
+                    <button
+                      onClick={() => setMessageSearchQuery("")}
+                      style={{
+                        background: "transparent",
+                        border: "none",
+                        color: WHITE,
+                        cursor: "pointer",
+                        fontSize: "14px",
+                        padding: 0,
+                        lineHeight: 1,
+                        fontFamily: FONT_FAMILY,
+                        fontWeight: 700,
+                      }}
+                    >
+                      ×
+                    </button>
+                  )}
+                </div>
               </div>
 
               {/* Messages */}
@@ -2901,7 +3159,7 @@ const LiveChat = ({
                   minHeight: 0,
                 }}
               >
-                {messages.length === 0 ? (
+                {filteredMessages.length === 0 ? (
                   <div
                     style={{
                       textAlign: "center",
@@ -2911,11 +3169,11 @@ const LiveChat = ({
                       fontFamily: FONT_FAMILY,
                     }}
                   >
-                    No messages yet
+                    {messageSearchQuery ? "No messages found" : "No messages yet"}
                   </div>
                 ) : (
                   <AnimatePresence initial={false}>
-                    {messages.map((msg, idx) => {
+                    {filteredMessages.map((msg, idx) => {
                       const isMine = msg.senderId === user.uid;
                       return (
                         <motion.div
@@ -3599,14 +3857,18 @@ export default function LiveChatPage(): React.JSX.Element {
         }
         .chat-messages-container::-webkit-scrollbar,
         .chat-list-container::-webkit-scrollbar,
-        .chat-list-container > div::-webkit-scrollbar {
+        .chat-list-container > div::-webkit-scrollbar,
+        .online-panel-container::-webkit-scrollbar,
+        .online-panel-container > div::-webkit-scrollbar {
           display: none !important;
           width: 0 !important;
           height: 0 !important;
         }
         .chat-messages-container,
         .chat-list-container,
-        .chat-list-container > div {
+        .chat-list-container > div,
+        .online-panel-container,
+        .online-panel-container > div {
           scrollbar-width: none !important;
           -ms-overflow-style: none !important;
         }
