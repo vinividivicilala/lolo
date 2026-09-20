@@ -25,10 +25,12 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 import { Physics2DPlugin } from "gsap/Physics2DPlugin";
 
+// Register GSAP plugins
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, SplitText, Physics2DPlugin);
 }
 
+// Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyD_htQZ1TClnXKZGRJ4izbMQ02y6V3aNAQ",
   authDomain: "wawa44-58d1e.firebaseapp.com",
@@ -40,9 +42,9 @@ const firebaseConfig = {
   measurementId: "G-8LMP7F4BE9",
 };
 
-let app = null;
-let auth = null;
-let db = null;
+let app: any = null;
+let auth: any = null;
+let db: any = null;
 
 if (typeof window !== "undefined") {
   app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
@@ -223,6 +225,7 @@ function containsBannedContent(text: string): { isBanned: boolean; reason: strin
   return { isBanned: false, reason: "" };
 }
 
+// ===== BAN USER PERMANENT =====
 async function banUserPermanent(
   userId: string,
   userEmail: string,
@@ -255,6 +258,7 @@ async function banUserPermanent(
   }
 }
 
+// ===== CHECK BAN STATUS =====
 async function checkBanStatus(userId: string): Promise<{
   isBanned: boolean; reason: string; message: string;
   canCreateTicket: boolean; canSendMessage: boolean;
@@ -392,6 +396,7 @@ const BrandIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: st
   </svg>
 );
 
+// ===== FOOTER LINKS =====
 const footerLinks = [
   { title: "Get in Touch", links: ["Contact", "Instagram", "Live Chat"] },
   {
@@ -613,7 +618,6 @@ const FooterMenuruTitle = () => {
     if (!titleRef.current || !containerRef.current) return;
 
     const title = titleRef.current;
-
     let split: any = null;
     let ctx: any = null;
 
@@ -897,13 +901,7 @@ const CookieConsentPopup = ({
           gap: "14px",
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-          }}
-        >
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <div
             style={{
               width: "34px",
@@ -924,35 +922,14 @@ const CookieConsentPopup = ({
               <circle cx="9.5" cy="15.5" r="1" fill="#ffffff" />
             </svg>
           </div>
-          <span
-            style={{
-              fontSize: "15px",
-              fontWeight: 700,
-              color: "#000000",
-              letterSpacing: "-0.01em",
-            }}
-          >
+          <span style={{ fontSize: "15px", fontWeight: 700, color: "#000000", letterSpacing: "-0.01em" }}>
             Cookies
           </span>
         </div>
 
-        <p
-          style={{
-            fontSize: "13px",
-            lineHeight: 1.55,
-            color: "#333333",
-            margin: 0,
-          }}
-        >
+        <p style={{ fontSize: "13px", lineHeight: 1.55, color: "#333333", margin: 0 }}>
           We use cookies to improve your experience and analyse site usage.{" "}
-          <Link
-            href="/cookie-policy"
-            style={{
-              color: "#0D3CFC",
-              textDecoration: "underline",
-              fontWeight: 600,
-            }}
-          >
+          <Link href="/cookie-policy" style={{ color: "#0D3CFC", textDecoration: "underline", fontWeight: 600 }}>
             Cookie Policy
           </Link>
         </p>
@@ -974,14 +951,10 @@ const CookieConsentPopup = ({
             transition: "background-color 0.2s ease, transform 0.15s ease",
           }}
           onMouseEnter={(e) => {
-            if (!saving) {
-              (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#000000";
-            }
+            if (!saving) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#000000";
           }}
           onMouseLeave={(e) => {
-            if (!saving) {
-              (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#0D3CFC";
-            }
+            if (!saving) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#0D3CFC";
           }}
         >
           {saving ? "Saving..." : "Accept"}
@@ -1099,11 +1072,7 @@ const NavbarButton = ({
   const strokeColor = open ? labelTextHoverColor : labelTextColor;
 
   return (
-    <div
-      style={{ position: "relative" }}
-      onMouseEnter={handleEnter}
-      onMouseLeave={handleLeave}
-    >
+    <div style={{ position: "relative" }} onMouseEnter={handleEnter} onMouseLeave={handleLeave}>
       <div
         style={{
           display: "flex",
@@ -1115,9 +1084,7 @@ const NavbarButton = ({
           WebkitBackdropFilter: "blur(20px)",
           borderRadius: "10px",
           border: "1px solid rgba(255,255,255,0.18)",
-          boxShadow: open
-            ? "0 8px 24px rgba(0,0,0,0.35)"
-            : `0 8px 24px ${buttonColor}55`,
+          boxShadow: open ? "0 8px 24px rgba(0,0,0,0.35)" : `0 8px 24px ${buttonColor}55`,
           transition: "background-color 0.25s ease, box-shadow 0.25s ease",
           cursor: "pointer",
           position: "relative",
@@ -1149,34 +1116,9 @@ const NavbarButton = ({
             transition: "background-color 0.25s ease",
           }}
         >
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            style={{ display: "block" }}
-          >
-            <line
-              ref={linesTopRef}
-              x1="4"
-              y1="7"
-              x2="20"
-              y2="7"
-              stroke={strokeColor}
-              strokeWidth="2.5"
-              strokeLinecap="round"
-            />
-            <line
-              ref={linesBottomRef}
-              x1="4"
-              y1="17"
-              x2="20"
-              y2="17"
-              stroke={strokeColor}
-              strokeWidth="2.5"
-              strokeLinecap="round"
-            />
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ display: "block" }}>
+            <line ref={linesTopRef} x1="4" y1="7" x2="20" y2="7" stroke={strokeColor} strokeWidth="2.5" strokeLinecap="round" />
+            <line ref={linesBottomRef} x1="4" y1="17" x2="20" y2="17" stroke={strokeColor} strokeWidth="2.5" strokeLinecap="round" />
           </svg>
         </div>
       </div>
@@ -1207,23 +1149,13 @@ const NavbarButton = ({
             alignItems: "flex-start",
           }}
         >
-          <div
-            style={{
-              flex: "1 1 0",
-              minWidth: 0,
-              display: "flex",
-              flexDirection: "column",
-              gap: "12px",
-            }}
-          >
+          <div style={{ flex: "1 1 0", minWidth: 0, display: "flex", flexDirection: "column", gap: "12px" }}>
             {isResources ? (
               <>
                 <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                     <DocsIcon size={22} color={titleTextColor} />
-                    <span style={{ fontSize: "16px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>
-                      Docs
-                    </span>
+                    <span style={{ fontSize: "16px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>Docs</span>
                   </div>
                   <p style={{ fontSize: "12px", lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY, maxWidth: "340px" }}>
                     Dokumentasi lengkap panduan produk, API, dan tutorial Menuru.
@@ -1233,9 +1165,7 @@ const NavbarButton = ({
                 <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                     <BrandIcon size={22} color={titleTextColor} />
-                    <span style={{ fontSize: "16px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>
-                      Brand
-                    </span>
+                    <span style={{ fontSize: "16px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>Brand</span>
                   </div>
                   <p style={{ fontSize: "12px", lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY, maxWidth: "340px" }}>
                     Aset visual, logo, dan panduan identitas brand Menuru.
@@ -1269,9 +1199,7 @@ const NavbarButton = ({
               <>
                 <div style={{ backgroundColor: panelBoxColor, border: `1px solid ${panelBoxBorder}`, borderRadius: "12px", padding: "12px", display: "flex", flexDirection: "column", gap: "8px" }}>
                   <img src={panelImage} alt="Docs" style={{ width: "100%", height: "120px", objectFit: "contain", display: "block", borderRadius: "8px" }} />
-                  <span style={{ fontSize: "14px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>
-                    Docs Guide
-                  </span>
+                  <span style={{ fontSize: "14px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>Docs Guide</span>
                   <p style={{ fontSize: "12px", lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY }}>
                     Panduan lengkap dan referensi teknis.
                   </p>
@@ -1279,9 +1207,7 @@ const NavbarButton = ({
 
                 <div style={{ backgroundColor: panelBoxColor, border: `1px solid ${panelBoxBorder}`, borderRadius: "12px", padding: "12px", display: "flex", flexDirection: "column", gap: "8px" }}>
                   <img src={panelImage} alt="Brand" style={{ width: "100%", height: "120px", objectFit: "contain", display: "block", borderRadius: "8px" }} />
-                  <span style={{ fontSize: "14px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>
-                    Brand Assets
-                  </span>
+                  <span style={{ fontSize: "14px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>Brand Assets</span>
                   <p style={{ fontSize: "12px", lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY }}>
                     Logo, palet warna, dan identitas visual.
                   </p>
@@ -1305,7 +1231,7 @@ const NavbarButton = ({
   );
 };
 
-// ===== LEFT NAVBAR COMPONENT =====
+// ===== LEFT NAVBAR =====
 const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
   return (
     <div
@@ -1373,7 +1299,7 @@ const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
   );
 };
 
-// ===== RIGHT NAVBAR COMPONENT =====
+// ===== RIGHT NAVBAR =====
 const RightNavbar = () => {
   return (
     <div
@@ -1414,7 +1340,7 @@ const RightNavbar = () => {
   );
 };
 
-// ===== ONBOARDING TOUR COMPONENT =====
+// ===== ONBOARDING TOUR =====
 const OnboardingTour = ({
   steps,
   onComplete,
@@ -1457,18 +1383,10 @@ const OnboardingTour = ({
         const spaceLeft = rect.left;
 
         let pos = step.position || "bottom";
-        if (pos === "bottom" && spaceBelow < tooltipHeight + gap) {
-          pos = spaceAbove > spaceBelow ? "top" : "bottom";
-        }
-        if (pos === "top" && spaceAbove < tooltipHeight + gap) {
-          pos = spaceBelow > spaceAbove ? "bottom" : "top";
-        }
-        if (pos === "right" && spaceRight < tooltipWidth + gap) {
-          pos = spaceLeft > spaceRight ? "left" : "right";
-        }
-        if (pos === "left" && spaceLeft < tooltipWidth + gap) {
-          pos = spaceRight > spaceLeft ? "right" : "left";
-        }
+        if (pos === "bottom" && spaceBelow < tooltipHeight + gap) pos = spaceAbove > spaceBelow ? "top" : "bottom";
+        if (pos === "top" && spaceAbove < tooltipHeight + gap) pos = spaceBelow > spaceAbove ? "bottom" : "top";
+        if (pos === "right" && spaceRight < tooltipWidth + gap) pos = spaceLeft > spaceRight ? "left" : "right";
+        if (pos === "left" && spaceLeft < tooltipWidth + gap) pos = spaceRight > spaceLeft ? "right" : "left";
 
         if (pos === "bottom") {
           top = rect.bottom + gap + arrowSize;
@@ -1490,13 +1408,9 @@ const OnboardingTour = ({
 
         const padding = 12;
         if (left < padding) left = padding;
-        if (left + tooltipWidth > window.innerWidth - padding) {
-          left = window.innerWidth - tooltipWidth - padding;
-        }
+        if (left + tooltipWidth > window.innerWidth - padding) left = window.innerWidth - tooltipWidth - padding;
         if (top < padding) top = padding;
-        if (top + tooltipHeight > window.innerHeight - padding) {
-          top = window.innerHeight - tooltipHeight - padding;
-        }
+        if (top + tooltipHeight > window.innerHeight - padding) top = window.innerHeight - tooltipHeight - padding;
 
         setTooltipPos({ top, left });
         setArrowPos(arrow);
@@ -1507,9 +1421,7 @@ const OnboardingTour = ({
 
     updateRect();
     const el = document.querySelector(`[data-tour="${step.target}"]`);
-    if (el) {
-      (el as HTMLElement).scrollIntoView({ behavior: "smooth", block: "center" });
-    }
+    if (el) (el as HTMLElement).scrollIntoView({ behavior: "smooth", block: "center" });
     const timeout = setTimeout(updateRect, 400);
 
     window.addEventListener("resize", updateRect);
@@ -1524,20 +1436,13 @@ const OnboardingTour = ({
   if (!isActive || !step) return null;
 
   const handleNext = () => {
-    if (currentStep < steps.length - 1) {
-      setCurrentStep(currentStep + 1);
-    } else {
-      onComplete();
-    }
+    if (currentStep < steps.length - 1) setCurrentStep(currentStep + 1);
+    else onComplete();
   };
-
   const handlePrev = () => {
     if (currentStep > 0) setCurrentStep(currentStep - 1);
   };
-
-  const handleSkip = () => {
-    onComplete();
-  };
+  const handleSkip = () => onComplete();
 
   const renderArrow = () => {
     const arrowSize = 14;
@@ -1549,77 +1454,16 @@ const OnboardingTour = ({
       pointerEvents: "none",
     };
 
-    if (arrowPos === "top") {
-      return (
-        <div
-          style={{
-            ...baseStyle,
-            top: -arrowSize,
-            left: "50%",
-            marginLeft: -arrowSize,
-            borderWidth: `0 ${arrowSize}px ${arrowSize}px ${arrowSize}px`,
-            borderColor: `transparent transparent #0D3CFC transparent`,
-          }}
-        />
-      );
-    }
-    if (arrowPos === "bottom") {
-      return (
-        <div
-          style={{
-            ...baseStyle,
-            bottom: -arrowSize,
-            left: "50%",
-            marginLeft: -arrowSize,
-            borderWidth: `${arrowSize}px ${arrowSize}px 0 ${arrowSize}px`,
-            borderColor: `#0D3CFC transparent transparent transparent`,
-          }}
-        />
-      );
-    }
-    if (arrowPos === "left") {
-      return (
-        <div
-          style={{
-            ...baseStyle,
-            left: -arrowSize,
-            top: "50%",
-            marginTop: -arrowSize,
-            borderWidth: `${arrowSize}px ${arrowSize}px ${arrowSize}px 0`,
-            borderColor: `transparent #0D3CFC transparent transparent`,
-          }}
-        />
-      );
-    }
-    if (arrowPos === "right") {
-      return (
-        <div
-          style={{
-            ...baseStyle,
-            right: -arrowSize,
-            top: "50%",
-            marginTop: -arrowSize,
-            borderWidth: `${arrowSize}px 0 ${arrowSize}px ${arrowSize}px`,
-            borderColor: `transparent transparent transparent #0D3CFC`,
-          }}
-        />
-      );
-    }
+    if (arrowPos === "top") return <div style={{ ...baseStyle, top: -arrowSize, left: "50%", marginLeft: -arrowSize, borderWidth: `0 ${arrowSize}px ${arrowSize}px ${arrowSize}px`, borderColor: `transparent transparent #0D3CFC transparent` }} />;
+    if (arrowPos === "bottom") return <div style={{ ...baseStyle, bottom: -arrowSize, left: "50%", marginLeft: -arrowSize, borderWidth: `${arrowSize}px ${arrowSize}px 0 ${arrowSize}px`, borderColor: `#0D3CFC transparent transparent transparent` }} />;
+    if (arrowPos === "left") return <div style={{ ...baseStyle, left: -arrowSize, top: "50%", marginTop: -arrowSize, borderWidth: `${arrowSize}px ${arrowSize}px ${arrowSize}px 0`, borderColor: `transparent #0D3CFC transparent transparent` }} />;
+    if (arrowPos === "right") return <div style={{ ...baseStyle, right: -arrowSize, top: "50%", marginTop: -arrowSize, borderWidth: `${arrowSize}px 0 ${arrowSize}px ${arrowSize}px`, borderColor: `transparent transparent transparent #0D3CFC` }} />;
     return null;
   };
 
   return (
     <>
-      <div
-        onClick={handleSkip}
-        style={{
-          position: "fixed",
-          inset: 0,
-          backgroundColor: "rgba(0,0,0,0.6)",
-          zIndex: 9998,
-          pointerEvents: "auto",
-        }}
-      />
+      <div onClick={handleSkip} style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.6)", zIndex: 9998, pointerEvents: "auto" }} />
 
       {targetRect && (
         <div
@@ -1656,78 +1500,21 @@ const OnboardingTour = ({
       >
         {renderArrow()}
 
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "10px",
-          }}
-        >
-          <span
-            style={{
-              fontSize: "11px",
-              fontWeight: 700,
-              color: "#ffffff",
-              letterSpacing: "0.1em",
-              textTransform: "uppercase",
-              opacity: 0.9,
-            }}
-          >
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+          <span style={{ fontSize: "11px", fontWeight: 700, color: "#ffffff", letterSpacing: "0.1em", textTransform: "uppercase", opacity: 0.9 }}>
             Step {currentStep + 1} of {steps.length}
           </span>
-          <button
-            onClick={handleSkip}
-            style={{
-              background: "transparent",
-              border: "none",
-              color: "#ffffff",
-              cursor: "pointer",
-              fontSize: "18px",
-              fontFamily: FONT_FAMILY,
-              padding: 0,
-              lineHeight: 1,
-              opacity: 0.9,
-            }}
-            aria-label="Skip tour"
-          >
+          <button onClick={handleSkip} style={{ background: "transparent", border: "none", color: "#ffffff", cursor: "pointer", fontSize: "18px", fontFamily: FONT_FAMILY, padding: 0, lineHeight: 1, opacity: 0.9 }} aria-label="Skip tour">
             ×
           </button>
         </div>
 
-        <h4
-          style={{
-            fontSize: "18px",
-            fontWeight: 700,
-            color: "#ffffff",
-            margin: 0,
-            marginBottom: "8px",
-          }}
-        >
-          {step.title}
-        </h4>
-        <p
-          style={{
-            fontSize: "13px",
-            fontWeight: 400,
-            color: "#ffffff",
-            margin: 0,
-            marginBottom: "18px",
-            lineHeight: 1.5,
-            opacity: 0.95,
-          }}
-        >
+        <h4 style={{ fontSize: "18px", fontWeight: 700, color: "#ffffff", margin: 0, marginBottom: "8px" }}>{step.title}</h4>
+        <p style={{ fontSize: "13px", fontWeight: 400, color: "#ffffff", margin: 0, marginBottom: "18px", lineHeight: 1.5, opacity: 0.95 }}>
           {step.content}
         </p>
 
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: "8px",
-          }}
-        >
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px" }}>
           <button
             onClick={handlePrev}
             disabled={currentStep === 0}
@@ -1745,21 +1532,7 @@ const OnboardingTour = ({
           >
             Back
           </button>
-          <button
-            onClick={handleSkip}
-            style={{
-              padding: "7px 14px",
-              backgroundColor: "transparent",
-              color: "#ffffff",
-              border: "none",
-              borderRadius: "8px",
-              fontSize: "12px",
-              fontWeight: 500,
-              cursor: "pointer",
-              fontFamily: FONT_FAMILY,
-              opacity: 0.8,
-            }}
-          >
+          <button onClick={handleSkip} style={{ padding: "7px 14px", backgroundColor: "transparent", color: "#ffffff", border: "none", borderRadius: "8px", fontSize: "12px", fontWeight: 500, cursor: "pointer", fontFamily: FONT_FAMILY, opacity: 0.8 }}>
             Skip Tour
           </button>
           <button
@@ -1784,14 +1557,7 @@ const OnboardingTour = ({
           </button>
         </div>
 
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            gap: "5px",
-            marginTop: "14px",
-          }}
-        >
+        <div style={{ display: "flex", justifyContent: "center", gap: "5px", marginTop: "14px" }}>
           {steps.map((_, i) => (
             <div
               key={i}
@@ -1799,8 +1565,7 @@ const OnboardingTour = ({
                 width: i === currentStep ? "18px" : "6px",
                 height: "6px",
                 borderRadius: "3px",
-                backgroundColor:
-                  i === currentStep ? "#ffffff" : "rgba(255,255,255,0.35)",
+                backgroundColor: i === currentStep ? "#ffffff" : "rgba(255,255,255,0.35)",
                 transition: "all 0.3s ease",
               }}
             />
@@ -1808,6 +1573,101 @@ const OnboardingTour = ({
         </div>
       </div>
     </>
+  );
+};
+
+// ===== ROLLING NEW MESSAGE COMPONENT (GSAP) =====
+const RollingNewMessage = ({
+  senderName,
+  message,
+  isFromAgent,
+  isAdmin,
+}: {
+  senderName: string;
+  message: string;
+  isFromAgent: boolean;
+  isAdmin: boolean;
+}) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLDivElement>(null);
+  const prevMessageRef = useRef<string>("");
+
+  useEffect(() => {
+    if (!containerRef.current || !textRef.current) return;
+    if (message === prevMessageRef.current) return;
+    prevMessageRef.current = message;
+
+    const container = containerRef.current;
+    const textEl = textRef.current;
+
+    // Kill animasi lama
+    gsap.killTweensOf([container, textEl]);
+
+    // Set kondisi awal untuk rolling
+    gsap.set(container, { height: 0, opacity: 0 });
+    gsap.set(textEl, { yPercent: 120, opacity: 0, rotateX: -90, transformOrigin: "50% 100%" });
+
+    const tl = gsap.timeline();
+    tl.to(container, {
+      height: 22,
+      opacity: 1,
+      duration: 0.4,
+      ease: "power2.out",
+    })
+      .to(
+        textEl,
+        {
+          yPercent: 0,
+          opacity: 1,
+          rotateX: 0,
+          duration: 0.6,
+          ease: "back.out(1.7)",
+        },
+        "-=0.2"
+      );
+
+    return () => {
+      tl.kill();
+    };
+  }, [message]);
+
+  const labelColor = isAdmin ? "#0D3CFC" : "#ffffff";
+  const textColor = isAdmin ? "#0D3CFC" : "#ffffff";
+
+  return (
+    <div
+      ref={containerRef}
+      style={{
+        overflow: "hidden",
+        height: 0,
+        opacity: 0,
+        marginTop: 0,
+        display: "flex",
+        alignItems: "center",
+        gap: "4px",
+        fontFamily: FONT_FAMILY,
+        fontSize: "11px",
+        whiteSpace: "nowrap",
+      }}
+    >
+      <div ref={textRef} style={{ display: "flex", alignItems: "center", gap: "4px", overflow: "hidden", width: "100%" }}>
+        <span style={{ fontWeight: 700, color: labelColor, flexShrink: 0 }}>
+          {senderName}
+        </span>
+        <span style={{ color: textColor, opacity: 0.75, flexShrink: 0 }}>from</span>
+        <span
+          style={{
+            color: textColor,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            fontStyle: "italic",
+          }}
+        >
+          {message.length > 40 ? message.substring(0, 40) + "..." : message}
+        </span>
+      </div>
+    </div>
   );
 };
 
@@ -1841,6 +1701,7 @@ const LiveChatAgent = ({
   const [onlineAgents, setOnlineAgents] = useState<OnlineUser[]>([]);
   const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
   const [ticketPreviews, setTicketPreviews] = useState<{ [ticketId: string]: LastMessagePreview[] }>({});
+  const [ticketLatestMessage, setTicketLatestMessage] = useState<{ [ticketId: string]: LastMessagePreview | null }>({});
   const [ticketMsgCounts, setTicketMsgCounts] = useState<{ [ticketId: string]: number }>({});
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -1865,44 +1726,38 @@ const LiveChatAgent = ({
     {
       target: "login-button",
       title: "Login First",
-      content:
-        "Welcome to Live Chat Agent! First, please login to your account so you can start chatting with our support agent.",
+      content: "Welcome to Live Chat Agent! First, please login to your account so you can start chatting with our support agent.",
       position: "bottom",
       isLoginStep: true,
     },
     {
       target: "livechat-title",
       title: "Live Chat Agent",
-      content:
-        "This is the Live Chat Agent section. Here you can chat directly with our support team in real time.",
+      content: "This is the Live Chat Agent section. Here you can chat directly with our support team in real time.",
       position: "bottom",
     },
     {
       target: "online-panel",
       title: "Online Agents & Users",
-      content:
-        "See who is online right now. Agents see online users, and users see online agents — all updated in real time.",
+      content: "See who is online right now. Agents see online users, and users see online agents — all updated in real time.",
       position: "right",
     },
     {
       target: "chat-list",
       title: "Chat History",
-      content:
-        "All your conversations appear here. Each ticket shows the last 3 messages preview, message count, and status.",
+      content: "All your conversations appear here. Each ticket shows the last 3 messages preview, message count, and status.",
       position: "right",
     },
     {
       target: "search-bar",
       title: "Search Chats",
-      content:
-        "Use the search bar to quickly find any chat by name, topic, ticket ID, or message content.",
+      content: "Use the search bar to quickly find any chat by name, topic, ticket ID, or message content.",
       position: "bottom",
     },
     {
       target: "start-chat-button",
       title: "Start a New Chat",
-      content:
-        "Click this button to start a new conversation with our support agent. Pick a topic and we'll connect you.",
+      content: "Click this button to start a new conversation with our support agent. Pick a topic and we'll connect you.",
       position: "top",
     },
   ];
@@ -2033,10 +1888,10 @@ const LiveChatAgent = ({
   useEffect(() => {
     if (!db || !isMounted) return;
     const q = query(collection(db, "users"), where("online", "==", true));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
+    const unsubscribe = onSnapshot(q, (snapshot: any) => {
       const agents: OnlineUser[] = [];
       const users: OnlineUser[] = [];
-      snapshot.forEach((docSnap) => {
+      snapshot.forEach((docSnap: any) => {
         const data = docSnap.data();
         const item: OnlineUser = {
           uid: docSnap.id,
@@ -2063,16 +1918,12 @@ const LiveChatAgent = ({
     if (isAdmin) {
       q = query(collection(db, "livechat_tickets"), orderBy("createdAt", "desc"));
     } else {
-      q = query(
-        collection(db, "livechat_tickets"),
-        where("userId", "==", user.uid),
-        orderBy("createdAt", "desc")
-      );
+      q = query(collection(db, "livechat_tickets"), where("userId", "==", user.uid), orderBy("createdAt", "desc"));
     }
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
+    const unsubscribe = onSnapshot(q, (snapshot: any) => {
       const ticketList: Ticket[] = [];
-      snapshot.forEach((docSnap) => {
+      snapshot.forEach((docSnap: any) => {
         const data = docSnap.data();
         ticketList.push({ id: docSnap.id, ...data } as Ticket);
       });
@@ -2097,7 +1948,7 @@ const LiveChatAgent = ({
         orderBy("timestamp", "desc"),
         limit(3)
       );
-      const unsub = onSnapshot(q, async (snapshot) => {
+      const unsub = onSnapshot(q, async (snapshot: any) => {
         const count = snapshot.size;
         setTicketMsgCounts((prev) => ({ ...prev, [ticket.id]: count }));
         const previews: LastMessagePreview[] = [];
@@ -2119,6 +1970,10 @@ const LiveChatAgent = ({
           });
         }
         setTicketPreviews((prev) => ({ ...prev, [ticket.id]: previews }));
+        // Set latest message untuk rolling (previews[0] = terbaru karena orderBy desc)
+        if (previews.length > 0) {
+          setTicketLatestMessage((prev) => ({ ...prev, [ticket.id]: previews[0] }));
+        }
       });
       unsubscribes.push(unsub);
     });
@@ -2133,7 +1988,7 @@ const LiveChatAgent = ({
       collection(db, "livechat_tickets", selectedTicket.id, "messages"),
       orderBy("timestamp", "asc")
     );
-    const unsubscribe = onSnapshot(q, async (snapshot) => {
+    const unsubscribe = onSnapshot(q, async (snapshot: any) => {
       const msgList: ChatMessage[] = [];
       for (const docSnap of snapshot.docs) {
         const data = docSnap.data();
@@ -2166,9 +2021,7 @@ const LiveChatAgent = ({
   useEffect(() => {
     if (!user || isAdmin || !isMounted) return;
     const userTickets = tickets.filter((t) => t.userId === user.uid);
-    const activeTicket = userTickets.find(
-      (t) => t.status === "waiting" || t.status === "active"
-    );
+    const activeTicket = userTickets.find((t) => t.status === "waiting" || t.status === "active");
     if (activeTicket) setSelectedTicket(activeTicket);
     else if (userTickets.length > 0 && !selectedTicket) setSelectedTicket(userTickets[0]);
     else if (userTickets.length === 0) {
@@ -2196,8 +2049,7 @@ const LiveChatAgent = ({
 
   const scrollToBottom = () => {
     if (chatMessagesContainerRef.current) {
-      chatMessagesContainerRef.current.scrollTop =
-        chatMessagesContainerRef.current.scrollHeight;
+      chatMessagesContainerRef.current.scrollTop = chatMessagesContainerRef.current.scrollHeight;
     }
   };
 
@@ -2281,11 +2133,7 @@ const LiveChatAgent = ({
       return;
     }
     const hasActiveTicket = tickets.some(
-      (t) =>
-        t.userId === user.uid &&
-        (t.status === "waiting" || t.status === "active") &&
-        !t.isAnnouncement &&
-        !t.isBroadcast
+      (t) => t.userId === user.uid && (t.status === "waiting" || t.status === "active") && !t.isAnnouncement && !t.isBroadcast
     );
     if (hasActiveTicket) {
       alert("You still have an active chat with an agent. Please wait until it is finished.");
@@ -2342,20 +2190,12 @@ const LiveChatAgent = ({
     }
     const checkResult = containsBannedContent(messageText);
     if (checkResult.isBanned) {
-      await banUserPermanent(
-        user.uid,
-        user.email || "",
-        user.displayName || "User",
-        checkResult.reason,
-        messageText
-      );
+      await banUserPermanent(user.uid, user.email || "", user.displayName || "User", checkResult.reason, messageText);
       setIsBanned(true);
       setBanReason(checkResult.reason);
       setCanCreateTicket(false);
       setCanSendMessage(false);
-      setBanMessage(
-        `YOUR ACCOUNT HAS BEEN PERMANENTLY BANNED\n\nReason: ${checkResult.reason}\n\nMessage sent: "${messageText}"`
-      );
+      setBanMessage(`YOUR ACCOUNT HAS BEEN PERMANENTLY BANNED\n\nReason: ${checkResult.reason}\n\nMessage sent: "${messageText}"`);
       setMessageText("");
       return;
     }
@@ -2369,11 +2209,7 @@ const LiveChatAgent = ({
     }
     try {
       const ticketRef = doc(db, "livechat_tickets", selectedTicket.id);
-      await updateDoc(ticketRef, {
-        typing: false,
-        typingUserId: null,
-        typingUserName: null,
-      });
+      await updateDoc(ticketRef, { typing: false, typingUserId: null, typingUserName: null });
       const senderName = isAdmin ? AGENT_NAME : user.displayName || user.email || "User";
       const encryptedMessage = await encryptMessage(messageText.trim());
       await addDoc(collection(db, "livechat_tickets", selectedTicket.id, "messages"), {
@@ -2480,6 +2316,8 @@ const LiveChatAgent = ({
           height: "700px",
           display: "flex",
           flexDirection: "column",
+          scrollbarWidth: "none",
+          msOverflowStyle: "none",
         }}
       >
         <div
@@ -2500,28 +2338,13 @@ const LiveChatAgent = ({
           }}
         >
           <span>{title}</span>
-          <span
-            style={{
-              fontSize: "11px",
-              backgroundColor: "rgba(255,255,255,0.2)",
-              padding: "2px 8px",
-              borderRadius: "8px",
-            }}
-          >
+          <span style={{ fontSize: "11px", backgroundColor: "rgba(255,255,255,0.2)", padding: "2px 8px", borderRadius: "8px" }}>
             {list.length}
           </span>
         </div>
-        <div style={{ overflowY: "auto", flex: 1 }}>
+        <div style={{ overflowY: "auto", flex: 1, scrollbarWidth: "none", msOverflowStyle: "none" }}>
           {list.length === 0 ? (
-            <div
-              style={{
-                padding: "30px 16px",
-                textAlign: "center",
-                color: "#999",
-                fontSize: "13px",
-                fontFamily: FONT_FAMILY,
-              }}
-            >
+            <div style={{ padding: "30px 16px", textAlign: "center", color: "#999", fontSize: "13px", fontFamily: FONT_FAMILY }}>
               {emptyText}
             </div>
           ) : (
@@ -2554,11 +2377,7 @@ const LiveChatAgent = ({
                     }}
                   >
                     {u.photoURL ? (
-                      <img
-                        src={u.photoURL}
-                        alt={u.displayName}
-                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                      />
+                      <img src={u.photoURL} alt={u.displayName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                     ) : (
                       u.displayName.charAt(0).toUpperCase()
                     )}
@@ -2589,9 +2408,7 @@ const LiveChatAgent = ({
                   >
                     {u.displayName}
                   </div>
-                  <div style={{ fontSize: "11px", color: "#22c55e", fontWeight: 500 }}>
-                    Online
-                  </div>
+                  <div style={{ fontSize: "11px", color: "#22c55e", fontWeight: 500 }}>Online</div>
                 </div>
               </div>
             ))
@@ -2601,114 +2418,57 @@ const LiveChatAgent = ({
     );
   };
 
-  // ===== ROLLING TEXT PREVIEW COMPONENT =====
-  const RollingMessagePreview = ({ ticketId, isAdmin: adminView }: { ticketId: string; isAdmin: boolean }) => {
-    const containerRef = useRef<HTMLDivElement>(null);
-    const textRef = useRef<HTMLDivElement>(null);
-    const lastMessageRef = useRef<string>("");
+  const renderTicketPreview = (ticketId: string) => {
     const previews = ticketPreviews[ticketId] || [];
-    const orderedPreviews = [...previews].reverse();
-
-    const latestPreview = orderedPreviews.length > 0 ? orderedPreviews[orderedPreviews.length - 1] : null;
-
-    useEffect(() => {
-      if (!latestPreview || !containerRef.current || !textRef.current) return;
-
-      const messageKey = latestPreview.text + latestPreview.senderName + latestPreview.timestamp;
-      if (messageKey === lastMessageRef.current) return;
-      lastMessageRef.current = messageKey;
-
-      const container = containerRef.current;
-      const el = textRef.current;
-
-      // Format: "NamaUser from: kalimat pesan" or "NamaUser from group: kalimat pesan"
-      // atau "Agent NamaAgent: kalimat pesan"
-      const ticket = tickets.find((t) => t.id === ticketId);
-      let displayText = "";
-
-      if (latestPreview.isFromAgent) {
-        displayText = `Agent ${latestPreview.senderName}: ${latestPreview.text}`;
-      } else if (ticket?.isAnnouncement || ticket?.isBroadcast) {
-        displayText = `${latestPreview.senderName} from group: ${latestPreview.text}`;
-      } else {
-        displayText = `${latestPreview.senderName} from: ${latestPreview.text}`;
-      }
-
-      el.innerHTML = "";
-      const chars = displayText.split("");
-      chars.forEach((char) => {
-        const span = document.createElement("span");
-        span.textContent = char === " " ? "\u00A0" : char;
-        span.style.display = "inline-block";
-        span.style.opacity = "0";
-        span.style.transform = "translateY(20px)";
-        el.appendChild(span);
-      });
-
-      const charElements = el.querySelectorAll("span");
-      gsap.to(charElements, {
-        opacity: 1,
-        y: 0,
-        duration: 0.4,
-        stagger: 0.015,
-        ease: "back.out(1.7)",
-        overwrite: true,
-      });
-
-      gsap.fromTo(
-        container,
-        { opacity: 0, y: 10 },
-        { opacity: 1, y: 0, duration: 0.4, ease: "power3.out", overwrite: true }
-      );
-    }, [latestPreview, ticketId, adminView, tickets]);
-
-    if (!latestPreview) return null;
-
-    const isFromAgent = latestPreview.isFromAgent;
-    const textColor = adminView ? (isFromAgent ? "#0D3CFC" : "#333") : "#ffffff";
-    const bgColor = adminView ? "rgba(13,60,252,0.08)" : "rgba(255,255,255,0.12)";
-    const borderColor = adminView ? "rgba(13,60,252,0.3)" : "rgba(255,255,255,0.3)";
-
+    if (previews.length === 0) return null;
+    const ordered = [...previews].reverse();
+    const userTextColor = "#ffffff";
+    const agentTextColor = isAdmin ? "#0D3CFC" : "#ffffff";
+    const labelUserColor = isAdmin ? "#888" : "#ffffff";
+    const labelAgentColor = isAdmin ? "#0D3CFC" : "#ffffff";
     return (
-      <div
-        ref={containerRef}
-        style={{
-          marginTop: "8px",
-          padding: "6px 10px",
-          backgroundColor: bgColor,
-          borderRadius: "8px",
-          border: `1px solid ${borderColor}`,
-          overflow: "hidden",
-          minHeight: "26px",
-          display: "flex",
-          alignItems: "center",
-        }}
-      >
-        <div
-          ref={textRef}
-          style={{
-            fontSize: "11px",
-            color: textColor,
-            fontFamily: FONT_FAMILY,
-            fontWeight: 500,
-            lineHeight: 1.3,
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            width: "100%",
-          }}
-        />
+      <div style={{ marginTop: "6px", display: "flex", flexDirection: "column", gap: "3px" }}>
+        {ordered.map((p, i) => (
+          <div
+            key={i}
+            style={{
+              fontSize: "11px",
+              color: p.isFromAgent ? agentTextColor : userTextColor,
+              fontStyle: "italic",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              fontFamily: FONT_FAMILY,
+              display: "flex",
+              alignItems: "center",
+              gap: "4px",
+            }}
+          >
+            <span style={{ fontWeight: 600, color: p.isFromAgent ? labelAgentColor : labelUserColor, flexShrink: 0 }}>
+              {p.isFromAgent ? "Agent:" : "User:"}
+            </span>
+            <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>
+              {p.text.length > 30 ? p.text.substring(0, 30) + "..." : p.text}
+            </span>
+          </div>
+        ))}
       </div>
     );
   };
 
   const renderSearchBar = () => {
+    const isDark = !isAdmin;
+    // ✅ Input search: huruf warna putih full cerah
+    const bgColor = isDark ? "rgba(255,255,255,0.15)" : "#ffffff";
+    const textColor = "#ffffff"; // selalu putih full cerah
+    const iconColor = "#ffffff";
+    const borderColor = isDark ? "rgba(255,255,255,0.25)" : "#e8e8e8";
     return (
       <div
         data-tour="search-bar"
         style={{
           padding: "10px 14px",
-          borderBottom: isAdmin ? "1px solid #e8e8e8" : "1px solid rgba(255,255,255,0.1)",
+          borderBottom: isDark ? "1px solid rgba(255,255,255,0.1)" : "1px solid #e8e8e8",
         }}
       >
         <div
@@ -2717,12 +2477,12 @@ const LiveChatAgent = ({
             alignItems: "center",
             gap: "8px",
             padding: "8px 12px",
-            backgroundColor: isAdmin ? "#ffffff" : "rgba(255,255,255,0.15)",
-            border: isAdmin ? "1px solid #e8e8e8" : "1px solid rgba(255,255,255,0.25)",
+            backgroundColor: bgColor,
+            border: `1px solid ${borderColor}`,
             borderRadius: "8px",
           }}
         >
-          <SearchIcon size={14} color="#ffffff" />
+          <SearchIcon size={14} color={iconColor} />
           <input
             type="text"
             value={searchQuery}
@@ -2733,11 +2493,11 @@ const LiveChatAgent = ({
               background: "transparent",
               border: "none",
               outline: "none",
-              color: "#ffffff",
+              color: textColor,
               fontSize: "12px",
               fontFamily: FONT_FAMILY,
               padding: 0,
-              fontWeight: 500,
+              caretColor: "#ffffff",
             }}
           />
           {searchQuery && (
@@ -2746,7 +2506,7 @@ const LiveChatAgent = ({
               style={{
                 background: "transparent",
                 border: "none",
-                color: "#ffffff",
+                color: textColor,
                 cursor: "pointer",
                 fontSize: "14px",
                 padding: 0,
@@ -2781,59 +2541,16 @@ const LiveChatAgent = ({
                 fontFamily: FONT_FAMILY,
               }}
             >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginBottom: "10px",
-                }}
-              >
-                <div style={{ fontSize: "16px", fontWeight: 700, color: "#ffffff" }}>
-                  Announcement
-                </div>
-                <div
-                  style={{
-                    fontSize: "11px",
-                    backgroundColor: "rgba(255,255,255,0.2)",
-                    padding: "2px 10px",
-                    borderRadius: "8px",
-                    color: "#ffffff",
-                    fontWeight: 600,
-                  }}
-                >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+                <div style={{ fontSize: "16px", fontWeight: 700, color: "#ffffff" }}>Announcement</div>
+                <div style={{ fontSize: "11px", backgroundColor: "rgba(255,255,255,0.2)", padding: "2px 10px", borderRadius: "8px", color: "#ffffff", fontWeight: 600 }}>
                   {announcementTickets.length} active
                 </div>
               </div>
               {announcementTickets.slice(0, 3).map((t) => (
-                <div
-                  key={t.id}
-                  onClick={() => setSelectedTicket(t)}
-                  style={{
-                    padding: "8px 0",
-                    borderTop: "1px solid rgba(255,255,255,0.15)",
-                    cursor: "pointer",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: "13px",
-                      fontWeight: 600,
-                      color: "#ffffff",
-                      marginBottom: "3px",
-                    }}
-                  >
-                    {t.userName}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: "11px",
-                      color: "rgba(255,255,255,0.85)",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
+                <div key={t.id} onClick={() => setSelectedTicket(t)} style={{ padding: "8px 0", borderTop: "1px solid rgba(255,255,255,0.15)", cursor: "pointer" }}>
+                  <div style={{ fontSize: "13px", fontWeight: 600, color: "#ffffff", marginBottom: "3px" }}>{t.userName}</div>
+                  <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.85)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                     {t.topic}
                   </div>
                 </div>
@@ -2851,59 +2568,16 @@ const LiveChatAgent = ({
                 fontFamily: FONT_FAMILY,
               }}
             >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginBottom: "10px",
-                }}
-              >
-                <div style={{ fontSize: "16px", fontWeight: 700, color: "#ffffff" }}>
-                  Broadcasting
-                </div>
-                <div
-                  style={{
-                    fontSize: "11px",
-                    backgroundColor: "rgba(255,255,255,0.2)",
-                    padding: "2px 10px",
-                    borderRadius: "8px",
-                    color: "#ffffff",
-                    fontWeight: 600,
-                  }}
-                >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+                <div style={{ fontSize: "16px", fontWeight: 700, color: "#ffffff" }}>Broadcasting</div>
+                <div style={{ fontSize: "11px", backgroundColor: "rgba(255,255,255,0.2)", padding: "2px 10px", borderRadius: "8px", color: "#ffffff", fontWeight: 600 }}>
                   {broadcastTickets.length} active
                 </div>
               </div>
               {broadcastTickets.slice(0, 3).map((t) => (
-                <div
-                  key={t.id}
-                  onClick={() => setSelectedTicket(t)}
-                  style={{
-                    padding: "8px 0",
-                    borderTop: "1px solid rgba(255,255,255,0.15)",
-                    cursor: "pointer",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: "13px",
-                      fontWeight: 600,
-                      color: "#ffffff",
-                      marginBottom: "3px",
-                    }}
-                  >
-                    {t.userName}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: "11px",
-                      color: "rgba(255,255,255,0.85)",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
+                <div key={t.id} onClick={() => setSelectedTicket(t)} style={{ padding: "8px 0", borderTop: "1px solid rgba(255,255,255,0.15)", cursor: "pointer" }}>
+                  <div style={{ fontSize: "13px", fontWeight: 600, color: "#ffffff", marginBottom: "3px" }}>{t.userName}</div>
+                  <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.85)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                     {t.topic}
                   </div>
                 </div>
@@ -2918,27 +2592,10 @@ const LiveChatAgent = ({
   if (checkingBan) {
     return (
       <div style={{ marginTop: "80px", paddingTop: "30px" }}>
-        <h3
-          style={{
-            fontSize: "80px",
-            fontWeight: 700,
-            color: "#0D3CFC",
-            fontFamily: FONT_FAMILY,
-            letterSpacing: "-0.03em",
-            margin: 0,
-            lineHeight: 1.1,
-          }}
-        >
+        <h3 style={{ fontSize: "80px", fontWeight: 700, color: "#0D3CFC", fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1 }}>
           Live Chat Agent
         </h3>
-        <div
-          style={{
-            padding: "20px",
-            textAlign: "center",
-            color: "#666",
-            fontFamily: FONT_FAMILY,
-          }}
-        >
+        <div style={{ padding: "20px", textAlign: "center", color: "#666", fontFamily: FONT_FAMILY }}>
           Checking account status...
         </div>
       </div>
@@ -2949,13 +2606,7 @@ const LiveChatAgent = ({
   if (!user) {
     return (
       <>
-        <OnboardingTour
-          steps={tourSteps}
-          onComplete={completeTour}
-          isActive={showTour}
-          currentStep={tourStep}
-          setCurrentStep={setTourStep}
-        />
+        <OnboardingTour steps={tourSteps} onComplete={completeTour} isActive={showTour} currentStep={tourStep} setCurrentStep={setTourStep} />
         <div style={{ marginTop: "80px", paddingTop: "30px" }}>
           <h3
             ref={liveChatTitleRef}
@@ -2973,14 +2624,7 @@ const LiveChatAgent = ({
           >
             Live Chat Agent
           </h3>
-          <p
-            style={{
-              fontSize: "15px",
-              color: "#666",
-              fontFamily: FONT_FAMILY,
-              marginBottom: "10px",
-            }}
-          >
+          <p style={{ fontSize: "15px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "10px" }}>
             Please login to use Live Chat Agent
           </p>
           <Link href="/" style={{ textDecoration: "none" }}>
@@ -3026,25 +2670,8 @@ const LiveChatAgent = ({
   if (!isAdmin && isBanned) {
     return (
       <div style={{ marginTop: "80px", paddingTop: "30px" }}>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            marginBottom: "20px",
-          }}
-        >
-          <h3
-            style={{
-              fontSize: "80px",
-              fontWeight: 700,
-              color: "#0D3CFC",
-              fontFamily: FONT_FAMILY,
-              letterSpacing: "-0.03em",
-              margin: 0,
-              lineHeight: 1.1,
-            }}
-          >
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "20px" }}>
+          <h3 style={{ fontSize: "80px", fontWeight: 700, color: "#0D3CFC", fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1 }}>
             Live Chat Agent
           </h3>
           <button
@@ -3080,15 +2707,7 @@ const LiveChatAgent = ({
         >
           YOUR ACCOUNT HAS BEEN PERMANENTLY BANNED
         </div>
-        <div
-          style={{
-            color: "#0D3CFC",
-            fontSize: "22px",
-            fontWeight: 400,
-            fontFamily: FONT_FAMILY,
-            marginBottom: "6px",
-          }}
-        >
+        <div style={{ color: "#0D3CFC", fontSize: "22px", fontWeight: 400, fontFamily: FONT_FAMILY, marginBottom: "6px" }}>
           REASON: {banReason || "SUSPICIOUS ACTIVITY"}
         </div>
       </div>
@@ -3100,22 +2719,9 @@ const LiveChatAgent = ({
   if (!isAdmin && userTickets.length === 0 && !showStartChat) {
     return (
       <>
-        <OnboardingTour
-          steps={tourSteps}
-          onComplete={completeTour}
-          isActive={showTour}
-          currentStep={tourStep}
-          setCurrentStep={setTourStep}
-        />
+        <OnboardingTour steps={tourSteps} onComplete={completeTour} isActive={showTour} currentStep={tourStep} setCurrentStep={setTourStep} />
         <div style={{ marginTop: "80px", paddingTop: "30px" }}>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "flex-start",
-              marginBottom: "20px",
-            }}
-          >
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "20px" }}>
             <h3
               ref={liveChatTitleRef}
               data-tour="livechat-title"
@@ -3184,27 +2790,16 @@ const LiveChatAgent = ({
                   }}
                 >
                   <OnlineDot color="#22c55e" size={8} />
-                  <span style={{ fontSize: "13px", fontWeight: 600, color: "#0D3CFC" }}>
-                    {a.displayName}
-                  </span>
+                  <span style={{ fontSize: "13px", fontWeight: 600, color: "#0D3CFC" }}>{a.displayName}</span>
                 </div>
               ))}
               {onlineAgents.length === 0 && (
-                <span style={{ fontSize: "13px", color: "#999", fontFamily: FONT_FAMILY }}>
-                  No agents online
-                </span>
+                <span style={{ fontSize: "13px", color: "#999", fontFamily: FONT_FAMILY }}>No agents online</span>
               )}
             </div>
           </div>
 
-          <p
-            style={{
-              fontSize: "15px",
-              color: "#666",
-              fontFamily: FONT_FAMILY,
-              marginBottom: "16px",
-            }}
-          >
+          <p style={{ fontSize: "15px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "16px" }}>
             Need help? Chat directly with our agent.
           </p>
           <button
@@ -3249,25 +2844,8 @@ const LiveChatAgent = ({
   if (!isAdmin && showStartChat) {
     return (
       <div style={{ marginTop: "80px", paddingTop: "30px" }}>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            marginBottom: "20px",
-          }}
-        >
-          <h3
-            style={{
-              fontSize: "80px",
-              fontWeight: 700,
-              color: "#0D3CFC",
-              fontFamily: FONT_FAMILY,
-              letterSpacing: "-0.03em",
-              margin: 0,
-              lineHeight: 1.1,
-            }}
-          >
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "20px" }}>
+          <h3 style={{ fontSize: "80px", fontWeight: 700, color: "#0D3CFC", fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1 }}>
             Live Chat Agent
           </h3>
           <button
@@ -3291,9 +2869,7 @@ const LiveChatAgent = ({
           </button>
         </div>
         <div style={{ maxWidth: "400px" }}>
-          <div style={{ fontSize: "15px", marginBottom: "10px", fontFamily: FONT_FAMILY }}>
-            Select your issue topic:
-          </div>
+          <div style={{ fontSize: "15px", marginBottom: "10px", fontFamily: FONT_FAMILY }}>Select your issue topic:</div>
           <select
             value={selectedTopic}
             onChange={(e) => setSelectedTopic(e.target.value)}
@@ -3312,9 +2888,7 @@ const LiveChatAgent = ({
           >
             <option value="">-- Select topic --</option>
             {topics.map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
+              <option key={t} value={t}>{t}</option>
             ))}
           </select>
           <div style={{ display: "flex", gap: "10px" }}>
@@ -3359,9 +2933,7 @@ const LiveChatAgent = ({
 
   const waitingTicketsRaw = tickets.filter((t) => t.status === "waiting");
   const activeTicketsRaw = tickets.filter((t) => t.status === "active");
-  const resolvedTicketsRaw = tickets.filter(
-    (t) => t.status === "resolved" || t.status === "closed"
-  );
+  const resolvedTicketsRaw = tickets.filter((t) => t.status === "resolved" || t.status === "closed");
   const waitingTickets = filterTicketsBySearch(waitingTicketsRaw);
   const activeTickets = filterTicketsBySearch(activeTicketsRaw);
   const resolvedTickets = filterTicketsBySearch(resolvedTicketsRaw);
@@ -3369,22 +2941,9 @@ const LiveChatAgent = ({
 
   return (
     <>
-      <OnboardingTour
-        steps={tourSteps}
-        onComplete={completeTour}
-        isActive={showTour}
-        currentStep={tourStep}
-        setCurrentStep={setTourStep}
-      />
+      <OnboardingTour steps={tourSteps} onComplete={completeTour} isActive={showTour} currentStep={tourStep} setCurrentStep={setTourStep} />
       <div style={{ marginTop: "80px", paddingTop: "30px" }}>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            marginBottom: "20px",
-          }}
-        >
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "20px" }}>
           <h3
             ref={liveChatTitleRef}
             data-tour="livechat-title"
@@ -3400,15 +2959,7 @@ const LiveChatAgent = ({
           >
             Live Chat Agent
           </h3>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "flex-end",
-              gap: "10px",
-              paddingTop: "10px",
-            }}
-          >
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "10px", paddingTop: "10px" }}>
             <span
               style={{
                 fontSize: "16px",
@@ -3474,34 +3025,36 @@ const LiveChatAgent = ({
         >
           {renderOnlinePanel()}
 
+          {/* ===== CHAT LIST (design disamakan untuk admin & user) ===== */}
           <div
             data-tour="chat-list"
             style={{
               width: "360px",
-              backgroundColor: isAdmin ? "#f9f9f9" : "#0D3CFC",
+              // ✅ Design disamakan: baik admin maupun user pakai #0D3CFC
+              backgroundColor: "#0D3CFC",
               borderRadius: "12px",
-              border: isAdmin ? "1px solid #e8e8e8" : "none",
+              border: "none",
               overflowY: "auto",
               flexShrink: 0,
               height: "700px",
-              color: isAdmin ? "#000" : "#fff",
+              color: "#ffffff",
               fontFamily: FONT_FAMILY,
               display: "flex",
               flexDirection: "column",
+              scrollbarWidth: "none",
+              msOverflowStyle: "none",
             }}
           >
             <div
               style={{
                 padding: "14px 16px",
-                borderBottom: isAdmin
-                  ? "1px solid #e8e8e8"
-                  : "1px solid rgba(255,255,255,0.15)",
+                borderBottom: "1px solid rgba(255,255,255,0.15)",
                 fontWeight: 600,
                 fontSize: "14px",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
-                backgroundColor: isAdmin ? "#f9f9f9" : "#0D3CFC",
+                backgroundColor: "#0D3CFC",
                 position: "sticky",
                 top: 0,
                 zIndex: 2,
@@ -3511,7 +3064,7 @@ const LiveChatAgent = ({
               <span
                 style={{
                   fontSize: "11px",
-                  backgroundColor: isAdmin ? "#e5e7eb" : "rgba(255,255,255,0.2)",
+                  backgroundColor: "rgba(255,255,255,0.2)",
                   padding: "2px 8px",
                   borderRadius: "8px",
                 }}
@@ -3522,7 +3075,7 @@ const LiveChatAgent = ({
 
             {renderSearchBar()}
 
-            <div style={{ overflowY: "auto", flex: 1, minHeight: 0 }}>
+            <div style={{ overflowY: "auto", flex: 1, scrollbarWidth: "none", msOverflowStyle: "none" }}>
               {isAdmin ? (
                 <>
                   {waitingTickets.length > 0 && (
@@ -3550,37 +3103,26 @@ const LiveChatAgent = ({
                           }}
                           style={{
                             padding: "12px 16px",
-                            borderBottom: "1px solid #e8e8e8",
+                            borderBottom: "1px solid rgba(255,255,255,0.1)",
                             cursor: "pointer",
-                            backgroundColor:
-                              selectedTicket?.id === ticket.id
-                                ? "rgba(13,60,252,0.08)"
-                                : "transparent",
+                            backgroundColor: selectedTicket?.id === ticket.id ? "rgba(255,255,255,0.12)" : "transparent",
                           }}
                         >
-                          <div
-                            style={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              alignItems: "center",
-                              marginBottom: "4px",
-                            }}
-                          >
-                            <div
-                              style={{ fontWeight: 600, fontSize: "13px", color: "#0D3CFC" }}
-                            >
-                              {ticket.userName}
-                            </div>
-                            <span style={{ fontSize: "10px", color: "#999" }}>
-                              {ticketMsgCounts[ticket.id] || 0} msgs
-                            </span>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+                            <div style={{ fontWeight: 600, fontSize: "13px", color: "#ffffff" }}>{ticket.userName}</div>
+                            <span style={{ fontSize: "10px", color: "#ffffff" }}>{ticketMsgCounts[ticket.id] || 0} msgs</span>
                           </div>
-                          <div
-                            style={{ fontSize: "11px", color: "#666", marginBottom: "4px" }}
-                          >
-                            {ticket.topic}
-                          </div>
-                          <RollingMessagePreview ticketId={ticket.id} isAdmin={true} />
+                          <div style={{ fontSize: "11px", color: "#ffffff", marginBottom: "4px" }}>{ticket.topic}</div>
+                          {renderTicketPreview(ticket.id)}
+                          {/* ✅ Rolling teks pesan baru di bawah teks chat histori */}
+                          {ticketLatestMessage[ticket.id] && (
+                            <RollingNewMessage
+                              senderName={ticketLatestMessage[ticket.id]!.senderName}
+                              message={ticketLatestMessage[ticket.id]!.text}
+                              isFromAgent={ticketLatestMessage[ticket.id]!.isFromAgent}
+                              isAdmin={isAdmin}
+                            />
+                          )}
                         </div>
                       ))}
                     </div>
@@ -3607,37 +3149,25 @@ const LiveChatAgent = ({
                           onClick={() => setSelectedTicket(ticket)}
                           style={{
                             padding: "12px 16px",
-                            borderBottom: "1px solid #e8e8e8",
+                            borderBottom: "1px solid rgba(255,255,255,0.1)",
                             cursor: "pointer",
-                            backgroundColor:
-                              selectedTicket?.id === ticket.id
-                                ? "rgba(13,60,252,0.08)"
-                                : "transparent",
+                            backgroundColor: selectedTicket?.id === ticket.id ? "rgba(255,255,255,0.12)" : "transparent",
                           }}
                         >
-                          <div
-                            style={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              alignItems: "center",
-                              marginBottom: "4px",
-                            }}
-                          >
-                            <div
-                              style={{ fontWeight: 600, fontSize: "13px", color: "#0D3CFC" }}
-                            >
-                              {ticket.userName}
-                            </div>
-                            <span style={{ fontSize: "10px", color: "#999" }}>
-                              {ticketMsgCounts[ticket.id] || 0} msgs
-                            </span>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+                            <div style={{ fontWeight: 600, fontSize: "13px", color: "#ffffff" }}>{ticket.userName}</div>
+                            <span style={{ fontSize: "10px", color: "#ffffff" }}>{ticketMsgCounts[ticket.id] || 0} msgs</span>
                           </div>
-                          <div
-                            style={{ fontSize: "11px", color: "#666", marginBottom: "4px" }}
-                          >
-                            {ticket.topic}
-                          </div>
-                          <RollingMessagePreview ticketId={ticket.id} isAdmin={true} />
+                          <div style={{ fontSize: "11px", color: "#ffffff", marginBottom: "4px" }}>{ticket.topic}</div>
+                          {renderTicketPreview(ticket.id)}
+                          {ticketLatestMessage[ticket.id] && (
+                            <RollingNewMessage
+                              senderName={ticketLatestMessage[ticket.id]!.senderName}
+                              message={ticketLatestMessage[ticket.id]!.text}
+                              isFromAgent={ticketLatestMessage[ticket.id]!.isFromAgent}
+                              isAdmin={isAdmin}
+                            />
+                          )}
                         </div>
                       ))}
                     </div>
@@ -3664,153 +3194,94 @@ const LiveChatAgent = ({
                           onClick={() => setSelectedTicket(ticket)}
                           style={{
                             padding: "12px 16px",
-                            borderBottom: "1px solid #e8e8e8",
+                            borderBottom: "1px solid rgba(255,255,255,0.1)",
                             cursor: "pointer",
-                            backgroundColor:
-                              selectedTicket?.id === ticket.id
-                                ? "rgba(13,60,252,0.08)"
-                                : "transparent",
+                            backgroundColor: selectedTicket?.id === ticket.id ? "rgba(255,255,255,0.12)" : "transparent",
                             opacity: 0.7,
                           }}
                         >
-                          <div
-                            style={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              alignItems: "center",
-                              marginBottom: "4px",
-                            }}
-                          >
-                            <div
-                              style={{ fontWeight: 600, fontSize: "13px", color: "#0D3CFC" }}
-                            >
-                              {ticket.userName}
-                            </div>
-                            <span style={{ fontSize: "10px", color: "#999" }}>
-                              {ticketMsgCounts[ticket.id] || 0} msgs
-                            </span>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+                            <div style={{ fontWeight: 600, fontSize: "13px", color: "#ffffff" }}>{ticket.userName}</div>
+                            <span style={{ fontSize: "10px", color: "#ffffff" }}>{ticketMsgCounts[ticket.id] || 0} msgs</span>
                           </div>
-                          <div
-                            style={{ fontSize: "11px", color: "#666", marginBottom: "4px" }}
-                          >
-                            {ticket.topic}
-                          </div>
-                          <RollingMessagePreview ticketId={ticket.id} isAdmin={true} />
+                          <div style={{ fontSize: "11px", color: "#ffffff", marginBottom: "4px" }}>{ticket.topic}</div>
+                          {renderTicketPreview(ticket.id)}
+                          {ticketLatestMessage[ticket.id] && (
+                            <RollingNewMessage
+                              senderName={ticketLatestMessage[ticket.id]!.senderName}
+                              message={ticketLatestMessage[ticket.id]!.text}
+                              isFromAgent={ticketLatestMessage[ticket.id]!.isFromAgent}
+                              isAdmin={isAdmin}
+                            />
+                          )}
                         </div>
                       ))}
                     </div>
                   )}
-                  {waitingTickets.length === 0 &&
-                    activeTickets.length === 0 &&
-                    resolvedTickets.length === 0 && (
-                      <div
-                        style={{
-                          padding: "30px 16px",
-                          textAlign: "center",
-                          color: "#999",
-                          fontSize: "13px",
-                        }}
-                      >
-                        {searchQuery ? "No results found" : "No incoming chats"}
-                      </div>
-                    )}
+                  {waitingTickets.length === 0 && activeTickets.length === 0 && resolvedTickets.length === 0 && (
+                    <div style={{ padding: "30px 16px", textAlign: "center", color: "#ffffff", fontSize: "13px" }}>
+                      {searchQuery ? "No results found" : "No incoming chats"}
+                    </div>
+                  )}
                 </>
               ) : (
                 <>
-                  {filterTicketsBySearch(tickets.filter((t) => t.userId === user.uid)).map(
-                    (ticket) => {
-                      const ticketId = generateTicketId(ticket.createdAt);
-                      const isActive = selectedTicket?.id === ticket.id;
-                      const statusLabel =
-                        ticket.status === "waiting"
-                          ? "Waiting"
-                          : ticket.status === "active"
-                          ? "Active"
-                          : "Resolved";
-                      return (
-                        <div
-                          key={ticket.id}
-                          onClick={() => {
-                            setSelectedTicket(ticket);
-                            setMessages([]);
-                          }}
-                          style={{
-                            padding: "14px 16px",
-                            borderLeft: isActive ? "4px solid #fff" : "4px solid transparent",
-                            backgroundColor: isActive
-                              ? "rgba(255,255,255,0.12)"
-                              : "transparent",
-                            cursor: "pointer",
-                            borderBottom: "1px solid rgba(255,255,255,0.06)",
-                          }}
-                        >
-                          <div
-                            style={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              alignItems: "center",
-                              marginBottom: "4px",
-                            }}
-                          >
-                            <div style={{ fontWeight: 600, fontSize: "14px", color: "#fff" }}>
-                              {ticket.userName}
-                            </div>
-                            <span style={{ fontSize: "10px", color: "#fff" }}>
-                              {ticketMsgCounts[ticket.id] || 0} msgs
-                            </span>
-                          </div>
-                          <div
-                            style={{ fontSize: "12px", color: "#fff", marginBottom: "6px" }}
-                          >
-                            {ticket.topic}
-                          </div>
-                          <RollingMessagePreview ticketId={ticket.id} isAdmin={false} />
-                          <div
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "6px",
-                              marginTop: "6px",
-                            }}
-                          >
-                            <span
-                              style={{
-                                fontSize: "10px",
-                                backgroundColor:
-                                  ticket.status === "waiting"
-                                    ? "#fef3c7"
-                                    : ticket.status === "active"
-                                    ? "#d1fae5"
-                                    : "#e5e7eb",
-                                color:
-                                  ticket.status === "waiting"
-                                    ? "#92400e"
-                                    : ticket.status === "active"
-                                    ? "#065f46"
-                                    : "#6b7280",
-                                padding: "2px 8px",
-                                borderRadius: "8px",
-                                fontWeight: 600,
-                              }}
-                            >
-                              {statusLabel}
-                            </span>
-                            <span style={{ fontSize: "9px", color: "#fff" }}>{ticketId}</span>
-                          </div>
+                  {filterTicketsBySearch(tickets.filter((t) => t.userId === user.uid)).map((ticket) => {
+                    const ticketId = generateTicketId(ticket.createdAt);
+                    const isActive = selectedTicket?.id === ticket.id;
+                    const statusLabel =
+                      ticket.status === "waiting" ? "Waiting" : ticket.status === "active" ? "Active" : "Resolved";
+                    return (
+                      <div
+                        key={ticket.id}
+                        onClick={() => {
+                          setSelectedTicket(ticket);
+                          setMessages([]);
+                        }}
+                        style={{
+                          padding: "14px 16px",
+                          borderLeft: isActive ? "4px solid #fff" : "4px solid transparent",
+                          backgroundColor: isActive ? "rgba(255,255,255,0.12)" : "transparent",
+                          cursor: "pointer",
+                          borderBottom: "1px solid rgba(255,255,255,0.06)",
+                        }}
+                      >
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+                          <div style={{ fontWeight: 600, fontSize: "14px", color: "#fff" }}>{ticket.userName}</div>
+                          <span style={{ fontSize: "10px", color: "#fff" }}>{ticketMsgCounts[ticket.id] || 0} msgs</span>
                         </div>
-                      );
-                    }
-                  )}
-                  {filterTicketsBySearch(tickets.filter((t) => t.userId === user.uid))
-                    .length === 0 && (
-                    <div
-                      style={{
-                        padding: "30px 16px",
-                        textAlign: "center",
-                        color: "#fff",
-                        fontSize: "13px",
-                      }}
-                    >
+                        <div style={{ fontSize: "12px", color: "#fff", marginBottom: "6px" }}>{ticket.topic}</div>
+                        {renderTicketPreview(ticket.id)}
+                        {/* ✅ Rolling teks pesan baru di bawah teks chat histori */}
+                        {ticketLatestMessage[ticket.id] && (
+                          <RollingNewMessage
+                            senderName={ticketLatestMessage[ticket.id]!.senderName}
+                            message={ticketLatestMessage[ticket.id]!.text}
+                            isFromAgent={ticketLatestMessage[ticket.id]!.isFromAgent}
+                            isAdmin={isAdmin}
+                          />
+                        )}
+                        <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "6px" }}>
+                          <span
+                            style={{
+                              fontSize: "10px",
+                              backgroundColor:
+                                ticket.status === "waiting" ? "#fef3c7" : ticket.status === "active" ? "#d1fae5" : "#e5e7eb",
+                              color: ticket.status === "waiting" ? "#92400e" : ticket.status === "active" ? "#065f46" : "#6b7280",
+                              padding: "2px 8px",
+                              borderRadius: "8px",
+                              fontWeight: 600,
+                            }}
+                          >
+                            {statusLabel}
+                          </span>
+                          <span style={{ fontSize: "9px", color: "#fff" }}>{ticketId}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {filterTicketsBySearch(tickets.filter((t) => t.userId === user.uid)).length === 0 && (
+                    <div style={{ padding: "30px 16px", textAlign: "center", color: "#fff", fontSize: "13px" }}>
                       {searchQuery ? "No results found" : "No chats yet"}
                     </div>
                   )}
@@ -3850,6 +3321,7 @@ const LiveChatAgent = ({
             )}
           </div>
 
+          {/* ===== CHAT VIEW ===== */}
           <div
             style={{
               flex: 1,
@@ -3875,23 +3347,9 @@ const LiveChatAgent = ({
                   }}
                 >
                   <div>
-                    <div
-                      style={{
-                        fontWeight: 600,
-                        fontSize: "17px",
-                        color: "#fff",
-                        fontFamily: FONT_FAMILY,
-                      }}
-                    >
+                    <div style={{ fontWeight: 600, fontSize: "17px", color: "#fff", fontFamily: FONT_FAMILY }}>
                       {selectedTicket.userName}
-                      <span
-                        style={{
-                          fontSize: "14px",
-                          fontWeight: 400,
-                          color: "rgba(255,255,255,0.8)",
-                          marginLeft: "8px",
-                        }}
-                      >
+                      <span style={{ fontSize: "14px", fontWeight: 400, color: "rgba(255,255,255,0.8)", marginLeft: "8px" }}>
                         {selectedTicket.topic}
                       </span>
                       {selectedTicket.isAnnouncement && (
@@ -3923,28 +3381,18 @@ const LiveChatAgent = ({
                         </span>
                       )}
                     </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                        marginTop: "4px",
-                      }}
-                    >
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "4px" }}>
                       <span
                         style={{
                           fontSize: "13px",
-                          color:
-                            selectedTicket.status === "waiting" ? "#fef3c7" : "#d1fae5",
+                          color: selectedTicket.status === "waiting" ? "#fef3c7" : "#d1fae5",
                           fontWeight: 600,
                         }}
                       >
                         {selectedTicket.status === "waiting" ? "Waiting" : "Active"}
                       </span>
                       {selectedTicket.typing && selectedTicket.status !== "resolved" && (
-                        <span
-                          style={{ fontSize: "13px", color: "#ffd700", fontStyle: "italic" }}
-                        >
+                        <span style={{ fontSize: "13px", color: "#ffd700", fontStyle: "italic" }}>
                           {selectedTicket.typingUserName} is typing...
                         </span>
                       )}
@@ -3953,40 +3401,41 @@ const LiveChatAgent = ({
                       </span>
                     </div>
                   </div>
-                  {isAdmin &&
-                    selectedTicket.status !== "resolved" &&
-                    selectedTicket.status !== "closed" && (
-                      <button
-                        onClick={() => resolveTicket(selectedTicket.id)}
-                        style={{
-                          padding: "8px 18px",
-                          backgroundColor: "#22c55e",
-                          color: "#fff",
-                          border: "none",
-                          borderRadius: "8px",
-                          fontSize: "13px",
-                          fontWeight: 600,
-                          cursor: "pointer",
-                          fontFamily: FONT_FAMILY,
-                        }}
-                      >
-                        Resolve
-                      </button>
-                    )}
+                  {isAdmin && selectedTicket.status !== "resolved" && selectedTicket.status !== "closed" && (
+                    <button
+                      onClick={() => resolveTicket(selectedTicket.id)}
+                      style={{
+                        padding: "8px 18px",
+                        backgroundColor: "#22c55e",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "8px",
+                        fontSize: "13px",
+                        fontWeight: 600,
+                        cursor: "pointer",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
+                      Resolve
+                    </button>
+                  )}
                 </div>
 
+                {/* ✅ Messages area: bisa scroll atas/bawah bebas, scrollbar hidden */}
                 <div
                   ref={chatMessagesContainerRef}
+                  className="chat-messages-container"
                   style={{
                     flex: 1,
                     overflowY: "auto",
+                    overflowX: "hidden",
                     padding: "24px",
                     display: "flex",
                     flexDirection: "column",
                     gap: "12px",
                     minHeight: 0,
-                    scrollbarWidth: "thin",
-                    scrollbarColor: "#0D3CFC #f0f0f0",
+                    scrollbarWidth: "none",
+                    msOverflowStyle: "none",
                   }}
                 >
                   {messages.length === 0 ? (
@@ -4005,13 +3454,7 @@ const LiveChatAgent = ({
                     messages.map((msg, idx) => {
                       const isMine = msg.senderId === user.uid;
                       return (
-                        <div
-                          key={idx}
-                          style={{
-                            alignSelf: isMine ? "flex-end" : "flex-start",
-                            maxWidth: "70%",
-                          }}
-                        >
+                        <div key={idx} style={{ alignSelf: isMine ? "flex-end" : "flex-start", maxWidth: "70%" }}>
                           <div
                             style={{
                               padding: "12px 16px",
@@ -4024,14 +3467,7 @@ const LiveChatAgent = ({
                             }}
                           >
                             {!isMine && (
-                              <div
-                                style={{
-                                  fontSize: "12px",
-                                  fontWeight: 600,
-                                  color: "#0D3CFC",
-                                  marginBottom: "5px",
-                                }}
-                              >
+                              <div style={{ fontSize: "12px", fontWeight: 600, color: "#0D3CFC", marginBottom: "5px" }}>
                                 {msg.senderName}
                               </div>
                             )}
@@ -4046,12 +3482,7 @@ const LiveChatAgent = ({
                               }}
                             >
                               {renderDeliveryStatus(msg, isMine)}
-                              <span
-                                style={{
-                                  fontSize: "10px",
-                                  color: isMine ? "#ffffff" : "#999",
-                                }}
-                              >
+                              <span style={{ fontSize: "10px", color: isMine ? "#ffffff" : "#999" }}>
                                 {formatTime(msg.timestamp)}
                               </span>
                             </div>
@@ -4077,78 +3508,63 @@ const LiveChatAgent = ({
                   <div ref={messagesEndRef} />
                 </div>
 
-                {selectedTicket.status !== "resolved" &&
-                  selectedTicket.status !== "closed" && (
-                    <div
+                {selectedTicket.status !== "resolved" && selectedTicket.status !== "closed" && (
+                  <div
+                    style={{
+                      padding: "16px 24px",
+                      borderTop: "1px solid #e8e8e8",
+                      display: "flex",
+                      gap: "12px",
+                      backgroundColor: "#fff",
+                      flexShrink: 0,
+                    }}
+                  >
+                    <input
+                      type="text"
+                      value={messageText}
+                      onChange={handleTyping}
+                      onKeyPress={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey && messageText.trim()) {
+                          e.preventDefault();
+                          sendMessage();
+                        }
+                      }}
+                      placeholder={
+                        selectedTicket.status === "waiting" && !isAdmin ? "Waiting for agent..." : "Type a message..."
+                      }
+                      disabled={selectedTicket.status === "waiting" && !isAdmin}
                       style={{
-                        padding: "16px 24px",
-                        borderTop: "1px solid #e8e8e8",
-                        display: "flex",
-                        gap: "12px",
-                        backgroundColor: "#fff",
-                        flexShrink: 0,
+                        flex: 1,
+                        padding: "12px 16px",
+                        border: "1px solid #e8e8e8",
+                        borderRadius: "10px",
+                        fontSize: "15px",
+                        outline: "none",
+                        fontFamily: FONT_FAMILY,
+                        backgroundColor: selectedTicket.status === "waiting" && !isAdmin ? "#f5f5f5" : "#fff",
+                      }}
+                    />
+                    <button
+                      onClick={sendMessage}
+                      disabled={(selectedTicket.status === "waiting" && !isAdmin) || !messageText.trim()}
+                      style={{
+                        padding: "12px 24px",
+                        backgroundColor:
+                          (selectedTicket.status === "waiting" && !isAdmin) || !messageText.trim() ? "#ccc" : "#0D3CFC",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "10px",
+                        cursor:
+                          (selectedTicket.status === "waiting" && !isAdmin) || !messageText.trim() ? "not-allowed" : "pointer",
+                        fontFamily: FONT_FAMILY,
+                        fontSize: "15px",
+                        fontWeight: 600,
                       }}
                     >
-                      <input
-                        type="text"
-                        value={messageText}
-                        onChange={handleTyping}
-                        onKeyPress={(e) => {
-                          if (e.key === "Enter" && !e.shiftKey && messageText.trim()) {
-                            e.preventDefault();
-                            sendMessage();
-                          }
-                        }}
-                        placeholder={
-                          selectedTicket.status === "waiting" && !isAdmin
-                            ? "Waiting for agent..."
-                            : "Type a message..."
-                        }
-                        disabled={selectedTicket.status === "waiting" && !isAdmin}
-                        style={{
-                          flex: 1,
-                          padding: "12px 16px",
-                          border: "1px solid #e8e8e8",
-                          borderRadius: "10px",
-                          fontSize: "15px",
-                          outline: "none",
-                          fontFamily: FONT_FAMILY,
-                          backgroundColor:
-                            selectedTicket.status === "waiting" && !isAdmin
-                              ? "#f5f5f5"
-                              : "#fff",
-                        }}
-                      />
-                      <button
-                        onClick={sendMessage}
-                        disabled={
-                          (selectedTicket.status === "waiting" && !isAdmin) ||
-                          !messageText.trim()
-                        }
-                        style={{
-                          padding: "12px 24px",
-                          backgroundColor:
-                            (selectedTicket.status === "waiting" && !isAdmin) ||
-                            !messageText.trim()
-                              ? "#ccc"
-                              : "#0D3CFC",
-                          color: "#fff",
-                          border: "none",
-                          borderRadius: "10px",
-                          cursor:
-                            (selectedTicket.status === "waiting" && !isAdmin) ||
-                            !messageText.trim()
-                              ? "not-allowed"
-                              : "pointer",
-                          fontFamily: FONT_FAMILY,
-                          fontSize: "15px",
-                          fontWeight: 600,
-                        }}
-                      >
-                        Send
-                      </button>
-                    </div>
-                  )}
+                      Send
+                    </button>
+                  </div>
+                )}
               </>
             ) : (
               <div
@@ -4183,7 +3599,6 @@ export default function HomePage(): React.JSX.Element {
 
   const preloaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
-  const liveChatEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setIsMounted(true);
@@ -4191,7 +3606,7 @@ export default function HomePage(): React.JSX.Element {
 
   useEffect(() => {
     if (!auth || !isMounted) return;
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser: any) => {
       setUser(currentUser);
       setLoading(false);
       if (currentUser) {
@@ -4234,23 +3649,19 @@ export default function HomePage(): React.JSX.Element {
     tl.to(textRef.current, { y: 0, opacity: 1, duration: 0.8, ease: "back.out(1.7)" })
       .to(textRef.current, { duration: 0.6 })
       .to(textRef.current, {
-        opacity: 0, y: -20, scale: 0.9, duration: 0.4, ease: "power2.out",
+        opacity: 0,
+        y: -20,
+        scale: 0.9,
+        duration: 0.4,
+        ease: "power2.out",
         onComplete: () => {
           if (textRef.current) textRef.current.textContent = "Note";
         },
       })
-      .to(textRef.current, {
-        opacity: 1, y: 0, scale: 1, duration: 0.6, ease: "back.out(1.7)",
-      })
+      .to(textRef.current, { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: "back.out(1.7)" })
       .to(textRef.current, { duration: 0.8 })
-      .to(textRef.current, {
-        scale: 0.3, opacity: 0, duration: 0.7, ease: "power2.in",
-      })
-      .to(
-        preloaderRef.current,
-        { scale: 0.95, opacity: 0.8, duration: 0.3, ease: "power2.inOut" },
-        "-=0.3"
-      );
+      .to(textRef.current, { scale: 0.3, opacity: 0, duration: 0.7, ease: "power2.in" })
+      .to(preloaderRef.current, { scale: 0.95, opacity: 0.8, duration: 0.3, ease: "power2.inOut" }, "-=0.3");
   };
 
   if (!isMounted || loading) {
@@ -4258,27 +3669,32 @@ export default function HomePage(): React.JSX.Element {
       <div
         style={{
           position: "fixed",
-          top: 0, left: 0, width: "100%", height: "100%",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
           backgroundColor: "#ffffff",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          zIndex: 9999, fontFamily: FONT_FAMILY,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 9999,
+          fontFamily: FONT_FAMILY,
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "40px", overflow: "hidden" }}>
-          <span
-            style={{
-              fontSize: "100px", fontWeight: 700, color: "#0D3CFC",
-              fontFamily: FONT_FAMILY, letterSpacing: "-0.03em",
-            }}
-          >
+          <span style={{ fontSize: "100px", fontWeight: 700, color: "#0D3CFC", fontFamily: FONT_FAMILY, letterSpacing: "-0.03em" }}>
             Menuru
           </span>
           <span
             ref={textRef}
             style={{
-              fontSize: "50px", fontWeight: 600, color: "#000000",
-              fontFamily: FONT_FAMILY, letterSpacing: "-0.02em",
-              display: "inline-block", willChange: "transform, opacity",
+              fontSize: "50px",
+              fontWeight: 600,
+              color: "#000000",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "-0.02em",
+              display: "inline-block",
+              willChange: "transform, opacity",
             }}
           >
             Shop
@@ -4294,27 +3710,32 @@ export default function HomePage(): React.JSX.Element {
         ref={preloaderRef}
         style={{
           position: "fixed",
-          top: 0, left: 0, width: "100%", height: "100%",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
           backgroundColor: "#ffffff",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          zIndex: 9999, fontFamily: FONT_FAMILY,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 9999,
+          fontFamily: FONT_FAMILY,
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "40px", overflow: "hidden" }}>
-          <span
-            style={{
-              fontSize: "100px", fontWeight: 700, color: "#0D3CFC",
-              fontFamily: FONT_FAMILY, letterSpacing: "-0.03em",
-            }}
-          >
+          <span style={{ fontSize: "100px", fontWeight: 700, color: "#0D3CFC", fontFamily: FONT_FAMILY, letterSpacing: "-0.03em" }}>
             Menuru
           </span>
           <span
             ref={textRef}
             style={{
-              fontSize: "50px", fontWeight: 600, color: "#000000",
-              fontFamily: FONT_FAMILY, letterSpacing: "-0.02em",
-              display: "inline-block", willChange: "transform, opacity",
+              fontSize: "50px",
+              fontWeight: 600,
+              color: "#000000",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "-0.02em",
+              display: "inline-block",
+              willChange: "transform, opacity",
             }}
           >
             Shop
@@ -4329,10 +3750,7 @@ export default function HomePage(): React.JSX.Element {
       <Head>
         <title>Menuru Official | Home</title>
         <meta name="description" content="Menuru Brand from Love yourself" />
-        <meta
-          name="viewport"
-          content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
-        />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
         <meta name="theme-color" content="#0D3CFC" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -4360,9 +3778,11 @@ export default function HomePage(): React.JSX.Element {
         style={{
           minHeight: "100vh",
           backgroundColor: "#ffffff",
-          margin: 0, padding: 0, position: "relative",
-          fontFamily: FONT_FAMILY, overflow: "visible",
-          paddingBottom: "80px",
+          margin: 0,
+          padding: 0,
+          position: "relative",
+          fontFamily: FONT_FAMILY,
+          overflow: "visible",
         }}
       >
         <HeroMenuruTitle onNavbarShiftChange={setNavbarShifted} />
@@ -4371,51 +3791,35 @@ export default function HomePage(): React.JSX.Element {
           <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} />
         </div>
 
-        {/* ===== FOOTER (dengan posisi fixed di bawah agar tidak ikut scroll) ===== */}
         <div
-          ref={liveChatEndRef}
           style={{
-            position: "fixed",
-            bottom: 0,
-            left: 0,
             width: "100%",
             padding: "60px 40px 40px 40px",
             backgroundColor: "#ffffff",
             borderTop: "1px solid rgba(0,0,0,0.05)",
+            marginTop: "20px",
+            position: "relative",
             overflow: "hidden",
-            zIndex: 100,
           }}
         >
-          <div
-            style={{
-              position: "absolute", left: "40px", top: "50%",
-              transform: "translateY(-50%)",
-              width: "200px", height: "auto", opacity: 0.8,
-            }}
-          >
-            <img
-              src="/images/p0l.jpg" alt=""
-              style={{ width: "100%", height: "auto", display: "block", objectFit: "cover" }}
-            />
+          <div style={{ position: "absolute", left: "40px", top: "50%", transform: "translateY(-50%)", width: "200px", height: "auto", opacity: 0.8 }}>
+            <img src="/images/p0l.jpg" alt="" style={{ width: "100%", height: "auto", display: "block", objectFit: "cover" }} />
           </div>
-          <div
-            style={{
-              position: "absolute", right: "40px", top: "50%",
-              transform: "translateY(-50%)",
-              width: "200px", height: "auto", opacity: 0.8,
-            }}
-          >
-            <img
-              src="/images/xxz.jpg" alt=""
-              style={{ width: "100%", height: "auto", display: "block", objectFit: "cover" }}
-            />
+          <div style={{ position: "absolute", right: "40px", top: "50%", transform: "translateY(-50%)", width: "200px", height: "auto", opacity: 0.8 }}>
+            <img src="/images/xxz.jpg" alt="" style={{ width: "100%", height: "auto", display: "block", objectFit: "cover" }} />
           </div>
 
           <div
             style={{
-              display: "flex", justifyContent: "space-between", alignItems: "flex-start",
-              maxWidth: "1400px", margin: "0 auto", gap: "40px",
-              flexWrap: "wrap", position: "relative", zIndex: 1,
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+              maxWidth: "1400px",
+              margin: "0 auto",
+              gap: "40px",
+              flexWrap: "wrap",
+              position: "relative",
+              zIndex: 1,
             }}
           >
             {footerLinks.map((section, idx) => (
@@ -4423,9 +3827,13 @@ export default function HomePage(): React.JSX.Element {
                 <h3
                   style={{
                     fontFamily: FONT_FAMILY,
-                    fontSize: "28px", fontWeight: 600,
-                    color: "#000000", margin: 0, marginBottom: "16px",
-                    letterSpacing: "-0.01em", textTransform: "none",
+                    fontSize: "28px",
+                    fontWeight: 600,
+                    color: "#000000",
+                    margin: 0,
+                    marginBottom: "16px",
+                    letterSpacing: "-0.01em",
+                    textTransform: "none",
                   }}
                 >
                   {section.title}
@@ -4457,9 +3865,12 @@ export default function HomePage(): React.JSX.Element {
                         <Link href={linkHref} style={{ textDecoration: "none" }}>
                           <span
                             style={{
-                              fontFamily: FONT_FAMILY, fontSize: "20px",
-                              fontWeight: 400, color: "#0D3CFC",
-                              letterSpacing: "-0.01em", cursor: "pointer",
+                              fontFamily: FONT_FAMILY,
+                              fontSize: "20px",
+                              fontWeight: 400,
+                              color: "#0D3CFC",
+                              letterSpacing: "-0.01em",
+                              cursor: "pointer",
                               textTransform: "none",
                             }}
                           >
@@ -4469,10 +3880,14 @@ export default function HomePage(): React.JSX.Element {
                         {isAttention && (
                           <span
                             style={{
-                              backgroundColor: "#0D3CFC", color: "#ffffff",
-                              padding: "2px 10px", borderRadius: "4px",
-                              fontSize: "11px", fontWeight: 600,
-                              fontFamily: FONT_FAMILY, letterSpacing: "0.3px",
+                              backgroundColor: "#0D3CFC",
+                              color: "#ffffff",
+                              padding: "2px 10px",
+                              borderRadius: "4px",
+                              fontSize: "11px",
+                              fontWeight: 600,
+                              fontFamily: FONT_FAMILY,
+                              letterSpacing: "0.3px",
                               display: "inline-block",
                             }}
                           >
@@ -4482,10 +3897,14 @@ export default function HomePage(): React.JSX.Element {
                         {isStories && (
                           <span
                             style={{
-                              backgroundColor: "#0D3CFC", color: "#ffffff",
-                              padding: "2px 10px", borderRadius: "4px",
-                              fontSize: "11px", fontWeight: 600,
-                              fontFamily: FONT_FAMILY, letterSpacing: "0.3px",
+                              backgroundColor: "#0D3CFC",
+                              color: "#ffffff",
+                              padding: "2px 10px",
+                              borderRadius: "4px",
+                              fontSize: "11px",
+                              fontWeight: 600,
+                              fontFamily: FONT_FAMILY,
+                              letterSpacing: "0.3px",
                               display: "inline-block",
                             }}
                           >
@@ -4502,28 +3921,31 @@ export default function HomePage(): React.JSX.Element {
 
           <div
             style={{
-              maxWidth: "1400px", margin: "40px auto 0 auto",
-              paddingTop: "20px", borderTop: "1px solid rgba(0,0,0,0.05)",
-              position: "relative", zIndex: 1,
+              maxWidth: "1400px",
+              margin: "40px auto 0 auto",
+              paddingTop: "20px",
+              borderTop: "1px solid rgba(0,0,0,0.05)",
+              position: "relative",
+              zIndex: 1,
             }}
           >
             <p
               style={{
-                fontFamily: FONT_FAMILY, fontSize: "14px", fontWeight: 400,
-                color: "#666", margin: 0, textAlign: "center",
+                fontFamily: FONT_FAMILY,
+                fontSize: "14px",
+                fontWeight: 400,
+                color: "#666",
+                margin: 0,
+                textAlign: "center",
                 letterSpacing: "0.01em",
               }}
             >
-              Terms and conditions apply. By using this website, you agree to our Terms of Use
-              and Privacy Policy.
+              Terms and conditions apply. By using this website, you agree to our Terms of Use and Privacy Policy.
             </p>
           </div>
         </div>
 
-        {/* ===== FOOTER MENURU TITLE ===== */}
-        <div style={{ position: "relative", zIndex: 1, marginTop: "0", paddingBottom: "0" }}>
-          <FooterMenuruTitle />
-        </div>
+        <FooterMenuruTitle />
       </div>
 
       <style jsx global>{`
@@ -4542,7 +3964,8 @@ export default function HomePage(): React.JSX.Element {
           overflow: auto !important;
           -ms-overflow-style: none !important;
           scrollbar-width: none !important;
-          margin: 0; padding: 0;
+          margin: 0;
+          padding: 0;
           background-color: #ffffff !important;
           min-height: 100% !important;
           height: auto !important;
@@ -4552,7 +3975,9 @@ export default function HomePage(): React.JSX.Element {
           width: 0 !important;
           height: 0 !important;
         }
-        * { background-color: transparent; }
+        * {
+          background-color: transparent;
+        }
         .menuru-char {
           display: inline-block;
           will-change: transform, opacity;
@@ -4581,17 +4006,19 @@ export default function HomePage(): React.JSX.Element {
           opacity: 1 !important;
           visibility: visible !important;
         }
+        /* ✅ Hapus scrollbar di semua area chat & list */
         .chat-messages-container::-webkit-scrollbar,
-        .chat-messages-container-admin::-webkit-scrollbar {
-          width: 6px;
+        .chat-list-container::-webkit-scrollbar,
+        .online-panel-container::-webkit-scrollbar {
+          display: none !important;
+          width: 0 !important;
+          height: 0 !important;
         }
-        .chat-messages-container::-webkit-scrollbar-track {
-          background: #f0f0f0;
-          border-radius: 3px;
-        }
-        .chat-messages-container::-webkit-scrollbar-thumb {
-          background: #0D3CFC;
-          border-radius: 3px;
+        .chat-messages-container,
+        .chat-list-container,
+        .online-panel-container {
+          scrollbar-width: none !important;
+          -ms-overflow-style: none !important;
         }
       `}</style>
     </>
