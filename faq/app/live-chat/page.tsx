@@ -1571,7 +1571,6 @@ const LiveChat = ({
     if (!db || !user) return;
     setAddingUserId(pickedUser.id);
     try {
-      // Cek apakah sudah ada
       const existing = contacts.find((c) => c.userId === pickedUser.userId);
       if (!existing) {
         await addDoc(collection(db, "user_contacts"), {
@@ -1591,6 +1590,34 @@ const LiveChat = ({
       console.error("Error adding user to contacts:", error);
     } finally {
       setAddingUserId(null);
+    }
+  };
+
+  // ===== DELETE CONTACT =====
+  const handleDeleteContact = async (contactId: string) => {
+    if (!db) return;
+    const el = contactItemRefs.current[contactId];
+    if (el) {
+      gsap.to(el, {
+        x: 100,
+        opacity: 0,
+        scale: 0.8,
+        duration: 0.4,
+        ease: "power2.in",
+        onComplete: async () => {
+          try {
+            await deleteDoc(doc(db, "user_contacts", contactId));
+          } catch (error) {
+            console.error("Error deleting contact:", error);
+          }
+        },
+      });
+    } else {
+      try {
+        await deleteDoc(doc(db, "user_contacts", contactId));
+      } catch (error) {
+        console.error("Error deleting contact:", error);
+      }
     }
   };
 
@@ -1990,6 +2017,7 @@ const LiveChat = ({
           cursor: "pointer",
           borderBottom: "1px solid rgba(255,255,255,0.08)",
           transition: "background-color 0.2s ease",
+          position: "relative",
         }}
       >
         <div
@@ -2041,6 +2069,29 @@ const LiveChat = ({
             >
               {isContact ? `${msgCount} msgs` : `${group.members.length} members`}
             </span>
+            {isContact && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDeleteContact(contact.id);
+                }}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  cursor: "pointer",
+                  padding: "2px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  opacity: 0.6,
+                  transition: "opacity 0.2s",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.opacity = "1")}
+                onMouseLeave={(e) => (e.currentTarget.style.opacity = "0.6")}
+              >
+                <CloseIcon size={12} color={WHITE} />
+              </button>
+            )}
           </div>
         </div>
         <div
@@ -2356,8 +2407,8 @@ const LiveChat = ({
                   gap: "6px",
                   flex: 1,
                   padding: "10px 8px",
-                  backgroundColor: "transparent",
-                  color: WHITE,
+                  backgroundColor: WHITE,
+                  color: BLUE,
                   border: `1.5px solid ${WHITE}`,
                   borderRadius: "8px",
                   fontSize: "12px",
@@ -2370,19 +2421,19 @@ const LiveChat = ({
                 onMouseEnter={(e) => {
                   gsap.to(e.currentTarget, {
                     scale: 1.03,
-                    backgroundColor: "rgba(255,255,255,0.15)",
+                    boxShadow: "0 0 20px rgba(255,255,255,0.3)",
                     duration: 0.3,
                   });
                 }}
                 onMouseLeave={(e) => {
                   gsap.to(e.currentTarget, {
                     scale: 1,
-                    backgroundColor: "transparent",
+                    boxShadow: "0 0 0px rgba(255,255,255,0)",
                     duration: 0.3,
                   });
                 }}
               >
-                <PlusIcon size={14} color={WHITE} />
+                <PlusIcon size={14} color={BLUE} />
                 Add Group
               </button>
             </div>
@@ -2392,17 +2443,17 @@ const LiveChat = ({
               <div
                 ref={addUserFormRef}
                 style={{
-                  backgroundColor: "rgba(255,255,255,0.1)",
+                  backgroundColor: WHITE,
                   borderRadius: "10px",
                   padding: "12px",
-                  border: "1px solid rgba(255,255,255,0.2)",
+                  border: `1.5px solid ${WHITE}`,
                   overflow: "hidden",
                 }}
               >
                 <div
                   style={{
                     fontSize: "11px",
-                    color: "rgba(255,255,255,0.8)",
+                    color: BLUE,
                     marginBottom: "8px",
                     fontWeight: 800,
                     letterSpacing: "0.5px",
@@ -2417,13 +2468,13 @@ const LiveChat = ({
                     alignItems: "center",
                     gap: "6px",
                     padding: "6px 10px",
-                    backgroundColor: "rgba(255,255,255,0.15)",
-                    border: "1px solid rgba(255,255,255,0.25)",
+                    backgroundColor: WHITE,
+                    border: `1.5px solid ${BLUE}`,
                     borderRadius: "6px",
                     marginBottom: "8px",
                   }}
                 >
-                  <SearchIcon size={12} color="#ffffff" />
+                  <SearchIcon size={12} color={BLUE} />
                   <input
                     type="text"
                     value={userSearchQuery}
@@ -2434,11 +2485,11 @@ const LiveChat = ({
                       background: "transparent",
                       border: "none",
                       outline: "none",
-                      color: "#ffffff",
+                      color: BLUE,
                       fontSize: "12px",
                       fontFamily: FONT_FAMILY,
                       padding: 0,
-                      caretColor: "#ffffff",
+                      caretColor: BLUE,
                       fontWeight: 600,
                     }}
                   />
@@ -2457,7 +2508,7 @@ const LiveChat = ({
                       style={{
                         padding: "14px",
                         textAlign: "center",
-                        color: "rgba(255,255,255,0.6)",
+                        color: BLUE,
                         fontSize: "12px",
                       }}
                     >
@@ -2481,20 +2532,18 @@ const LiveChat = ({
                             padding: "8px 10px",
                             borderRadius: "6px",
                             cursor: addingUserId ? "wait" : "pointer",
-                            backgroundColor: alreadyAdded
-                              ? "rgba(76,175,80,0.2)"
-                              : "rgba(255,255,255,0.05)",
+                            backgroundColor: alreadyAdded ? "rgba(76,175,80,0.15)" : WHITE,
+                            border: `1px solid ${BLUE}`,
                             transition: "background-color 0.2s",
                           }}
                           onMouseEnter={(e) => {
                             if (!alreadyAdded)
                               (e.currentTarget as HTMLDivElement).style.backgroundColor =
-                                "rgba(255,255,255,0.15)";
+                                "rgba(13,60,252,0.08)";
                           }}
                           onMouseLeave={(e) => {
                             if (!alreadyAdded)
-                              (e.currentTarget as HTMLDivElement).style.backgroundColor =
-                                "rgba(255,255,255,0.05)";
+                              (e.currentTarget as HTMLDivElement).style.backgroundColor = WHITE;
                           }}
                         >
                           <div
@@ -2502,8 +2551,8 @@ const LiveChat = ({
                               width: "30px",
                               height: "30px",
                               borderRadius: "6px",
-                              backgroundColor: WHITE,
-                              color: BLUE,
+                              backgroundColor: BLUE,
+                              color: WHITE,
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
@@ -2533,7 +2582,7 @@ const LiveChat = ({
                                   height: "8px",
                                   borderRadius: "50%",
                                   backgroundColor: "#4CAF50",
-                                  border: `1.5px solid ${BLUE}`,
+                                  border: `1.5px solid ${WHITE}`,
                                 }}
                               />
                             )}
@@ -2543,7 +2592,7 @@ const LiveChat = ({
                               style={{
                                 fontSize: "12px",
                                 fontWeight: 700,
-                                color: WHITE,
+                                color: BLUE,
                                 overflow: "hidden",
                                 textOverflow: "ellipsis",
                                 whiteSpace: "nowrap",
@@ -2554,7 +2603,8 @@ const LiveChat = ({
                             <div
                               style={{
                                 fontSize: "10px",
-                                color: "rgba(255,255,255,0.6)",
+                                color: BLUE,
+                                opacity: 0.7,
                                 overflow: "hidden",
                                 textOverflow: "ellipsis",
                                 whiteSpace: "nowrap",
@@ -2569,7 +2619,7 @@ const LiveChat = ({
                                 fontSize: "9px",
                                 fontWeight: 800,
                                 color: WHITE,
-                                backgroundColor: "rgba(76,175,80,0.9)",
+                                backgroundColor: "#4CAF50",
                                 padding: "2px 6px",
                                 borderRadius: "4px",
                                 letterSpacing: "0.5px",
@@ -2584,7 +2634,7 @@ const LiveChat = ({
                             <span
                               style={{
                                 fontSize: "10px",
-                                color: WHITE,
+                                color: BLUE,
                                 flexShrink: 0,
                               }}
                             >
@@ -2604,10 +2654,10 @@ const LiveChat = ({
               <div
                 ref={addGroupFormRef}
                 style={{
-                  backgroundColor: "rgba(255,255,255,0.1)",
+                  backgroundColor: WHITE,
                   borderRadius: "10px",
                   padding: "14px",
-                  border: "1px solid rgba(255,255,255,0.2)",
+                  border: `1.5px solid ${WHITE}`,
                   overflow: "hidden",
                 }}
               >
@@ -2621,13 +2671,14 @@ const LiveChat = ({
                       width: "100%",
                       padding: "8px 10px",
                       borderRadius: "6px",
-                      border: "1px solid rgba(255,255,255,0.3)",
-                      backgroundColor: "rgba(255,255,255,0.15)",
-                      color: WHITE,
+                      border: `1.5px solid ${BLUE}`,
+                      backgroundColor: WHITE,
+                      color: BLUE,
                       fontSize: "13px",
                       fontFamily: FONT_FAMILY,
                       outline: "none",
                       boxSizing: "border-box",
+                      fontWeight: 600,
                     }}
                   />
                 </div>
@@ -2641,23 +2692,24 @@ const LiveChat = ({
                       width: "100%",
                       padding: "8px 10px",
                       borderRadius: "6px",
-                      border: "1px solid rgba(255,255,255,0.3)",
-                      backgroundColor: "rgba(255,255,255,0.15)",
-                      color: WHITE,
+                      border: `1.5px solid ${BLUE}`,
+                      backgroundColor: WHITE,
+                      color: BLUE,
                       fontSize: "13px",
                       fontFamily: FONT_FAMILY,
                       outline: "none",
                       resize: "none",
                       boxSizing: "border-box",
+                      fontWeight: 600,
                     }}
                   />
                 </div>
                 <div
                   style={{
                     fontSize: "11px",
-                    color: "rgba(255,255,255,0.7)",
+                    color: BLUE,
                     marginBottom: "6px",
-                    fontWeight: 700,
+                    fontWeight: 800,
                     letterSpacing: "0.5px",
                     textTransform: "uppercase",
                   }}
@@ -2685,17 +2737,19 @@ const LiveChat = ({
                         borderRadius: "4px",
                         cursor: "pointer",
                         fontSize: "12px",
-                        color: WHITE,
+                        color: BLUE,
                         backgroundColor: selectedMembers.includes(c.userId)
-                          ? "rgba(255,255,255,0.15)"
-                          : "transparent",
+                          ? "rgba(13,60,252,0.1)"
+                          : WHITE,
+                        border: `1px solid ${BLUE}`,
+                        fontWeight: 600,
                       }}
                     >
                       <input
                         type="checkbox"
                         checked={selectedMembers.includes(c.userId)}
                         onChange={() => toggleMember(c.userId)}
-                        style={{ accentColor: WHITE }}
+                        style={{ accentColor: BLUE }}
                       />
                       {c.userName}
                     </label>
@@ -2705,7 +2759,7 @@ const LiveChat = ({
                   <div
                     style={{
                       fontSize: "12px",
-                      color: "#FFB3B3",
+                      color: "#d32f2f",
                       marginBottom: "8px",
                       fontWeight: 600,
                     }}
@@ -2722,12 +2776,12 @@ const LiveChat = ({
                     style={{
                       flex: 1,
                       padding: "8px",
-                      backgroundColor: "transparent",
-                      color: WHITE,
-                      border: "1px solid rgba(255,255,255,0.4)",
+                      backgroundColor: WHITE,
+                      color: BLUE,
+                      border: `1.5px solid ${BLUE}`,
                       borderRadius: "6px",
                       fontSize: "12px",
-                      fontWeight: 700,
+                      fontWeight: 800,
                       cursor: "pointer",
                       fontFamily: FONT_FAMILY,
                     }}
@@ -2740,14 +2794,15 @@ const LiveChat = ({
                     style={{
                       flex: 1,
                       padding: "8px",
-                      backgroundColor: addingGroup ? "#ccc" : WHITE,
+                      backgroundColor: WHITE,
                       color: BLUE,
-                      border: "none",
+                      border: `1.5px solid ${BLUE}`,
                       borderRadius: "6px",
                       fontSize: "12px",
                       fontWeight: 800,
                       cursor: addingGroup ? "not-allowed" : "pointer",
                       fontFamily: FONT_FAMILY,
+                      opacity: addingGroup ? 0.6 : 1,
                     }}
                   >
                     {addingGroup ? "..." : "Create"}
