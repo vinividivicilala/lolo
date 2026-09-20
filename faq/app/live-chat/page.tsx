@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { initializeApp, getApps } from "firebase/app";
@@ -20,14 +20,15 @@ import {
   setDoc,
   limit,
   deleteDoc,
-  getDocs,
-  writeBatch,
-  arrayUnion,
 } from "firebase/firestore";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
-import { motion, AnimatePresence } from "framer-motion";
+
+// Register GSAP plugins
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger, SplitText);
+}
 
 // Firebase Config
 const firebaseConfig = {
@@ -50,20 +51,6 @@ if (typeof window !== "undefined") {
   auth = getAuth(app);
   db = getFirestore(app);
 }
-
-// Register GSAP plugins
-if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger, SplitText);
-}
-
-const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
-const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
-const AGENT_NAME = "Farid Ardiansyah";
-
-// ===== COLORS =====
-const BLUE = "#0D3CFC";
-const WHITE = "#FFFFFF";
-const BLACK = "#000000";
 
 // ===== ENCRYPTION AES-256-GCM =====
 const ENCRYPTION_KEY_BASE64 = "bWVudXJ1LXNlY3JldC1rZXktMjAyNi0zMmJ5dGVzISEh";
@@ -309,6 +296,14 @@ async function checkBanStatus(userId: string): Promise<{
   }
 }
 
+const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
+const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
+
+// ===== CORE COLORS =====
+const BLUE = "#0D3CFC";
+const WHITE = "#FFFFFF";
+const BLACK = "#000000";
+
 // ===== SVG ICONS =====
 const ArrowRight = ({ size = 20, color = "currentColor" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
@@ -395,43 +390,336 @@ const BrandIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: st
   </svg>
 );
 
-// ===== STABILO BADGE =====
-const StabiloBadge = ({
-  label,
-  bg,
-  text,
-  border,
-  size = "sm",
-}: {
-  label: string;
-  bg: string;
+// ===== FOOTER LINKS =====
+const footerLinks = [
+  { title: "Get in Touch", links: ["Contact", "Instagram", "Live Chat"] },
+  {
+    title: "Product",
+    links: ["Shop", "Note", "Calendar", "Blog", "Donation", "Community", "Live Chat Agent", "Stories"],
+  },
+  { title: "Attention", links: ["Privacy Policy", "Terms & Conditions", "About Us", "Terms of Use", "Help Center"] },
+];
+
+// ===== INTERFACES =====
+interface ChatMessage {
+  id: string;
+  senderId: string;
+  senderName: string;
   text: string;
-  border: string;
-  size?: "sm" | "md";
+  timestamp: any;
+  read: boolean;
+  isEncrypted?: boolean;
+  isBotDetected?: boolean;
+  deliveryStatus?: "sending" | "sent" | "delivered" | "read" | "failed";
+}
+
+interface ChatContact {
+  id: string;
+  userId: string;
+  userName: string;
+  userEmail: string;
+  userPhoto?: string;
+  online?: boolean;
+  lastSeen?: any;
+}
+
+interface ChatGroup {
+  id: string;
+  groupName: string;
+  description: string;
+  members: string[];
+  createdBy: string;
+  createdAt: any;
+}
+
+interface LastMessagePreview {
+  text: string;
+  senderName: string;
+  timestamp: any;
+  isFromMe: boolean;
+}
+
+// ===== HERO MENURU TITLE =====
+const HeroMenuruTitle = ({
+  onNavbarShiftChange,
+}: {
+  onNavbarShiftChange: (shifted: boolean) => void;
 }) => {
-  const isSmall = size === "sm";
+  const containerRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isMounted) return;
+    if (!containerRef.current || !titleRef.current) return;
+
+    const container = containerRef.current;
+    const title = titleRef.current;
+
+    const NAV_TOP = 10;
+    const NAV_LEFT = 40;
+    const NAV_FONT_SIZE = 70;
+    const NAV_HEIGHT = 60;
+
+    const ctx = gsap.context(() => {
+      const split = new SplitText(title, {
+        type: "chars",
+        charsClass: "hero-menuru-char",
+      });
+
+      gsap.set(split.chars, {
+        opacity: 0,
+        y: 220,
+        rotationX: -90,
+        scale: 0.4,
+        transformOrigin: "50% 100%",
+        force3D: true,
+      });
+
+      gsap.to(split.chars, {
+        opacity: 1,
+        y: 0,
+        rotationX: 0,
+        scale: 1,
+        duration: 1.4,
+        stagger: 0.09,
+        ease: "back.out(1.8)",
+        delay: 0.2,
+      });
+
+      const scrollTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: container,
+          start: "top top",
+          end: "+=500",
+          scrub: 0.8,
+          pin: false,
+          onUpdate: (self) => {
+            onNavbarShiftChange(self.progress > 0.35);
+          },
+          onLeave: () => onNavbarShiftChange(true),
+          onEnterBack: () => onNavbarShiftChange(false),
+        },
+      });
+
+      scrollTl.to(
+        title,
+        {
+          position: "fixed",
+          top: `${NAV_TOP}px`,
+          left: `${NAV_LEFT}px`,
+          fontSize: `${NAV_FONT_SIZE}px`,
+          fontWeight: 700,
+          letterSpacing: "-0.03em",
+          lineHeight: 1,
+          height: `${NAV_HEIGHT}px`,
+          display: "flex",
+          alignItems: "center",
+          transform: "translateX(0px) translateY(0px)",
+          duration: 1,
+          ease: "power2.inOut",
+        },
+        0
+      );
+
+      scrollTl.to(
+        container,
+        {
+          height: "80px",
+          duration: 1,
+          ease: "power2.inOut",
+        },
+        0
+      );
+
+      return () => {
+        if (split) split.revert();
+      };
+    }, containerRef);
+
+    return () => ctx.revert();
+  }, [isMounted, onNavbarShiftChange]);
+
   return (
-    <span
+    <div
+      ref={containerRef}
       style={{
-        display: "inline-flex",
+        width: "100%",
+        height: "650px",
+        backgroundColor: "#ffffff",
+        overflow: "visible",
+        display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        padding: isSmall ? "3px 9px" : "4px 11px",
-        borderRadius: "4px",
-        border: `1.5px solid ${border}`,
-        backgroundColor: bg,
-        color: text,
-        fontSize: isSmall ? "10px" : "11px",
-        fontWeight: 800,
-        letterSpacing: "0.6px",
-        textTransform: "uppercase",
-        fontFamily: FONT_FAMILY,
-        lineHeight: 1.3,
-        whiteSpace: "nowrap",
+        position: "relative",
+        paddingTop: "110px",
       }}
     >
-      {label}
-    </span>
+      <h1
+        ref={titleRef}
+        style={{
+          fontFamily: FONT_FAMILY,
+          fontSize: "600px",
+          fontWeight: 700,
+          color: "#0D3CFC",
+          letterSpacing: "-0.05em",
+          lineHeight: 0.85,
+          margin: 0,
+          textAlign: "center",
+          userSelect: "none",
+          whiteSpace: "nowrap",
+          display: "inline-block",
+          WebkitFontSmoothing: "antialiased",
+          MozOsxFontSmoothing: "grayscale",
+          willChange: "transform, font-size, top, left",
+          zIndex: 8999,
+        }}
+      >
+        Menuru
+      </h1>
+    </div>
+  );
+};
+
+// ===== FOOTER MENURU TITLE =====
+const FooterMenuruTitle = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!titleRef.current || !containerRef.current) return;
+
+    const title = titleRef.current;
+    let split: any = null;
+    let ctx: any = null;
+
+    const setup = () => {
+      split = new SplitText(title, {
+        type: "chars",
+        charsClass: "footer-menuru-char",
+      });
+
+      ctx = gsap.context(() => {
+        gsap.set(split.chars, {
+          yPercent: 120,
+          opacity: 0,
+          rotationX: -90,
+          transformOrigin: "50% 100%",
+          force3D: true,
+        });
+
+        gsap.to(split.chars, {
+          yPercent: 0,
+          opacity: 1,
+          rotationX: 0,
+          duration: 1,
+          stagger: 0.08,
+          ease: "back.out(1.7)",
+          scrollTrigger: {
+            trigger: containerRef.current,
+            start: "top 90%",
+            end: "top 40%",
+            scrub: 1,
+            toggleActions: "play none none reverse",
+            invalidateOnRefresh: true,
+          },
+        });
+      }, containerRef);
+    };
+
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => {
+        setTimeout(setup, 50);
+      });
+    } else {
+      setTimeout(setup, 200);
+    }
+
+    return () => {
+      if (ctx) ctx.revert();
+      if (split && split.revert) split.revert();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const onLoad = () => ScrollTrigger.refresh();
+    window.addEventListener("load", onLoad);
+    const t1 = setTimeout(() => ScrollTrigger.refresh(), 600);
+    const t2 = setTimeout(() => ScrollTrigger.refresh(), 1500);
+    return () => {
+      window.removeEventListener("load", onLoad);
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
+  }, []);
+
+  return (
+    <div
+      ref={containerRef}
+      style={{
+        width: "100%",
+        padding: "0 40px 20px 40px",
+        backgroundColor: "#ffffff",
+        overflow: "visible",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "flex-start",
+        position: "relative",
+      }}
+    >
+      <span
+        ref={titleRef}
+        style={{
+          fontFamily: FONT_FAMILY,
+          fontSize: "600px",
+          fontWeight: 700,
+          color: "#0D3CFC",
+          letterSpacing: "-0.05em",
+          textTransform: "none",
+          lineHeight: "0.85",
+          display: "block",
+          textAlign: "left",
+          WebkitFontSmoothing: "antialiased",
+          MozOsxFontSmoothing: "grayscale",
+          willChange: "transform, opacity",
+          whiteSpace: "nowrap",
+          margin: 0,
+          padding: 0,
+          overflow: "visible",
+          position: "relative",
+        }}
+      >
+        Menuru
+      </span>
+
+      <div
+        style={{
+          width: "100%",
+          display: "flex",
+          justifyContent: "flex-start",
+          marginTop: "10px",
+        }}
+      >
+        <span
+          style={{
+            fontFamily: FONT_FAMILY,
+            fontSize: "16px",
+            fontWeight: 400,
+            color: "#0D3CFC",
+            letterSpacing: "0.01em",
+            opacity: 0.8,
+          }}
+        >
+          2024 - 2026 Menuru. All rights reserved.
+        </span>
+      </div>
+    </div>
   );
 };
 
@@ -446,16 +734,16 @@ const NavbarButton = ({
   iconType,
   bigPanelWidth = 850,
   bigPanelHeight = 260,
-  buttonColor = BLUE,
-  buttonHoverColor = BLACK,
-  panelColor = BLUE,
-  iconButtonColor = BLACK,
-  iconButtonHoverColor = BLUE,
+  buttonColor = "#0D3CFC",
+  buttonHoverColor = "#000000",
+  panelColor = "#0D3CFC",
+  iconButtonColor = "#000000",
+  iconButtonHoverColor = "#0D3CFC",
   panelBoxColor = "rgba(255,255,255,0.12)",
   panelBoxBorder = "rgba(255,255,255,0.25)",
-  labelTextColor = WHITE,
-  labelTextHoverColor = WHITE,
-  titleTextColor = WHITE,
+  labelTextColor = "#ffffff",
+  labelTextHoverColor = "#ffffff",
+  titleTextColor = "#ffffff",
   descriptionTextColor = "rgba(255,255,255,0.9)",
   isResources = false,
 }: {
@@ -497,7 +785,9 @@ const NavbarButton = ({
 
   const handleLeave = () => {
     if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
-    closeTimeoutRef.current = setTimeout(() => setOpen(false), 250);
+    closeTimeoutRef.current = setTimeout(() => {
+      setOpen(false);
+    }, 250);
   };
 
   useEffect(() => {
@@ -583,7 +873,7 @@ const NavbarButton = ({
             transition: "background-color 0.25s ease",
           }}
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{ display: "block" }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ display: "block" }}>
             <line ref={linesTopRef} x1="4" y1="7" x2="20" y2="7" stroke={strokeColor} strokeWidth="2.5" strokeLinecap="round" />
             <line ref={linesBottomRef} x1="4" y1="17" x2="20" y2="17" stroke={strokeColor} strokeWidth="2.5" strokeLinecap="round" />
           </svg>
@@ -807,329 +1097,84 @@ const RightNavbar = () => {
   );
 };
 
-// ===== HERO MENURU TITLE =====
-const HeroMenuruTitle = ({
-  onNavbarShiftChange,
+// ===== CLOSE ROOM BUTTON (GSAP) =====
+const CloseRoomButton = ({
+  onConfirm,
+  disabled,
 }: {
-  onNavbarShiftChange: (shifted: boolean) => void;
+  onConfirm: () => void;
+  disabled?: boolean;
 }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const titleRef = useRef<HTMLHeadingElement>(null);
-  const [isMounted, setIsMounted] = useState(false);
+  const btnRef = useRef<HTMLButtonElement>(null);
+  const iconRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setIsMounted(true);
+    if (iconRef.current) {
+      gsap.fromTo(
+        iconRef.current,
+        { rotate: 0, scale: 0.7, opacity: 0 },
+        { rotate: 360, scale: 1, opacity: 1, duration: 0.7, ease: "back.out(1.6)" }
+      );
+    }
   }, []);
 
-  useEffect(() => {
-    if (!isMounted) return;
-    if (!containerRef.current || !titleRef.current) return;
+  const handleEnter = () => {
+    if (disabled) return;
+    if (btnRef.current) {
+      gsap.to(btnRef.current, { scale: 1.08, duration: 0.25, ease: "power2.out" });
+    }
+    if (iconRef.current) {
+      gsap.to(iconRef.current, { rotate: "+=90", duration: 0.35, ease: "power2.out" });
+    }
+  };
 
-    const container = containerRef.current;
-    const title = titleRef.current;
+  const handleLeave = () => {
+    if (disabled) return;
+    if (btnRef.current) {
+      gsap.to(btnRef.current, { scale: 1, duration: 0.25, ease: "power2.out" });
+    }
+  };
 
-    const NAV_TOP = 10;
-    const NAV_LEFT = 40;
-    const NAV_FONT_SIZE = 70;
-    const NAV_HEIGHT = 60;
-
-    const ctx = gsap.context(() => {
-      const split = new SplitText(title, {
-        type: "chars",
-        charsClass: "hero-menuru-char",
-      });
-
-      gsap.set(split.chars, {
-        opacity: 0,
-        y: 220,
-        rotationX: -90,
-        scale: 0.4,
-        transformOrigin: "50% 100%",
-        force3D: true,
-      });
-
-      gsap.to(split.chars, {
-        opacity: 1,
-        y: 0,
-        rotationX: 0,
-        scale: 1,
-        duration: 1.4,
-        stagger: 0.09,
-        ease: "back.out(1.8)",
-        delay: 0.2,
-      });
-
-      const scrollTl = gsap.timeline({
-        scrollTrigger: {
-          trigger: container,
-          start: "top top",
-          end: "+=500",
-          scrub: 0.8,
-          pin: false,
-          onUpdate: (self) => {
-            onNavbarShiftChange(self.progress > 0.35);
-          },
-          onLeave: () => onNavbarShiftChange(true),
-          onEnterBack: () => onNavbarShiftChange(false),
-        },
-      });
-
-      scrollTl.to(
-        title,
-        {
-          position: "fixed",
-          top: `${NAV_TOP}px`,
-          left: `${NAV_LEFT}px`,
-          fontSize: `${NAV_FONT_SIZE}px`,
-          fontWeight: 700,
-          letterSpacing: "-0.03em",
-          lineHeight: 1,
-          height: `${NAV_HEIGHT}px`,
-          display: "flex",
-          alignItems: "center",
-          transform: "translateX(0px) translateY(0px)",
-          duration: 1,
-          ease: "power2.inOut",
-        },
-        0
-      );
-
-      scrollTl.to(
-        container,
-        {
-          height: "80px",
-          duration: 1,
-          ease: "power2.inOut",
-        },
-        0
-      );
-
-      return () => {
-        if (split) split.revert();
-      };
-    }, containerRef);
-
-    return () => ctx.revert();
-  }, [isMounted, onNavbarShiftChange]);
+  const handleClick = () => {
+    if (disabled) return;
+    if (btnRef.current) {
+      gsap.timeline()
+        .to(btnRef.current, { scale: 0.92, duration: 0.12, ease: "power2.in" })
+        .to(btnRef.current, { scale: 1, duration: 0.2, ease: "back.out(2)" });
+    }
+    onConfirm();
+  };
 
   return (
-    <div
-      ref={containerRef}
+    <button
+      ref={btnRef}
+      onClick={handleClick}
+      onMouseEnter={handleEnter}
+      onMouseLeave={handleLeave}
+      disabled={disabled}
+      title="Close room"
+      aria-label="Close room"
       style={{
-        width: "100%",
-        height: "650px",
-        backgroundColor: "#ffffff",
-        overflow: "visible",
+        width: "36px",
+        height: "36px",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        position: "relative",
-        paddingTop: "110px",
+        backgroundColor: WHITE,
+        border: `1.5px solid ${WHITE}`,
+        borderRadius: "8px",
+        cursor: disabled ? "not-allowed" : "pointer",
+        padding: 0,
+        opacity: disabled ? 0.4 : 1,
+        transition: "background-color 0.2s ease",
       }}
     >
-      <h1
-        ref={titleRef}
-        style={{
-          fontFamily: FONT_FAMILY,
-          fontSize: "600px",
-          fontWeight: 700,
-          color: BLUE,
-          letterSpacing: "-0.05em",
-          lineHeight: 0.85,
-          margin: 0,
-          textAlign: "center",
-          userSelect: "none",
-          whiteSpace: "nowrap",
-          display: "inline-block",
-          WebkitFontSmoothing: "antialiased",
-          MozOsxFontSmoothing: "grayscale",
-          willChange: "transform, font-size, top, left",
-          zIndex: 8999,
-        }}
-      >
-        Menuru
-      </h1>
-    </div>
-  );
-};
-
-// ===== FOOTER MENURU TITLE =====
-const FooterMenuruTitle = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const titleRef = useRef<HTMLSpanElement>(null);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (!titleRef.current || !containerRef.current) return;
-
-    const title = titleRef.current;
-    let split: any = null;
-    let ctx: any = null;
-
-    const setup = () => {
-      split = new SplitText(title, {
-        type: "chars",
-        charsClass: "footer-menuru-char",
-      });
-
-      ctx = gsap.context(() => {
-        gsap.set(split.chars, {
-          yPercent: 120,
-          opacity: 0,
-          rotationX: -90,
-          transformOrigin: "50% 100%",
-          force3D: true,
-        });
-
-        gsap.to(split.chars, {
-          yPercent: 0,
-          opacity: 1,
-          rotationX: 0,
-          duration: 1,
-          stagger: 0.08,
-          ease: "back.out(1.7)",
-          scrollTrigger: {
-            trigger: containerRef.current,
-            start: "top 90%",
-            end: "top 40%",
-            scrub: 1,
-            toggleActions: "play none none reverse",
-            invalidateOnRefresh: true,
-          },
-        });
-      }, containerRef);
-    };
-
-    if (document.fonts && document.fonts.ready) {
-      document.fonts.ready.then(() => setTimeout(setup, 50));
-    } else {
-      setTimeout(setup, 200);
-    }
-
-    return () => {
-      if (ctx) ctx.revert();
-      if (split && split.revert) split.revert();
-    };
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const onLoad = () => ScrollTrigger.refresh();
-    window.addEventListener("load", onLoad);
-    const t1 = setTimeout(() => ScrollTrigger.refresh(), 600);
-    const t2 = setTimeout(() => ScrollTrigger.refresh(), 1500);
-    return () => {
-      window.removeEventListener("load", onLoad);
-      clearTimeout(t1);
-      clearTimeout(t2);
-    };
-  }, []);
-
-  return (
-    <div
-      ref={containerRef}
-      style={{
-        width: "100%",
-        padding: "0 40px 20px 40px",
-        backgroundColor: "#ffffff",
-        overflow: "visible",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "flex-start",
-        position: "relative",
-      }}
-    >
-      <span
-        ref={titleRef}
-        style={{
-          fontFamily: FONT_FAMILY,
-          fontSize: "600px",
-          fontWeight: 700,
-          color: BLUE,
-          letterSpacing: "-0.05em",
-          textTransform: "none",
-          lineHeight: "0.85",
-          display: "block",
-          textAlign: "left",
-          WebkitFontSmoothing: "antialiased",
-          MozOsxFontSmoothing: "grayscale",
-          willChange: "transform, opacity",
-          whiteSpace: "nowrap",
-          margin: 0,
-          padding: 0,
-          overflow: "visible",
-          position: "relative",
-        }}
-      >
-        Menuru
-      </span>
-
-      <div
-        style={{
-          width: "100%",
-          display: "flex",
-          justifyContent: "flex-start",
-          marginTop: "10px",
-        }}
-      >
-        <span
-          style={{
-            fontFamily: FONT_FAMILY,
-            fontSize: "16px",
-            fontWeight: 400,
-            color: BLUE,
-            letterSpacing: "0.01em",
-            opacity: 0.8,
-          }}
-        >
-          2024 - 2026 Menuru. All rights reserved.
-        </span>
+      <div ref={iconRef} style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <CloseIcon size={16} color={BLUE} />
       </div>
-    </div>
+    </button>
   );
 };
-
-// ===== FOOTER LINKS =====
-const footerLinks = [
-  { title: "Get in Touch", links: ["Contact", "Instagram", "Live Chat"] },
-  {
-    title: "Product",
-    links: ["Shop", "Note", "Calendar", "Blog", "Donation", "Community", "Live Chat Agent", "Stories"],
-  },
-  { title: "Attention", links: ["Privacy Policy", "Terms & Conditions", "About Us", "Terms of Use", "Help Center"] },
-];
-
-// ===== INTERFACES =====
-interface ChatMessage {
-  id: string;
-  senderId: string;
-  senderName: string;
-  text: string;
-  timestamp: any;
-  read: boolean;
-  isEncrypted?: boolean;
-  isBotDetected?: boolean;
-  deliveryStatus?: "sending" | "sent" | "delivered" | "read" | "failed";
-}
-
-interface ChatContact {
-  id: string;
-  userId: string;
-  userName: string;
-  userEmail: string;
-  userPhoto?: string;
-  online?: boolean;
-  lastSeen?: any;
-}
-
-interface ChatGroup {
-  id: string;
-  groupName: string;
-  description: string;
-  members: string[];
-  createdBy: string;
-  createdAt: any;
-}
 
 // ===== LIVE CHAT COMPONENT =====
 const LiveChat = ({
@@ -1143,7 +1188,7 @@ const LiveChat = ({
   auth: any;
   isAdmin: boolean;
 }) => {
-  // Chat states
+  // ===== STATE =====
   const [selectedContact, setSelectedContact] = useState<ChatContact | null>(null);
   const [selectedGroup, setSelectedGroup] = useState<ChatGroup | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -1161,19 +1206,21 @@ const LiveChat = ({
   const [groups, setGroups] = useState<ChatGroup[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [messageSearchQuery, setMessageSearchQuery] = useState("");
-  const [messagePreviews, setMessagePreviews] = useState<{ [contactId: string]: string }>({});
-  const [contactMsgCounts, setContactMsgCounts] = useState<{ [contactId: string]: number }>({});
 
-  // ===== ONLINE USERS PANEL =====
+  // ✅ Message previews & counts per chat — AUTO UPDATE
+  const [chatPreviews, setChatPreviews] = useState<{ [chatId: string]: LastMessagePreview[] }>({});
+  const [chatMsgCounts, setChatMsgCounts] = useState<{ [chatId: string]: number }>({});
+
+  // Online users panel
   const [onlineUsers, setOnlineUsers] = useState<ChatContact[]>([]);
 
-  // ===== ADD USER (INLINE, NO MODAL) =====
+  // Add User
   const [showAddUserForm, setShowAddUserForm] = useState(false);
   const [allUsers, setAllUsers] = useState<ChatContact[]>([]);
   const [userSearchQuery, setUserSearchQuery] = useState("");
   const [addingUserId, setAddingUserId] = useState<string | null>(null);
 
-  // ===== ADD GROUP (INLINE, NO MODAL) =====
+  // Add Group
   const [showAddGroupForm, setShowAddGroupForm] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
   const [newGroupDesc, setNewGroupDesc] = useState("");
@@ -1181,10 +1228,12 @@ const LiveChat = ({
   const [addingGroup, setAddingGroup] = useState(false);
   const [groupError, setGroupError] = useState("");
 
+  // ✅ Close room confirm (inline toast)
+  const [showCloseConfirm, setShowCloseConfirm] = useState(false);
+
   // Refs
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatMessagesContainerRef = useRef<HTMLDivElement>(null);
-  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const liveChatTitleRef = useRef<HTMLHeadingElement>(null);
   const addUserBtnRef = useRef<HTMLButtonElement>(null);
   const addGroupBtnRef = useRef<HTMLButtonElement>(null);
@@ -1192,8 +1241,11 @@ const LiveChat = ({
   const addGroupFormRef = useRef<HTMLDivElement>(null);
   const contactItemRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const groupItemRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
-  const userPickerItemRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const onlineUserItemRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+
+  // ✅ Cache untuk messages & prev len
+  const messagesCacheRef = useRef<{ [chatId: string]: ChatMessage[] }>({});
+  const prevMessagesLenRef = useRef<number>(0);
 
   useEffect(() => {
     setIsMounted(true);
@@ -1223,45 +1275,40 @@ const LiveChat = ({
           duration: 0.8,
           stagger: 0.05,
           ease: "back.out(1.2)",
+          scrollTrigger: {
+            trigger: liveChatTitleRef.current,
+            start: "top 85%",
+            end: "bottom 70%",
+            toggleActions: "play none none reverse",
+          },
         }
       );
     }
+    return () => {
+      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+    };
   }, [isMounted]);
 
-  // GSAP Add User button animation
+  // GSAP Add User button
   useEffect(() => {
     if (!isMounted) return;
     if (addUserBtnRef.current) {
       gsap.fromTo(
         addUserBtnRef.current,
         { scale: 0, rotation: -180, opacity: 0 },
-        {
-          scale: 1,
-          rotation: 0,
-          opacity: 1,
-          duration: 0.8,
-          ease: "back.out(1.7)",
-          delay: 0.4,
-        }
+        { scale: 1, rotation: 0, opacity: 1, duration: 0.8, ease: "back.out(1.7)", delay: 0.4 }
       );
     }
   }, [isMounted]);
 
-  // GSAP Add Group button animation
+  // GSAP Add Group button
   useEffect(() => {
     if (!isMounted) return;
     if (addGroupBtnRef.current) {
       gsap.fromTo(
         addGroupBtnRef.current,
         { scale: 0, rotation: -180, opacity: 0 },
-        {
-          scale: 1,
-          rotation: 0,
-          opacity: 1,
-          duration: 0.8,
-          ease: "back.out(1.7)",
-          delay: 0.5,
-        }
+        { scale: 1, rotation: 0, opacity: 1, duration: 0.8, ease: "back.out(1.7)", delay: 0.5 }
       );
     }
   }, [isMounted]);
@@ -1314,61 +1361,33 @@ const LiveChat = ({
     }
   }, [showAddGroupForm]);
 
-  // GSAP animate user picker items
-  useEffect(() => {
-    if (!isMounted || !showAddUserForm) return;
-    allUsers.forEach((u) => {
-      const el = userPickerItemRefs.current[u.id];
-      if (el && !el.dataset.animated) {
-        el.dataset.animated = "true";
-        gsap.fromTo(
-          el,
-          { x: -30, opacity: 0 },
-          { x: 0, opacity: 1, duration: 0.4, ease: "back.out(1.4)" }
-        );
-      }
-    });
-  }, [allUsers, showAddUserForm, isMounted]);
-
-  // GSAP animate online users
+  // GSAP online users
   useEffect(() => {
     if (!isMounted) return;
     onlineUsers.forEach((u) => {
       const el = onlineUserItemRefs.current[u.id];
       if (el && !el.dataset.animated) {
         el.dataset.animated = "true";
-        gsap.fromTo(
-          el,
-          { x: -40, opacity: 0 },
-          { x: 0, opacity: 1, duration: 0.5, ease: "back.out(1.4)" }
-        );
+        gsap.fromTo(el, { x: -40, opacity: 0 }, { x: 0, opacity: 1, duration: 0.5, ease: "back.out(1.4)" });
       }
     });
   }, [onlineUsers, isMounted]);
 
-  // GSAP animate contacts on change
+  // GSAP contacts
   useEffect(() => {
     if (!isMounted) return;
     contacts.forEach((contact) => {
       const el = contactItemRefs.current[contact.id];
       if (el && !el.dataset.animated) {
         el.dataset.animated = "true";
-        gsap.fromTo(
-          el,
-          { x: -60, opacity: 0, scale: 0.9 },
-          { x: 0, opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.4)" }
-        );
+        gsap.fromTo(el, { x: -60, opacity: 0, scale: 0.9 }, { x: 0, opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.4)" });
       }
     });
     groups.forEach((group) => {
       const el = groupItemRefs.current[group.id];
       if (el && !el.dataset.animated) {
         el.dataset.animated = "true";
-        gsap.fromTo(
-          el,
-          { x: -60, opacity: 0, scale: 0.9 },
-          { x: 0, opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.4)" }
-        );
+        gsap.fromTo(el, { x: -60, opacity: 0, scale: 0.9 }, { x: 0, opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.4)" });
       }
     });
   }, [contacts, groups, isMounted]);
@@ -1402,7 +1421,7 @@ const LiveChat = ({
     checkBan();
   }, [user, isMounted]);
 
-  // ===== LOAD ALL REGISTERED USERS (untuk Add User picker) =====
+  // ===== LOAD ALL USERS =====
   useEffect(() => {
     if (!db || !user || !isMounted) return;
     const q = query(collection(db, "users"), orderBy("displayName", "asc"));
@@ -1427,7 +1446,7 @@ const LiveChat = ({
     return () => unsubscribe();
   }, [db, user, isMounted]);
 
-  // ===== LOAD ONLINE USERS (Panel kiri) =====
+  // ===== LOAD ONLINE USERS =====
   useEffect(() => {
     if (!db || !user || !isMounted) return;
     const q = query(collection(db, "users"), where("online", "==", true));
@@ -1497,21 +1516,30 @@ const LiveChat = ({
     return () => unsubscribe();
   }, [db, user, isMounted]);
 
-  // ===== MESSAGE PREVIEWS FOR CONTACTS =====
+  // ===== AUTO PREVIEWS & COUNTS UNTUK SEMUA CHAT (CONTACTS + GROUPS) =====
+  // Sama seperti halaman utama — preview 3 pesan terakhir + counter otomatis
   useEffect(() => {
-    if (!db || !contacts.length || !user || !isMounted) return;
+    if (!db || !user || !isMounted) return;
     const unsubscribes: (() => void)[] = [];
+
+    // Contacts
     contacts.forEach((contact) => {
       const chatId = [user.uid, contact.userId].sort().join("_");
+      const key = `c_${contact.id}`;
       const q = query(
         collection(db, "direct_messages", chatId, "messages"),
         orderBy("timestamp", "desc"),
         limit(3)
       );
       const unsub = onSnapshot(q, async (snapshot: any) => {
-        setContactMsgCounts((prev) => ({ ...prev, [contact.id]: snapshot.size }));
-        if (!snapshot.empty) {
-          const data = snapshot.docs[0].data();
+        // ✅ Counter otomatis: jumlah dokumen di preview (max 3) + full count via total
+        // Untuk counter real-time yang akurat, kita ambil full count via getCountFromServer-like
+        // tapi karena Firestore client tidak support count langsung tanpa agregasi,
+        // kita pakai snapshot.size dari query limit 3 sebagai hint, DAN hitung full via query terpisah (opsional).
+        // Di sini kita simpan preview 3 pesan terakhir + update counter setelah full count.
+        const previews: LastMessagePreview[] = [];
+        for (const docSnap of snapshot.docs) {
+          const data = docSnap.data();
           let text = data.text || "";
           if (data.isEncrypted) {
             try {
@@ -1520,19 +1548,66 @@ const LiveChat = ({
               text = "[Encrypted]";
             }
           }
-          setMessagePreviews((prev) => ({ ...prev, [contact.id]: text }));
+          previews.push({
+            text,
+            senderName: data.senderName || "User",
+            timestamp: data.timestamp,
+            isFromMe: data.senderId === user.uid,
+          });
         }
+        setChatPreviews((prev) => ({ ...prev, [key]: previews }));
+        setChatMsgCounts((prev) => ({ ...prev, [key]: snapshot.size }));
       });
       unsubscribes.push(unsub);
     });
+
+    // Groups
+    groups.forEach((group) => {
+      const key = `g_${group.id}`;
+      const q = query(
+        collection(db, "chat_groups", group.id, "messages"),
+        orderBy("timestamp", "desc"),
+        limit(3)
+      );
+      const unsub = onSnapshot(q, async (snapshot: any) => {
+        const previews: LastMessagePreview[] = [];
+        for (const docSnap of snapshot.docs) {
+          const data = docSnap.data();
+          let text = data.text || "";
+          if (data.isEncrypted) {
+            try {
+              text = await decryptMessage(text);
+            } catch {
+              text = "[Encrypted]";
+            }
+          }
+          previews.push({
+            text,
+            senderName: data.senderName || "User",
+            timestamp: data.timestamp,
+            isFromMe: data.senderId === user.uid,
+          });
+        }
+        setChatPreviews((prev) => ({ ...prev, [key]: previews }));
+        setChatMsgCounts((prev) => ({ ...prev, [key]: snapshot.size }));
+      });
+      unsubscribes.push(unsub);
+    });
+
     return () => unsubscribes.forEach((unsub) => unsub());
-  }, [db, contacts, user, isMounted]);
+  }, [db, contacts, groups, user, isMounted]);
 
   // ===== MESSAGES LISTENER (DIRECT CHAT) =====
   useEffect(() => {
     if (!db || !selectedContact || !user || !isMounted) return;
 
     const chatId = [user.uid, selectedContact.userId].sort().join("_");
+
+    if (messagesCacheRef.current[chatId]) {
+      setMessages(messagesCacheRef.current[chatId]);
+      prevMessagesLenRef.current = messagesCacheRef.current[chatId].length;
+    }
+
     const q = query(
       collection(db, "direct_messages", chatId, "messages"),
       orderBy("timestamp", "asc")
@@ -1552,7 +1627,21 @@ const LiveChat = ({
         }
         msgList.push({ id: docSnap.id, ...data, text } as ChatMessage);
       }
+
+      // ✅ Rolling new message animation
+      const newLen = msgList.length;
+      if (prevMessagesLenRef.current > 0 && newLen > prevMessagesLenRef.current) {
+        setTimeout(() => {
+          if (chatMessagesContainerRef.current) {
+            chatMessagesContainerRef.current.scrollTop = chatMessagesContainerRef.current.scrollHeight;
+          }
+        }, 50);
+      }
+      prevMessagesLenRef.current = newLen;
+
+      messagesCacheRef.current[chatId] = msgList;
       setMessages(msgList);
+
       requestAnimationFrame(() => {
         if (chatMessagesContainerRef.current) {
           chatMessagesContainerRef.current.scrollTop = chatMessagesContainerRef.current.scrollHeight;
@@ -1565,6 +1654,13 @@ const LiveChat = ({
   // ===== MESSAGES LISTENER (GROUP CHAT) =====
   useEffect(() => {
     if (!db || !selectedGroup || !user || !isMounted) return;
+
+    const chatId = `g_${selectedGroup.id}`;
+
+    if (messagesCacheRef.current[chatId]) {
+      setMessages(messagesCacheRef.current[chatId]);
+      prevMessagesLenRef.current = messagesCacheRef.current[chatId].length;
+    }
 
     const q = query(
       collection(db, "chat_groups", selectedGroup.id, "messages"),
@@ -1585,7 +1681,20 @@ const LiveChat = ({
         }
         msgList.push({ id: docSnap.id, ...data, text } as ChatMessage);
       }
+
+      const newLen = msgList.length;
+      if (prevMessagesLenRef.current > 0 && newLen > prevMessagesLenRef.current) {
+        setTimeout(() => {
+          if (chatMessagesContainerRef.current) {
+            chatMessagesContainerRef.current.scrollTop = chatMessagesContainerRef.current.scrollHeight;
+          }
+        }, 50);
+      }
+      prevMessagesLenRef.current = newLen;
+
+      messagesCacheRef.current[chatId] = msgList;
       setMessages(msgList);
+
       requestAnimationFrame(() => {
         if (chatMessagesContainerRef.current) {
           chatMessagesContainerRef.current.scrollTop = chatMessagesContainerRef.current.scrollHeight;
@@ -1594,6 +1703,18 @@ const LiveChat = ({
     });
     return () => unsubscribe();
   }, [db, selectedGroup, user, isMounted]);
+
+  // Reset saat ganti chat
+  useEffect(() => {
+    const chatId = selectedContact
+      ? [user?.uid, selectedContact.userId].sort().join("_")
+      : selectedGroup
+      ? `g_${selectedGroup.id}`
+      : "";
+    prevMessagesLenRef.current = messagesCacheRef.current[chatId]?.length || 0;
+    setShowCloseConfirm(false);
+    setMessageSearchQuery("");
+  }, [selectedContact?.id, selectedGroup?.id, user?.uid]);
 
   // Mark messages as read
   useEffect(() => {
@@ -1612,7 +1733,7 @@ const LiveChat = ({
     });
   }, [messages, selectedContact, selectedGroup, db, user, isMounted]);
 
-  // ===== ADD USER TO MY CONTACTS =====
+  // ===== ADD USER =====
   const handleAddUserToContacts = async (pickedUser: ChatContact) => {
     if (!db || !user) return;
     setAddingUserId(pickedUser.id);
@@ -1734,19 +1855,11 @@ const LiveChat = ({
     }
     const checkResult = containsBannedContent(messageText);
     if (checkResult.isBanned) {
-      await banUserPermanent(
-        user.uid,
-        user.email || "",
-        user.displayName || "User",
-        checkResult.reason,
-        messageText
-      );
+      await banUserPermanent(user.uid, user.email || "", user.displayName || "User", checkResult.reason, messageText);
       setIsBanned(true);
       setBanReason(checkResult.reason);
       setCanSendMessage(false);
-      setBanMessage(
-        `YOUR ACCOUNT HAS BEEN PERMANENTLY BANNED\n\nReason: ${checkResult.reason}\n\nMessage sent: "${messageText}"`
-      );
+      setBanMessage(`YOUR ACCOUNT HAS BEEN PERMANENTLY BANNED\n\nReason: ${checkResult.reason}\n\nMessage sent: "${messageText}"`);
       setMessageText("");
       return;
     }
@@ -1784,15 +1897,10 @@ const LiveChat = ({
 
       setMessageText("");
       setBanMessage(null);
-      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     } catch (error) {
       console.error("Error sending message:", error);
       alert("An error occurred while sending the message. Please try again.");
     }
-  };
-
-  const handleTyping = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setMessageText(e.target.value);
   };
 
   const formatTime = useCallback((timestamp: any) => {
@@ -1814,6 +1922,7 @@ const LiveChat = ({
     }
   };
 
+  // ✅ Delivery status (SAMA seperti halaman utama)
   const renderDeliveryStatus = (msg: ChatMessage, isMine: boolean) => {
     if (!isMine) return null;
     let label = "Sent";
@@ -1867,167 +1976,16 @@ const LiveChat = ({
       u.userEmail.toLowerCase().includes(userSearchQuery.toLowerCase())
   );
 
-  // Filter pesan di dalam chat
+  // Filter pesan di dalam chat (search)
   const filteredMessages = messageSearchQuery.trim()
-    ? messages.filter((m) =>
-        m.text.toLowerCase().includes(messageSearchQuery.toLowerCase()) ||
-        m.senderName.toLowerCase().includes(messageSearchQuery.toLowerCase())
+    ? messages.filter(
+        (m) =>
+          m.text.toLowerCase().includes(messageSearchQuery.toLowerCase()) ||
+          m.senderName.toLowerCase().includes(messageSearchQuery.toLowerCase())
       )
     : messages;
 
-  if (checkingBan) {
-    return (
-      <div style={{ marginTop: "80px", paddingTop: "30px" }}>
-        <h3
-          style={{
-            fontSize: "80px",
-            fontWeight: 700,
-            color: BLUE,
-            fontFamily: FONT_FAMILY,
-            letterSpacing: "-0.03em",
-            margin: 0,
-            lineHeight: 1.1,
-          }}
-        >
-          Live Chat
-        </h3>
-        <div
-          style={{
-            padding: "20px",
-            textAlign: "center",
-            color: "#666",
-            fontFamily: FONT_FAMILY,
-          }}
-        >
-          Checking account status...
-        </div>
-      </div>
-    );
-  }
-  if (!isMounted) return <div style={{ minHeight: "100px" }} />;
-
-  if (!user) {
-    return (
-      <div style={{ marginTop: "80px", paddingTop: "30px" }}>
-        <h3
-          ref={liveChatTitleRef}
-          style={{
-            fontSize: "80px",
-            fontWeight: 700,
-            color: BLUE,
-            fontFamily: FONT_FAMILY,
-            letterSpacing: "-0.03em",
-            margin: 0,
-            lineHeight: 1.1,
-            marginBottom: "20px",
-          }}
-        >
-          Live Chat
-        </h3>
-        <p
-          style={{
-            fontSize: "15px",
-            color: "#666",
-            fontFamily: FONT_FAMILY,
-            marginBottom: "10px",
-          }}
-        >
-          Please login to use Live Chat
-        </p>
-        <Link href="/" style={{ textDecoration: "none" }}>
-          <button
-            style={{
-              padding: "8px 20px",
-              backgroundColor: BLUE,
-              color: WHITE,
-              border: "none",
-              borderRadius: "6px",
-              fontSize: "14px",
-              fontWeight: 600,
-              cursor: "pointer",
-              fontFamily: FONT_FAMILY,
-            }}
-          >
-            Login
-          </button>
-        </Link>
-      </div>
-    );
-  }
-
-  if (isBanned) {
-    return (
-      <div style={{ marginTop: "80px", paddingTop: "30px" }}>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            marginBottom: "20px",
-          }}
-        >
-          <h3
-            style={{
-              fontSize: "80px",
-              fontWeight: 700,
-              color: BLUE,
-              fontFamily: FONT_FAMILY,
-              letterSpacing: "-0.03em",
-              margin: 0,
-              lineHeight: 1.1,
-            }}
-          >
-            Live Chat
-          </h3>
-          <button
-            onClick={handleLogout}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              padding: "0",
-              backgroundColor: "transparent",
-              color: BLUE,
-              border: "none",
-              fontSize: "20px",
-              fontWeight: 700,
-              cursor: "pointer",
-              fontFamily: FONT_FAMILY,
-            }}
-          >
-            <span>Logout</span>
-            <ArrowRight size={20} color={BLUE} />
-          </button>
-        </div>
-        <div
-          style={{
-            color: BLUE,
-            fontSize: "50px",
-            fontWeight: 700,
-            fontFamily: FONT_FAMILY,
-            lineHeight: 1.2,
-            marginBottom: "12px",
-            letterSpacing: "-0.02em",
-          }}
-        >
-          YOUR ACCOUNT HAS BEEN PERMANENTLY BANNED
-        </div>
-        <div
-          style={{
-            color: BLUE,
-            fontSize: "22px",
-            fontWeight: 400,
-            fontFamily: FONT_FAMILY,
-            marginBottom: "6px",
-          }}
-        >
-          REASON: {banReason || "SUSPICIOUS ACTIVITY"}
-        </div>
-      </div>
-    );
-  }
-
-  // ===== RENDER CHAT LIST ITEM =====
+  // ===== RENDER CHAT LIST ITEM (dengan preview + counter otomatis) =====
   const renderChatListItem = (item: ChatContact | ChatGroup, type: "contact" | "group") => {
     const isContact = type === "contact";
     const contact = item as ChatContact;
@@ -2035,25 +1993,18 @@ const LiveChat = ({
     const isActive = isContact
       ? selectedContact?.id === contact.id
       : selectedGroup?.id === group.id;
-    const preview = isContact ? messagePreviews[contact.id] : "";
-    const msgCount = isContact ? contactMsgCounts[contact.id] || 0 : 0;
+    const key = isContact ? `c_${contact.id}` : `g_${group.id}`;
+    const previews = chatPreviews[key] || [];
+    const msgCount = chatMsgCounts[key] || 0;
     const displayName = isContact ? contact.userName : group.groupName;
-    const subInfo = isContact
-      ? contact.userEmail
-      : `${group.members.length} members · ${group.description}`;
 
     return (
-      <motion.div
+      <div
         key={isContact ? contact.id : group.id}
         ref={(el) => {
           if (isContact) contactItemRefs.current[contact.id] = el;
           else groupItemRefs.current[group.id] = el;
         }}
-        layout
-        initial={{ opacity: 0, x: -40 }}
-        animate={{ opacity: 1, x: 0 }}
-        exit={{ opacity: 0, x: -40 }}
-        transition={{ duration: 0.35, ease: "easeOut" }}
         onClick={() => {
           if (isContact) {
             setSelectedContact(contact);
@@ -2113,6 +2064,7 @@ const LiveChat = ({
             )}
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "6px", flexShrink: 0 }}>
+            {/* ✅ Counter otomatis */}
             <span
               style={{
                 fontSize: "10px",
@@ -2147,34 +2099,159 @@ const LiveChat = ({
             )}
           </div>
         </div>
-        <div
-          style={{
-            fontSize: "11px",
-            color: "rgba(255,255,255,0.65)",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-            fontFamily: FONT_FAMILY,
-          }}
-        >
-          {isContact ? (preview ? preview : subInfo) : subInfo}
-        </div>
-      </motion.div>
+
+        {/* ✅ Preview pesan otomatis (3 pesan terakhir, sama seperti halaman utama) */}
+        {previews.length > 0 ? (
+          <div style={{ marginTop: "6px", display: "flex", flexDirection: "column", gap: "3px" }}>
+            {[...previews].reverse().map((p, i) => (
+              <div
+                key={i}
+                style={{
+                  fontSize: "11px",
+                  color: "#ffffff",
+                  fontStyle: "italic",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                  fontFamily: FONT_FAMILY,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "4px",
+                }}
+              >
+                <span style={{ fontWeight: 700, color: "#ffffff", flexShrink: 0 }}>{p.senderName}:</span>
+                <span style={{ overflow: "hidden", textOverflow: "ellipsis", color: "#ffffff" }}>
+                  {p.text.length > 30 ? p.text.substring(0, 30) + "..." : p.text}
+                </span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div
+            style={{
+              fontSize: "11px",
+              color: "rgba(255,255,255,0.65)",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              fontFamily: FONT_FAMILY,
+            }}
+          >
+            {isContact
+              ? contact.userEmail
+              : `${group.members.length} members · ${group.description}`}
+          </div>
+        )}
+      </div>
     );
   };
 
+  if (checkingBan) {
+    return (
+      <div style={{ marginTop: "80px", paddingTop: "30px" }}>
+        <h3 style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1 }}>
+          Live Chat
+        </h3>
+        <div style={{ padding: "20px", textAlign: "center", color: "#666", fontFamily: FONT_FAMILY }}>
+          Checking account status...
+        </div>
+      </div>
+    );
+  }
+  if (!isMounted) return <div style={{ minHeight: "100px" }} />;
+
+  if (!user) {
+    return (
+      <div style={{ marginTop: "80px", paddingTop: "30px" }}>
+        <h3
+          ref={liveChatTitleRef}
+          style={{
+            fontSize: "80px",
+            fontWeight: 700,
+            color: BLUE,
+            fontFamily: FONT_FAMILY,
+            letterSpacing: "-0.03em",
+            margin: 0,
+            lineHeight: 1.1,
+            marginBottom: "20px",
+          }}
+        >
+          Live Chat
+        </h3>
+        <p style={{ fontSize: "15px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "10px" }}>
+          Please login to use Live Chat
+        </p>
+        <Link href="/" style={{ textDecoration: "none" }}>
+          <button
+            style={{
+              padding: "8px 20px",
+              backgroundColor: BLUE,
+              color: WHITE,
+              border: "none",
+              borderRadius: "6px",
+              fontSize: "14px",
+              fontWeight: 600,
+              cursor: "pointer",
+              fontFamily: FONT_FAMILY,
+            }}
+          >
+            Login
+          </button>
+        </Link>
+      </div>
+    );
+  }
+
+  if (isBanned) {
+    return (
+      <div style={{ marginTop: "80px", paddingTop: "30px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "20px" }}>
+          <h3 style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1 }}>
+            Live Chat
+          </h3>
+          <button
+            onClick={handleLogout}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              padding: "0",
+              backgroundColor: "transparent",
+              color: BLUE,
+              border: "none",
+              fontSize: "20px",
+              fontWeight: 700,
+              cursor: "pointer",
+              fontFamily: FONT_FAMILY,
+            }}
+          >
+            <span>Logout</span>
+            <ArrowRight size={20} color={BLUE} />
+          </button>
+        </div>
+        <div
+          style={{
+            color: BLUE,
+            fontSize: "50px",
+            fontWeight: 700,
+            fontFamily: FONT_FAMILY,
+            lineHeight: 1.2,
+            marginBottom: "12px",
+            letterSpacing: "-0.02em",
+          }}
+        >
+          YOUR ACCOUNT HAS BEEN PERMANENTLY BANNED
+        </div>
+        <div style={{ color: BLUE, fontSize: "22px", fontWeight: 400, fontFamily: FONT_FAMILY, marginBottom: "6px" }}>
+          REASON: {banReason || "SUSPICIOUS ACTIVITY"}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={{ marginTop: "80px", paddingTop: "30px" }}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-          marginBottom: "20px",
-          flexWrap: "wrap",
-          gap: "16px",
-        }}
-      >
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "20px", flexWrap: "wrap", gap: "16px" }}>
         <h3
           ref={liveChatTitleRef}
           style={{
@@ -2189,15 +2266,7 @@ const LiveChat = ({
         >
           Live Chat
         </h3>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "flex-end",
-            gap: "10px",
-            paddingTop: "10px",
-          }}
-        >
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "10px", paddingTop: "10px" }}>
           <button
             onClick={handleLogout}
             style={{
@@ -2276,15 +2345,7 @@ const LiveChat = ({
           </div>
           <div style={{ overflowY: "auto", flex: 1, minHeight: 0 }}>
             {onlineUsers.length === 0 ? (
-              <div
-                style={{
-                  padding: "30px 16px",
-                  textAlign: "center",
-                  color: "#999",
-                  fontSize: "13px",
-                  fontFamily: FONT_FAMILY,
-                }}
-              >
+              <div style={{ padding: "30px 16px", textAlign: "center", color: "#999", fontSize: "13px", fontFamily: FONT_FAMILY }}>
                 No users online
               </div>
             ) : (
@@ -2326,30 +2387,13 @@ const LiveChat = ({
                       fontSize: "14px",
                       overflow: "hidden",
                       flexShrink: 0,
-                      position: "relative",
                     }}
                   >
                     {u.userPhoto ? (
-                      <img
-                        src={u.userPhoto}
-                        alt={u.userName}
-                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                      />
+                      <img src={u.userPhoto} alt={u.userName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                     ) : (
                       u.userName.charAt(0).toUpperCase()
                     )}
-                    <span
-                      style={{
-                        position: "absolute",
-                        bottom: -2,
-                        right: -2,
-                        width: "10px",
-                        height: "10px",
-                        borderRadius: "50%",
-                        backgroundColor: "#4CAF50",
-                        border: `2px solid ${WHITE}`,
-                      }}
-                    />
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div
@@ -2402,7 +2446,6 @@ const LiveChat = ({
             position: "relative",
           }}
         >
-          {/* Header */}
           <div
             style={{
               padding: "14px 16px",
@@ -2433,7 +2476,7 @@ const LiveChat = ({
             </span>
           </div>
 
-          {/* Search chat — bg putih, teks biru */}
+          {/* ✅ Search chat — bg putih, teks biru */}
           <div
             style={{
               padding: "10px 14px",
@@ -2492,7 +2535,6 @@ const LiveChat = ({
             </div>
           </div>
 
-          {/* Chat List */}
           <div style={{ overflowY: "auto", flex: 1, minHeight: 0 }}>
             {filteredGroups.length > 0 && (
               <>
@@ -2508,9 +2550,7 @@ const LiveChat = ({
                 >
                   Groups
                 </div>
-                <AnimatePresence>
-                  {filteredGroups.map((group) => renderChatListItem(group, "group"))}
-                </AnimatePresence>
+                {filteredGroups.map((group) => renderChatListItem(group, "group"))}
               </>
             )}
 
@@ -2528,27 +2568,17 @@ const LiveChat = ({
                 >
                   Contacts
                 </div>
-                <AnimatePresence>
-                  {filteredContacts.map((contact) => renderChatListItem(contact, "contact"))}
-                </AnimatePresence>
+                {filteredContacts.map((contact) => renderChatListItem(contact, "contact"))}
               </>
             )}
 
             {filteredContacts.length === 0 && filteredGroups.length === 0 && (
-              <div
-                style={{
-                  padding: "30px 16px",
-                  textAlign: "center",
-                  color: WHITE,
-                  fontSize: "13px",
-                }}
-              >
+              <div style={{ padding: "30px 16px", textAlign: "center", color: WHITE, fontSize: "13px" }}>
                 {searchQuery ? "No results found" : "No contacts yet. Add a user to start chatting."}
               </div>
             )}
           </div>
 
-          {/* Add User + Add Group Buttons + Inline Forms */}
           <div
             style={{
               padding: "12px 16px",
@@ -2583,18 +2613,10 @@ const LiveChat = ({
                   textTransform: "uppercase",
                 }}
                 onMouseEnter={(e) => {
-                  gsap.to(e.currentTarget, {
-                    scale: 1.03,
-                    boxShadow: "0 0 20px rgba(255,255,255,0.3)",
-                    duration: 0.3,
-                  });
+                  gsap.to(e.currentTarget, { scale: 1.03, boxShadow: "0 0 20px rgba(255,255,255,0.3)", duration: 0.3 });
                 }}
                 onMouseLeave={(e) => {
-                  gsap.to(e.currentTarget, {
-                    scale: 1,
-                    boxShadow: "0 0 0px rgba(255,255,255,0)",
-                    duration: 0.3,
-                  });
+                  gsap.to(e.currentTarget, { scale: 1, boxShadow: "0 0 0px rgba(255,255,255,0)", duration: 0.3 });
                 }}
               >
                 <PlusIcon size={14} color={BLUE} />
@@ -2626,18 +2648,10 @@ const LiveChat = ({
                   textTransform: "uppercase",
                 }}
                 onMouseEnter={(e) => {
-                  gsap.to(e.currentTarget, {
-                    scale: 1.03,
-                    boxShadow: "0 0 20px rgba(255,255,255,0.3)",
-                    duration: 0.3,
-                  });
+                  gsap.to(e.currentTarget, { scale: 1.03, boxShadow: "0 0 20px rgba(255,255,255,0.3)", duration: 0.3 });
                 }}
                 onMouseLeave={(e) => {
-                  gsap.to(e.currentTarget, {
-                    scale: 1,
-                    boxShadow: "0 0 0px rgba(255,255,255,0)",
-                    duration: 0.3,
-                  });
+                  gsap.to(e.currentTarget, { scale: 1, boxShadow: "0 0 0px rgba(255,255,255,0)", duration: 0.3 });
                 }}
               >
                 <PlusIcon size={14} color={BLUE} />
@@ -2645,7 +2659,7 @@ const LiveChat = ({
               </button>
             </div>
 
-            {/* INLINE ADD USER FORM */}
+            {/* ADD USER FORM */}
             {showAddUserForm && (
               <div
                 ref={addUserFormRef}
@@ -2701,33 +2715,15 @@ const LiveChat = ({
                     }}
                   />
                 </div>
-                <div
-                  style={{
-                    maxHeight: "200px",
-                    overflowY: "auto",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "4px",
-                  }}
-                >
+                <div style={{ maxHeight: "200px", overflowY: "auto", display: "flex", flexDirection: "column", gap: "4px" }}>
                   {filteredAllUsers.length === 0 ? (
-                    <div
-                      style={{
-                        padding: "14px",
-                        textAlign: "center",
-                        color: BLUE,
-                        fontSize: "12px",
-                      }}
-                    >
-                      No users found
-                    </div>
+                    <div style={{ padding: "14px", textAlign: "center", color: BLUE, fontSize: "12px" }}>No users found</div>
                   ) : (
                     filteredAllUsers.map((u) => {
                       const alreadyAdded = contacts.some((c) => c.userId === u.userId);
                       return (
                         <div
                           key={u.id}
-                          ref={(el) => { userPickerItemRefs.current[u.id] = el; }}
                           onClick={() => {
                             if (addingUserId) return;
                             handleAddUserToContacts(u);
@@ -2741,11 +2737,9 @@ const LiveChat = ({
                             cursor: addingUserId ? "wait" : "pointer",
                             backgroundColor: WHITE,
                             border: `1px solid ${BLUE}`,
-                            transition: "background-color 0.2s",
                           }}
                           onMouseEnter={(e) => {
-                            (e.currentTarget as HTMLDivElement).style.backgroundColor =
-                              "rgba(13,60,252,0.08)";
+                            (e.currentTarget as HTMLDivElement).style.backgroundColor = "rgba(13,60,252,0.08)";
                           }}
                           onMouseLeave={(e) => {
                             (e.currentTarget as HTMLDivElement).style.backgroundColor = WHITE;
@@ -2765,31 +2759,12 @@ const LiveChat = ({
                               fontSize: "12px",
                               flexShrink: 0,
                               overflow: "hidden",
-                              position: "relative",
                             }}
                           >
                             {u.userPhoto ? (
-                              <img
-                                src={u.userPhoto}
-                                alt={u.userName}
-                                style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                              />
+                              <img src={u.userPhoto} alt={u.userName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                             ) : (
                               u.userName.charAt(0).toUpperCase()
-                            )}
-                            {u.online && (
-                              <span
-                                style={{
-                                  position: "absolute",
-                                  bottom: -1,
-                                  right: -1,
-                                  width: "8px",
-                                  height: "8px",
-                                  borderRadius: "50%",
-                                  backgroundColor: "#4CAF50",
-                                  border: `1.5px solid ${WHITE}`,
-                                }}
-                              />
                             )}
                           </div>
                           <div style={{ flex: 1, minWidth: 0 }}>
@@ -2835,17 +2810,6 @@ const LiveChat = ({
                               Added
                             </span>
                           )}
-                          {addingUserId === u.id && (
-                            <span
-                              style={{
-                                fontSize: "10px",
-                                color: BLUE,
-                                flexShrink: 0,
-                              }}
-                            >
-                              ...
-                            </span>
-                          )}
                         </div>
                       );
                     })
@@ -2854,7 +2818,7 @@ const LiveChat = ({
               </div>
             )}
 
-            {/* INLINE ADD GROUP FORM */}
+            {/* ADD GROUP FORM */}
             {showAddGroupForm && (
               <div
                 ref={addGroupFormRef}
@@ -2921,16 +2885,7 @@ const LiveChat = ({
                 >
                   Select Members ({selectedMembers.length})
                 </div>
-                <div
-                  style={{
-                    maxHeight: "120px",
-                    overflowY: "auto",
-                    marginBottom: "10px",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "4px",
-                  }}
-                >
+                <div style={{ maxHeight: "120px", overflowY: "auto", marginBottom: "10px", display: "flex", flexDirection: "column", gap: "4px" }}>
                   {allUsers.map((c) => (
                     <label
                       key={c.id}
@@ -2943,9 +2898,7 @@ const LiveChat = ({
                         cursor: "pointer",
                         fontSize: "12px",
                         color: BLUE,
-                        backgroundColor: selectedMembers.includes(c.userId)
-                          ? "rgba(13,60,252,0.1)"
-                          : WHITE,
+                        backgroundColor: selectedMembers.includes(c.userId) ? "rgba(13,60,252,0.1)" : WHITE,
                         border: `1px solid ${BLUE}`,
                         fontWeight: 600,
                       }}
@@ -2961,16 +2914,7 @@ const LiveChat = ({
                   ))}
                 </div>
                 {groupError && (
-                  <div
-                    style={{
-                      fontSize: "12px",
-                      color: "#d32f2f",
-                      marginBottom: "8px",
-                      fontWeight: 600,
-                    }}
-                  >
-                    {groupError}
-                  </div>
+                  <div style={{ fontSize: "12px", color: "#d32f2f", marginBottom: "8px", fontWeight: 600 }}>{groupError}</div>
                 )}
                 <div style={{ display: "flex", gap: "8px" }}>
                   <button
@@ -3078,33 +3022,27 @@ const LiveChat = ({
                       </span>
                     )}
                   </div>
-                  <div
-                    style={{
-                      fontSize: "11px",
-                      color: "rgba(255,255,255,0.75)",
-                      fontWeight: 600,
-                    }}
-                  >
+                  <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.75)", fontWeight: 600 }}>
                     {selectedContact
                       ? selectedContact.userEmail
                       : `${selectedGroup?.members.length} members · ${selectedGroup?.description}`}
                   </div>
                 </div>
 
-                {/* Search dalam chat — bg biru, teks putih */}
+                {/* ✅ SEARCH DI DALAM CHAT — bg putih, teks biru */}
                 <div
                   style={{
                     display: "flex",
                     alignItems: "center",
                     gap: "8px",
                     padding: "8px 12px",
-                    backgroundColor: BLUE,
+                    backgroundColor: WHITE,
                     border: `1.5px solid ${WHITE}`,
                     borderRadius: "8px",
                     minWidth: "220px",
                   }}
                 >
-                  <SearchIcon size={14} color={WHITE} />
+                  <SearchIcon size={14} color={BLUE} />
                   <input
                     type="text"
                     value={messageSearchQuery}
@@ -3115,11 +3053,11 @@ const LiveChat = ({
                       background: "transparent",
                       border: "none",
                       outline: "none",
-                      color: WHITE,
+                      color: BLUE,
                       fontSize: "12px",
                       fontFamily: FONT_FAMILY,
                       padding: 0,
-                      caretColor: WHITE,
+                      caretColor: BLUE,
                       fontWeight: 600,
                     }}
                   />
@@ -3129,7 +3067,7 @@ const LiveChat = ({
                       style={{
                         background: "transparent",
                         border: "none",
-                        color: WHITE,
+                        color: BLUE,
                         cursor: "pointer",
                         fontSize: "14px",
                         padding: 0,
@@ -3142,7 +3080,53 @@ const LiveChat = ({
                     </button>
                   )}
                 </div>
+
+                {/* Close room button */}
+                {(selectedContact || selectedGroup) && (
+                  <CloseRoomButton
+                    onConfirm={() => {
+                      setShowCloseConfirm(true);
+                      setTimeout(() => setShowCloseConfirm(false), 2200);
+                    }}
+                  />
+                )}
               </div>
+
+              {/* Inline toast konfirmasi */}
+              {showCloseConfirm && (
+                <div
+                  style={{
+                    padding: "10px 20px",
+                    backgroundColor: WHITE,
+                    borderBottom: `1.5px solid ${BLUE}`,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    fontFamily: FONT_FAMILY,
+                    flexShrink: 0,
+                  }}
+                >
+                  <span
+                    style={{
+                      display: "inline-block",
+                      padding: "3px 9px",
+                      border: `1.5px solid ${BLUE}`,
+                      backgroundColor: WHITE,
+                      color: BLUE,
+                      fontSize: "10px",
+                      fontWeight: 800,
+                      letterSpacing: "0.5px",
+                      borderRadius: "4px",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    Info
+                  </span>
+                  <span style={{ fontSize: "13px", color: BLUE, fontWeight: 600 }}>
+                    Room chat siap ditutup. Fitur close room tidak menghapus history.
+                  </span>
+                </div>
+              )}
 
               {/* Messages */}
               <div
@@ -3172,70 +3156,52 @@ const LiveChat = ({
                     {messageSearchQuery ? "No messages found" : "No messages yet"}
                   </div>
                 ) : (
-                  <AnimatePresence initial={false}>
-                    {filteredMessages.map((msg, idx) => {
-                      const isMine = msg.senderId === user.uid;
-                      return (
-                        <motion.div
-                          key={msg.id || idx}
-                          data-msg-id={msg.id || idx}
-                          initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                          animate={{ opacity: 1, y: 0, scale: 1 }}
-                          transition={{ duration: 0.3, ease: "easeOut" }}
+                  filteredMessages.map((msg, idx) => {
+                    const isMine = msg.senderId === user.uid;
+                    return (
+                      <div
+                        key={msg.id || idx}
+                        style={{
+                          alignSelf: isMine ? "flex-end" : "flex-start",
+                          maxWidth: "70%",
+                        }}
+                      >
+                        <div
                           style={{
-                            alignSelf: isMine ? "flex-end" : "flex-start",
-                            maxWidth: "70%",
+                            padding: "12px 16px",
+                            borderRadius: "12px",
+                            backgroundColor: isMine ? BLUE : "#f4f4f5",
+                            color: isMine ? WHITE : BLACK,
+                            fontSize: "15px",
+                            fontFamily: FONT_FAMILY,
+                            wordBreak: "break-word",
+                            border: isMine ? "none" : "1px solid rgba(0,0,0,0.05)",
                           }}
                         >
+                          {!isMine && (
+                            <div style={{ fontSize: "12px", fontWeight: 700, color: BLUE, marginBottom: "5px" }}>
+                              {msg.senderName}
+                            </div>
+                          )}
+                          <div>{msg.text}</div>
                           <div
                             style={{
-                              padding: "12px 16px",
-                              borderRadius: "12px",
-                              backgroundColor: isMine ? BLUE : "#f4f4f5",
-                              color: isMine ? WHITE : BLACK,
-                              fontSize: "15px",
-                              fontFamily: FONT_FAMILY,
-                              wordBreak: "break-word",
-                              border: isMine ? "none" : "1px solid rgba(0,0,0,0.05)",
+                              display: "flex",
+                              justifyContent: "flex-end",
+                              alignItems: "center",
+                              gap: "6px",
+                              marginTop: "5px",
                             }}
                           >
-                            {!isMine && (
-                              <div
-                                style={{
-                                  fontSize: "12px",
-                                  fontWeight: 700,
-                                  color: BLUE,
-                                  marginBottom: "5px",
-                                }}
-                              >
-                                {msg.senderName}
-                              </div>
-                            )}
-                            <div>{msg.text}</div>
-                            <div
-                              style={{
-                                display: "flex",
-                                justifyContent: "flex-end",
-                                alignItems: "center",
-                                gap: "6px",
-                                marginTop: "5px",
-                              }}
-                            >
-                              {renderDeliveryStatus(msg, isMine)}
-                              <span
-                                style={{
-                                  fontSize: "10px",
-                                  color: isMine ? WHITE : "#999",
-                                }}
-                              >
-                                {formatTime(msg.timestamp)}
-                              </span>
-                            </div>
+                            {renderDeliveryStatus(msg, isMine)}
+                            <span style={{ fontSize: "10px", color: isMine ? WHITE : "#999" }}>
+                              {formatTime(msg.timestamp)}
+                            </span>
                           </div>
-                        </motion.div>
-                      );
-                    })}
-                  </AnimatePresence>
+                        </div>
+                      </div>
+                    );
+                  })
                 )}
                 <div ref={messagesEndRef} />
               </div>
@@ -3254,7 +3220,7 @@ const LiveChat = ({
                 <input
                   type="text"
                   value={messageText}
-                  onChange={handleTyping}
+                  onChange={(e) => setMessageText(e.target.value)}
                   onKeyPress={(e) => {
                     if (e.key === "Enter" && !e.shiftKey && messageText.trim()) {
                       e.preventDefault();
@@ -3317,11 +3283,11 @@ const LiveChat = ({
 
 // ===== MAIN PAGE =====
 export default function LiveChatPage(): React.JSX.Element {
+  const [showMain, setShowMain] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isMounted, setIsMounted] = useState(false);
-  const [showMain, setShowMain] = useState(false);
   const [navbarShifted, setNavbarShifted] = useState(false);
 
   const preloaderRef = useRef<HTMLDivElement>(null);
@@ -3373,12 +3339,7 @@ export default function LiveChatPage(): React.JSX.Element {
       },
     });
     gsap.set(textRef.current, { y: 100, opacity: 0 });
-    tl.to(textRef.current, {
-      y: 0,
-      opacity: 1,
-      duration: 0.8,
-      ease: "back.out(1.7)",
-    })
+    tl.to(textRef.current, { y: 0, opacity: 1, duration: 0.8, ease: "back.out(1.7)" })
       .to(textRef.current, { duration: 0.6 })
       .to(textRef.current, {
         opacity: 0,
@@ -3390,25 +3351,10 @@ export default function LiveChatPage(): React.JSX.Element {
           if (textRef.current) textRef.current.textContent = "Note";
         },
       })
-      .to(textRef.current, {
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        duration: 0.6,
-        ease: "back.out(1.7)",
-      })
+      .to(textRef.current, { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: "back.out(1.7)" })
       .to(textRef.current, { duration: 0.8 })
-      .to(textRef.current, {
-        scale: 0.3,
-        opacity: 0,
-        duration: 0.7,
-        ease: "power2.in",
-      })
-      .to(
-        preloaderRef.current,
-        { scale: 0.95, opacity: 0.8, duration: 0.3, ease: "power2.inOut" },
-        "-=0.3"
-      );
+      .to(textRef.current, { scale: 0.3, opacity: 0, duration: 0.7, ease: "power2.in" })
+      .to(preloaderRef.current, { scale: 0.95, opacity: 0.8, duration: 0.3, ease: "power2.inOut" }, "-=0.3");
   };
 
   if (!isMounted || loading) {
@@ -3428,23 +3374,8 @@ export default function LiveChatPage(): React.JSX.Element {
           fontFamily: FONT_FAMILY,
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "40px",
-            overflow: "hidden",
-          }}
-        >
-          <span
-            style={{
-              fontSize: "100px",
-              fontWeight: 700,
-              color: BLUE,
-              fontFamily: FONT_FAMILY,
-              letterSpacing: "-0.03em",
-            }}
-          >
+        <div style={{ display: "flex", alignItems: "center", gap: "40px", overflow: "hidden" }}>
+          <span style={{ fontSize: "100px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em" }}>
             Menuru
           </span>
           <span
@@ -3484,23 +3415,8 @@ export default function LiveChatPage(): React.JSX.Element {
           fontFamily: FONT_FAMILY,
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "40px",
-            overflow: "hidden",
-          }}
-        >
-          <span
-            style={{
-              fontSize: "100px",
-              fontWeight: 700,
-              color: BLUE,
-              fontFamily: FONT_FAMILY,
-              letterSpacing: "-0.03em",
-            }}
-          >
+        <div style={{ display: "flex", alignItems: "center", gap: "40px", overflow: "hidden" }}>
+          <span style={{ fontSize: "100px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em" }}>
             Menuru
           </span>
           <span
@@ -3527,16 +3443,10 @@ export default function LiveChatPage(): React.JSX.Element {
       <Head>
         <title>Live Chat | Menuru Official</title>
         <meta name="description" content="Live Chat Menuru" />
-        <meta
-          name="viewport"
-          content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
-        />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
         <meta name="theme-color" content={BLUE} />
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta
-          name="apple-mobile-web-app-status-bar-style"
-          content="black-translucent"
-        />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Menuru" />
         <meta name="mobile-web-app-capable" content="yes" />
         <link rel="icon" href="/images/ai.jpg" type="image/jpeg" />
@@ -3564,22 +3474,12 @@ export default function LiveChatPage(): React.JSX.Element {
           overflow: "visible",
         }}
       >
-        {/* HERO */}
         <HeroMenuruTitle onNavbarShiftChange={setNavbarShifted} />
 
-        {/* KONTEN — LIVE CHAT */}
-        <div
-          style={{
-            padding: "0 40px",
-            maxWidth: "1600px",
-            margin: "0 auto",
-            width: "100%",
-          }}
-        >
+        <div style={{ padding: "0 40px", maxWidth: "1600px", margin: "0 auto", width: "100%" }}>
           <LiveChat user={user} isAdmin={isAdmin} db={db} auth={auth} />
         </div>
 
-        {/* FOOTER */}
         <div
           style={{
             width: "100%",
@@ -3591,49 +3491,11 @@ export default function LiveChatPage(): React.JSX.Element {
             overflow: "hidden",
           }}
         >
-          <div
-            style={{
-              position: "absolute",
-              left: "40px",
-              top: "50%",
-              transform: "translateY(-50%)",
-              width: "200px",
-              height: "auto",
-              opacity: 0.8,
-            }}
-          >
-            <img
-              src="/images/p0l.jpg"
-              alt=""
-              style={{
-                width: "100%",
-                height: "auto",
-                display: "block",
-                objectFit: "cover",
-              }}
-            />
+          <div style={{ position: "absolute", left: "40px", top: "50%", transform: "translateY(-50%)", width: "200px", height: "auto", opacity: 0.8 }}>
+            <img src="/images/p0l.jpg" alt="" style={{ width: "100%", height: "auto", display: "block", objectFit: "cover" }} />
           </div>
-          <div
-            style={{
-              position: "absolute",
-              right: "40px",
-              top: "50%",
-              transform: "translateY(-50%)",
-              width: "200px",
-              height: "auto",
-              opacity: 0.8,
-            }}
-          >
-            <img
-              src="/images/xxz.jpg"
-              alt=""
-              style={{
-                width: "100%",
-                height: "auto",
-                display: "block",
-                objectFit: "cover",
-              }}
-            />
+          <div style={{ position: "absolute", right: "40px", top: "50%", transform: "translateY(-50%)", width: "200px", height: "auto", opacity: 0.8 }}>
+            <img src="/images/xxz.jpg" alt="" style={{ width: "100%", height: "auto", display: "block", objectFit: "cover" }} />
           </div>
 
           <div
@@ -3665,55 +3527,30 @@ export default function LiveChatPage(): React.JSX.Element {
                 >
                   {section.title}
                 </h3>
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "8px",
-                  }}
-                >
+                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                   {section.links.map((link, linkIdx) => {
                     let linkHref = "#";
                     let isAttention = false;
                     let isStories = false;
                     if (link === "Contact") linkHref = "/contact";
                     else if (link === "Live Chat") linkHref = "/live-chat";
-                    else if (link === "Live Chat Agent")
-                      linkHref = "/live-chat-agent";
+                    else if (link === "Live Chat Agent") linkHref = "/live-chat-agent";
                     else if (link === "Help Center") linkHref = "/pusat-bantuan";
-                    else if (link === "About Us") {
-                      linkHref = "/profile";
-                      isAttention = true;
-                    } else if (link === "Privacy Policy") {
-                      linkHref = "/privacy-policy";
-                      isAttention = true;
-                    } else if (link === "Terms & Conditions") {
-                      linkHref = "/terms-of-services";
-                      isAttention = true;
-                    } else if (link === "Terms of Use") {
-                      linkHref = "/terms-of-use";
-                      isAttention = true;
-                    } else if (link === "Stories") {
-                      linkHref = "/stories";
-                      isStories = true;
-                    } else if (link === "Shop") linkHref = "/shop";
+                    else if (link === "About Us") { linkHref = "/profile"; isAttention = true; }
+                    else if (link === "Privacy Policy") { linkHref = "/privacy-policy"; isAttention = true; }
+                    else if (link === "Terms & Conditions") { linkHref = "/terms-of-services"; isAttention = true; }
+                    else if (link === "Terms of Use") { linkHref = "/terms-of-use"; isAttention = true; }
+                    else if (link === "Stories") { linkHref = "/stories"; isStories = true; }
+                    else if (link === "Shop") linkHref = "/shop";
                     else if (link === "Note") linkHref = "/note";
                     else if (link === "Calendar") linkHref = "/calendar";
                     else if (link === "Blog") linkHref = "/blog";
                     else if (link === "Donation") linkHref = "/donation";
                     else if (link === "Community") linkHref = "/community";
-                    else if (link === "Instagram")
-                      linkHref = "https://instagram.com/menuru";
+                    else if (link === "Instagram") linkHref = "https://instagram.com/menuru";
 
                     return (
-                      <div
-                        key={linkIdx}
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "10px",
-                        }}
-                      >
+                      <div key={linkIdx} style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                         <Link href={linkHref} style={{ textDecoration: "none" }}>
                           <span
                             style={{
@@ -3796,8 +3633,7 @@ export default function LiveChatPage(): React.JSX.Element {
                 letterSpacing: "0.01em",
               }}
             >
-              Terms and conditions apply. By using this website, you agree to
-              our Terms of Use and Privacy Policy.
+              Terms and conditions apply. By using this website, you agree to our Terms of Use and Privacy Policy.
             </p>
           </div>
         </div>
@@ -3839,6 +3675,10 @@ export default function LiveChatPage(): React.JSX.Element {
           display: inline-block;
           will-change: transform, opacity;
         }
+        .split-char-livechat {
+          display: inline-block;
+          will-change: transform, opacity, filter;
+        }
         .hero-menuru-char {
           display: inline-block;
           will-change: transform, opacity;
@@ -3850,10 +3690,6 @@ export default function LiveChatPage(): React.JSX.Element {
           will-change: transform, opacity;
           color: #0D3CFC !important;
           transform-origin: 50% 100%;
-        }
-        .split-char-livechat {
-          display: inline-block;
-          will-change: transform, opacity, filter;
         }
         .chat-messages-container::-webkit-scrollbar,
         .chat-list-container::-webkit-scrollbar,
