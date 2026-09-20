@@ -309,57 +309,6 @@ async function checkBanStatus(userId: string): Promise<{
   }
 }
 
-// ===== STATUS STYLES =====
-const STATUS_STYLES: {
-  [key: string]: {
-    label: string;
-    bg: string;
-    text: string;
-    border: string;
-  };
-} = {
-  waiting: {
-    label: "Waiting",
-    bg: WHITE,
-    text: BLUE,
-    border: BLUE,
-  },
-  active: {
-    label: "Active",
-    bg: BLACK,
-    text: WHITE,
-    border: WHITE,
-  },
-  resolved: {
-    label: "Resolved",
-    bg: WHITE,
-    text: BLUE,
-    border: BLUE,
-  },
-  closed: {
-    label: "Closed",
-    bg: BLACK,
-    text: WHITE,
-    border: WHITE,
-  },
-};
-
-// ===== TOPIC STYLES =====
-const TOPIC_STYLES: {
-  [key: string]: {
-    bg: string;
-    text: string;
-    border: string;
-  };
-} = {
-  "Product Inquiry": { bg: WHITE, text: BLUE, border: BLUE },
-  "Technical Support": { bg: BLACK, text: WHITE, border: WHITE },
-  "Account Issues": { bg: WHITE, text: BLUE, border: BLUE },
-  "Donation": { bg: BLACK, text: WHITE, border: WHITE },
-  "Partnership": { bg: WHITE, text: BLUE, border: BLUE },
-  "Other": { bg: BLACK, text: WHITE, border: WHITE },
-};
-
 // ===== SVG ICONS =====
 const ArrowRight = ({ size = 20, color = "currentColor" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
@@ -1151,28 +1100,6 @@ const footerLinks = [
 ];
 
 // ===== INTERFACES =====
-interface Ticket {
-  id: string;
-  userId: string;
-  userName: string;
-  userEmail: string;
-  userPhoto?: string;
-  agentId?: string;
-  agentName?: string;
-  status: "waiting" | "active" | "resolved" | "closed";
-  topic: string;
-  createdAt: any;
-  lastMessage?: string;
-  lastMessageTime?: any;
-  lastMessageSender?: string;
-  unreadCount: number;
-  typing: boolean;
-  typingUserId?: string | null;
-  typingUserName?: string | null;
-  isAnnouncement?: boolean;
-  isBroadcast?: boolean;
-}
-
 interface ChatMessage {
   id: string;
   senderId: string;
@@ -1185,34 +1112,36 @@ interface ChatMessage {
   deliveryStatus?: "sending" | "sent" | "delivered" | "read" | "failed";
 }
 
-interface OnlineUser {
-  uid: string;
-  displayName: string;
-  email: string;
-  photoURL?: string;
-  online: boolean;
-  lastSeen?: any;
-  isAgent?: boolean;
-}
-
-interface LastMessagePreview {
-  text: string;
-  senderName: string;
-  timestamp: any;
-  isFromAgent: boolean;
-}
-
 interface ChatContact {
   id: string;
   userId: string;
   userName: string;
   userEmail: string;
   userPhoto?: string;
-  addedAt: any;
-  addedBy: string;
+  online?: boolean;
+  lastSeen?: any;
 }
 
-// ===== LIVE CHAT COMPONENT (BIASA - BUKAN AGENT) =====
+interface ChatGroup {
+  id: string;
+  groupName: string;
+  description: string;
+  members: string[];
+  createdBy: string;
+  createdAt: any;
+}
+
+interface GroupMessage {
+  id: string;
+  senderId: string;
+  senderName: string;
+  text: string;
+  timestamp: any;
+  read: boolean;
+  isEncrypted?: boolean;
+}
+
+// ===== LIVE CHAT COMPONENT =====
 const LiveChat = ({
   user,
   db,
@@ -1224,65 +1153,42 @@ const LiveChat = ({
   auth: any;
   isAdmin: boolean;
 }) => {
-  const [tickets, setTickets] = useState<Ticket[]>([]);
-  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
+  // Chat states
+  const [selectedContact, setSelectedContact] = useState<ChatContact | null>(null);
+  const [selectedGroup, setSelectedGroup] = useState<ChatGroup | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [messageText, setMessageText] = useState("");
-  const [showStartChat, setShowStartChat] = useState(false);
-  const [selectedTopic, setSelectedTopic] = useState("");
   const [isMounted, setIsMounted] = useState(false);
   const [banMessage, setBanMessage] = useState<string | null>(null);
   const [isBanned, setIsBanned] = useState(false);
   const [banReason, setBanReason] = useState("");
   const [encryptionReady, setEncryptionReady] = useState(false);
   const [checkingBan, setCheckingBan] = useState(true);
-  const [canCreateTicket, setCanCreateTicket] = useState(true);
   const [canSendMessage, setCanSendMessage] = useState(true);
 
-  const [onlineAgents, setOnlineAgents] = useState<OnlineUser[]>([]);
-  const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
-  const [ticketPreviews, setTicketPreviews] = useState<{ [ticketId: string]: LastMessagePreview[] }>({});
-  const [ticketMsgCounts, setTicketMsgCounts] = useState<{ [ticketId: string]: number }>({});
-  const [searchQuery, setSearchQuery] = useState("");
-
-  const [latestRollingMessage, setLatestRollingMessage] = useState<LastMessagePreview | null>(null);
-  const [rollingKey, setRollingKey] = useState(0);
-
-  const [showCloseConfirm, setShowCloseConfirm] = useState(false);
-
-  // ===== ADD USER CONTACTS STATE =====
+  // Contacts & Groups
   const [contacts, setContacts] = useState<ChatContact[]>([]);
-  const [showAddUserModal, setShowAddUserModal] = useState(false);
-  const [newContactName, setNewContactName] = useState("");
-  const [newContactEmail, setNewContactEmail] = useState("");
-  const [addingUser, setAddingUser] = useState(false);
-  const [addUserError, setAddUserError] = useState("");
-  const [addUserSuccess, setAddUserSuccess] = useState(false);
+  const [groups, setGroups] = useState<ChatGroup[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [messagePreviews, setMessagePreviews] = useState<{ [contactId: string]: string }>({});
 
-  // GSAP refs for animations
-  const addButtonRef = useRef<HTMLButtonElement>(null);
-  const addModalRef = useRef<HTMLDivElement>(null);
-  const addModalContentRef = useRef<HTMLDivElement>(null);
-  const contactItemRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
-  const plusIconRef = useRef<SVGSVGElement>(null);
+  // Add Group inline form
+  const [showAddGroupForm, setShowAddGroupForm] = useState(false);
+  const [newGroupName, setNewGroupName] = useState("");
+  const [newGroupDesc, setNewGroupDesc] = useState("");
+  const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
+  const [addingGroup, setAddingGroup] = useState(false);
+  const [groupError, setGroupError] = useState("");
 
+  // Refs
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatMessagesContainerRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const liveChatTitleRef = useRef<HTMLHeadingElement>(null);
-  const prevMessagesLenRef = useRef<number>(0);
-  const prevContactsLenRef = useRef<number>(0);
-
-  const messagesCacheRef = useRef<{ [ticketId: string]: ChatMessage[] }>({});
-
-  const topics = [
-    "Product Inquiry",
-    "Technical Support",
-    "Account Issues",
-    "Donation",
-    "Partnership",
-    "Other",
-  ];
+  const addGroupBtnRef = useRef<HTMLButtonElement>(null);
+  const addGroupFormRef = useRef<HTMLDivElement>(null);
+  const contactItemRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+  const groupItemRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
   useEffect(() => {
     setIsMounted(true);
@@ -1294,6 +1200,7 @@ const LiveChat = ({
       });
   }, []);
 
+  // GSAP title animation
   useEffect(() => {
     if (!isMounted) return;
     if (liveChatTitleRef.current) {
@@ -1311,26 +1218,17 @@ const LiveChat = ({
           duration: 0.8,
           stagger: 0.05,
           ease: "back.out(1.2)",
-          scrollTrigger: {
-            trigger: liveChatTitleRef.current,
-            start: "top 85%",
-            end: "bottom 70%",
-            toggleActions: "play none none reverse",
-          },
         }
       );
     }
-    return () => {
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
-    };
   }, [isMounted]);
 
-  // GSAP: Animate Add User button on mount
+  // GSAP Add Group button animation
   useEffect(() => {
     if (!isMounted) return;
-    if (addButtonRef.current) {
+    if (addGroupBtnRef.current) {
       gsap.fromTo(
-        addButtonRef.current,
+        addGroupBtnRef.current,
         { scale: 0, rotation: -180, opacity: 0 },
         {
           scale: 1,
@@ -1342,77 +1240,60 @@ const LiveChat = ({
         }
       );
     }
-    if (plusIconRef.current) {
-      gsap.to(plusIconRef.current, {
-        rotation: 360,
-        duration: 20,
-        repeat: -1,
-        ease: "none",
-      });
-    }
   }, [isMounted]);
 
-  // GSAP: Animate contacts on change
+  // GSAP Add Group form open/close
   useEffect(() => {
-    if (!isMounted) return;
-    const contactIds = contacts.map((c) => c.id);
-    const newIds = contactIds.filter((id) => !contactItemRefs.current[id]);
-
-    newIds.forEach((id) => {
-      const el = contactItemRefs.current[id];
-      if (el) {
-        gsap.fromTo(
-          el,
-          { x: -80, opacity: 0, scale: 0.8, rotation: -5 },
-          {
-            x: 0,
-            opacity: 1,
-            scale: 1,
-            rotation: 0,
-            duration: 0.6,
-            ease: "back.out(1.4)",
-          }
-        );
-      }
-    });
-  }, [contacts, isMounted]);
-
-  // GSAP: Animate Add User Modal open/close
-  useEffect(() => {
-    if (!addModalRef.current) return;
-    if (showAddUserModal) {
-      gsap.set(addModalRef.current, { display: "flex" });
+    if (!addGroupFormRef.current) return;
+    if (showAddGroupForm) {
+      gsap.set(addGroupFormRef.current, { display: "block" });
       gsap.fromTo(
-        addModalRef.current,
-        { opacity: 0 },
-        { opacity: 1, duration: 0.3, ease: "power2.out" }
+        addGroupFormRef.current,
+        { height: 0, opacity: 0, y: -20 },
+        { height: "auto", opacity: 1, y: 0, duration: 0.5, ease: "back.out(1.4)" }
       );
-      if (addModalContentRef.current) {
-        gsap.fromTo(
-          addModalContentRef.current,
-          { y: -60, scale: 0.9, opacity: 0, rotationX: -15 },
-          {
-            y: 0,
-            scale: 1,
-            opacity: 1,
-            rotationX: 0,
-            duration: 0.6,
-            ease: "back.out(1.5)",
-          }
-        );
-      }
     } else {
-      gsap.to(addModalRef.current, {
+      gsap.to(addGroupFormRef.current, {
+        height: 0,
         opacity: 0,
-        duration: 0.25,
+        y: -20,
+        duration: 0.3,
         ease: "power2.in",
         onComplete: () => {
-          if (addModalRef.current) gsap.set(addModalRef.current, { display: "none" });
+          if (addGroupFormRef.current) gsap.set(addGroupFormRef.current, { display: "none" });
         },
       });
     }
-  }, [showAddUserModal]);
+  }, [showAddGroupForm]);
 
+  // GSAP animate contacts on change
+  useEffect(() => {
+    if (!isMounted) return;
+    contacts.forEach((contact) => {
+      const el = contactItemRefs.current[contact.id];
+      if (el && !el.dataset.animated) {
+        el.dataset.animated = "true";
+        gsap.fromTo(
+          el,
+          { x: -60, opacity: 0, scale: 0.9 },
+          { x: 0, opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.4)" }
+        );
+      }
+    });
+    groups.forEach((group) => {
+      const el = groupItemRefs.current[group.id];
+      if (el && !el.dataset.animated) {
+        el.dataset.animated = "true";
+        gsap.fromTo(
+          el,
+          { x: -60, opacity: 0, scale: 0.9 },
+          { x: 0, opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.4)" }
+        );
+      }
+    });
+  }, [contacts, groups, isMounted]);
+
+  // Check ban status
   useEffect(() => {
     if (!user || !isMounted) {
       setCheckingBan(false);
@@ -1425,13 +1306,10 @@ const LiveChat = ({
         if (status.isBanned) {
           setIsBanned(true);
           setBanReason(status.reason);
-          setCanCreateTicket(status.canCreateTicket);
           setCanSendMessage(status.canSendMessage);
           setBanMessage(`YOUR ACCOUNT HAS BEEN PERMANENTLY BANNED\n\nReason: ${status.reason}`);
         } else {
           setIsBanned(false);
-          setBanReason("");
-          setCanCreateTicket(true);
           setCanSendMessage(true);
           setBanMessage(null);
         }
@@ -1444,255 +1322,63 @@ const LiveChat = ({
     checkBan();
   }, [user, isMounted]);
 
-  const checkBanBeforeAction = async (): Promise<boolean> => {
-    if (!user) return true;
-    try {
-      const status = await checkBanStatus(user.uid);
-      if (status.isBanned) {
-        setIsBanned(true);
-        setBanReason(status.reason);
-        setCanCreateTicket(status.canCreateTicket);
-        setCanSendMessage(status.canSendMessage);
-        setBanMessage(`YOUR ACCOUNT HAS BEEN PERMANENTLY BANNED\n\nReason: ${status.reason}`);
-        return true;
-      }
-      return false;
-    } catch (error) {
-      console.error("Error checking ban before action:", error);
-      return false;
-    }
-  };
-
-  // ===== LOAD CONTACTS =====
+  // ===== LOAD REGISTERED USERS (CONTACTS) FROM FIREBASE =====
   useEffect(() => {
     if (!db || !user || !isMounted) return;
-    const q = query(
-      collection(db, "chat_contacts"),
-      where("addedBy", "==", user.uid),
-      orderBy("addedAt", "desc")
-    );
+    const q = query(collection(db, "users"), orderBy("displayName", "asc"));
     const unsubscribe = onSnapshot(q, (snapshot: any) => {
-      const contactList: ChatContact[] = [];
+      const userList: ChatContact[] = [];
       snapshot.forEach((docSnap: any) => {
-        contactList.push({ id: docSnap.id, ...docSnap.data() } as ChatContact);
+        const data = docSnap.data();
+        if (data.uid !== user.uid) {
+          userList.push({
+            id: docSnap.id,
+            userId: docSnap.id,
+            userName: data.displayName || data.name || data.email || "User",
+            userEmail: data.email || "",
+            userPhoto: data.photoURL || "",
+            online: data.online || false,
+            lastSeen: data.lastSeen,
+          });
+        }
       });
-      setContacts(contactList);
+      setContacts(userList);
     });
     return () => unsubscribe();
   }, [db, user, isMounted]);
 
-  // ===== ADD CONTACT =====
-  const handleAddContact = async () => {
-    if (!db || !user) return;
-    setAddUserError("");
-    if (!newContactName.trim()) {
-      setAddUserError("Name is required");
-      return;
-    }
-    if (!newContactEmail.trim() || !newContactEmail.includes("@")) {
-      setAddUserError("Valid email is required");
-      return;
-    }
-    setAddingUser(true);
-    try {
-      // Check if contact already exists
-      const existing = contacts.find(
-        (c) => c.userEmail.toLowerCase() === newContactEmail.trim().toLowerCase()
-      );
-      if (existing) {
-        setAddUserError("This contact already exists");
-        setAddingUser(false);
-        return;
-      }
-
-      await addDoc(collection(db, "chat_contacts"), {
-        userId: user.uid,
-        userName: newContactName.trim(),
-        userEmail: newContactEmail.trim().toLowerCase(),
-        userPhoto: "",
-        addedAt: serverTimestamp(),
-        addedBy: user.uid,
-      });
-
-      setAddUserSuccess(true);
-      setNewContactName("");
-      setNewContactEmail("");
-      setTimeout(() => {
-        setAddUserSuccess(false);
-        setShowAddUserModal(false);
-      }, 1200);
-    } catch (error) {
-      console.error("Error adding contact:", error);
-      setAddUserError("Failed to add contact. Please try again.");
-    } finally {
-      setAddingUser(false);
-    }
-  };
-
-  // ===== DELETE CONTACT =====
-  const handleDeleteContact = async (contactId: string) => {
-    if (!db) return;
-    const el = contactItemRefs.current[contactId];
-    if (el) {
-      gsap.to(el, {
-        x: 100,
-        opacity: 0,
-        scale: 0.8,
-        duration: 0.4,
-        ease: "power2.in",
-        onComplete: async () => {
-          try {
-            await deleteDoc(doc(db, "chat_contacts", contactId));
-          } catch (error) {
-            console.error("Error deleting contact:", error);
-          }
-        },
-      });
-    } else {
-      try {
-        await deleteDoc(doc(db, "chat_contacts", contactId));
-      } catch (error) {
-        console.error("Error deleting contact:", error);
-      }
-    }
-  };
-
-  // ===== START CHAT WITH CONTACT =====
-  const startChatWithContact = async (contact: ChatContact) => {
-    if (!db || !user || !encryptionReady) return;
-    const isBannedNow = await checkBanBeforeAction();
-    if (isBannedNow) return;
-    if (!canCreateTicket) {
-      setBanMessage("YOU DO NOT HAVE PERMISSION TO CREATE A NEW TICKET");
-      return;
-    }
-    const hasActiveTicket = tickets.some(
-      (t) =>
-        t.userId === user.uid &&
-        (t.status === "waiting" || t.status === "active") &&
-        !t.isAnnouncement &&
-        !t.isBroadcast
-    );
-    if (hasActiveTicket) {
-      alert("You still have an active chat. Please wait until it is finished.");
-      return;
-    }
-    try {
-      const ticketRef = await addDoc(collection(db, "livechat_tickets"), {
-        userId: user.uid,
-        userName: contact.userName,
-        userEmail: contact.userEmail,
-        userPhoto: contact.userPhoto || "",
-        status: "waiting",
-        topic: "Other",
-        createdAt: serverTimestamp(),
-        unreadCount: 0,
-        typing: false,
-        typingUserId: null,
-        typingUserName: null,
-        isAnnouncement: false,
-        isBroadcast: false,
-        contactId: contact.id,
-      });
-      const initialMessage = `Hello ${contact.userName}, I would like to chat with you.`;
-      const encryptedMessage = await encryptMessage(initialMessage);
-      await addDoc(collection(db, "livechat_tickets", ticketRef.id, "messages"), {
-        senderId: user.uid,
-        senderName: user.displayName || user.email || "User",
-        text: encryptedMessage,
-        timestamp: serverTimestamp(),
-        read: false,
-        isEncrypted: true,
-        isBotDetected: false,
-        deliveryStatus: "sent",
-      });
-      await updateDoc(ticketRef, {
-        lastMessage: initialMessage,
-        lastMessageTime: serverTimestamp(),
-        lastMessageSender: user.displayName || user.email || "User",
-      });
-      setShowStartChat(false);
-      setBanMessage(null);
-    } catch (error) {
-      console.error("Error starting chat with contact:", error);
-      alert("An error occurred while starting the chat. Please try again.");
-    }
-  };
-
-  // ===== ONLINE USERS LISTENER =====
-  useEffect(() => {
-    if (!db || !isMounted) return;
-    const q = query(collection(db, "users"), where("online", "==", true));
-    const unsubscribe = onSnapshot(q, (snapshot: any) => {
-      const agents: OnlineUser[] = [];
-      const users: OnlineUser[] = [];
-      snapshot.forEach((docSnap: any) => {
-        const data = docSnap.data();
-        const item: OnlineUser = {
-          uid: docSnap.id,
-          displayName: data.displayName || data.name || data.email || "User",
-          email: data.email || "",
-          photoURL: data.photoURL || "",
-          online: data.online || false,
-          lastSeen: data.lastSeen,
-          isAgent: data.email === ADMIN_EMAIL,
-        };
-        if (item.isAgent) agents.push(item);
-        else users.push(item);
-      });
-      setOnlineAgents(agents);
-      setOnlineUsers(users);
-    });
-    return () => unsubscribe();
-  }, [db, isMounted]);
-
-  // ===== TICKETS LISTENER =====
+  // ===== LOAD GROUPS =====
   useEffect(() => {
     if (!db || !user || !isMounted) return;
-
-    let q;
-    if (isAdmin) {
-      q = query(collection(db, "livechat_tickets"), orderBy("createdAt", "desc"));
-    } else {
-      q = query(
-        collection(db, "livechat_tickets"),
-        where("userId", "==", user.uid),
-        orderBy("createdAt", "desc")
-      );
-    }
-
+    const q = query(
+      collection(db, "chat_groups"),
+      where("members", "array-contains", user.uid),
+      orderBy("createdAt", "desc")
+    );
     const unsubscribe = onSnapshot(q, (snapshot: any) => {
-      const ticketList: Ticket[] = [];
+      const groupList: ChatGroup[] = [];
       snapshot.forEach((docSnap: any) => {
-        const data = docSnap.data();
-        ticketList.push({ id: docSnap.id, ...data } as Ticket);
+        groupList.push({ id: docSnap.id, ...docSnap.data() } as ChatGroup);
       });
-      setTickets(ticketList);
-      setSelectedTicket((prev) => {
-        if (!prev) return prev;
-        const updated = ticketList.find((t) => t.id === prev.id);
-        return updated || prev;
-      });
+      setGroups(groupList);
     });
     return () => unsubscribe();
-  }, [db, user, isAdmin, isMounted]);
+  }, [db, user, isMounted]);
 
-  // ===== TICKET PREVIEWS LISTENER =====
+  // ===== MESSAGE PREVIEWS FOR CONTACTS =====
   useEffect(() => {
-    if (!db || !tickets.length || !isMounted) return;
+    if (!db || !contacts.length || !user || !isMounted) return;
     const unsubscribes: (() => void)[] = [];
-    tickets.forEach((ticket) => {
+    contacts.forEach((contact) => {
+      const chatId = [user.uid, contact.userId].sort().join("_");
       const q = query(
-        collection(db, "livechat_tickets", ticket.id, "messages"),
+        collection(db, "direct_messages", chatId, "messages"),
         orderBy("timestamp", "desc"),
-        limit(3)
+        limit(1)
       );
       const unsub = onSnapshot(q, async (snapshot: any) => {
-        const count = snapshot.size;
-        setTicketMsgCounts((prev) => ({ ...prev, [ticket.id]: count }));
-        const previews: LastMessagePreview[] = [];
-        for (const docSnap of snapshot.docs) {
-          const data = docSnap.data();
+        if (!snapshot.empty) {
+          const data = snapshot.docs[0].data();
           let text = data.text || "";
           if (data.isEncrypted) {
             try {
@@ -1701,37 +1387,24 @@ const LiveChat = ({
               text = "[Encrypted]";
             }
           }
-          previews.push({
-            text,
-            senderName: data.senderName || "User",
-            timestamp: data.timestamp,
-            isFromAgent: data.senderName === AGENT_NAME,
-          });
+          setMessagePreviews((prev) => ({ ...prev, [contact.id]: text }));
         }
-        setTicketPreviews((prev) => ({ ...prev, [ticket.id]: previews }));
       });
       unsubscribes.push(unsub);
     });
-    return () => {
-      unsubscribes.forEach((unsub) => unsub());
-    };
-  }, [db, tickets, isMounted]);
+    return () => unsubscribes.forEach((unsub) => unsub());
+  }, [db, contacts, user, isMounted]);
 
-  // ===== MESSAGES LISTENER =====
+  // ===== MESSAGES LISTENER (DIRECT CHAT) =====
   useEffect(() => {
-    if (!db || !selectedTicket || !isMounted) return;
+    if (!db || !selectedContact || !user || !isMounted) return;
 
-    const ticketId = selectedTicket.id;
-
-    if (messagesCacheRef.current[ticketId]) {
-      setMessages(messagesCacheRef.current[ticketId]);
-      prevMessagesLenRef.current = messagesCacheRef.current[ticketId].length;
-    }
-
+    const chatId = [user.uid, selectedContact.userId].sort().join("_");
     const q = query(
-      collection(db, "livechat_tickets", ticketId, "messages"),
+      collection(db, "direct_messages", chatId, "messages"),
       orderBy("timestamp", "asc")
     );
+
     const unsubscribe = onSnapshot(q, async (snapshot: any) => {
       const msgList: ChatMessage[] = [];
       for (const docSnap of snapshot.docs) {
@@ -1740,46 +1413,13 @@ const LiveChat = ({
         if (data.isEncrypted) {
           try {
             text = await decryptMessage(text);
-          } catch (e) {
-            console.error("Failed to decrypt message:", e);
+          } catch {
             text = "[Encrypted message]";
           }
         }
         msgList.push({ id: docSnap.id, ...data, text } as ChatMessage);
       }
-
-      const newLen = msgList.length;
-      if (prevMessagesLenRef.current > 0 && newLen > prevMessagesLenRef.current) {
-        const newestMsg = msgList[newLen - 1];
-        if (newestMsg) {
-          const isFromAgentMsg = newestMsg.senderName === AGENT_NAME;
-          setLatestRollingMessage({
-            text: newestMsg.text,
-            senderName: newestMsg.senderName || "User",
-            timestamp: newestMsg.timestamp,
-            isFromAgent: isFromAgentMsg,
-          });
-          setRollingKey((k) => k + 1);
-
-          // GSAP: Animate new message
-          setTimeout(() => {
-            const msgElements = chatMessagesContainerRef.current?.querySelectorAll("[data-msg-id]");
-            if (msgElements && msgElements.length > 0) {
-              const lastEl = msgElements[msgElements.length - 1];
-              gsap.fromTo(
-                lastEl,
-                { y: 30, opacity: 0, scale: 0.95 },
-                { y: 0, opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.5)" }
-              );
-            }
-          }, 50);
-        }
-      }
-      prevMessagesLenRef.current = newLen;
-
-      messagesCacheRef.current[ticketId] = msgList;
       setMessages(msgList);
-
       requestAnimationFrame(() => {
         if (chatMessagesContainerRef.current) {
           chatMessagesContainerRef.current.scrollTop = chatMessagesContainerRef.current.scrollHeight;
@@ -1787,209 +1427,125 @@ const LiveChat = ({
       });
     });
     return () => unsubscribe();
-  }, [db, selectedTicket, isMounted]);
+  }, [db, selectedContact, user, isMounted]);
 
+  // ===== MESSAGES LISTENER (GROUP CHAT) =====
   useEffect(() => {
-    setLatestRollingMessage(null);
-    prevMessagesLenRef.current = messagesCacheRef.current[selectedTicket?.id || ""]?.length || 0;
-    setShowCloseConfirm(false);
-  }, [selectedTicket?.id]);
+    if (!db || !selectedGroup || !user || !isMounted) return;
 
-  // ===== MARK MESSAGES AS READ =====
+    const q = query(
+      collection(db, "chat_groups", selectedGroup.id, "messages"),
+      orderBy("timestamp", "asc")
+    );
+
+    const unsubscribe = onSnapshot(q, async (snapshot: any) => {
+      const msgList: ChatMessage[] = [];
+      for (const docSnap of snapshot.docs) {
+        const data = docSnap.data();
+        let text = data.text || "";
+        if (data.isEncrypted) {
+          try {
+            text = await decryptMessage(text);
+          } catch {
+            text = "[Encrypted message]";
+          }
+        }
+        msgList.push({ id: docSnap.id, ...data, text } as ChatMessage);
+      }
+      setMessages(msgList);
+      requestAnimationFrame(() => {
+        if (chatMessagesContainerRef.current) {
+          chatMessagesContainerRef.current.scrollTop = chatMessagesContainerRef.current.scrollHeight;
+        }
+      });
+    });
+    return () => unsubscribe();
+  }, [db, selectedGroup, user, isMounted]);
+
+  // Mark messages as read
   useEffect(() => {
-    if (!db || !selectedTicket || !user || !isMounted) return;
+    if (!db || !user || !isMounted) return;
+    const chatRef = selectedContact
+      ? collection(db, "direct_messages", [user.uid, selectedContact.userId].sort().join("_"), "messages")
+      : selectedGroup
+      ? collection(db, "chat_groups", selectedGroup.id, "messages")
+      : null;
+    if (!chatRef) return;
     const unread = messages.filter((m) => m.senderId !== user.uid && !m.read);
     unread.forEach(async (msg) => {
-      const msgRef = doc(db, "livechat_tickets", selectedTicket.id, "messages", msg.id);
-      await updateDoc(msgRef, { read: true, deliveryStatus: "read" });
+      try {
+        await updateDoc(doc(chatRef, msg.id), { read: true, deliveryStatus: "read" });
+      } catch (e) {}
     });
-  }, [messages, selectedTicket, db, user, isMounted]);
+  }, [messages, selectedContact, selectedGroup, db, user, isMounted]);
 
-  const hasAutoSelectedRef = useRef(false);
-  useEffect(() => {
-    if (!user || isAdmin || !isMounted) return;
-    if (hasAutoSelectedRef.current) return;
-    if (selectedTicket) {
-      hasAutoSelectedRef.current = true;
+  // ===== ADD GROUP (INLINE, NO MODAL) =====
+  const handleAddGroup = async () => {
+    if (!db || !user) return;
+    setGroupError("");
+    if (!newGroupName.trim()) {
+      setGroupError("Group name is required");
       return;
     }
-    const userTickets = tickets.filter((t) => t.userId === user.uid);
-    if (userTickets.length === 0) return;
-    const activeTicket = userTickets.find((t) => t.status === "waiting" || t.status === "active");
-    if (activeTicket) {
-      setSelectedTicket(activeTicket);
-      hasAutoSelectedRef.current = true;
-    } else if (userTickets.length > 0) {
-      setSelectedTicket(userTickets[0]);
-      hasAutoSelectedRef.current = true;
+    if (!newGroupDesc.trim()) {
+      setGroupError("Description is required");
+      return;
     }
-  }, [tickets, user, isAdmin, selectedTicket, isMounted]);
-
-  const generateTicketId = useCallback((createdAt: any): string => {
-    if (!createdAt) return "#TICKET-0000";
-    const date = createdAt.toDate ? createdAt.toDate() : new Date(createdAt);
-    const year = date.getFullYear().toString().slice(-2);
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    const hours = String(date.getHours()).padStart(2, "0");
-    const minutes = String(date.getMinutes()).padStart(2, "0");
-    return `#TICKET-${year}${month}${day}${hours}${minutes}`;
-  }, []);
-
-  const formatTime = useCallback((timestamp: any) => {
-    if (!timestamp) return "";
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    return date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
-  }, []);
-
-  const getTypingText = (ticket: Ticket | null) => {
-    if (!ticket || !ticket.typing) return null;
-    const name = ticket.typingUserName || "Someone";
-    return `${name} is typing...`;
-  };
-
-  const handleLogout = async () => {
-    if (!auth) return;
+    if (selectedMembers.length === 0) {
+      setGroupError("Select at least one member");
+      return;
+    }
+    setAddingGroup(true);
     try {
-      await updateDoc(doc(db, "users", user.uid), {
-        online: false,
-        lastSeen: serverTimestamp(),
-        typing: false,
-      });
-      await signOut(auth);
-    } catch (error) {
-      console.error("Logout error:", error);
-    }
-  };
-
-  const filterTicketsBySearch = useCallback(
-    (list: Ticket[]) => {
-      const q = searchQuery.trim().toLowerCase();
-      if (!q) return list;
-      return list.filter((ticket) => {
-        if (ticket.userName?.toLowerCase().includes(q)) return true;
-        if (ticket.userEmail?.toLowerCase().includes(q)) return true;
-        if (ticket.topic?.toLowerCase().includes(q)) return true;
-        if (generateTicketId(ticket.createdAt).toLowerCase().includes(q)) return true;
-        const previews = ticketPreviews[ticket.id] || [];
-        for (const p of previews) {
-          if (p.text.toLowerCase().includes(q)) return true;
-        }
-        return false;
-      });
-    },
-    [searchQuery, ticketPreviews, generateTicketId]
-  );
-
-  const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setMessageText(value);
-    if (!selectedTicket || !user || !db || isBanned) return;
-    const ticketRef = doc(db, "livechat_tickets", selectedTicket.id);
-    if (value.length > 0) {
-      await updateDoc(ticketRef, {
-        typing: true,
-        typingUserId: user.uid,
-        typingUserName: user.displayName || user.email || "User",
-      });
-    } else {
-      await updateDoc(ticketRef, {
-        typing: false,
-        typingUserId: null,
-        typingUserName: null,
-      });
-    }
-    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-    typingTimeoutRef.current = setTimeout(async () => {
-      await updateDoc(ticketRef, {
-        typing: false,
-        typingUserId: null,
-        typingUserName: null,
-      });
-    }, 2000);
-  };
-
-  const startChat = async () => {
-    if (!db || !user || !selectedTopic) return;
-    const isBannedNow = await checkBanBeforeAction();
-    if (isBannedNow) {
-      setShowStartChat(false);
-      return;
-    }
-    if (!canCreateTicket) {
-      setBanMessage("YOU DO NOT HAVE PERMISSION TO CREATE A NEW TICKET");
-      return;
-    }
-    if (!encryptionReady) {
-      alert("Encryption is being initialized, please wait a moment.");
-      return;
-    }
-    const hasActiveTicket = tickets.some(
-      (t) =>
-        t.userId === user.uid &&
-        (t.status === "waiting" || t.status === "active") &&
-        !t.isAnnouncement &&
-        !t.isBroadcast
-    );
-    if (hasActiveTicket) {
-      alert("You still have an active chat with an agent. Please wait until it is finished.");
-      return;
-    }
-    try {
-      const ticketRef = await addDoc(collection(db, "livechat_tickets"), {
-        userId: user.uid,
-        userName: user.displayName || user.email || "User",
-        userEmail: user.email,
-        userPhoto: user.photoURL || "",
-        status: "waiting",
-        topic: selectedTopic,
+      const members = [user.uid, ...selectedMembers];
+      await addDoc(collection(db, "chat_groups"), {
+        groupName: newGroupName.trim(),
+        description: newGroupDesc.trim(),
+        members: members,
+        createdBy: user.uid,
         createdAt: serverTimestamp(),
-        unreadCount: 0,
-        typing: false,
-        typingUserId: null,
-        typingUserName: null,
-        isAnnouncement: false,
-        isBroadcast: false,
       });
-      const initialMessage = `Hello, I would like to ask about: ${selectedTopic}`;
-      const encryptedMessage = await encryptMessage(initialMessage);
-      await addDoc(collection(db, "livechat_tickets", ticketRef.id, "messages"), {
-        senderId: user.uid,
-        senderName: user.displayName || user.email || "User",
-        text: encryptedMessage,
-        timestamp: serverTimestamp(),
-        read: false,
-        isEncrypted: true,
-        isBotDetected: false,
-        deliveryStatus: "sent",
-      });
-      await updateDoc(ticketRef, {
-        lastMessage: initialMessage,
-        lastMessageTime: serverTimestamp(),
-        lastMessageSender: user.displayName || user.email || "User",
-      });
-      setSelectedTopic("");
-      setShowStartChat(false);
-      setBanMessage(null);
-      hasAutoSelectedRef.current = false;
+      setNewGroupName("");
+      setNewGroupDesc("");
+      setSelectedMembers([]);
+      setShowAddGroupForm(false);
     } catch (error) {
-      console.error("Error starting chat:", error);
-      alert("An error occurred while starting the chat. Please try again.");
+      console.error("Error creating group:", error);
+      setGroupError("Failed to create group. Please try again.");
+    } finally {
+      setAddingGroup(false);
     }
   };
 
+  const toggleMember = (userId: string) => {
+    setSelectedMembers((prev) =>
+      prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]
+    );
+  };
+
+  // ===== SEND MESSAGE =====
   const sendMessage = async () => {
-    if (!db || !selectedTicket || !messageText.trim() || !user) return;
-    const isBannedNow = await checkBanBeforeAction();
-    if (isBannedNow) {
-      setMessageText("");
-      return;
+    if (!db || !messageText.trim() || !user) return;
+
+    // Check ban
+    if (user) {
+      try {
+        const status = await checkBanStatus(user.uid);
+        if (status.isBanned) {
+          setIsBanned(true);
+          setBanReason(status.reason);
+          setBanMessage(`YOUR ACCOUNT HAS BEEN PERMANENTLY BANNED\n\nReason: ${status.reason}`);
+          setMessageText("");
+          return;
+        }
+      } catch {}
     }
     if (!canSendMessage) {
       setBanMessage("YOU DO NOT HAVE PERMISSION TO SEND MESSAGES");
       setMessageText("");
       return;
     }
+    // Check banned content
     const checkResult = containsBannedContent(messageText);
     if (checkResult.isBanned) {
       await banUserPermanent(
@@ -2001,7 +1557,6 @@ const LiveChat = ({
       );
       setIsBanned(true);
       setBanReason(checkResult.reason);
-      setCanCreateTicket(false);
       setCanSendMessage(false);
       setBanMessage(
         `YOUR ACCOUNT HAS BEEN PERMANENTLY BANNED\n\nReason: ${checkResult.reason}\n\nMessage sent: "${messageText}"`
@@ -2013,33 +1568,34 @@ const LiveChat = ({
       alert("Encryption is being initialized, please wait a moment.");
       return;
     }
-    if (selectedTicket.status === "resolved" || selectedTicket.status === "closed") {
-      alert("This chat is finished. Please create a new ticket.");
-      return;
-    }
+
     try {
-      const ticketRef = doc(db, "livechat_tickets", selectedTicket.id);
-      await updateDoc(ticketRef, { typing: false, typingUserId: null, typingUserName: null });
-      const senderName = isAdmin ? AGENT_NAME : user.displayName || user.email || "User";
+      const senderName = user.displayName || user.email || "User";
       const encryptedMessage = await encryptMessage(messageText.trim());
-      await addDoc(collection(db, "livechat_tickets", selectedTicket.id, "messages"), {
-        senderId: user.uid,
-        senderName: senderName,
-        text: encryptedMessage,
-        timestamp: serverTimestamp(),
-        read: false,
-        isEncrypted: true,
-        isBotDetected: false,
-        deliveryStatus: "sent",
-      });
-      await updateDoc(ticketRef, {
-        lastMessage: messageText.trim(),
-        lastMessageTime: serverTimestamp(),
-        lastMessageSender: senderName,
-        ...(selectedTicket.status === "waiting" && { status: "active" }),
-        agentId: isAdmin ? user.uid : selectedTicket.agentId,
-        agentName: isAdmin ? AGENT_NAME : selectedTicket.agentName,
-      });
+
+      if (selectedContact) {
+        const chatId = [user.uid, selectedContact.userId].sort().join("_");
+        await addDoc(collection(db, "direct_messages", chatId, "messages"), {
+          senderId: user.uid,
+          senderName: senderName,
+          text: encryptedMessage,
+          timestamp: serverTimestamp(),
+          read: false,
+          isEncrypted: true,
+          deliveryStatus: "sent",
+        });
+      } else if (selectedGroup) {
+        await addDoc(collection(db, "chat_groups", selectedGroup.id, "messages"), {
+          senderId: user.uid,
+          senderName: senderName,
+          text: encryptedMessage,
+          timestamp: serverTimestamp(),
+          read: false,
+          isEncrypted: true,
+          deliveryStatus: "sent",
+        });
+      }
+
       setMessageText("");
       setBanMessage(null);
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
@@ -2049,14 +1605,26 @@ const LiveChat = ({
     }
   };
 
-  const handleCloseRoom = async () => {
-    if (!db || !selectedTicket) return;
+  const handleTyping = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setMessageText(e.target.value);
+  };
+
+  const formatTime = useCallback((timestamp: any) => {
+    if (!timestamp) return "";
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    return date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+  }, []);
+
+  const handleLogout = async () => {
+    if (!auth) return;
     try {
-      await updateDoc(doc(db, "livechat_tickets", selectedTicket.id), { status: "closed" });
-      setShowCloseConfirm(true);
-      setTimeout(() => setShowCloseConfirm(false), 2200);
+      await updateDoc(doc(db, "users", user.uid), {
+        online: false,
+        lastSeen: serverTimestamp(),
+      });
+      await signOut(auth);
     } catch (error) {
-      console.error("Error closing ticket:", error);
+      console.error("Logout error:", error);
     }
   };
 
@@ -2095,235 +1663,17 @@ const LiveChat = ({
     );
   };
 
-  const renderOnlinePanel = () => {
-    const list = isAdmin ? onlineUsers : onlineAgents;
-    const title = isAdmin ? "Online Users" : "Online Agents";
-    const emptyText = isAdmin ? "No users online" : "No agents online";
-    return (
-      <div
-        className="online-panel-container"
-        style={{
-          width: "260px",
-          backgroundColor: "#ffffff",
-          borderRadius: "12px",
-          border: "1px solid rgba(0,0,0,0.08)",
-          flexShrink: 0,
-          height: "700px",
-          display: "flex",
-          flexDirection: "column",
-          overflow: "hidden",
-        }}
-      >
-        <div
-          style={{
-            padding: "14px 16px",
-            backgroundColor: BLUE,
-            color: WHITE,
-            fontWeight: 700,
-            fontSize: "14px",
-            fontFamily: FONT_FAMILY,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            flexShrink: 0,
-          }}
-        >
-          <span>{title}</span>
-          <span
-            style={{
-              fontSize: "11px",
-              color: WHITE,
-              padding: "2px 8px",
-              borderRadius: "4px",
-              border: `1.5px solid ${WHITE}`,
-              fontWeight: 700,
-              letterSpacing: "0.5px",
-            }}
-          >
-            {list.length}
-          </span>
-        </div>
-        <div style={{ overflowY: "auto", flex: 1, minHeight: 0 }}>
-          {list.length === 0 ? (
-            <div
-              style={{
-                padding: "30px 16px",
-                textAlign: "center",
-                color: "#999",
-                fontSize: "13px",
-                fontFamily: FONT_FAMILY,
-              }}
-            >
-              {emptyText}
-            </div>
-          ) : (
-            list.map((u) => (
-              <div
-                key={u.uid}
-                style={{
-                  padding: "12px 16px",
-                  borderBottom: "1px solid #f0f0f0",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "10px",
-                  fontFamily: FONT_FAMILY,
-                }}
-              >
-                <div
-                  style={{
-                    width: "36px",
-                    height: "36px",
-                    borderRadius: "8px",
-                    backgroundColor: BLUE,
-                    color: WHITE,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontWeight: 800,
-                    fontSize: "14px",
-                    overflow: "hidden",
-                    flexShrink: 0,
-                  }}
-                >
-                  {u.photoURL ? (
-                    <img
-                      src={u.photoURL}
-                      alt={u.displayName}
-                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                    />
-                  ) : (
-                    u.displayName.charAt(0).toUpperCase()
-                  )}
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div
-                    style={{
-                      fontSize: "13px",
-                      fontWeight: 700,
-                      color: "#000",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                      marginBottom: "3px",
-                    }}
-                  >
-                    {u.displayName}
-                  </div>
-                  <span
-                    style={{
-                      display: "inline-block",
-                      fontSize: "10px",
-                      fontWeight: 800,
-                      color: BLUE,
-                      letterSpacing: "0.5px",
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    Online
-                  </span>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-      </div>
-    );
-  };
+  const filteredContacts = contacts.filter(
+    (c) =>
+      c.userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      c.userEmail.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
-  const renderTicketPreview = (ticketId: string) => {
-    const previews = ticketPreviews[ticketId] || [];
-    if (previews.length === 0) return null;
-    const ordered = [...previews].reverse();
-    return (
-      <div style={{ marginTop: "6px", display: "flex", flexDirection: "column", gap: "3px" }}>
-        {ordered.map((p, i) => (
-          <div
-            key={i}
-            style={{
-              fontSize: "11px",
-              color: "#ffffff",
-              fontStyle: "italic",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-              fontFamily: FONT_FAMILY,
-              display: "flex",
-              alignItems: "center",
-              gap: "4px",
-            }}
-          >
-            <span style={{ fontWeight: 700, color: "#ffffff", flexShrink: 0 }}>{p.senderName}:</span>
-            <span style={{ overflow: "hidden", textOverflow: "ellipsis", color: "#ffffff" }}>
-              {p.text.length > 30 ? p.text.substring(0, 30) + "..." : p.text}
-            </span>
-          </div>
-        ))}
-      </div>
-    );
-  };
-
-  const renderSearchBar = () => {
-    const isAgentSearch = isAdmin;
-    return (
-      <div
-        style={{
-          padding: "10px 14px",
-          borderBottom: "1px solid rgba(255,255,255,0.15)",
-          flexShrink: 0,
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            padding: "8px 12px",
-            backgroundColor: isAgentSearch ? "rgba(255,255,255,0.15)" : "#ffffff",
-            border: isAgentSearch ? "1px solid rgba(255,255,255,0.25)" : "1px solid #ffffff",
-            borderRadius: "8px",
-          }}
-        >
-          <SearchIcon size={14} color={isAgentSearch ? "#ffffff" : BLUE} />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search chats or messages..."
-            style={{
-              flex: 1,
-              background: "transparent",
-              border: "none",
-              outline: "none",
-              color: isAgentSearch ? "#ffffff" : BLUE,
-              fontSize: "12px",
-              fontFamily: FONT_FAMILY,
-              padding: 0,
-              caretColor: isAgentSearch ? "#ffffff" : BLUE,
-              fontWeight: 600,
-            }}
-          />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery("")}
-              style={{
-                background: "transparent",
-                border: "none",
-                color: isAgentSearch ? "#ffffff" : BLUE,
-                cursor: "pointer",
-                fontSize: "14px",
-                padding: 0,
-                lineHeight: 1,
-                fontFamily: FONT_FAMILY,
-                fontWeight: 700,
-              }}
-            >
-              ×
-            </button>
-          )}
-        </div>
-      </div>
-    );
-  };
+  const filteredGroups = groups.filter(
+    (g) =>
+      g.groupName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      g.description.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   if (checkingBan) {
     return (
@@ -2405,7 +1755,7 @@ const LiveChat = ({
     );
   }
 
-  if (!isAdmin && isBanned) {
+  if (isBanned) {
     return (
       <div style={{ marginTop: "80px", paddingTop: "30px" }}>
         <div
@@ -2477,104 +1827,6 @@ const LiveChat = ({
     );
   }
 
-  const userTickets = tickets.filter((t) => t.userId === user.uid);
-  const typingText = selectedTicket ? getTypingText(selectedTicket) : null;
-
-  const renderChatListItem = (ticket: Ticket) => {
-    const isActive = selectedTicket?.id === ticket.id;
-    const ticketId = generateTicketId(ticket.createdAt);
-    const statusStyle = STATUS_STYLES[ticket.status] || STATUS_STYLES.active;
-    const topicStyle = TOPIC_STYLES[ticket.topic] || TOPIC_STYLES["Other"];
-
-    return (
-      <motion.div
-        key={ticket.id}
-        layout
-        initial={{ opacity: 0, x: -40 }}
-        animate={{ opacity: 1, x: 0 }}
-        exit={{ opacity: 0, x: -40 }}
-        transition={{ duration: 0.35, ease: "easeOut" }}
-        onClick={() => setSelectedTicket(ticket)}
-        style={{
-          padding: "14px 16px",
-          borderLeft: isActive ? `3px solid ${WHITE}` : "3px solid transparent",
-          backgroundColor: isActive ? "rgba(255,255,255,0.14)" : "transparent",
-          cursor: "pointer",
-          borderBottom: "1px solid rgba(255,255,255,0.08)",
-          transition: "background-color 0.2s ease",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "6px",
-            gap: "8px",
-            flexWrap: "wrap",
-          }}
-        >
-          <div
-            style={{
-              fontWeight: 700,
-              fontSize: "14px",
-              color: WHITE,
-              minWidth: 0,
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-              flex: "1 1 auto",
-            }}
-          >
-            {ticket.userName}
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "6px", flexShrink: 0 }}>
-            <StabiloBadge
-              label={statusStyle.label}
-              bg={statusStyle.bg}
-              text={statusStyle.text}
-              border={statusStyle.border}
-              size="sm"
-            />
-          </div>
-        </div>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "6px",
-            marginBottom: "8px",
-            flexWrap: "wrap",
-          }}
-        >
-          <StabiloBadge
-            label={ticket.topic}
-            bg={topicStyle.bg}
-            text={topicStyle.text}
-            border={topicStyle.border}
-            size="sm"
-          />
-          <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.75)", fontWeight: 700 }}>
-            {ticketMsgCounts[ticket.id] || 0} msgs
-          </span>
-        </div>
-        {renderTicketPreview(ticket.id)}
-        <div style={{ marginTop: "6px" }}>
-          <span
-            style={{
-              fontSize: "9px",
-              color: "rgba(255,255,255,0.65)",
-              fontWeight: 700,
-              letterSpacing: "0.3px",
-            }}
-          >
-            {ticketId}
-          </span>
-        </div>
-      </motion.div>
-    );
-  };
-
   return (
     <div style={{ marginTop: "80px", paddingTop: "30px" }}>
       <div
@@ -2610,23 +1862,6 @@ const LiveChat = ({
             paddingTop: "10px",
           }}
         >
-          <span
-            style={{
-              fontSize: "13px",
-              fontWeight: 800,
-              color: onlineAgents.length > 0 ? WHITE : "#999",
-              backgroundColor: onlineAgents.length > 0 ? BLUE : "transparent",
-              fontFamily: FONT_FAMILY,
-              letterSpacing: "0.5px",
-              textTransform: "uppercase",
-              padding: onlineAgents.length > 0 ? "4px 10px" : "0",
-              borderRadius: "4px",
-            }}
-          >
-            {onlineAgents.length > 0
-              ? `${onlineAgents.length} Agent${onlineAgents.length !== 1 ? "s" : ""} Online`
-              : "No Agents Online"}
-          </span>
           <button
             onClick={handleLogout}
             style={{
@@ -2659,10 +1894,7 @@ const LiveChat = ({
           borderRadius: "12px",
         }}
       >
-        {/* ===== ONLINE PANEL ===== */}
-        {renderOnlinePanel()}
-
-        {/* ===== CONTACTS + CHAT LIST ===== */}
+        {/* ===== LEFT SIDEBAR: CONTACTS + GROUPS ===== */}
         <div
           className="chat-list-container"
           style={{
@@ -2680,6 +1912,7 @@ const LiveChat = ({
             position: "relative",
           }}
         >
+          {/* Header */}
           <div
             style={{
               padding: "14px 16px",
@@ -2693,7 +1926,7 @@ const LiveChat = ({
               flexShrink: 0,
             }}
           >
-            <span style={{ color: WHITE, letterSpacing: "0.3px" }}>Chat History</span>
+            <span style={{ color: WHITE, letterSpacing: "0.3px" }}>Chats</span>
             <span
               style={{
                 fontSize: "11px",
@@ -2706,207 +1939,284 @@ const LiveChat = ({
                 letterSpacing: "0.5px",
               }}
             >
-              {isAdmin
-                ? tickets.length
-                : tickets.filter((t) => t.userId === user.uid).length}
+              {contacts.length + groups.length}
             </span>
           </div>
 
-          {/* ===== CONTACTS SECTION ===== */}
-          {contacts.length > 0 && (
+          {/* Search */}
+          <div
+            style={{
+              padding: "10px 14px",
+              borderBottom: "1px solid rgba(255,255,255,0.15)",
+              flexShrink: 0,
+            }}
+          >
             <div
               style={{
-                borderBottom: "1px solid rgba(255,255,255,0.15)",
-                flexShrink: 0,
-                maxHeight: "220px",
-                overflowY: "auto",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "8px 12px",
+                backgroundColor: "rgba(255,255,255,0.15)",
+                border: "1px solid rgba(255,255,255,0.25)",
+                borderRadius: "8px",
               }}
             >
-              <div
+              <SearchIcon size={14} color="#ffffff" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search contacts or groups..."
                 style={{
-                  padding: "10px 16px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
+                  flex: 1,
+                  background: "transparent",
+                  border: "none",
+                  outline: "none",
+                  color: "#ffffff",
+                  fontSize: "12px",
+                  fontFamily: FONT_FAMILY,
+                  padding: 0,
+                  caretColor: "#ffffff",
+                  fontWeight: 600,
                 }}
-              >
-                <span
+              />
+            </div>
+          </div>
+
+          {/* Contacts & Groups List */}
+          <div style={{ overflowY: "auto", flex: 1, minHeight: 0 }}>
+            {/* Groups Section */}
+            {filteredGroups.length > 0 && (
+              <div>
+                <div
                   style={{
-                    fontSize: "11px",
+                    padding: "10px 16px 6px",
+                    fontSize: "10px",
                     fontWeight: 800,
-                    color: "rgba(255,255,255,0.8)",
-                    letterSpacing: "0.5px",
+                    color: "rgba(255,255,255,0.6)",
+                    letterSpacing: "0.8px",
                     textTransform: "uppercase",
                   }}
                 >
-                  Contacts ({contacts.length})
-                </span>
-              </div>
-              <AnimatePresence>
-                {contacts.map((contact) => (
-                  <motion.div
-                    key={contact.id}
-                    ref={(el) => {
-                      contactItemRefs.current[contact.id] = el;
-                    }}
-                    initial={{ opacity: 0, x: -80, scale: 0.8 }}
-                    animate={{ opacity: 1, x: 0, scale: 1 }}
-                    exit={{ opacity: 0, x: 100, scale: 0.8 }}
-                    transition={{ duration: 0.4, ease: "easeOut" }}
-                    style={{
-                      padding: "10px 16px",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "10px",
-                      cursor: "pointer",
-                      borderBottom: "1px solid rgba(255,255,255,0.06)",
-                      transition: "background-color 0.2s ease",
-                    }}
-                    onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLDivElement).style.backgroundColor =
-                        "rgba(255,255,255,0.08)";
-                    }}
-                    onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLDivElement).style.backgroundColor =
-                        "transparent";
-                    }}
-                  >
+                  Groups
+                </div>
+                {filteredGroups.map((group) => {
+                  const isSelected = selectedGroup?.id === group.id;
+                  return (
                     <div
-                      style={{
-                        width: "32px",
-                        height: "32px",
-                        borderRadius: "8px",
-                        backgroundColor: WHITE,
-                        color: BLUE,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontWeight: 800,
-                        fontSize: "13px",
-                        flexShrink: 0,
-                      }}
-                    >
-                      {contact.userName.charAt(0).toUpperCase()}
-                    </div>
-                    <div
-                      style={{
-                        flex: 1,
-                        minWidth: 0,
-                      }}
-                      onClick={() => startChatWithContact(contact)}
-                    >
-                      <div
-                        style={{
-                          fontSize: "13px",
-                          fontWeight: 700,
-                          color: WHITE,
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {contact.userName}
-                      </div>
-                      <div
-                        style={{
-                          fontSize: "10px",
-                          color: "rgba(255,255,255,0.6)",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {contact.userEmail}
-                      </div>
-                    </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteContact(contact.id);
+                      key={group.id}
+                      ref={(el) => { groupItemRefs.current[group.id] = el; }}
+                      onClick={() => {
+                        setSelectedGroup(group);
+                        setSelectedContact(null);
                       }}
                       style={{
-                        background: "transparent",
-                        border: "none",
+                        padding: "12px 16px",
+                        borderLeft: isSelected ? `3px solid ${WHITE}` : "3px solid transparent",
+                        backgroundColor: isSelected ? "rgba(255,255,255,0.14)" : "transparent",
                         cursor: "pointer",
-                        padding: "4px",
+                        borderBottom: "1px solid rgba(255,255,255,0.06)",
                         display: "flex",
                         alignItems: "center",
-                        justifyContent: "center",
-                        opacity: 0.6,
-                        transition: "opacity 0.2s",
+                        gap: "10px",
                       }}
-                      onMouseEnter={(e) => (e.currentTarget.style.opacity = "1")}
-                      onMouseLeave={(e) => (e.currentTarget.style.opacity = "0.6")}
                     >
-                      <CloseIcon size={14} color={WHITE} />
-                    </button>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-            </div>
-          )}
+                      <div
+                        style={{
+                          width: "36px",
+                          height: "36px",
+                          borderRadius: "8px",
+                          backgroundColor: WHITE,
+                          color: BLUE,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontWeight: 800,
+                          fontSize: "14px",
+                          flexShrink: 0,
+                        }}
+                      >
+                        {group.groupName.charAt(0).toUpperCase()}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div
+                          style={{
+                            fontSize: "13px",
+                            fontWeight: 700,
+                            color: WHITE,
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {group.groupName}
+                        </div>
+                        <div
+                          style={{
+                            fontSize: "10px",
+                            color: "rgba(255,255,255,0.6)",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {group.members.length} members
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
 
-          {renderSearchBar()}
+            {/* Contacts Section */}
+            {filteredContacts.length > 0 && (
+              <div>
+                <div
+                  style={{
+                    padding: "10px 16px 6px",
+                    fontSize: "10px",
+                    fontWeight: 800,
+                    color: "rgba(255,255,255,0.6)",
+                    letterSpacing: "0.8px",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Contacts
+                </div>
+                {filteredContacts.map((contact) => {
+                  const isSelected = selectedContact?.id === contact.id;
+                  const preview = messagePreviews[contact.id];
+                  return (
+                    <div
+                      key={contact.id}
+                      ref={(el) => { contactItemRefs.current[contact.id] = el; }}
+                      onClick={() => {
+                        setSelectedContact(contact);
+                        setSelectedGroup(null);
+                      }}
+                      style={{
+                        padding: "12px 16px",
+                        borderLeft: isSelected ? `3px solid ${WHITE}` : "3px solid transparent",
+                        backgroundColor: isSelected ? "rgba(255,255,255,0.14)" : "transparent",
+                        cursor: "pointer",
+                        borderBottom: "1px solid rgba(255,255,255,0.06)",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "10px",
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: "36px",
+                          height: "36px",
+                          borderRadius: "8px",
+                          backgroundColor: WHITE,
+                          color: BLUE,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontWeight: 800,
+                          fontSize: "14px",
+                          flexShrink: 0,
+                          overflow: "hidden",
+                          position: "relative",
+                        }}
+                      >
+                        {contact.userPhoto ? (
+                          <img
+                            src={contact.userPhoto}
+                            alt={contact.userName}
+                            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                          />
+                        ) : (
+                          contact.userName.charAt(0).toUpperCase()
+                        )}
+                        {contact.online && (
+                          <span
+                            style={{
+                              position: "absolute",
+                              bottom: 0,
+                              right: 0,
+                              width: "10px",
+                              height: "10px",
+                              borderRadius: "50%",
+                              backgroundColor: "#4CAF50",
+                              border: `2px solid ${BLUE}`,
+                            }}
+                          />
+                        )}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div
+                          style={{
+                            fontSize: "13px",
+                            fontWeight: 700,
+                            color: WHITE,
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {contact.userName}
+                        </div>
+                        <div
+                          style={{
+                            fontSize: "10px",
+                            color: "rgba(255,255,255,0.6)",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {preview
+                            ? preview.length > 28
+                              ? preview.substring(0, 28) + "..."
+                              : preview
+                            : contact.online
+                            ? "Online"
+                            : "Offline"}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
 
-          <div style={{ overflowY: "auto", flex: 1, minHeight: 0 }}>
-            {isAdmin ? (
-              <>
-                {filterTicketsBySearch(tickets).map((ticket) => renderChatListItem(ticket))}
-                {filterTicketsBySearch(tickets).length === 0 && (
-                  <div
-                    style={{
-                      padding: "30px 16px",
-                      textAlign: "center",
-                      color: WHITE,
-                      fontSize: "13px",
-                    }}
-                  >
-                    {searchQuery ? "No results found" : "No incoming chats"}
-                  </div>
-                )}
-              </>
-            ) : (
-              <>
-                {filterTicketsBySearch(tickets.filter((t) => t.userId === user.uid)).map(
-                  (ticket) => renderChatListItem(ticket)
-                )}
-                {filterTicketsBySearch(tickets.filter((t) => t.userId === user.uid))
-                  .length === 0 && (
-                  <div
-                    style={{
-                      padding: "30px 16px",
-                      textAlign: "center",
-                      color: WHITE,
-                      fontSize: "13px",
-                    }}
-                  >
-                    {searchQuery ? "No results found" : "No chats yet"}
-                  </div>
-                )}
-              </>
+            {filteredContacts.length === 0 && filteredGroups.length === 0 && (
+              <div
+                style={{
+                  padding: "30px 16px",
+                  textAlign: "center",
+                  color: WHITE,
+                  fontSize: "13px",
+                }}
+              >
+                {searchQuery ? "No results found" : "No contacts or groups"}
+              </div>
             )}
           </div>
 
-          {/* ===== ADD USER BUTTON (GSAP) ===== */}
+          {/* Add Group Button + Inline Form */}
           <div
             style={{
               padding: "12px 16px",
               borderTop: "1px solid rgba(255,255,255,0.1)",
               flexShrink: 0,
               backgroundColor: BLUE,
-              display: "flex",
-              gap: "10px",
             }}
           >
             <button
-              ref={addButtonRef}
-              onClick={() => setShowAddUserModal(true)}
+              ref={addGroupBtnRef}
+              onClick={() => setShowAddGroupForm(!showAddGroupForm)}
               style={{
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 gap: "8px",
-                flex: 1,
+                width: "100%",
                 padding: "10px",
                 backgroundColor: WHITE,
                 color: BLUE,
@@ -2918,15 +2228,12 @@ const LiveChat = ({
                 fontFamily: FONT_FAMILY,
                 letterSpacing: "0.5px",
                 textTransform: "uppercase",
-                position: "relative",
-                overflow: "hidden",
               }}
               onMouseEnter={(e) => {
                 gsap.to(e.currentTarget, {
                   scale: 1.03,
                   boxShadow: "0 0 20px rgba(255,255,255,0.3)",
                   duration: 0.3,
-                  ease: "power2.out",
                 });
               }}
               onMouseLeave={(e) => {
@@ -2934,53 +2241,174 @@ const LiveChat = ({
                   scale: 1,
                   boxShadow: "0 0 0px rgba(255,255,255,0)",
                   duration: 0.3,
-                  ease: "power2.out",
                 });
               }}
             >
-              <svg
-                ref={plusIconRef}
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                style={{ display: "block" }}
-              >
-                <path
-                  d="M12 5V19M5 12H19"
-                  stroke={BLUE}
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              Add User
+              <PlusIcon size={16} color={BLUE} />
+              Add Group
             </button>
-            {!isAdmin && (
-              <button
-                onClick={() => setShowStartChat(true)}
+
+            {/* Inline Add Group Form (No Modal) */}
+            {showAddGroupForm && (
+              <div
+                ref={addGroupFormRef}
                 style={{
-                  padding: "10px 14px",
-                  backgroundColor: "transparent",
-                  color: WHITE,
-                  border: `1.5px solid ${WHITE}`,
-                  borderRadius: "8px",
-                  fontSize: "13px",
-                  fontWeight: 800,
-                  cursor: "pointer",
-                  fontFamily: FONT_FAMILY,
-                  letterSpacing: "0.5px",
-                  textTransform: "uppercase",
-                  flexShrink: 0,
+                  marginTop: "12px",
+                  backgroundColor: "rgba(255,255,255,0.1)",
+                  borderRadius: "10px",
+                  padding: "14px",
+                  border: "1px solid rgba(255,255,255,0.2)",
+                  overflow: "hidden",
                 }}
               >
-                + Chat
-              </button>
+                <div style={{ marginBottom: "10px" }}>
+                  <input
+                    type="text"
+                    value={newGroupName}
+                    onChange={(e) => setNewGroupName(e.target.value)}
+                    placeholder="Group name"
+                    style={{
+                      width: "100%",
+                      padding: "8px 10px",
+                      borderRadius: "6px",
+                      border: "1px solid rgba(255,255,255,0.3)",
+                      backgroundColor: "rgba(255,255,255,0.15)",
+                      color: WHITE,
+                      fontSize: "13px",
+                      fontFamily: FONT_FAMILY,
+                      outline: "none",
+                      boxSizing: "border-box",
+                    }}
+                  />
+                </div>
+                <div style={{ marginBottom: "10px" }}>
+                  <textarea
+                    value={newGroupDesc}
+                    onChange={(e) => setNewGroupDesc(e.target.value)}
+                    placeholder="Description"
+                    rows={2}
+                    style={{
+                      width: "100%",
+                      padding: "8px 10px",
+                      borderRadius: "6px",
+                      border: "1px solid rgba(255,255,255,0.3)",
+                      backgroundColor: "rgba(255,255,255,0.15)",
+                      color: WHITE,
+                      fontSize: "13px",
+                      fontFamily: FONT_FAMILY,
+                      outline: "none",
+                      resize: "none",
+                      boxSizing: "border-box",
+                    }}
+                  />
+                </div>
+                <div
+                  style={{
+                    fontSize: "11px",
+                    color: "rgba(255,255,255,0.7)",
+                    marginBottom: "6px",
+                    fontWeight: 700,
+                    letterSpacing: "0.5px",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Select Members ({selectedMembers.length})
+                </div>
+                <div
+                  style={{
+                    maxHeight: "120px",
+                    overflowY: "auto",
+                    marginBottom: "10px",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "4px",
+                  }}
+                >
+                  {contacts.map((c) => (
+                    <label
+                      key={c.id}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        padding: "4px 6px",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                        fontSize: "12px",
+                        color: WHITE,
+                        backgroundColor: selectedMembers.includes(c.userId)
+                          ? "rgba(255,255,255,0.15)"
+                          : "transparent",
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedMembers.includes(c.userId)}
+                        onChange={() => toggleMember(c.userId)}
+                        style={{ accentColor: WHITE }}
+                      />
+                      {c.userName}
+                    </label>
+                  ))}
+                </div>
+                {groupError && (
+                  <div
+                    style={{
+                      fontSize: "12px",
+                      color: "#FFB3B3",
+                      marginBottom: "8px",
+                      fontWeight: 600,
+                    }}
+                  >
+                    {groupError}
+                  </div>
+                )}
+                <div style={{ display: "flex", gap: "8px" }}>
+                  <button
+                    onClick={() => {
+                      setShowAddGroupForm(false);
+                      setGroupError("");
+                    }}
+                    style={{
+                      flex: 1,
+                      padding: "8px",
+                      backgroundColor: "transparent",
+                      color: WHITE,
+                      border: "1px solid rgba(255,255,255,0.4)",
+                      borderRadius: "6px",
+                      fontSize: "12px",
+                      fontWeight: 700,
+                      cursor: "pointer",
+                      fontFamily: FONT_FAMILY,
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleAddGroup}
+                    disabled={addingGroup}
+                    style={{
+                      flex: 1,
+                      padding: "8px",
+                      backgroundColor: addingGroup ? "#ccc" : WHITE,
+                      color: BLUE,
+                      border: "none",
+                      borderRadius: "6px",
+                      fontSize: "12px",
+                      fontWeight: 800,
+                      cursor: addingGroup ? "not-allowed" : "pointer",
+                      fontFamily: FONT_FAMILY,
+                    }}
+                  >
+                    {addingGroup ? "..." : "Create"}
+                  </button>
+                </div>
+              </div>
             )}
           </div>
         </div>
 
-        {/* ===== CHAT VIEW ===== */}
+        {/* ===== RIGHT SIDE: CHAT VIEW ===== */}
         <div
           style={{
             flex: 1,
@@ -2994,8 +2422,9 @@ const LiveChat = ({
             minWidth: 0,
           }}
         >
-          {selectedTicket ? (
+          {selectedContact || selectedGroup ? (
             <>
+              {/* Chat Header */}
               <div
                 style={{
                   padding: "16px 20px",
@@ -3014,159 +2443,28 @@ const LiveChat = ({
                       fontSize: "17px",
                       color: WHITE,
                       fontFamily: FONT_FAMILY,
-                      marginBottom: "6px",
+                      marginBottom: "4px",
                     }}
                   >
-                    {selectedTicket.userName}
+                    {selectedContact ? selectedContact.userName : selectedGroup?.groupName}
                   </div>
                   <div
                     style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
-                      flexWrap: "wrap",
+                      fontSize: "11px",
+                      color: "rgba(255,255,255,0.75)",
+                      fontWeight: 600,
                     }}
                   >
-                    <StabiloBadge
-                      label={
-                        (STATUS_STYLES[selectedTicket.status] || STATUS_STYLES.active).label
-                      }
-                      bg={
-                        (STATUS_STYLES[selectedTicket.status] || STATUS_STYLES.active).bg
-                      }
-                      text={
-                        (STATUS_STYLES[selectedTicket.status] || STATUS_STYLES.active).text
-                      }
-                      border={
-                        (STATUS_STYLES[selectedTicket.status] || STATUS_STYLES.active)
-                          .border
-                      }
-                      size="sm"
-                    />
-                    <StabiloBadge
-                      label={selectedTicket.topic}
-                      bg={
-                        (TOPIC_STYLES[selectedTicket.topic] || TOPIC_STYLES["Other"]).bg
-                      }
-                      text={
-                        (TOPIC_STYLES[selectedTicket.topic] || TOPIC_STYLES["Other"]).text
-                      }
-                      border={
-                        (TOPIC_STYLES[selectedTicket.topic] || TOPIC_STYLES["Other"])
-                          .border
-                      }
-                      size="sm"
-                    />
-                    {selectedTicket.typing && selectedTicket.status !== "resolved" && (
-                      <span
-                        style={{
-                          fontSize: "12px",
-                          color: WHITE,
-                          fontStyle: "italic",
-                          fontWeight: 700,
-                        }}
-                      >
-                        {selectedTicket.typingUserName} is typing...
-                      </span>
-                    )}
-                    <span
-                      style={{
-                        fontSize: "10px",
-                        color: "rgba(255,255,255,0.75)",
-                        fontWeight: 700,
-                        letterSpacing: "0.3px",
-                      }}
-                    >
-                      {generateTicketId(selectedTicket.createdAt)}
-                    </span>
+                    {selectedContact
+                      ? selectedContact.online
+                        ? "Online"
+                        : "Offline"
+                      : `${selectedGroup?.members.length} members · ${selectedGroup?.description}`}
                   </div>
-                </div>
-
-                <div style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
-                  {isAdmin &&
-                    selectedTicket.status !== "resolved" &&
-                    selectedTicket.status !== "closed" && (
-                      <button
-                        onClick={async () => {
-                          if (!db) return;
-                          await updateDoc(doc(db, "livechat_tickets", selectedTicket.id), {
-                            status: "resolved",
-                          });
-                        }}
-                        style={{
-                          padding: "8px 16px",
-                          backgroundColor: WHITE,
-                          color: BLUE,
-                          border: `1.5px solid ${WHITE}`,
-                          borderRadius: "8px",
-                          fontSize: "12px",
-                          fontWeight: 800,
-                          cursor: "pointer",
-                          fontFamily: FONT_FAMILY,
-                          letterSpacing: "0.5px",
-                          textTransform: "uppercase",
-                        }}
-                      >
-                        Resolve
-                      </button>
-                    )}
-                  {selectedTicket.status !== "closed" && (
-                    <button
-                      onClick={handleCloseRoom}
-                      style={{
-                        width: "36px",
-                        height: "36px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        backgroundColor: WHITE,
-                        border: `1.5px solid ${WHITE}`,
-                        borderRadius: "8px",
-                        cursor: "pointer",
-                        padding: 0,
-                      }}
-                    >
-                      <CloseIcon size={16} color={BLUE} />
-                    </button>
-                  )}
                 </div>
               </div>
 
-              {showCloseConfirm && (
-                <div
-                  style={{
-                    padding: "10px 20px",
-                    backgroundColor: WHITE,
-                    borderBottom: `1.5px solid ${BLUE}`,
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "10px",
-                    fontFamily: FONT_FAMILY,
-                    flexShrink: 0,
-                  }}
-                >
-                  <span
-                    style={{
-                      display: "inline-block",
-                      padding: "3px 9px",
-                      border: `1.5px solid ${BLUE}`,
-                      backgroundColor: WHITE,
-                      color: BLUE,
-                      fontSize: "10px",
-                      fontWeight: 800,
-                      letterSpacing: "0.5px",
-                      borderRadius: "4px",
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    Peringatan
-                  </span>
-                  <span style={{ fontSize: "13px", color: BLUE, fontWeight: 600 }}>
-                    Room chat berhasil ditutup. Buat room baru untuk melanjutkan.
-                  </span>
-                </div>
-              )}
-
+              {/* Messages */}
               <div
                 ref={chatMessagesContainerRef}
                 className="chat-messages-container"
@@ -3191,7 +2489,7 @@ const LiveChat = ({
                       fontFamily: FONT_FAMILY,
                     }}
                   >
-                    No messages yet
+                    No messages yet. Start the conversation!
                   </div>
                 ) : (
                   <AnimatePresence initial={false}>
@@ -3259,115 +2557,62 @@ const LiveChat = ({
                     })}
                   </AnimatePresence>
                 )}
-                {typingText && selectedTicket.status !== "resolved" && (
-                  <div
-                    style={{
-                      alignSelf: "flex-start",
-                      fontSize: "14px",
-                      color: "#666",
-                      fontStyle: "italic",
-                      padding: "5px 10px",
-                      fontFamily: FONT_FAMILY,
-                    }}
-                  >
-                    {typingText}
-                  </div>
-                )}
-
                 <div ref={messagesEndRef} />
               </div>
 
-              {selectedTicket.status !== "resolved" && selectedTicket.status !== "closed" ? (
-                <div
-                  style={{
-                    padding: "16px 24px",
-                    borderTop: "1px solid rgba(0,0,0,0.06)",
-                    display: "flex",
-                    gap: "12px",
-                    backgroundColor: WHITE,
-                    flexShrink: 0,
+              {/* Input */}
+              <div
+                style={{
+                  padding: "16px 24px",
+                  borderTop: "1px solid rgba(0,0,0,0.06)",
+                  display: "flex",
+                  gap: "12px",
+                  backgroundColor: WHITE,
+                  flexShrink: 0,
+                }}
+              >
+                <input
+                  type="text"
+                  value={messageText}
+                  onChange={handleTyping}
+                  onKeyPress={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey && messageText.trim()) {
+                      e.preventDefault();
+                      sendMessage();
+                    }
                   }}
-                >
-                  <input
-                    type="text"
-                    value={messageText}
-                    onChange={handleTyping}
-                    onKeyPress={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey && messageText.trim()) {
-                        e.preventDefault();
-                        sendMessage();
-                      }
-                    }}
-                    placeholder={
-                      selectedTicket.status === "waiting" && !isAdmin
-                        ? "Waiting for agent..."
-                        : "Type a message..."
-                    }
-                    disabled={selectedTicket.status === "waiting" && !isAdmin}
-                    style={{
-                      flex: 1,
-                      padding: "12px 16px",
-                      border: "1px solid rgba(0,0,0,0.1)",
-                      borderRadius: "10px",
-                      fontSize: "15px",
-                      outline: "none",
-                      fontFamily: FONT_FAMILY,
-                      backgroundColor:
-                        selectedTicket.status === "waiting" && !isAdmin
-                          ? "#f5f5f5"
-                          : WHITE,
-                    }}
-                  />
-                  <button
-                    onClick={sendMessage}
-                    disabled={
-                      (selectedTicket.status === "waiting" && !isAdmin) ||
-                      !messageText.trim()
-                    }
-                    style={{
-                      padding: "12px 24px",
-                      backgroundColor:
-                        (selectedTicket.status === "waiting" && !isAdmin) ||
-                        !messageText.trim()
-                          ? "#ccc"
-                          : BLUE,
-                      color: WHITE,
-                      border: "none",
-                      borderRadius: "10px",
-                      cursor:
-                        (selectedTicket.status === "waiting" && !isAdmin) ||
-                        !messageText.trim()
-                          ? "not-allowed"
-                          : "pointer",
-                      fontFamily: FONT_FAMILY,
-                      fontSize: "14px",
-                      fontWeight: 800,
-                      letterSpacing: "0.5px",
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    Send
-                  </button>
-                </div>
-              ) : (
-                <div
+                  placeholder="Type a message..."
                   style={{
-                    padding: "14px 24px",
-                    borderTop: "1px solid rgba(0,0,0,0.06)",
-                    backgroundColor: "#fafafa",
-                    textAlign: "center",
+                    flex: 1,
+                    padding: "12px 16px",
+                    border: "1px solid rgba(0,0,0,0.1)",
+                    borderRadius: "10px",
+                    fontSize: "15px",
+                    outline: "none",
                     fontFamily: FONT_FAMILY,
-                    fontSize: "13px",
-                    color: BLUE,
-                    flexShrink: 0,
-                    fontWeight: 700,
+                    backgroundColor: WHITE,
+                  }}
+                />
+                <button
+                  onClick={sendMessage}
+                  disabled={!messageText.trim()}
+                  style={{
+                    padding: "12px 24px",
+                    backgroundColor: !messageText.trim() ? "#ccc" : BLUE,
+                    color: WHITE,
+                    border: "none",
+                    borderRadius: "10px",
+                    cursor: !messageText.trim() ? "not-allowed" : "pointer",
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "14px",
+                    fontWeight: 800,
+                    letterSpacing: "0.5px",
+                    textTransform: "uppercase",
                   }}
                 >
-                  Room ini telah{" "}
-                  {selectedTicket.status === "closed" ? "ditutup" : "diselesaikan"}.
-                  Buat room baru untuk melanjutkan.
-                </div>
-              )}
+                  Send
+                </button>
+              </div>
             </>
           ) : (
             <div
@@ -3381,448 +2626,11 @@ const LiveChat = ({
                 fontFamily: FONT_FAMILY,
               }}
             >
-              Select a chat from the list on the left
+              Select a contact or group to start chatting
             </div>
           )}
         </div>
       </div>
-
-      {/* ===== ADD USER MODAL (GSAP) ===== */}
-      {showAddUserModal && (
-        <div
-          ref={addModalRef}
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            backgroundColor: "rgba(0,0,0,0.6)",
-            backdropFilter: "blur(8px)",
-            WebkitBackdropFilter: "blur(8px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 99999,
-            fontFamily: FONT_FAMILY,
-          }}
-          onClick={(e) => {
-            if (e.target === addModalRef.current) setShowAddUserModal(false);
-          }}
-        >
-          <div
-            ref={addModalContentRef}
-            style={{
-              backgroundColor: WHITE,
-              borderRadius: "16px",
-              padding: "32px",
-              width: "90%",
-              maxWidth: "440px",
-              boxShadow: "0 24px 64px rgba(0,0,0,0.3)",
-              position: "relative",
-              overflow: "hidden",
-            }}
-          >
-            {/* Decorative gradient bar */}
-            <div
-              style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                right: 0,
-                height: "4px",
-                background: `linear-gradient(90deg, ${BLUE}, #6B8CFF, ${BLUE})`,
-              }}
-            />
-
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                marginBottom: "24px",
-              }}
-            >
-              <h3
-                style={{
-                  fontSize: "24px",
-                  fontWeight: 700,
-                  color: BLUE,
-                  fontFamily: FONT_FAMILY,
-                  margin: 0,
-                  letterSpacing: "-0.02em",
-                }}
-              >
-                Add New User
-              </h3>
-              <button
-                onClick={() => setShowAddUserModal(false)}
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  cursor: "pointer",
-                  padding: "4px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  borderRadius: "8px",
-                  transition: "background-color 0.2s",
-                }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.05)")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.backgroundColor = "transparent")
-                }
-              >
-                <CloseIcon size={20} color={BLUE} />
-              </button>
-            </div>
-
-            {addUserSuccess ? (
-              <motion.div
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 0.4, ease: "backOut" }}
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  gap: "16px",
-                  padding: "20px 0",
-                }}
-              >
-                <div
-                  style={{
-                    width: "64px",
-                    height: "64px",
-                    borderRadius: "50%",
-                    backgroundColor: BLUE,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <CheckIcon size={32} color={WHITE} />
-                </div>
-                <p
-                  style={{
-                    fontSize: "16px",
-                    fontWeight: 600,
-                    color: BLUE,
-                    fontFamily: FONT_FAMILY,
-                    margin: 0,
-                  }}
-                >
-                  User added successfully!
-                </p>
-              </motion.div>
-            ) : (
-              <>
-                <div style={{ marginBottom: "18px" }}>
-                  <label
-                    style={{
-                      display: "block",
-                      fontSize: "13px",
-                      fontWeight: 700,
-                      color: BLUE,
-                      fontFamily: FONT_FAMILY,
-                      marginBottom: "6px",
-                      letterSpacing: "0.3px",
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    Full Name
-                  </label>
-                  <input
-                    type="text"
-                    value={newContactName}
-                    onChange={(e) => setNewContactName(e.target.value)}
-                    placeholder="Enter full name"
-                    style={{
-                      width: "100%",
-                      padding: "12px 14px",
-                      border: `1.5px solid rgba(13,60,252,0.2)`,
-                      borderRadius: "10px",
-                      fontSize: "15px",
-                      fontFamily: FONT_FAMILY,
-                      outline: "none",
-                      color: BLUE,
-                      transition: "border-color 0.2s, box-shadow 0.2s",
-                      boxSizing: "border-box",
-                    }}
-                    onFocus={(e) => {
-                      e.target.style.borderColor = BLUE;
-                      e.target.style.boxShadow = `0 0 0 3px rgba(13,60,252,0.1)`;
-                    }}
-                    onBlur={(e) => {
-                      e.target.style.borderColor = "rgba(13,60,252,0.2)";
-                      e.target.style.boxShadow = "none";
-                    }}
-                  />
-                </div>
-
-                <div style={{ marginBottom: "18px" }}>
-                  <label
-                    style={{
-                      display: "block",
-                      fontSize: "13px",
-                      fontWeight: 700,
-                      color: BLUE,
-                      fontFamily: FONT_FAMILY,
-                      marginBottom: "6px",
-                      letterSpacing: "0.3px",
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    Email Address
-                  </label>
-                  <input
-                    type="email"
-                    value={newContactEmail}
-                    onChange={(e) => setNewContactEmail(e.target.value)}
-                    placeholder="Enter email address"
-                    style={{
-                      width: "100%",
-                      padding: "12px 14px",
-                      border: `1.5px solid rgba(13,60,252,0.2)`,
-                      borderRadius: "10px",
-                      fontSize: "15px",
-                      fontFamily: FONT_FAMILY,
-                      outline: "none",
-                      color: BLUE,
-                      transition: "border-color 0.2s, box-shadow 0.2s",
-                      boxSizing: "border-box",
-                    }}
-                    onFocus={(e) => {
-                      e.target.style.borderColor = BLUE;
-                      e.target.style.boxShadow = `0 0 0 3px rgba(13,60,252,0.1)`;
-                    }}
-                    onBlur={(e) => {
-                      e.target.style.borderColor = "rgba(13,60,252,0.2)";
-                      e.target.style.boxShadow = "none";
-                    }}
-                  />
-                </div>
-
-                {addUserError && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    style={{
-                      padding: "10px 14px",
-                      backgroundColor: "rgba(255,0,0,0.08)",
-                      border: "1px solid rgba(255,0,0,0.2)",
-                      borderRadius: "8px",
-                      marginBottom: "18px",
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontSize: "13px",
-                        color: "#d32f2f",
-                        fontWeight: 600,
-                        fontFamily: FONT_FAMILY,
-                      }}
-                    >
-                      {addUserError}
-                    </span>
-                  </motion.div>
-                )}
-
-                <div style={{ display: "flex", gap: "12px" }}>
-                  <button
-                    onClick={() => {
-                      setShowAddUserModal(false);
-                      setAddUserError("");
-                      setNewContactName("");
-                      setNewContactEmail("");
-                    }}
-                    style={{
-                      flex: 1,
-                      padding: "12px",
-                      backgroundColor: "transparent",
-                      color: "#666",
-                      border: "1.5px solid #ddd",
-                      borderRadius: "10px",
-                      fontSize: "14px",
-                      fontWeight: 700,
-                      cursor: "pointer",
-                      fontFamily: FONT_FAMILY,
-                    }}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleAddContact}
-                    disabled={addingUser}
-                    style={{
-                      flex: 1,
-                      padding: "12px",
-                      backgroundColor: addingUser ? "#ccc" : BLUE,
-                      color: WHITE,
-                      border: "none",
-                      borderRadius: "10px",
-                      fontSize: "14px",
-                      fontWeight: 800,
-                      cursor: addingUser ? "not-allowed" : "pointer",
-                      fontFamily: FONT_FAMILY,
-                      letterSpacing: "0.5px",
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    {addingUser ? "Adding..." : "Add User"}
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* ===== START CHAT MODAL ===== */}
-      {showStartChat && !isAdmin && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            backgroundColor: "rgba(0,0,0,0.6)",
-            backdropFilter: "blur(8px)",
-            WebkitBackdropFilter: "blur(8px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 99999,
-            fontFamily: FONT_FAMILY,
-          }}
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setShowStartChat(false);
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: WHITE,
-              borderRadius: "16px",
-              padding: "32px",
-              width: "90%",
-              maxWidth: "440px",
-              boxShadow: "0 24px 64px rgba(0,0,0,0.3)",
-              position: "relative",
-              overflow: "hidden",
-            }}
-          >
-            <div
-              style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                right: 0,
-                height: "4px",
-                background: `linear-gradient(90deg, ${BLUE}, #6B8CFF, ${BLUE})`,
-              }}
-            />
-            <h3
-              style={{
-                fontSize: "24px",
-                fontWeight: 700,
-                color: BLUE,
-                fontFamily: FONT_FAMILY,
-                margin: 0,
-                marginBottom: "24px",
-                letterSpacing: "-0.02em",
-              }}
-            >
-              Start New Chat
-            </h3>
-            <div style={{ marginBottom: "18px" }}>
-              <label
-                style={{
-                  display: "block",
-                  fontSize: "13px",
-                  fontWeight: 700,
-                  color: BLUE,
-                  fontFamily: FONT_FAMILY,
-                  marginBottom: "6px",
-                  letterSpacing: "0.3px",
-                  textTransform: "uppercase",
-                }}
-              >
-                Select Topic
-              </label>
-              <select
-                value={selectedTopic}
-                onChange={(e) => setSelectedTopic(e.target.value)}
-                style={{
-                  width: "100%",
-                  padding: "12px 14px",
-                  border: `1.5px solid rgba(13,60,252,0.2)`,
-                  borderRadius: "10px",
-                  fontSize: "15px",
-                  fontFamily: FONT_FAMILY,
-                  outline: "none",
-                  color: BLUE,
-                  fontWeight: 600,
-                  backgroundColor: WHITE,
-                  cursor: "pointer",
-                  boxSizing: "border-box",
-                }}
-              >
-                <option value="">-- Select topic --</option>
-                {topics.map((t) => (
-                  <option key={t} value={t}>
-                    {t}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div style={{ display: "flex", gap: "12px" }}>
-              <button
-                onClick={() => {
-                  setShowStartChat(false);
-                  setSelectedTopic("");
-                }}
-                style={{
-                  flex: 1,
-                  padding: "12px",
-                  backgroundColor: "transparent",
-                  color: "#666",
-                  border: "1.5px solid #ddd",
-                  borderRadius: "10px",
-                  fontSize: "14px",
-                  fontWeight: 700,
-                  cursor: "pointer",
-                  fontFamily: FONT_FAMILY,
-                }}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={startChat}
-                disabled={!selectedTopic}
-                style={{
-                  flex: 1,
-                  padding: "12px",
-                  backgroundColor: selectedTopic ? BLUE : "#ccc",
-                  color: WHITE,
-                  border: "none",
-                  borderRadius: "10px",
-                  fontSize: "14px",
-                  fontWeight: 800,
-                  cursor: selectedTopic ? "pointer" : "not-allowed",
-                  fontFamily: FONT_FAMILY,
-                  letterSpacing: "0.5px",
-                  textTransform: "uppercase",
-                }}
-              >
-                Start Chat
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
@@ -4369,18 +3177,14 @@ export default function LiveChatPage(): React.JSX.Element {
         }
         .chat-messages-container::-webkit-scrollbar,
         .chat-list-container::-webkit-scrollbar,
-        .chat-list-container > div::-webkit-scrollbar,
-        .online-panel-container::-webkit-scrollbar,
-        .online-panel-container > div::-webkit-scrollbar {
+        .chat-list-container > div::-webkit-scrollbar {
           display: none !important;
           width: 0 !important;
           height: 0 !important;
         }
         .chat-messages-container,
         .chat-list-container,
-        .chat-list-container > div,
-        .online-panel-container,
-        .online-panel-container > div {
+        .chat-list-container > div {
           scrollbar-width: none !important;
           -ms-overflow-style: none !important;
         }
