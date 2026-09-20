@@ -21,6 +21,8 @@ import {
   limit,
   deleteDoc,
   getDocs,
+  writeBatch,
+  arrayUnion,
 } from "firebase/firestore";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -340,6 +342,22 @@ const STATUS_STYLES: {
     text: WHITE,
     border: WHITE,
   },
+};
+
+// ===== TOPIC STYLES =====
+const TOPIC_STYLES: {
+  [key: string]: {
+    bg: string;
+    text: string;
+    border: string;
+  };
+} = {
+  "Product Inquiry": { bg: WHITE, text: BLUE, border: BLUE },
+  "Technical Support": { bg: BLACK, text: WHITE, border: WHITE },
+  "Account Issues": { bg: WHITE, text: BLUE, border: BLUE },
+  "Donation": { bg: BLACK, text: WHITE, border: WHITE },
+  "Partnership": { bg: WHITE, text: BLUE, border: BLUE },
+  "Other": { bg: BLACK, text: WHITE, border: WHITE },
 };
 
 // ===== SVG ICONS =====
@@ -1139,7 +1157,10 @@ interface Ticket {
   userName: string;
   userEmail: string;
   userPhoto?: string;
+  agentId?: string;
+  agentName?: string;
   status: "waiting" | "active" | "resolved" | "closed";
+  topic: string;
   createdAt: any;
   lastMessage?: string;
   lastMessageTime?: any;
@@ -1164,38 +1185,51 @@ interface ChatMessage {
   deliveryStatus?: "sending" | "sent" | "delivered" | "read" | "failed";
 }
 
-interface FirebaseUser {
+interface OnlineUser {
   uid: string;
   displayName: string;
   email: string;
   photoURL?: string;
-  online?: boolean;
+  online: boolean;
   lastSeen?: any;
-  bio?: string;
-  createdAt?: any;
+  isAgent?: boolean;
 }
 
 interface LastMessagePreview {
   text: string;
   senderName: string;
   timestamp: any;
-  isFromMe: boolean;
+  isFromAgent: boolean;
 }
 
-// ===== LIVE CHAT COMPONENT (BIASA) =====
+interface ChatContact {
+  id: string;
+  userId: string;
+  userName: string;
+  userEmail: string;
+  userPhoto?: string;
+  addedAt: any;
+  addedBy: string;
+}
+
+// ===== LIVE CHAT COMPONENT (BIASA - BUKAN AGENT) =====
 const LiveChat = ({
   user,
   db,
   auth,
+  isAdmin,
 }: {
   user: any;
   db: any;
   auth: any;
+  isAdmin: boolean;
 }) => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [messageText, setMessageText] = useState("");
+  const [showStartChat, setShowStartChat] = useState(false);
+  const [selectedTopic, setSelectedTopic] = useState("");
   const [isMounted, setIsMounted] = useState(false);
   const [banMessage, setBanMessage] = useState<string | null>(null);
   const [isBanned, setIsBanned] = useState(false);
@@ -1205,30 +1239,50 @@ const LiveChat = ({
   const [canCreateTicket, setCanCreateTicket] = useState(true);
   const [canSendMessage, setCanSendMessage] = useState(true);
 
+  const [onlineAgents, setOnlineAgents] = useState<OnlineUser[]>([]);
+  const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
   const [ticketPreviews, setTicketPreviews] = useState<{ [ticketId: string]: LastMessagePreview[] }>({});
   const [ticketMsgCounts, setTicketMsgCounts] = useState<{ [ticketId: string]: number }>({});
   const [searchQuery, setSearchQuery] = useState("");
 
+  const [latestRollingMessage, setLatestRollingMessage] = useState<LastMessagePreview | null>(null);
+  const [rollingKey, setRollingKey] = useState(0);
+
   const [showCloseConfirm, setShowCloseConfirm] = useState(false);
 
-  // ===== ALL FIREBASE USERS =====
-  const [allUsers, setAllUsers] = useState<FirebaseUser[]>([]);
-  const [showUserPicker, setShowUserPicker] = useState(false);
-  const [userSearchQuery, setUserSearchQuery] = useState("");
+  // ===== ADD USER CONTACTS STATE =====
+  const [contacts, setContacts] = useState<ChatContact[]>([]);
+  const [showAddUserModal, setShowAddUserModal] = useState(false);
+  const [newContactName, setNewContactName] = useState("");
+  const [newContactEmail, setNewContactEmail] = useState("");
+  const [addingUser, setAddingUser] = useState(false);
+  const [addUserError, setAddUserError] = useState("");
+  const [addUserSuccess, setAddUserSuccess] = useState(false);
 
-  // GSAP refs
+  // GSAP refs for animations
   const addButtonRef = useRef<HTMLButtonElement>(null);
+  const addModalRef = useRef<HTMLDivElement>(null);
+  const addModalContentRef = useRef<HTMLDivElement>(null);
+  const contactItemRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const plusIconRef = useRef<SVGSVGElement>(null);
-  const userPickerRef = useRef<HTMLDivElement>(null);
-  const userItemRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatMessagesContainerRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const liveChatTitleRef = useRef<HTMLHeadingElement>(null);
   const prevMessagesLenRef = useRef<number>(0);
+  const prevContactsLenRef = useRef<number>(0);
 
   const messagesCacheRef = useRef<{ [ticketId: string]: ChatMessage[] }>({});
+
+  const topics = [
+    "Product Inquiry",
+    "Technical Support",
+    "Account Issues",
+    "Donation",
+    "Partnership",
+    "Other",
+  ];
 
   useEffect(() => {
     setIsMounted(true);
@@ -1271,7 +1325,7 @@ const LiveChat = ({
     };
   }, [isMounted]);
 
-  // GSAP: Add User button animation
+  // GSAP: Animate Add User button on mount
   useEffect(() => {
     if (!isMounted) return;
     if (addButtonRef.current) {
@@ -1298,28 +1352,66 @@ const LiveChat = ({
     }
   }, [isMounted]);
 
-  // GSAP: User picker open/close
+  // GSAP: Animate contacts on change
   useEffect(() => {
-    if (!userPickerRef.current) return;
-    if (showUserPicker) {
-      gsap.set(userPickerRef.current, { display: "flex" });
+    if (!isMounted) return;
+    const contactIds = contacts.map((c) => c.id);
+    const newIds = contactIds.filter((id) => !contactItemRefs.current[id]);
+
+    newIds.forEach((id) => {
+      const el = contactItemRefs.current[id];
+      if (el) {
+        gsap.fromTo(
+          el,
+          { x: -80, opacity: 0, scale: 0.8, rotation: -5 },
+          {
+            x: 0,
+            opacity: 1,
+            scale: 1,
+            rotation: 0,
+            duration: 0.6,
+            ease: "back.out(1.4)",
+          }
+        );
+      }
+    });
+  }, [contacts, isMounted]);
+
+  // GSAP: Animate Add User Modal open/close
+  useEffect(() => {
+    if (!addModalRef.current) return;
+    if (showAddUserModal) {
+      gsap.set(addModalRef.current, { display: "flex" });
       gsap.fromTo(
-        userPickerRef.current,
-        { opacity: 0, y: 20 },
-        { opacity: 1, y: 0, duration: 0.35, ease: "power2.out" }
+        addModalRef.current,
+        { opacity: 0 },
+        { opacity: 1, duration: 0.3, ease: "power2.out" }
       );
+      if (addModalContentRef.current) {
+        gsap.fromTo(
+          addModalContentRef.current,
+          { y: -60, scale: 0.9, opacity: 0, rotationX: -15 },
+          {
+            y: 0,
+            scale: 1,
+            opacity: 1,
+            rotationX: 0,
+            duration: 0.6,
+            ease: "back.out(1.5)",
+          }
+        );
+      }
     } else {
-      gsap.to(userPickerRef.current, {
+      gsap.to(addModalRef.current, {
         opacity: 0,
-        y: 20,
         duration: 0.25,
         ease: "power2.in",
         onComplete: () => {
-          if (userPickerRef.current) gsap.set(userPickerRef.current, { display: "none" });
+          if (addModalRef.current) gsap.set(addModalRef.current, { display: "none" });
         },
       });
     }
-  }, [showUserPicker]);
+  }, [showAddUserModal]);
 
   useEffect(() => {
     if (!user || !isMounted) {
@@ -1371,41 +1463,203 @@ const LiveChat = ({
     }
   };
 
-  // ===== LOAD ALL FIREBASE USERS =====
+  // ===== LOAD CONTACTS =====
   useEffect(() => {
     if (!db || !user || !isMounted) return;
-    const q = query(collection(db, "users"), limit(100));
+    const q = query(
+      collection(db, "chat_contacts"),
+      where("addedBy", "==", user.uid),
+      orderBy("addedAt", "desc")
+    );
     const unsubscribe = onSnapshot(q, (snapshot: any) => {
-      const users: FirebaseUser[] = [];
+      const contactList: ChatContact[] = [];
       snapshot.forEach((docSnap: any) => {
-        const data = docSnap.data();
-        if (docSnap.id !== user.uid) {
-          users.push({
-            uid: docSnap.id,
-            displayName: data.displayName || data.name || data.email || "User",
-            email: data.email || "",
-            photoURL: data.photoURL || "",
-            online: data.online || false,
-            lastSeen: data.lastSeen,
-            bio: data.bio || "",
-            createdAt: data.createdAt,
-          });
-        }
+        contactList.push({ id: docSnap.id, ...docSnap.data() } as ChatContact);
       });
-      setAllUsers(users);
+      setContacts(contactList);
     });
     return () => unsubscribe();
   }, [db, user, isMounted]);
+
+  // ===== ADD CONTACT =====
+  const handleAddContact = async () => {
+    if (!db || !user) return;
+    setAddUserError("");
+    if (!newContactName.trim()) {
+      setAddUserError("Name is required");
+      return;
+    }
+    if (!newContactEmail.trim() || !newContactEmail.includes("@")) {
+      setAddUserError("Valid email is required");
+      return;
+    }
+    setAddingUser(true);
+    try {
+      // Check if contact already exists
+      const existing = contacts.find(
+        (c) => c.userEmail.toLowerCase() === newContactEmail.trim().toLowerCase()
+      );
+      if (existing) {
+        setAddUserError("This contact already exists");
+        setAddingUser(false);
+        return;
+      }
+
+      await addDoc(collection(db, "chat_contacts"), {
+        userId: user.uid,
+        userName: newContactName.trim(),
+        userEmail: newContactEmail.trim().toLowerCase(),
+        userPhoto: "",
+        addedAt: serverTimestamp(),
+        addedBy: user.uid,
+      });
+
+      setAddUserSuccess(true);
+      setNewContactName("");
+      setNewContactEmail("");
+      setTimeout(() => {
+        setAddUserSuccess(false);
+        setShowAddUserModal(false);
+      }, 1200);
+    } catch (error) {
+      console.error("Error adding contact:", error);
+      setAddUserError("Failed to add contact. Please try again.");
+    } finally {
+      setAddingUser(false);
+    }
+  };
+
+  // ===== DELETE CONTACT =====
+  const handleDeleteContact = async (contactId: string) => {
+    if (!db) return;
+    const el = contactItemRefs.current[contactId];
+    if (el) {
+      gsap.to(el, {
+        x: 100,
+        opacity: 0,
+        scale: 0.8,
+        duration: 0.4,
+        ease: "power2.in",
+        onComplete: async () => {
+          try {
+            await deleteDoc(doc(db, "chat_contacts", contactId));
+          } catch (error) {
+            console.error("Error deleting contact:", error);
+          }
+        },
+      });
+    } else {
+      try {
+        await deleteDoc(doc(db, "chat_contacts", contactId));
+      } catch (error) {
+        console.error("Error deleting contact:", error);
+      }
+    }
+  };
+
+  // ===== START CHAT WITH CONTACT =====
+  const startChatWithContact = async (contact: ChatContact) => {
+    if (!db || !user || !encryptionReady) return;
+    const isBannedNow = await checkBanBeforeAction();
+    if (isBannedNow) return;
+    if (!canCreateTicket) {
+      setBanMessage("YOU DO NOT HAVE PERMISSION TO CREATE A NEW TICKET");
+      return;
+    }
+    const hasActiveTicket = tickets.some(
+      (t) =>
+        t.userId === user.uid &&
+        (t.status === "waiting" || t.status === "active") &&
+        !t.isAnnouncement &&
+        !t.isBroadcast
+    );
+    if (hasActiveTicket) {
+      alert("You still have an active chat. Please wait until it is finished.");
+      return;
+    }
+    try {
+      const ticketRef = await addDoc(collection(db, "livechat_tickets"), {
+        userId: user.uid,
+        userName: contact.userName,
+        userEmail: contact.userEmail,
+        userPhoto: contact.userPhoto || "",
+        status: "waiting",
+        topic: "Other",
+        createdAt: serverTimestamp(),
+        unreadCount: 0,
+        typing: false,
+        typingUserId: null,
+        typingUserName: null,
+        isAnnouncement: false,
+        isBroadcast: false,
+        contactId: contact.id,
+      });
+      const initialMessage = `Hello ${contact.userName}, I would like to chat with you.`;
+      const encryptedMessage = await encryptMessage(initialMessage);
+      await addDoc(collection(db, "livechat_tickets", ticketRef.id, "messages"), {
+        senderId: user.uid,
+        senderName: user.displayName || user.email || "User",
+        text: encryptedMessage,
+        timestamp: serverTimestamp(),
+        read: false,
+        isEncrypted: true,
+        isBotDetected: false,
+        deliveryStatus: "sent",
+      });
+      await updateDoc(ticketRef, {
+        lastMessage: initialMessage,
+        lastMessageTime: serverTimestamp(),
+        lastMessageSender: user.displayName || user.email || "User",
+      });
+      setShowStartChat(false);
+      setBanMessage(null);
+    } catch (error) {
+      console.error("Error starting chat with contact:", error);
+      alert("An error occurred while starting the chat. Please try again.");
+    }
+  };
+
+  // ===== ONLINE USERS LISTENER =====
+  useEffect(() => {
+    if (!db || !isMounted) return;
+    const q = query(collection(db, "users"), where("online", "==", true));
+    const unsubscribe = onSnapshot(q, (snapshot: any) => {
+      const agents: OnlineUser[] = [];
+      const users: OnlineUser[] = [];
+      snapshot.forEach((docSnap: any) => {
+        const data = docSnap.data();
+        const item: OnlineUser = {
+          uid: docSnap.id,
+          displayName: data.displayName || data.name || data.email || "User",
+          email: data.email || "",
+          photoURL: data.photoURL || "",
+          online: data.online || false,
+          lastSeen: data.lastSeen,
+          isAgent: data.email === ADMIN_EMAIL,
+        };
+        if (item.isAgent) agents.push(item);
+        else users.push(item);
+      });
+      setOnlineAgents(agents);
+      setOnlineUsers(users);
+    });
+    return () => unsubscribe();
+  }, [db, isMounted]);
 
   // ===== TICKETS LISTENER =====
   useEffect(() => {
     if (!db || !user || !isMounted) return;
 
-    const q = query(
-      collection(db, "livechat_tickets"),
-      where("userId", "==", user.uid),
-      orderBy("createdAt", "desc")
-    );
+    let q;
+    if (isAdmin) {
+      q = query(collection(db, "livechat_tickets"), orderBy("createdAt", "desc"));
+    } else {
+      q = query(
+        collection(db, "livechat_tickets"),
+        where("userId", "==", user.uid),
+        orderBy("createdAt", "desc")
+      );
+    }
 
     const unsubscribe = onSnapshot(q, (snapshot: any) => {
       const ticketList: Ticket[] = [];
@@ -1421,7 +1675,7 @@ const LiveChat = ({
       });
     });
     return () => unsubscribe();
-  }, [db, user, isMounted]);
+  }, [db, user, isAdmin, isMounted]);
 
   // ===== TICKET PREVIEWS LISTENER =====
   useEffect(() => {
@@ -1451,7 +1705,7 @@ const LiveChat = ({
             text,
             senderName: data.senderName || "User",
             timestamp: data.timestamp,
-            isFromMe: data.senderId === user.uid,
+            isFromAgent: data.senderName === AGENT_NAME,
           });
         }
         setTicketPreviews((prev) => ({ ...prev, [ticket.id]: previews }));
@@ -1461,7 +1715,7 @@ const LiveChat = ({
     return () => {
       unsubscribes.forEach((unsub) => unsub());
     };
-  }, [db, tickets, isMounted, user]);
+  }, [db, tickets, isMounted]);
 
   // ===== MESSAGES LISTENER =====
   useEffect(() => {
@@ -1496,17 +1750,30 @@ const LiveChat = ({
 
       const newLen = msgList.length;
       if (prevMessagesLenRef.current > 0 && newLen > prevMessagesLenRef.current) {
-        setTimeout(() => {
-          const msgElements = chatMessagesContainerRef.current?.querySelectorAll("[data-msg-id]");
-          if (msgElements && msgElements.length > 0) {
-            const lastEl = msgElements[msgElements.length - 1];
-            gsap.fromTo(
-              lastEl,
-              { y: 30, opacity: 0, scale: 0.95 },
-              { y: 0, opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.5)" }
-            );
-          }
-        }, 50);
+        const newestMsg = msgList[newLen - 1];
+        if (newestMsg) {
+          const isFromAgentMsg = newestMsg.senderName === AGENT_NAME;
+          setLatestRollingMessage({
+            text: newestMsg.text,
+            senderName: newestMsg.senderName || "User",
+            timestamp: newestMsg.timestamp,
+            isFromAgent: isFromAgentMsg,
+          });
+          setRollingKey((k) => k + 1);
+
+          // GSAP: Animate new message
+          setTimeout(() => {
+            const msgElements = chatMessagesContainerRef.current?.querySelectorAll("[data-msg-id]");
+            if (msgElements && msgElements.length > 0) {
+              const lastEl = msgElements[msgElements.length - 1];
+              gsap.fromTo(
+                lastEl,
+                { y: 30, opacity: 0, scale: 0.95 },
+                { y: 0, opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.5)" }
+              );
+            }
+          }, 50);
+        }
       }
       prevMessagesLenRef.current = newLen;
 
@@ -1523,6 +1790,7 @@ const LiveChat = ({
   }, [db, selectedTicket, isMounted]);
 
   useEffect(() => {
+    setLatestRollingMessage(null);
     prevMessagesLenRef.current = messagesCacheRef.current[selectedTicket?.id || ""]?.length || 0;
     setShowCloseConfirm(false);
   }, [selectedTicket?.id]);
@@ -1539,7 +1807,7 @@ const LiveChat = ({
 
   const hasAutoSelectedRef = useRef(false);
   useEffect(() => {
-    if (!user || !isMounted) return;
+    if (!user || isAdmin || !isMounted) return;
     if (hasAutoSelectedRef.current) return;
     if (selectedTicket) {
       hasAutoSelectedRef.current = true;
@@ -1555,7 +1823,7 @@ const LiveChat = ({
       setSelectedTicket(userTickets[0]);
       hasAutoSelectedRef.current = true;
     }
-  }, [tickets, user, selectedTicket, isMounted]);
+  }, [tickets, user, isAdmin, selectedTicket, isMounted]);
 
   const generateTicketId = useCallback((createdAt: any): string => {
     if (!createdAt) return "#TICKET-0000";
@@ -1601,6 +1869,7 @@ const LiveChat = ({
       return list.filter((ticket) => {
         if (ticket.userName?.toLowerCase().includes(q)) return true;
         if (ticket.userEmail?.toLowerCase().includes(q)) return true;
+        if (ticket.topic?.toLowerCase().includes(q)) return true;
         if (generateTicketId(ticket.createdAt).toLowerCase().includes(q)) return true;
         const previews = ticketPreviews[ticket.id] || [];
         for (const p of previews) {
@@ -1640,41 +1909,40 @@ const LiveChat = ({
     }, 2000);
   };
 
-  // ===== START CHAT WITH FIREBASE USER =====
-  const startChatWithUser = async (targetUser: FirebaseUser) => {
-    if (!db || !user || !encryptionReady) return;
+  const startChat = async () => {
+    if (!db || !user || !selectedTopic) return;
     const isBannedNow = await checkBanBeforeAction();
     if (isBannedNow) {
-      setShowUserPicker(false);
+      setShowStartChat(false);
       return;
     }
     if (!canCreateTicket) {
       setBanMessage("YOU DO NOT HAVE PERMISSION TO CREATE A NEW TICKET");
-      setShowUserPicker(false);
       return;
     }
-
-    // Check if there's already an active ticket with this user
-    const existingTicket = tickets.find(
+    if (!encryptionReady) {
+      alert("Encryption is being initialized, please wait a moment.");
+      return;
+    }
+    const hasActiveTicket = tickets.some(
       (t) =>
         t.userId === user.uid &&
         (t.status === "waiting" || t.status === "active") &&
-        t.userEmail === targetUser.email
+        !t.isAnnouncement &&
+        !t.isBroadcast
     );
-
-    if (existingTicket) {
-      setSelectedTicket(existingTicket);
-      setShowUserPicker(false);
+    if (hasActiveTicket) {
+      alert("You still have an active chat with an agent. Please wait until it is finished.");
       return;
     }
-
     try {
       const ticketRef = await addDoc(collection(db, "livechat_tickets"), {
         userId: user.uid,
-        userName: targetUser.displayName,
-        userEmail: targetUser.email,
-        userPhoto: targetUser.photoURL || "",
-        status: "active",
+        userName: user.displayName || user.email || "User",
+        userEmail: user.email,
+        userPhoto: user.photoURL || "",
+        status: "waiting",
+        topic: selectedTopic,
         createdAt: serverTimestamp(),
         unreadCount: 0,
         typing: false,
@@ -1682,10 +1950,8 @@ const LiveChat = ({
         typingUserName: null,
         isAnnouncement: false,
         isBroadcast: false,
-        targetUserId: targetUser.uid,
       });
-
-      const initialMessage = `Hello ${targetUser.displayName}, let's start a conversation!`;
+      const initialMessage = `Hello, I would like to ask about: ${selectedTopic}`;
       const encryptedMessage = await encryptMessage(initialMessage);
       await addDoc(collection(db, "livechat_tickets", ticketRef.id, "messages"), {
         senderId: user.uid,
@@ -1697,14 +1963,13 @@ const LiveChat = ({
         isBotDetected: false,
         deliveryStatus: "sent",
       });
-
       await updateDoc(ticketRef, {
         lastMessage: initialMessage,
         lastMessageTime: serverTimestamp(),
         lastMessageSender: user.displayName || user.email || "User",
       });
-
-      setShowUserPicker(false);
+      setSelectedTopic("");
+      setShowStartChat(false);
       setBanMessage(null);
       hasAutoSelectedRef.current = false;
     } catch (error) {
@@ -1755,7 +2020,7 @@ const LiveChat = ({
     try {
       const ticketRef = doc(db, "livechat_tickets", selectedTicket.id);
       await updateDoc(ticketRef, { typing: false, typingUserId: null, typingUserName: null });
-      const senderName = user.displayName || user.email || "User";
+      const senderName = isAdmin ? AGENT_NAME : user.displayName || user.email || "User";
       const encryptedMessage = await encryptMessage(messageText.trim());
       await addDoc(collection(db, "livechat_tickets", selectedTicket.id, "messages"), {
         senderId: user.uid,
@@ -1771,7 +2036,9 @@ const LiveChat = ({
         lastMessage: messageText.trim(),
         lastMessageTime: serverTimestamp(),
         lastMessageSender: senderName,
-        status: "active",
+        ...(selectedTicket.status === "waiting" && { status: "active" }),
+        agentId: isAdmin ? user.uid : selectedTicket.agentId,
+        agentName: isAdmin ? AGENT_NAME : selectedTicket.agentName,
       });
       setMessageText("");
       setBanMessage(null);
@@ -1828,6 +2095,141 @@ const LiveChat = ({
     );
   };
 
+  const renderOnlinePanel = () => {
+    const list = isAdmin ? onlineUsers : onlineAgents;
+    const title = isAdmin ? "Online Users" : "Online Agents";
+    const emptyText = isAdmin ? "No users online" : "No agents online";
+    return (
+      <div
+        className="online-panel-container"
+        style={{
+          width: "260px",
+          backgroundColor: "#ffffff",
+          borderRadius: "12px",
+          border: "1px solid rgba(0,0,0,0.08)",
+          flexShrink: 0,
+          height: "700px",
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+        }}
+      >
+        <div
+          style={{
+            padding: "14px 16px",
+            backgroundColor: BLUE,
+            color: WHITE,
+            fontWeight: 700,
+            fontSize: "14px",
+            fontFamily: FONT_FAMILY,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexShrink: 0,
+          }}
+        >
+          <span>{title}</span>
+          <span
+            style={{
+              fontSize: "11px",
+              color: WHITE,
+              padding: "2px 8px",
+              borderRadius: "4px",
+              border: `1.5px solid ${WHITE}`,
+              fontWeight: 700,
+              letterSpacing: "0.5px",
+            }}
+          >
+            {list.length}
+          </span>
+        </div>
+        <div style={{ overflowY: "auto", flex: 1, minHeight: 0 }}>
+          {list.length === 0 ? (
+            <div
+              style={{
+                padding: "30px 16px",
+                textAlign: "center",
+                color: "#999",
+                fontSize: "13px",
+                fontFamily: FONT_FAMILY,
+              }}
+            >
+              {emptyText}
+            </div>
+          ) : (
+            list.map((u) => (
+              <div
+                key={u.uid}
+                style={{
+                  padding: "12px 16px",
+                  borderBottom: "1px solid #f0f0f0",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                  fontFamily: FONT_FAMILY,
+                }}
+              >
+                <div
+                  style={{
+                    width: "36px",
+                    height: "36px",
+                    borderRadius: "8px",
+                    backgroundColor: BLUE,
+                    color: WHITE,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontWeight: 800,
+                    fontSize: "14px",
+                    overflow: "hidden",
+                    flexShrink: 0,
+                  }}
+                >
+                  {u.photoURL ? (
+                    <img
+                      src={u.photoURL}
+                      alt={u.displayName}
+                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    />
+                  ) : (
+                    u.displayName.charAt(0).toUpperCase()
+                  )}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div
+                    style={{
+                      fontSize: "13px",
+                      fontWeight: 700,
+                      color: "#000",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                      marginBottom: "3px",
+                    }}
+                  >
+                    {u.displayName}
+                  </div>
+                  <span
+                    style={{
+                      display: "inline-block",
+                      fontSize: "10px",
+                      fontWeight: 800,
+                      color: BLUE,
+                      letterSpacing: "0.5px",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    Online
+                  </span>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    );
+  };
+
   const renderTicketPreview = (ticketId: string) => {
     const previews = ticketPreviews[ticketId] || [];
     if (previews.length === 0) return null;
@@ -1861,6 +2263,7 @@ const LiveChat = ({
   };
 
   const renderSearchBar = () => {
+    const isAgentSearch = isAdmin;
     return (
       <div
         style={{
@@ -1875,27 +2278,27 @@ const LiveChat = ({
             alignItems: "center",
             gap: "8px",
             padding: "8px 12px",
-            backgroundColor: "rgba(255,255,255,0.15)",
-            border: "1px solid rgba(255,255,255,0.25)",
+            backgroundColor: isAgentSearch ? "rgba(255,255,255,0.15)" : "#ffffff",
+            border: isAgentSearch ? "1px solid rgba(255,255,255,0.25)" : "1px solid #ffffff",
             borderRadius: "8px",
           }}
         >
-          <SearchIcon size={14} color="#ffffff" />
+          <SearchIcon size={14} color={isAgentSearch ? "#ffffff" : BLUE} />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search chats..."
+            placeholder="Search chats or messages..."
             style={{
               flex: 1,
               background: "transparent",
               border: "none",
               outline: "none",
-              color: "#ffffff",
+              color: isAgentSearch ? "#ffffff" : BLUE,
               fontSize: "12px",
               fontFamily: FONT_FAMILY,
               padding: 0,
-              caretColor: "#ffffff",
+              caretColor: isAgentSearch ? "#ffffff" : BLUE,
               fontWeight: 600,
             }}
           />
@@ -1905,7 +2308,7 @@ const LiveChat = ({
               style={{
                 background: "transparent",
                 border: "none",
-                color: "#ffffff",
+                color: isAgentSearch ? "#ffffff" : BLUE,
                 cursor: "pointer",
                 fontSize: "14px",
                 padding: 0,
@@ -1921,16 +2324,6 @@ const LiveChat = ({
       </div>
     );
   };
-
-  const filteredUsers = useMemo(() => {
-    const q = userSearchQuery.trim().toLowerCase();
-    if (!q) return allUsers;
-    return allUsers.filter(
-      (u) =>
-        u.displayName.toLowerCase().includes(q) ||
-        u.email.toLowerCase().includes(q)
-    );
-  }, [allUsers, userSearchQuery]);
 
   if (checkingBan) {
     return (
@@ -2012,7 +2405,7 @@ const LiveChat = ({
     );
   }
 
-  if (isBanned) {
+  if (!isAdmin && isBanned) {
     return (
       <div style={{ marginTop: "80px", paddingTop: "30px" }}>
         <div
@@ -2084,12 +2477,14 @@ const LiveChat = ({
     );
   }
 
+  const userTickets = tickets.filter((t) => t.userId === user.uid);
   const typingText = selectedTicket ? getTypingText(selectedTicket) : null;
 
   const renderChatListItem = (ticket: Ticket) => {
     const isActive = selectedTicket?.id === ticket.id;
     const ticketId = generateTicketId(ticket.createdAt);
     const statusStyle = STATUS_STYLES[ticket.status] || STATUS_STYLES.active;
+    const topicStyle = TOPIC_STYLES[ticket.topic] || TOPIC_STYLES["Other"];
 
     return (
       <motion.div
@@ -2152,6 +2547,13 @@ const LiveChat = ({
             flexWrap: "wrap",
           }}
         >
+          <StabiloBadge
+            label={ticket.topic}
+            bg={topicStyle.bg}
+            text={topicStyle.text}
+            border={topicStyle.border}
+            size="sm"
+          />
           <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.75)", fontWeight: 700 }}>
             {ticketMsgCounts[ticket.id] || 0} msgs
           </span>
@@ -2208,6 +2610,23 @@ const LiveChat = ({
             paddingTop: "10px",
           }}
         >
+          <span
+            style={{
+              fontSize: "13px",
+              fontWeight: 800,
+              color: onlineAgents.length > 0 ? WHITE : "#999",
+              backgroundColor: onlineAgents.length > 0 ? BLUE : "transparent",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "0.5px",
+              textTransform: "uppercase",
+              padding: onlineAgents.length > 0 ? "4px 10px" : "0",
+              borderRadius: "4px",
+            }}
+          >
+            {onlineAgents.length > 0
+              ? `${onlineAgents.length} Agent${onlineAgents.length !== 1 ? "s" : ""} Online`
+              : "No Agents Online"}
+          </span>
           <button
             onClick={handleLogout}
             style={{
@@ -2240,7 +2659,10 @@ const LiveChat = ({
           borderRadius: "12px",
         }}
       >
-        {/* ===== CHAT LIST ===== */}
+        {/* ===== ONLINE PANEL ===== */}
+        {renderOnlinePanel()}
+
+        {/* ===== CONTACTS + CHAT LIST ===== */}
         <div
           className="chat-list-container"
           style={{
@@ -2284,27 +2706,184 @@ const LiveChat = ({
                 letterSpacing: "0.5px",
               }}
             >
-              {tickets.length}
+              {isAdmin
+                ? tickets.length
+                : tickets.filter((t) => t.userId === user.uid).length}
             </span>
           </div>
+
+          {/* ===== CONTACTS SECTION ===== */}
+          {contacts.length > 0 && (
+            <div
+              style={{
+                borderBottom: "1px solid rgba(255,255,255,0.15)",
+                flexShrink: 0,
+                maxHeight: "220px",
+                overflowY: "auto",
+              }}
+            >
+              <div
+                style={{
+                  padding: "10px 16px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: "11px",
+                    fontWeight: 800,
+                    color: "rgba(255,255,255,0.8)",
+                    letterSpacing: "0.5px",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Contacts ({contacts.length})
+                </span>
+              </div>
+              <AnimatePresence>
+                {contacts.map((contact) => (
+                  <motion.div
+                    key={contact.id}
+                    ref={(el) => {
+                      contactItemRefs.current[contact.id] = el;
+                    }}
+                    initial={{ opacity: 0, x: -80, scale: 0.8 }}
+                    animate={{ opacity: 1, x: 0, scale: 1 }}
+                    exit={{ opacity: 0, x: 100, scale: 0.8 }}
+                    transition={{ duration: 0.4, ease: "easeOut" }}
+                    style={{
+                      padding: "10px 16px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                      cursor: "pointer",
+                      borderBottom: "1px solid rgba(255,255,255,0.06)",
+                      transition: "background-color 0.2s ease",
+                    }}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLDivElement).style.backgroundColor =
+                        "rgba(255,255,255,0.08)";
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLDivElement).style.backgroundColor =
+                        "transparent";
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: "32px",
+                        height: "32px",
+                        borderRadius: "8px",
+                        backgroundColor: WHITE,
+                        color: BLUE,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontWeight: 800,
+                        fontSize: "13px",
+                        flexShrink: 0,
+                      }}
+                    >
+                      {contact.userName.charAt(0).toUpperCase()}
+                    </div>
+                    <div
+                      style={{
+                        flex: 1,
+                        minWidth: 0,
+                      }}
+                      onClick={() => startChatWithContact(contact)}
+                    >
+                      <div
+                        style={{
+                          fontSize: "13px",
+                          fontWeight: 700,
+                          color: WHITE,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {contact.userName}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: "10px",
+                          color: "rgba(255,255,255,0.6)",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {contact.userEmail}
+                      </div>
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteContact(contact.id);
+                      }}
+                      style={{
+                        background: "transparent",
+                        border: "none",
+                        cursor: "pointer",
+                        padding: "4px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        opacity: 0.6,
+                        transition: "opacity 0.2s",
+                      }}
+                      onMouseEnter={(e) => (e.currentTarget.style.opacity = "1")}
+                      onMouseLeave={(e) => (e.currentTarget.style.opacity = "0.6")}
+                    >
+                      <CloseIcon size={14} color={WHITE} />
+                    </button>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+          )}
 
           {renderSearchBar()}
 
           <div style={{ overflowY: "auto", flex: 1, minHeight: 0 }}>
-            <AnimatePresence>
-              {filterTicketsBySearch(tickets).map((ticket) => renderChatListItem(ticket))}
-            </AnimatePresence>
-            {filterTicketsBySearch(tickets).length === 0 && (
-              <div
-                style={{
-                  padding: "30px 16px",
-                  textAlign: "center",
-                  color: WHITE,
-                  fontSize: "13px",
-                }}
-              >
-                {searchQuery ? "No results found" : "No chats yet"}
-              </div>
+            {isAdmin ? (
+              <>
+                {filterTicketsBySearch(tickets).map((ticket) => renderChatListItem(ticket))}
+                {filterTicketsBySearch(tickets).length === 0 && (
+                  <div
+                    style={{
+                      padding: "30px 16px",
+                      textAlign: "center",
+                      color: WHITE,
+                      fontSize: "13px",
+                    }}
+                  >
+                    {searchQuery ? "No results found" : "No incoming chats"}
+                  </div>
+                )}
+              </>
+            ) : (
+              <>
+                {filterTicketsBySearch(tickets.filter((t) => t.userId === user.uid)).map(
+                  (ticket) => renderChatListItem(ticket)
+                )}
+                {filterTicketsBySearch(tickets.filter((t) => t.userId === user.uid))
+                  .length === 0 && (
+                  <div
+                    style={{
+                      padding: "30px 16px",
+                      textAlign: "center",
+                      color: WHITE,
+                      fontSize: "13px",
+                    }}
+                  >
+                    {searchQuery ? "No results found" : "No chats yet"}
+                  </div>
+                )}
+              </>
             )}
           </div>
 
@@ -2315,18 +2894,19 @@ const LiveChat = ({
               borderTop: "1px solid rgba(255,255,255,0.1)",
               flexShrink: 0,
               backgroundColor: BLUE,
-              position: "relative",
+              display: "flex",
+              gap: "10px",
             }}
           >
             <button
               ref={addButtonRef}
-              onClick={() => setShowUserPicker((prev) => !prev)}
+              onClick={() => setShowAddUserModal(true)}
               style={{
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 gap: "8px",
-                width: "100%",
+                flex: 1,
                 padding: "10px",
                 backgroundColor: WHITE,
                 color: BLUE,
@@ -2376,161 +2956,27 @@ const LiveChat = ({
               </svg>
               Add User
             </button>
-
-            {/* ===== USER PICKER (DROPDOWN) ===== */}
-            <div
-              ref={userPickerRef}
-              style={{
-                display: "none",
-                position: "absolute",
-                bottom: "calc(100% + 10px)",
-                left: "12px",
-                right: "12px",
-                backgroundColor: WHITE,
-                borderRadius: "12px",
-                boxShadow: "0 8px 32px rgba(0,0,0,0.25)",
-                overflow: "hidden",
-                zIndex: 100,
-                flexDirection: "column",
-                maxHeight: "400px",
-              }}
-            >
-              <div
+            {!isAdmin && (
+              <button
+                onClick={() => setShowStartChat(true)}
                 style={{
-                  padding: "12px 14px",
-                  borderBottom: `1px solid rgba(13,60,252,0.1)`,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
+                  padding: "10px 14px",
+                  backgroundColor: "transparent",
+                  color: WHITE,
+                  border: `1.5px solid ${WHITE}`,
+                  borderRadius: "8px",
+                  fontSize: "13px",
+                  fontWeight: 800,
+                  cursor: "pointer",
+                  fontFamily: FONT_FAMILY,
+                  letterSpacing: "0.5px",
+                  textTransform: "uppercase",
+                  flexShrink: 0,
                 }}
               >
-                <SearchIcon size={14} color={BLUE} />
-                <input
-                  type="text"
-                  value={userSearchQuery}
-                  onChange={(e) => setUserSearchQuery(e.target.value)}
-                  placeholder="Search users..."
-                  style={{
-                    flex: 1,
-                    background: "transparent",
-                    border: "none",
-                    outline: "none",
-                    color: BLUE,
-                    fontSize: "13px",
-                    fontFamily: FONT_FAMILY,
-                    padding: 0,
-                    caretColor: BLUE,
-                    fontWeight: 600,
-                  }}
-                />
-              </div>
-              <div style={{ overflowY: "auto", flex: 1, maxHeight: "340px" }}>
-                {filteredUsers.length === 0 ? (
-                  <div
-                    style={{
-                      padding: "24px 14px",
-                      textAlign: "center",
-                      color: "#999",
-                      fontSize: "12px",
-                      fontFamily: FONT_FAMILY,
-                    }}
-                  >
-                    No users found
-                  </div>
-                ) : (
-                  filteredUsers.map((u, idx) => (
-                    <motion.div
-                      key={u.uid}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.25, delay: idx * 0.03 }}
-                      onClick={() => startChatWithUser(u)}
-                      style={{
-                        padding: "10px 14px",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "10px",
-                        cursor: "pointer",
-                        borderBottom: "1px solid rgba(0,0,0,0.04)",
-                        transition: "background-color 0.2s",
-                      }}
-                      onMouseEnter={(e) => {
-                        (e.currentTarget as HTMLDivElement).style.backgroundColor =
-                          "rgba(13,60,252,0.06)";
-                      }}
-                      onMouseLeave={(e) => {
-                        (e.currentTarget as HTMLDivElement).style.backgroundColor =
-                          "transparent";
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: "36px",
-                          height: "36px",
-                          borderRadius: "8px",
-                          backgroundColor: BLUE,
-                          color: WHITE,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          fontWeight: 800,
-                          fontSize: "14px",
-                          overflow: "hidden",
-                          flexShrink: 0,
-                        }}
-                      >
-                        {u.photoURL ? (
-                          <img
-                            src={u.photoURL}
-                            alt={u.displayName}
-                            style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                          />
-                        ) : (
-                          u.displayName.charAt(0).toUpperCase()
-                        )}
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div
-                          style={{
-                            fontSize: "13px",
-                            fontWeight: 700,
-                            color: BLACK,
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
-                            marginBottom: "2px",
-                          }}
-                        >
-                          {u.displayName}
-                        </div>
-                        <div
-                          style={{
-                            fontSize: "11px",
-                            color: "#666",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
-                          }}
-                        >
-                          {u.email}
-                        </div>
-                      </div>
-                      {u.online && (
-                        <span
-                          style={{
-                            width: "8px",
-                            height: "8px",
-                            borderRadius: "50%",
-                            backgroundColor: "#22c55e",
-                            flexShrink: 0,
-                          }}
-                        />
-                      )}
-                    </motion.div>
-                  ))
-                )}
-              </div>
-            </div>
+                + Chat
+              </button>
+            )}
           </div>
         </div>
 
@@ -2597,6 +3043,20 @@ const LiveChat = ({
                       }
                       size="sm"
                     />
+                    <StabiloBadge
+                      label={selectedTicket.topic}
+                      bg={
+                        (TOPIC_STYLES[selectedTicket.topic] || TOPIC_STYLES["Other"]).bg
+                      }
+                      text={
+                        (TOPIC_STYLES[selectedTicket.topic] || TOPIC_STYLES["Other"]).text
+                      }
+                      border={
+                        (TOPIC_STYLES[selectedTicket.topic] || TOPIC_STYLES["Other"])
+                          .border
+                      }
+                      size="sm"
+                    />
                     {selectedTicket.typing && selectedTicket.status !== "resolved" && (
                       <span
                         style={{
@@ -2623,6 +3083,33 @@ const LiveChat = ({
                 </div>
 
                 <div style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
+                  {isAdmin &&
+                    selectedTicket.status !== "resolved" &&
+                    selectedTicket.status !== "closed" && (
+                      <button
+                        onClick={async () => {
+                          if (!db) return;
+                          await updateDoc(doc(db, "livechat_tickets", selectedTicket.id), {
+                            status: "resolved",
+                          });
+                        }}
+                        style={{
+                          padding: "8px 16px",
+                          backgroundColor: WHITE,
+                          color: BLUE,
+                          border: `1.5px solid ${WHITE}`,
+                          borderRadius: "8px",
+                          fontSize: "12px",
+                          fontWeight: 800,
+                          cursor: "pointer",
+                          fontFamily: FONT_FAMILY,
+                          letterSpacing: "0.5px",
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        Resolve
+                      </button>
+                    )}
                   {selectedTicket.status !== "closed" && (
                     <button
                       onClick={handleCloseRoom}
@@ -2672,7 +3159,7 @@ const LiveChat = ({
                       textTransform: "uppercase",
                     }}
                   >
-                    Info
+                    Peringatan
                   </span>
                   <span style={{ fontSize: "13px", color: BLUE, fontWeight: 600 }}>
                     Room chat berhasil ditutup. Buat room baru untuk melanjutkan.
@@ -2811,7 +3298,12 @@ const LiveChat = ({
                         sendMessage();
                       }
                     }}
-                    placeholder="Type a message..."
+                    placeholder={
+                      selectedTicket.status === "waiting" && !isAdmin
+                        ? "Waiting for agent..."
+                        : "Type a message..."
+                    }
+                    disabled={selectedTicket.status === "waiting" && !isAdmin}
                     style={{
                       flex: 1,
                       padding: "12px 16px",
@@ -2820,19 +3312,33 @@ const LiveChat = ({
                       fontSize: "15px",
                       outline: "none",
                       fontFamily: FONT_FAMILY,
-                      backgroundColor: WHITE,
+                      backgroundColor:
+                        selectedTicket.status === "waiting" && !isAdmin
+                          ? "#f5f5f5"
+                          : WHITE,
                     }}
                   />
                   <button
                     onClick={sendMessage}
-                    disabled={!messageText.trim()}
+                    disabled={
+                      (selectedTicket.status === "waiting" && !isAdmin) ||
+                      !messageText.trim()
+                    }
                     style={{
                       padding: "12px 24px",
-                      backgroundColor: !messageText.trim() ? "#ccc" : BLUE,
+                      backgroundColor:
+                        (selectedTicket.status === "waiting" && !isAdmin) ||
+                        !messageText.trim()
+                          ? "#ccc"
+                          : BLUE,
                       color: WHITE,
                       border: "none",
                       borderRadius: "10px",
-                      cursor: !messageText.trim() ? "not-allowed" : "pointer",
+                      cursor:
+                        (selectedTicket.status === "waiting" && !isAdmin) ||
+                        !messageText.trim()
+                          ? "not-allowed"
+                          : "pointer",
                       fontFamily: FONT_FAMILY,
                       fontSize: "14px",
                       fontWeight: 800,
@@ -2868,23 +3374,455 @@ const LiveChat = ({
               style={{
                 flex: 1,
                 display: "flex",
-                flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
                 color: "#999",
                 fontSize: "15px",
                 fontFamily: FONT_FAMILY,
-                gap: "16px",
               }}
             >
-              <span>Select a chat from the list on the left</span>
-              <span style={{ fontSize: "13px", color: "#bbb" }}>
-                or click "Add User" to start a new conversation
-              </span>
+              Select a chat from the list on the left
             </div>
           )}
         </div>
       </div>
+
+      {/* ===== ADD USER MODAL (GSAP) ===== */}
+      {showAddUserModal && (
+        <div
+          ref={addModalRef}
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0,0,0,0.6)",
+            backdropFilter: "blur(8px)",
+            WebkitBackdropFilter: "blur(8px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 99999,
+            fontFamily: FONT_FAMILY,
+          }}
+          onClick={(e) => {
+            if (e.target === addModalRef.current) setShowAddUserModal(false);
+          }}
+        >
+          <div
+            ref={addModalContentRef}
+            style={{
+              backgroundColor: WHITE,
+              borderRadius: "16px",
+              padding: "32px",
+              width: "90%",
+              maxWidth: "440px",
+              boxShadow: "0 24px 64px rgba(0,0,0,0.3)",
+              position: "relative",
+              overflow: "hidden",
+            }}
+          >
+            {/* Decorative gradient bar */}
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                height: "4px",
+                background: `linear-gradient(90deg, ${BLUE}, #6B8CFF, ${BLUE})`,
+              }}
+            />
+
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginBottom: "24px",
+              }}
+            >
+              <h3
+                style={{
+                  fontSize: "24px",
+                  fontWeight: 700,
+                  color: BLUE,
+                  fontFamily: FONT_FAMILY,
+                  margin: 0,
+                  letterSpacing: "-0.02em",
+                }}
+              >
+                Add New User
+              </h3>
+              <button
+                onClick={() => setShowAddUserModal(false)}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  cursor: "pointer",
+                  padding: "4px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  borderRadius: "8px",
+                  transition: "background-color 0.2s",
+                }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.05)")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.backgroundColor = "transparent")
+                }
+              >
+                <CloseIcon size={20} color={BLUE} />
+              </button>
+            </div>
+
+            {addUserSuccess ? (
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.4, ease: "backOut" }}
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: "16px",
+                  padding: "20px 0",
+                }}
+              >
+                <div
+                  style={{
+                    width: "64px",
+                    height: "64px",
+                    borderRadius: "50%",
+                    backgroundColor: BLUE,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <CheckIcon size={32} color={WHITE} />
+                </div>
+                <p
+                  style={{
+                    fontSize: "16px",
+                    fontWeight: 600,
+                    color: BLUE,
+                    fontFamily: FONT_FAMILY,
+                    margin: 0,
+                  }}
+                >
+                  User added successfully!
+                </p>
+              </motion.div>
+            ) : (
+              <>
+                <div style={{ marginBottom: "18px" }}>
+                  <label
+                    style={{
+                      display: "block",
+                      fontSize: "13px",
+                      fontWeight: 700,
+                      color: BLUE,
+                      fontFamily: FONT_FAMILY,
+                      marginBottom: "6px",
+                      letterSpacing: "0.3px",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    Full Name
+                  </label>
+                  <input
+                    type="text"
+                    value={newContactName}
+                    onChange={(e) => setNewContactName(e.target.value)}
+                    placeholder="Enter full name"
+                    style={{
+                      width: "100%",
+                      padding: "12px 14px",
+                      border: `1.5px solid rgba(13,60,252,0.2)`,
+                      borderRadius: "10px",
+                      fontSize: "15px",
+                      fontFamily: FONT_FAMILY,
+                      outline: "none",
+                      color: BLUE,
+                      transition: "border-color 0.2s, box-shadow 0.2s",
+                      boxSizing: "border-box",
+                    }}
+                    onFocus={(e) => {
+                      e.target.style.borderColor = BLUE;
+                      e.target.style.boxShadow = `0 0 0 3px rgba(13,60,252,0.1)`;
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = "rgba(13,60,252,0.2)";
+                      e.target.style.boxShadow = "none";
+                    }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: "18px" }}>
+                  <label
+                    style={{
+                      display: "block",
+                      fontSize: "13px",
+                      fontWeight: 700,
+                      color: BLUE,
+                      fontFamily: FONT_FAMILY,
+                      marginBottom: "6px",
+                      letterSpacing: "0.3px",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    value={newContactEmail}
+                    onChange={(e) => setNewContactEmail(e.target.value)}
+                    placeholder="Enter email address"
+                    style={{
+                      width: "100%",
+                      padding: "12px 14px",
+                      border: `1.5px solid rgba(13,60,252,0.2)`,
+                      borderRadius: "10px",
+                      fontSize: "15px",
+                      fontFamily: FONT_FAMILY,
+                      outline: "none",
+                      color: BLUE,
+                      transition: "border-color 0.2s, box-shadow 0.2s",
+                      boxSizing: "border-box",
+                    }}
+                    onFocus={(e) => {
+                      e.target.style.borderColor = BLUE;
+                      e.target.style.boxShadow = `0 0 0 3px rgba(13,60,252,0.1)`;
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = "rgba(13,60,252,0.2)";
+                      e.target.style.boxShadow = "none";
+                    }}
+                  />
+                </div>
+
+                {addUserError && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    style={{
+                      padding: "10px 14px",
+                      backgroundColor: "rgba(255,0,0,0.08)",
+                      border: "1px solid rgba(255,0,0,0.2)",
+                      borderRadius: "8px",
+                      marginBottom: "18px",
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: "13px",
+                        color: "#d32f2f",
+                        fontWeight: 600,
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
+                      {addUserError}
+                    </span>
+                  </motion.div>
+                )}
+
+                <div style={{ display: "flex", gap: "12px" }}>
+                  <button
+                    onClick={() => {
+                      setShowAddUserModal(false);
+                      setAddUserError("");
+                      setNewContactName("");
+                      setNewContactEmail("");
+                    }}
+                    style={{
+                      flex: 1,
+                      padding: "12px",
+                      backgroundColor: "transparent",
+                      color: "#666",
+                      border: "1.5px solid #ddd",
+                      borderRadius: "10px",
+                      fontSize: "14px",
+                      fontWeight: 700,
+                      cursor: "pointer",
+                      fontFamily: FONT_FAMILY,
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleAddContact}
+                    disabled={addingUser}
+                    style={{
+                      flex: 1,
+                      padding: "12px",
+                      backgroundColor: addingUser ? "#ccc" : BLUE,
+                      color: WHITE,
+                      border: "none",
+                      borderRadius: "10px",
+                      fontSize: "14px",
+                      fontWeight: 800,
+                      cursor: addingUser ? "not-allowed" : "pointer",
+                      fontFamily: FONT_FAMILY,
+                      letterSpacing: "0.5px",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    {addingUser ? "Adding..." : "Add User"}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ===== START CHAT MODAL ===== */}
+      {showStartChat && !isAdmin && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0,0,0,0.6)",
+            backdropFilter: "blur(8px)",
+            WebkitBackdropFilter: "blur(8px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 99999,
+            fontFamily: FONT_FAMILY,
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowStartChat(false);
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: WHITE,
+              borderRadius: "16px",
+              padding: "32px",
+              width: "90%",
+              maxWidth: "440px",
+              boxShadow: "0 24px 64px rgba(0,0,0,0.3)",
+              position: "relative",
+              overflow: "hidden",
+            }}
+          >
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                height: "4px",
+                background: `linear-gradient(90deg, ${BLUE}, #6B8CFF, ${BLUE})`,
+              }}
+            />
+            <h3
+              style={{
+                fontSize: "24px",
+                fontWeight: 700,
+                color: BLUE,
+                fontFamily: FONT_FAMILY,
+                margin: 0,
+                marginBottom: "24px",
+                letterSpacing: "-0.02em",
+              }}
+            >
+              Start New Chat
+            </h3>
+            <div style={{ marginBottom: "18px" }}>
+              <label
+                style={{
+                  display: "block",
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: BLUE,
+                  fontFamily: FONT_FAMILY,
+                  marginBottom: "6px",
+                  letterSpacing: "0.3px",
+                  textTransform: "uppercase",
+                }}
+              >
+                Select Topic
+              </label>
+              <select
+                value={selectedTopic}
+                onChange={(e) => setSelectedTopic(e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: "12px 14px",
+                  border: `1.5px solid rgba(13,60,252,0.2)`,
+                  borderRadius: "10px",
+                  fontSize: "15px",
+                  fontFamily: FONT_FAMILY,
+                  outline: "none",
+                  color: BLUE,
+                  fontWeight: 600,
+                  backgroundColor: WHITE,
+                  cursor: "pointer",
+                  boxSizing: "border-box",
+                }}
+              >
+                <option value="">-- Select topic --</option>
+                {topics.map((t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div style={{ display: "flex", gap: "12px" }}>
+              <button
+                onClick={() => {
+                  setShowStartChat(false);
+                  setSelectedTopic("");
+                }}
+                style={{
+                  flex: 1,
+                  padding: "12px",
+                  backgroundColor: "transparent",
+                  color: "#666",
+                  border: "1.5px solid #ddd",
+                  borderRadius: "10px",
+                  fontSize: "14px",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  fontFamily: FONT_FAMILY,
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={startChat}
+                disabled={!selectedTopic}
+                style={{
+                  flex: 1,
+                  padding: "12px",
+                  backgroundColor: selectedTopic ? BLUE : "#ccc",
+                  color: WHITE,
+                  border: "none",
+                  borderRadius: "10px",
+                  fontSize: "14px",
+                  fontWeight: 800,
+                  cursor: selectedTopic ? "pointer" : "not-allowed",
+                  fontFamily: FONT_FAMILY,
+                  letterSpacing: "0.5px",
+                  textTransform: "uppercase",
+                }}
+              >
+                Start Chat
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -2892,6 +3830,7 @@ const LiveChat = ({
 // ===== MAIN PAGE =====
 export default function LiveChatPage(): React.JSX.Element {
   const [user, setUser] = useState<any>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isMounted, setIsMounted] = useState(false);
   const [showMain, setShowMain] = useState(false);
@@ -2910,6 +3849,7 @@ export default function LiveChatPage(): React.JSX.Element {
       setUser(currentUser);
       setLoading(false);
       if (currentUser) {
+        setIsAdmin(currentUser.email === ADMIN_EMAIL);
         try {
           await updateDoc(doc(db, "users", currentUser.uid), {
             online: true,
@@ -3148,7 +4088,7 @@ export default function LiveChatPage(): React.JSX.Element {
             width: "100%",
           }}
         >
-          <LiveChat user={user} db={db} auth={auth} />
+          <LiveChat user={user} isAdmin={isAdmin} db={db} auth={auth} />
         </div>
 
         {/* FOOTER */}
@@ -3429,14 +4369,18 @@ export default function LiveChatPage(): React.JSX.Element {
         }
         .chat-messages-container::-webkit-scrollbar,
         .chat-list-container::-webkit-scrollbar,
-        .chat-list-container > div::-webkit-scrollbar {
+        .chat-list-container > div::-webkit-scrollbar,
+        .online-panel-container::-webkit-scrollbar,
+        .online-panel-container > div::-webkit-scrollbar {
           display: none !important;
           width: 0 !important;
           height: 0 !important;
         }
         .chat-messages-container,
         .chat-list-container,
-        .chat-list-container > div {
+        .chat-list-container > div,
+        .online-panel-container,
+        .online-panel-container > div {
           scrollbar-width: none !important;
           -ms-overflow-style: none !important;
         }
