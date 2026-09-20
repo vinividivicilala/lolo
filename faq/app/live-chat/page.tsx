@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { initializeApp, getApps } from "firebase/app";
@@ -19,10 +19,15 @@ import {
   getDoc,
   setDoc,
   limit,
+  deleteDoc,
+  getDocs,
+  writeBatch,
+  arrayUnion,
 } from "firebase/firestore";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
+import { motion, AnimatePresence } from "framer-motion";
 
 // Firebase Config
 const firebaseConfig = {
@@ -396,21 +401,23 @@ const CloseIcon = ({ size = 18, color = "currentColor" }: { size?: number; color
     <path d="M6 6L18 18M18 6L6 18" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
-
+const PlusIcon = ({ size = 20, color = "currentColor" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <path d="M12 5V19M5 12H19" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
 const PeopleIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <circle cx="12" cy="8" r="4" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     <path d="M4 21V19C4 16.7909 5.79086 15 8 15H16C18.2091 15 20 16.7909 20 19V21" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
-
 const TrustIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M12 2L4 5V11C4 16 8 20 12 22C16 20 20 16 20 11V5L12 2Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     <path d="M9 12L11 14L15 10" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
-
 const CareerIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <rect x="2" y="7" width="20" height="14" rx="2" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -418,14 +425,12 @@ const CareerIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?: s
     <path d="M2 13H22" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
-
 const ResourcesIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M4 4H10C11.1046 4 12 4.89543 12 6V20C12 18.8954 11.1046 18 10 18H4V4Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     <path d="M20 4H14C12.8954 4 12 4.89543 12 6V20C12 18.8954 12.8954 18 14 18H20V4Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
-
 const DocsIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M14 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -434,7 +439,6 @@ const DocsIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: str
     <path d="M8 17H16" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
-
 const BrandIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M20.59 13.41L11 3.83C10.6 3.43 10.06 3.2 9.5 3.2H4C2.9 3.2 2 4.1 2 5.2V10.7C2 11.26 2.22 11.8 2.63 12.2L12.21 21.79C13 22.57 14.27 22.57 15.06 21.79L20.59 16.26C21.37 15.47 21.37 14.2 20.59 13.41Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -1198,17 +1202,27 @@ interface LastMessagePreview {
   isFromAgent: boolean;
 }
 
-// ===== LIVE CHAT AGENT COMPONENT =====
-const LiveChatAgent = ({
+interface ChatContact {
+  id: string;
+  userId: string;
+  userName: string;
+  userEmail: string;
+  userPhoto?: string;
+  addedAt: any;
+  addedBy: string;
+}
+
+// ===== LIVE CHAT COMPONENT (BIASA - BUKAN AGENT) =====
+const LiveChat = ({
   user,
-  isAdmin,
   db,
   auth,
+  isAdmin,
 }: {
   user: any;
-  isAdmin: boolean;
   db: any;
   auth: any;
+  isAdmin: boolean;
 }) => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
@@ -1236,11 +1250,28 @@ const LiveChatAgent = ({
 
   const [showCloseConfirm, setShowCloseConfirm] = useState(false);
 
+  // ===== ADD USER CONTACTS STATE =====
+  const [contacts, setContacts] = useState<ChatContact[]>([]);
+  const [showAddUserModal, setShowAddUserModal] = useState(false);
+  const [newContactName, setNewContactName] = useState("");
+  const [newContactEmail, setNewContactEmail] = useState("");
+  const [addingUser, setAddingUser] = useState(false);
+  const [addUserError, setAddUserError] = useState("");
+  const [addUserSuccess, setAddUserSuccess] = useState(false);
+
+  // GSAP refs for animations
+  const addButtonRef = useRef<HTMLButtonElement>(null);
+  const addModalRef = useRef<HTMLDivElement>(null);
+  const addModalContentRef = useRef<HTMLDivElement>(null);
+  const contactItemRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+  const plusIconRef = useRef<SVGSVGElement>(null);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatMessagesContainerRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const liveChatTitleRef = useRef<HTMLHeadingElement>(null);
   const prevMessagesLenRef = useRef<number>(0);
+  const prevContactsLenRef = useRef<number>(0);
 
   const messagesCacheRef = useRef<{ [ticketId: string]: ChatMessage[] }>({});
 
@@ -1294,6 +1325,94 @@ const LiveChatAgent = ({
     };
   }, [isMounted]);
 
+  // GSAP: Animate Add User button on mount
+  useEffect(() => {
+    if (!isMounted) return;
+    if (addButtonRef.current) {
+      gsap.fromTo(
+        addButtonRef.current,
+        { scale: 0, rotation: -180, opacity: 0 },
+        {
+          scale: 1,
+          rotation: 0,
+          opacity: 1,
+          duration: 0.8,
+          ease: "back.out(1.7)",
+          delay: 0.5,
+        }
+      );
+    }
+    if (plusIconRef.current) {
+      gsap.to(plusIconRef.current, {
+        rotation: 360,
+        duration: 20,
+        repeat: -1,
+        ease: "none",
+      });
+    }
+  }, [isMounted]);
+
+  // GSAP: Animate contacts on change
+  useEffect(() => {
+    if (!isMounted) return;
+    const contactIds = contacts.map((c) => c.id);
+    const newIds = contactIds.filter((id) => !contactItemRefs.current[id]);
+
+    newIds.forEach((id) => {
+      const el = contactItemRefs.current[id];
+      if (el) {
+        gsap.fromTo(
+          el,
+          { x: -80, opacity: 0, scale: 0.8, rotation: -5 },
+          {
+            x: 0,
+            opacity: 1,
+            scale: 1,
+            rotation: 0,
+            duration: 0.6,
+            ease: "back.out(1.4)",
+          }
+        );
+      }
+    });
+  }, [contacts, isMounted]);
+
+  // GSAP: Animate Add User Modal open/close
+  useEffect(() => {
+    if (!addModalRef.current) return;
+    if (showAddUserModal) {
+      gsap.set(addModalRef.current, { display: "flex" });
+      gsap.fromTo(
+        addModalRef.current,
+        { opacity: 0 },
+        { opacity: 1, duration: 0.3, ease: "power2.out" }
+      );
+      if (addModalContentRef.current) {
+        gsap.fromTo(
+          addModalContentRef.current,
+          { y: -60, scale: 0.9, opacity: 0, rotationX: -15 },
+          {
+            y: 0,
+            scale: 1,
+            opacity: 1,
+            rotationX: 0,
+            duration: 0.6,
+            ease: "back.out(1.5)",
+          }
+        );
+      }
+    } else {
+      gsap.to(addModalRef.current, {
+        opacity: 0,
+        duration: 0.25,
+        ease: "power2.in",
+        onComplete: () => {
+          if (addModalRef.current) gsap.set(addModalRef.current, { display: "none" });
+        },
+      });
+    }
+  }, [showAddUserModal]);
+
   useEffect(() => {
     if (!user || !isMounted) {
       setCheckingBan(false);
@@ -1344,6 +1463,163 @@ const LiveChatAgent = ({
     }
   };
 
+  // ===== LOAD CONTACTS =====
+  useEffect(() => {
+    if (!db || !user || !isMounted) return;
+    const q = query(
+      collection(db, "chat_contacts"),
+      where("addedBy", "==", user.uid),
+      orderBy("addedAt", "desc")
+    );
+    const unsubscribe = onSnapshot(q, (snapshot: any) => {
+      const contactList: ChatContact[] = [];
+      snapshot.forEach((docSnap: any) => {
+        contactList.push({ id: docSnap.id, ...docSnap.data() } as ChatContact);
+      });
+      setContacts(contactList);
+    });
+    return () => unsubscribe();
+  }, [db, user, isMounted]);
+
+  // ===== ADD CONTACT =====
+  const handleAddContact = async () => {
+    if (!db || !user) return;
+    setAddUserError("");
+    if (!newContactName.trim()) {
+      setAddUserError("Name is required");
+      return;
+    }
+    if (!newContactEmail.trim() || !newContactEmail.includes("@")) {
+      setAddUserError("Valid email is required");
+      return;
+    }
+    setAddingUser(true);
+    try {
+      // Check if contact already exists
+      const existing = contacts.find(
+        (c) => c.userEmail.toLowerCase() === newContactEmail.trim().toLowerCase()
+      );
+      if (existing) {
+        setAddUserError("This contact already exists");
+        setAddingUser(false);
+        return;
+      }
+
+      await addDoc(collection(db, "chat_contacts"), {
+        userId: user.uid,
+        userName: newContactName.trim(),
+        userEmail: newContactEmail.trim().toLowerCase(),
+        userPhoto: "",
+        addedAt: serverTimestamp(),
+        addedBy: user.uid,
+      });
+
+      setAddUserSuccess(true);
+      setNewContactName("");
+      setNewContactEmail("");
+      setTimeout(() => {
+        setAddUserSuccess(false);
+        setShowAddUserModal(false);
+      }, 1200);
+    } catch (error) {
+      console.error("Error adding contact:", error);
+      setAddUserError("Failed to add contact. Please try again.");
+    } finally {
+      setAddingUser(false);
+    }
+  };
+
+  // ===== DELETE CONTACT =====
+  const handleDeleteContact = async (contactId: string) => {
+    if (!db) return;
+    const el = contactItemRefs.current[contactId];
+    if (el) {
+      gsap.to(el, {
+        x: 100,
+        opacity: 0,
+        scale: 0.8,
+        duration: 0.4,
+        ease: "power2.in",
+        onComplete: async () => {
+          try {
+            await deleteDoc(doc(db, "chat_contacts", contactId));
+          } catch (error) {
+            console.error("Error deleting contact:", error);
+          }
+        },
+      });
+    } else {
+      try {
+        await deleteDoc(doc(db, "chat_contacts", contactId));
+      } catch (error) {
+        console.error("Error deleting contact:", error);
+      }
+    }
+  };
+
+  // ===== START CHAT WITH CONTACT =====
+  const startChatWithContact = async (contact: ChatContact) => {
+    if (!db || !user || !encryptionReady) return;
+    const isBannedNow = await checkBanBeforeAction();
+    if (isBannedNow) return;
+    if (!canCreateTicket) {
+      setBanMessage("YOU DO NOT HAVE PERMISSION TO CREATE A NEW TICKET");
+      return;
+    }
+    const hasActiveTicket = tickets.some(
+      (t) =>
+        t.userId === user.uid &&
+        (t.status === "waiting" || t.status === "active") &&
+        !t.isAnnouncement &&
+        !t.isBroadcast
+    );
+    if (hasActiveTicket) {
+      alert("You still have an active chat. Please wait until it is finished.");
+      return;
+    }
+    try {
+      const ticketRef = await addDoc(collection(db, "livechat_tickets"), {
+        userId: user.uid,
+        userName: contact.userName,
+        userEmail: contact.userEmail,
+        userPhoto: contact.userPhoto || "",
+        status: "waiting",
+        topic: "Other",
+        createdAt: serverTimestamp(),
+        unreadCount: 0,
+        typing: false,
+        typingUserId: null,
+        typingUserName: null,
+        isAnnouncement: false,
+        isBroadcast: false,
+        contactId: contact.id,
+      });
+      const initialMessage = `Hello ${contact.userName}, I would like to chat with you.`;
+      const encryptedMessage = await encryptMessage(initialMessage);
+      await addDoc(collection(db, "livechat_tickets", ticketRef.id, "messages"), {
+        senderId: user.uid,
+        senderName: user.displayName || user.email || "User",
+        text: encryptedMessage,
+        timestamp: serverTimestamp(),
+        read: false,
+        isEncrypted: true,
+        isBotDetected: false,
+        deliveryStatus: "sent",
+      });
+      await updateDoc(ticketRef, {
+        lastMessage: initialMessage,
+        lastMessageTime: serverTimestamp(),
+        lastMessageSender: user.displayName || user.email || "User",
+      });
+      setShowStartChat(false);
+      setBanMessage(null);
+    } catch (error) {
+      console.error("Error starting chat with contact:", error);
+      alert("An error occurred while starting the chat. Please try again.");
+    }
+  };
+
+  // ===== ONLINE USERS LISTENER =====
   useEffect(() => {
     if (!db || !isMounted) return;
     const q = query(collection(db, "users"), where("online", "==", true));
@@ -1370,6 +1646,7 @@ const LiveChatAgent = ({
     return () => unsubscribe();
   }, [db, isMounted]);
 
+  // ===== TICKETS LISTENER =====
   useEffect(() => {
     if (!db || !user || !isMounted) return;
 
@@ -1377,7 +1654,11 @@ const LiveChatAgent = ({
     if (isAdmin) {
       q = query(collection(db, "livechat_tickets"), orderBy("createdAt", "desc"));
     } else {
-      q = query(collection(db, "livechat_tickets"), where("userId", "==", user.uid), orderBy("createdAt", "desc"));
+      q = query(
+        collection(db, "livechat_tickets"),
+        where("userId", "==", user.uid),
+        orderBy("createdAt", "desc")
+      );
     }
 
     const unsubscribe = onSnapshot(q, (snapshot: any) => {
@@ -1396,6 +1677,7 @@ const LiveChatAgent = ({
     return () => unsubscribe();
   }, [db, user, isAdmin, isMounted]);
 
+  // ===== TICKET PREVIEWS LISTENER =====
   useEffect(() => {
     if (!db || !tickets.length || !isMounted) return;
     const unsubscribes: (() => void)[] = [];
@@ -1435,6 +1717,7 @@ const LiveChatAgent = ({
     };
   }, [db, tickets, isMounted]);
 
+  // ===== MESSAGES LISTENER =====
   useEffect(() => {
     if (!db || !selectedTicket || !isMounted) return;
 
@@ -1477,6 +1760,19 @@ const LiveChatAgent = ({
             isFromAgent: isFromAgentMsg,
           });
           setRollingKey((k) => k + 1);
+
+          // GSAP: Animate new message
+          setTimeout(() => {
+            const msgElements = chatMessagesContainerRef.current?.querySelectorAll("[data-msg-id]");
+            if (msgElements && msgElements.length > 0) {
+              const lastEl = msgElements[msgElements.length - 1];
+              gsap.fromTo(
+                lastEl,
+                { y: 30, opacity: 0, scale: 0.95 },
+                { y: 0, opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.5)" }
+              );
+            }
+          }, 50);
         }
       }
       prevMessagesLenRef.current = newLen;
@@ -1499,14 +1795,15 @@ const LiveChatAgent = ({
     setShowCloseConfirm(false);
   }, [selectedTicket?.id]);
 
+  // ===== MARK MESSAGES AS READ =====
   useEffect(() => {
-    if (!db || !selectedTicket || !user || !isAdmin || !isMounted) return;
+    if (!db || !selectedTicket || !user || !isMounted) return;
     const unread = messages.filter((m) => m.senderId !== user.uid && !m.read);
     unread.forEach(async (msg) => {
       const msgRef = doc(db, "livechat_tickets", selectedTicket.id, "messages", msg.id);
       await updateDoc(msgRef, { read: true, deliveryStatus: "read" });
     });
-  }, [messages, selectedTicket, db, user, isAdmin, isMounted]);
+  }, [messages, selectedTicket, db, user, isMounted]);
 
   const hasAutoSelectedRef = useRef(false);
   useEffect(() => {
@@ -1628,7 +1925,11 @@ const LiveChatAgent = ({
       return;
     }
     const hasActiveTicket = tickets.some(
-      (t) => t.userId === user.uid && (t.status === "waiting" || t.status === "active") && !t.isAnnouncement && !t.isBroadcast
+      (t) =>
+        t.userId === user.uid &&
+        (t.status === "waiting" || t.status === "active") &&
+        !t.isAnnouncement &&
+        !t.isBroadcast
     );
     if (hasActiveTicket) {
       alert("You still have an active chat with an agent. Please wait until it is finished.");
@@ -1691,12 +1992,20 @@ const LiveChatAgent = ({
     }
     const checkResult = containsBannedContent(messageText);
     if (checkResult.isBanned) {
-      await banUserPermanent(user.uid, user.email || "", user.displayName || "User", checkResult.reason, messageText);
+      await banUserPermanent(
+        user.uid,
+        user.email || "",
+        user.displayName || "User",
+        checkResult.reason,
+        messageText
+      );
       setIsBanned(true);
       setBanReason(checkResult.reason);
       setCanCreateTicket(false);
       setCanSendMessage(false);
-      setBanMessage(`YOUR ACCOUNT HAS BEEN PERMANENTLY BANNED\n\nReason: ${checkResult.reason}\n\nMessage sent: "${messageText}"`);
+      setBanMessage(
+        `YOUR ACCOUNT HAS BEEN PERMANENTLY BANNED\n\nReason: ${checkResult.reason}\n\nMessage sent: "${messageText}"`
+      );
       setMessageText("");
       return;
     }
@@ -1737,28 +2046,6 @@ const LiveChatAgent = ({
     } catch (error) {
       console.error("Error sending message:", error);
       alert("An error occurred while sending the message. Please try again.");
-    }
-  };
-
-  const takeTicket = async (ticketId: string) => {
-    if (!db || !isAdmin || !user) return;
-    try {
-      await updateDoc(doc(db, "livechat_tickets", ticketId), {
-        agentId: user.uid,
-        agentName: AGENT_NAME,
-        status: "active",
-      });
-    } catch (error) {
-      console.error("Error taking ticket:", error);
-    }
-  };
-
-  const resolveTicket = async (ticketId: string) => {
-    if (!db || !isAdmin) return;
-    try {
-      await updateDoc(doc(db, "livechat_tickets", ticketId), { status: "resolved" });
-    } catch (error) {
-      console.error("Error resolving ticket:", error);
     }
   };
 
@@ -1858,7 +2145,15 @@ const LiveChatAgent = ({
         </div>
         <div style={{ overflowY: "auto", flex: 1, minHeight: 0 }}>
           {list.length === 0 ? (
-            <div style={{ padding: "30px 16px", textAlign: "center", color: "#999", fontSize: "13px", fontFamily: FONT_FAMILY }}>
+            <div
+              style={{
+                padding: "30px 16px",
+                textAlign: "center",
+                color: "#999",
+                fontSize: "13px",
+                fontFamily: FONT_FAMILY,
+              }}
+            >
               {emptyText}
             </div>
           ) : (
@@ -1891,7 +2186,11 @@ const LiveChatAgent = ({
                   }}
                 >
                   {u.photoURL ? (
-                    <img src={u.photoURL} alt={u.displayName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    <img
+                      src={u.photoURL}
+                      alt={u.displayName}
+                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    />
                   ) : (
                     u.displayName.charAt(0).toUpperCase()
                   )}
@@ -2029,10 +2328,27 @@ const LiveChatAgent = ({
   if (checkingBan) {
     return (
       <div style={{ marginTop: "80px", paddingTop: "30px" }}>
-        <h3 style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1 }}>
-          Live Chat Agent
+        <h3
+          style={{
+            fontSize: "80px",
+            fontWeight: 700,
+            color: BLUE,
+            fontFamily: FONT_FAMILY,
+            letterSpacing: "-0.03em",
+            margin: 0,
+            lineHeight: 1.1,
+          }}
+        >
+          Live Chat
         </h3>
-        <div style={{ padding: "20px", textAlign: "center", color: "#666", fontFamily: FONT_FAMILY }}>
+        <div
+          style={{
+            padding: "20px",
+            textAlign: "center",
+            color: "#666",
+            fontFamily: FONT_FAMILY,
+          }}
+        >
           Checking account status...
         </div>
       </div>
@@ -2056,10 +2372,17 @@ const LiveChatAgent = ({
             marginBottom: "20px",
           }}
         >
-          Live Chat Agent
+          Live Chat
         </h3>
-        <p style={{ fontSize: "15px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "10px" }}>
-          Please login to use Live Chat Agent
+        <p
+          style={{
+            fontSize: "15px",
+            color: "#666",
+            fontFamily: FONT_FAMILY,
+            marginBottom: "10px",
+          }}
+        >
+          Please login to use Live Chat
         </p>
         <Link href="/" style={{ textDecoration: "none" }}>
           <button
@@ -2085,9 +2408,26 @@ const LiveChatAgent = ({
   if (!isAdmin && isBanned) {
     return (
       <div style={{ marginTop: "80px", paddingTop: "30px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "20px" }}>
-          <h3 style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1 }}>
-            Live Chat Agent
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+            marginBottom: "20px",
+          }}
+        >
+          <h3
+            style={{
+              fontSize: "80px",
+              fontWeight: 700,
+              color: BLUE,
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "-0.03em",
+              margin: 0,
+              lineHeight: 1.1,
+            }}
+          >
+            Live Chat
           </h3>
           <button
             onClick={handleLogout}
@@ -2122,7 +2462,15 @@ const LiveChatAgent = ({
         >
           YOUR ACCOUNT HAS BEEN PERMANENTLY BANNED
         </div>
-        <div style={{ color: BLUE, fontSize: "22px", fontWeight: 400, fontFamily: FONT_FAMILY, marginBottom: "6px" }}>
+        <div
+          style={{
+            color: BLUE,
+            fontSize: "22px",
+            fontWeight: 400,
+            fontFamily: FONT_FAMILY,
+            marginBottom: "6px",
+          }}
+        >
           REASON: {banReason || "SUSPICIOUS ACTIVITY"}
         </div>
       </div>
@@ -2130,220 +2478,23 @@ const LiveChatAgent = ({
   }
 
   const userTickets = tickets.filter((t) => t.userId === user.uid);
-
-  if (!isAdmin && userTickets.length === 0 && !showStartChat) {
-    return (
-      <div style={{ marginTop: "80px", paddingTop: "30px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "20px" }}>
-          <h3
-            ref={liveChatTitleRef}
-            style={{
-              fontSize: "80px",
-              fontWeight: 700,
-              color: BLUE,
-              fontFamily: FONT_FAMILY,
-              letterSpacing: "-0.03em",
-              margin: 0,
-              lineHeight: 1.1,
-            }}
-          >
-            Live Chat Agent
-          </h3>
-          <button
-            onClick={handleLogout}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              padding: "0",
-              backgroundColor: "transparent",
-              color: BLUE,
-              border: "none",
-              fontSize: "20px",
-              fontWeight: 700,
-              cursor: "pointer",
-              fontFamily: FONT_FAMILY,
-            }}
-          >
-            <span>Logout</span>
-            <ArrowRight size={20} color={BLUE} />
-          </button>
-        </div>
-
-        <div style={{ marginBottom: "20px" }}>
-          <div
-            style={{
-              fontSize: "13px",
-              fontWeight: 700,
-              color: BLUE,
-              fontFamily: FONT_FAMILY,
-              marginBottom: "12px",
-              letterSpacing: "0.5px",
-              textTransform: "uppercase",
-            }}
-          >
-            {onlineAgents.length} Agent{onlineAgents.length !== 1 ? "s" : ""} Online
-          </div>
-          <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-            {onlineAgents.map((a) => (
-              <div
-                key={a.uid}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "10px",
-                  padding: "8px 14px",
-                  backgroundColor: BLUE,
-                  border: `1.5px solid ${BLUE}`,
-                  borderRadius: "8px",
-                  fontFamily: FONT_FAMILY,
-                }}
-              >
-                <span style={{ fontSize: "13px", fontWeight: 700, color: WHITE }}>{a.displayName}</span>
-                <span style={{ fontSize: "10px", fontWeight: 800, color: WHITE, letterSpacing: "0.5px" }}>ONLINE</span>
-              </div>
-            ))}
-            {onlineAgents.length === 0 && (
-              <span style={{ fontSize: "13px", color: "#999", fontFamily: FONT_FAMILY }}>No agents online</span>
-            )}
-          </div>
-        </div>
-
-        <p style={{ fontSize: "15px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "16px" }}>
-          Need help? Chat directly with our agent.
-        </p>
-        <button
-          onClick={() => setShowStartChat(true)}
-          style={{
-            padding: "10px 24px",
-            backgroundColor: BLUE,
-            color: WHITE,
-            border: "none",
-            borderRadius: "8px",
-            fontSize: "15px",
-            fontWeight: 600,
-            cursor: "pointer",
-            fontFamily: FONT_FAMILY,
-          }}
-        >
-          Start Live Chat
-        </button>
-      </div>
-    );
-  }
-
-  if (!isAdmin && showStartChat) {
-    return (
-      <div style={{ marginTop: "80px", paddingTop: "30px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "20px" }}>
-          <h3 style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1 }}>
-            Live Chat Agent
-          </h3>
-          <button
-            onClick={handleLogout}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              padding: "0",
-              backgroundColor: "transparent",
-              color: BLUE,
-              border: "none",
-              fontSize: "20px",
-              fontWeight: 700,
-              cursor: "pointer",
-              fontFamily: FONT_FAMILY,
-            }}
-          >
-            <span>Logout</span>
-            <ArrowRight size={20} color={BLUE} />
-          </button>
-        </div>
-        <div style={{ maxWidth: "400px" }}>
-          <div style={{ fontSize: "15px", marginBottom: "10px", fontFamily: FONT_FAMILY, fontWeight: 700, color: BLUE }}>Select your issue topic:</div>
-          <select
-            value={selectedTopic}
-            onChange={(e) => setSelectedTopic(e.target.value)}
-            style={{
-              width: "100%",
-              padding: "10px 14px",
-              border: `2px solid ${BLUE}`,
-              borderRadius: "8px",
-              fontSize: "15px",
-              fontFamily: FONT_FAMILY,
-              outline: "none",
-              backgroundColor: WHITE,
-              marginBottom: "14px",
-              color: BLUE,
-              fontWeight: 600,
-            }}
-          >
-            <option value="">-- Select topic --</option>
-            {topics.map((t) => (
-              <option key={t} value={t}>{t}</option>
-            ))}
-          </select>
-          <div style={{ display: "flex", gap: "10px" }}>
-            <button
-              onClick={startChat}
-              disabled={!selectedTopic}
-              style={{
-                padding: "8px 20px",
-                backgroundColor: selectedTopic ? BLUE : "#ccc",
-                color: WHITE,
-                border: "none",
-                borderRadius: "8px",
-                fontSize: "14px",
-                fontWeight: 600,
-                cursor: selectedTopic ? "pointer" : "not-allowed",
-                fontFamily: FONT_FAMILY,
-              }}
-            >
-              Start Chat
-            </button>
-            <button
-              onClick={() => setShowStartChat(false)}
-              style={{
-                padding: "8px 20px",
-                backgroundColor: "transparent",
-                color: "#666",
-                border: "1px solid #ccc",
-                borderRadius: "8px",
-                fontSize: "14px",
-                fontWeight: 600,
-                cursor: "pointer",
-                fontFamily: FONT_FAMILY,
-              }}
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  const waitingTicketsRaw = tickets.filter((t) => t.status === "waiting");
-  const activeTicketsRaw = tickets.filter((t) => t.status === "active");
-  const resolvedTicketsRaw = tickets.filter((t) => t.status === "resolved" || t.status === "closed");
-  const waitingTickets = filterTicketsBySearch(waitingTicketsRaw);
-  const activeTickets = filterTicketsBySearch(activeTicketsRaw);
-  const resolvedTickets = filterTicketsBySearch(resolvedTicketsRaw);
   const typingText = selectedTicket ? getTypingText(selectedTicket) : null;
 
-  const renderChatListItem = (ticket: Ticket, options?: { onExtraClick?: () => void }) => {
+  const renderChatListItem = (ticket: Ticket) => {
     const isActive = selectedTicket?.id === ticket.id;
     const ticketId = generateTicketId(ticket.createdAt);
     const statusStyle = STATUS_STYLES[ticket.status] || STATUS_STYLES.active;
     const topicStyle = TOPIC_STYLES[ticket.topic] || TOPIC_STYLES["Other"];
 
     return (
-      <div
+      <motion.div
         key={ticket.id}
-        onClick={() => {
-          setSelectedTicket(ticket);
-          if (options?.onExtraClick) options.onExtraClick();
-        }}
+        layout
+        initial={{ opacity: 0, x: -40 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -40 }}
+        transition={{ duration: 0.35, ease: "easeOut" }}
+        onClick={() => setSelectedTicket(ticket)}
         style={{
           padding: "14px 16px",
           borderLeft: isActive ? `3px solid ${WHITE}` : "3px solid transparent",
@@ -2353,8 +2504,28 @@ const LiveChatAgent = ({
           transition: "background-color 0.2s ease",
         }}
       >
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px", gap: "8px", flexWrap: "wrap" }}>
-          <div style={{ fontWeight: 700, fontSize: "14px", color: WHITE, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: "1 1 auto" }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "6px",
+            gap: "8px",
+            flexWrap: "wrap",
+          }}
+        >
+          <div
+            style={{
+              fontWeight: 700,
+              fontSize: "14px",
+              color: WHITE,
+              minWidth: 0,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              flex: "1 1 auto",
+            }}
+          >
             {ticket.userName}
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "6px", flexShrink: 0 }}>
@@ -2367,7 +2538,15 @@ const LiveChatAgent = ({
             />
           </div>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "8px", flexWrap: "wrap" }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+            marginBottom: "8px",
+            flexWrap: "wrap",
+          }}
+        >
           <StabiloBadge
             label={ticket.topic}
             bg={topicStyle.bg}
@@ -2381,15 +2560,33 @@ const LiveChatAgent = ({
         </div>
         {renderTicketPreview(ticket.id)}
         <div style={{ marginTop: "6px" }}>
-          <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.65)", fontWeight: 700, letterSpacing: "0.3px" }}>{ticketId}</span>
+          <span
+            style={{
+              fontSize: "9px",
+              color: "rgba(255,255,255,0.65)",
+              fontWeight: 700,
+              letterSpacing: "0.3px",
+            }}
+          >
+            {ticketId}
+          </span>
         </div>
-      </div>
+      </motion.div>
     );
   };
 
   return (
     <div style={{ marginTop: "80px", paddingTop: "30px" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "20px" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+          marginBottom: "20px",
+          flexWrap: "wrap",
+          gap: "16px",
+        }}
+      >
         <h3
           ref={liveChatTitleRef}
           style={{
@@ -2402,9 +2599,17 @@ const LiveChatAgent = ({
             lineHeight: 1.1,
           }}
         >
-          Live Chat Agent
+          Live Chat
         </h3>
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "10px", paddingTop: "10px" }}>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-end",
+            gap: "10px",
+            paddingTop: "10px",
+          }}
+        >
           <span
             style={{
               fontSize: "13px",
@@ -2454,9 +2659,10 @@ const LiveChatAgent = ({
           borderRadius: "12px",
         }}
       >
+        {/* ===== ONLINE PANEL ===== */}
         {renderOnlinePanel()}
 
-        {/* ===== CHAT LIST ===== */}
+        {/* ===== CONTACTS + CHAT LIST ===== */}
         <div
           className="chat-list-container"
           style={{
@@ -2471,6 +2677,7 @@ const LiveChatAgent = ({
             fontFamily: FONT_FAMILY,
             display: "flex",
             flexDirection: "column",
+            position: "relative",
           }}
         >
           <div
@@ -2499,96 +2706,180 @@ const LiveChatAgent = ({
                 letterSpacing: "0.5px",
               }}
             >
-              {isAdmin ? tickets.length : tickets.filter((t) => t.userId === user.uid).length}
+              {isAdmin
+                ? tickets.length
+                : tickets.filter((t) => t.userId === user.uid).length}
             </span>
           </div>
+
+          {/* ===== CONTACTS SECTION ===== */}
+          {contacts.length > 0 && (
+            <div
+              style={{
+                borderBottom: "1px solid rgba(255,255,255,0.15)",
+                flexShrink: 0,
+                maxHeight: "220px",
+                overflowY: "auto",
+              }}
+            >
+              <div
+                style={{
+                  padding: "10px 16px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: "11px",
+                    fontWeight: 800,
+                    color: "rgba(255,255,255,0.8)",
+                    letterSpacing: "0.5px",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Contacts ({contacts.length})
+                </span>
+              </div>
+              <AnimatePresence>
+                {contacts.map((contact) => (
+                  <motion.div
+                    key={contact.id}
+                    ref={(el) => {
+                      contactItemRefs.current[contact.id] = el;
+                    }}
+                    initial={{ opacity: 0, x: -80, scale: 0.8 }}
+                    animate={{ opacity: 1, x: 0, scale: 1 }}
+                    exit={{ opacity: 0, x: 100, scale: 0.8 }}
+                    transition={{ duration: 0.4, ease: "easeOut" }}
+                    style={{
+                      padding: "10px 16px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                      cursor: "pointer",
+                      borderBottom: "1px solid rgba(255,255,255,0.06)",
+                      transition: "background-color 0.2s ease",
+                    }}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLDivElement).style.backgroundColor =
+                        "rgba(255,255,255,0.08)";
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLDivElement).style.backgroundColor =
+                        "transparent";
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: "32px",
+                        height: "32px",
+                        borderRadius: "8px",
+                        backgroundColor: WHITE,
+                        color: BLUE,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontWeight: 800,
+                        fontSize: "13px",
+                        flexShrink: 0,
+                      }}
+                    >
+                      {contact.userName.charAt(0).toUpperCase()}
+                    </div>
+                    <div
+                      style={{
+                        flex: 1,
+                        minWidth: 0,
+                      }}
+                      onClick={() => startChatWithContact(contact)}
+                    >
+                      <div
+                        style={{
+                          fontSize: "13px",
+                          fontWeight: 700,
+                          color: WHITE,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {contact.userName}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: "10px",
+                          color: "rgba(255,255,255,0.6)",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {contact.userEmail}
+                      </div>
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteContact(contact.id);
+                      }}
+                      style={{
+                        background: "transparent",
+                        border: "none",
+                        cursor: "pointer",
+                        padding: "4px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        opacity: 0.6,
+                        transition: "opacity 0.2s",
+                      }}
+                      onMouseEnter={(e) => (e.currentTarget.style.opacity = "1")}
+                      onMouseLeave={(e) => (e.currentTarget.style.opacity = "0.6")}
+                    >
+                      <CloseIcon size={14} color={WHITE} />
+                    </button>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+          )}
 
           {renderSearchBar()}
 
           <div style={{ overflowY: "auto", flex: 1, minHeight: 0 }}>
             {isAdmin ? (
               <>
-                {waitingTickets.length > 0 && (
-                  <div>
-                    <div
-                      style={{
-                        padding: "10px 16px",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                        borderBottom: "1px solid rgba(255,255,255,0.1)",
-                      }}
-                    >
-                      <StabiloBadge
-                        label={`Waiting (${waitingTickets.length})`}
-                        bg={STATUS_STYLES.waiting.bg}
-                        text={STATUS_STYLES.waiting.text}
-                        border={STATUS_STYLES.waiting.border}
-                        size="md"
-                      />
-                    </div>
-                    {waitingTickets.map((ticket) =>
-                      renderChatListItem(ticket, { onExtraClick: () => takeTicket(ticket.id) })
-                    )}
-                  </div>
-                )}
-                {activeTickets.length > 0 && (
-                  <div>
-                    <div
-                      style={{
-                        padding: "10px 16px",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                        borderBottom: "1px solid rgba(255,255,255,0.1)",
-                      }}
-                    >
-                      <StabiloBadge
-                        label={`Active (${activeTickets.length})`}
-                        bg={STATUS_STYLES.active.bg}
-                        text={STATUS_STYLES.active.text}
-                        border={STATUS_STYLES.active.border}
-                        size="md"
-                      />
-                    </div>
-                    {activeTickets.map((ticket) => renderChatListItem(ticket))}
-                  </div>
-                )}
-                {resolvedTickets.length > 0 && (
-                  <div>
-                    <div
-                      style={{
-                        padding: "10px 16px",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                        borderBottom: "1px solid rgba(255,255,255,0.1)",
-                      }}
-                    >
-                      <StabiloBadge
-                        label={`Resolved (${resolvedTickets.length})`}
-                        bg={STATUS_STYLES.resolved.bg}
-                        text={STATUS_STYLES.resolved.text}
-                        border={STATUS_STYLES.resolved.border}
-                        size="md"
-                      />
-                    </div>
-                    {resolvedTickets.map((ticket) => renderChatListItem(ticket))}
-                  </div>
-                )}
-                {waitingTickets.length === 0 && activeTickets.length === 0 && resolvedTickets.length === 0 && (
-                  <div style={{ padding: "30px 16px", textAlign: "center", color: WHITE, fontSize: "13px" }}>
+                {filterTicketsBySearch(tickets).map((ticket) => renderChatListItem(ticket))}
+                {filterTicketsBySearch(tickets).length === 0 && (
+                  <div
+                    style={{
+                      padding: "30px 16px",
+                      textAlign: "center",
+                      color: WHITE,
+                      fontSize: "13px",
+                    }}
+                  >
                     {searchQuery ? "No results found" : "No incoming chats"}
                   </div>
                 )}
               </>
             ) : (
               <>
-                {filterTicketsBySearch(tickets.filter((t) => t.userId === user.uid)).map((ticket) =>
-                  renderChatListItem(ticket)
+                {filterTicketsBySearch(tickets.filter((t) => t.userId === user.uid)).map(
+                  (ticket) => renderChatListItem(ticket)
                 )}
-                {filterTicketsBySearch(tickets.filter((t) => t.userId === user.uid)).length === 0 && (
-                  <div style={{ padding: "30px 16px", textAlign: "center", color: WHITE, fontSize: "13px" }}>
+                {filterTicketsBySearch(tickets.filter((t) => t.userId === user.uid))
+                  .length === 0 && (
+                  <div
+                    style={{
+                      padding: "30px 16px",
+                      textAlign: "center",
+                      color: WHITE,
+                      fontSize: "13px",
+                    }}
+                  >
                     {searchQuery ? "No results found" : "No chats yet"}
                   </div>
                 )}
@@ -2596,22 +2887,82 @@ const LiveChatAgent = ({
             )}
           </div>
 
-          {!isAdmin && (
-            <div
+          {/* ===== ADD USER BUTTON (GSAP) ===== */}
+          <div
+            style={{
+              padding: "12px 16px",
+              borderTop: "1px solid rgba(255,255,255,0.1)",
+              flexShrink: 0,
+              backgroundColor: BLUE,
+              display: "flex",
+              gap: "10px",
+            }}
+          >
+            <button
+              ref={addButtonRef}
+              onClick={() => setShowAddUserModal(true)}
               style={{
-                padding: "10px 16px",
-                borderTop: "1px solid rgba(255,255,255,0.1)",
-                flexShrink: 0,
-                backgroundColor: BLUE,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px",
+                flex: 1,
+                padding: "10px",
+                backgroundColor: WHITE,
+                color: BLUE,
+                border: `1.5px solid ${WHITE}`,
+                borderRadius: "8px",
+                fontSize: "13px",
+                fontWeight: 800,
+                cursor: "pointer",
+                fontFamily: FONT_FAMILY,
+                letterSpacing: "0.5px",
+                textTransform: "uppercase",
+                position: "relative",
+                overflow: "hidden",
+              }}
+              onMouseEnter={(e) => {
+                gsap.to(e.currentTarget, {
+                  scale: 1.03,
+                  boxShadow: "0 0 20px rgba(255,255,255,0.3)",
+                  duration: 0.3,
+                  ease: "power2.out",
+                });
+              }}
+              onMouseLeave={(e) => {
+                gsap.to(e.currentTarget, {
+                  scale: 1,
+                  boxShadow: "0 0 0px rgba(255,255,255,0)",
+                  duration: 0.3,
+                  ease: "power2.out",
+                });
               }}
             >
+              <svg
+                ref={plusIconRef}
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                style={{ display: "block" }}
+              >
+                <path
+                  d="M12 5V19M5 12H19"
+                  stroke={BLUE}
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              Add User
+            </button>
+            {!isAdmin && (
               <button
                 onClick={() => setShowStartChat(true)}
                 style={{
-                  width: "100%",
-                  padding: "10px",
-                  backgroundColor: WHITE,
-                  color: BLUE,
+                  padding: "10px 14px",
+                  backgroundColor: "transparent",
+                  color: WHITE,
                   border: `1.5px solid ${WHITE}`,
                   borderRadius: "8px",
                   fontSize: "13px",
@@ -2620,12 +2971,13 @@ const LiveChatAgent = ({
                   fontFamily: FONT_FAMILY,
                   letterSpacing: "0.5px",
                   textTransform: "uppercase",
+                  flexShrink: 0,
                 }}
               >
-                + New Chat
+                + Chat
               </button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
         {/* ===== CHAT VIEW ===== */}
@@ -2656,56 +3008,108 @@ const LiveChatAgent = ({
                 }}
               >
                 <div style={{ minWidth: 0, flex: 1 }}>
-                  <div style={{ fontWeight: 700, fontSize: "17px", color: WHITE, fontFamily: FONT_FAMILY, marginBottom: "6px" }}>
+                  <div
+                    style={{
+                      fontWeight: 700,
+                      fontSize: "17px",
+                      color: WHITE,
+                      fontFamily: FONT_FAMILY,
+                      marginBottom: "6px",
+                    }}
+                  >
                     {selectedTicket.userName}
                   </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      flexWrap: "wrap",
+                    }}
+                  >
                     <StabiloBadge
-                      label={(STATUS_STYLES[selectedTicket.status] || STATUS_STYLES.active).label}
-                      bg={(STATUS_STYLES[selectedTicket.status] || STATUS_STYLES.active).bg}
-                      text={(STATUS_STYLES[selectedTicket.status] || STATUS_STYLES.active).text}
-                      border={(STATUS_STYLES[selectedTicket.status] || STATUS_STYLES.active).border}
+                      label={
+                        (STATUS_STYLES[selectedTicket.status] || STATUS_STYLES.active).label
+                      }
+                      bg={
+                        (STATUS_STYLES[selectedTicket.status] || STATUS_STYLES.active).bg
+                      }
+                      text={
+                        (STATUS_STYLES[selectedTicket.status] || STATUS_STYLES.active).text
+                      }
+                      border={
+                        (STATUS_STYLES[selectedTicket.status] || STATUS_STYLES.active)
+                          .border
+                      }
                       size="sm"
                     />
                     <StabiloBadge
                       label={selectedTicket.topic}
-                      bg={(TOPIC_STYLES[selectedTicket.topic] || TOPIC_STYLES["Other"]).bg}
-                      text={(TOPIC_STYLES[selectedTicket.topic] || TOPIC_STYLES["Other"]).text}
-                      border={(TOPIC_STYLES[selectedTicket.topic] || TOPIC_STYLES["Other"]).border}
+                      bg={
+                        (TOPIC_STYLES[selectedTicket.topic] || TOPIC_STYLES["Other"]).bg
+                      }
+                      text={
+                        (TOPIC_STYLES[selectedTicket.topic] || TOPIC_STYLES["Other"]).text
+                      }
+                      border={
+                        (TOPIC_STYLES[selectedTicket.topic] || TOPIC_STYLES["Other"])
+                          .border
+                      }
                       size="sm"
                     />
                     {selectedTicket.typing && selectedTicket.status !== "resolved" && (
-                      <span style={{ fontSize: "12px", color: WHITE, fontStyle: "italic", fontWeight: 700 }}>
+                      <span
+                        style={{
+                          fontSize: "12px",
+                          color: WHITE,
+                          fontStyle: "italic",
+                          fontWeight: 700,
+                        }}
+                      >
                         {selectedTicket.typingUserName} is typing...
                       </span>
                     )}
-                    <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.75)", fontWeight: 700, letterSpacing: "0.3px" }}>
+                    <span
+                      style={{
+                        fontSize: "10px",
+                        color: "rgba(255,255,255,0.75)",
+                        fontWeight: 700,
+                        letterSpacing: "0.3px",
+                      }}
+                    >
                       {generateTicketId(selectedTicket.createdAt)}
                     </span>
                   </div>
                 </div>
 
                 <div style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
-                  {isAdmin && selectedTicket.status !== "resolved" && selectedTicket.status !== "closed" && (
-                    <button
-                      onClick={() => resolveTicket(selectedTicket.id)}
-                      style={{
-                        padding: "8px 16px",
-                        backgroundColor: WHITE,
-                        color: BLUE,
-                        border: `1.5px solid ${WHITE}`,
-                        borderRadius: "8px",
-                        fontSize: "12px",
-                        fontWeight: 800,
-                        cursor: "pointer",
-                        fontFamily: FONT_FAMILY,
-                        letterSpacing: "0.5px",
-                        textTransform: "uppercase",
-                      }}
-                    >
-                      Resolve
-                    </button>
-                  )}
+                  {isAdmin &&
+                    selectedTicket.status !== "resolved" &&
+                    selectedTicket.status !== "closed" && (
+                      <button
+                        onClick={async () => {
+                          if (!db) return;
+                          await updateDoc(doc(db, "livechat_tickets", selectedTicket.id), {
+                            status: "resolved",
+                          });
+                        }}
+                        style={{
+                          padding: "8px 16px",
+                          backgroundColor: WHITE,
+                          color: BLUE,
+                          border: `1.5px solid ${WHITE}`,
+                          borderRadius: "8px",
+                          fontSize: "12px",
+                          fontWeight: 800,
+                          cursor: "pointer",
+                          fontFamily: FONT_FAMILY,
+                          letterSpacing: "0.5px",
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        Resolve
+                      </button>
+                    )}
                   {selectedTicket.status !== "closed" && (
                     <button
                       onClick={handleCloseRoom}
@@ -2790,46 +3194,70 @@ const LiveChatAgent = ({
                     No messages yet
                   </div>
                 ) : (
-                  messages.map((msg, idx) => {
-                    const isMine = msg.senderId === user.uid;
-                    return (
-                      <div key={msg.id || idx} style={{ alignSelf: isMine ? "flex-end" : "flex-start", maxWidth: "70%" }}>
-                        <div
+                  <AnimatePresence initial={false}>
+                    {messages.map((msg, idx) => {
+                      const isMine = msg.senderId === user.uid;
+                      return (
+                        <motion.div
+                          key={msg.id || idx}
+                          data-msg-id={msg.id || idx}
+                          initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          transition={{ duration: 0.3, ease: "easeOut" }}
                           style={{
-                            padding: "12px 16px",
-                            borderRadius: "12px",
-                            backgroundColor: isMine ? BLUE : "#f4f4f5",
-                            color: isMine ? WHITE : BLACK,
-                            fontSize: "15px",
-                            fontFamily: FONT_FAMILY,
-                            wordBreak: "break-word",
-                            border: isMine ? "none" : "1px solid rgba(0,0,0,0.05)",
+                            alignSelf: isMine ? "flex-end" : "flex-start",
+                            maxWidth: "70%",
                           }}
                         >
-                          {!isMine && (
-                            <div style={{ fontSize: "12px", fontWeight: 700, color: BLUE, marginBottom: "5px" }}>
-                              {msg.senderName}
-                            </div>
-                          )}
-                          <div>{msg.text}</div>
                           <div
                             style={{
-                              display: "flex",
-                              justifyContent: "flex-end",
-                              alignItems: "center",
-                              gap: "6px",
-                              marginTop: "5px",
+                              padding: "12px 16px",
+                              borderRadius: "12px",
+                              backgroundColor: isMine ? BLUE : "#f4f4f5",
+                              color: isMine ? WHITE : BLACK,
+                              fontSize: "15px",
+                              fontFamily: FONT_FAMILY,
+                              wordBreak: "break-word",
+                              border: isMine ? "none" : "1px solid rgba(0,0,0,0.05)",
                             }}
                           >
-                            {renderDeliveryStatus(msg, isMine)}
-                            <span style={{ fontSize: "10px", color: isMine ? WHITE : "#999" }}>
-                              {formatTime(msg.timestamp)}
-                            </span>
+                            {!isMine && (
+                              <div
+                                style={{
+                                  fontSize: "12px",
+                                  fontWeight: 700,
+                                  color: BLUE,
+                                  marginBottom: "5px",
+                                }}
+                              >
+                                {msg.senderName}
+                              </div>
+                            )}
+                            <div>{msg.text}</div>
+                            <div
+                              style={{
+                                display: "flex",
+                                justifyContent: "flex-end",
+                                alignItems: "center",
+                                gap: "6px",
+                                marginTop: "5px",
+                              }}
+                            >
+                              {renderDeliveryStatus(msg, isMine)}
+                              <span
+                                style={{
+                                  fontSize: "10px",
+                                  color: isMine ? WHITE : "#999",
+                                }}
+                              >
+                                {formatTime(msg.timestamp)}
+                              </span>
+                            </div>
                           </div>
-                        </div>
-                      </div>
-                    );
-                  })
+                        </motion.div>
+                      );
+                    })}
+                  </AnimatePresence>
                 )}
                 {typingText && selectedTicket.status !== "resolved" && (
                   <div
@@ -2871,7 +3299,9 @@ const LiveChatAgent = ({
                       }
                     }}
                     placeholder={
-                      selectedTicket.status === "waiting" && !isAdmin ? "Waiting for agent..." : "Type a message..."
+                      selectedTicket.status === "waiting" && !isAdmin
+                        ? "Waiting for agent..."
+                        : "Type a message..."
                     }
                     disabled={selectedTicket.status === "waiting" && !isAdmin}
                     style={{
@@ -2882,21 +3312,33 @@ const LiveChatAgent = ({
                       fontSize: "15px",
                       outline: "none",
                       fontFamily: FONT_FAMILY,
-                      backgroundColor: selectedTicket.status === "waiting" && !isAdmin ? "#f5f5f5" : WHITE,
+                      backgroundColor:
+                        selectedTicket.status === "waiting" && !isAdmin
+                          ? "#f5f5f5"
+                          : WHITE,
                     }}
                   />
                   <button
                     onClick={sendMessage}
-                    disabled={(selectedTicket.status === "waiting" && !isAdmin) || !messageText.trim()}
+                    disabled={
+                      (selectedTicket.status === "waiting" && !isAdmin) ||
+                      !messageText.trim()
+                    }
                     style={{
                       padding: "12px 24px",
                       backgroundColor:
-                        (selectedTicket.status === "waiting" && !isAdmin) || !messageText.trim() ? "#ccc" : BLUE,
+                        (selectedTicket.status === "waiting" && !isAdmin) ||
+                        !messageText.trim()
+                          ? "#ccc"
+                          : BLUE,
                       color: WHITE,
                       border: "none",
                       borderRadius: "10px",
                       cursor:
-                        (selectedTicket.status === "waiting" && !isAdmin) || !messageText.trim() ? "not-allowed" : "pointer",
+                        (selectedTicket.status === "waiting" && !isAdmin) ||
+                        !messageText.trim()
+                          ? "not-allowed"
+                          : "pointer",
                       fontFamily: FONT_FAMILY,
                       fontSize: "14px",
                       fontWeight: 800,
@@ -2921,7 +3363,9 @@ const LiveChatAgent = ({
                     fontWeight: 700,
                   }}
                 >
-                  Room ini telah {selectedTicket.status === "closed" ? "ditutup" : "diselesaikan"}. Buat room baru untuk melanjutkan.
+                  Room ini telah{" "}
+                  {selectedTicket.status === "closed" ? "ditutup" : "diselesaikan"}.
+                  Buat room baru untuk melanjutkan.
                 </div>
               )}
             </>
@@ -2942,6 +3386,443 @@ const LiveChatAgent = ({
           )}
         </div>
       </div>
+
+      {/* ===== ADD USER MODAL (GSAP) ===== */}
+      {showAddUserModal && (
+        <div
+          ref={addModalRef}
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0,0,0,0.6)",
+            backdropFilter: "blur(8px)",
+            WebkitBackdropFilter: "blur(8px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 99999,
+            fontFamily: FONT_FAMILY,
+          }}
+          onClick={(e) => {
+            if (e.target === addModalRef.current) setShowAddUserModal(false);
+          }}
+        >
+          <div
+            ref={addModalContentRef}
+            style={{
+              backgroundColor: WHITE,
+              borderRadius: "16px",
+              padding: "32px",
+              width: "90%",
+              maxWidth: "440px",
+              boxShadow: "0 24px 64px rgba(0,0,0,0.3)",
+              position: "relative",
+              overflow: "hidden",
+            }}
+          >
+            {/* Decorative gradient bar */}
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                height: "4px",
+                background: `linear-gradient(90deg, ${BLUE}, #6B8CFF, ${BLUE})`,
+              }}
+            />
+
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginBottom: "24px",
+              }}
+            >
+              <h3
+                style={{
+                  fontSize: "24px",
+                  fontWeight: 700,
+                  color: BLUE,
+                  fontFamily: FONT_FAMILY,
+                  margin: 0,
+                  letterSpacing: "-0.02em",
+                }}
+              >
+                Add New User
+              </h3>
+              <button
+                onClick={() => setShowAddUserModal(false)}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  cursor: "pointer",
+                  padding: "4px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  borderRadius: "8px",
+                  transition: "background-color 0.2s",
+                }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.05)")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.backgroundColor = "transparent")
+                }
+              >
+                <CloseIcon size={20} color={BLUE} />
+              </button>
+            </div>
+
+            {addUserSuccess ? (
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.4, ease: "backOut" }}
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: "16px",
+                  padding: "20px 0",
+                }}
+              >
+                <div
+                  style={{
+                    width: "64px",
+                    height: "64px",
+                    borderRadius: "50%",
+                    backgroundColor: BLUE,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <CheckIcon size={32} color={WHITE} />
+                </div>
+                <p
+                  style={{
+                    fontSize: "16px",
+                    fontWeight: 600,
+                    color: BLUE,
+                    fontFamily: FONT_FAMILY,
+                    margin: 0,
+                  }}
+                >
+                  User added successfully!
+                </p>
+              </motion.div>
+            ) : (
+              <>
+                <div style={{ marginBottom: "18px" }}>
+                  <label
+                    style={{
+                      display: "block",
+                      fontSize: "13px",
+                      fontWeight: 700,
+                      color: BLUE,
+                      fontFamily: FONT_FAMILY,
+                      marginBottom: "6px",
+                      letterSpacing: "0.3px",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    Full Name
+                  </label>
+                  <input
+                    type="text"
+                    value={newContactName}
+                    onChange={(e) => setNewContactName(e.target.value)}
+                    placeholder="Enter full name"
+                    style={{
+                      width: "100%",
+                      padding: "12px 14px",
+                      border: `1.5px solid rgba(13,60,252,0.2)`,
+                      borderRadius: "10px",
+                      fontSize: "15px",
+                      fontFamily: FONT_FAMILY,
+                      outline: "none",
+                      color: BLUE,
+                      transition: "border-color 0.2s, box-shadow 0.2s",
+                      boxSizing: "border-box",
+                    }}
+                    onFocus={(e) => {
+                      e.target.style.borderColor = BLUE;
+                      e.target.style.boxShadow = `0 0 0 3px rgba(13,60,252,0.1)`;
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = "rgba(13,60,252,0.2)";
+                      e.target.style.boxShadow = "none";
+                    }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: "18px" }}>
+                  <label
+                    style={{
+                      display: "block",
+                      fontSize: "13px",
+                      fontWeight: 700,
+                      color: BLUE,
+                      fontFamily: FONT_FAMILY,
+                      marginBottom: "6px",
+                      letterSpacing: "0.3px",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    value={newContactEmail}
+                    onChange={(e) => setNewContactEmail(e.target.value)}
+                    placeholder="Enter email address"
+                    style={{
+                      width: "100%",
+                      padding: "12px 14px",
+                      border: `1.5px solid rgba(13,60,252,0.2)`,
+                      borderRadius: "10px",
+                      fontSize: "15px",
+                      fontFamily: FONT_FAMILY,
+                      outline: "none",
+                      color: BLUE,
+                      transition: "border-color 0.2s, box-shadow 0.2s",
+                      boxSizing: "border-box",
+                    }}
+                    onFocus={(e) => {
+                      e.target.style.borderColor = BLUE;
+                      e.target.style.boxShadow = `0 0 0 3px rgba(13,60,252,0.1)`;
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = "rgba(13,60,252,0.2)";
+                      e.target.style.boxShadow = "none";
+                    }}
+                  />
+                </div>
+
+                {addUserError && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    style={{
+                      padding: "10px 14px",
+                      backgroundColor: "rgba(255,0,0,0.08)",
+                      border: "1px solid rgba(255,0,0,0.2)",
+                      borderRadius: "8px",
+                      marginBottom: "18px",
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: "13px",
+                        color: "#d32f2f",
+                        fontWeight: 600,
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
+                      {addUserError}
+                    </span>
+                  </motion.div>
+                )}
+
+                <div style={{ display: "flex", gap: "12px" }}>
+                  <button
+                    onClick={() => {
+                      setShowAddUserModal(false);
+                      setAddUserError("");
+                      setNewContactName("");
+                      setNewContactEmail("");
+                    }}
+                    style={{
+                      flex: 1,
+                      padding: "12px",
+                      backgroundColor: "transparent",
+                      color: "#666",
+                      border: "1.5px solid #ddd",
+                      borderRadius: "10px",
+                      fontSize: "14px",
+                      fontWeight: 700,
+                      cursor: "pointer",
+                      fontFamily: FONT_FAMILY,
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleAddContact}
+                    disabled={addingUser}
+                    style={{
+                      flex: 1,
+                      padding: "12px",
+                      backgroundColor: addingUser ? "#ccc" : BLUE,
+                      color: WHITE,
+                      border: "none",
+                      borderRadius: "10px",
+                      fontSize: "14px",
+                      fontWeight: 800,
+                      cursor: addingUser ? "not-allowed" : "pointer",
+                      fontFamily: FONT_FAMILY,
+                      letterSpacing: "0.5px",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    {addingUser ? "Adding..." : "Add User"}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ===== START CHAT MODAL ===== */}
+      {showStartChat && !isAdmin && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0,0,0,0.6)",
+            backdropFilter: "blur(8px)",
+            WebkitBackdropFilter: "blur(8px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 99999,
+            fontFamily: FONT_FAMILY,
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowStartChat(false);
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: WHITE,
+              borderRadius: "16px",
+              padding: "32px",
+              width: "90%",
+              maxWidth: "440px",
+              boxShadow: "0 24px 64px rgba(0,0,0,0.3)",
+              position: "relative",
+              overflow: "hidden",
+            }}
+          >
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                height: "4px",
+                background: `linear-gradient(90deg, ${BLUE}, #6B8CFF, ${BLUE})`,
+              }}
+            />
+            <h3
+              style={{
+                fontSize: "24px",
+                fontWeight: 700,
+                color: BLUE,
+                fontFamily: FONT_FAMILY,
+                margin: 0,
+                marginBottom: "24px",
+                letterSpacing: "-0.02em",
+              }}
+            >
+              Start New Chat
+            </h3>
+            <div style={{ marginBottom: "18px" }}>
+              <label
+                style={{
+                  display: "block",
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: BLUE,
+                  fontFamily: FONT_FAMILY,
+                  marginBottom: "6px",
+                  letterSpacing: "0.3px",
+                  textTransform: "uppercase",
+                }}
+              >
+                Select Topic
+              </label>
+              <select
+                value={selectedTopic}
+                onChange={(e) => setSelectedTopic(e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: "12px 14px",
+                  border: `1.5px solid rgba(13,60,252,0.2)`,
+                  borderRadius: "10px",
+                  fontSize: "15px",
+                  fontFamily: FONT_FAMILY,
+                  outline: "none",
+                  color: BLUE,
+                  fontWeight: 600,
+                  backgroundColor: WHITE,
+                  cursor: "pointer",
+                  boxSizing: "border-box",
+                }}
+              >
+                <option value="">-- Select topic --</option>
+                {topics.map((t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div style={{ display: "flex", gap: "12px" }}>
+              <button
+                onClick={() => {
+                  setShowStartChat(false);
+                  setSelectedTopic("");
+                }}
+                style={{
+                  flex: 1,
+                  padding: "12px",
+                  backgroundColor: "transparent",
+                  color: "#666",
+                  border: "1.5px solid #ddd",
+                  borderRadius: "10px",
+                  fontSize: "14px",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  fontFamily: FONT_FAMILY,
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={startChat}
+                disabled={!selectedTopic}
+                style={{
+                  flex: 1,
+                  padding: "12px",
+                  backgroundColor: selectedTopic ? BLUE : "#ccc",
+                  color: WHITE,
+                  border: "none",
+                  borderRadius: "10px",
+                  fontSize: "14px",
+                  fontWeight: 800,
+                  cursor: selectedTopic ? "pointer" : "not-allowed",
+                  fontFamily: FONT_FAMILY,
+                  letterSpacing: "0.5px",
+                  textTransform: "uppercase",
+                }}
+              >
+                Start Chat
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -3004,7 +3885,12 @@ export default function LiveChatPage(): React.JSX.Element {
       },
     });
     gsap.set(textRef.current, { y: 100, opacity: 0 });
-    tl.to(textRef.current, { y: 0, opacity: 1, duration: 0.8, ease: "back.out(1.7)" })
+    tl.to(textRef.current, {
+      y: 0,
+      opacity: 1,
+      duration: 0.8,
+      ease: "back.out(1.7)",
+    })
       .to(textRef.current, { duration: 0.6 })
       .to(textRef.current, {
         opacity: 0,
@@ -3016,10 +3902,25 @@ export default function LiveChatPage(): React.JSX.Element {
           if (textRef.current) textRef.current.textContent = "Note";
         },
       })
-      .to(textRef.current, { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: "back.out(1.7)" })
+      .to(textRef.current, {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        duration: 0.6,
+        ease: "back.out(1.7)",
+      })
       .to(textRef.current, { duration: 0.8 })
-      .to(textRef.current, { scale: 0.3, opacity: 0, duration: 0.7, ease: "power2.in" })
-      .to(preloaderRef.current, { scale: 0.95, opacity: 0.8, duration: 0.3, ease: "power2.inOut" }, "-=0.3");
+      .to(textRef.current, {
+        scale: 0.3,
+        opacity: 0,
+        duration: 0.7,
+        ease: "power2.in",
+      })
+      .to(
+        preloaderRef.current,
+        { scale: 0.95, opacity: 0.8, duration: 0.3, ease: "power2.inOut" },
+        "-=0.3"
+      );
   };
 
   if (!isMounted || loading) {
@@ -3039,8 +3940,23 @@ export default function LiveChatPage(): React.JSX.Element {
           fontFamily: FONT_FAMILY,
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "40px", overflow: "hidden" }}>
-          <span style={{ fontSize: "100px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em" }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "40px",
+            overflow: "hidden",
+          }}
+        >
+          <span
+            style={{
+              fontSize: "100px",
+              fontWeight: 700,
+              color: BLUE,
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "-0.03em",
+            }}
+          >
             Menuru
           </span>
           <span
@@ -3080,8 +3996,23 @@ export default function LiveChatPage(): React.JSX.Element {
           fontFamily: FONT_FAMILY,
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "40px", overflow: "hidden" }}>
-          <span style={{ fontSize: "100px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em" }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "40px",
+            overflow: "hidden",
+          }}
+        >
+          <span
+            style={{
+              fontSize: "100px",
+              fontWeight: 700,
+              color: BLUE,
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "-0.03em",
+            }}
+          >
             Menuru
           </span>
           <span
@@ -3106,22 +4037,28 @@ export default function LiveChatPage(): React.JSX.Element {
   return (
     <>
       <Head>
-        <title>Live Chat Agent | Menuru Official</title>
-        <meta name="description" content="Live Chat Agent Menuru" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+        <title>Live Chat | Menuru Official</title>
+        <meta name="description" content="Live Chat Menuru" />
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+        />
         <meta name="theme-color" content={BLUE} />
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta
+          name="apple-mobile-web-app-status-bar-style"
+          content="black-translucent"
+        />
         <meta name="apple-mobile-web-app-title" content="Menuru" />
         <meta name="mobile-web-app-capable" content="yes" />
         <link rel="icon" href="/images/ai.jpg" type="image/jpeg" />
         <link rel="apple-touch-icon" href="/images/ai.jpg" />
-        <meta property="og:title" content="Live Chat Agent | Menuru Official" />
-        <meta property="og:description" content="Live Chat Agent Menuru" />
+        <meta property="og:title" content="Live Chat | Menuru Official" />
+        <meta property="og:description" content="Live Chat Menuru" />
         <meta property="og:image" content="/images/ai.jpg" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Live Chat Agent | Menuru Official" />
-        <meta name="twitter:description" content="Live Chat Agent Menuru" />
+        <meta name="twitter:title" content="Live Chat | Menuru Official" />
+        <meta name="twitter:description" content="Live Chat Menuru" />
         <meta name="twitter:image" content="/images/ai.jpg" />
       </Head>
 
@@ -3143,8 +4080,15 @@ export default function LiveChatPage(): React.JSX.Element {
         <HeroMenuruTitle onNavbarShiftChange={setNavbarShifted} />
 
         {/* KONTEN — LIVE CHAT */}
-        <div style={{ padding: "0 40px", maxWidth: "1600px", margin: "0 auto", width: "100%" }}>
-          <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} />
+        <div
+          style={{
+            padding: "0 40px",
+            maxWidth: "1600px",
+            margin: "0 auto",
+            width: "100%",
+          }}
+        >
+          <LiveChat user={user} isAdmin={isAdmin} db={db} auth={auth} />
         </div>
 
         {/* FOOTER */}
@@ -3159,11 +4103,49 @@ export default function LiveChatPage(): React.JSX.Element {
             overflow: "hidden",
           }}
         >
-          <div style={{ position: "absolute", left: "40px", top: "50%", transform: "translateY(-50%)", width: "200px", height: "auto", opacity: 0.8 }}>
-            <img src="/images/p0l.jpg" alt="" style={{ width: "100%", height: "auto", display: "block", objectFit: "cover" }} />
+          <div
+            style={{
+              position: "absolute",
+              left: "40px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              width: "200px",
+              height: "auto",
+              opacity: 0.8,
+            }}
+          >
+            <img
+              src="/images/p0l.jpg"
+              alt=""
+              style={{
+                width: "100%",
+                height: "auto",
+                display: "block",
+                objectFit: "cover",
+              }}
+            />
           </div>
-          <div style={{ position: "absolute", right: "40px", top: "50%", transform: "translateY(-50%)", width: "200px", height: "auto", opacity: 0.8 }}>
-            <img src="/images/xxz.jpg" alt="" style={{ width: "100%", height: "auto", display: "block", objectFit: "cover" }} />
+          <div
+            style={{
+              position: "absolute",
+              right: "40px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              width: "200px",
+              height: "auto",
+              opacity: 0.8,
+            }}
+          >
+            <img
+              src="/images/xxz.jpg"
+              alt=""
+              style={{
+                width: "100%",
+                height: "auto",
+                display: "block",
+                objectFit: "cover",
+              }}
+            />
           </div>
 
           <div
@@ -3195,30 +4177,55 @@ export default function LiveChatPage(): React.JSX.Element {
                 >
                   {section.title}
                 </h3>
-                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "8px",
+                  }}
+                >
                   {section.links.map((link, linkIdx) => {
                     let linkHref = "#";
                     let isAttention = false;
                     let isStories = false;
                     if (link === "Contact") linkHref = "/contact";
                     else if (link === "Live Chat") linkHref = "/live-chat";
-                    else if (link === "Live Chat Agent") linkHref = "/live-chat-agent";
+                    else if (link === "Live Chat Agent")
+                      linkHref = "/live-chat-agent";
                     else if (link === "Help Center") linkHref = "/pusat-bantuan";
-                    else if (link === "About Us") { linkHref = "/profile"; isAttention = true; }
-                    else if (link === "Privacy Policy") { linkHref = "/privacy-policy"; isAttention = true; }
-                    else if (link === "Terms & Conditions") { linkHref = "/terms-of-services"; isAttention = true; }
-                    else if (link === "Terms of Use") { linkHref = "/terms-of-use"; isAttention = true; }
-                    else if (link === "Stories") { linkHref = "/stories"; isStories = true; }
-                    else if (link === "Shop") linkHref = "/shop";
+                    else if (link === "About Us") {
+                      linkHref = "/profile";
+                      isAttention = true;
+                    } else if (link === "Privacy Policy") {
+                      linkHref = "/privacy-policy";
+                      isAttention = true;
+                    } else if (link === "Terms & Conditions") {
+                      linkHref = "/terms-of-services";
+                      isAttention = true;
+                    } else if (link === "Terms of Use") {
+                      linkHref = "/terms-of-use";
+                      isAttention = true;
+                    } else if (link === "Stories") {
+                      linkHref = "/stories";
+                      isStories = true;
+                    } else if (link === "Shop") linkHref = "/shop";
                     else if (link === "Note") linkHref = "/note";
                     else if (link === "Calendar") linkHref = "/calendar";
                     else if (link === "Blog") linkHref = "/blog";
                     else if (link === "Donation") linkHref = "/donation";
                     else if (link === "Community") linkHref = "/community";
-                    else if (link === "Instagram") linkHref = "https://instagram.com/menuru";
+                    else if (link === "Instagram")
+                      linkHref = "https://instagram.com/menuru";
 
                     return (
-                      <div key={linkIdx} style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                      <div
+                        key={linkIdx}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "10px",
+                        }}
+                      >
                         <Link href={linkHref} style={{ textDecoration: "none" }}>
                           <span
                             style={{
@@ -3301,7 +4308,8 @@ export default function LiveChatPage(): React.JSX.Element {
                 letterSpacing: "0.01em",
               }}
             >
-              Terms and conditions apply. By using this website, you agree to our Terms of Use and Privacy Policy.
+              Terms and conditions apply. By using this website, you agree to
+              our Terms of Use and Privacy Policy.
             </p>
           </div>
         </div>
