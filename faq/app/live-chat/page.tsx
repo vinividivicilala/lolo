@@ -439,6 +439,15 @@ interface LastMessagePreview {
   isFromMe: boolean;
 }
 
+// ✅ Rolling message item — format: [Sender Name] from [Message]
+interface RollingMessageItem {
+  id: string;
+  senderName: string;
+  text: string;
+  timestamp: any;
+  isMine: boolean;
+}
+
 // ===== HERO MENURU TITLE =====
 const HeroMenuruTitle = ({
   onNavbarShiftChange,
@@ -1176,6 +1185,145 @@ const CloseRoomButton = ({
   );
 };
 
+// ===== ROLLING MESSAGE ITEM COMPONENT (GSAP — PERSISTENT) =====
+// Format: [Sender Name] from [Message]
+// Muncul permanen di body chat dengan animasi GSAP
+const RollingMessageItemComponent = ({
+  item,
+  index,
+}: {
+  item: RollingMessageItem;
+  index: number;
+}) => {
+  const itemRef = useRef<HTMLDivElement>(null);
+  const senderRef = useRef<HTMLSpanElement>(null);
+  const fromRef = useRef<HTMLSpanElement>(null);
+  const textRef = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    if (!itemRef.current) return;
+
+    const tl = gsap.timeline();
+
+    // Container slide in dari kiri
+    tl.fromTo(
+      itemRef.current,
+      { opacity: 0, x: -60, scale: 0.9, height: 0 },
+      {
+        opacity: 1,
+        x: 0,
+        scale: 1,
+        height: "auto",
+        duration: 0.5,
+        ease: "back.out(1.4)",
+      }
+    );
+
+    // Sender name — flip in
+    if (senderRef.current) {
+      tl.fromTo(
+        senderRef.current,
+        { yPercent: 120, opacity: 0, rotateX: -90, transformOrigin: "50% 100%" },
+        { yPercent: 0, opacity: 1, rotateX: 0, duration: 0.5, ease: "back.out(1.7)" },
+        "-=0.3"
+      );
+    }
+
+    // "from" — fade in
+    if (fromRef.current) {
+      tl.fromTo(
+        fromRef.current,
+        { opacity: 0, scale: 0.6 },
+        { opacity: 1, scale: 1, duration: 0.35, ease: "back.out(2)" },
+        "-=0.25"
+      );
+    }
+
+    // Message text — slide in
+    if (textRef.current) {
+      tl.fromTo(
+        textRef.current,
+        { yPercent: 100, opacity: 0, rotateX: -60, transformOrigin: "50% 100%" },
+        { yPercent: 0, opacity: 1, rotateX: 0, duration: 0.6, ease: "back.out(1.7)" },
+        "-=0.3"
+      );
+    }
+
+    return () => {
+      tl.kill();
+    };
+  }, [item.id]);
+
+  return (
+    <div
+      ref={itemRef}
+      data-rolling-id={item.id}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "6px",
+        padding: "8px 12px",
+        backgroundColor: item.isMine ? BLUE : WHITE,
+        border: `1.5px solid ${BLUE}`,
+        borderRadius: "8px",
+        fontFamily: FONT_FAMILY,
+        fontSize: "13px",
+        overflow: "hidden",
+        marginBottom: "6px",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "6px",
+          overflow: "hidden",
+          width: "100%",
+        }}
+      >
+        <span
+          ref={senderRef}
+          style={{
+            fontWeight: 700,
+            color: item.isMine ? WHITE : BLUE,
+            flexShrink: 0,
+            display: "inline-block",
+          }}
+        >
+          {item.senderName}
+        </span>
+        <span
+          ref={fromRef}
+          style={{
+            color: item.isMine ? WHITE : BLUE,
+            flexShrink: 0,
+            fontStyle: "italic",
+            opacity: 0.85,
+          }}
+        >
+          from
+        </span>
+        <span
+          ref={textRef}
+          style={{
+            color: item.isMine ? WHITE : BLUE,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            fontStyle: "italic",
+            fontWeight: 500,
+            display: "inline-block",
+            flex: 1,
+            minWidth: 0,
+          }}
+        >
+          {item.text.length > 80 ? item.text.substring(0, 80) + "..." : item.text}
+        </span>
+      </div>
+    </div>
+  );
+};
+
 // ===== LIVE CHAT COMPONENT =====
 const LiveChat = ({
   user,
@@ -1207,11 +1355,15 @@ const LiveChat = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [messageSearchQuery, setMessageSearchQuery] = useState("");
 
-  // ✅ Message previews & counts per chat — AUTO UPDATE
+  // Preview & counts
   const [chatPreviews, setChatPreviews] = useState<{ [chatId: string]: LastMessagePreview[] }>({});
-  const [chatMsgCounts, setChatMsgCounts] = useState<{ [chatId: string]: number }>({});
+  // ✅ Counter dari pesan yang DIKIRIM user sendiri (pengirim), bukan yang diterima
+  const [sentCounts, setSentCounts] = useState<{ [chatId: string]: number }>({});
 
-  // Online users panel
+  // ✅ Rolling messages — tampil permanen di body chat
+  const [rollingMessages, setRollingMessages] = useState<RollingMessageItem[]>([]);
+
+  // Online users
   const [onlineUsers, setOnlineUsers] = useState<ChatContact[]>([]);
 
   // Add User
@@ -1228,7 +1380,7 @@ const LiveChat = ({
   const [addingGroup, setAddingGroup] = useState(false);
   const [groupError, setGroupError] = useState("");
 
-  // ✅ Close room confirm (inline toast)
+  // Close room confirm
   const [showCloseConfirm, setShowCloseConfirm] = useState(false);
 
   // Refs
@@ -1243,9 +1395,10 @@ const LiveChat = ({
   const groupItemRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const onlineUserItemRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
-  // ✅ Cache untuk messages & prev len
   const messagesCacheRef = useRef<{ [chatId: string]: ChatMessage[] }>({});
   const prevMessagesLenRef = useRef<number>(0);
+  // ✅ Simpan rolling messages per chat
+  const rollingCacheRef = useRef<{ [chatId: string]: RollingMessageItem[] }>({});
 
   useEffect(() => {
     setIsMounted(true);
@@ -1257,7 +1410,7 @@ const LiveChat = ({
       });
   }, []);
 
-  // GSAP title animation
+  // GSAP title
   useEffect(() => {
     if (!isMounted) return;
     if (liveChatTitleRef.current) {
@@ -1289,7 +1442,7 @@ const LiveChat = ({
     };
   }, [isMounted]);
 
-  // GSAP Add User button
+  // GSAP Add buttons
   useEffect(() => {
     if (!isMounted) return;
     if (addUserBtnRef.current) {
@@ -1299,11 +1452,6 @@ const LiveChat = ({
         { scale: 1, rotation: 0, opacity: 1, duration: 0.8, ease: "back.out(1.7)", delay: 0.4 }
       );
     }
-  }, [isMounted]);
-
-  // GSAP Add Group button
-  useEffect(() => {
-    if (!isMounted) return;
     if (addGroupBtnRef.current) {
       gsap.fromTo(
         addGroupBtnRef.current,
@@ -1313,7 +1461,7 @@ const LiveChat = ({
     }
   }, [isMounted]);
 
-  // GSAP Add User form open/close
+  // GSAP forms open/close
   useEffect(() => {
     if (!addUserFormRef.current) return;
     if (showAddUserForm) {
@@ -1337,7 +1485,6 @@ const LiveChat = ({
     }
   }, [showAddUserForm]);
 
-  // GSAP Add Group form open/close
   useEffect(() => {
     if (!addGroupFormRef.current) return;
     if (showAddGroupForm) {
@@ -1361,7 +1508,7 @@ const LiveChat = ({
     }
   }, [showAddGroupForm]);
 
-  // GSAP online users
+  // GSAP online users & contacts
   useEffect(() => {
     if (!isMounted) return;
     onlineUsers.forEach((u) => {
@@ -1373,7 +1520,6 @@ const LiveChat = ({
     });
   }, [onlineUsers, isMounted]);
 
-  // GSAP contacts
   useEffect(() => {
     if (!isMounted) return;
     contacts.forEach((contact) => {
@@ -1392,7 +1538,7 @@ const LiveChat = ({
     });
   }, [contacts, groups, isMounted]);
 
-  // Check ban status
+  // Check ban
   useEffect(() => {
     if (!user || !isMounted) {
       setCheckingBan(false);
@@ -1421,7 +1567,7 @@ const LiveChat = ({
     checkBan();
   }, [user, isMounted]);
 
-  // ===== LOAD ALL USERS =====
+  // Load all users
   useEffect(() => {
     if (!db || !user || !isMounted) return;
     const q = query(collection(db, "users"), orderBy("displayName", "asc"));
@@ -1446,7 +1592,7 @@ const LiveChat = ({
     return () => unsubscribe();
   }, [db, user, isMounted]);
 
-  // ===== LOAD ONLINE USERS =====
+  // Online users
   useEffect(() => {
     if (!db || !user || !isMounted) return;
     const q = query(collection(db, "users"), where("online", "==", true));
@@ -1471,7 +1617,7 @@ const LiveChat = ({
     return () => unsubscribe();
   }, [db, user, isMounted]);
 
-  // ===== LOAD MY CONTACTS =====
+  // My contacts
   useEffect(() => {
     if (!db || !user || !isMounted) return;
     const q = query(
@@ -1498,7 +1644,7 @@ const LiveChat = ({
     return () => unsubscribe();
   }, [db, user, isMounted]);
 
-  // ===== LOAD GROUPS =====
+  // Groups
   useEffect(() => {
     if (!db || !user || !isMounted) return;
     const q = query(
@@ -1516,8 +1662,7 @@ const LiveChat = ({
     return () => unsubscribe();
   }, [db, user, isMounted]);
 
-  // ===== AUTO PREVIEWS & COUNTS UNTUK SEMUA CHAT (CONTACTS + GROUPS) =====
-  // Sama seperti halaman utama — preview 3 pesan terakhir + counter otomatis
+  // ===== AUTO PREVIEWS + COUNTER (dari pesan yang DIKIRIM user sendiri) =====
   useEffect(() => {
     if (!db || !user || !isMounted) return;
     const unsubscribes: (() => void)[] = [];
@@ -1529,15 +1674,11 @@ const LiveChat = ({
       const q = query(
         collection(db, "direct_messages", chatId, "messages"),
         orderBy("timestamp", "desc"),
-        limit(3)
+        limit(20)
       );
       const unsub = onSnapshot(q, async (snapshot: any) => {
-        // ✅ Counter otomatis: jumlah dokumen di preview (max 3) + full count via total
-        // Untuk counter real-time yang akurat, kita ambil full count via getCountFromServer-like
-        // tapi karena Firestore client tidak support count langsung tanpa agregasi,
-        // kita pakai snapshot.size dari query limit 3 sebagai hint, DAN hitung full via query terpisah (opsional).
-        // Di sini kita simpan preview 3 pesan terakhir + update counter setelah full count.
         const previews: LastMessagePreview[] = [];
+        let sentCount = 0;
         for (const docSnap of snapshot.docs) {
           const data = docSnap.data();
           let text = data.text || "";
@@ -1548,15 +1689,20 @@ const LiveChat = ({
               text = "[Encrypted]";
             }
           }
-          previews.push({
-            text,
-            senderName: data.senderName || "User",
-            timestamp: data.timestamp,
-            isFromMe: data.senderId === user.uid,
-          });
+          // ✅ Counter: hanya hitung pesan yang dikirim user sendiri (pengirim)
+          if (data.senderId === user.uid) sentCount++;
+          // Preview: 3 pesan terakhir
+          if (previews.length < 3) {
+            previews.push({
+              text,
+              senderName: data.senderName || "User",
+              timestamp: data.timestamp,
+              isFromMe: data.senderId === user.uid,
+            });
+          }
         }
         setChatPreviews((prev) => ({ ...prev, [key]: previews }));
-        setChatMsgCounts((prev) => ({ ...prev, [key]: snapshot.size }));
+        setSentCounts((prev) => ({ ...prev, [key]: sentCount }));
       });
       unsubscribes.push(unsub);
     });
@@ -1567,10 +1713,11 @@ const LiveChat = ({
       const q = query(
         collection(db, "chat_groups", group.id, "messages"),
         orderBy("timestamp", "desc"),
-        limit(3)
+        limit(20)
       );
       const unsub = onSnapshot(q, async (snapshot: any) => {
         const previews: LastMessagePreview[] = [];
+        let sentCount = 0;
         for (const docSnap of snapshot.docs) {
           const data = docSnap.data();
           let text = data.text || "";
@@ -1581,15 +1728,18 @@ const LiveChat = ({
               text = "[Encrypted]";
             }
           }
-          previews.push({
-            text,
-            senderName: data.senderName || "User",
-            timestamp: data.timestamp,
-            isFromMe: data.senderId === user.uid,
-          });
+          if (data.senderId === user.uid) sentCount++;
+          if (previews.length < 3) {
+            previews.push({
+              text,
+              senderName: data.senderName || "User",
+              timestamp: data.timestamp,
+              isFromMe: data.senderId === user.uid,
+            });
+          }
         }
         setChatPreviews((prev) => ({ ...prev, [key]: previews }));
-        setChatMsgCounts((prev) => ({ ...prev, [key]: snapshot.size }));
+        setSentCounts((prev) => ({ ...prev, [key]: sentCount }));
       });
       unsubscribes.push(unsub);
     });
@@ -1597,16 +1747,20 @@ const LiveChat = ({
     return () => unsubscribes.forEach((unsub) => unsub());
   }, [db, contacts, groups, user, isMounted]);
 
-  // ===== MESSAGES LISTENER (DIRECT CHAT) =====
+  // ===== MESSAGES LISTENER — DIRECT CHAT (dengan rolling messages) =====
   useEffect(() => {
     if (!db || !selectedContact || !user || !isMounted) return;
 
     const chatId = [user.uid, selectedContact.userId].sort().join("_");
+    const key = `c_${selectedContact.id}`;
 
+    // Load cached
     if (messagesCacheRef.current[chatId]) {
       setMessages(messagesCacheRef.current[chatId]);
       prevMessagesLenRef.current = messagesCacheRef.current[chatId].length;
     }
+    // Load rolling cache
+    setRollingMessages(rollingCacheRef.current[key] || []);
 
     const q = query(
       collection(db, "direct_messages", chatId, "messages"),
@@ -1628,7 +1782,21 @@ const LiveChat = ({
         msgList.push({ id: docSnap.id, ...data, text } as ChatMessage);
       }
 
-      // ✅ Rolling new message animation
+      // ✅ Build rolling messages dari SEMUA pesan yang DIKIRIM user sendiri
+      // Format: [senderName] from [text]
+      const myRollingMessages: RollingMessageItem[] = msgList
+        .filter((m) => m.senderId === user.uid)
+        .map((m) => ({
+          id: m.id,
+          senderName: m.senderName || "User",
+          text: m.text,
+          timestamp: m.timestamp,
+          isMine: true,
+        }));
+
+      rollingCacheRef.current[key] = myRollingMessages;
+      setRollingMessages(myRollingMessages);
+
       const newLen = msgList.length;
       if (prevMessagesLenRef.current > 0 && newLen > prevMessagesLenRef.current) {
         setTimeout(() => {
@@ -1641,26 +1809,22 @@ const LiveChat = ({
 
       messagesCacheRef.current[chatId] = msgList;
       setMessages(msgList);
-
-      requestAnimationFrame(() => {
-        if (chatMessagesContainerRef.current) {
-          chatMessagesContainerRef.current.scrollTop = chatMessagesContainerRef.current.scrollHeight;
-        }
-      });
     });
     return () => unsubscribe();
   }, [db, selectedContact, user, isMounted]);
 
-  // ===== MESSAGES LISTENER (GROUP CHAT) =====
+  // ===== MESSAGES LISTENER — GROUP CHAT (dengan rolling messages) =====
   useEffect(() => {
     if (!db || !selectedGroup || !user || !isMounted) return;
 
     const chatId = `g_${selectedGroup.id}`;
+    const key = `g_${selectedGroup.id}`;
 
     if (messagesCacheRef.current[chatId]) {
       setMessages(messagesCacheRef.current[chatId]);
       prevMessagesLenRef.current = messagesCacheRef.current[chatId].length;
     }
+    setRollingMessages(rollingCacheRef.current[key] || []);
 
     const q = query(
       collection(db, "chat_groups", selectedGroup.id, "messages"),
@@ -1682,6 +1846,20 @@ const LiveChat = ({
         msgList.push({ id: docSnap.id, ...data, text } as ChatMessage);
       }
 
+      // ✅ Rolling messages: SEMUA pesan yang DIKIRIM user sendiri di grup
+      const myRollingMessages: RollingMessageItem[] = msgList
+        .filter((m) => m.senderId === user.uid)
+        .map((m) => ({
+          id: m.id,
+          senderName: m.senderName || "User",
+          text: m.text,
+          timestamp: m.timestamp,
+          isMine: true,
+        }));
+
+      rollingCacheRef.current[key] = myRollingMessages;
+      setRollingMessages(myRollingMessages);
+
       const newLen = msgList.length;
       if (prevMessagesLenRef.current > 0 && newLen > prevMessagesLenRef.current) {
         setTimeout(() => {
@@ -1694,17 +1872,11 @@ const LiveChat = ({
 
       messagesCacheRef.current[chatId] = msgList;
       setMessages(msgList);
-
-      requestAnimationFrame(() => {
-        if (chatMessagesContainerRef.current) {
-          chatMessagesContainerRef.current.scrollTop = chatMessagesContainerRef.current.scrollHeight;
-        }
-      });
     });
     return () => unsubscribe();
   }, [db, selectedGroup, user, isMounted]);
 
-  // Reset saat ganti chat
+  // Reset on chat change
   useEffect(() => {
     const chatId = selectedContact
       ? [user?.uid, selectedContact.userId].sort().join("_")
@@ -1712,6 +1884,9 @@ const LiveChat = ({
       ? `g_${selectedGroup.id}`
       : "";
     prevMessagesLenRef.current = messagesCacheRef.current[chatId]?.length || 0;
+
+    const key = selectedContact ? `c_${selectedContact.id}` : selectedGroup ? `g_${selectedGroup.id}` : "";
+    setRollingMessages(rollingCacheRef.current[key] || []);
     setShowCloseConfirm(false);
     setMessageSearchQuery("");
   }, [selectedContact?.id, selectedGroup?.id, user?.uid]);
@@ -1733,7 +1908,7 @@ const LiveChat = ({
     });
   }, [messages, selectedContact, selectedGroup, db, user, isMounted]);
 
-  // ===== ADD USER =====
+  // Add user
   const handleAddUserToContacts = async (pickedUser: ChatContact) => {
     if (!db || !user) return;
     setAddingUserId(pickedUser.id);
@@ -1760,7 +1935,6 @@ const LiveChat = ({
     }
   };
 
-  // ===== DELETE CONTACT =====
   const handleDeleteContact = async (contactId: string) => {
     if (!db) return;
     const el = contactItemRefs.current[contactId];
@@ -1788,7 +1962,6 @@ const LiveChat = ({
     }
   };
 
-  // ===== ADD GROUP =====
   const handleAddGroup = async () => {
     if (!db || !user) return;
     setGroupError("");
@@ -1832,7 +2005,6 @@ const LiveChat = ({
     );
   };
 
-  // ===== SEND MESSAGE =====
   const sendMessage = async () => {
     if (!db || !messageText.trim() || !user) return;
 
@@ -1922,7 +2094,6 @@ const LiveChat = ({
     }
   };
 
-  // ✅ Delivery status (SAMA seperti halaman utama)
   const renderDeliveryStatus = (msg: ChatMessage, isMine: boolean) => {
     if (!isMine) return null;
     let label = "Sent";
@@ -1976,7 +2147,6 @@ const LiveChat = ({
       u.userEmail.toLowerCase().includes(userSearchQuery.toLowerCase())
   );
 
-  // Filter pesan di dalam chat (search)
   const filteredMessages = messageSearchQuery.trim()
     ? messages.filter(
         (m) =>
@@ -1985,7 +2155,7 @@ const LiveChat = ({
       )
     : messages;
 
-  // ===== RENDER CHAT LIST ITEM (dengan preview + counter otomatis) =====
+  // ===== RENDER CHAT LIST ITEM =====
   const renderChatListItem = (item: ChatContact | ChatGroup, type: "contact" | "group") => {
     const isContact = type === "contact";
     const contact = item as ChatContact;
@@ -1995,7 +2165,8 @@ const LiveChat = ({
       : selectedGroup?.id === group.id;
     const key = isContact ? `c_${contact.id}` : `g_${group.id}`;
     const previews = chatPreviews[key] || [];
-    const msgCount = chatMsgCounts[key] || 0;
+    // ✅ Counter dari pesan yang DIKIRIM user sendiri
+    const sentCount = sentCounts[key] || 0;
     const displayName = isContact ? contact.userName : group.groupName;
 
     return (
@@ -2064,7 +2235,7 @@ const LiveChat = ({
             )}
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "6px", flexShrink: 0 }}>
-            {/* ✅ Counter otomatis */}
+            {/* ✅ Counter: pesan yang DIKIRIM user (sent) */}
             <span
               style={{
                 fontSize: "10px",
@@ -2072,7 +2243,7 @@ const LiveChat = ({
                 fontWeight: 700,
               }}
             >
-              {isContact ? `${msgCount} msgs` : `${group.members.length} members`}
+              {isContact ? `${sentCount} sent` : `${group.members.length} members`}
             </span>
             {isContact && (
               <button
@@ -2100,7 +2271,6 @@ const LiveChat = ({
           </div>
         </div>
 
-        {/* ✅ Preview pesan otomatis (3 pesan terakhir, sama seperti halaman utama) */}
         {previews.length > 0 ? (
           <div style={{ marginTop: "6px", display: "flex", flexDirection: "column", gap: "3px" }}>
             {[...previews].reverse().map((p, i) => (
@@ -2299,7 +2469,7 @@ const LiveChat = ({
           borderRadius: "12px",
         }}
       >
-        {/* ===== PANEL USER ONLINE (KIRI) ===== */}
+        {/* ===== PANEL USER ONLINE ===== */}
         <div
           className="online-panel-container"
           style={{
@@ -2428,7 +2598,7 @@ const LiveChat = ({
           </div>
         </div>
 
-        {/* ===== SIDEBAR: CHAT LIST (CONTACTS + GROUPS) ===== */}
+        {/* ===== SIDEBAR CHAT LIST ===== */}
         <div
           className="chat-list-container"
           style={{
@@ -2476,7 +2646,7 @@ const LiveChat = ({
             </span>
           </div>
 
-          {/* ✅ Search chat — bg putih, teks biru */}
+          {/* Search chat — bg putih, teks biru */}
           <div
             style={{
               padding: "10px 14px",
@@ -2579,6 +2749,7 @@ const LiveChat = ({
             )}
           </div>
 
+          {/* Add User + Add Group */}
           <div
             style={{
               padding: "12px 16px",
@@ -2659,7 +2830,7 @@ const LiveChat = ({
               </button>
             </div>
 
-            {/* ADD USER FORM */}
+            {/* Add User form */}
             {showAddUserForm && (
               <div
                 ref={addUserFormRef}
@@ -2818,7 +2989,7 @@ const LiveChat = ({
               </div>
             )}
 
-            {/* ADD GROUP FORM */}
+            {/* Add Group form */}
             {showAddGroupForm && (
               <div
                 ref={addGroupFormRef}
@@ -2962,7 +3133,7 @@ const LiveChat = ({
           </div>
         </div>
 
-        {/* ===== RIGHT SIDE: CHAT VIEW ===== */}
+        {/* ===== CHAT VIEW ===== */}
         <div
           style={{
             flex: 1,
@@ -3029,7 +3200,7 @@ const LiveChat = ({
                   </div>
                 </div>
 
-                {/* ✅ SEARCH DI DALAM CHAT — bg putih, teks biru */}
+                {/* Search dalam chat — bg putih, teks biru */}
                 <div
                   style={{
                     display: "flex",
@@ -3081,18 +3252,14 @@ const LiveChat = ({
                   )}
                 </div>
 
-                {/* Close room button */}
-                {(selectedContact || selectedGroup) && (
-                  <CloseRoomButton
-                    onConfirm={() => {
-                      setShowCloseConfirm(true);
-                      setTimeout(() => setShowCloseConfirm(false), 2200);
-                    }}
-                  />
-                )}
+                <CloseRoomButton
+                  onConfirm={() => {
+                    setShowCloseConfirm(true);
+                    setTimeout(() => setShowCloseConfirm(false), 2200);
+                  }}
+                />
               </div>
 
-              {/* Inline toast konfirmasi */}
               {showCloseConfirm && (
                 <div
                   style={{
@@ -3128,7 +3295,40 @@ const LiveChat = ({
                 </div>
               )}
 
-              {/* Messages */}
+              {/* ===== ROLLING MESSAGES SECTION (di atas body chat) ===== */}
+              {/* Format: [Sender Name] from [Message] — PERSISTENT + GSAP */}
+              {rollingMessages.length > 0 && (
+                <div
+                  style={{
+                    padding: "12px 16px",
+                    borderBottom: `1.5px solid ${BLUE}`,
+                    backgroundColor: "#f8f9ff",
+                    flexShrink: 0,
+                    maxHeight: "220px",
+                    overflowY: "auto",
+                  }}
+                  className="rolling-messages-container"
+                >
+                  <div
+                    style={{
+                      fontSize: "10px",
+                      fontWeight: 800,
+                      color: BLUE,
+                      letterSpacing: "0.8px",
+                      textTransform: "uppercase",
+                      marginBottom: "8px",
+                      fontFamily: FONT_FAMILY,
+                    }}
+                  >
+                    Your Sent Messages ({rollingMessages.length})
+                  </div>
+                  {rollingMessages.map((item, idx) => (
+                    <RollingMessageItemComponent key={item.id} item={item} index={idx} />
+                  ))}
+                </div>
+              )}
+
+              {/* Messages body — bubble chat */}
               <div
                 ref={chatMessagesContainerRef}
                 className="chat-messages-container"
@@ -3695,7 +3895,8 @@ export default function LiveChatPage(): React.JSX.Element {
         .chat-list-container::-webkit-scrollbar,
         .chat-list-container > div::-webkit-scrollbar,
         .online-panel-container::-webkit-scrollbar,
-        .online-panel-container > div::-webkit-scrollbar {
+        .online-panel-container > div::-webkit-scrollbar,
+        .rolling-messages-container::-webkit-scrollbar {
           display: none !important;
           width: 0 !important;
           height: 0 !important;
@@ -3704,7 +3905,8 @@ export default function LiveChatPage(): React.JSX.Element {
         .chat-list-container,
         .chat-list-container > div,
         .online-panel-container,
-        .online-panel-container > div {
+        .online-panel-container > div,
+        .rolling-messages-container {
           scrollbar-width: none !important;
           -ms-overflow-style: none !important;
         }
