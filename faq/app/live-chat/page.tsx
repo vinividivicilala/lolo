@@ -62,6 +62,7 @@ if (typeof window !== "undefined") {
 const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
 const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 const BROADCAST_SENDER_NAME = "Menuru";
+const BROADCAST_SENDER_UID = "menuru_official"; // UID virtual untuk broadcast
 const BLUE = "#0D3CFC";
 const WHITE = "#FFFFFF";
 const BLACK = "#000000";
@@ -379,6 +380,9 @@ interface ChatMessage {
   isEncrypted?: boolean;
   isBotDetected?: boolean;
   deliveryStatus?: "sending" | "sent" | "delivered" | "read" | "failed";
+  isBroadcastContext?: boolean;
+  broadcastTitle?: string;
+  broadcastTopic?: string;
 }
 
 interface ChatContact {
@@ -1229,7 +1233,7 @@ const RightNavbar = () => (
 );
 
 // ================================================================
-// CLOSE ROOM BUTTON (BG BIRU, ICON PUTIH)
+// CLOSE ROOM BUTTON
 // ================================================================
 const CloseRoomButton = ({ onConfirm, disabled }: { onConfirm: () => void; disabled?: boolean }) => {
   const btnRef = useRef<HTMLButtonElement>(null);
@@ -1410,7 +1414,7 @@ const RollingMessageItemComponent = ({ item }: { item: RollingMessageItem; index
 };
 
 // ================================================================
-// ADMIN COMPOSER — Buat Announcement / Broadcast
+// ADMIN COMPOSER
 // ================================================================
 const AdminComposer = ({
   user,
@@ -1435,7 +1439,6 @@ const AdminComposer = ({
   const headerRef = useRef<HTMLDivElement>(null);
   const iconRef = useRef<HTMLDivElement>(null);
 
-  // GSAP: button entrance + continuous icon rotate
   useEffect(() => {
     if (!isAdmin) return;
     if (btnRef.current) {
@@ -1456,7 +1459,6 @@ const AdminComposer = ({
     }
   }, [isAdmin]);
 
-  // GSAP: form open/close animation
   useEffect(() => {
     if (!formRef.current) return;
     if (isOpen) {
@@ -1503,14 +1505,17 @@ const AdminComposer = ({
     setSuccessMsg("");
 
     try {
-      const encryptedText = await encryptMessage(message.trim());
+      const plainText = message.trim();
+      const encryptedText = await encryptMessage(plainText);
       const payload = {
-        userId: user.uid,
-        userName: BROADCAST_SENDER_NAME, // ← dikirim atas nama "Menuru"
+        userId: BROADCAST_SENDER_UID,
+        userName: BROADCAST_SENDER_NAME,
         userEmail: user.email || ADMIN_EMAIL,
+        adminUid: user.uid,
         title: title.trim(),
         topic: topic.trim() || "General",
         text: encryptedText,
+        plainTextPreview: plainText.substring(0, 100),
         message: encryptedText,
         isEncrypted: true,
         createdAt: serverTimestamp(),
@@ -1528,7 +1533,6 @@ const AdminComposer = ({
         `${mode === "announcement" ? "Announcement" : "Broadcast"} sent as "${BROADCAST_SENDER_NAME}"`
       );
 
-      // GSAP: form pulse animation on success
       if (formRef.current) {
         gsap.fromTo(
           formRef.current,
@@ -1609,7 +1613,6 @@ const AdminComposer = ({
             </div>
           </div>
 
-          {/* MODE TOGGLE */}
           <div style={{ display: "flex", gap: "8px", marginBottom: "14px" }}>
             <button
               onClick={() => setMode("announcement")}
@@ -1651,7 +1654,6 @@ const AdminComposer = ({
             </button>
           </div>
 
-          {/* TITLE */}
           <div style={{ marginBottom: "10px" }}>
             <div
               style={{
@@ -1686,7 +1688,6 @@ const AdminComposer = ({
             />
           </div>
 
-          {/* TOPIC */}
           <div style={{ marginBottom: "10px" }}>
             <div
               style={{
@@ -1721,7 +1722,6 @@ const AdminComposer = ({
             />
           </div>
 
-          {/* MESSAGE */}
           <div style={{ marginBottom: "12px" }}>
             <div
               style={{
@@ -1877,6 +1877,18 @@ const LiveChat = ({
   const [encryptionReady, setEncryptionReady] = useState(false);
   const [checkingBan, setCheckingBan] = useState(true);
   const [canSendMessage, setCanSendMessage] = useState(true);
+
+  // Broadcast context — ketika user klik announcement/broadcast
+  const [activeBroadcastContext, setActiveBroadcastContext] = useState<{
+    type: "announcement" | "broadcast";
+    id: string;
+    title: string;
+    topic: string;
+    text: string;
+    senderName: string;
+    senderEmail: string;
+    createdAt: any;
+  } | null>(null);
 
   // ---------- CONTACTS / GROUPS ----------
   const [contacts, setContacts] = useState<ChatContact[]>([]);
@@ -2213,9 +2225,9 @@ const LiveChat = ({
           }
           list.push({
             id: docSnap.id,
-            userId: data.userId || data.senderId || data.createdBy || "",
-            userName: data.userName || data.senderName || BROADCAST_SENDER_NAME,
-            userEmail: data.userEmail || data.senderEmail || "",
+            userId: data.userId || BROADCAST_SENDER_UID,
+            userName: data.userName || BROADCAST_SENDER_NAME,
+            userEmail: data.userEmail || "",
             topic: data.topic || "Announcement",
             text: text || data.title || "",
             title: data.title || "Announcement",
@@ -2250,9 +2262,9 @@ const LiveChat = ({
           }
           list.push({
             id: docSnap.id,
-            userId: data.userId || data.senderId || data.createdBy || "",
-            userName: data.userName || data.senderName || BROADCAST_SENDER_NAME,
-            userEmail: data.userEmail || data.senderEmail || "",
+            userId: data.userId || BROADCAST_SENDER_UID,
+            userName: data.userName || BROADCAST_SENDER_NAME,
+            userEmail: data.userEmail || "",
             topic: data.topic || "Broadcast",
             text: text || data.title || "",
             title: data.title || "Broadcast",
@@ -2477,8 +2489,6 @@ const LiveChat = ({
     setRollingMessages(rollingCacheRef.current[key] || []);
     setShowCloseConfirm(false);
     setMessageSearchQuery("");
-    setSelectedAnnouncementId(null);
-    setSelectedBroadcastId(null);
   }, [selectedContact?.id, selectedGroup?.id, user?.uid]);
 
   // ---------- MARK AS READ ----------
@@ -2598,81 +2608,81 @@ const LiveChat = ({
     );
   };
 
-  // ---------- CLICK ANNOUNCEMENT ----------
+  // ============================================================
+  // FIX UTAMA: CLICK ANNOUNCEMENT → Muncul isi pesan broadcast
+  // ============================================================
   const handleAnnouncementClick = async (ann: AnnouncementItem) => {
     setSelectedAnnouncementId(ann.id);
     setSelectedBroadcastId(null);
+    setSelectedGroup(null);
 
-    // Cari sender di allUsers, atau buat virtual contact dari data announcement
-    let sender = allUsers.find((u) => u.userId === ann.userId || u.userEmail === ann.userEmail);
-    if (!sender && ann.userId) {
-      sender = {
-        id: `virtual_${ann.userId}`,
-        userId: ann.userId,
-        userName: ann.userName || BROADCAST_SENDER_NAME,
-        userEmail: ann.userEmail,
-        userPhoto: "",
-        online: false,
-      };
-    }
+    // Set broadcast context — inilah isi pesan yang muncul di body chat
+    setActiveBroadcastContext({
+      type: "announcement",
+      id: ann.id,
+      title: ann.title,
+      topic: ann.topic,
+      text: ann.text,
+      senderName: BROADCAST_SENDER_NAME,
+      senderEmail: ann.userEmail || ADMIN_EMAIL,
+      createdAt: ann.createdAt,
+    });
 
-    if (sender) {
-      const existing = contacts.find((c) => c.userId === sender!.userId);
-      if (!existing && sender.userId !== user?.uid && db && user) {
-        try {
-          await addDoc(collection(db, "user_contacts"), {
-            ownerId: user.uid,
-            contactId: sender.userId,
-            contactName: sender.userName,
-            contactEmail: sender.userEmail,
-            contactPhoto: sender.userPhoto || "",
-            addedAt: serverTimestamp(),
-          });
-        } catch (e) {
-          console.error(e);
-        }
+    // Buat contact virtual "Menuru" (atau ambil yang ada)
+    const menuruContact: ChatContact = {
+      id: `menuru_official_${ann.id}`,
+      userId: BROADCAST_SENDER_UID,
+      userName: BROADCAST_SENDER_NAME,
+      userEmail: ann.userEmail || ADMIN_EMAIL,
+      userPhoto: "",
+      online: true,
+    };
+
+    setSelectedContact(menuruContact);
+
+    // Auto-scroll ke body chat
+    setTimeout(() => {
+      if (chatMessagesContainerRef.current) {
+        chatMessagesContainerRef.current.scrollTop = 0;
       }
-      setSelectedContact(sender);
-      setSelectedGroup(null);
-    }
+    }, 200);
   };
 
-  // ---------- CLICK BROADCAST ----------
+  // ============================================================
+  // FIX UTAMA: CLICK BROADCAST → Muncul isi pesan broadcast
+  // ============================================================
   const handleBroadcastClick = async (bc: BroadcastItem) => {
     setSelectedBroadcastId(bc.id);
     setSelectedAnnouncementId(null);
+    setSelectedGroup(null);
 
-    let sender = allUsers.find((u) => u.userId === bc.userId || u.userEmail === bc.userEmail);
-    if (!sender && bc.userId) {
-      sender = {
-        id: `virtual_${bc.userId}`,
-        userId: bc.userId,
-        userName: bc.userName || BROADCAST_SENDER_NAME,
-        userEmail: bc.userEmail,
-        userPhoto: "",
-        online: false,
-      };
-    }
+    setActiveBroadcastContext({
+      type: "broadcast",
+      id: bc.id,
+      title: bc.title,
+      topic: bc.topic,
+      text: bc.text,
+      senderName: BROADCAST_SENDER_NAME,
+      senderEmail: bc.userEmail || ADMIN_EMAIL,
+      createdAt: bc.createdAt,
+    });
 
-    if (sender) {
-      const existing = contacts.find((c) => c.userId === sender!.userId);
-      if (!existing && sender.userId !== user?.uid && db && user) {
-        try {
-          await addDoc(collection(db, "user_contacts"), {
-            ownerId: user.uid,
-            contactId: sender.userId,
-            contactName: sender.userName,
-            contactEmail: sender.userEmail,
-            contactPhoto: sender.userPhoto || "",
-            addedAt: serverTimestamp(),
-          });
-        } catch (e) {
-          console.error(e);
-        }
+    const menuruContact: ChatContact = {
+      id: `menuru_official_${bc.id}`,
+      userId: BROADCAST_SENDER_UID,
+      userName: BROADCAST_SENDER_NAME,
+      userEmail: bc.userEmail || ADMIN_EMAIL,
+      userPhoto: "",
+      online: true,
+    };
+
+    setSelectedContact(menuruContact);
+
+    setTimeout(() => {
+      if (chatMessagesContainerRef.current) {
+        chatMessagesContainerRef.current.scrollTop = 0;
       }
-      setSelectedContact(sender);
-      setSelectedGroup(null);
-    }
+    }, 200);
   };
 
   // ---------- SEND MESSAGE ----------
@@ -2727,6 +2737,7 @@ const LiveChat = ({
       const encryptedMessage = await encryptMessage(messageText.trim());
 
       if (selectedContact) {
+        // Kalau kirim ke "Menuru" (broadcast context), simpan dengan userId konsisten
         const chatId = [user.uid, selectedContact.userId].sort().join("_");
         await addDoc(collection(db, "direct_messages", chatId, "messages"), {
           senderId: user.uid,
@@ -2826,7 +2837,32 @@ const LiveChat = ({
       u.userName.toLowerCase().includes(userSearchQuery.toLowerCase()) ||
       u.userEmail.toLowerCase().includes(userSearchQuery.toLowerCase())
   );
-  const filteredMessages = messageSearchQuery.trim()
+
+  // Filter pesan dengan broadcast context di atas
+  const displayMessages: ChatMessage[] = activeBroadcastContext
+    ? [
+        {
+          id: `broadcast_${activeBroadcastContext.id}`,
+          senderId: BROADCAST_SENDER_UID,
+          senderName: BROADCAST_SENDER_NAME,
+          text: activeBroadcastContext.text,
+          timestamp: activeBroadcastContext.createdAt,
+          read: true,
+          isEncrypted: false,
+          isBroadcastContext: true,
+          broadcastTitle: activeBroadcastContext.title,
+          broadcastTopic: activeBroadcastContext.topic,
+          deliveryStatus: "delivered",
+        },
+        ...(messageSearchQuery.trim()
+          ? messages.filter(
+              (m) =>
+                m.text.toLowerCase().includes(messageSearchQuery.toLowerCase()) ||
+                m.senderName.toLowerCase().includes(messageSearchQuery.toLowerCase())
+            )
+          : messages),
+      ]
+    : messageSearchQuery.trim()
     ? messages.filter(
         (m) =>
           m.text.toLowerCase().includes(messageSearchQuery.toLowerCase()) ||
@@ -3151,9 +3187,11 @@ const LiveChat = ({
           if (isContact) {
             setSelectedContact(contact);
             setSelectedGroup(null);
+            setActiveBroadcastContext(null);
           } else {
             setSelectedGroup(group);
             setSelectedContact(null);
+            setActiveBroadcastContext(null);
           }
         }}
         style={{
@@ -3480,7 +3518,7 @@ const LiveChat = ({
         </div>
       </div>
 
-      {/* ADMIN COMPOSER — hanya muncul untuk admin */}
+      {/* ADMIN COMPOSER */}
       <AdminComposer user={user} db={db} isAdmin={isAdmin} />
 
       {/* ANNOUNCEMENT & BROADCAST */}
@@ -3564,6 +3602,7 @@ const LiveChat = ({
                   onClick={() => {
                     setSelectedContact(u);
                     setSelectedGroup(null);
+                    setActiveBroadcastContext(null);
                   }}
                   style={{
                     padding: "12px 16px",
@@ -3622,12 +3661,17 @@ const LiveChat = ({
                     >
                       {u.userName}
                     </div>
+                    {/* ✅ STATUS ONLINE: BG PUTIH, TEKS BIRU */}
                     <span
                       style={{
                         display: "inline-block",
                         fontSize: "10px",
                         fontWeight: 800,
                         color: BLUE,
+                        backgroundColor: WHITE,
+                        border: `1.5px solid ${BLUE}`,
+                        padding: "2px 8px",
+                        borderRadius: "4px",
                         letterSpacing: "0.5px",
                         textTransform: "uppercase",
                       }}
@@ -3641,7 +3685,7 @@ const LiveChat = ({
           </div>
         </div>
 
-        {/* SIDEBAR — CHAT LIST */}
+        {/* SIDEBAR CHAT LIST */}
         <div
           className="chat-list-container"
           style={{
@@ -3659,7 +3703,6 @@ const LiveChat = ({
             position: "relative",
           }}
         >
-          {/* HEADER */}
           <div
             style={{
               padding: "14px 16px",
@@ -3690,7 +3733,6 @@ const LiveChat = ({
             </span>
           </div>
 
-          {/* SEARCH */}
           <div
             style={{
               padding: "10px 14px",
@@ -3749,7 +3791,6 @@ const LiveChat = ({
             </div>
           </div>
 
-          {/* CHAT LIST */}
           <div style={{ overflowY: "auto", flex: 1, minHeight: 0 }}>
             {filteredGroups.length > 0 && (
               <>
@@ -3803,7 +3844,6 @@ const LiveChat = ({
             )}
           </div>
 
-          {/* ADD USER / ADD GROUP */}
           <div
             style={{
               padding: "12px 16px",
@@ -4293,8 +4333,9 @@ const LiveChat = ({
                         style={{
                           fontSize: "10px",
                           fontWeight: 800,
-                          color: WHITE,
-                          backgroundColor: "rgba(76,175,80,0.9)",
+                          color: BLUE,
+                          backgroundColor: WHITE,
+                          border: `1.5px solid ${WHITE}`,
                           padding: "2px 8px",
                           borderRadius: "4px",
                           letterSpacing: "0.5px",
@@ -4304,7 +4345,7 @@ const LiveChat = ({
                         Online
                       </span>
                     )}
-                    {(selectedAnnouncementId || selectedBroadcastId) && (
+                    {activeBroadcastContext && (
                       <span
                         style={{
                           fontSize: "10px",
@@ -4317,7 +4358,9 @@ const LiveChat = ({
                           textTransform: "uppercase",
                         }}
                       >
-                        {selectedAnnouncementId ? "Announcement" : "Broadcast"}
+                        {activeBroadcastContext.type === "announcement"
+                          ? "Announcement"
+                          : "Broadcast"}
                       </span>
                     )}
                   </div>
@@ -4431,7 +4474,7 @@ const LiveChat = ({
               )}
 
               {/* ROLLING MESSAGES */}
-              {rollingMessages.length > 0 && (
+              {rollingMessages.length > 0 && !activeBroadcastContext && (
                 <div
                   style={{
                     padding: "12px 16px",
@@ -4477,7 +4520,7 @@ const LiveChat = ({
                   minHeight: 0,
                 }}
               >
-                {filteredMessages.length === 0 ? (
+                {displayMessages.length === 0 ? (
                   <div
                     style={{
                       textAlign: "center",
@@ -4490,29 +4533,112 @@ const LiveChat = ({
                     {messageSearchQuery ? "No messages found" : "No messages yet"}
                   </div>
                 ) : (
-                  filteredMessages.map((msg, idx) => {
+                  displayMessages.map((msg, idx) => {
                     const isMine = msg.senderId === user.uid;
+                    const isBroadcastMsg = msg.isBroadcastContext === true;
                     return (
                       <div
                         key={msg.id || idx}
                         style={{
                           alignSelf: isMine ? "flex-end" : "flex-start",
-                          maxWidth: "70%",
+                          maxWidth: isBroadcastMsg ? "85%" : "70%",
                         }}
                       >
                         <div
                           style={{
-                            padding: "12px 16px",
+                            padding: isBroadcastMsg ? "16px 20px" : "12px 16px",
                             borderRadius: "12px",
-                            backgroundColor: isMine ? BLUE : "#f4f4f5",
-                            color: isMine ? WHITE : BLACK,
+                            backgroundColor: isBroadcastMsg
+                              ? BLUE
+                              : isMine
+                              ? BLUE
+                              : "#f4f4f5",
+                            color: isBroadcastMsg || isMine ? WHITE : BLACK,
                             fontSize: "15px",
                             fontFamily: FONT_FAMILY,
                             wordBreak: "break-word",
-                            border: isMine ? "none" : "1px solid rgba(0,0,0,0.05)",
+                            border: isBroadcastMsg
+                              ? `2px solid ${BLUE}`
+                              : isMine
+                              ? "none"
+                              : "1px solid rgba(0,0,0,0.05)",
+                            boxShadow: isBroadcastMsg
+                              ? "0 4px 20px rgba(13,60,252,0.25)"
+                              : "none",
                           }}
                         >
-                          {!isMine && (
+                          {/* Broadcast header */}
+                          {isBroadcastMsg && (
+                            <>
+                              <div
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: "8px",
+                                  marginBottom: "10px",
+                                  flexWrap: "wrap",
+                                }}
+                              >
+                                <MegaphoneIcon size={18} color={WHITE} />
+                                <span
+                                  style={{
+                                    fontSize: "14px",
+                                    fontWeight: 800,
+                                    color: WHITE,
+                                    letterSpacing: "0.5px",
+                                  }}
+                                >
+                                  {msg.senderName}
+                                </span>
+                                {msg.broadcastTopic && (
+                                  <span
+                                    style={{
+                                      fontSize: "9px",
+                                      fontWeight: 800,
+                                      color: BLUE,
+                                      backgroundColor: WHITE,
+                                      padding: "2px 8px",
+                                      borderRadius: "4px",
+                                      letterSpacing: "0.5px",
+                                      textTransform: "uppercase",
+                                    }}
+                                  >
+                                    {msg.broadcastTopic}
+                                  </span>
+                                )}
+                                <span
+                                  style={{
+                                    fontSize: "9px",
+                                    fontWeight: 800,
+                                    color: BLUE,
+                                    backgroundColor: WHITE,
+                                    padding: "2px 8px",
+                                    borderRadius: "4px",
+                                    letterSpacing: "0.5px",
+                                    textTransform: "uppercase",
+                                  }}
+                                >
+                                  {activeBroadcastContext?.type === "announcement"
+                                    ? "Announcement"
+                                    : "Broadcast"}
+                                </span>
+                              </div>
+                              {msg.broadcastTitle && (
+                                <div
+                                  style={{
+                                    fontSize: "16px",
+                                    fontWeight: 700,
+                                    color: WHITE,
+                                    marginBottom: "8px",
+                                  }}
+                                >
+                                  {msg.broadcastTitle}
+                                </div>
+                              )}
+                            </>
+                          )}
+
+                          {!isMine && !isBroadcastMsg && (
                             <div
                               style={{
                                 fontSize: "12px",
@@ -4524,21 +4650,24 @@ const LiveChat = ({
                               {msg.senderName}
                             </div>
                           )}
-                          <div>{msg.text}</div>
+
+                          <div style={{ lineHeight: 1.6 }}>{msg.text}</div>
+
                           <div
                             style={{
                               display: "flex",
                               justifyContent: "flex-end",
                               alignItems: "center",
                               gap: "6px",
-                              marginTop: "5px",
+                              marginTop: "8px",
                             }}
                           >
-                            {renderDeliveryStatus(msg, isMine)}
+                            {!isBroadcastMsg && renderDeliveryStatus(msg, isMine)}
                             <span
                               style={{
                                 fontSize: "10px",
-                                color: isMine ? WHITE : "#999",
+                                color: isBroadcastMsg || isMine ? WHITE : "#999",
+                                opacity: 0.9,
                               }}
                             >
                               {formatTime(msg.timestamp)}
@@ -4573,7 +4702,11 @@ const LiveChat = ({
                       sendMessage();
                     }
                   }}
-                  placeholder="Type a message..."
+                  placeholder={
+                    activeBroadcastContext
+                      ? `Reply to ${activeBroadcastContext.senderName}...`
+                      : "Type a message..."
+                  }
                   style={{
                     flex: 1,
                     padding: "12px 16px",
