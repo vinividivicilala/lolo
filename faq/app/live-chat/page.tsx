@@ -439,13 +439,29 @@ interface LastMessagePreview {
   isFromMe: boolean;
 }
 
-// ✅ Rolling message item — format: [Sender Name] from [Message]
 interface RollingMessageItem {
   id: string;
   senderName: string;
   text: string;
   timestamp: any;
   isMine: boolean;
+}
+
+// ✅ Announcement & Broadcast interfaces (sama seperti halaman utama)
+interface AnnouncementItem {
+  id: string;
+  userName: string;
+  topic: string;
+  text: string;
+  createdAt: any;
+}
+
+interface BroadcastItem {
+  id: string;
+  userName: string;
+  topic: string;
+  text: string;
+  createdAt: any;
 }
 
 // ===== HERO MENURU TITLE =====
@@ -1106,7 +1122,7 @@ const RightNavbar = () => {
   );
 };
 
-// ===== CLOSE ROOM BUTTON (GSAP) =====
+// ===== CLOSE ROOM BUTTON — ✅ BG BIRU, TEKS/ICON PUTIH FULL =====
 const CloseRoomButton = ({
   onConfirm,
   disabled,
@@ -1169,7 +1185,8 @@ const CloseRoomButton = ({
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: WHITE,
+        // ✅ BG BIRU, TEKS/ICON PUTIH
+        backgroundColor: BLUE,
         border: `1.5px solid ${WHITE}`,
         borderRadius: "8px",
         cursor: disabled ? "not-allowed" : "pointer",
@@ -1179,15 +1196,14 @@ const CloseRoomButton = ({
       }}
     >
       <div ref={iconRef} style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <CloseIcon size={16} color={BLUE} />
+        {/* ✅ Icon close putih */}
+        <CloseIcon size={16} color={WHITE} />
       </div>
     </button>
   );
 };
 
-// ===== ROLLING MESSAGE ITEM COMPONENT (GSAP — PERSISTENT) =====
-// Format: [Sender Name] from [Message]
-// Muncul permanen di body chat dengan animasi GSAP
+// ===== ROLLING MESSAGE ITEM (GSAP — PERSISTENT) =====
 const RollingMessageItemComponent = ({
   item,
   index,
@@ -1205,7 +1221,6 @@ const RollingMessageItemComponent = ({
 
     const tl = gsap.timeline();
 
-    // Container slide in dari kiri
     tl.fromTo(
       itemRef.current,
       { opacity: 0, x: -60, scale: 0.9, height: 0 },
@@ -1219,7 +1234,6 @@ const RollingMessageItemComponent = ({
       }
     );
 
-    // Sender name — flip in
     if (senderRef.current) {
       tl.fromTo(
         senderRef.current,
@@ -1229,7 +1243,6 @@ const RollingMessageItemComponent = ({
       );
     }
 
-    // "from" — fade in
     if (fromRef.current) {
       tl.fromTo(
         fromRef.current,
@@ -1239,7 +1252,6 @@ const RollingMessageItemComponent = ({
       );
     }
 
-    // Message text — slide in
     if (textRef.current) {
       tl.fromTo(
         textRef.current,
@@ -1357,10 +1369,9 @@ const LiveChat = ({
 
   // Preview & counts
   const [chatPreviews, setChatPreviews] = useState<{ [chatId: string]: LastMessagePreview[] }>({});
-  // ✅ Counter dari pesan yang DIKIRIM user sendiri (pengirim), bukan yang diterima
   const [sentCounts, setSentCounts] = useState<{ [chatId: string]: number }>({});
 
-  // ✅ Rolling messages — tampil permanen di body chat
+  // Rolling messages
   const [rollingMessages, setRollingMessages] = useState<RollingMessageItem[]>([]);
 
   // Online users
@@ -1383,6 +1394,10 @@ const LiveChat = ({
   // Close room confirm
   const [showCloseConfirm, setShowCloseConfirm] = useState(false);
 
+  // ✅ ANNOUNCEMENT & BROADCAST STATE (sama seperti halaman utama)
+  const [announcements, setAnnouncements] = useState<AnnouncementItem[]>([]);
+  const [broadcasts, setBroadcasts] = useState<BroadcastItem[]>([]);
+
   // Refs
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatMessagesContainerRef = useRef<HTMLDivElement>(null);
@@ -1397,7 +1412,6 @@ const LiveChat = ({
 
   const messagesCacheRef = useRef<{ [chatId: string]: ChatMessage[] }>({});
   const prevMessagesLenRef = useRef<number>(0);
-  // ✅ Simpan rolling messages per chat
   const rollingCacheRef = useRef<{ [chatId: string]: RollingMessageItem[] }>({});
 
   useEffect(() => {
@@ -1662,12 +1676,78 @@ const LiveChat = ({
     return () => unsubscribe();
   }, [db, user, isMounted]);
 
-  // ===== AUTO PREVIEWS + COUNTER (dari pesan yang DIKIRIM user sendiri) =====
+  // ===== ✅ LOAD ANNOUNCEMENTS (sama seperti halaman utama) =====
+  useEffect(() => {
+    if (!db || !user || !isMounted) return;
+    // Announcement: pesan broadcast ke user — diambil dari collection "announcements"
+    const q = query(
+      collection(db, "announcements"),
+      orderBy("createdAt", "desc"),
+      limit(20)
+    );
+    const unsubscribe = onSnapshot(q, async (snapshot: any) => {
+      const list: AnnouncementItem[] = [];
+      for (const docSnap of snapshot.docs) {
+        const data = docSnap.data();
+        let text = data.text || "";
+        if (data.isEncrypted && text) {
+          try {
+            text = await decryptMessage(text);
+          } catch {
+            text = "[Encrypted]";
+          }
+        }
+        list.push({
+          id: docSnap.id,
+          userName: data.userName || data.title || "Admin",
+          topic: data.topic || "Announcement",
+          text: text || data.title || "",
+          createdAt: data.createdAt,
+        });
+      }
+      setAnnouncements(list);
+    });
+    return () => unsubscribe();
+  }, [db, user, isMounted]);
+
+  // ===== ✅ LOAD BROADCASTS (sama seperti halaman utama) =====
+  useEffect(() => {
+    if (!db || !user || !isMounted) return;
+    const q = query(
+      collection(db, "broadcasts"),
+      orderBy("createdAt", "desc"),
+      limit(20)
+    );
+    const unsubscribe = onSnapshot(q, async (snapshot: any) => {
+      const list: BroadcastItem[] = [];
+      for (const docSnap of snapshot.docs) {
+        const data = docSnap.data();
+        let text = data.text || "";
+        if (data.isEncrypted && text) {
+          try {
+            text = await decryptMessage(text);
+          } catch {
+            text = "[Encrypted]";
+          }
+        }
+        list.push({
+          id: docSnap.id,
+          userName: data.userName || data.title || "Admin",
+          topic: data.topic || "Broadcast",
+          text: text || data.title || "",
+          createdAt: data.createdAt,
+        });
+      }
+      setBroadcasts(list);
+    });
+    return () => unsubscribe();
+  }, [db, user, isMounted]);
+
+  // Auto previews + counters
   useEffect(() => {
     if (!db || !user || !isMounted) return;
     const unsubscribes: (() => void)[] = [];
 
-    // Contacts
     contacts.forEach((contact) => {
       const chatId = [user.uid, contact.userId].sort().join("_");
       const key = `c_${contact.id}`;
@@ -1689,9 +1769,7 @@ const LiveChat = ({
               text = "[Encrypted]";
             }
           }
-          // ✅ Counter: hanya hitung pesan yang dikirim user sendiri (pengirim)
           if (data.senderId === user.uid) sentCount++;
-          // Preview: 3 pesan terakhir
           if (previews.length < 3) {
             previews.push({
               text,
@@ -1707,7 +1785,6 @@ const LiveChat = ({
       unsubscribes.push(unsub);
     });
 
-    // Groups
     groups.forEach((group) => {
       const key = `g_${group.id}`;
       const q = query(
@@ -1747,19 +1824,17 @@ const LiveChat = ({
     return () => unsubscribes.forEach((unsub) => unsub());
   }, [db, contacts, groups, user, isMounted]);
 
-  // ===== MESSAGES LISTENER — DIRECT CHAT (dengan rolling messages) =====
+  // Direct chat messages
   useEffect(() => {
     if (!db || !selectedContact || !user || !isMounted) return;
 
     const chatId = [user.uid, selectedContact.userId].sort().join("_");
     const key = `c_${selectedContact.id}`;
 
-    // Load cached
     if (messagesCacheRef.current[chatId]) {
       setMessages(messagesCacheRef.current[chatId]);
       prevMessagesLenRef.current = messagesCacheRef.current[chatId].length;
     }
-    // Load rolling cache
     setRollingMessages(rollingCacheRef.current[key] || []);
 
     const q = query(
@@ -1782,8 +1857,6 @@ const LiveChat = ({
         msgList.push({ id: docSnap.id, ...data, text } as ChatMessage);
       }
 
-      // ✅ Build rolling messages dari SEMUA pesan yang DIKIRIM user sendiri
-      // Format: [senderName] from [text]
       const myRollingMessages: RollingMessageItem[] = msgList
         .filter((m) => m.senderId === user.uid)
         .map((m) => ({
@@ -1813,7 +1886,7 @@ const LiveChat = ({
     return () => unsubscribe();
   }, [db, selectedContact, user, isMounted]);
 
-  // ===== MESSAGES LISTENER — GROUP CHAT (dengan rolling messages) =====
+  // Group chat messages
   useEffect(() => {
     if (!db || !selectedGroup || !user || !isMounted) return;
 
@@ -1846,7 +1919,6 @@ const LiveChat = ({
         msgList.push({ id: docSnap.id, ...data, text } as ChatMessage);
       }
 
-      // ✅ Rolling messages: SEMUA pesan yang DIKIRIM user sendiri di grup
       const myRollingMessages: RollingMessageItem[] = msgList
         .filter((m) => m.senderId === user.uid)
         .map((m) => ({
@@ -1891,7 +1963,7 @@ const LiveChat = ({
     setMessageSearchQuery("");
   }, [selectedContact?.id, selectedGroup?.id, user?.uid]);
 
-  // Mark messages as read
+  // Mark as read
   useEffect(() => {
     if (!db || !user || !isMounted) return;
     const chatRef = selectedContact
@@ -2155,6 +2227,93 @@ const LiveChat = ({
       )
     : messages;
 
+  // ===== ✅ RENDER ANNOUNCEMENT & BROADCAST SECTION (sama seperti halaman utama) =====
+  const renderAnnouncementBroadcastSection = () => {
+    if (announcements.length === 0 && broadcasts.length === 0) return null;
+    return (
+      <div style={{ marginBottom: "20px" }}>
+        <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
+          {announcements.length > 0 && (
+            <div
+              style={{
+                flex: "1 1 300px",
+                backgroundColor: BLUE,
+                borderRadius: "12px",
+                padding: "16px 20px",
+                color: WHITE,
+                fontFamily: FONT_FAMILY,
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+                <div style={{ fontSize: "16px", fontWeight: 700, color: WHITE }}>Announcement</div>
+                <div
+                  style={{
+                    fontSize: "10px",
+                    border: `1.5px solid ${WHITE}`,
+                    backgroundColor: WHITE,
+                    color: BLUE,
+                    padding: "2px 8px",
+                    borderRadius: "4px",
+                    fontWeight: 800,
+                    letterSpacing: "0.5px",
+                  }}
+                >
+                  {announcements.length} ACTIVE
+                </div>
+              </div>
+              {announcements.slice(0, 3).map((a) => (
+                <div key={a.id} style={{ padding: "8px 0", borderTop: "1px solid rgba(255,255,255,0.15)" }}>
+                  <div style={{ fontSize: "13px", fontWeight: 600, color: WHITE, marginBottom: "3px" }}>{a.userName}</div>
+                  <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.85)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {a.text}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          {broadcasts.length > 0 && (
+            <div
+              style={{
+                flex: "1 1 300px",
+                backgroundColor: BLUE,
+                borderRadius: "12px",
+                padding: "16px 20px",
+                color: WHITE,
+                fontFamily: FONT_FAMILY,
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+                <div style={{ fontSize: "16px", fontWeight: 700, color: WHITE }}>Broadcasting</div>
+                <div
+                  style={{
+                    fontSize: "10px",
+                    border: `1.5px solid ${WHITE}`,
+                    backgroundColor: WHITE,
+                    color: BLUE,
+                    padding: "2px 8px",
+                    borderRadius: "4px",
+                    fontWeight: 800,
+                    letterSpacing: "0.5px",
+                  }}
+                >
+                  {broadcasts.length} ACTIVE
+                </div>
+              </div>
+              {broadcasts.slice(0, 3).map((b) => (
+                <div key={b.id} style={{ padding: "8px 0", borderTop: "1px solid rgba(255,255,255,0.15)" }}>
+                  <div style={{ fontSize: "13px", fontWeight: 600, color: WHITE, marginBottom: "3px" }}>{b.userName}</div>
+                  <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.85)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {b.text}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   // ===== RENDER CHAT LIST ITEM =====
   const renderChatListItem = (item: ChatContact | ChatGroup, type: "contact" | "group") => {
     const isContact = type === "contact";
@@ -2165,7 +2324,6 @@ const LiveChat = ({
       : selectedGroup?.id === group.id;
     const key = isContact ? `c_${contact.id}` : `g_${group.id}`;
     const previews = chatPreviews[key] || [];
-    // ✅ Counter dari pesan yang DIKIRIM user sendiri
     const sentCount = sentCounts[key] || 0;
     const displayName = isContact ? contact.userName : group.groupName;
 
@@ -2235,7 +2393,6 @@ const LiveChat = ({
             )}
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "6px", flexShrink: 0 }}>
-            {/* ✅ Counter: pesan yang DIKIRIM user (sent) */}
             <span
               style={{
                 fontSize: "10px",
@@ -2459,6 +2616,9 @@ const LiveChat = ({
         </div>
       </div>
 
+      {/* ✅ ANNOUNCEMENT & BROADCAST SECTION (di atas) */}
+      {renderAnnouncementBroadcastSection()}
+
       <div
         style={{
           display: "flex",
@@ -2646,7 +2806,6 @@ const LiveChat = ({
             </span>
           </div>
 
-          {/* Search chat — bg putih, teks biru */}
           <div
             style={{
               padding: "10px 14px",
@@ -2749,7 +2908,6 @@ const LiveChat = ({
             )}
           </div>
 
-          {/* Add User + Add Group */}
           <div
             style={{
               padding: "12px 16px",
@@ -2830,7 +2988,6 @@ const LiveChat = ({
               </button>
             </div>
 
-            {/* Add User form */}
             {showAddUserForm && (
               <div
                 ref={addUserFormRef}
@@ -2989,7 +3146,6 @@ const LiveChat = ({
               </div>
             )}
 
-            {/* Add Group form */}
             {showAddGroupForm && (
               <div
                 ref={addGroupFormRef}
@@ -3149,7 +3305,7 @@ const LiveChat = ({
         >
           {selectedContact || selectedGroup ? (
             <>
-              {/* Chat Header */}
+              {/* Header */}
               <div
                 style={{
                   padding: "16px 20px",
@@ -3200,7 +3356,6 @@ const LiveChat = ({
                   </div>
                 </div>
 
-                {/* Search dalam chat — bg putih, teks biru */}
                 <div
                   style={{
                     display: "flex",
@@ -3252,6 +3407,7 @@ const LiveChat = ({
                   )}
                 </div>
 
+                {/* ✅ Close room button — bg biru, teks putih full */}
                 <CloseRoomButton
                   onConfirm={() => {
                     setShowCloseConfirm(true);
@@ -3260,11 +3416,12 @@ const LiveChat = ({
                 />
               </div>
 
+              {/* ✅ Toast info — bg biru, teks putih full */}
               {showCloseConfirm && (
                 <div
                   style={{
                     padding: "10px 20px",
-                    backgroundColor: WHITE,
+                    backgroundColor: BLUE,
                     borderBottom: `1.5px solid ${BLUE}`,
                     display: "flex",
                     alignItems: "center",
@@ -3277,7 +3434,7 @@ const LiveChat = ({
                     style={{
                       display: "inline-block",
                       padding: "3px 9px",
-                      border: `1.5px solid ${BLUE}`,
+                      border: `1.5px solid ${WHITE}`,
                       backgroundColor: WHITE,
                       color: BLUE,
                       fontSize: "10px",
@@ -3289,14 +3446,13 @@ const LiveChat = ({
                   >
                     Info
                   </span>
-                  <span style={{ fontSize: "13px", color: BLUE, fontWeight: 600 }}>
+                  <span style={{ fontSize: "13px", color: WHITE, fontWeight: 600 }}>
                     Room chat siap ditutup. Fitur close room tidak menghapus history.
                   </span>
                 </div>
               )}
 
-              {/* ===== ROLLING MESSAGES SECTION (di atas body chat) ===== */}
-              {/* Format: [Sender Name] from [Message] — PERSISTENT + GSAP */}
+              {/* ✅ Rolling messages — format: [Sender] from [Message] */}
               {rollingMessages.length > 0 && (
                 <div
                   style={{
@@ -3328,7 +3484,7 @@ const LiveChat = ({
                 </div>
               )}
 
-              {/* Messages body — bubble chat */}
+              {/* Messages body */}
               <div
                 ref={chatMessagesContainerRef}
                 className="chat-messages-container"
