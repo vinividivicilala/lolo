@@ -351,6 +351,7 @@ const OnlineDot = ({ color = "#22c55e", size = 8 }: { color?: string; size?: num
   />
 );
 
+// ===== PEOPLE ICON =====
 const PeopleIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <circle cx="12" cy="8" r="4" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -358,6 +359,7 @@ const PeopleIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: s
   </svg>
 );
 
+// ===== TRUST ICON =====
 const TrustIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M12 2L4 5V11C4 16 8 20 12 22C16 20 20 16 20 11V5L12 2Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -365,6 +367,7 @@ const TrustIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?: st
   </svg>
 );
 
+// ===== CAREER ICON =====
 const CareerIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <rect x="2" y="7" width="20" height="14" rx="2" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -373,6 +376,7 @@ const CareerIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?: s
   </svg>
 );
 
+// ===== RESOURCES ICON =====
 const ResourcesIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M4 4H10C11.1046 4 12 4.89543 12 6V20C12 18.8954 11.1046 18 10 18H4V4Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -380,6 +384,7 @@ const ResourcesIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?
   </svg>
 );
 
+// ===== DOCS ICON =====
 const DocsIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M14 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -389,6 +394,7 @@ const DocsIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: str
   </svg>
 );
 
+// ===== BRAND ICON =====
 const BrandIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M20.59 13.41L11 3.83C10.6 3.43 10.06 3.2 9.5 3.2H4C2.9 3.2 2 4.1 2 5.2V10.7C2 11.26 2.22 11.8 2.63 12.2L12.21 21.79C13 22.57 14.27 22.57 15.06 21.79L20.59 16.26C21.37 15.47 21.37 14.2 20.59 13.41Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -396,6 +402,7 @@ const BrandIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: st
   </svg>
 );
 
+// ===== FOOTER LINKS =====
 const footerLinks = [
   { title: "Get in Touch", links: ["Contact", "Instagram", "Live Chat"] },
   {
@@ -453,6 +460,7 @@ interface LastMessagePreview {
   isFromAgent: boolean;
 }
 
+// ===== TOUR STEP INTERFACE =====
 interface TourStep {
   target: string;
   title: string;
@@ -1816,51 +1824,58 @@ const OnboardingTour = ({
 };
 
 // ===== ROLLING MESSAGE PREVIEW COMPONENT =====
+// Menampilkan preview pesan terbaru di bawah "Chat History" untuk setiap ticket.
+// Format:
+//   - Dari agent  : "Agent [NamaAgent]: [pesan]"
+//   - Dari user   : "[NamaUser] from: [pesan]"
+//   - Dari grup   : "[NamaUser] from group: [pesan]"
+// Animasi GSAP rolling text per karakter.
 const RollingMessagePreview = ({
   ticketId,
   isAdmin,
-  previews,
   tickets,
+  ticketPreviews,
 }: {
   ticketId: string;
   isAdmin: boolean;
-  previews: LastMessagePreview[];
   tickets: Ticket[];
+  ticketPreviews: { [ticketId: string]: LastMessagePreview[] };
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
   const lastMessageRef = useRef<string>("");
 
-  const orderedPreviews = [...previews].reverse();
+  const previews = ticketPreviews[ticketId] || [];
+  const orderedPreviews = [...previews].reverse(); // oldest -> newest
   const latestPreview =
-    orderedPreviews.length > 0
-      ? orderedPreviews[orderedPreviews.length - 1]
-      : null;
+    orderedPreviews.length > 0 ? orderedPreviews[orderedPreviews.length - 1] : null;
 
   useEffect(() => {
     if (!latestPreview || !containerRef.current || !textRef.current) return;
 
-    const messageKey = `${latestPreview.senderName}::${latestPreview.text}`;
+    const messageKey = latestPreview.text + "|" + latestPreview.senderName;
     if (messageKey === lastMessageRef.current) return;
     lastMessageRef.current = messageKey;
 
     const container = containerRef.current;
     const el = textRef.current;
 
-    // Build display text
+    // Bangun teks sesuai format
     let displayText = "";
     const ticket = tickets.find((t) => t.id === ticketId);
+
     if (latestPreview.isFromAgent) {
-      displayText = `Agent ${latestPreview.senderName} from: ${latestPreview.text}`;
+      // Dari agent
+      displayText = `Agent ${latestPreview.senderName}: ${latestPreview.text}`;
+    } else if (ticket?.isAnnouncement || ticket?.isBroadcast) {
+      // Dari grup
+      displayText = `${latestPreview.senderName} from group: ${latestPreview.text}`;
     } else {
-      if (ticket?.isAnnouncement || ticket?.isBroadcast) {
-        displayText = `${latestPreview.senderName} from group: ${latestPreview.text}`;
-      } else {
-        displayText = `${latestPreview.senderName} from: ${latestPreview.text}`;
-      }
+      // Dari user biasa
+      displayText = `${latestPreview.senderName} from: ${latestPreview.text}`;
     }
 
-    // Reset and rebuild chars
+    // Bangun karakter untuk animasi rolling
     el.innerHTML = "";
     const chars = displayText.split("");
     chars.forEach((char) => {
@@ -1868,26 +1883,25 @@ const RollingMessagePreview = ({
       span.textContent = char === " " ? "\u00A0" : char;
       span.style.display = "inline-block";
       span.style.opacity = "0";
-      span.style.transform = "translateY(18px)";
-      span.style.willChange = "transform, opacity";
+      span.style.transform = "translateY(20px)";
+      span.style.whiteSpace = "pre";
       el.appendChild(span);
     });
 
     const charElements = el.querySelectorAll("span");
-    gsap.killTweensOf(charElements);
     gsap.to(charElements, {
       opacity: 1,
       y: 0,
-      duration: 0.45,
-      stagger: 0.012,
-      ease: "back.out(1.6)",
+      duration: 0.5,
+      stagger: 0.018,
+      ease: "back.out(1.7)",
       overwrite: true,
     });
 
     gsap.fromTo(
       container,
-      { opacity: 0, y: 12 },
-      { opacity: 1, y: 0, duration: 0.5, ease: "power3.out", overwrite: true }
+      { opacity: 0, y: 15 },
+      { opacity: 1, y: 0, duration: 0.6, ease: "power3.out", overwrite: true }
     );
   }, [latestPreview, ticketId, isAdmin, tickets]);
 
@@ -1897,10 +1911,10 @@ const RollingMessagePreview = ({
   const textColor = isAdmin
     ? isFromAgent
       ? "#0D3CFC"
-      : "#1f2937"
+      : "#333"
     : "#ffffff";
-  const bgColor = isAdmin ? "rgba(13,60,252,0.08)" : "rgba(255,255,255,0.15)";
-  const borderColor = isAdmin ? "rgba(13,60,252,0.25)" : "rgba(255,255,255,0.3)";
+  const bgColor = isAdmin ? "#f0f4ff" : "rgba(255,255,255,0.12)";
+  const borderColor = isAdmin ? "#0D3CFC" : "rgba(255,255,255,0.3)";
 
   return (
     <div
@@ -1912,7 +1926,7 @@ const RollingMessagePreview = ({
         borderRadius: "8px",
         border: `1px solid ${borderColor}`,
         overflow: "hidden",
-        minHeight: "26px",
+        minHeight: "28px",
         display: "flex",
         alignItems: "center",
       }}
@@ -1924,7 +1938,7 @@ const RollingMessagePreview = ({
           color: textColor,
           fontFamily: FONT_FAMILY,
           fontWeight: 500,
-          lineHeight: 1.35,
+          lineHeight: 1.3,
           whiteSpace: "nowrap",
           overflow: "hidden",
           textOverflow: "ellipsis",
@@ -1964,12 +1978,8 @@ const LiveChatAgent = ({
 
   const [onlineAgents, setOnlineAgents] = useState<OnlineUser[]>([]);
   const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
-  const [ticketPreviews, setTicketPreviews] = useState<{
-    [ticketId: string]: LastMessagePreview[];
-  }>({});
-  const [ticketMsgCounts, setTicketMsgCounts] = useState<{
-    [ticketId: string]: number;
-  }>({});
+  const [ticketPreviews, setTicketPreviews] = useState<{ [ticketId: string]: LastMessagePreview[] }>({});
+  const [ticketMsgCounts, setTicketMsgCounts] = useState<{ [ticketId: string]: number }>({});
   const [searchQuery, setSearchQuery] = useState("");
 
   const [showTour, setShowTour] = useState(false);
@@ -2122,9 +2132,7 @@ const LiveChatAgent = ({
           setBanReason(status.reason);
           setCanCreateTicket(status.canCreateTicket);
           setCanSendMessage(status.canSendMessage);
-          setBanMessage(
-            `YOUR ACCOUNT HAS BEEN PERMANENTLY BANNED\n\nReason: ${status.reason}`
-          );
+          setBanMessage(`YOUR ACCOUNT HAS BEEN PERMANENTLY BANNED\n\nReason: ${status.reason}`);
         } else {
           setIsBanned(false);
           setBanReason("");
@@ -2150,9 +2158,7 @@ const LiveChatAgent = ({
         setBanReason(status.reason);
         setCanCreateTicket(status.canCreateTicket);
         setCanSendMessage(status.canSendMessage);
-        setBanMessage(
-          `YOUR ACCOUNT HAS BEEN PERMANENTLY BANNED\n\nReason: ${status.reason}`
-        );
+        setBanMessage(`YOUR ACCOUNT HAS BEEN PERMANENTLY BANNED\n\nReason: ${status.reason}`);
         return true;
       }
       return false;
@@ -2193,10 +2199,7 @@ const LiveChatAgent = ({
 
     let q;
     if (isAdmin) {
-      q = query(
-        collection(db, "livechat_tickets"),
-        orderBy("createdAt", "desc")
-      );
+      q = query(collection(db, "livechat_tickets"), orderBy("createdAt", "desc"));
     } else {
       q = query(
         collection(db, "livechat_tickets"),
@@ -2223,7 +2226,7 @@ const LiveChatAgent = ({
     return () => unsubscribe();
   }, [db, user, isAdmin, selectedTicket, isMounted]);
 
-  // Ambil preview pesan terakhir per ticket (dipakai rolling text)
+  // Ambil 3 pesan terakhir per ticket sebagai preview
   useEffect(() => {
     if (!db || !tickets.length || !isMounted) return;
     const unsubscribes: (() => void)[] = [];
@@ -2285,7 +2288,7 @@ const LiveChatAgent = ({
         msgList.push({ id: docSnap.id, ...data, text } as ChatMessage);
       }
       setMessages(msgList);
-      setTimeout(() => scrollToBottom(), 60);
+      setTimeout(() => scrollToBottom(), 50);
     });
     return () => unsubscribe();
   }, [db, selectedTicket, isMounted]);
@@ -2294,13 +2297,7 @@ const LiveChatAgent = ({
     if (!db || !selectedTicket || !user || !isAdmin || !isMounted) return;
     const unread = messages.filter((m) => m.senderId !== user.uid && !m.read);
     unread.forEach(async (msg) => {
-      const msgRef = doc(
-        db,
-        "livechat_tickets",
-        selectedTicket.id,
-        "messages",
-        msg.id
-      );
+      const msgRef = doc(db, "livechat_tickets", selectedTicket.id, "messages", msg.id);
       await updateDoc(msgRef, { read: true, deliveryStatus: "read" });
     });
   }, [messages, selectedTicket, db, user, isAdmin, isMounted]);
@@ -2312,8 +2309,7 @@ const LiveChatAgent = ({
       (t) => t.status === "waiting" || t.status === "active"
     );
     if (activeTicket) setSelectedTicket(activeTicket);
-    else if (userTickets.length > 0 && !selectedTicket)
-      setSelectedTicket(userTickets[0]);
+    else if (userTickets.length > 0 && !selectedTicket) setSelectedTicket(userTickets[0]);
     else if (userTickets.length === 0) {
       setSelectedTicket(null);
       setMessages([]);
@@ -2334,10 +2330,7 @@ const LiveChatAgent = ({
   const formatTime = (timestamp: any) => {
     if (!timestamp) return "";
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    return date.toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    return date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
   };
 
   const scrollToBottom = () => {
@@ -2374,8 +2367,7 @@ const LiveChatAgent = ({
       if (ticket.userName?.toLowerCase().includes(q)) return true;
       if (ticket.userEmail?.toLowerCase().includes(q)) return true;
       if (ticket.topic?.toLowerCase().includes(q)) return true;
-      if (generateTicketId(ticket.createdAt).toLowerCase().includes(q))
-        return true;
+      if (generateTicketId(ticket.createdAt).toLowerCase().includes(q)) return true;
       const previews = ticketPreviews[ticket.id] || [];
       for (const p of previews) {
         if (p.text.toLowerCase().includes(q)) return true;
@@ -2435,9 +2427,7 @@ const LiveChatAgent = ({
         !t.isBroadcast
     );
     if (hasActiveTicket) {
-      alert(
-        "You still have an active chat with an agent. Please wait until it is finished."
-      );
+      alert("You still have an active chat with an agent. Please wait until it is finished.");
       return;
     }
     try {
@@ -2458,19 +2448,16 @@ const LiveChatAgent = ({
       });
       const initialMessage = `Hello, I would like to ask about: ${selectedTopic}`;
       const encryptedMessage = await encryptMessage(initialMessage);
-      await addDoc(
-        collection(db, "livechat_tickets", ticketRef.id, "messages"),
-        {
-          senderId: user.uid,
-          senderName: user.displayName || user.email || "User",
-          text: encryptedMessage,
-          timestamp: serverTimestamp(),
-          read: false,
-          isEncrypted: true,
-          isBotDetected: false,
-          deliveryStatus: "sent",
-        }
-      );
+      await addDoc(collection(db, "livechat_tickets", ticketRef.id, "messages"), {
+        senderId: user.uid,
+        senderName: user.displayName || user.email || "User",
+        text: encryptedMessage,
+        timestamp: serverTimestamp(),
+        read: false,
+        isEncrypted: true,
+        isBotDetected: false,
+        deliveryStatus: "sent",
+      });
       setSelectedTopic("");
       setShowStartChat(false);
       setBanMessage(null);
@@ -2515,10 +2502,7 @@ const LiveChatAgent = ({
       alert("Encryption is being initialized, please wait a moment.");
       return;
     }
-    if (
-      selectedTicket.status === "resolved" ||
-      selectedTicket.status === "closed"
-    ) {
+    if (selectedTicket.status === "resolved" || selectedTicket.status === "closed") {
       alert("This chat is finished. Please create a new ticket.");
       return;
     }
@@ -2529,23 +2513,18 @@ const LiveChatAgent = ({
         typingUserId: null,
         typingUserName: null,
       });
-      const senderName = isAdmin
-        ? AGENT_NAME
-        : user.displayName || user.email || "User";
+      const senderName = isAdmin ? AGENT_NAME : user.displayName || user.email || "User";
       const encryptedMessage = await encryptMessage(messageText.trim());
-      await addDoc(
-        collection(db, "livechat_tickets", selectedTicket.id, "messages"),
-        {
-          senderId: user.uid,
-          senderName: senderName,
-          text: encryptedMessage,
-          timestamp: serverTimestamp(),
-          read: false,
-          isEncrypted: true,
-          isBotDetected: false,
-          deliveryStatus: "sent",
-        }
-      );
+      await addDoc(collection(db, "livechat_tickets", selectedTicket.id, "messages"), {
+        senderId: user.uid,
+        senderName: senderName,
+        text: encryptedMessage,
+        timestamp: serverTimestamp(),
+        read: false,
+        isEncrypted: true,
+        isBotDetected: false,
+        deliveryStatus: "sent",
+      });
       await updateDoc(ticketRef, {
         lastMessage: messageText.trim(),
         lastMessageTime: serverTimestamp(),
@@ -2578,9 +2557,7 @@ const LiveChatAgent = ({
   const resolveTicket = async (ticketId: string) => {
     if (!db || !isAdmin) return;
     try {
-      await updateDoc(doc(db, "livechat_tickets", ticketId), {
-        status: "resolved",
-      });
+      await updateDoc(doc(db, "livechat_tickets", ticketId), { status: "resolved" });
       if (selectedTicket?.id === ticketId) {
         setSelectedTicket(null);
         setMessages([]);
@@ -2639,7 +2616,7 @@ const LiveChatAgent = ({
           border: "1px solid #e8e8e8",
           overflowY: "auto",
           flexShrink: 0,
-          height: "100%",
+          height: "700px",
           display: "flex",
           flexDirection: "column",
         }}
@@ -2673,7 +2650,7 @@ const LiveChatAgent = ({
             {list.length}
           </span>
         </div>
-        <div style={{ overflowY: "auto", flex: 1, minHeight: 0 }}>
+        <div style={{ overflowY: "auto", flex: 1 }}>
           {list.length === 0 ? (
             <div
               style={{
@@ -2719,11 +2696,7 @@ const LiveChatAgent = ({
                       <img
                         src={u.photoURL}
                         alt={u.displayName}
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "cover",
-                        }}
+                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
                       />
                     ) : (
                       u.displayName.charAt(0).toUpperCase()
@@ -2755,13 +2728,7 @@ const LiveChatAgent = ({
                   >
                     {u.displayName}
                   </div>
-                  <div
-                    style={{
-                      fontSize: "11px",
-                      color: "#22c55e",
-                      fontWeight: 500,
-                    }}
-                  >
+                  <div style={{ fontSize: "11px", color: "#22c55e", fontWeight: 500 }}>
                     Online
                   </div>
                 </div>
@@ -2775,19 +2742,15 @@ const LiveChatAgent = ({
 
   const renderSearchBar = () => {
     const isDark = !isAdmin;
-    const bgColor = isDark ? "rgba(255,255,255,0.18)" : "#ffffff";
+    const bgColor = isDark ? "rgba(255,255,255,0.15)" : "#ffffff";
     const iconColor = isDark ? "#ffffff" : "#666";
-    const borderColor = isDark
-      ? "rgba(255,255,255,0.35)"
-      : "#e8e8e8";
+    const borderColor = isDark ? "rgba(255,255,255,0.25)" : "#e8e8e8";
     return (
       <div
         data-tour="search-bar"
         style={{
           padding: "10px 14px",
-          borderBottom: isDark
-            ? "1px solid rgba(255,255,255,0.1)"
-            : "1px solid #e8e8e8",
+          borderBottom: isDark ? "1px solid rgba(255,255,255,0.1)" : "1px solid #e8e8e8",
         }}
       >
         <div
@@ -2816,6 +2779,7 @@ const LiveChatAgent = ({
               fontSize: "12px",
               fontFamily: FONT_FAMILY,
               padding: 0,
+              WebkitTextFillColor: "#ffffff",
               caretColor: "#ffffff",
             }}
           />
@@ -2843,12 +2807,9 @@ const LiveChatAgent = ({
 
   const renderAnnouncementBroadcastSection = () => {
     if (!isAdmin) return null;
-    const announcementTickets = tickets.filter(
-      (t) => t.isAnnouncement && !t.isBroadcast
-    );
+    const announcementTickets = tickets.filter((t) => t.isAnnouncement && !t.isBroadcast);
     const broadcastTickets = tickets.filter((t) => t.isBroadcast);
-    if (announcementTickets.length === 0 && broadcastTickets.length === 0)
-      return null;
+    if (announcementTickets.length === 0 && broadcastTickets.length === 0) return null;
     return (
       <div style={{ marginBottom: "20px" }}>
         <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
@@ -2871,9 +2832,7 @@ const LiveChatAgent = ({
                   marginBottom: "10px",
                 }}
               >
-                <div
-                  style={{ fontSize: "16px", fontWeight: 700, color: "#ffffff" }}
-                >
+                <div style={{ fontSize: "16px", fontWeight: 700, color: "#ffffff" }}>
                   Announcement
                 </div>
                 <div
@@ -2943,9 +2902,7 @@ const LiveChatAgent = ({
                   marginBottom: "10px",
                 }}
               >
-                <div
-                  style={{ fontSize: "16px", fontWeight: 700, color: "#ffffff" }}
-                >
+                <div style={{ fontSize: "16px", fontWeight: 700, color: "#ffffff" }}>
                   Broadcasting
                 </div>
                 <div
@@ -3252,8 +3209,7 @@ const LiveChatAgent = ({
               }}
             >
               <OnlineDot color="#22c55e" size={10} />
-              {onlineAgents.length} Agent{onlineAgents.length !== 1 ? "s" : ""}{" "}
-              Online
+              {onlineAgents.length} Agent{onlineAgents.length !== 1 ? "s" : ""} Online
             </div>
             <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
               {onlineAgents.map((a) => (
@@ -3271,25 +3227,13 @@ const LiveChatAgent = ({
                   }}
                 >
                   <OnlineDot color="#22c55e" size={8} />
-                  <span
-                    style={{
-                      fontSize: "13px",
-                      fontWeight: 600,
-                      color: "#0D3CFC",
-                    }}
-                  >
+                  <span style={{ fontSize: "13px", fontWeight: 600, color: "#0D3CFC" }}>
                     {a.displayName}
                   </span>
                 </div>
               ))}
               {onlineAgents.length === 0 && (
-                <span
-                  style={{
-                    fontSize: "13px",
-                    color: "#999",
-                    fontFamily: FONT_FAMILY,
-                  }}
-                >
+                <span style={{ fontSize: "13px", color: "#999", fontFamily: FONT_FAMILY }}>
                   No agents online
                 </span>
               )}
@@ -3390,13 +3334,7 @@ const LiveChatAgent = ({
           </button>
         </div>
         <div style={{ maxWidth: "400px" }}>
-          <div
-            style={{
-              fontSize: "15px",
-              marginBottom: "10px",
-              fontFamily: FONT_FAMILY,
-            }}
-          >
+          <div style={{ fontSize: "15px", marginBottom: "10px", fontFamily: FONT_FAMILY }}>
             Select your issue topic:
           </div>
           <select
@@ -3523,9 +3461,7 @@ const LiveChatAgent = ({
               }}
             >
               {onlineAgents.length > 0
-                ? `${onlineAgents.length} Agent${
-                    onlineAgents.length !== 1 ? "s" : ""
-                  } Online`
+                ? `${onlineAgents.length} Agent${onlineAgents.length !== 1 ? "s" : ""} Online`
                 : "No Agents Online"}
             </span>
             <button
@@ -3588,16 +3524,15 @@ const LiveChatAgent = ({
               backgroundColor: isAdmin ? "#f9f9f9" : "#0D3CFC",
               borderRadius: "12px",
               border: isAdmin ? "1px solid #e8e8e8" : "none",
+              overflowY: "auto",
               flexShrink: 0,
-              height: "100%",
+              height: "700px",
               color: isAdmin ? "#000" : "#fff",
               fontFamily: FONT_FAMILY,
               display: "flex",
               flexDirection: "column",
-              overflow: "hidden",
             }}
           >
-            {/* HEADER "Chat History" */}
             <div
               style={{
                 padding: "14px 16px",
@@ -3610,39 +3545,27 @@ const LiveChatAgent = ({
                 alignItems: "center",
                 justifyContent: "space-between",
                 backgroundColor: isAdmin ? "#f9f9f9" : "#0D3CFC",
-                flexShrink: 0,
+                position: "sticky",
+                top: 0,
+                zIndex: 2,
               }}
             >
               <span>Chat History</span>
               <span
                 style={{
                   fontSize: "11px",
-                  backgroundColor: isAdmin
-                    ? "#e5e7eb"
-                    : "rgba(255,255,255,0.2)",
+                  backgroundColor: isAdmin ? "#e5e7eb" : "rgba(255,255,255,0.2)",
                   padding: "2px 8px",
                   borderRadius: "8px",
                 }}
               >
-                {isAdmin
-                  ? tickets.length
-                  : tickets.filter((t) => t.userId === user.uid).length}
+                {isAdmin ? tickets.length : tickets.filter((t) => t.userId === user.uid).length}
               </span>
             </div>
 
-            {/* SEARCH BAR */}
-            <div style={{ flexShrink: 0 }}>{renderSearchBar()}</div>
+            {renderSearchBar()}
 
-            {/* LIST CHAT — di bawah "Chat History" */}
-            <div
-              style={{
-                overflowY: "auto",
-                flex: 1,
-                minHeight: 0,
-                scrollbarWidth: "none",
-                msOverflowStyle: "none",
-              }}
-            >
+            <div style={{ overflowY: "auto", flex: 1, minHeight: 0 }}>
               {isAdmin ? (
                 <>
                   {waitingTickets.length > 0 && (
@@ -3687,11 +3610,7 @@ const LiveChatAgent = ({
                             }}
                           >
                             <div
-                              style={{
-                                fontWeight: 600,
-                                fontSize: "13px",
-                                color: "#0D3CFC",
-                              }}
+                              style={{ fontWeight: 600, fontSize: "13px", color: "#0D3CFC" }}
                             >
                               {ticket.userName}
                             </div>
@@ -3700,19 +3619,15 @@ const LiveChatAgent = ({
                             </span>
                           </div>
                           <div
-                            style={{
-                              fontSize: "11px",
-                              color: "#666",
-                              marginBottom: "4px",
-                            }}
+                            style={{ fontSize: "11px", color: "#666", marginBottom: "4px" }}
                           >
                             {ticket.topic}
                           </div>
                           <RollingMessagePreview
                             ticketId={ticket.id}
                             isAdmin={true}
-                            previews={ticketPreviews[ticket.id] || []}
                             tickets={tickets}
+                            ticketPreviews={ticketPreviews}
                           />
                         </div>
                       ))}
@@ -3757,11 +3672,7 @@ const LiveChatAgent = ({
                             }}
                           >
                             <div
-                              style={{
-                                fontWeight: 600,
-                                fontSize: "13px",
-                                color: "#0D3CFC",
-                              }}
+                              style={{ fontWeight: 600, fontSize: "13px", color: "#0D3CFC" }}
                             >
                               {ticket.userName}
                             </div>
@@ -3770,19 +3681,15 @@ const LiveChatAgent = ({
                             </span>
                           </div>
                           <div
-                            style={{
-                              fontSize: "11px",
-                              color: "#666",
-                              marginBottom: "4px",
-                            }}
+                            style={{ fontSize: "11px", color: "#666", marginBottom: "4px" }}
                           >
                             {ticket.topic}
                           </div>
                           <RollingMessagePreview
                             ticketId={ticket.id}
                             isAdmin={true}
-                            previews={ticketPreviews[ticket.id] || []}
                             tickets={tickets}
+                            ticketPreviews={ticketPreviews}
                           />
                         </div>
                       ))}
@@ -3828,11 +3735,7 @@ const LiveChatAgent = ({
                             }}
                           >
                             <div
-                              style={{
-                                fontWeight: 600,
-                                fontSize: "13px",
-                                color: "#0D3CFC",
-                              }}
+                              style={{ fontWeight: 600, fontSize: "13px", color: "#0D3CFC" }}
                             >
                               {ticket.userName}
                             </div>
@@ -3841,19 +3744,15 @@ const LiveChatAgent = ({
                             </span>
                           </div>
                           <div
-                            style={{
-                              fontSize: "11px",
-                              color: "#666",
-                              marginBottom: "4px",
-                            }}
+                            style={{ fontSize: "11px", color: "#666", marginBottom: "4px" }}
                           >
                             {ticket.topic}
                           </div>
                           <RollingMessagePreview
                             ticketId={ticket.id}
                             isAdmin={true}
-                            previews={ticketPreviews[ticket.id] || []}
                             tickets={tickets}
+                            ticketPreviews={ticketPreviews}
                           />
                         </div>
                       ))}
@@ -3876,112 +3775,97 @@ const LiveChatAgent = ({
                 </>
               ) : (
                 <>
-                  {filterTicketsBySearch(
-                    tickets.filter((t) => t.userId === user.uid)
-                  ).map((ticket) => {
-                    const ticketId = generateTicketId(ticket.createdAt);
-                    const isActive = selectedTicket?.id === ticket.id;
-                    const statusLabel =
-                      ticket.status === "waiting"
-                        ? "Waiting"
-                        : ticket.status === "active"
-                        ? "Active"
-                        : "Resolved";
-                    return (
-                      <div
-                        key={ticket.id}
-                        onClick={() => {
-                          setSelectedTicket(ticket);
-                          setMessages([]);
-                        }}
-                        style={{
-                          padding: "14px 16px",
-                          borderLeft: isActive
-                            ? "4px solid #fff"
-                            : "4px solid transparent",
-                          backgroundColor: isActive
-                            ? "rgba(255,255,255,0.12)"
-                            : "transparent",
-                          cursor: "pointer",
-                          borderBottom: "1px solid rgba(255,255,255,0.06)",
-                        }}
-                      >
+                  {filterTicketsBySearch(tickets.filter((t) => t.userId === user.uid)).map(
+                    (ticket) => {
+                      const ticketId = generateTicketId(ticket.createdAt);
+                      const isActive = selectedTicket?.id === ticket.id;
+                      const statusLabel =
+                        ticket.status === "waiting"
+                          ? "Waiting"
+                          : ticket.status === "active"
+                          ? "Active"
+                          : "Resolved";
+                      return (
                         <div
+                          key={ticket.id}
+                          onClick={() => {
+                            setSelectedTicket(ticket);
+                            setMessages([]);
+                          }}
                           style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                            marginBottom: "4px",
+                            padding: "14px 16px",
+                            borderLeft: isActive ? "4px solid #fff" : "4px solid transparent",
+                            backgroundColor: isActive
+                              ? "rgba(255,255,255,0.12)"
+                              : "transparent",
+                            cursor: "pointer",
+                            borderBottom: "1px solid rgba(255,255,255,0.06)",
                           }}
                         >
                           <div
                             style={{
-                              fontWeight: 600,
-                              fontSize: "14px",
-                              color: "#fff",
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                              marginBottom: "4px",
                             }}
                           >
-                            {ticket.userName}
+                            <div style={{ fontWeight: 600, fontSize: "14px", color: "#fff" }}>
+                              {ticket.userName}
+                            </div>
+                            <span style={{ fontSize: "10px", color: "#fff" }}>
+                              {ticketMsgCounts[ticket.id] || 0} msgs
+                            </span>
                           </div>
-                          <span style={{ fontSize: "10px", color: "#fff" }}>
-                            {ticketMsgCounts[ticket.id] || 0} msgs
-                          </span>
-                        </div>
-                        <div
-                          style={{
-                            fontSize: "12px",
-                            color: "#fff",
-                            marginBottom: "6px",
-                          }}
-                        >
-                          {ticket.topic}
-                        </div>
-                        <RollingMessagePreview
-                          ticketId={ticket.id}
-                          isAdmin={false}
-                          previews={ticketPreviews[ticket.id] || []}
-                          tickets={tickets}
-                        />
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "6px",
-                            marginTop: "6px",
-                          }}
-                        >
-                          <span
+                          <div
+                            style={{ fontSize: "12px", color: "#fff", marginBottom: "6px" }}
+                          >
+                            {ticket.topic}
+                          </div>
+                          <RollingMessagePreview
+                            ticketId={ticket.id}
+                            isAdmin={false}
+                            tickets={tickets}
+                            ticketPreviews={ticketPreviews}
+                          />
+                          <div
                             style={{
-                              fontSize: "10px",
-                              backgroundColor:
-                                ticket.status === "waiting"
-                                  ? "#fef3c7"
-                                  : ticket.status === "active"
-                                  ? "#d1fae5"
-                                  : "#e5e7eb",
-                              color:
-                                ticket.status === "waiting"
-                                  ? "#92400e"
-                                  : ticket.status === "active"
-                                  ? "#065f46"
-                                  : "#6b7280",
-                              padding: "2px 8px",
-                              borderRadius: "8px",
-                              fontWeight: 600,
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "6px",
+                              marginTop: "6px",
                             }}
                           >
-                            {statusLabel}
-                          </span>
-                          <span style={{ fontSize: "9px", color: "#fff" }}>
-                            {ticketId}
-                          </span>
+                            <span
+                              style={{
+                                fontSize: "10px",
+                                backgroundColor:
+                                  ticket.status === "waiting"
+                                    ? "#fef3c7"
+                                    : ticket.status === "active"
+                                    ? "#d1fae5"
+                                    : "#e5e7eb",
+                                color:
+                                  ticket.status === "waiting"
+                                    ? "#92400e"
+                                    : ticket.status === "active"
+                                    ? "#065f46"
+                                    : "#6b7280",
+                                padding: "2px 8px",
+                                borderRadius: "8px",
+                                fontWeight: 600,
+                              }}
+                            >
+                              {statusLabel}
+                            </span>
+                            <span style={{ fontSize: "9px", color: "#fff" }}>{ticketId}</span>
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
-                  {filterTicketsBySearch(
-                    tickets.filter((t) => t.userId === user.uid)
-                  ).length === 0 && (
+                      );
+                    }
+                  )}
+                  {filterTicketsBySearch(tickets.filter((t) => t.userId === user.uid))
+                    .length === 0 && (
                     <div
                       style={{
                         padding: "30px 16px",
@@ -4002,8 +3886,9 @@ const LiveChatAgent = ({
                 style={{
                   padding: "10px 16px",
                   borderTop: "1px solid rgba(255,255,255,0.1)",
+                  position: "sticky",
+                  bottom: 0,
                   backgroundColor: "#0D3CFC",
-                  flexShrink: 0,
                 }}
               >
                 <button
@@ -4037,8 +3922,7 @@ const LiveChatAgent = ({
               display: "flex",
               flexDirection: "column",
               overflow: "hidden",
-              height: "100%",
-              minHeight: 0,
+              height: "700px",
             }}
           >
             {selectedTicket ? (
@@ -4114,34 +3998,20 @@ const LiveChatAgent = ({
                         style={{
                           fontSize: "13px",
                           color:
-                            selectedTicket.status === "waiting"
-                              ? "#fef3c7"
-                              : "#d1fae5",
+                            selectedTicket.status === "waiting" ? "#fef3c7" : "#d1fae5",
                           fontWeight: 600,
                         }}
                       >
-                        {selectedTicket.status === "waiting"
-                          ? "Waiting"
-                          : "Active"}
+                        {selectedTicket.status === "waiting" ? "Waiting" : "Active"}
                       </span>
-                      {selectedTicket.typing &&
-                        selectedTicket.status !== "resolved" && (
-                          <span
-                            style={{
-                              fontSize: "13px",
-                              color: "#ffd700",
-                              fontStyle: "italic",
-                            }}
-                          >
-                            {selectedTicket.typingUserName} is typing...
-                          </span>
-                        )}
-                      <span
-                        style={{
-                          fontSize: "11px",
-                          color: "rgba(255,255,255,0.6)",
-                        }}
-                      >
+                      {selectedTicket.typing && selectedTicket.status !== "resolved" && (
+                        <span
+                          style={{ fontSize: "13px", color: "#ffd700", fontStyle: "italic" }}
+                        >
+                          {selectedTicket.typingUserName} is typing...
+                        </span>
+                      )}
+                      <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.6)" }}>
                         {generateTicketId(selectedTicket.createdAt)}
                       </span>
                     </div>
@@ -4170,17 +4040,15 @@ const LiveChatAgent = ({
 
                 <div
                   ref={chatMessagesContainerRef}
-                  className="chat-messages-container"
                   style={{
                     flex: 1,
                     overflowY: "auto",
-                    overflowX: "hidden",
                     padding: "24px",
                     display: "flex",
                     flexDirection: "column",
                     gap: "12px",
                     minHeight: 0,
-                    WebkitOverflowScrolling: "touch",
+                    maxHeight: "100%",
                     scrollbarWidth: "none",
                     msOverflowStyle: "none",
                   }}
@@ -4206,6 +4074,7 @@ const LiveChatAgent = ({
                           style={{
                             alignSelf: isMine ? "flex-end" : "flex-start",
                             maxWidth: "70%",
+                            flexShrink: 0,
                           }}
                         >
                           <div
@@ -4217,7 +4086,6 @@ const LiveChatAgent = ({
                               fontSize: "15px",
                               fontFamily: FONT_FAMILY,
                               wordBreak: "break-word",
-                              overflowWrap: "anywhere",
                             }}
                           >
                             {!isMine && (
@@ -4266,6 +4134,7 @@ const LiveChatAgent = ({
                         fontStyle: "italic",
                         padding: "5px 10px",
                         fontFamily: FONT_FAMILY,
+                        flexShrink: 0,
                       }}
                     >
                       {typingText}
@@ -4291,11 +4160,7 @@ const LiveChatAgent = ({
                         value={messageText}
                         onChange={handleTyping}
                         onKeyPress={(e) => {
-                          if (
-                            e.key === "Enter" &&
-                            !e.shiftKey &&
-                            messageText.trim()
-                          ) {
+                          if (e.key === "Enter" && !e.shiftKey && messageText.trim()) {
                             e.preventDefault();
                             sendMessage();
                           }
@@ -4305,9 +4170,7 @@ const LiveChatAgent = ({
                             ? "Waiting for agent..."
                             : "Type a message..."
                         }
-                        disabled={
-                          selectedTicket.status === "waiting" && !isAdmin
-                        }
+                        disabled={selectedTicket.status === "waiting" && !isAdmin}
                         style={{
                           flex: 1,
                           padding: "12px 16px",
@@ -4433,36 +4296,20 @@ export default function HomePage(): React.JSX.Element {
       },
     });
     gsap.set(textRef.current, { y: 100, opacity: 0 });
-    tl.to(textRef.current, {
-      y: 0,
-      opacity: 1,
-      duration: 0.8,
-      ease: "back.out(1.7)",
-    })
+    tl.to(textRef.current, { y: 0, opacity: 1, duration: 0.8, ease: "back.out(1.7)" })
       .to(textRef.current, { duration: 0.6 })
       .to(textRef.current, {
-        opacity: 0,
-        y: -20,
-        scale: 0.9,
-        duration: 0.4,
-        ease: "power2.out",
+        opacity: 0, y: -20, scale: 0.9, duration: 0.4, ease: "power2.out",
         onComplete: () => {
           if (textRef.current) textRef.current.textContent = "Note";
         },
       })
       .to(textRef.current, {
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        duration: 0.6,
-        ease: "back.out(1.7)",
+        opacity: 1, y: 0, scale: 1, duration: 0.6, ease: "back.out(1.7)",
       })
       .to(textRef.current, { duration: 0.8 })
       .to(textRef.current, {
-        scale: 0.3,
-        opacity: 0,
-        duration: 0.7,
-        ease: "power2.in",
+        scale: 0.3, opacity: 0, duration: 0.7, ease: "power2.in",
       })
       .to(
         preloaderRef.current,
@@ -4476,33 +4323,17 @@ export default function HomePage(): React.JSX.Element {
       <div
         style={{
           position: "fixed",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
+          top: 0, left: 0, width: "100%", height: "100%",
           backgroundColor: "#ffffff",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          zIndex: 9999,
-          fontFamily: FONT_FAMILY,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          zIndex: 9999, fontFamily: FONT_FAMILY,
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "40px",
-            overflow: "hidden",
-          }}
-        >
+        <div style={{ display: "flex", alignItems: "center", gap: "40px", overflow: "hidden" }}>
           <span
             style={{
-              fontSize: "100px",
-              fontWeight: 700,
-              color: "#0D3CFC",
-              fontFamily: FONT_FAMILY,
-              letterSpacing: "-0.03em",
+              fontSize: "100px", fontWeight: 700, color: "#0D3CFC",
+              fontFamily: FONT_FAMILY, letterSpacing: "-0.03em",
             }}
           >
             Menuru
@@ -4510,13 +4341,9 @@ export default function HomePage(): React.JSX.Element {
           <span
             ref={textRef}
             style={{
-              fontSize: "50px",
-              fontWeight: 600,
-              color: "#000000",
-              fontFamily: FONT_FAMILY,
-              letterSpacing: "-0.02em",
-              display: "inline-block",
-              willChange: "transform, opacity",
+              fontSize: "50px", fontWeight: 600, color: "#000000",
+              fontFamily: FONT_FAMILY, letterSpacing: "-0.02em",
+              display: "inline-block", willChange: "transform, opacity",
             }}
           >
             Shop
@@ -4532,33 +4359,17 @@ export default function HomePage(): React.JSX.Element {
         ref={preloaderRef}
         style={{
           position: "fixed",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
+          top: 0, left: 0, width: "100%", height: "100%",
           backgroundColor: "#ffffff",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          zIndex: 9999,
-          fontFamily: FONT_FAMILY,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          zIndex: 9999, fontFamily: FONT_FAMILY,
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "40px",
-            overflow: "hidden",
-          }}
-        >
+        <div style={{ display: "flex", alignItems: "center", gap: "40px", overflow: "hidden" }}>
           <span
             style={{
-              fontSize: "100px",
-              fontWeight: 700,
-              color: "#0D3CFC",
-              fontFamily: FONT_FAMILY,
-              letterSpacing: "-0.03em",
+              fontSize: "100px", fontWeight: 700, color: "#0D3CFC",
+              fontFamily: FONT_FAMILY, letterSpacing: "-0.03em",
             }}
           >
             Menuru
@@ -4566,13 +4377,9 @@ export default function HomePage(): React.JSX.Element {
           <span
             ref={textRef}
             style={{
-              fontSize: "50px",
-              fontWeight: 600,
-              color: "#000000",
-              fontFamily: FONT_FAMILY,
-              letterSpacing: "-0.02em",
-              display: "inline-block",
-              willChange: "transform, opacity",
+              fontSize: "50px", fontWeight: 600, color: "#000000",
+              fontFamily: FONT_FAMILY, letterSpacing: "-0.02em",
+              display: "inline-block", willChange: "transform, opacity",
             }}
           >
             Shop
@@ -4593,266 +4400,196 @@ export default function HomePage(): React.JSX.Element {
         />
         <meta name="theme-color" content="#0D3CFC" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta
-          name="apple-mobile-web-app-status-bar-style"
-          content="black-translucent"
-        />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Menuru" />
         <meta name="mobile-web-app-capable" content="yes" />
         <link rel="icon" href="/images/ai.jpg" type="image/jpeg" />
         <link rel="apple-touch-icon" href="/images/ai.jpg" />
         <meta property="og:title" content="Menuru Official | Home" />
-        <meta
-          property="og:description"
-          content="Menuru Brand from Love yourself"
-        />
+        <meta property="og:description" content="Menuru Brand from Love yourself" />
         <meta property="og:image" content="/images/ai.jpg" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Menuru Official | Home" />
-        <meta
-          name="twitter:description"
-          content="Menuru Brand from Love yourself"
-        />
+        <meta name="twitter:description" content="Menuru Brand from Love yourself" />
         <meta name="twitter:image" content="/images/ai.jpg" />
       </Head>
 
       <LeftNavbar shifted={navbarShifted} />
       <RightNavbar />
 
+      {/* ===== COOKIE CONSENT POPUP ===== */}
       <CookieConsentPopup user={user} db={db} isMounted={isMounted} />
 
       <div
         style={{
           minHeight: "100vh",
           backgroundColor: "#ffffff",
-          margin: 0,
-          padding: 0,
-          position: "relative",
-          fontFamily: FONT_FAMILY,
-          overflow: "visible",
+          margin: 0, padding: 0, position: "relative",
+          fontFamily: FONT_FAMILY, overflow: "visible",
         }}
       >
+        {/* ===== HERO MENURU TITLE ===== */}
         <HeroMenuruTitle onNavbarShiftChange={setNavbarShifted} />
 
-        {/* LIVE CHAT AGENT + FOOTER — dibungkus fixed di bawah */}
+        {/* LIVE CHAT AGENT */}
+        <div style={{ padding: "0 40px", maxWidth: "1600px", margin: "0 auto", width: "100%" }}>
+          <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} />
+        </div>
+
+        {/* ===== FOOTER FIXED DI BAWAH ===== */}
+        {/* Footer dibungkus dengan position: fixed di bawah supaya tidak ikut scroll ke atas */}
+        {/* Design footer TIDAK diubah sama sekali, hanya posisinya di-fix di bawah */}
         <div
           style={{
             position: "fixed",
+            bottom: 0,
             left: 0,
             right: 0,
-            bottom: 0,
-            top: "80px",
-            display: "flex",
-            flexDirection: "column",
+            width: "100%",
+            padding: "60px 40px 40px 40px",
             backgroundColor: "#ffffff",
-            zIndex: 10,
+            borderTop: "1px solid rgba(0,0,0,0.05)",
+            zIndex: 8000,
             overflow: "hidden",
           }}
         >
-          {/* Live Chat Agent scroll area */}
           <div
             style={{
-              flex: 1,
-              minHeight: 0,
-              overflowY: "auto",
-              overflowX: "hidden",
-              padding: "0 40px",
-              scrollbarWidth: "none",
-              msOverflowStyle: "none",
+              position: "absolute", left: "40px", top: "50%",
+              transform: "translateY(-50%)",
+              width: "200px", height: "auto", opacity: 0.8,
             }}
-            className="livechat-scroll-area"
           >
-            <div
-              style={{
-                maxWidth: "1600px",
-                margin: "0 auto",
-                width: "100%",
-              }}
-            >
-              <LiveChatAgent
-                user={user}
-                isAdmin={isAdmin}
-                db={db}
-                auth={auth}
-              />
-            </div>
+            <img
+              src="/images/p0l.jpg" alt=""
+              style={{ width: "100%", height: "auto", display: "block", objectFit: "cover" }}
+            />
+          </div>
+          <div
+            style={{
+              position: "absolute", right: "40px", top: "50%",
+              transform: "translateY(-50%)",
+              width: "200px", height: "auto", opacity: 0.8,
+            }}
+          >
+            <img
+              src="/images/xxz.jpg" alt=""
+              style={{ width: "100%", height: "auto", display: "block", objectFit: "cover" }}
+            />
           </div>
 
-          {/* Footer fixed di bawah — tidak ikut scroll ke atas */}
           <div
             style={{
-              flexShrink: 0,
-              width: "100%",
-              padding: "20px 40px 16px 40px",
-              backgroundColor: "#ffffff",
-              borderTop: "1px solid rgba(0,0,0,0.08)",
-              position: "relative",
-              zIndex: 20,
-              boxShadow: "0 -8px 24px rgba(0,0,0,0.04)",
+              display: "flex", justifyContent: "space-between", alignItems: "flex-start",
+              maxWidth: "1400px", margin: "0 auto", gap: "40px",
+              flexWrap: "wrap", position: "relative", zIndex: 1,
             }}
           >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "flex-start",
-                maxWidth: "1400px",
-                margin: "0 auto",
-                gap: "24px",
-                flexWrap: "wrap",
-              }}
-            >
-              {footerLinks.map((section, idx) => (
-                <div key={idx} style={{ flex: "1", minWidth: "180px" }}>
-                  <h3
-                    style={{
-                      fontFamily: FONT_FAMILY,
-                      fontSize: "16px",
-                      fontWeight: 600,
-                      color: "#000000",
-                      margin: 0,
-                      marginBottom: "8px",
-                      letterSpacing: "-0.01em",
-                    }}
-                  >
-                    {section.title}
-                  </h3>
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: "4px",
-                    }}
-                  >
-                    {section.links.map((link, linkIdx) => {
-                      let linkHref = "#";
-                      let isAttention = false;
-                      let isStories = false;
-                      if (link === "Contact") linkHref = "/contact";
-                      else if (link === "Live Chat") linkHref = "/live-chat";
-                      else if (link === "Live Chat Agent")
-                        linkHref = "/live-chat-agent";
-                      else if (link === "Help Center")
-                        linkHref = "/pusat-bantuan";
-                      else if (link === "About Us") {
-                        linkHref = "/profile";
-                        isAttention = true;
-                      } else if (link === "Privacy Policy") {
-                        linkHref = "/privacy-policy";
-                        isAttention = true;
-                      } else if (link === "Terms & Conditions") {
-                        linkHref = "/terms-of-services";
-                        isAttention = true;
-                      } else if (link === "Terms of Use") {
-                        linkHref = "/terms-of-use";
-                        isAttention = true;
-                      } else if (link === "Stories") {
-                        linkHref = "/stories";
-                        isStories = true;
-                      } else if (link === "Shop") linkHref = "/shop";
-                      else if (link === "Note") linkHref = "/note";
-                      else if (link === "Calendar") linkHref = "/calendar";
-                      else if (link === "Blog") linkHref = "/blog";
-                      else if (link === "Donation") linkHref = "/donation";
-                      else if (link === "Community") linkHref = "/community";
-                      else if (link === "Instagram")
-                        linkHref = "https://instagram.com/menuru";
+            {footerLinks.map((section, idx) => (
+              <div key={idx} style={{ flex: "1", minWidth: "200px" }}>
+                <h3
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "28px", fontWeight: 600,
+                    color: "#000000", margin: 0, marginBottom: "16px",
+                    letterSpacing: "-0.01em", textTransform: "none",
+                  }}
+                >
+                  {section.title}
+                </h3>
+                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                  {section.links.map((link, linkIdx) => {
+                    let linkHref = "#";
+                    let isAttention = false;
+                    let isStories = false;
+                    if (link === "Contact") linkHref = "/contact";
+                    else if (link === "Live Chat") linkHref = "/live-chat";
+                    else if (link === "Live Chat Agent") linkHref = "/live-chat-agent";
+                    else if (link === "Help Center") linkHref = "/pusat-bantuan";
+                    else if (link === "About Us") { linkHref = "/profile"; isAttention = true; }
+                    else if (link === "Privacy Policy") { linkHref = "/privacy-policy"; isAttention = true; }
+                    else if (link === "Terms & Conditions") { linkHref = "/terms-of-services"; isAttention = true; }
+                    else if (link === "Terms of Use") { linkHref = "/terms-of-use"; isAttention = true; }
+                    else if (link === "Stories") { linkHref = "/stories"; isStories = true; }
+                    else if (link === "Shop") linkHref = "/shop";
+                    else if (link === "Note") linkHref = "/note";
+                    else if (link === "Calendar") linkHref = "/calendar";
+                    else if (link === "Blog") linkHref = "/blog";
+                    else if (link === "Donation") linkHref = "/donation";
+                    else if (link === "Community") linkHref = "/community";
+                    else if (link === "Instagram") linkHref = "https://instagram.com/menuru";
 
-                      return (
-                        <div
-                          key={linkIdx}
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "6px",
-                          }}
-                        >
-                          <Link
-                            href={linkHref}
-                            style={{ textDecoration: "none" }}
+                    return (
+                      <div key={linkIdx} style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                        <Link href={linkHref} style={{ textDecoration: "none" }}>
+                          <span
+                            style={{
+                              fontFamily: FONT_FAMILY, fontSize: "20px",
+                              fontWeight: 400, color: "#0D3CFC",
+                              letterSpacing: "-0.01em", cursor: "pointer",
+                              textTransform: "none",
+                            }}
                           >
-                            <span
-                              style={{
-                                fontFamily: FONT_FAMILY,
-                                fontSize: "13px",
-                                fontWeight: 400,
-                                color: "#0D3CFC",
-                                letterSpacing: "-0.01em",
-                                cursor: "pointer",
-                              }}
-                            >
-                              {link}
-                            </span>
-                          </Link>
-                          {isAttention && (
-                            <span
-                              style={{
-                                backgroundColor: "#0D3CFC",
-                                color: "#ffffff",
-                                padding: "1px 6px",
-                                borderRadius: "3px",
-                                fontSize: "9px",
-                                fontWeight: 600,
-                                fontFamily: FONT_FAMILY,
-                                display: "inline-block",
-                              }}
-                            >
-                              Updated
-                            </span>
-                          )}
-                          {isStories && (
-                            <span
-                              style={{
-                                backgroundColor: "#0D3CFC",
-                                color: "#ffffff",
-                                padding: "1px 6px",
-                                borderRadius: "3px",
-                                fontSize: "9px",
-                                fontWeight: 600,
-                                fontFamily: FONT_FAMILY,
-                                display: "inline-block",
-                              }}
-                            >
-                              New
-                            </span>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
+                            {link}
+                          </span>
+                        </Link>
+                        {isAttention && (
+                          <span
+                            style={{
+                              backgroundColor: "#0D3CFC", color: "#ffffff",
+                              padding: "2px 10px", borderRadius: "4px",
+                              fontSize: "11px", fontWeight: 600,
+                              fontFamily: FONT_FAMILY, letterSpacing: "0.3px",
+                              display: "inline-block",
+                            }}
+                          >
+                            Updated
+                          </span>
+                        )}
+                        {isStories && (
+                          <span
+                            style={{
+                              backgroundColor: "#0D3CFC", color: "#ffffff",
+                              padding: "2px 10px", borderRadius: "4px",
+                              fontSize: "11px", fontWeight: 600,
+                              fontFamily: FONT_FAMILY, letterSpacing: "0.3px",
+                              display: "inline-block",
+                            }}
+                          >
+                            New
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
+          </div>
 
-            <div
+          <div
+            style={{
+              maxWidth: "1400px", margin: "40px auto 0 auto",
+              paddingTop: "20px", borderTop: "1px solid rgba(0,0,0,0.05)",
+              position: "relative", zIndex: 1,
+            }}
+          >
+            <p
               style={{
-                maxWidth: "1400px",
-                margin: "12px auto 0 auto",
-                paddingTop: "10px",
-                borderTop: "1px solid rgba(0,0,0,0.05)",
+                fontFamily: FONT_FAMILY, fontSize: "14px", fontWeight: 400,
+                color: "#666", margin: 0, textAlign: "center",
+                letterSpacing: "0.01em",
               }}
             >
-              <p
-                style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: "11px",
-                  fontWeight: 400,
-                  color: "#666",
-                  margin: 0,
-                  textAlign: "center",
-                  letterSpacing: "0.01em",
-                }}
-              >
-                Terms and conditions apply. By using this website, you agree
-                to our Terms of Use and Privacy Policy.
-              </p>
-            </div>
+              Terms and conditions apply. By using this website, you agree to our Terms of Use
+              and Privacy Policy.
+            </p>
           </div>
         </div>
 
-        {/* FOOTER MENURU TITLE */}
+        {/* ===== FOOTER MENURU TITLE (muncul dari bawah) ===== */}
         <FooterMenuruTitle />
       </div>
 
@@ -4872,8 +4609,7 @@ export default function HomePage(): React.JSX.Element {
           overflow: auto !important;
           -ms-overflow-style: none !important;
           scrollbar-width: none !important;
-          margin: 0;
-          padding: 0;
+          margin: 0; padding: 0;
           background-color: #ffffff !important;
           min-height: 100% !important;
           height: auto !important;
@@ -4883,9 +4619,7 @@ export default function HomePage(): React.JSX.Element {
           width: 0 !important;
           height: 0 !important;
         }
-        * {
-          background-color: transparent;
-        }
+        * { background-color: transparent; }
         .menuru-char {
           display: inline-block;
           will-change: transform, opacity;
@@ -4915,15 +4649,13 @@ export default function HomePage(): React.JSX.Element {
           visibility: visible !important;
         }
         .chat-messages-container::-webkit-scrollbar,
-        .chat-messages-container-admin::-webkit-scrollbar,
-        .livechat-scroll-area::-webkit-scrollbar {
+        .chat-messages-container-admin::-webkit-scrollbar {
           display: none !important;
           width: 0 !important;
           height: 0 !important;
         }
         .chat-messages-container,
-        .chat-messages-container-admin,
-        .livechat-scroll-area {
+        .chat-messages-container-admin {
           scrollbar-width: none !important;
           -ms-overflow-style: none !important;
         }
