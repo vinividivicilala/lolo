@@ -25,12 +25,10 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 import { Physics2DPlugin } from "gsap/Physics2DPlugin";
 
-// Register GSAP plugins
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, SplitText, Physics2DPlugin);
 }
 
-// Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyD_htQZ1TClnXKZGRJ4izbMQ02y6V3aNAQ",
   authDomain: "wawa44-58d1e.firebaseapp.com",
@@ -225,7 +223,6 @@ function containsBannedContent(text: string): { isBanned: boolean; reason: strin
   return { isBanned: false, reason: "" };
 }
 
-// ===== BAN USER PERMANENT =====
 async function banUserPermanent(
   userId: string,
   userEmail: string,
@@ -258,7 +255,6 @@ async function banUserPermanent(
   }
 }
 
-// ===== CHECK BAN STATUS =====
 async function checkBanStatus(userId: string): Promise<{
   isBanned: boolean; reason: string; message: string;
   canCreateTicket: boolean; canSendMessage: boolean;
@@ -351,7 +347,6 @@ const OnlineDot = ({ color = "#22c55e", size = 8 }: { color?: string; size?: num
   />
 );
 
-// ===== PEOPLE ICON =====
 const PeopleIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <circle cx="12" cy="8" r="4" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -359,7 +354,6 @@ const PeopleIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: s
   </svg>
 );
 
-// ===== TRUST ICON =====
 const TrustIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M12 2L4 5V11C4 16 8 20 12 22C16 20 20 16 20 11V5L12 2Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -367,7 +361,6 @@ const TrustIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?: st
   </svg>
 );
 
-// ===== CAREER ICON =====
 const CareerIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <rect x="2" y="7" width="20" height="14" rx="2" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -376,7 +369,6 @@ const CareerIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?: s
   </svg>
 );
 
-// ===== RESOURCES ICON =====
 const ResourcesIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M4 4H10C11.1046 4 12 4.89543 12 6V20C12 18.8954 11.1046 18 10 18H4V4Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -384,7 +376,6 @@ const ResourcesIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?
   </svg>
 );
 
-// ===== DOCS ICON =====
 const DocsIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M14 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -394,7 +385,6 @@ const DocsIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: str
   </svg>
 );
 
-// ===== BRAND ICON =====
 const BrandIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M20.59 13.41L11 3.83C10.6 3.43 10.06 3.2 9.5 3.2H4C2.9 3.2 2 4.1 2 5.2V10.7C2 11.26 2.22 11.8 2.63 12.2L12.21 21.79C13 22.57 14.27 22.57 15.06 21.79L20.59 16.26C21.37 15.47 21.37 14.2 20.59 13.41Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -402,7 +392,6 @@ const BrandIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: st
   </svg>
 );
 
-// ===== FOOTER LINKS =====
 const footerLinks = [
   { title: "Get in Touch", links: ["Contact", "Instagram", "Live Chat"] },
   {
@@ -460,7 +449,6 @@ interface LastMessagePreview {
   isFromAgent: boolean;
 }
 
-// ===== TOUR STEP INTERFACE =====
 interface TourStep {
   target: string;
   title: string;
@@ -1823,132 +1811,6 @@ const OnboardingTour = ({
   );
 };
 
-// ===== ROLLING MESSAGE PREVIEW COMPONENT =====
-// Menampilkan preview pesan terbaru di bawah "Chat History" untuk setiap ticket.
-// Format:
-//   - Dari agent  : "Agent [NamaAgent]: [pesan]"
-//   - Dari user   : "[NamaUser] from: [pesan]"
-//   - Dari grup   : "[NamaUser] from group: [pesan]"
-// Animasi GSAP rolling text per karakter.
-const RollingMessagePreview = ({
-  ticketId,
-  isAdmin,
-  tickets,
-  ticketPreviews,
-}: {
-  ticketId: string;
-  isAdmin: boolean;
-  tickets: Ticket[];
-  ticketPreviews: { [ticketId: string]: LastMessagePreview[] };
-}) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const textRef = useRef<HTMLDivElement>(null);
-  const lastMessageRef = useRef<string>("");
-
-  const previews = ticketPreviews[ticketId] || [];
-  const orderedPreviews = [...previews].reverse(); // oldest -> newest
-  const latestPreview =
-    orderedPreviews.length > 0 ? orderedPreviews[orderedPreviews.length - 1] : null;
-
-  useEffect(() => {
-    if (!latestPreview || !containerRef.current || !textRef.current) return;
-
-    const messageKey = latestPreview.text + "|" + latestPreview.senderName;
-    if (messageKey === lastMessageRef.current) return;
-    lastMessageRef.current = messageKey;
-
-    const container = containerRef.current;
-    const el = textRef.current;
-
-    // Bangun teks sesuai format
-    let displayText = "";
-    const ticket = tickets.find((t) => t.id === ticketId);
-
-    if (latestPreview.isFromAgent) {
-      // Dari agent
-      displayText = `Agent ${latestPreview.senderName}: ${latestPreview.text}`;
-    } else if (ticket?.isAnnouncement || ticket?.isBroadcast) {
-      // Dari grup
-      displayText = `${latestPreview.senderName} from group: ${latestPreview.text}`;
-    } else {
-      // Dari user biasa
-      displayText = `${latestPreview.senderName} from: ${latestPreview.text}`;
-    }
-
-    // Bangun karakter untuk animasi rolling
-    el.innerHTML = "";
-    const chars = displayText.split("");
-    chars.forEach((char) => {
-      const span = document.createElement("span");
-      span.textContent = char === " " ? "\u00A0" : char;
-      span.style.display = "inline-block";
-      span.style.opacity = "0";
-      span.style.transform = "translateY(20px)";
-      span.style.whiteSpace = "pre";
-      el.appendChild(span);
-    });
-
-    const charElements = el.querySelectorAll("span");
-    gsap.to(charElements, {
-      opacity: 1,
-      y: 0,
-      duration: 0.5,
-      stagger: 0.018,
-      ease: "back.out(1.7)",
-      overwrite: true,
-    });
-
-    gsap.fromTo(
-      container,
-      { opacity: 0, y: 15 },
-      { opacity: 1, y: 0, duration: 0.6, ease: "power3.out", overwrite: true }
-    );
-  }, [latestPreview, ticketId, isAdmin, tickets]);
-
-  if (!latestPreview) return null;
-
-  const isFromAgent = latestPreview.isFromAgent;
-  const textColor = isAdmin
-    ? isFromAgent
-      ? "#0D3CFC"
-      : "#333"
-    : "#ffffff";
-  const bgColor = isAdmin ? "#f0f4ff" : "rgba(255,255,255,0.12)";
-  const borderColor = isAdmin ? "#0D3CFC" : "rgba(255,255,255,0.3)";
-
-  return (
-    <div
-      ref={containerRef}
-      style={{
-        marginTop: "8px",
-        padding: "6px 10px",
-        backgroundColor: bgColor,
-        borderRadius: "8px",
-        border: `1px solid ${borderColor}`,
-        overflow: "hidden",
-        minHeight: "28px",
-        display: "flex",
-        alignItems: "center",
-      }}
-    >
-      <div
-        ref={textRef}
-        style={{
-          fontSize: "11px",
-          color: textColor,
-          fontFamily: FONT_FAMILY,
-          fontWeight: 500,
-          lineHeight: 1.3,
-          whiteSpace: "nowrap",
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-          width: "100%",
-        }}
-      />
-    </div>
-  );
-};
-
 // ===== LIVE CHAT AGENT COMPONENT =====
 const LiveChatAgent = ({
   user,
@@ -2226,7 +2088,6 @@ const LiveChatAgent = ({
     return () => unsubscribe();
   }, [db, user, isAdmin, selectedTicket, isMounted]);
 
-  // Ambil 3 pesan terakhir per ticket sebagai preview
   useEffect(() => {
     if (!db || !tickets.length || !isMounted) return;
     const unsubscribes: (() => void)[] = [];
@@ -2740,17 +2601,114 @@ const LiveChatAgent = ({
     );
   };
 
+  // ===== ROLLING TEXT PREVIEW COMPONENT =====
+  const RollingMessagePreview = ({ ticketId, isAdmin: adminView }: { ticketId: string; isAdmin: boolean }) => {
+    const containerRef = useRef<HTMLDivElement>(null);
+    const textRef = useRef<HTMLDivElement>(null);
+    const lastMessageRef = useRef<string>("");
+    const previews = ticketPreviews[ticketId] || [];
+    const orderedPreviews = [...previews].reverse();
+
+    const latestPreview = orderedPreviews.length > 0 ? orderedPreviews[orderedPreviews.length - 1] : null;
+
+    useEffect(() => {
+      if (!latestPreview || !containerRef.current || !textRef.current) return;
+
+      const messageKey = latestPreview.text + latestPreview.senderName + latestPreview.timestamp;
+      if (messageKey === lastMessageRef.current) return;
+      lastMessageRef.current = messageKey;
+
+      const container = containerRef.current;
+      const el = textRef.current;
+
+      // Format: "NamaUser from: kalimat pesan" or "NamaUser from group: kalimat pesan"
+      // atau "Agent NamaAgent: kalimat pesan"
+      const ticket = tickets.find((t) => t.id === ticketId);
+      let displayText = "";
+
+      if (latestPreview.isFromAgent) {
+        displayText = `Agent ${latestPreview.senderName}: ${latestPreview.text}`;
+      } else if (ticket?.isAnnouncement || ticket?.isBroadcast) {
+        displayText = `${latestPreview.senderName} from group: ${latestPreview.text}`;
+      } else {
+        displayText = `${latestPreview.senderName} from: ${latestPreview.text}`;
+      }
+
+      el.innerHTML = "";
+      const chars = displayText.split("");
+      chars.forEach((char) => {
+        const span = document.createElement("span");
+        span.textContent = char === " " ? "\u00A0" : char;
+        span.style.display = "inline-block";
+        span.style.opacity = "0";
+        span.style.transform = "translateY(20px)";
+        el.appendChild(span);
+      });
+
+      const charElements = el.querySelectorAll("span");
+      gsap.to(charElements, {
+        opacity: 1,
+        y: 0,
+        duration: 0.4,
+        stagger: 0.015,
+        ease: "back.out(1.7)",
+        overwrite: true,
+      });
+
+      gsap.fromTo(
+        container,
+        { opacity: 0, y: 10 },
+        { opacity: 1, y: 0, duration: 0.4, ease: "power3.out", overwrite: true }
+      );
+    }, [latestPreview, ticketId, adminView, tickets]);
+
+    if (!latestPreview) return null;
+
+    const isFromAgent = latestPreview.isFromAgent;
+    const textColor = adminView ? (isFromAgent ? "#0D3CFC" : "#333") : "#ffffff";
+    const bgColor = adminView ? "rgba(13,60,252,0.08)" : "rgba(255,255,255,0.12)";
+    const borderColor = adminView ? "rgba(13,60,252,0.3)" : "rgba(255,255,255,0.3)";
+
+    return (
+      <div
+        ref={containerRef}
+        style={{
+          marginTop: "8px",
+          padding: "6px 10px",
+          backgroundColor: bgColor,
+          borderRadius: "8px",
+          border: `1px solid ${borderColor}`,
+          overflow: "hidden",
+          minHeight: "26px",
+          display: "flex",
+          alignItems: "center",
+        }}
+      >
+        <div
+          ref={textRef}
+          style={{
+            fontSize: "11px",
+            color: textColor,
+            fontFamily: FONT_FAMILY,
+            fontWeight: 500,
+            lineHeight: 1.3,
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            width: "100%",
+          }}
+        />
+      </div>
+    );
+  };
+
   const renderSearchBar = () => {
-    const isDark = !isAdmin;
-    const bgColor = isDark ? "rgba(255,255,255,0.15)" : "#ffffff";
-    const iconColor = isDark ? "#ffffff" : "#666";
-    const borderColor = isDark ? "rgba(255,255,255,0.25)" : "#e8e8e8";
     return (
       <div
         data-tour="search-bar"
         style={{
           padding: "10px 14px",
-          borderBottom: isDark ? "1px solid rgba(255,255,255,0.1)" : "1px solid #e8e8e8",
+          borderBottom: isAdmin ? "1px solid #e8e8e8" : "1px solid rgba(255,255,255,0.1)",
         }}
       >
         <div
@@ -2759,12 +2717,12 @@ const LiveChatAgent = ({
             alignItems: "center",
             gap: "8px",
             padding: "8px 12px",
-            backgroundColor: bgColor,
-            border: `1px solid ${borderColor}`,
+            backgroundColor: isAdmin ? "#ffffff" : "rgba(255,255,255,0.15)",
+            border: isAdmin ? "1px solid #e8e8e8" : "1px solid rgba(255,255,255,0.25)",
             borderRadius: "8px",
           }}
         >
-          <SearchIcon size={14} color={iconColor} />
+          <SearchIcon size={14} color="#ffffff" />
           <input
             type="text"
             value={searchQuery}
@@ -2779,8 +2737,7 @@ const LiveChatAgent = ({
               fontSize: "12px",
               fontFamily: FONT_FAMILY,
               padding: 0,
-              WebkitTextFillColor: "#ffffff",
-              caretColor: "#ffffff",
+              fontWeight: 500,
             }}
           />
           {searchQuery && (
@@ -3623,12 +3580,7 @@ const LiveChatAgent = ({
                           >
                             {ticket.topic}
                           </div>
-                          <RollingMessagePreview
-                            ticketId={ticket.id}
-                            isAdmin={true}
-                            tickets={tickets}
-                            ticketPreviews={ticketPreviews}
-                          />
+                          <RollingMessagePreview ticketId={ticket.id} isAdmin={true} />
                         </div>
                       ))}
                     </div>
@@ -3685,12 +3637,7 @@ const LiveChatAgent = ({
                           >
                             {ticket.topic}
                           </div>
-                          <RollingMessagePreview
-                            ticketId={ticket.id}
-                            isAdmin={true}
-                            tickets={tickets}
-                            ticketPreviews={ticketPreviews}
-                          />
+                          <RollingMessagePreview ticketId={ticket.id} isAdmin={true} />
                         </div>
                       ))}
                     </div>
@@ -3748,12 +3695,7 @@ const LiveChatAgent = ({
                           >
                             {ticket.topic}
                           </div>
-                          <RollingMessagePreview
-                            ticketId={ticket.id}
-                            isAdmin={true}
-                            tickets={tickets}
-                            ticketPreviews={ticketPreviews}
-                          />
+                          <RollingMessagePreview ticketId={ticket.id} isAdmin={true} />
                         </div>
                       ))}
                     </div>
@@ -3822,12 +3764,7 @@ const LiveChatAgent = ({
                           >
                             {ticket.topic}
                           </div>
-                          <RollingMessagePreview
-                            ticketId={ticket.id}
-                            isAdmin={false}
-                            tickets={tickets}
-                            ticketPreviews={ticketPreviews}
-                          />
+                          <RollingMessagePreview ticketId={ticket.id} isAdmin={false} />
                           <div
                             style={{
                               display: "flex",
@@ -4048,9 +3985,8 @@ const LiveChatAgent = ({
                     flexDirection: "column",
                     gap: "12px",
                     minHeight: 0,
-                    maxHeight: "100%",
-                    scrollbarWidth: "none",
-                    msOverflowStyle: "none",
+                    scrollbarWidth: "thin",
+                    scrollbarColor: "#0D3CFC #f0f0f0",
                   }}
                 >
                   {messages.length === 0 ? (
@@ -4074,7 +4010,6 @@ const LiveChatAgent = ({
                           style={{
                             alignSelf: isMine ? "flex-end" : "flex-start",
                             maxWidth: "70%",
-                            flexShrink: 0,
                           }}
                         >
                           <div
@@ -4134,7 +4069,6 @@ const LiveChatAgent = ({
                         fontStyle: "italic",
                         padding: "5px 10px",
                         fontFamily: FONT_FAMILY,
-                        flexShrink: 0,
                       }}
                     >
                       {typingText}
@@ -4249,6 +4183,7 @@ export default function HomePage(): React.JSX.Element {
 
   const preloaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
+  const liveChatEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setIsMounted(true);
@@ -4419,7 +4354,6 @@ export default function HomePage(): React.JSX.Element {
       <LeftNavbar shifted={navbarShifted} />
       <RightNavbar />
 
-      {/* ===== COOKIE CONSENT POPUP ===== */}
       <CookieConsentPopup user={user} db={db} isMounted={isMounted} />
 
       <div
@@ -4428,31 +4362,28 @@ export default function HomePage(): React.JSX.Element {
           backgroundColor: "#ffffff",
           margin: 0, padding: 0, position: "relative",
           fontFamily: FONT_FAMILY, overflow: "visible",
+          paddingBottom: "80px",
         }}
       >
-        {/* ===== HERO MENURU TITLE ===== */}
         <HeroMenuruTitle onNavbarShiftChange={setNavbarShifted} />
 
-        {/* LIVE CHAT AGENT */}
         <div style={{ padding: "0 40px", maxWidth: "1600px", margin: "0 auto", width: "100%" }}>
           <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} />
         </div>
 
-        {/* ===== FOOTER FIXED DI BAWAH ===== */}
-        {/* Footer dibungkus dengan position: fixed di bawah supaya tidak ikut scroll ke atas */}
-        {/* Design footer TIDAK diubah sama sekali, hanya posisinya di-fix di bawah */}
+        {/* ===== FOOTER (dengan posisi fixed di bawah agar tidak ikut scroll) ===== */}
         <div
+          ref={liveChatEndRef}
           style={{
             position: "fixed",
             bottom: 0,
             left: 0,
-            right: 0,
             width: "100%",
             padding: "60px 40px 40px 40px",
             backgroundColor: "#ffffff",
             borderTop: "1px solid rgba(0,0,0,0.05)",
-            zIndex: 8000,
             overflow: "hidden",
+            zIndex: 100,
           }}
         >
           <div
@@ -4589,8 +4520,10 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* ===== FOOTER MENURU TITLE (muncul dari bawah) ===== */}
-        <FooterMenuruTitle />
+        {/* ===== FOOTER MENURU TITLE ===== */}
+        <div style={{ position: "relative", zIndex: 1, marginTop: "0", paddingBottom: "0" }}>
+          <FooterMenuruTitle />
+        </div>
       </div>
 
       <style jsx global>{`
@@ -4650,14 +4583,15 @@ export default function HomePage(): React.JSX.Element {
         }
         .chat-messages-container::-webkit-scrollbar,
         .chat-messages-container-admin::-webkit-scrollbar {
-          display: none !important;
-          width: 0 !important;
-          height: 0 !important;
+          width: 6px;
         }
-        .chat-messages-container,
-        .chat-messages-container-admin {
-          scrollbar-width: none !important;
-          -ms-overflow-style: none !important;
+        .chat-messages-container::-webkit-scrollbar-track {
+          background: #f0f0f0;
+          border-radius: 3px;
+        }
+        .chat-messages-container::-webkit-scrollbar-thumb {
+          background: #0D3CFC;
+          border-radius: 3px;
         }
       `}</style>
     </>
