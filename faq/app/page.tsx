@@ -1576,17 +1576,15 @@ const OnboardingTour = ({
   );
 };
 
-// ===== ROLLING NEW MESSAGE COMPONENT (GSAP) =====
+// ===== ROLLING NEW MESSAGE COMPONENT (GSAP) - Tampil di bawah chat histori pesan =====
 const RollingNewMessage = ({
   senderName,
   message,
   isFromAgent,
-  isAdmin,
 }: {
   senderName: string;
   message: string;
   isFromAgent: boolean;
-  isAdmin: boolean;
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
@@ -1600,39 +1598,33 @@ const RollingNewMessage = ({
     const container = containerRef.current;
     const textEl = textRef.current;
 
-    // Kill animasi lama
     gsap.killTweensOf([container, textEl]);
 
-    // Set kondisi awal untuk rolling
     gsap.set(container, { height: 0, opacity: 0 });
     gsap.set(textEl, { yPercent: 120, opacity: 0, rotateX: -90, transformOrigin: "50% 100%" });
 
     const tl = gsap.timeline();
     tl.to(container, {
-      height: 22,
+      height: 24,
       opacity: 1,
       duration: 0.4,
       ease: "power2.out",
-    })
-      .to(
-        textEl,
-        {
-          yPercent: 0,
-          opacity: 1,
-          rotateX: 0,
-          duration: 0.6,
-          ease: "back.out(1.7)",
-        },
-        "-=0.2"
-      );
+    }).to(
+      textEl,
+      {
+        yPercent: 0,
+        opacity: 1,
+        rotateX: 0,
+        duration: 0.6,
+        ease: "back.out(1.7)",
+      },
+      "-=0.2"
+    );
 
     return () => {
       tl.kill();
     };
   }, [message]);
-
-  const labelColor = isAdmin ? "#0D3CFC" : "#ffffff";
-  const textColor = isAdmin ? "#0D3CFC" : "#ffffff";
 
   return (
     <div
@@ -1644,27 +1636,29 @@ const RollingNewMessage = ({
         marginTop: 0,
         display: "flex",
         alignItems: "center",
-        gap: "4px",
+        gap: "6px",
         fontFamily: FONT_FAMILY,
-        fontSize: "11px",
+        fontSize: "13px",
         whiteSpace: "nowrap",
+        paddingLeft: "4px",
       }}
     >
-      <div ref={textRef} style={{ display: "flex", alignItems: "center", gap: "4px", overflow: "hidden", width: "100%" }}>
-        <span style={{ fontWeight: 700, color: labelColor, flexShrink: 0 }}>
+      <div ref={textRef} style={{ display: "flex", alignItems: "center", gap: "6px", overflow: "hidden", width: "100%" }}>
+        <span style={{ fontWeight: 700, color: "#0D3CFC", flexShrink: 0 }}>
           {senderName}
         </span>
-        <span style={{ color: textColor, opacity: 0.75, flexShrink: 0 }}>from</span>
+        <span style={{ color: "#666", flexShrink: 0 }}>from</span>
         <span
           style={{
-            color: textColor,
+            color: "#0D3CFC",
             overflow: "hidden",
             textOverflow: "ellipsis",
             whiteSpace: "nowrap",
             fontStyle: "italic",
+            fontWeight: 500,
           }}
         >
-          {message.length > 40 ? message.substring(0, 40) + "..." : message}
+          {message.length > 60 ? message.substring(0, 60) + "..." : message}
         </span>
       </div>
     </div>
@@ -1701,9 +1695,12 @@ const LiveChatAgent = ({
   const [onlineAgents, setOnlineAgents] = useState<OnlineUser[]>([]);
   const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
   const [ticketPreviews, setTicketPreviews] = useState<{ [ticketId: string]: LastMessagePreview[] }>({});
-  const [ticketLatestMessage, setTicketLatestMessage] = useState<{ [ticketId: string]: LastMessagePreview | null }>({});
   const [ticketMsgCounts, setTicketMsgCounts] = useState<{ [ticketId: string]: number }>({});
   const [searchQuery, setSearchQuery] = useState("");
+
+  // ✅ Rolling latest message untuk ditampilkan di BAWAH chat histori pesan (dalam chat view)
+  const [latestRollingMessage, setLatestRollingMessage] = useState<LastMessagePreview | null>(null);
+  const [rollingKey, setRollingKey] = useState(0);
 
   const [showTour, setShowTour] = useState(false);
   const [tourStep, setTourStep] = useState(0);
@@ -1712,6 +1709,7 @@ const LiveChatAgent = ({
   const chatMessagesContainerRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const liveChatTitleRef = useRef<HTMLHeadingElement>(null);
+  const prevMessagesLenRef = useRef<number>(0);
 
   const topics = [
     "Product Inquiry",
@@ -1933,6 +1931,10 @@ const LiveChatAgent = ({
         if (!stillExists) {
           setSelectedTicket(null);
           setMessages([]);
+        } else {
+          // update selected ticket data agar status terbaru
+          const updated = ticketList.find((t) => t.id === selectedTicket.id);
+          if (updated) setSelectedTicket(updated);
         }
       }
     });
@@ -1970,10 +1972,6 @@ const LiveChatAgent = ({
           });
         }
         setTicketPreviews((prev) => ({ ...prev, [ticket.id]: previews }));
-        // Set latest message untuk rolling (previews[0] = terbaru karena orderBy desc)
-        if (previews.length > 0) {
-          setTicketLatestMessage((prev) => ({ ...prev, [ticket.id]: previews[0] }));
-        }
       });
       unsubscribes.push(unsub);
     });
@@ -2003,11 +2001,35 @@ const LiveChatAgent = ({
         }
         msgList.push({ id: docSnap.id, ...data, text } as ChatMessage);
       }
+
+      // ✅ Deteksi pesan baru untuk rolling text di bawah chat histori
+      const newLen = msgList.length;
+      if (prevMessagesLenRef.current > 0 && newLen > prevMessagesLenRef.current) {
+        const newestMsg = msgList[newLen - 1];
+        if (newestMsg) {
+          const isFromAgentMsg = newestMsg.senderName === AGENT_NAME;
+          setLatestRollingMessage({
+            text: newestMsg.text,
+            senderName: newestMsg.senderName || "User",
+            timestamp: newestMsg.timestamp,
+            isFromAgent: isFromAgentMsg,
+          });
+          setRollingKey((k) => k + 1);
+        }
+      }
+      prevMessagesLenRef.current = newLen;
+
       setMessages(msgList);
       setTimeout(() => scrollToBottom(), 50);
     });
     return () => unsubscribe();
   }, [db, selectedTicket, isMounted]);
+
+  // Reset rolling saat ganti ticket
+  useEffect(() => {
+    setLatestRollingMessage(null);
+    prevMessagesLenRef.current = 0;
+  }, [selectedTicket?.id]);
 
   useEffect(() => {
     if (!db || !selectedTicket || !user || !isAdmin || !isMounted) return;
@@ -2018,15 +2040,24 @@ const LiveChatAgent = ({
     });
   }, [messages, selectedTicket, db, user, isAdmin, isMounted]);
 
+  // ✅ Auto-select active ticket HANYA sekali di awal (saat belum ada pilihan sama sekali)
+  const hasAutoSelectedRef = useRef(false);
   useEffect(() => {
     if (!user || isAdmin || !isMounted) return;
+    if (hasAutoSelectedRef.current) return;
+    if (selectedTicket) {
+      hasAutoSelectedRef.current = true;
+      return;
+    }
     const userTickets = tickets.filter((t) => t.userId === user.uid);
+    if (userTickets.length === 0) return;
     const activeTicket = userTickets.find((t) => t.status === "waiting" || t.status === "active");
-    if (activeTicket) setSelectedTicket(activeTicket);
-    else if (userTickets.length > 0 && !selectedTicket) setSelectedTicket(userTickets[0]);
-    else if (userTickets.length === 0) {
-      setSelectedTicket(null);
-      setMessages([]);
+    if (activeTicket) {
+      setSelectedTicket(activeTicket);
+      hasAutoSelectedRef.current = true;
+    } else if (userTickets.length > 0) {
+      setSelectedTicket(userTickets[0]);
+      hasAutoSelectedRef.current = true;
     }
   }, [tickets, user, isAdmin, selectedTicket, isMounted]);
 
@@ -2170,6 +2201,7 @@ const LiveChatAgent = ({
       setSelectedTopic("");
       setShowStartChat(false);
       setBanMessage(null);
+      hasAutoSelectedRef.current = false; // biar auto-select active ticket lagi
     } catch (error) {
       console.error("Error starting chat:", error);
       alert("An error occurred while starting the chat. Please try again.");
@@ -2255,10 +2287,6 @@ const LiveChatAgent = ({
     if (!db || !isAdmin) return;
     try {
       await updateDoc(doc(db, "livechat_tickets", ticketId), { status: "resolved" });
-      if (selectedTicket?.id === ticketId) {
-        setSelectedTicket(null);
-        setMessages([]);
-      }
     } catch (error) {
       console.error("Error resolving ticket:", error);
     }
@@ -2422,10 +2450,6 @@ const LiveChatAgent = ({
     const previews = ticketPreviews[ticketId] || [];
     if (previews.length === 0) return null;
     const ordered = [...previews].reverse();
-    const userTextColor = "#ffffff";
-    const agentTextColor = isAdmin ? "#0D3CFC" : "#ffffff";
-    const labelUserColor = isAdmin ? "#888" : "#ffffff";
-    const labelAgentColor = isAdmin ? "#0D3CFC" : "#ffffff";
     return (
       <div style={{ marginTop: "6px", display: "flex", flexDirection: "column", gap: "3px" }}>
         {ordered.map((p, i) => (
@@ -2433,7 +2457,8 @@ const LiveChatAgent = ({
             key={i}
             style={{
               fontSize: "11px",
-              color: p.isFromAgent ? agentTextColor : userTextColor,
+              // ✅ Semua teks preview putih full (baik admin maupun user)
+              color: "#ffffff",
               fontStyle: "italic",
               overflow: "hidden",
               textOverflow: "ellipsis",
@@ -2444,10 +2469,10 @@ const LiveChatAgent = ({
               gap: "4px",
             }}
           >
-            <span style={{ fontWeight: 600, color: p.isFromAgent ? labelAgentColor : labelUserColor, flexShrink: 0 }}>
-              {p.isFromAgent ? "Agent:" : "User:"}
+            <span style={{ fontWeight: 700, color: "#ffffff", flexShrink: 0 }}>
+              {p.senderName}:
             </span>
-            <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>
+            <span style={{ overflow: "hidden", textOverflow: "ellipsis", color: "#ffffff" }}>
               {p.text.length > 30 ? p.text.substring(0, 30) + "..." : p.text}
             </span>
           </div>
@@ -2456,19 +2481,14 @@ const LiveChatAgent = ({
     );
   };
 
+  // ✅ Search bar style SAMA untuk admin & user (background putih transparan, teks putih full)
   const renderSearchBar = () => {
-    const isDark = !isAdmin;
-    // ✅ Input search: huruf warna putih full cerah
-    const bgColor = isDark ? "rgba(255,255,255,0.15)" : "#ffffff";
-    const textColor = "#ffffff"; // selalu putih full cerah
-    const iconColor = "#ffffff";
-    const borderColor = isDark ? "rgba(255,255,255,0.25)" : "#e8e8e8";
     return (
       <div
         data-tour="search-bar"
         style={{
           padding: "10px 14px",
-          borderBottom: isDark ? "1px solid rgba(255,255,255,0.1)" : "1px solid #e8e8e8",
+          borderBottom: "1px solid rgba(255,255,255,0.15)",
         }}
       >
         <div
@@ -2477,12 +2497,12 @@ const LiveChatAgent = ({
             alignItems: "center",
             gap: "8px",
             padding: "8px 12px",
-            backgroundColor: bgColor,
-            border: `1px solid ${borderColor}`,
+            backgroundColor: "rgba(255,255,255,0.15)",
+            border: "1px solid rgba(255,255,255,0.25)",
             borderRadius: "8px",
           }}
         >
-          <SearchIcon size={14} color={iconColor} />
+          <SearchIcon size={14} color="#ffffff" />
           <input
             type="text"
             value={searchQuery}
@@ -2493,7 +2513,7 @@ const LiveChatAgent = ({
               background: "transparent",
               border: "none",
               outline: "none",
-              color: textColor,
+              color: "#ffffff",
               fontSize: "12px",
               fontFamily: FONT_FAMILY,
               padding: 0,
@@ -2506,7 +2526,7 @@ const LiveChatAgent = ({
               style={{
                 background: "transparent",
                 border: "none",
-                color: textColor,
+                color: "#ffffff",
                 cursor: "pointer",
                 fontSize: "14px",
                 padding: 0,
@@ -2939,6 +2959,55 @@ const LiveChatAgent = ({
   const resolvedTickets = filterTicketsBySearch(resolvedTicketsRaw);
   const typingText = selectedTicket ? getTypingText(selectedTicket) : null;
 
+  // ✅ Design list chat SAMA untuk admin & user biasa
+  const renderChatListItem = (ticket: Ticket, options?: { showStatus?: boolean; onExtraClick?: () => void }) => {
+    const isActive = selectedTicket?.id === ticket.id;
+    const ticketId = generateTicketId(ticket.createdAt);
+    const statusLabel =
+      ticket.status === "waiting" ? "Waiting" : ticket.status === "active" ? "Active" : "Resolved";
+    return (
+      <div
+        key={ticket.id}
+        onClick={() => {
+          setSelectedTicket(ticket);
+          if (options?.onExtraClick) options.onExtraClick();
+        }}
+        style={{
+          padding: "14px 16px",
+          borderLeft: isActive ? "4px solid #fff" : "4px solid transparent",
+          backgroundColor: isActive ? "rgba(255,255,255,0.12)" : "transparent",
+          cursor: "pointer",
+          borderBottom: "1px solid rgba(255,255,255,0.08)",
+        }}
+      >
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+          <div style={{ fontWeight: 600, fontSize: "14px", color: "#ffffff" }}>{ticket.userName}</div>
+          <span style={{ fontSize: "10px", color: "#ffffff" }}>{ticketMsgCounts[ticket.id] || 0} msgs</span>
+        </div>
+        <div style={{ fontSize: "12px", color: "#ffffff", marginBottom: "6px" }}>{ticket.topic}</div>
+        {renderTicketPreview(ticket.id)}
+        {options?.showStatus && (
+          <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "6px" }}>
+            <span
+              style={{
+                fontSize: "10px",
+                backgroundColor:
+                  ticket.status === "waiting" ? "#fef3c7" : ticket.status === "active" ? "#d1fae5" : "#e5e7eb",
+                color: ticket.status === "waiting" ? "#92400e" : ticket.status === "active" ? "#065f46" : "#6b7280",
+                padding: "2px 8px",
+                borderRadius: "8px",
+                fontWeight: 600,
+              }}
+            >
+              {statusLabel}
+            </span>
+            <span style={{ fontSize: "9px", color: "#ffffff" }}>{ticketId}</span>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <>
       <OnboardingTour steps={tourSteps} onComplete={completeTour} isActive={showTour} currentStep={tourStep} setCurrentStep={setTourStep} />
@@ -3025,12 +3094,11 @@ const LiveChatAgent = ({
         >
           {renderOnlinePanel()}
 
-          {/* ===== CHAT LIST (design disamakan untuk admin & user) ===== */}
+          {/* ===== CHAT LIST (design identik admin & user) ===== */}
           <div
             data-tour="chat-list"
             style={{
               width: "360px",
-              // ✅ Design disamakan: baik admin maupun user pakai #0D3CFC
               backgroundColor: "#0D3CFC",
               borderRadius: "12px",
               border: "none",
@@ -3060,13 +3128,14 @@ const LiveChatAgent = ({
                 zIndex: 2,
               }}
             >
-              <span>Chat History</span>
+              <span style={{ color: "#ffffff" }}>Chat History</span>
               <span
                 style={{
                   fontSize: "11px",
                   backgroundColor: "rgba(255,255,255,0.2)",
                   padding: "2px 8px",
                   borderRadius: "8px",
+                  color: "#ffffff",
                 }}
               >
                 {isAdmin ? tickets.length : tickets.filter((t) => t.userId === user.uid).length}
@@ -3083,10 +3152,10 @@ const LiveChatAgent = ({
                       <div
                         style={{
                           padding: "10px 16px",
-                          backgroundColor: "#fef3c7",
+                          backgroundColor: "rgba(255,255,255,0.2)",
                           fontWeight: 600,
                           fontSize: "12px",
-                          color: "#92400e",
+                          color: "#ffffff",
                           position: "sticky",
                           top: 0,
                           zIndex: 1,
@@ -3094,37 +3163,9 @@ const LiveChatAgent = ({
                       >
                         Waiting ({waitingTickets.length})
                       </div>
-                      {waitingTickets.map((ticket) => (
-                        <div
-                          key={ticket.id}
-                          onClick={() => {
-                            setSelectedTicket(ticket);
-                            takeTicket(ticket.id);
-                          }}
-                          style={{
-                            padding: "12px 16px",
-                            borderBottom: "1px solid rgba(255,255,255,0.1)",
-                            cursor: "pointer",
-                            backgroundColor: selectedTicket?.id === ticket.id ? "rgba(255,255,255,0.12)" : "transparent",
-                          }}
-                        >
-                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
-                            <div style={{ fontWeight: 600, fontSize: "13px", color: "#ffffff" }}>{ticket.userName}</div>
-                            <span style={{ fontSize: "10px", color: "#ffffff" }}>{ticketMsgCounts[ticket.id] || 0} msgs</span>
-                          </div>
-                          <div style={{ fontSize: "11px", color: "#ffffff", marginBottom: "4px" }}>{ticket.topic}</div>
-                          {renderTicketPreview(ticket.id)}
-                          {/* ✅ Rolling teks pesan baru di bawah teks chat histori */}
-                          {ticketLatestMessage[ticket.id] && (
-                            <RollingNewMessage
-                              senderName={ticketLatestMessage[ticket.id]!.senderName}
-                              message={ticketLatestMessage[ticket.id]!.text}
-                              isFromAgent={ticketLatestMessage[ticket.id]!.isFromAgent}
-                              isAdmin={isAdmin}
-                            />
-                          )}
-                        </div>
-                      ))}
+                      {waitingTickets.map((ticket) =>
+                        renderChatListItem(ticket, { onExtraClick: () => takeTicket(ticket.id) })
+                      )}
                     </div>
                   )}
                   {activeTickets.length > 0 && (
@@ -3132,10 +3173,10 @@ const LiveChatAgent = ({
                       <div
                         style={{
                           padding: "10px 16px",
-                          backgroundColor: "#d1fae5",
+                          backgroundColor: "rgba(255,255,255,0.2)",
                           fontWeight: 600,
                           fontSize: "12px",
-                          color: "#065f46",
+                          color: "#ffffff",
                           position: "sticky",
                           top: 0,
                           zIndex: 1,
@@ -3143,33 +3184,7 @@ const LiveChatAgent = ({
                       >
                         Active ({activeTickets.length})
                       </div>
-                      {activeTickets.map((ticket) => (
-                        <div
-                          key={ticket.id}
-                          onClick={() => setSelectedTicket(ticket)}
-                          style={{
-                            padding: "12px 16px",
-                            borderBottom: "1px solid rgba(255,255,255,0.1)",
-                            cursor: "pointer",
-                            backgroundColor: selectedTicket?.id === ticket.id ? "rgba(255,255,255,0.12)" : "transparent",
-                          }}
-                        >
-                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
-                            <div style={{ fontWeight: 600, fontSize: "13px", color: "#ffffff" }}>{ticket.userName}</div>
-                            <span style={{ fontSize: "10px", color: "#ffffff" }}>{ticketMsgCounts[ticket.id] || 0} msgs</span>
-                          </div>
-                          <div style={{ fontSize: "11px", color: "#ffffff", marginBottom: "4px" }}>{ticket.topic}</div>
-                          {renderTicketPreview(ticket.id)}
-                          {ticketLatestMessage[ticket.id] && (
-                            <RollingNewMessage
-                              senderName={ticketLatestMessage[ticket.id]!.senderName}
-                              message={ticketLatestMessage[ticket.id]!.text}
-                              isFromAgent={ticketLatestMessage[ticket.id]!.isFromAgent}
-                              isAdmin={isAdmin}
-                            />
-                          )}
-                        </div>
-                      ))}
+                      {activeTickets.map((ticket) => renderChatListItem(ticket))}
                     </div>
                   )}
                   {resolvedTickets.length > 0 && (
@@ -3177,10 +3192,10 @@ const LiveChatAgent = ({
                       <div
                         style={{
                           padding: "10px 16px",
-                          backgroundColor: "#e5e7eb",
+                          backgroundColor: "rgba(255,255,255,0.2)",
                           fontWeight: 600,
                           fontSize: "12px",
-                          color: "#6b7280",
+                          color: "#ffffff",
                           position: "sticky",
                           top: 0,
                           zIndex: 1,
@@ -3188,34 +3203,7 @@ const LiveChatAgent = ({
                       >
                         Resolved ({resolvedTickets.length})
                       </div>
-                      {resolvedTickets.map((ticket) => (
-                        <div
-                          key={ticket.id}
-                          onClick={() => setSelectedTicket(ticket)}
-                          style={{
-                            padding: "12px 16px",
-                            borderBottom: "1px solid rgba(255,255,255,0.1)",
-                            cursor: "pointer",
-                            backgroundColor: selectedTicket?.id === ticket.id ? "rgba(255,255,255,0.12)" : "transparent",
-                            opacity: 0.7,
-                          }}
-                        >
-                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
-                            <div style={{ fontWeight: 600, fontSize: "13px", color: "#ffffff" }}>{ticket.userName}</div>
-                            <span style={{ fontSize: "10px", color: "#ffffff" }}>{ticketMsgCounts[ticket.id] || 0} msgs</span>
-                          </div>
-                          <div style={{ fontSize: "11px", color: "#ffffff", marginBottom: "4px" }}>{ticket.topic}</div>
-                          {renderTicketPreview(ticket.id)}
-                          {ticketLatestMessage[ticket.id] && (
-                            <RollingNewMessage
-                              senderName={ticketLatestMessage[ticket.id]!.senderName}
-                              message={ticketLatestMessage[ticket.id]!.text}
-                              isFromAgent={ticketLatestMessage[ticket.id]!.isFromAgent}
-                              isAdmin={isAdmin}
-                            />
-                          )}
-                        </div>
-                      ))}
+                      {resolvedTickets.map((ticket) => renderChatListItem(ticket))}
                     </div>
                   )}
                   {waitingTickets.length === 0 && activeTickets.length === 0 && resolvedTickets.length === 0 && (
@@ -3226,60 +3214,9 @@ const LiveChatAgent = ({
                 </>
               ) : (
                 <>
-                  {filterTicketsBySearch(tickets.filter((t) => t.userId === user.uid)).map((ticket) => {
-                    const ticketId = generateTicketId(ticket.createdAt);
-                    const isActive = selectedTicket?.id === ticket.id;
-                    const statusLabel =
-                      ticket.status === "waiting" ? "Waiting" : ticket.status === "active" ? "Active" : "Resolved";
-                    return (
-                      <div
-                        key={ticket.id}
-                        onClick={() => {
-                          setSelectedTicket(ticket);
-                          setMessages([]);
-                        }}
-                        style={{
-                          padding: "14px 16px",
-                          borderLeft: isActive ? "4px solid #fff" : "4px solid transparent",
-                          backgroundColor: isActive ? "rgba(255,255,255,0.12)" : "transparent",
-                          cursor: "pointer",
-                          borderBottom: "1px solid rgba(255,255,255,0.06)",
-                        }}
-                      >
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
-                          <div style={{ fontWeight: 600, fontSize: "14px", color: "#fff" }}>{ticket.userName}</div>
-                          <span style={{ fontSize: "10px", color: "#fff" }}>{ticketMsgCounts[ticket.id] || 0} msgs</span>
-                        </div>
-                        <div style={{ fontSize: "12px", color: "#fff", marginBottom: "6px" }}>{ticket.topic}</div>
-                        {renderTicketPreview(ticket.id)}
-                        {/* ✅ Rolling teks pesan baru di bawah teks chat histori */}
-                        {ticketLatestMessage[ticket.id] && (
-                          <RollingNewMessage
-                            senderName={ticketLatestMessage[ticket.id]!.senderName}
-                            message={ticketLatestMessage[ticket.id]!.text}
-                            isFromAgent={ticketLatestMessage[ticket.id]!.isFromAgent}
-                            isAdmin={isAdmin}
-                          />
-                        )}
-                        <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "6px" }}>
-                          <span
-                            style={{
-                              fontSize: "10px",
-                              backgroundColor:
-                                ticket.status === "waiting" ? "#fef3c7" : ticket.status === "active" ? "#d1fae5" : "#e5e7eb",
-                              color: ticket.status === "waiting" ? "#92400e" : ticket.status === "active" ? "#065f46" : "#6b7280",
-                              padding: "2px 8px",
-                              borderRadius: "8px",
-                              fontWeight: 600,
-                            }}
-                          >
-                            {statusLabel}
-                          </span>
-                          <span style={{ fontSize: "9px", color: "#fff" }}>{ticketId}</span>
-                        </div>
-                      </div>
-                    );
-                  })}
+                  {filterTicketsBySearch(tickets.filter((t) => t.userId === user.uid)).map((ticket) =>
+                    renderChatListItem(ticket, { showStatus: true })
+                  )}
                   {filterTicketsBySearch(tickets.filter((t) => t.userId === user.uid)).length === 0 && (
                     <div style={{ padding: "30px 16px", textAlign: "center", color: "#fff", fontSize: "13px" }}>
                       {searchQuery ? "No results found" : "No chats yet"}
@@ -3421,7 +3358,7 @@ const LiveChatAgent = ({
                   )}
                 </div>
 
-                {/* ✅ Messages area: bisa scroll atas/bawah bebas, scrollbar hidden */}
+                {/* Messages area */}
                 <div
                   ref={chatMessagesContainerRef}
                   className="chat-messages-container"
@@ -3505,6 +3442,28 @@ const LiveChatAgent = ({
                       {typingText}
                     </div>
                   )}
+
+                  {/* ✅ Rolling teks pesan baru — muncul di bawah chat histori (di dalam chat view) */}
+                  {latestRollingMessage && (
+                    <div
+                      style={{
+                        alignSelf: "flex-start",
+                        maxWidth: "100%",
+                        width: "100%",
+                        borderTop: "1px dashed rgba(13,60,252,0.25)",
+                        paddingTop: "10px",
+                        marginTop: "6px",
+                      }}
+                    >
+                      <RollingNewMessage
+                        key={rollingKey}
+                        senderName={latestRollingMessage.senderName}
+                        message={latestRollingMessage.text}
+                        isFromAgent={latestRollingMessage.isFromAgent}
+                      />
+                    </div>
+                  )}
+
                   <div ref={messagesEndRef} />
                 </div>
 
@@ -4006,7 +3965,6 @@ export default function HomePage(): React.JSX.Element {
           opacity: 1 !important;
           visibility: visible !important;
         }
-        /* ✅ Hapus scrollbar di semua area chat & list */
         .chat-messages-container::-webkit-scrollbar,
         .chat-list-container::-webkit-scrollbar,
         .online-panel-container::-webkit-scrollbar {
