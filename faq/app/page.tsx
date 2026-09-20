@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { initializeApp, getApps } from "firebase/app";
@@ -302,12 +302,35 @@ const AGENT_NAME = "Farid Ardiansyah";
 const TOUR_STORAGE_KEY = "menuru_livechat_tour_completed_v1";
 const COOKIE_CONSENT_STORAGE_KEY = "menuru_cookie_consent_v1";
 
-// ===== COLOR PALETTE (WARNA WARNI TERANG) =====
-const STATUS_COLORS = {
-  waiting: { bg: "#FBBF24", text: "#ffffff", label: "Waiting" },   // kuning terang
-  active: { bg: "#10B981", text: "#ffffff", label: "Active" },     // hijau terang
-  resolved: { bg: "#8B5CF6", text: "#ffffff", label: "Resolved" }, // ungu terang
-  closed: { bg: "#EF4444", text: "#ffffff", label: "Closed" },     // merah terang
+// ===== MODERN AWWWARDS PALETTE (STABILO MINIMALIST) =====
+// Warna-warna modern studio/agency: lime, cyan, coral, violet, amber
+const ACCENT = {
+  blue: "#0D3CFC",
+  lime: "#C8FF00",
+  cyan: "#00E5FF",
+  coral: "#FF5E5B",
+  violet: "#B794F6",
+  amber: "#FFB800",
+  mint: "#5EEAD4",
+  pink: "#FF6EC7",
+};
+
+// ===== STATUS STYLES (KOTAK BORDER STABILO) =====
+const STATUS_STYLES = {
+  waiting: { border: ACCENT.amber, text: ACCENT.amber, label: "Waiting" },
+  active: { border: ACCENT.cyan, text: ACCENT.cyan, label: "Active" },
+  resolved: { border: ACCENT.violet, text: ACCENT.violet, label: "Resolved" },
+  closed: { border: ACCENT.coral, text: ACCENT.coral, label: "Closed" },
+};
+
+// ===== TOPIC STABILO COLORS (kotak border stabilo) =====
+const TOPIC_COLORS: { [key: string]: string } = {
+  "Product Inquiry": ACCENT.lime,
+  "Technical Support": ACCENT.cyan,
+  "Account Issues": ACCENT.coral,
+  "Donation": ACCENT.pink,
+  "Partnership": ACCENT.violet,
+  "Other": ACCENT.amber,
 };
 
 // ===== SVG ICONS =====
@@ -346,17 +369,10 @@ const SearchIcon = ({ size = 16, color = "currentColor" }: { size?: number; colo
     <path d="M21 21L16.65 16.65" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
-const OnlineDot = ({ color = "#22c55e", size = 8 }: { color?: string; size?: number }) => (
-  <span
-    style={{
-      display: "inline-block",
-      width: size,
-      height: size,
-      borderRadius: "50%",
-      backgroundColor: color,
-      boxShadow: `0 0 6px ${color}`,
-    }}
-  />
+const CloseIcon = ({ size = 18, color = "currentColor" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <path d="M6 6L18 18M18 6L6 18" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
 );
 
 const PeopleIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: string }) => (
@@ -404,6 +420,42 @@ const BrandIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: st
   </svg>
 );
 
+// ===== STABILO BADGE (KOTAK BORDER) =====
+const StabiloBadge = ({
+  label,
+  color,
+  size = "sm",
+}: {
+  label: string;
+  color: string;
+  size?: "sm" | "md";
+}) => {
+  const isSmall = size === "sm";
+  return (
+    <span
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: isSmall ? "2px 8px" : "3px 10px",
+        borderRadius: "4px",
+        border: `1.5px solid ${color}`,
+        backgroundColor: `${color}1F`,
+        color: color,
+        fontSize: isSmall ? "9.5px" : "10.5px",
+        fontWeight: 700,
+        letterSpacing: "0.5px",
+        textTransform: "uppercase",
+        fontFamily: FONT_FAMILY,
+        lineHeight: 1.4,
+        whiteSpace: "nowrap",
+      }}
+    >
+      {label}
+    </span>
+  );
+};
+
 // ===== FOOTER LINKS =====
 const footerLinks = [
   { title: "Get in Touch", links: ["Contact", "Instagram", "Live Chat"] },
@@ -428,6 +480,7 @@ interface Ticket {
   createdAt: any;
   lastMessage?: string;
   lastMessageTime?: any;
+  lastMessageSender?: string;
   unreadCount: number;
   typing: boolean;
   typingUserId?: string | null;
@@ -1671,6 +1724,149 @@ const RollingNewMessage = ({
   );
 };
 
+// ===== CONFIRM CLOSE MODAL =====
+const ConfirmCloseModal = ({
+  visible,
+  onConfirm,
+  onCancel,
+  title,
+  message,
+}: {
+  visible: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
+  title: string;
+  message: string;
+}) => {
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (visible && cardRef.current) {
+      gsap.fromTo(
+        cardRef.current,
+        { opacity: 0, y: 30, scale: 0.94 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.35, ease: "back.out(1.4)" }
+      );
+    }
+  }, [visible]);
+
+  if (!visible) return null;
+
+  return (
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        backgroundColor: "rgba(0,0,0,0.55)",
+        backdropFilter: "blur(6px)",
+        WebkitBackdropFilter: "blur(6px)",
+        zIndex: 12000,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "20px",
+        fontFamily: FONT_FAMILY,
+      }}
+      onClick={onCancel}
+    >
+      <div
+        ref={cardRef}
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          width: "100%",
+          maxWidth: "420px",
+          backgroundColor: "#ffffff",
+          borderRadius: "18px",
+          padding: "28px 26px 22px 26px",
+          border: "1px solid rgba(0,0,0,0.06)",
+          boxShadow: "0 24px 60px rgba(0,0,0,0.25)",
+        }}
+      >
+        <div
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "3px 10px",
+            borderRadius: "4px",
+            border: `1.5px solid ${ACCENT.coral}`,
+            backgroundColor: `${ACCENT.coral}1F`,
+            color: ACCENT.coral,
+            fontSize: "10px",
+            fontWeight: 700,
+            letterSpacing: "0.5px",
+            textTransform: "uppercase",
+            marginBottom: "14px",
+          }}
+        >
+          Peringatan
+        </div>
+
+        <h3
+          style={{
+            fontSize: "20px",
+            fontWeight: 700,
+            color: "#0D3CFC",
+            margin: 0,
+            marginBottom: "10px",
+            letterSpacing: "-0.01em",
+          }}
+        >
+          {title}
+        </h3>
+        <p
+          style={{
+            fontSize: "14px",
+            lineHeight: 1.6,
+            color: "#444",
+            margin: 0,
+            marginBottom: "22px",
+          }}
+        >
+          {message}
+        </p>
+
+        <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
+          <button
+            onClick={onCancel}
+            style={{
+              padding: "10px 20px",
+              backgroundColor: "transparent",
+              color: "#0D3CFC",
+              border: `1.5px solid #0D3CFC`,
+              borderRadius: "10px",
+              fontSize: "13px",
+              fontWeight: 700,
+              cursor: "pointer",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "0.3px",
+            }}
+          >
+            Batal
+          </button>
+          <button
+            onClick={onConfirm}
+            style={{
+              padding: "10px 22px",
+              backgroundColor: ACCENT.coral,
+              color: "#ffffff",
+              border: `1.5px solid ${ACCENT.coral}`,
+              borderRadius: "10px",
+              fontSize: "13px",
+              fontWeight: 700,
+              cursor: "pointer",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "0.3px",
+            }}
+          >
+            Ya, Tutup
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // ===== LIVE CHAT AGENT COMPONENT =====
 const LiveChatAgent = ({
   user,
@@ -1707,6 +1903,9 @@ const LiveChatAgent = ({
   const [latestRollingMessage, setLatestRollingMessage] = useState<LastMessagePreview | null>(null);
   const [rollingKey, setRollingKey] = useState(0);
 
+  // ✅ Confirm close modal
+  const [showCloseConfirm, setShowCloseConfirm] = useState(false);
+
   const [showTour, setShowTour] = useState(false);
   const [tourStep, setTourStep] = useState(0);
 
@@ -1716,9 +1915,7 @@ const LiveChatAgent = ({
   const liveChatTitleRef = useRef<HTMLHeadingElement>(null);
   const prevMessagesLenRef = useRef<number>(0);
 
-  // ✅ Cache pesan per ticket agar riwayat tidak berubah posisi
   const messagesCacheRef = useRef<{ [ticketId: string]: ChatMessage[] }>({});
-  const scrollPositionsRef = useRef<{ [ticketId: string]: number }>({});
 
   const topics = [
     "Product Inquiry",
@@ -1935,7 +2132,6 @@ const LiveChatAgent = ({
         ticketList.push({ id: docSnap.id, ...data } as Ticket);
       });
       setTickets(ticketList);
-      // Update selected ticket jika masih ada
       setSelectedTicket((prev) => {
         if (!prev) return prev;
         const updated = ticketList.find((t) => t.id === prev.id);
@@ -1984,13 +2180,11 @@ const LiveChatAgent = ({
     };
   }, [db, tickets, isMounted]);
 
-  // ✅ Listener pesan aktif per ticket — pakai cache agar cepat dan tidak berubah posisi
   useEffect(() => {
     if (!db || !selectedTicket || !isMounted) return;
 
     const ticketId = selectedTicket.id;
 
-    // Tampilkan cache dulu (instan)
     if (messagesCacheRef.current[ticketId]) {
       setMessages(messagesCacheRef.current[ticketId]);
       prevMessagesLenRef.current = messagesCacheRef.current[ticketId].length;
@@ -2016,7 +2210,6 @@ const LiveChatAgent = ({
         msgList.push({ id: docSnap.id, ...data, text } as ChatMessage);
       }
 
-      // Deteksi pesan baru untuk rolling text
       const newLen = msgList.length;
       if (prevMessagesLenRef.current > 0 && newLen > prevMessagesLenRef.current) {
         const newestMsg = msgList[newLen - 1];
@@ -2033,12 +2226,9 @@ const LiveChatAgent = ({
       }
       prevMessagesLenRef.current = newLen;
 
-      // Simpan ke cache
       messagesCacheRef.current[ticketId] = msgList;
-
       setMessages(msgList);
 
-      // Scroll ke bawah instan tanpa delay
       requestAnimationFrame(() => {
         if (chatMessagesContainerRef.current) {
           chatMessagesContainerRef.current.scrollTop = chatMessagesContainerRef.current.scrollHeight;
@@ -2062,7 +2252,6 @@ const LiveChatAgent = ({
     });
   }, [messages, selectedTicket, db, user, isAdmin, isMounted]);
 
-  // ✅ Auto-select active ticket HANYA sekali di awal
   const hasAutoSelectedRef = useRef(false);
   useEffect(() => {
     if (!user || isAdmin || !isMounted) return;
@@ -2217,6 +2406,12 @@ const LiveChatAgent = ({
         isBotDetected: false,
         deliveryStatus: "sent",
       });
+      // ✅ Simpan preview pesan terakhir ke ticket (permanen di Firebase)
+      await updateDoc(ticketRef, {
+        lastMessage: initialMessage,
+        lastMessageTime: serverTimestamp(),
+        lastMessageSender: user.displayName || user.email || "User",
+      });
       setSelectedTopic("");
       setShowStartChat(false);
       setBanMessage(null);
@@ -2273,9 +2468,11 @@ const LiveChatAgent = ({
         isBotDetected: false,
         deliveryStatus: "sent",
       });
+      // ✅ Simpan pesan terakhir ke ticket (permanen di Firebase)
       await updateDoc(ticketRef, {
         lastMessage: messageText.trim(),
         lastMessageTime: serverTimestamp(),
+        lastMessageSender: senderName,
         ...(selectedTicket.status === "waiting" && { status: "active" }),
         agentId: isAdmin ? user.uid : selectedTicket.agentId,
         agentName: isAdmin ? AGENT_NAME : selectedTicket.agentName,
@@ -2308,6 +2505,17 @@ const LiveChatAgent = ({
       await updateDoc(doc(db, "livechat_tickets", ticketId), { status: "resolved" });
     } catch (error) {
       console.error("Error resolving ticket:", error);
+    }
+  };
+
+  // ✅ Close ticket (agent atau user bisa close) dengan konfirmasi
+  const closeTicketConfirmed = async () => {
+    if (!db || !selectedTicket) return;
+    try {
+      await updateDoc(doc(db, "livechat_tickets", selectedTicket.id), { status: "closed" });
+      setShowCloseConfirm(false);
+    } catch (error) {
+      console.error("Error closing ticket:", error);
     }
   };
 
@@ -2356,9 +2564,9 @@ const LiveChatAgent = ({
         className="online-panel-container"
         style={{
           width: "260px",
-          backgroundColor: "#f9f9f9",
+          backgroundColor: "#ffffff",
           borderRadius: "12px",
-          border: "1px solid #e8e8e8",
+          border: "1px solid rgba(0,0,0,0.08)",
           flexShrink: 0,
           height: "700px",
           display: "flex",
@@ -2369,20 +2577,31 @@ const LiveChatAgent = ({
         <div
           style={{
             padding: "14px 16px",
-            backgroundColor: "#0D3CFC",
-            color: "#fff",
-            fontWeight: 600,
+            backgroundColor: "#ffffff",
+            color: "#0D3CFC",
+            fontWeight: 700,
             fontSize: "14px",
             fontFamily: FONT_FAMILY,
-            borderRadius: "12px 12px 0 0",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
             flexShrink: 0,
+            borderBottom: "1px solid rgba(0,0,0,0.06)",
           }}
         >
           <span>{title}</span>
-          <span style={{ fontSize: "11px", backgroundColor: "rgba(255,255,255,0.2)", padding: "2px 8px", borderRadius: "8px" }}>
+          <span
+            style={{
+              fontSize: "11px",
+              color: "#0D3CFC",
+              padding: "2px 8px",
+              borderRadius: "4px",
+              fontWeight: 700,
+              border: `1.5px solid ${ACCENT.cyan}`,
+              backgroundColor: `${ACCENT.cyan}1F`,
+              letterSpacing: "0.5px",
+            }}
+          >
             {list.length}
           </span>
         </div>
@@ -2397,62 +2616,63 @@ const LiveChatAgent = ({
                 key={u.uid}
                 style={{
                   padding: "12px 16px",
-                  borderBottom: "1px solid #e8e8e8",
+                  borderBottom: "1px solid #f0f0f0",
                   display: "flex",
                   alignItems: "center",
                   gap: "10px",
                   fontFamily: FONT_FAMILY,
                 }}
               >
-                <div style={{ position: "relative" }}>
-                  <div
-                    style={{
-                      width: "36px",
-                      height: "36px",
-                      borderRadius: "50%",
-                      backgroundColor: "#0D3CFC",
-                      color: "#fff",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontWeight: 700,
-                      fontSize: "14px",
-                      overflow: "hidden",
-                    }}
-                  >
-                    {u.photoURL ? (
-                      <img src={u.photoURL} alt={u.displayName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                    ) : (
-                      u.displayName.charAt(0).toUpperCase()
-                    )}
-                  </div>
-                  <div
-                    style={{
-                      position: "absolute",
-                      bottom: "0",
-                      right: "0",
-                      width: "10px",
-                      height: "10px",
-                      borderRadius: "50%",
-                      backgroundColor: "#22c55e",
-                      border: "2px solid #f9f9f9",
-                    }}
-                  />
+                <div
+                  style={{
+                    width: "36px",
+                    height: "36px",
+                    borderRadius: "8px",
+                    backgroundColor: `${ACCENT.blue}1A`,
+                    color: ACCENT.blue,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontWeight: 700,
+                    fontSize: "14px",
+                    overflow: "hidden",
+                    border: `1.5px solid ${ACCENT.blue}`,
+                    flexShrink: 0,
+                  }}
+                >
+                  {u.photoURL ? (
+                    <img src={u.photoURL} alt={u.displayName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  ) : (
+                    u.displayName.charAt(0).toUpperCase()
+                  )}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div
                     style={{
                       fontSize: "13px",
-                      fontWeight: 600,
+                      fontWeight: 700,
                       color: "#000",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
                       whiteSpace: "nowrap",
+                      marginBottom: "3px",
                     }}
                   >
                     {u.displayName}
                   </div>
-                  <div style={{ fontSize: "11px", color: "#22c55e", fontWeight: 500 }}>Online</div>
+                  {/* ✅ Status online biru, tanpa titik bulat */}
+                  <span
+                    style={{
+                      display: "inline-block",
+                      fontSize: "10px",
+                      fontWeight: 700,
+                      color: ACCENT.blue,
+                      letterSpacing: "0.4px",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    Online
+                  </span>
                 </div>
               </div>
             ))
@@ -2494,7 +2714,6 @@ const LiveChatAgent = ({
     );
   };
 
-  // ✅ SEARCH BAR: Agent = putih transparan, User biasa = putih solid + teks biru
   const renderSearchBar = () => {
     const isAgentSearch = isAdmin;
     return (
@@ -2533,7 +2752,7 @@ const LiveChatAgent = ({
               fontFamily: FONT_FAMILY,
               padding: 0,
               caretColor: isAgentSearch ? "#ffffff" : "#0D3CFC",
-              fontWeight: 500,
+              fontWeight: 600,
             }}
           />
           {searchQuery && (
@@ -2580,8 +2799,19 @@ const LiveChatAgent = ({
             >
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
                 <div style={{ fontSize: "16px", fontWeight: 700, color: "#ffffff" }}>Announcement</div>
-                <div style={{ fontSize: "11px", backgroundColor: "rgba(255,255,255,0.2)", padding: "2px 10px", borderRadius: "8px", color: "#ffffff", fontWeight: 600 }}>
-                  {announcementTickets.length} active
+                <div
+                  style={{
+                    fontSize: "10px",
+                    border: `1.5px solid ${ACCENT.lime}`,
+                    backgroundColor: `${ACCENT.lime}1F`,
+                    color: ACCENT.lime,
+                    padding: "2px 8px",
+                    borderRadius: "4px",
+                    fontWeight: 700,
+                    letterSpacing: "0.5px",
+                  }}
+                >
+                  {announcementTickets.length} ACTIVE
                 </div>
               </div>
               {announcementTickets.slice(0, 3).map((t) => (
@@ -2607,8 +2837,19 @@ const LiveChatAgent = ({
             >
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
                 <div style={{ fontSize: "16px", fontWeight: 700, color: "#ffffff" }}>Broadcasting</div>
-                <div style={{ fontSize: "11px", backgroundColor: "rgba(255,255,255,0.2)", padding: "2px 10px", borderRadius: "8px", color: "#ffffff", fontWeight: 600 }}>
-                  {broadcastTickets.length} active
+                <div
+                  style={{
+                    fontSize: "10px",
+                    border: `1.5px solid ${ACCENT.pink}`,
+                    backgroundColor: `${ACCENT.pink}1F`,
+                    color: ACCENT.pink,
+                    padding: "2px 8px",
+                    borderRadius: "4px",
+                    fontWeight: 700,
+                    letterSpacing: "0.5px",
+                  }}
+                >
+                  {broadcastTickets.length} ACTIVE
                 </div>
               </div>
               {broadcastTickets.slice(0, 3).map((t) => (
@@ -2798,17 +3039,15 @@ const LiveChatAgent = ({
           <div style={{ marginBottom: "20px" }} data-tour="online-panel">
             <div
               style={{
-                fontSize: "15px",
-                fontWeight: 600,
+                fontSize: "13px",
+                fontWeight: 700,
                 color: "#0D3CFC",
                 fontFamily: FONT_FAMILY,
-                marginBottom: "10px",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
+                marginBottom: "12px",
+                letterSpacing: "0.4px",
+                textTransform: "uppercase",
               }}
             >
-              <OnlineDot color="#22c55e" size={10} />
               {onlineAgents.length} Agent{onlineAgents.length !== 1 ? "s" : ""} Online
             </div>
             <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
@@ -2818,16 +3057,16 @@ const LiveChatAgent = ({
                   style={{
                     display: "flex",
                     alignItems: "center",
-                    gap: "8px",
+                    gap: "10px",
                     padding: "8px 14px",
-                    backgroundColor: "#f0f4ff",
-                    border: "1px solid #0D3CFC",
-                    borderRadius: "10px",
+                    backgroundColor: `${ACCENT.blue}0F`,
+                    border: `1.5px solid ${ACCENT.blue}`,
+                    borderRadius: "8px",
                     fontFamily: FONT_FAMILY,
                   }}
                 >
-                  <OnlineDot color="#22c55e" size={8} />
-                  <span style={{ fontSize: "13px", fontWeight: 600, color: "#0D3CFC" }}>{a.displayName}</span>
+                  <span style={{ fontSize: "13px", fontWeight: 700, color: ACCENT.blue }}>{a.displayName}</span>
+                  <span style={{ fontSize: "10px", fontWeight: 700, color: ACCENT.blue, letterSpacing: "0.4px" }}>ONLINE</span>
                 </div>
               ))}
               {onlineAgents.length === 0 && (
@@ -2906,7 +3145,7 @@ const LiveChatAgent = ({
           </button>
         </div>
         <div style={{ maxWidth: "400px" }}>
-          <div style={{ fontSize: "15px", marginBottom: "10px", fontFamily: FONT_FAMILY }}>Select your issue topic:</div>
+          <div style={{ fontSize: "15px", marginBottom: "10px", fontFamily: FONT_FAMILY, fontWeight: 600, color: "#0D3CFC" }}>Select your issue topic:</div>
           <select
             value={selectedTopic}
             onChange={(e) => setSelectedTopic(e.target.value)}
@@ -2921,6 +3160,7 @@ const LiveChatAgent = ({
               backgroundColor: "#fff",
               marginBottom: "14px",
               color: "#0D3CFC",
+              fontWeight: 600,
             }}
           >
             <option value="">-- Select topic --</option>
@@ -2976,14 +3216,12 @@ const LiveChatAgent = ({
   const resolvedTickets = filterTicketsBySearch(resolvedTicketsRaw);
   const typingText = selectedTicket ? getTypingText(selectedTicket) : null;
 
-  // ✅ List chat item (warna warni untuk agent, teks putih blok untuk status)
-  const renderChatListItem = (ticket: Ticket, options?: { showStatusBadge?: boolean; onExtraClick?: () => void }) => {
+  // ✅ List chat item
+  const renderChatListItem = (ticket: Ticket, options?: { onExtraClick?: () => void }) => {
     const isActive = selectedTicket?.id === ticket.id;
     const ticketId = generateTicketId(ticket.createdAt);
-    const statusMeta = STATUS_COLORS[ticket.status] || STATUS_COLORS.active;
-
-    // Warna background border kiri per status (khusus admin biar warna warni)
-    const accentColor = isAdmin ? statusMeta.bg : "#ffffff";
+    const statusMeta = STATUS_STYLES[ticket.status] || STATUS_STYLES.active;
+    const topicColor = TOPIC_COLORS[ticket.topic] || ACCENT.cyan;
 
     return (
       <div
@@ -2994,44 +3232,33 @@ const LiveChatAgent = ({
         }}
         style={{
           padding: "14px 16px",
-          borderLeft: isActive ? `4px solid ${accentColor}` : "4px solid transparent",
-          backgroundColor: isActive ? "rgba(255,255,255,0.15)" : "transparent",
+          borderLeft: isActive ? `3px solid ${statusMeta.border}` : "3px solid transparent",
+          backgroundColor: isActive ? "rgba(255,255,255,0.14)" : "transparent",
           cursor: "pointer",
           borderBottom: "1px solid rgba(255,255,255,0.08)",
           transition: "background-color 0.2s ease",
         }}
       >
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px", gap: "8px" }}>
-          <div style={{ fontWeight: 700, fontSize: "14px", color: "#ffffff" }}>{ticket.userName}</div>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px", gap: "8px", flexWrap: "wrap" }}>
+          <div style={{ fontWeight: 700, fontSize: "14px", color: "#ffffff", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: "1 1 auto" }}>
+            {ticket.userName}
+          </div>
           <div style={{ display: "flex", alignItems: "center", gap: "6px", flexShrink: 0 }}>
-            {/* ✅ Status badge warna warni dengan teks putih blok */}
-            <span
-              style={{
-                fontSize: "10px",
-                backgroundColor: statusMeta.bg,
-                color: "#ffffff",
-                padding: "3px 10px",
-                borderRadius: "10px",
-                fontWeight: 800,
-                letterSpacing: "0.3px",
-                textTransform: "uppercase",
-                boxShadow: `0 2px 6px ${statusMeta.bg}66`,
-              }}
-            >
-              {statusMeta.label}
-            </span>
-            <span style={{ fontSize: "10px", color: "#ffffff", fontWeight: 600 }}>
-              {ticketMsgCounts[ticket.id] || 0} msgs
-            </span>
+            {/* ✅ Status badge kotak border stabilo */}
+            <StabiloBadge label={statusMeta.label} color={statusMeta.border} size="sm" />
           </div>
         </div>
-        <div style={{ fontSize: "12px", color: "#ffffff", marginBottom: "6px", opacity: 0.95 }}>{ticket.topic}</div>
+        <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "8px", flexWrap: "wrap" }}>
+          {/* ✅ Topik badge kotak border stabilo */}
+          <StabiloBadge label={ticket.topic} color={topicColor} size="sm" />
+          <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.7)", fontWeight: 600 }}>
+            {ticketMsgCounts[ticket.id] || 0} msgs
+          </span>
+        </div>
         {renderTicketPreview(ticket.id)}
-        {options?.showStatusBadge && (
-          <div style={{ marginTop: "6px" }}>
-            <span style={{ fontSize: "9px", color: "#ffffff", fontWeight: 600, opacity: 0.85 }}>{ticketId}</span>
-          </div>
-        )}
+        <div style={{ marginTop: "6px" }}>
+          <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.65)", fontWeight: 600, letterSpacing: "0.3px" }}>{ticketId}</span>
+        </div>
       </div>
     );
   };
@@ -3039,6 +3266,16 @@ const LiveChatAgent = ({
   return (
     <>
       <OnboardingTour steps={tourSteps} onComplete={completeTour} isActive={showTour} currentStep={tourStep} setCurrentStep={setTourStep} />
+
+      {/* ✅ Modal konfirmasi close */}
+      <ConfirmCloseModal
+        visible={showCloseConfirm}
+        onConfirm={closeTicketConfirmed}
+        onCancel={() => setShowCloseConfirm(false)}
+        title="Tutup Room Chat?"
+        message="Room chat yang ditutup tidak dapat dilanjutkan lagi. Anda bisa membuat room baru jika masih butuh bantuan. Yakin ingin menutup room ini?"
+      />
+
       <div style={{ marginTop: "80px", paddingTop: "30px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "20px" }}>
           <h3
@@ -3059,10 +3296,12 @@ const LiveChatAgent = ({
           <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "10px", paddingTop: "10px" }}>
             <span
               style={{
-                fontSize: "16px",
-                fontWeight: 600,
-                color: onlineAgents.length > 0 ? "#0D3CFC" : "#999",
+                fontSize: "13px",
+                fontWeight: 700,
+                color: onlineAgents.length > 0 ? ACCENT.blue : "#999",
                 fontFamily: FONT_FAMILY,
+                letterSpacing: "0.4px",
+                textTransform: "uppercase",
               }}
             >
               {onlineAgents.length > 0
@@ -3144,7 +3383,7 @@ const LiveChatAgent = ({
               style={{
                 padding: "14px 16px",
                 borderBottom: "1px solid rgba(255,255,255,0.15)",
-                fontWeight: 600,
+                fontWeight: 700,
                 fontSize: "14px",
                 display: "flex",
                 alignItems: "center",
@@ -3153,14 +3392,16 @@ const LiveChatAgent = ({
                 flexShrink: 0,
               }}
             >
-              <span style={{ color: "#ffffff" }}>Chat History</span>
+              <span style={{ color: "#ffffff", letterSpacing: "0.3px" }}>Chat History</span>
               <span
                 style={{
                   fontSize: "11px",
-                  backgroundColor: "rgba(255,255,255,0.2)",
-                  padding: "2px 8px",
-                  borderRadius: "8px",
                   color: "#ffffff",
+                  padding: "2px 8px",
+                  borderRadius: "4px",
+                  border: `1.5px solid rgba(255,255,255,0.5)`,
+                  backgroundColor: "rgba(255,255,255,0.12)",
+                  fontWeight: 700,
                 }}
               >
                 {isAdmin ? tickets.length : tickets.filter((t) => t.userId === user.uid).length}
@@ -3174,20 +3415,16 @@ const LiveChatAgent = ({
                 <>
                   {waitingTickets.length > 0 && (
                     <div>
-                      {/* ✅ Header Waiting warna kuning terang, teks putih blok */}
                       <div
                         style={{
                           padding: "10px 16px",
-                          backgroundColor: STATUS_COLORS.waiting.bg,
-                          fontWeight: 800,
-                          fontSize: "12px",
-                          color: "#ffffff",
-                          textTransform: "uppercase",
-                          letterSpacing: "0.5px",
-                          boxShadow: `0 2px 8px ${STATUS_COLORS.waiting.bg}66`,
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "8px",
+                          borderBottom: "1px solid rgba(255,255,255,0.1)",
                         }}
                       >
-                        Waiting ({waitingTickets.length})
+                        <StabiloBadge label={`Waiting (${waitingTickets.length})`} color={ACCENT.amber} size="md" />
                       </div>
                       {waitingTickets.map((ticket) =>
                         renderChatListItem(ticket, { onExtraClick: () => takeTicket(ticket.id) })
@@ -3196,40 +3433,32 @@ const LiveChatAgent = ({
                   )}
                   {activeTickets.length > 0 && (
                     <div>
-                      {/* ✅ Header Active warna hijau terang, teks putih blok */}
                       <div
                         style={{
                           padding: "10px 16px",
-                          backgroundColor: STATUS_COLORS.active.bg,
-                          fontWeight: 800,
-                          fontSize: "12px",
-                          color: "#ffffff",
-                          textTransform: "uppercase",
-                          letterSpacing: "0.5px",
-                          boxShadow: `0 2px 8px ${STATUS_COLORS.active.bg}66`,
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "8px",
+                          borderBottom: "1px solid rgba(255,255,255,0.1)",
                         }}
                       >
-                        Active ({activeTickets.length})
+                        <StabiloBadge label={`Active (${activeTickets.length})`} color={ACCENT.cyan} size="md" />
                       </div>
                       {activeTickets.map((ticket) => renderChatListItem(ticket))}
                     </div>
                   )}
                   {resolvedTickets.length > 0 && (
                     <div>
-                      {/* ✅ Header Resolved warna ungu terang, teks putih blok */}
                       <div
                         style={{
                           padding: "10px 16px",
-                          backgroundColor: STATUS_COLORS.resolved.bg,
-                          fontWeight: 800,
-                          fontSize: "12px",
-                          color: "#ffffff",
-                          textTransform: "uppercase",
-                          letterSpacing: "0.5px",
-                          boxShadow: `0 2px 8px ${STATUS_COLORS.resolved.bg}66`,
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "8px",
+                          borderBottom: "1px solid rgba(255,255,255,0.1)",
                         }}
                       >
-                        Resolved ({resolvedTickets.length})
+                        <StabiloBadge label={`Resolved (${resolvedTickets.length})`} color={ACCENT.violet} size="md" />
                       </div>
                       {resolvedTickets.map((ticket) => renderChatListItem(ticket))}
                     </div>
@@ -3243,7 +3472,7 @@ const LiveChatAgent = ({
               ) : (
                 <>
                   {filterTicketsBySearch(tickets.filter((t) => t.userId === user.uid)).map((ticket) =>
-                    renderChatListItem(ticket, { showStatusBadge: true })
+                    renderChatListItem(ticket)
                   )}
                   {filterTicketsBySearch(tickets.filter((t) => t.userId === user.uid)).length === 0 && (
                     <div style={{ padding: "30px 16px", textAlign: "center", color: "#fff", fontSize: "13px" }}>
@@ -3271,12 +3500,13 @@ const LiveChatAgent = ({
                     padding: "10px",
                     backgroundColor: "rgba(255,255,255,0.15)",
                     color: "#fff",
-                    border: "none",
+                    border: `1.5px solid rgba(255,255,255,0.4)`,
                     borderRadius: "8px",
-                    fontSize: "14px",
-                    fontWeight: 600,
+                    fontSize: "13px",
+                    fontWeight: 700,
                     cursor: "pointer",
                     fontFamily: FONT_FAMILY,
+                    letterSpacing: "0.3px",
                   }}
                 >
                   + New Chat
@@ -3291,7 +3521,7 @@ const LiveChatAgent = ({
               flex: 1,
               backgroundColor: "#ffffff",
               borderRadius: "12px",
-              border: "1px solid #e8e8e8",
+              border: "1px solid rgba(0,0,0,0.06)",
               display: "flex",
               flexDirection: "column",
               overflow: "hidden",
@@ -3303,68 +3533,87 @@ const LiveChatAgent = ({
               <>
                 <div
                   style={{
-                    padding: "16px 24px",
+                    padding: "16px 20px",
                     backgroundColor: "#0D3CFC",
                     display: "flex",
                     justifyContent: "space-between",
                     alignItems: "center",
                     flexShrink: 0,
+                    gap: "12px",
                   }}
                 >
-                  <div>
-                    <div style={{ fontWeight: 600, fontSize: "17px", color: "#fff", fontFamily: FONT_FAMILY }}>
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <div style={{ fontWeight: 700, fontSize: "17px", color: "#fff", fontFamily: FONT_FAMILY, marginBottom: "6px" }}>
                       {selectedTicket.userName}
-                      <span style={{ fontSize: "14px", fontWeight: 400, color: "rgba(255,255,255,0.8)", marginLeft: "8px" }}>
-                        {selectedTicket.topic}
-                      </span>
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "6px" }}>
-                      {/* ✅ Status badge warna warni teks putih blok */}
-                      <span
-                        style={{
-                          fontSize: "11px",
-                          backgroundColor: (STATUS_COLORS[selectedTicket.status] || STATUS_COLORS.active).bg,
-                          color: "#ffffff",
-                          padding: "3px 10px",
-                          borderRadius: "10px",
-                          fontWeight: 800,
-                          letterSpacing: "0.3px",
-                          textTransform: "uppercase",
-                        }}
-                      >
-                        {(STATUS_COLORS[selectedTicket.status] || STATUS_COLORS.active).label}
-                      </span>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                      <StabiloBadge
+                        label={(STATUS_STYLES[selectedTicket.status] || STATUS_STYLES.active).label}
+                        color={(STATUS_STYLES[selectedTicket.status] || STATUS_STYLES.active).border}
+                        size="sm"
+                      />
+                      <StabiloBadge
+                        label={selectedTicket.topic}
+                        color={TOPIC_COLORS[selectedTicket.topic] || ACCENT.cyan}
+                        size="sm"
+                      />
                       {selectedTicket.typing && selectedTicket.status !== "resolved" && (
-                        <span style={{ fontSize: "13px", color: "#ffd700", fontStyle: "italic" }}>
+                        <span style={{ fontSize: "12px", color: ACCENT.lime, fontStyle: "italic", fontWeight: 600 }}>
                           {selectedTicket.typingUserName} is typing...
                         </span>
                       )}
-                      <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.7)", fontWeight: 600 }}>
+                      <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.7)", fontWeight: 600, letterSpacing: "0.3px" }}>
                         {generateTicketId(selectedTicket.createdAt)}
                       </span>
                     </div>
                   </div>
-                  {isAdmin && selectedTicket.status !== "resolved" && selectedTicket.status !== "closed" && (
-                    <button
-                      onClick={() => resolveTicket(selectedTicket.id)}
-                      style={{
-                        padding: "8px 18px",
-                        backgroundColor: "#22c55e",
-                        color: "#fff",
-                        border: "none",
-                        borderRadius: "8px",
-                        fontSize: "13px",
-                        fontWeight: 700,
-                        cursor: "pointer",
-                        fontFamily: FONT_FAMILY,
-                      }}
-                    >
-                      Resolve
-                    </button>
-                  )}
+
+                  {/* ✅ Action buttons: Resolve (admin) + Close (X) */}
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
+                    {isAdmin && selectedTicket.status !== "resolved" && selectedTicket.status !== "closed" && (
+                      <button
+                        onClick={() => resolveTicket(selectedTicket.id)}
+                        style={{
+                          padding: "8px 16px",
+                          backgroundColor: "transparent",
+                          color: ACCENT.cyan,
+                          border: `1.5px solid ${ACCENT.cyan}`,
+                          borderRadius: "8px",
+                          fontSize: "12px",
+                          fontWeight: 700,
+                          cursor: "pointer",
+                          fontFamily: FONT_FAMILY,
+                          letterSpacing: "0.3px",
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        Resolve
+                      </button>
+                    )}
+                    {selectedTicket.status !== "closed" && (
+                      <button
+                        onClick={() => setShowCloseConfirm(true)}
+                        title="Close room"
+                        aria-label="Close room"
+                        style={{
+                          width: "36px",
+                          height: "36px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          backgroundColor: "transparent",
+                          border: `1.5px solid ${ACCENT.coral}`,
+                          borderRadius: "8px",
+                          cursor: "pointer",
+                          padding: 0,
+                        }}
+                      >
+                        <CloseIcon size={16} color={ACCENT.coral} />
+                      </button>
+                    )}
+                  </div>
                 </div>
 
-                {/* ✅ Messages area: scroll atas/bawah bebas, tidak mentok */}
                 <div
                   ref={chatMessagesContainerRef}
                   className="chat-messages-container"
@@ -3400,11 +3649,12 @@ const LiveChatAgent = ({
                             style={{
                               padding: "12px 16px",
                               borderRadius: "12px",
-                              backgroundColor: isMine ? "#0D3CFC" : "#f0f0f0",
+                              backgroundColor: isMine ? "#0D3CFC" : "#f4f4f5",
                               color: isMine ? "#fff" : "#000",
                               fontSize: "15px",
                               fontFamily: FONT_FAMILY,
                               wordBreak: "break-word",
+                              border: isMine ? "none" : "1px solid rgba(0,0,0,0.05)",
                             }}
                           >
                             {!isMine && (
@@ -3471,11 +3721,11 @@ const LiveChatAgent = ({
                   <div ref={messagesEndRef} />
                 </div>
 
-                {selectedTicket.status !== "resolved" && selectedTicket.status !== "closed" && (
+                {selectedTicket.status !== "resolved" && selectedTicket.status !== "closed" ? (
                   <div
                     style={{
                       padding: "16px 24px",
-                      borderTop: "1px solid #e8e8e8",
+                      borderTop: "1px solid rgba(0,0,0,0.06)",
                       display: "flex",
                       gap: "12px",
                       backgroundColor: "#fff",
@@ -3499,7 +3749,7 @@ const LiveChatAgent = ({
                       style={{
                         flex: 1,
                         padding: "12px 16px",
-                        border: "1px solid #e8e8e8",
+                        border: "1px solid rgba(0,0,0,0.1)",
                         borderRadius: "10px",
                         fontSize: "15px",
                         outline: "none",
@@ -3520,12 +3770,29 @@ const LiveChatAgent = ({
                         cursor:
                           (selectedTicket.status === "waiting" && !isAdmin) || !messageText.trim() ? "not-allowed" : "pointer",
                         fontFamily: FONT_FAMILY,
-                        fontSize: "15px",
+                        fontSize: "14px",
                         fontWeight: 700,
+                        letterSpacing: "0.3px",
                       }}
                     >
                       Send
                     </button>
+                  </div>
+                ) : (
+                  <div
+                    style={{
+                      padding: "14px 24px",
+                      borderTop: "1px solid rgba(0,0,0,0.06)",
+                      backgroundColor: "#fafafa",
+                      textAlign: "center",
+                      fontFamily: FONT_FAMILY,
+                      fontSize: "13px",
+                      color: "#666",
+                      flexShrink: 0,
+                      fontWeight: 600,
+                    }}
+                  >
+                    Room ini telah {selectedTicket.status === "closed" ? "ditutup" : "diselesaikan"}. Buat room baru untuk melanjutkan.
                   </div>
                 )}
               </>
@@ -3843,14 +4110,16 @@ export default function HomePage(): React.JSX.Element {
                         {isAttention && (
                           <span
                             style={{
-                              backgroundColor: "#0D3CFC",
-                              color: "#ffffff",
-                              padding: "2px 10px",
+                              backgroundColor: "transparent",
+                              border: `1.5px solid ${ACCENT.coral}`,
+                              color: ACCENT.coral,
+                              padding: "2px 8px",
                               borderRadius: "4px",
-                              fontSize: "11px",
-                              fontWeight: 600,
+                              fontSize: "10px",
+                              fontWeight: 700,
                               fontFamily: FONT_FAMILY,
-                              letterSpacing: "0.3px",
+                              letterSpacing: "0.5px",
+                              textTransform: "uppercase",
                               display: "inline-block",
                             }}
                           >
@@ -3860,14 +4129,16 @@ export default function HomePage(): React.JSX.Element {
                         {isStories && (
                           <span
                             style={{
-                              backgroundColor: "#0D3CFC",
-                              color: "#ffffff",
-                              padding: "2px 10px",
+                              backgroundColor: "transparent",
+                              border: `1.5px solid ${ACCENT.lime}`,
+                              color: ACCENT.lime,
+                              padding: "2px 8px",
                               borderRadius: "4px",
-                              fontSize: "11px",
-                              fontWeight: 600,
+                              fontSize: "10px",
+                              fontWeight: 700,
                               fontFamily: FONT_FAMILY,
-                              letterSpacing: "0.3px",
+                              letterSpacing: "0.5px",
+                              textTransform: "uppercase",
                               display: "inline-block",
                             }}
                           >
@@ -3969,7 +4240,6 @@ export default function HomePage(): React.JSX.Element {
           opacity: 1 !important;
           visibility: visible !important;
         }
-        /* ✅ Hapus scrollbar di area chat, list, & online panel */
         .chat-messages-container::-webkit-scrollbar,
         .chat-list-container::-webkit-scrollbar,
         .chat-list-container > div::-webkit-scrollbar,
