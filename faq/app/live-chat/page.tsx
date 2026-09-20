@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { initializeApp, getApps } from "firebase/app";
@@ -26,7 +26,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 import { motion, AnimatePresence } from "framer-motion";
 
-// Firebase Config
+// ===== FIREBASE CONFIG =====
 const firebaseConfig = {
   apiKey: "AIzaSyD_htQZ1TClnXKZGRJ4izbMQ02y6V3aNAQ",
   authDomain: "wawa44-58d1e.firebaseapp.com",
@@ -54,7 +54,6 @@ if (typeof window !== "undefined") {
 
 const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
 const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
-const AGENT_NAME = "Farid Ardiansyah";
 
 // ===== COLORS =====
 const BLUE = "#0D3CFC";
@@ -155,9 +154,7 @@ async function decryptMessage(encrypted: string): Promise<string> {
     console.error("Decryption error:", error);
     if (encrypted.startsWith("encrypted:") || encrypted.startsWith("plain:")) {
       try {
-        const encoded = encrypted.includes(":")
-          ? encrypted.split(":")[1]
-          : encrypted;
+        const encoded = encrypted.includes(":") ? encrypted.split(":")[1] : encrypted;
         return decodeURIComponent(escape(atob(encoded)));
       } catch {
         return "[Message cannot be decrypted]";
@@ -341,11 +338,6 @@ const SearchIcon = ({ size = 16, color = "currentColor" }: { size?: number; colo
     <path d="M21 21L16.65 16.65" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
-const CloseIcon = ({ size = 18, color = "currentColor" }: { size?: number; color?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <path d="M6 6L18 18M18 6L6 18" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
 const PeopleIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <circle cx="12" cy="8" r="4" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -390,14 +382,13 @@ interface ChatContact {
   addedAt: any;
 }
 
-// ===== MAIN PAGE =====
-export default function LiveChatPage(): React.JSX.Element {
+// ===== MAIN PAGE (DEFAULT EXPORT) =====
+export default function LiveChatMain(): React.JSX.Element {
   const [user, setUser] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isMounted, setIsMounted] = useState(false);
   const [showMain, setShowMain] = useState(false);
-  const [navbarShifted, setNavbarShifted] = useState(false);
 
   const preloaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
@@ -429,6 +420,7 @@ export default function LiveChatPage(): React.JSX.Element {
   useEffect(() => {
     if (!isMounted || loading) return;
     setTimeout(() => startPreloaderAnimation(), 500);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isMounted, loading]);
 
   const startPreloaderAnimation = () => {
@@ -448,12 +440,7 @@ export default function LiveChatPage(): React.JSX.Element {
       },
     });
     gsap.set(textRef.current, { y: 100, opacity: 0 });
-    tl.to(textRef.current, {
-      y: 0,
-      opacity: 1,
-      duration: 0.8,
-      ease: "back.out(1.7)",
-    })
+    tl.to(textRef.current, { y: 0, opacity: 1, duration: 0.8, ease: "back.out(1.7)" })
       .to(textRef.current, { duration: 0.6 })
       .to(textRef.current, {
         opacity: 0,
@@ -465,25 +452,10 @@ export default function LiveChatPage(): React.JSX.Element {
           if (textRef.current) textRef.current.textContent = "Note";
         },
       })
-      .to(textRef.current, {
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        duration: 0.6,
-        ease: "back.out(1.7)",
-      })
+      .to(textRef.current, { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: "back.out(1.7)" })
       .to(textRef.current, { duration: 0.8 })
-      .to(textRef.current, {
-        scale: 0.3,
-        opacity: 0,
-        duration: 0.7,
-        ease: "power2.in",
-      })
-      .to(
-        preloaderRef.current,
-        { scale: 0.95, opacity: 0.8, duration: 0.3, ease: "power2.inOut" },
-        "-=0.3"
-      );
+      .to(textRef.current, { scale: 0.3, opacity: 0, duration: 0.7, ease: "power2.in" })
+      .to(preloaderRef.current, { scale: 0.95, opacity: 0.8, duration: 0.3, ease: "power2.inOut" }, "-=0.3");
   };
 
   if (!isMounted || loading) {
@@ -625,9 +597,8 @@ export default function LiveChatPage(): React.JSX.Element {
           overflow: "visible",
         }}
       >
-        {/* CONTENT */}
         <div style={{ padding: "0 40px", maxWidth: "1600px", margin: "0 auto", width: "100%" }}>
-          <LiveChatPage user={user} isAdmin={isAdmin} db={db} auth={auth} />
+          <LiveChatView user={user} isAdmin={isAdmin} db={db} auth={auth} />
         </div>
       </div>
 
@@ -658,8 +629,8 @@ export default function LiveChatPage(): React.JSX.Element {
   );
 }
 
-// ===== LIVE CHAT PAGE COMPONENT =====
-function LiveChatPage({
+// ===== LIVE CHAT VIEW COMPONENT =====
+function LiveChatView({
   user,
   isAdmin,
   db,
@@ -979,7 +950,6 @@ function LiveChatPage({
       const chatId = [user.uid, selectedContact.userId].sort().join("_");
       const encrypted = await encryptMessage(text);
 
-      // ensure chat room doc exists
       await setDoc(
         doc(db, "direct_messages", chatId),
         {
