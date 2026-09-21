@@ -4020,7 +4020,7 @@ export default function HomePage(): React.JSX.Element {
       >
         <HeroMenuruTitle onNavbarShiftChange={setNavbarShifted} />
 
-        {/* ===== FEATURES TITLE (tidak ikut scroll hero, posisi kiri, sejajar dengan Live Chat Agent) ===== */}
+        {/* ===== FEATURES TITLE ===== */}
         <div
           style={{
             padding: "0 40px",
@@ -4049,6 +4049,61 @@ export default function HomePage(): React.JSX.Element {
           >
             Features
           </h2>
+
+          {/* ===== 01 NOTES TRUST ===== */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "14px",
+              marginBottom: "30px",
+              flexWrap: "wrap",
+            }}
+          >
+            <span
+              style={{
+                fontFamily: FONT_FAMILY,
+                fontSize: "28px",
+                fontWeight: 700,
+                color: BLUE,
+                letterSpacing: "-0.02em",
+                lineHeight: 1,
+              }}
+            >
+              01
+            </span>
+            <span
+              style={{
+                fontFamily: FONT_FAMILY,
+                fontSize: "28px",
+                fontWeight: 700,
+                color: BLACK,
+                letterSpacing: "-0.02em",
+                lineHeight: 1,
+              }}
+            >
+              Notes
+            </span>
+            <span
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "4px 12px",
+                backgroundColor: BLUE,
+                color: WHITE,
+                borderRadius: "4px",
+                fontSize: "13px",
+                fontWeight: 800,
+                letterSpacing: "0.8px",
+                textTransform: "uppercase",
+                fontFamily: FONT_FAMILY,
+                lineHeight: 1.3,
+              }}
+            >
+              Trust
+            </span>
+          </div>
         </div>
 
         <div
