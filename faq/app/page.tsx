@@ -340,7 +340,6 @@ const ArrowRight = ({ size = 20, color = "currentColor" }: { size?: number; colo
     <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
-// Minimalist chevron arrow (untuk dropdown user)
 const ChevronDownIcon = ({ size = 14, color = "currentColor" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <path d="M6 9L12 15L18 9" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -1376,7 +1375,6 @@ const RightNavbar = ({ user, auth, db }: { user: any; auth: any; db: any }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Tutup dropdown jika klik di luar
   useEffect(() => {
     if (!dropdownOpen) return;
     const handleClickOutside = (e: MouseEvent) => {
@@ -1388,7 +1386,6 @@ const RightNavbar = ({ user, auth, db }: { user: any; auth: any; db: any }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [dropdownOpen]);
 
-  // Animate dropdown
   useEffect(() => {
     if (dropdownOpen && dropdownRef.current) {
       gsap.fromTo(
@@ -1415,7 +1412,7 @@ const RightNavbar = ({ user, auth, db }: { user: any; auth: any; db: any }) => {
     }
   };
 
-  // ===== BELUM LOGIN: tombol "Log In" =====
+  // ===== BELUM LOGIN: tombol "Log In" dengan bg hitam =====
   if (!user) {
     return (
       <div
@@ -1456,7 +1453,7 @@ const RightNavbar = ({ user, auth, db }: { user: any; auth: any; db: any }) => {
     );
   }
 
-  // ===== SUDAH LOGIN: foto profil + nama user + dropdown Dashboard =====
+  // ===== SUDAH LOGIN: foto + nama user (teks biru, TANPA BG) =====
   const displayName = user.displayName || user.email?.split("@")[0] || "User";
   const photoURL = user.photoURL || "";
 
@@ -1471,22 +1468,16 @@ const RightNavbar = ({ user, auth, db }: { user: any; auth: any; db: any }) => {
         fontFamily: FONT_FAMILY,
       }}
     >
-      {/* Trigger: foto + nama user */}
+      {/* Trigger: foto + nama user (TANPA BG) */}
       <div
         onClick={() => setDropdownOpen((prev) => !prev)}
         style={{
           display: "flex",
           alignItems: "center",
           gap: "10px",
-          padding: "8px 14px 8px 8px",
-          backgroundColor: "rgba(0, 0, 0, 0.75)",
-          backdropFilter: "blur(20px)",
-          WebkitBackdropFilter: "blur(20px)",
-          borderRadius: "10px",
-          border: "1px solid rgba(255,255,255,0.15)",
-          boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
+          padding: "6px 8px",
+          backgroundColor: "transparent",
           cursor: "pointer",
-          transition: "background-color 0.2s ease",
         }}
       >
         {/* Foto profil dari Gmail */}
@@ -1501,7 +1492,6 @@ const RightNavbar = ({ user, auth, db }: { user: any; auth: any; db: any }) => {
             alignItems: "center",
             justifyContent: "center",
             flexShrink: 0,
-            border: "1.5px solid rgba(255,255,255,0.3)",
           }}
         >
           {photoURL ? (
@@ -1518,12 +1508,12 @@ const RightNavbar = ({ user, auth, db }: { user: any; auth: any; db: any }) => {
           )}
         </div>
 
-        {/* Nama user */}
+        {/* Nama user — teks biru */}
         <span
           style={{
-            color: "#ffffff",
+            color: BLUE,
             fontSize: "14px",
-            fontWeight: 600,
+            fontWeight: 700,
             letterSpacing: "0.02em",
             whiteSpace: "nowrap",
             maxWidth: "180px",
@@ -1544,11 +1534,11 @@ const RightNavbar = ({ user, auth, db }: { user: any; auth: any; db: any }) => {
             transition: "transform 0.25s ease",
           }}
         >
-          <ChevronDownIcon size={14} color="#ffffff" />
+          <ChevronDownIcon size={14} color={BLUE} />
         </div>
       </div>
 
-      {/* Dropdown: Dashboard + panah + Logout */}
+      {/* Dropdown: Dashboard + Logout (TANPA BG, teks biru) */}
       {dropdownOpen && (
         <div
           style={{
@@ -1556,16 +1546,14 @@ const RightNavbar = ({ user, auth, db }: { user: any; auth: any; db: any }) => {
             top: "calc(100% + 10px)",
             right: "0px",
             minWidth: "200px",
-            backgroundColor: "rgba(0, 0, 0, 0.9)",
-            backdropFilter: "blur(24px)",
-            WebkitBackdropFilter: "blur(24px)",
-            borderRadius: "12px",
-            border: "1px solid rgba(255,255,255,0.15)",
-            boxShadow: "0 12px 40px rgba(0,0,0,0.4)",
-            padding: "8px",
+            backgroundColor: "transparent",
+            borderRadius: "0px",
+            border: "none",
+            boxShadow: "none",
+            padding: "4px 0",
             display: "flex",
             flexDirection: "column",
-            gap: "4px",
+            gap: "2px",
             zIndex: 9001,
           }}
         >
@@ -1575,26 +1563,26 @@ const RightNavbar = ({ user, auth, db }: { user: any; auth: any; db: any }) => {
               textDecoration: "none",
               display: "flex",
               alignItems: "center",
-              justifyContent: "space-between",
-              gap: "12px",
-              padding: "10px 14px",
-              borderRadius: "8px",
-              color: "#ffffff",
-              fontSize: "14px",
-              fontWeight: 600,
+              justifyContent: "flex-end",
+              gap: "10px",
+              padding: "8px 6px",
+              color: BLUE,
+              fontSize: "15px",
+              fontWeight: 700,
               fontFamily: FONT_FAMILY,
-              transition: "background-color 0.2s ease",
+              backgroundColor: "transparent",
+              transition: "opacity 0.2s ease",
             }}
             onMouseEnter={(e) => {
-              (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "rgba(13,60,252,0.9)";
+              (e.currentTarget as HTMLAnchorElement).style.opacity = "0.6";
             }}
             onMouseLeave={(e) => {
-              (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "transparent";
+              (e.currentTarget as HTMLAnchorElement).style.opacity = "1";
             }}
             onClick={() => setDropdownOpen(false)}
           >
             <span>Dashboard</span>
-            <ArrowRight size={16} color="#ffffff" />
+            <ArrowRight size={16} color={BLUE} />
           </Link>
 
           <button
@@ -1602,30 +1590,29 @@ const RightNavbar = ({ user, auth, db }: { user: any; auth: any; db: any }) => {
             style={{
               display: "flex",
               alignItems: "center",
-              justifyContent: "space-between",
-              gap: "12px",
-              padding: "10px 14px",
-              borderRadius: "8px",
-              color: "#ffffff",
-              fontSize: "14px",
-              fontWeight: 600,
+              justifyContent: "flex-end",
+              gap: "10px",
+              padding: "8px 6px",
+              color: BLUE,
+              fontSize: "15px",
+              fontWeight: 700,
               fontFamily: FONT_FAMILY,
               backgroundColor: "transparent",
               border: "none",
               cursor: "pointer",
-              textAlign: "left",
+              textAlign: "right",
               width: "100%",
-              transition: "background-color 0.2s ease",
+              transition: "opacity 0.2s ease",
             }}
             onMouseEnter={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.backgroundColor = "rgba(255,255,255,0.1)";
+              (e.currentTarget as HTMLButtonElement).style.opacity = "0.6";
             }}
             onMouseLeave={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent";
+              (e.currentTarget as HTMLButtonElement).style.opacity = "1";
             }}
           >
             <span>Logout</span>
-            <ArrowRight size={16} color="#ffffff" />
+            <ArrowRight size={16} color={BLUE} />
           </button>
         </div>
       )}
@@ -1919,6 +1906,8 @@ const RollingNewMessage = ({
     };
   }, [message]);
 
+  const safeMessage = typeof message === "string" ? message : "";
+
   return (
     <div
       ref={containerRef}
@@ -1949,7 +1938,7 @@ const RollingNewMessage = ({
             fontWeight: 500,
           }}
         >
-          {message.length > 60 ? message.substring(0, 60) + "..." : message}
+          {safeMessage.length > 60 ? safeMessage.substring(0, 60) + "..." : safeMessage}
         </span>
       </div>
     </div>
@@ -2488,7 +2477,7 @@ const LiveChatAgent = ({
         if (generateTicketId(ticket.createdAt).toLowerCase().includes(q)) return true;
         const previews = ticketPreviews[ticket.id] || [];
         for (const p of previews) {
-          if (p.text.toLowerCase().includes(q)) return true;
+          if (p.text?.toLowerCase().includes(q)) return true;
         }
         return false;
       });
@@ -2806,7 +2795,7 @@ const LiveChatAgent = ({
                   {u.photoURL ? (
                     <img src={u.photoURL} alt={u.displayName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                   ) : (
-                    u.displayName.charAt(0).toUpperCase()
+                    (u.displayName || "U").charAt(0).toUpperCase()
                   )}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
@@ -2850,28 +2839,31 @@ const LiveChatAgent = ({
     const ordered = [...previews].reverse();
     return (
       <div style={{ marginTop: "6px", display: "flex", flexDirection: "column", gap: "3px" }}>
-        {ordered.map((p, i) => (
-          <div
-            key={i}
-            style={{
-              fontSize: "11px",
-              color: "#ffffff",
-              fontStyle: "italic",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-              fontFamily: FONT_FAMILY,
-              display: "flex",
-              alignItems: "center",
-              gap: "4px",
-            }}
-          >
-            <span style={{ fontWeight: 700, color: "#ffffff", flexShrink: 0 }}>{p.senderName}:</span>
-            <span style={{ overflow: "hidden", textOverflow: "ellipsis", color: "#ffffff" }}>
-              {p.text.length > 30 ? p.text.substring(0, 30) + "..." : p.text}
-            </span>
-          </div>
-        ))}
+        {ordered.map((p, i) => {
+          const safeText = typeof p.text === "string" ? p.text : "";
+          return (
+            <div
+              key={i}
+              style={{
+                fontSize: "11px",
+                color: "#ffffff",
+                fontStyle: "italic",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                fontFamily: FONT_FAMILY,
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
+              }}
+            >
+              <span style={{ fontWeight: 700, color: "#ffffff", flexShrink: 0 }}>{p.senderName}:</span>
+              <span style={{ overflow: "hidden", textOverflow: "ellipsis", color: "#ffffff" }}>
+                {safeText.length > 30 ? safeText.substring(0, 30) + "..." : safeText}
+              </span>
+            </div>
+          );
+        })}
       </div>
     );
   };
@@ -3915,7 +3907,7 @@ const LiveChatAgent = ({
                       <RollingNewMessage
                         key={rollingKey}
                         senderName={latestRollingMessage.senderName}
-                        message={latestRollingMessage.message}
+                        message={latestRollingMessage.text}
                         isFromAgent={latestRollingMessage.isFromAgent}
                       />
                     </div>
@@ -4320,9 +4312,8 @@ export default function HomePage(): React.JSX.Element {
           </div>
 
           {/* ===== BG KOTAK BIRU =====
-              - Ujung kiri SEJAJAR dengan huruf "N" pada "Notes"
-              - Ujung kanan SEJAJAR dengan sisi kiri badge "Trust"
-              - Tinggi gemuk (420px)
+              - Ujung kiri tepat di bawah huruf "N" pada "Notes"
+              - Ujung kanan sejajar dengan sisi kiri badge "Trust"
           */}
           <div
             style={{
@@ -4337,13 +4328,9 @@ export default function HomePage(): React.JSX.Element {
               style={{
                 position: "absolute",
                 top: "0px",
-                /* kiri: sejajar dengan huruf "N" pada "Notes"
-                   "01" fontSize 90px ≈ lebar ~110px
-                   gap 140px → Notes mulai ≈ 250px, tapi huruf N sedikit lebih ke kiri,
-                   jadi kita set 110px agar ujung kiri bg tepat di huruf "N" */
-                left: "110px",
-                /* kanan: sejajar dengan sisi kiri badge Trust
-                   Trust marginRight 360px */
+                /* Huruf "N" pada "Notes" berada di sekitar 260px dari kiri container
+                   (01: ~110px + gap 140px = 250px, huruf N mulai sedikit setelahnya ≈ 260px) */
+                left: "260px",
                 right: "360px",
                 height: "420px",
                 backgroundColor: BLUE,
