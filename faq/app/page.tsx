@@ -552,7 +552,7 @@ interface TourStep {
   isLoginStep?: boolean;
 }
 
-// ===== HERO MENURU TITLE (PINNED) =====
+// ===== HERO MENURU TITLE =====
 const HeroMenuruTitle = ({
   onNavbarShiftChange,
 }: {
@@ -610,8 +610,7 @@ const HeroMenuruTitle = ({
           start: "top top",
           end: "+=500",
           scrub: 0.8,
-          pin: true,
-          pinSpacing: true,
+          pin: false,
           onUpdate: (self) => {
             onNavbarShiftChange(self.progress > 0.35);
           },
@@ -1754,7 +1753,7 @@ const RollingNewMessage = ({
   );
 };
 
-// ===== CLOSE BUTTON WITH GSAP (putih full, tanpa modal) =====
+// ===== CLOSE BUTTON WITH GSAP =====
 const CloseRoomButton = ({
   onConfirm,
   disabled,
@@ -4015,190 +4014,182 @@ export default function HomePage(): React.JSX.Element {
           position: "relative",
           fontFamily: FONT_FAMILY,
           overflow: "visible",
+          display: "flex",
+          flexDirection: "column",
         }}
       >
-        {/* HERO + MAIN CONTENT WRAPPER */}
-        <div style={{ position: "relative", zIndex: 10, backgroundColor: WHITE }}>
-          <HeroMenuruTitle onNavbarShiftChange={setNavbarShifted} />
+        <HeroMenuruTitle onNavbarShiftChange={setNavbarShifted} />
 
-          {/* LIVE CHAT AGENT — starts after hero, stays in normal flow */}
-          <div
-            style={{
-              position: "relative",
-              zIndex: 11,
-              backgroundColor: WHITE,
-              padding: "0 40px",
-              maxWidth: "1600px",
-              margin: "0 auto",
-              width: "100%",
-            }}
-          >
-            <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} />
-          </div>
-        </div>
-
-        {/* FOOTER LINKS SECTION */}
         <div
           style={{
             position: "relative",
-            zIndex: 12,
-            width: "100%",
-            padding: "60px 40px 40px 40px",
+            zIndex: 1,
+            flex: "1 0 auto",
             backgroundColor: WHITE,
-            borderTop: "1px solid rgba(0,0,0,0.05)",
-            marginTop: "20px",
-            overflow: "hidden",
           }}
         >
-          <div style={{ position: "absolute", left: "40px", top: "50%", transform: "translateY(-50%)", width: "200px", height: "auto", opacity: 0.8 }}>
-            <img src="/images/p0l.jpg" alt="" style={{ width: "100%", height: "auto", display: "block", objectFit: "cover" }} />
-          </div>
-          <div style={{ position: "absolute", right: "40px", top: "50%", transform: "translateY(-50%)", width: "200px", height: "auto", opacity: 0.8 }}>
-            <img src="/images/xxz.jpg" alt="" style={{ width: "100%", height: "auto", display: "block", objectFit: "cover" }} />
+          <div style={{ padding: "0 40px", maxWidth: "1600px", margin: "0 auto", width: "100%" }}>
+            <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} />
           </div>
 
           <div
             style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "flex-start",
-              maxWidth: "1400px",
-              margin: "0 auto",
-              gap: "40px",
-              flexWrap: "wrap",
-              position: "relative",
-              zIndex: 1,
-            }}
-          >
-            {footerLinks.map((section, idx) => (
-              <div key={idx} style={{ flex: "1", minWidth: "200px" }}>
-                <h3
-                  style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: "28px",
-                    fontWeight: 600,
-                    color: BLACK,
-                    margin: 0,
-                    marginBottom: "16px",
-                    letterSpacing: "-0.01em",
-                    textTransform: "none",
-                  }}
-                >
-                  {section.title}
-                </h3>
-                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                  {section.links.map((link, linkIdx) => {
-                    let linkHref = "#";
-                    let isAttention = false;
-                    let isStories = false;
-                    if (link === "Contact") linkHref = "/contact";
-                    else if (link === "Live Chat") linkHref = "/live-chat";
-                    else if (link === "Live Chat Agent") linkHref = "/live-chat-agent";
-                    else if (link === "Help Center") linkHref = "/pusat-bantuan";
-                    else if (link === "About Us") { linkHref = "/profile"; isAttention = true; }
-                    else if (link === "Privacy Policy") { linkHref = "/privacy-policy"; isAttention = true; }
-                    else if (link === "Terms & Conditions") { linkHref = "/terms-of-services"; isAttention = true; }
-                    else if (link === "Terms of Use") { linkHref = "/terms-of-use"; isAttention = true; }
-                    else if (link === "Stories") { linkHref = "/stories"; isStories = true; }
-                    else if (link === "Shop") linkHref = "/shop";
-                    else if (link === "Note") linkHref = "/note";
-                    else if (link === "Calendar") linkHref = "/calendar";
-                    else if (link === "Blog") linkHref = "/blog";
-                    else if (link === "Donation") linkHref = "/donation";
-                    else if (link === "Community") linkHref = "/community";
-                    else if (link === "Instagram") linkHref = "https://instagram.com/menuru";
-
-                    return (
-                      <div key={linkIdx} style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                        <Link href={linkHref} style={{ textDecoration: "none" }}>
-                          <span
-                            style={{
-                              fontFamily: FONT_FAMILY,
-                              fontSize: "20px",
-                              fontWeight: 400,
-                              color: BLUE,
-                              letterSpacing: "-0.01em",
-                              cursor: "pointer",
-                              textTransform: "none",
-                            }}
-                          >
-                            {link}
-                          </span>
-                        </Link>
-                        {isAttention && (
-                          <span
-                            style={{
-                              backgroundColor: WHITE,
-                              border: `1.5px solid ${BLUE}`,
-                              color: BLUE,
-                              padding: "2px 8px",
-                              borderRadius: "4px",
-                              fontSize: "10px",
-                              fontWeight: 800,
-                              fontFamily: FONT_FAMILY,
-                              letterSpacing: "0.5px",
-                              textTransform: "uppercase",
-                              display: "inline-block",
-                            }}
-                          >
-                            Updated
-                          </span>
-                        )}
-                        {isStories && (
-                          <span
-                            style={{
-                              backgroundColor: BLACK,
-                              border: `1.5px solid ${BLACK}`,
-                              color: WHITE,
-                              padding: "2px 8px",
-                              borderRadius: "4px",
-                              fontSize: "10px",
-                              fontWeight: 800,
-                              fontFamily: FONT_FAMILY,
-                              letterSpacing: "0.5px",
-                              textTransform: "uppercase",
-                              display: "inline-block",
-                            }}
-                          >
-                            New
-                          </span>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div
-            style={{
-              maxWidth: "1400px",
-              margin: "40px auto 0 auto",
-              paddingTop: "20px",
+              width: "100%",
+              padding: "60px 40px 40px 40px",
+              backgroundColor: WHITE,
               borderTop: "1px solid rgba(0,0,0,0.05)",
+              marginTop: "20px",
               position: "relative",
-              zIndex: 1,
+              overflow: "hidden",
             }}
           >
-            <p
+            <div style={{ position: "absolute", left: "40px", top: "50%", transform: "translateY(-50%)", width: "200px", height: "auto", opacity: 0.8 }}>
+              <img src="/images/p0l.jpg" alt="" style={{ width: "100%", height: "auto", display: "block", objectFit: "cover" }} />
+            </div>
+            <div style={{ position: "absolute", right: "40px", top: "50%", transform: "translateY(-50%)", width: "200px", height: "auto", opacity: 0.8 }}>
+              <img src="/images/xxz.jpg" alt="" style={{ width: "100%", height: "auto", display: "block", objectFit: "cover" }} />
+            </div>
+
+            <div
               style={{
-                fontFamily: FONT_FAMILY,
-                fontSize: "14px",
-                fontWeight: 400,
-                color: "#666",
-                margin: 0,
-                textAlign: "center",
-                letterSpacing: "0.01em",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "flex-start",
+                maxWidth: "1400px",
+                margin: "0 auto",
+                gap: "40px",
+                flexWrap: "wrap",
+                position: "relative",
+                zIndex: 1,
               }}
             >
-              Terms and conditions apply. By using this website, you agree to our Terms of Use and Privacy Policy.
-            </p>
-          </div>
-        </div>
+              {footerLinks.map((section, idx) => (
+                <div key={idx} style={{ flex: "1", minWidth: "200px" }}>
+                  <h3
+                    style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: "28px",
+                      fontWeight: 600,
+                      color: BLACK,
+                      margin: 0,
+                      marginBottom: "16px",
+                      letterSpacing: "-0.01em",
+                      textTransform: "none",
+                    }}
+                  >
+                    {section.title}
+                  </h3>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                    {section.links.map((link, linkIdx) => {
+                      let linkHref = "#";
+                      let isAttention = false;
+                      let isStories = false;
+                      if (link === "Contact") linkHref = "/contact";
+                      else if (link === "Live Chat") linkHref = "/live-chat";
+                      else if (link === "Live Chat Agent") linkHref = "/live-chat-agent";
+                      else if (link === "Help Center") linkHref = "/pusat-bantuan";
+                      else if (link === "About Us") { linkHref = "/profile"; isAttention = true; }
+                      else if (link === "Privacy Policy") { linkHref = "/privacy-policy"; isAttention = true; }
+                      else if (link === "Terms & Conditions") { linkHref = "/terms-of-services"; isAttention = true; }
+                      else if (link === "Terms of Use") { linkHref = "/terms-of-use"; isAttention = true; }
+                      else if (link === "Stories") { linkHref = "/stories"; isStories = true; }
+                      else if (link === "Shop") linkHref = "/shop";
+                      else if (link === "Note") linkHref = "/note";
+                      else if (link === "Calendar") linkHref = "/calendar";
+                      else if (link === "Blog") linkHref = "/blog";
+                      else if (link === "Donation") linkHref = "/donation";
+                      else if (link === "Community") linkHref = "/community";
+                      else if (link === "Instagram") linkHref = "https://instagram.com/menuru";
 
-        {/* FOOTER TITLE — 2024 - 2026, positioned at absolute bottom */}
-        <div style={{ position: "relative", zIndex: 13, backgroundColor: WHITE }}>
+                      return (
+                        <div key={linkIdx} style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                          <Link href={linkHref} style={{ textDecoration: "none" }}>
+                            <span
+                              style={{
+                                fontFamily: FONT_FAMILY,
+                                fontSize: "20px",
+                                fontWeight: 400,
+                                color: BLUE,
+                                letterSpacing: "-0.01em",
+                                cursor: "pointer",
+                                textTransform: "none",
+                              }}
+                            >
+                              {link}
+                            </span>
+                          </Link>
+                          {isAttention && (
+                            <span
+                              style={{
+                                backgroundColor: WHITE,
+                                border: `1.5px solid ${BLUE}`,
+                                color: BLUE,
+                                padding: "2px 8px",
+                                borderRadius: "4px",
+                                fontSize: "10px",
+                                fontWeight: 800,
+                                fontFamily: FONT_FAMILY,
+                                letterSpacing: "0.5px",
+                                textTransform: "uppercase",
+                                display: "inline-block",
+                              }}
+                            >
+                              Updated
+                            </span>
+                          )}
+                          {isStories && (
+                            <span
+                              style={{
+                                backgroundColor: BLACK,
+                                border: `1.5px solid ${BLACK}`,
+                                color: WHITE,
+                                padding: "2px 8px",
+                                borderRadius: "4px",
+                                fontSize: "10px",
+                                fontWeight: 800,
+                                fontFamily: FONT_FAMILY,
+                                letterSpacing: "0.5px",
+                                textTransform: "uppercase",
+                                display: "inline-block",
+                              }}
+                            >
+                              New
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div
+              style={{
+                maxWidth: "1400px",
+                margin: "40px auto 0 auto",
+                paddingTop: "20px",
+                borderTop: "1px solid rgba(0,0,0,0.05)",
+                position: "relative",
+                zIndex: 1,
+              }}
+            >
+              <p
+                style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: "14px",
+                  fontWeight: 400,
+                  color: "#666",
+                  margin: 0,
+                  textAlign: "center",
+                  letterSpacing: "0.01em",
+                }}
+              >
+                Terms and conditions apply. By using this website, you agree to our Terms of Use and Privacy Policy.
+              </p>
+            </div>
+          </div>
+
           <FooterMenuruTitle />
         </div>
       </div>
