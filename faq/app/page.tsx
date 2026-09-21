@@ -3688,7 +3688,7 @@ const LiveChatAgent = ({
                       <RollingNewMessage
                         key={rollingKey}
                         senderName={latestRollingMessage.senderName}
-                        message={latestRollingMessage.text}
+                        message={latestRollingMessage.message}
                         isFromAgent={latestRollingMessage.isFromAgent}
                       />
                     </div>
@@ -3996,7 +3996,7 @@ export default function HomePage(): React.JSX.Element {
       >
         <HeroMenuruTitle onNavbarShiftChange={setNavbarShifted} />
 
-        {/* ===== FEATURES + 01 NOTES TRUST + KOTAK BIRU BESAR ===== */}
+        {/* ===== FEATURES + 01 NOTES TRUST + BG KOTAK BIRU ===== */}
         <div
           style={{
             padding: "0 40px",
@@ -4026,89 +4026,93 @@ export default function HomePage(): React.JSX.Element {
             Features
           </h2>
 
-          {/* ===== 01 NOTES TRUST ===== */}
+          {/* ===== WRAPPER: 01 NOTES TRUST + BG KOTAK BIRU ===== */}
           <div
             style={{
-              display: "flex",
-              alignItems: "center",
-              marginBottom: "40px",
-              width: "100%",
-              flexWrap: "wrap",
               position: "relative",
+              width: "100%",
+              marginBottom: "40px",
             }}
           >
-            {/* 01 + Notes — jarak lebih jauh */}
-            <div style={{ display: "flex", alignItems: "baseline", gap: "140px" }}>
+            {/* BARIS 01 NOTES TRUST */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                width: "100%",
+                flexWrap: "wrap",
+                position: "relative",
+                zIndex: 2,
+              }}
+            >
+              {/* 01 + Notes — jarak lebih jauh */}
+              <div style={{ display: "flex", alignItems: "baseline", gap: "140px" }}>
+                <span
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "90px",
+                    fontWeight: 700,
+                    color: BLUE,
+                    letterSpacing: "-0.04em",
+                    lineHeight: 1,
+                  }}
+                >
+                  01
+                </span>
+                <span
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "90px",
+                    fontWeight: 700,
+                    color: BLACK,
+                    letterSpacing: "-0.04em",
+                    lineHeight: 1,
+                  }}
+                >
+                  Notes
+                </span>
+              </div>
+
+              {/* Trust — digeser lebih ke kiri lagi */}
               <span
                 style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: "6px 16px",
+                  backgroundColor: BLUE,
+                  color: WHITE,
+                  borderRadius: "4px",
+                  fontSize: "16px",
+                  fontWeight: 800,
+                  letterSpacing: "0.8px",
+                  textTransform: "uppercase",
                   fontFamily: FONT_FAMILY,
-                  fontSize: "90px",
-                  fontWeight: 700,
-                  color: BLUE,
-                  letterSpacing: "-0.04em",
-                  lineHeight: 1,
+                  lineHeight: 1.3,
+                  marginLeft: "auto",
+                  marginRight: "260px",
+                  marginTop: "-45px",
+                  whiteSpace: "nowrap",
                 }}
               >
-                01
-              </span>
-              <span
-                style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: "90px",
-                  fontWeight: 700,
-                  color: BLACK,
-                  letterSpacing: "-0.04em",
-                  lineHeight: 1,
-                }}
-              >
-                Notes
+                Trust
               </span>
             </div>
 
-            {/* Trust — di kanan, naik ke atas (di tengah Features & Notes) */}
-            <span
+            {/* ===== BG KOTAK BIRU (sejajar dari Notes sampai Trust) ===== */}
+            <div
               style={{
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                padding: "6px 16px",
+                position: "absolute",
+                top: "110px",
+                left: "0px",
+                right: "260px",
+                height: "260px",
                 backgroundColor: BLUE,
-                color: WHITE,
-                borderRadius: "4px",
-                fontSize: "16px",
-                fontWeight: 800,
-                letterSpacing: "0.8px",
-                textTransform: "uppercase",
-                fontFamily: FONT_FAMILY,
-                lineHeight: 1.3,
-                marginLeft: "auto",
-                marginRight: "180px",
-                marginTop: "-45px",
-                whiteSpace: "nowrap",
+                borderRadius: "20px",
+                border: `2px solid ${BLUE}`,
+                zIndex: 1,
               }}
-            >
-              Trust
-            </span>
-          </div>
-
-          {/* ===== KOTAK BIRU BESAR DI BAWAH NOTES ===== */}
-          <div
-            style={{
-              width: "100%",
-              backgroundColor: BLUE,
-              borderRadius: "0px",
-              border: `2px solid ${BLUE}`,
-              padding: "80px 60px",
-              minHeight: "480px",
-              marginBottom: "60px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              position: "relative",
-              boxSizing: "border-box",
-            }}
-          >
-            {/* Konten di dalam kotak bisa ditambahkan di sini */}
+            />
           </div>
         </div>
 
