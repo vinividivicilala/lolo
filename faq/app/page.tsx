@@ -307,7 +307,7 @@ const BLUE = "#0D3CFC";
 const WHITE = "#FFFFFF";
 const BLACK = "#000000";
 
-// ===== STATUS STYLES (BG PUTIH / BG HITAM + BORDER KOTAK) =====
+// ===== STATUS STYLES =====
 const STATUS_STYLES: {
   [key: string]: {
     label: string;
@@ -316,39 +316,15 @@ const STATUS_STYLES: {
     border: string;
   };
 } = {
-  waiting: {
-    label: "Waiting",
-    bg: WHITE,
-    text: BLUE,
-    border: BLUE,
-  },
-  active: {
-    label: "Active",
-    bg: BLACK,
-    text: WHITE,
-    border: WHITE,
-  },
-  resolved: {
-    label: "Resolved",
-    bg: WHITE,
-    text: BLUE,
-    border: BLUE,
-  },
-  closed: {
-    label: "Closed",
-    bg: BLACK,
-    text: WHITE,
-    border: WHITE,
-  },
+  waiting: { label: "Waiting", bg: WHITE, text: BLUE, border: BLUE },
+  active: { label: "Active", bg: BLACK, text: WHITE, border: WHITE },
+  resolved: { label: "Resolved", bg: WHITE, text: BLUE, border: BLUE },
+  closed: { label: "Closed", bg: BLACK, text: WHITE, border: WHITE },
 };
 
-// ===== TOPIC STYLES (BG PUTIH / BG HITAM + BORDER KOTAK) =====
+// ===== TOPIC STYLES =====
 const TOPIC_STYLES: {
-  [key: string]: {
-    bg: string;
-    text: string;
-    border: string;
-  };
+  [key: string]: { bg: string; text: string; border: string };
 } = {
   "Product Inquiry": { bg: WHITE, text: BLUE, border: BLUE },
   "Technical Support": { bg: BLACK, text: WHITE, border: WHITE },
@@ -552,7 +528,7 @@ interface TourStep {
   isLoginStep?: boolean;
 }
 
-// ===== HERO MENURU TITLE =====
+// ===== HERO MENURU TITLE (ditinggikan) =====
 const HeroMenuruTitle = ({
   onNavbarShiftChange,
 }: {
@@ -608,7 +584,7 @@ const HeroMenuruTitle = ({
         scrollTrigger: {
           trigger: container,
           start: "top top",
-          end: "+=500",
+          end: "+=900",
           scrub: 0.8,
           pin: false,
           onUpdate: (self) => {
@@ -662,7 +638,7 @@ const HeroMenuruTitle = ({
       ref={containerRef}
       style={{
         width: "100%",
-        height: "650px",
+        height: "1100px",
         backgroundColor: "#ffffff",
         overflow: "visible",
         display: "flex",
@@ -1666,7 +1642,7 @@ const OnboardingTour = ({
   );
 };
 
-// ===== ROLLING NEW MESSAGE (GSAP) =====
+// ===== ROLLING NEW MESSAGE =====
 const RollingNewMessage = ({
   senderName,
   message,
@@ -4061,8 +4037,8 @@ export default function HomePage(): React.JSX.Element {
               position: "relative",
             }}
           >
-            {/* 01 + Notes — di kiri, jarak jauh */}
-            <div style={{ display: "flex", alignItems: "baseline", gap: "60px" }}>
+            {/* 01 + Notes — jarak lebih jauh */}
+            <div style={{ display: "flex", alignItems: "baseline", gap: "140px" }}>
               <span
                 style={{
                   fontFamily: FONT_FAMILY,
@@ -4089,7 +4065,7 @@ export default function HomePage(): React.JSX.Element {
               </span>
             </div>
 
-            {/* Trust — di kanan, naik ke atas dikit, tidak dekat layar kanan */}
+            {/* Trust — digeser ke kiri lagi & dinaikkan lagi (di tengah Features & Notes) */}
             <span
               style={{
                 display: "inline-flex",
@@ -4106,8 +4082,8 @@ export default function HomePage(): React.JSX.Element {
                 fontFamily: FONT_FAMILY,
                 lineHeight: 1.3,
                 marginLeft: "auto",
-                marginRight: "80px",
-                marginTop: "-20px",
+                marginRight: "180px",
+                marginTop: "-45px",
                 whiteSpace: "nowrap",
               }}
             >
