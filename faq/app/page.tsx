@@ -308,7 +308,6 @@ const WHITE = "#FFFFFF";
 const BLACK = "#000000";
 
 // ===== STATUS STYLES (BG PUTIH / BG HITAM + BORDER KOTAK) =====
-// Untuk list chat agent & user: putih/hitam solid bg + border teks biru/putih full
 const STATUS_STYLES: {
   [key: string]: {
     label: string;
@@ -446,7 +445,7 @@ const BrandIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: st
   </svg>
 );
 
-// ===== STABILO BADGE (BG PUTIH/HITAM + BORDER KOTAK + TEKS BIRU/PUTIH FULL) =====
+// ===== STABILO BADGE =====
 const StabiloBadge = ({
   label,
   bg,
@@ -695,6 +694,446 @@ const HeroMenuruTitle = ({
       >
         Menuru
       </h1>
+    </div>
+  );
+};
+
+// ===== STICKY SCROLL CMS TABS WITH GSAP SCROLLTRIGGER =====
+const StickyScrollCMSTabs = () => {
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const stickyRef = useRef<HTMLDivElement>(null);
+  const [isMounted, setIsMounted] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const cmsItems = [
+    {
+      id: "item-1",
+      label: "01",
+      title: "Content Management",
+      description:
+        "Kelola seluruh konten website Menuru dari satu dashboard terpusat. Tambah, edit, dan publikasikan artikel, produk, dan halaman statis tanpa menyentuh kode. Sistem CMS kami mendukung workflow editorial, versioning, dan jadwal publikasi otomatis.",
+      accent: BLUE,
+      bg: WHITE,
+      textColor: BLUE,
+      borderColor: BLUE,
+    },
+    {
+      id: "item-2",
+      label: "02",
+      title: "Realtime Analytics",
+      description:
+        "Pantau performa konten dan perilaku pengunjung secara real-time. Lihat metrik keterlibatan, conversion rate, dan bounce rate langsung dari panel analytics yang terintegrasi dengan Firebase. Data diperbarui setiap detik tanpa perlu refresh halaman.",
+      accent: BLACK,
+      bg: BLACK,
+      textColor: WHITE,
+      borderColor: WHITE,
+    },
+    {
+      id: "item-3",
+      label: "03",
+      title: "Secure & Scalable",
+      description:
+        "Infrastruktur Menuru dibangun dengan enkripsi AES-256-GCM end-to-end, anti-bot protection, dan auto-scaling cloud. Setiap transaksi dan pesan terenkripsi penuh, siap menangani ribuan pengguna secara bersamaan tanpa downtime.",
+      accent: BLUE,
+      bg: WHITE,
+      textColor: BLUE,
+      borderColor: BLUE,
+    },
+  ];
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isMounted) return;
+    if (typeof window === "undefined") return;
+    if (!sectionRef.current || !stickyRef.current) return;
+
+    const section = sectionRef.current;
+    const stickyEl = stickyRef.current;
+
+    const ctx = gsap.context(() => {
+      // Pin sticky container selama scroll
+      ScrollTrigger.create({
+        trigger: section,
+        start: "top top",
+        end: "bottom bottom",
+        pin: stickyEl,
+        pinSpacing: false,
+        anticipatePin: 1,
+        invalidateOnRefresh: true,
+      });
+
+      // Setiap item punya trigger sendiri untuk update activeIndex
+      cmsItems.forEach((item, idx) => {
+        const itemEl = document.querySelector(`[data-cms-item="${item.id}"]`);
+        if (!itemEl) return;
+
+        ScrollTrigger.create({
+          trigger: itemEl,
+          start: "top center",
+          end: "bottom center",
+          onEnter: () => setActiveIndex(idx),
+          onEnterBack: () => setActiveIndex(idx),
+          invalidateOnRefresh: true,
+        });
+
+        // Animasi masuk untuk teks item
+        gsap.fromTo(
+          itemEl.querySelectorAll(".cms-animate"),
+          { opacity: 0, y: 60 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.9,
+            stagger: 0.12,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: itemEl,
+              start: "top 85%",
+              end: "top 40%",
+              toggleActions: "play none none reverse",
+            },
+          }
+        );
+      });
+
+      // Animasi angka besar (label) — rotasi & scale saat masuk
+      cmsItems.forEach((item) => {
+        const labelEl = document.querySelector(`[data-cms-label="${item.id}"]`);
+        if (!labelEl) return;
+        gsap.fromTo(
+          labelEl,
+          { scale: 0.5, rotation: -15, opacity: 0 },
+          {
+            scale: 1,
+            rotation: 0,
+            opacity: 1,
+            duration: 1,
+            ease: "back.out(1.7)",
+            scrollTrigger: {
+              trigger: labelEl,
+              start: "top 90%",
+              end: "top 50%",
+              toggleActions: "play none none reverse",
+            },
+          }
+        );
+      });
+    }, sectionRef);
+
+    return () => {
+      ctx.revert();
+    };
+  }, [isMounted]);
+
+  useEffect(() => {
+    if (!isMounted) return;
+    const t1 = setTimeout(() => ScrollTrigger.refresh(), 400);
+    const t2 = setTimeout(() => ScrollTrigger.refresh(), 1200);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
+  }, [isMounted]);
+
+  return (
+    <div
+      ref={sectionRef}
+      style={{
+        width: "100%",
+        backgroundColor: WHITE,
+        position: "relative",
+        fontFamily: FONT_FAMILY,
+        padding: "0 40px",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          gap: "60px",
+          maxWidth: "1600px",
+          margin: "0 auto",
+          alignItems: "flex-start",
+          position: "relative",
+        }}
+      >
+        {/* ===== KIRI: STICKY ===== */}
+        <div
+          ref={stickyRef}
+          style={{
+            width: "45%",
+            flexShrink: 0,
+            position: "relative",
+            paddingTop: "80px",
+            paddingBottom: "80px",
+            alignSelf: "flex-start",
+            minHeight: "100vh",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+          }}
+        >
+          <div style={{ position: "relative", zIndex: 2 }}>
+            <span
+              style={{
+                display: "inline-block",
+                padding: "4px 12px",
+                border: `1.5px solid ${BLUE}`,
+                backgroundColor: WHITE,
+                color: BLUE,
+                fontSize: "10px",
+                fontWeight: 800,
+                letterSpacing: "1.2px",
+                textTransform: "uppercase",
+                borderRadius: "4px",
+                marginBottom: "20px",
+              }}
+            >
+              CMS Platform
+            </span>
+
+            <h2
+              style={{
+                fontFamily: FONT_FAMILY,
+                fontSize: "clamp(48px, 6vw, 96px)",
+                fontWeight: 700,
+                color: BLUE,
+                letterSpacing: "-0.04em",
+                lineHeight: 0.95,
+                margin: 0,
+                marginBottom: "28px",
+              }}
+            >
+              Build.
+              <br />
+              Manage.
+              <br />
+              Scale.
+            </h2>
+
+            <p
+              style={{
+                fontFamily: FONT_FAMILY,
+                fontSize: "16px",
+                lineHeight: 1.6,
+                color: "#333",
+                margin: 0,
+                marginBottom: "40px",
+                maxWidth: "460px",
+                fontWeight: 400,
+              }}
+            >
+              Menuru CMS adalah fondasi digital yang menghubungkan konten,
+              analytics, dan keamanan dalam satu ekosistem. Dirancang untuk
+              kreator, tim marketing, dan developer yang ingin bergerak cepat
+              tanpa mengorbankan kualitas.
+            </p>
+
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                marginTop: "10px",
+              }}
+            >
+              {cmsItems.map((item, idx) => (
+                <div
+                  key={item.id}
+                  style={{
+                    width: idx === activeIndex ? "40px" : "12px",
+                    height: "12px",
+                    borderRadius: "6px",
+                    backgroundColor:
+                      idx === activeIndex ? BLUE : "rgba(13,60,252,0.25)",
+                    border:
+                      idx === activeIndex
+                        ? `1.5px solid ${BLUE}`
+                        : "1.5px solid transparent",
+                    transition: "all 0.4s cubic-bezier(0.65,0,0.35,1)",
+                  }}
+                />
+              ))}
+              <span
+                style={{
+                  marginLeft: "12px",
+                  fontSize: "12px",
+                  fontWeight: 800,
+                  color: BLUE,
+                  letterSpacing: "1px",
+                }}
+              >
+                {cmsItems[activeIndex].label} / 03
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* ===== KANAN: SCROLL ITEMS ===== */}
+        <div
+          style={{
+            width: "55%",
+            flexShrink: 0,
+            display: "flex",
+            flexDirection: "column",
+            gap: "0px",
+            paddingTop: "80px",
+            paddingBottom: "80px",
+          }}
+        >
+          {cmsItems.map((item, idx) => {
+            const isActive = idx === activeIndex;
+            return (
+              <div
+                key={item.id}
+                data-cms-item={item.id}
+                style={{
+                  minHeight: "85vh",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  padding: "60px 0",
+                  position: "relative",
+                  borderTop:
+                    idx === 0 ? "none" : "1px solid rgba(0,0,0,0.08)",
+                }}
+              >
+                <div
+                  className="cms-animate"
+                  style={{
+                    backgroundColor: item.bg,
+                    border: `1.5px solid ${item.borderColor}`,
+                    borderRadius: "16px",
+                    padding: "48px 40px",
+                    position: "relative",
+                    overflow: "hidden",
+                    transition: "transform 0.5s ease, box-shadow 0.5s ease",
+                    transform: isActive ? "scale(1)" : "scale(0.97)",
+                    boxShadow: isActive
+                      ? `0 20px 60px ${item.accent}22`
+                      : "none",
+                  }}
+                >
+                  <span
+                    data-cms-label={item.id}
+                    style={{
+                      position: "absolute",
+                      top: "10px",
+                      right: "30px",
+                      fontFamily: FONT_FAMILY,
+                      fontSize: "180px",
+                      fontWeight: 700,
+                      color: item.accent,
+                      opacity: 0.08,
+                      lineHeight: 1,
+                      letterSpacing: "-0.05em",
+                      userSelect: "none",
+                      pointerEvents: "none",
+                      willChange: "transform, opacity",
+                    }}
+                  >
+                    {item.label}
+                  </span>
+
+                  <div
+                    className="cms-animate"
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "10px",
+                      marginBottom: "24px",
+                      position: "relative",
+                      zIndex: 1,
+                    }}
+                  >
+                    <span
+                      style={{
+                        display: "inline-block",
+                        padding: "3px 10px",
+                        border: `1.5px solid ${item.borderColor}`,
+                        backgroundColor: item.bg,
+                        color: item.textColor,
+                        fontSize: "10px",
+                        fontWeight: 800,
+                        letterSpacing: "1px",
+                        textTransform: "uppercase",
+                        borderRadius: "4px",
+                      }}
+                    >
+                      Step {item.label}
+                    </span>
+                    {isActive && (
+                      <span
+                        style={{
+                          fontSize: "11px",
+                          fontWeight: 800,
+                          color: item.textColor,
+                          letterSpacing: "1px",
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        ● Active
+                      </span>
+                    )}
+                  </div>
+
+                  <h3
+                    className="cms-animate"
+                    style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: "clamp(32px, 3.5vw, 52px)",
+                      fontWeight: 700,
+                      color: item.textColor,
+                      letterSpacing: "-0.03em",
+                      lineHeight: 1.05,
+                      margin: 0,
+                      marginBottom: "20px",
+                      position: "relative",
+                      zIndex: 1,
+                    }}
+                  >
+                    {item.title}
+                  </h3>
+
+                  <p
+                    className="cms-animate"
+                    style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: "16px",
+                      lineHeight: 1.65,
+                      color: item.textColor,
+                      opacity: 0.9,
+                      margin: 0,
+                      maxWidth: "560px",
+                      position: "relative",
+                      zIndex: 1,
+                      fontWeight: 400,
+                    }}
+                  >
+                    {item.description}
+                  </p>
+
+                  <div
+                    className="cms-animate"
+                    style={{
+                      marginTop: "32px",
+                      width: isActive ? "80px" : "40px",
+                      height: "3px",
+                      backgroundColor: item.accent,
+                      borderRadius: "2px",
+                      transition: "width 0.5s ease",
+                      position: "relative",
+                      zIndex: 1,
+                    }}
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 };
@@ -1754,7 +2193,7 @@ const RollingNewMessage = ({
   );
 };
 
-// ===== CLOSE BUTTON WITH GSAP (putih full, tanpa modal) =====
+// ===== CLOSE BUTTON WITH GSAP =====
 const CloseRoomButton = ({
   onConfirm,
   disabled,
@@ -1872,7 +2311,6 @@ const LiveChatAgent = ({
   const [showTour, setShowTour] = useState(false);
   const [tourStep, setTourStep] = useState(0);
 
-  // ✅ Inline confirm (bukan modal): muncul di bawah tombol close
   const [showCloseConfirm, setShowCloseConfirm] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -2473,7 +2911,6 @@ const LiveChatAgent = ({
     }
   };
 
-  // ✅ Close room — langsung (tanpa modal), ada toast inline
   const handleCloseRoom = async () => {
     if (!db || !selectedTicket) return;
     try {
@@ -2540,7 +2977,6 @@ const LiveChatAgent = ({
           overflow: "hidden",
         }}
       >
-        {/* ✅ Header biru, teks putih full */}
         <div
           style={{
             padding: "14px 16px",
@@ -2588,7 +3024,6 @@ const LiveChatAgent = ({
                   fontFamily: FONT_FAMILY,
                 }}
               >
-                {/* ✅ Avatar biru + teks putih */}
                 <div
                   style={{
                     width: "36px",
@@ -2625,7 +3060,6 @@ const LiveChatAgent = ({
                   >
                     {u.displayName}
                   </div>
-                  {/* ✅ Status online: teks biru full, tanpa titik bulat */}
                   <span
                     style={{
                       display: "inline-block",
@@ -3181,7 +3615,6 @@ const LiveChatAgent = ({
   const resolvedTickets = filterTicketsBySearch(resolvedTicketsRaw);
   const typingText = selectedTicket ? getTypingText(selectedTicket) : null;
 
-  // ✅ List chat item: status & topik pakai bg putih/hitam + border kotak
   const renderChatListItem = (ticket: Ticket, options?: { onExtraClick?: () => void }) => {
     const isActive = selectedTicket?.id === ticket.id;
     const ticketId = generateTicketId(ticket.createdAt);
@@ -3209,7 +3642,6 @@ const LiveChatAgent = ({
             {ticket.userName}
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "6px", flexShrink: 0 }}>
-            {/* ✅ Status badge bg putih/hitam + border kotak + teks biru/putih */}
             <StabiloBadge
               label={statusStyle.label}
               bg={statusStyle.bg}
@@ -3220,7 +3652,6 @@ const LiveChatAgent = ({
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "8px", flexWrap: "wrap" }}>
-          {/* ✅ Topik badge bg putih/hitam + border kotak */}
           <StabiloBadge
             label={ticket.topic}
             bg={topicStyle.bg}
@@ -3332,7 +3763,6 @@ const LiveChatAgent = ({
         >
           {renderOnlinePanel()}
 
-          {/* ===== CHAT LIST ===== */}
           <div
             data-tour="chat-list"
             className="chat-list-container"
@@ -3506,7 +3936,6 @@ const LiveChatAgent = ({
             )}
           </div>
 
-          {/* ===== CHAT VIEW ===== */}
           <div
             style={{
               flex: 1,
@@ -3563,7 +3992,6 @@ const LiveChatAgent = ({
                     </div>
                   </div>
 
-                  {/* ✅ Action buttons: Resolve (admin) + Close (X) putih full + GSAP */}
                   <div style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
                     {isAdmin && selectedTicket.status !== "resolved" && selectedTicket.status !== "closed" && (
                       <button
@@ -3591,7 +4019,6 @@ const LiveChatAgent = ({
                   </div>
                 </div>
 
-                {/* ✅ Toast konfirmasi inline (bukan modal) */}
                 {showCloseConfirm && (
                   <div
                     style={{
@@ -4031,6 +4458,9 @@ export default function HomePage(): React.JSX.Element {
       >
         <HeroMenuruTitle onNavbarShiftChange={setNavbarShifted} />
 
+        {/* ✅ Sticky Scroll CMS Tabs — tepat di bawah teks Menuru besar */}
+        <StickyScrollCMSTabs />
+
         <div style={{ padding: "0 40px", maxWidth: "1600px", margin: "0 auto", width: "100%" }}>
           <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} />
         </div>
@@ -4270,6 +4700,15 @@ export default function HomePage(): React.JSX.Element {
         .online-panel-container > div {
           scrollbar-width: none !important;
           -ms-overflow-style: none !important;
+        }
+        [data-cms-item] {
+          will-change: transform;
+        }
+        [data-cms-label] {
+          will-change: transform, opacity;
+        }
+        .cms-animate {
+          will-change: transform, opacity;
         }
       `}</style>
     </>
