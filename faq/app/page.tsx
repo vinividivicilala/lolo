@@ -307,7 +307,7 @@ const BLUE = "#0D3CFC";
 const WHITE = "#FFFFFF";
 const BLACK = "#000000";
 
-// ===== STATUS STYLES =====
+// ===== STATUS STYLES (BG PUTIH / BG HITAM + BORDER KOTAK) =====
 const STATUS_STYLES: {
   [key: string]: {
     label: string;
@@ -342,7 +342,7 @@ const STATUS_STYLES: {
   },
 };
 
-// ===== TOPIC STYLES =====
+// ===== TOPIC STYLES (BG PUTIH / BG HITAM + BORDER KOTAK) =====
 const TOPIC_STYLES: {
   [key: string]: {
     bg: string;
@@ -552,153 +552,7 @@ interface TourStep {
   isLoginStep?: boolean;
 }
 
-// ===== STICKY SCROLL CARDS (3 ITEM) =====
-const StickyScrollCards = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const card1Ref = useRef<HTMLDivElement>(null);
-  const card2Ref = useRef<HTMLDivElement>(null);
-  const card3Ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (!containerRef.current) return;
-
-    const cards = [card1Ref.current, card2Ref.current, card3Ref.current].filter(Boolean);
-
-    const ctx = gsap.context(() => {
-      cards.forEach((card, i) => {
-        gsap.fromTo(
-          card,
-          { y: 80, opacity: 0 },
-          {
-            y: 0,
-            opacity: 1,
-            duration: 0.9,
-            ease: "power3.out",
-            scrollTrigger: {
-              trigger: card,
-              start: "top 90%",
-              end: "top 60%",
-              scrub: 1,
-              toggleActions: "play none none reverse",
-            },
-          }
-        );
-      });
-
-      // Parallax stacking effect: card 2 & 3 overlap card sebelumnya saat scroll
-      gsap.to(card2Ref.current, {
-        y: -40,
-        scrollTrigger: {
-          trigger: card2Ref.current,
-          start: "top 80%",
-          end: "top 30%",
-          scrub: 1,
-        },
-      });
-
-      gsap.to(card3Ref.current, {
-        y: -80,
-        scrollTrigger: {
-          trigger: card3Ref.current,
-          start: "top 80%",
-          end: "top 30%",
-          scrub: 1,
-        },
-      });
-    }, containerRef);
-
-    return () => ctx.revert();
-  }, []);
-
-  const items = [
-    {
-      title: "Kualitas Tanpa Kompromi",
-      description:
-        "Setiap produk Menuru dirancang dengan standar kualitas tertinggi, menggunakan material pilihan dan proses produksi yang teliti untuk memastikan kepuasan Anda.",
-      ref: card1Ref,
-    },
-    {
-      title: "Desain yang Bermakna",
-      description:
-        "Kami percaya desain bukan sekadar estetika. Setiap detail memiliki cerita dan tujuan, menghadirkan pengalaman yang bermakna bagi setiap pengguna.",
-      ref: card2Ref,
-    },
-    {
-      title: "Komunitas yang Tumbuh",
-      description:
-        "Menuru adalah rumah bagi individu yang peduli pada diri sendiri dan sesama. Bergabunglah dengan komunitas kami dan tumbuh bersama.",
-      ref: card3Ref,
-    },
-  ];
-
-  return (
-    <div
-      ref={containerRef}
-      style={{
-        width: "100%",
-        backgroundColor: WHITE,
-        padding: "80px 40px 120px 40px",
-        display: "flex",
-        flexDirection: "column",
-        gap: "60px",
-        position: "relative",
-        fontFamily: FONT_FAMILY,
-      }}
-    >
-      {items.map((item, i) => (
-        <div
-          key={i}
-          ref={item.ref}
-          style={{
-            width: "100%",
-            maxWidth: "900px",
-            backgroundColor: WHITE,
-            border: `1.5px solid ${BLUE}`,
-            borderRadius: "16px",
-            padding: "48px 56px",
-            position: "relative",
-            zIndex: 3 - i,
-            marginLeft: i === 1 ? "80px" : i === 2 ? "160px" : "0",
-            marginTop: i > 0 ? "-20px" : "0",
-            boxShadow: "0 20px 60px rgba(13, 60, 252, 0.08)",
-            willChange: "transform, opacity",
-          }}
-        >
-          <h3
-            style={{
-              fontFamily: FONT_FAMILY,
-              fontSize: "clamp(28px, 4vw, 48px)",
-              fontWeight: 700,
-              color: BLUE,
-              letterSpacing: "-0.03em",
-              lineHeight: 1.1,
-              margin: 0,
-              marginBottom: "20px",
-            }}
-          >
-            {item.title}
-          </h3>
-          <p
-            style={{
-              fontFamily: FONT_FAMILY,
-              fontSize: "clamp(15px, 1.6vw, 18px)",
-              fontWeight: 400,
-              color: BLACK,
-              lineHeight: 1.6,
-              margin: 0,
-              maxWidth: "680px",
-            }}
-          >
-            {item.description}
-          </p>
-        </div>
-      ))}
-    </div>
-  );
-};
-
-// ===== HERO MENURU TITLE =====
+// ===== HERO MENURU TITLE (PINNED) =====
 const HeroMenuruTitle = ({
   onNavbarShiftChange,
 }: {
@@ -756,7 +610,8 @@ const HeroMenuruTitle = ({
           start: "top top",
           end: "+=500",
           scrub: 0.8,
-          pin: false,
+          pin: true,
+          pinSpacing: true,
           onUpdate: (self) => {
             onNavbarShiftChange(self.progress > 0.35);
           },
@@ -1899,7 +1754,7 @@ const RollingNewMessage = ({
   );
 };
 
-// ===== CLOSE BUTTON WITH GSAP =====
+// ===== CLOSE BUTTON WITH GSAP (putih full, tanpa modal) =====
 const CloseRoomButton = ({
   onConfirm,
   disabled,
@@ -3469,7 +3324,6 @@ const LiveChatAgent = ({
         >
           {renderOnlinePanel()}
 
-          {/* ===== CHAT LIST ===== */}
           <div
             data-tour="chat-list"
             className="chat-list-container"
@@ -3643,7 +3497,6 @@ const LiveChatAgent = ({
             )}
           </div>
 
-          {/* ===== CHAT VIEW ===== */}
           <div
             style={{
               flex: 1,
@@ -4164,23 +4017,36 @@ export default function HomePage(): React.JSX.Element {
           overflow: "visible",
         }}
       >
-        <HeroMenuruTitle onNavbarShiftChange={setNavbarShifted} />
+        {/* HERO + MAIN CONTENT WRAPPER */}
+        <div style={{ position: "relative", zIndex: 10, backgroundColor: WHITE }}>
+          <HeroMenuruTitle onNavbarShiftChange={setNavbarShifted} />
 
-        {/* ===== STICKY SCROLL CARDS (3 ITEM) ===== */}
-        <StickyScrollCards />
-
-        <div style={{ padding: "0 40px", maxWidth: "1600px", margin: "0 auto", width: "100%" }}>
-          <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} />
+          {/* LIVE CHAT AGENT — starts after hero, stays in normal flow */}
+          <div
+            style={{
+              position: "relative",
+              zIndex: 11,
+              backgroundColor: WHITE,
+              padding: "0 40px",
+              maxWidth: "1600px",
+              margin: "0 auto",
+              width: "100%",
+            }}
+          >
+            <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} />
+          </div>
         </div>
 
+        {/* FOOTER LINKS SECTION */}
         <div
           style={{
+            position: "relative",
+            zIndex: 12,
             width: "100%",
             padding: "60px 40px 40px 40px",
             backgroundColor: WHITE,
             borderTop: "1px solid rgba(0,0,0,0.05)",
             marginTop: "20px",
-            position: "relative",
             overflow: "hidden",
           }}
         >
@@ -4331,7 +4197,10 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        <FooterMenuruTitle />
+        {/* FOOTER TITLE — 2024 - 2026, positioned at absolute bottom */}
+        <div style={{ position: "relative", zIndex: 13, backgroundColor: WHITE }}>
+          <FooterMenuruTitle />
+        </div>
       </div>
 
       <style jsx global>{`
