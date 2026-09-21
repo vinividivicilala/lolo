@@ -340,6 +340,12 @@ const ArrowRight = ({ size = 20, color = "currentColor" }: { size?: number; colo
     <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
+// Minimalist chevron arrow (untuk dropdown user)
+const ChevronDownIcon = ({ size = 14, color = "currentColor" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <path d="M6 9L12 15L18 9" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
 const CheckIcon = ({ size = 12, color = "currentColor" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <path d="M20 6L9 17L4 12" stroke={color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
@@ -1365,43 +1371,264 @@ const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
   );
 };
 
-// ===== RIGHT NAVBAR =====
-const RightNavbar = () => {
+// ===== RIGHT NAVBAR (Login / User) =====
+const RightNavbar = ({ user, auth, db }: { user: any; auth: any; db: any }) => {
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Tutup dropdown jika klik di luar
+  useEffect(() => {
+    if (!dropdownOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [dropdownOpen]);
+
+  // Animate dropdown
+  useEffect(() => {
+    if (dropdownOpen && dropdownRef.current) {
+      gsap.fromTo(
+        dropdownRef.current,
+        { opacity: 0, y: -10, scale: 0.96 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.3, ease: "power3.out" }
+      );
+    }
+  }, [dropdownOpen]);
+
+  const handleLogout = async () => {
+    if (!auth) return;
+    try {
+      if (db && user) {
+        await updateDoc(doc(db, "users", user.uid), {
+          online: false,
+          lastSeen: serverTimestamp(),
+        });
+      }
+      await signOut(auth);
+      setDropdownOpen(false);
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
+
+  // ===== BELUM LOGIN: tombol "Log In" =====
+  if (!user) {
+    return (
+      <div
+        style={{
+          position: "fixed",
+          top: "20px",
+          right: "24px",
+          zIndex: 9000,
+          display: "flex",
+          alignItems: "center",
+          gap: "10px",
+          padding: "10px 18px 10px 16px",
+          backgroundColor: "rgba(0, 0, 0, 0.75)",
+          backdropFilter: "blur(20px)",
+          WebkitBackdropFilter: "blur(20px)",
+          borderRadius: "10px",
+          border: "1px solid rgba(255,255,255,0.15)",
+          boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
+          fontFamily: FONT_FAMILY,
+        }}
+      >
+        <PeopleIcon size={20} color="#ffffff" />
+        <Link
+          href="/signin"
+          style={{
+            textDecoration: "none",
+            color: "#ffffff",
+            fontSize: "14px",
+            fontWeight: 600,
+            letterSpacing: "0.02em",
+            fontFamily: FONT_FAMILY,
+            whiteSpace: "nowrap",
+          }}
+        >
+          Log In
+        </Link>
+      </div>
+    );
+  }
+
+  // ===== SUDAH LOGIN: foto profil + nama user + dropdown Dashboard =====
+  const displayName = user.displayName || user.email?.split("@")[0] || "User";
+  const photoURL = user.photoURL || "";
+
   return (
     <div
+      ref={dropdownRef}
       style={{
         position: "fixed",
         top: "20px",
         right: "24px",
         zIndex: 9000,
-        display: "flex",
-        alignItems: "center",
-        gap: "10px",
-        padding: "10px 18px 10px 16px",
-        backgroundColor: "rgba(0, 0, 0, 0.75)",
-        backdropFilter: "blur(20px)",
-        WebkitBackdropFilter: "blur(20px)",
-        borderRadius: "10px",
-        border: "1px solid rgba(255,255,255,0.15)",
-        boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
         fontFamily: FONT_FAMILY,
       }}
     >
-      <PeopleIcon size={20} color="#ffffff" />
-      <Link
-        href="/signin"
+      {/* Trigger: foto + nama user */}
+      <div
+        onClick={() => setDropdownOpen((prev) => !prev)}
         style={{
-          textDecoration: "none",
-          color: "#ffffff",
-          fontSize: "14px",
-          fontWeight: 600,
-          letterSpacing: "0.02em",
-          fontFamily: FONT_FAMILY,
-          whiteSpace: "nowrap",
+          display: "flex",
+          alignItems: "center",
+          gap: "10px",
+          padding: "8px 14px 8px 8px",
+          backgroundColor: "rgba(0, 0, 0, 0.75)",
+          backdropFilter: "blur(20px)",
+          WebkitBackdropFilter: "blur(20px)",
+          borderRadius: "10px",
+          border: "1px solid rgba(255,255,255,0.15)",
+          boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
+          cursor: "pointer",
+          transition: "background-color 0.2s ease",
         }}
       >
-        Log In
-      </Link>
+        {/* Foto profil dari Gmail */}
+        <div
+          style={{
+            width: "32px",
+            height: "32px",
+            borderRadius: "50%",
+            overflow: "hidden",
+            backgroundColor: BLUE,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+            border: "1.5px solid rgba(255,255,255,0.3)",
+          }}
+        >
+          {photoURL ? (
+            <img
+              src={photoURL}
+              alt={displayName}
+              style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+              referrerPolicy="no-referrer"
+            />
+          ) : (
+            <span style={{ fontSize: "14px", fontWeight: 800, color: WHITE }}>
+              {displayName.charAt(0).toUpperCase()}
+            </span>
+          )}
+        </div>
+
+        {/* Nama user */}
+        <span
+          style={{
+            color: "#ffffff",
+            fontSize: "14px",
+            fontWeight: 600,
+            letterSpacing: "0.02em",
+            whiteSpace: "nowrap",
+            maxWidth: "180px",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
+          {displayName}
+        </span>
+
+        {/* Panah minimalist */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            transform: dropdownOpen ? "rotate(180deg)" : "rotate(0deg)",
+            transition: "transform 0.25s ease",
+          }}
+        >
+          <ChevronDownIcon size={14} color="#ffffff" />
+        </div>
+      </div>
+
+      {/* Dropdown: Dashboard + panah + Logout */}
+      {dropdownOpen && (
+        <div
+          style={{
+            position: "absolute",
+            top: "calc(100% + 10px)",
+            right: "0px",
+            minWidth: "200px",
+            backgroundColor: "rgba(0, 0, 0, 0.9)",
+            backdropFilter: "blur(24px)",
+            WebkitBackdropFilter: "blur(24px)",
+            borderRadius: "12px",
+            border: "1px solid rgba(255,255,255,0.15)",
+            boxShadow: "0 12px 40px rgba(0,0,0,0.4)",
+            padding: "8px",
+            display: "flex",
+            flexDirection: "column",
+            gap: "4px",
+            zIndex: 9001,
+          }}
+        >
+          <Link
+            href="/dashboard"
+            style={{
+              textDecoration: "none",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "12px",
+              padding: "10px 14px",
+              borderRadius: "8px",
+              color: "#ffffff",
+              fontSize: "14px",
+              fontWeight: 600,
+              fontFamily: FONT_FAMILY,
+              transition: "background-color 0.2s ease",
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "rgba(13,60,252,0.9)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "transparent";
+            }}
+            onClick={() => setDropdownOpen(false)}
+          >
+            <span>Dashboard</span>
+            <ArrowRight size={16} color="#ffffff" />
+          </Link>
+
+          <button
+            onClick={handleLogout}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "12px",
+              padding: "10px 14px",
+              borderRadius: "8px",
+              color: "#ffffff",
+              fontSize: "14px",
+              fontWeight: 600,
+              fontFamily: FONT_FAMILY,
+              backgroundColor: "transparent",
+              border: "none",
+              cursor: "pointer",
+              textAlign: "left",
+              width: "100%",
+              transition: "background-color 0.2s ease",
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.backgroundColor = "rgba(255,255,255,0.1)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent";
+            }}
+          >
+            <span>Logout</span>
+            <ArrowRight size={16} color="#ffffff" />
+          </button>
+        </div>
+      )}
     </div>
   );
 };
@@ -3977,7 +4204,7 @@ export default function HomePage(): React.JSX.Element {
       </Head>
 
       <LeftNavbar shifted={navbarShifted} />
-      <RightNavbar />
+      <RightNavbar user={user} auth={auth} db={db} />
 
       <CookieConsentPopup user={user} db={db} isMounted={isMounted} />
 
@@ -4093,10 +4320,9 @@ export default function HomePage(): React.JSX.Element {
           </div>
 
           {/* ===== BG KOTAK BIRU =====
-              - Ujung kiri SEJAJAR dengan "Notes" (bukan "01")
+              - Ujung kiri SEJAJAR dengan huruf "N" pada "Notes"
               - Ujung kanan SEJAJAR dengan sisi kiri badge "Trust"
-              - Tinggi lebih gemuk (420px)
-              - Tidak menutupi "Live Chat Agent" karena absolute + zIndex di bawah konten
+              - Tinggi gemuk (420px)
           */}
           <div
             style={{
@@ -4111,12 +4337,13 @@ export default function HomePage(): React.JSX.Element {
               style={{
                 position: "absolute",
                 top: "0px",
-                /* kiri: sejajar dengan "Notes"
+                /* kiri: sejajar dengan huruf "N" pada "Notes"
                    "01" fontSize 90px ≈ lebar ~110px
-                   gap 140px → Notes mulai sekitar 110 + 140 = 250px dari kiri container */
-                left: "250px",
+                   gap 140px → Notes mulai ≈ 250px, tapi huruf N sedikit lebih ke kiri,
+                   jadi kita set 110px agar ujung kiri bg tepat di huruf "N" */
+                left: "110px",
                 /* kanan: sejajar dengan sisi kiri badge Trust
-                   Trust marginRight 360px → ujung kanan bg berhenti 360px dari kanan container */
+                   Trust marginRight 360px */
                 right: "360px",
                 height: "420px",
                 backgroundColor: BLUE,
