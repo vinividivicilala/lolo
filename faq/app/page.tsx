@@ -307,7 +307,7 @@ const BLUE = "#0D3CFC";
 const WHITE = "#FFFFFF";
 const BLACK = "#000000";
 
-// ===== STATUS STYLES =====
+// ===== STATUS STYLES (BG PUTIH / BG HITAM + BORDER KOTAK) =====
 const STATUS_STYLES: {
   [key: string]: {
     label: string;
@@ -316,13 +316,33 @@ const STATUS_STYLES: {
     border: string;
   };
 } = {
-  waiting: { label: "Waiting", bg: WHITE, text: BLUE, border: BLUE },
-  active: { label: "Active", bg: BLACK, text: WHITE, border: WHITE },
-  resolved: { label: "Resolved", bg: WHITE, text: BLUE, border: BLUE },
-  closed: { label: "Closed", bg: BLACK, text: WHITE, border: WHITE },
+  waiting: {
+    label: "Waiting",
+    bg: WHITE,
+    text: BLUE,
+    border: BLUE,
+  },
+  active: {
+    label: "Active",
+    bg: BLACK,
+    text: WHITE,
+    border: WHITE,
+  },
+  resolved: {
+    label: "Resolved",
+    bg: WHITE,
+    text: BLUE,
+    border: BLUE,
+  },
+  closed: {
+    label: "Closed",
+    bg: BLACK,
+    text: WHITE,
+    border: WHITE,
+  },
 };
 
-// ===== TOPIC STYLES =====
+// ===== TOPIC STYLES (BG PUTIH / BG HITAM + BORDER KOTAK) =====
 const TOPIC_STYLES: {
   [key: string]: {
     bg: string;
@@ -540,7 +560,6 @@ const HeroMenuruTitle = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
-  const featuresRef = useRef<HTMLSpanElement>(null);
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -553,7 +572,6 @@ const HeroMenuruTitle = ({
 
     const container = containerRef.current;
     const title = titleRef.current;
-    const features = featuresRef.current;
 
     const NAV_TOP = 10;
     const NAV_LEFT = 40;
@@ -585,18 +603,6 @@ const HeroMenuruTitle = ({
         ease: "back.out(1.8)",
         delay: 0.2,
       });
-
-      // Animate Features text
-      if (features) {
-        gsap.set(features, { opacity: 0, y: 30 });
-        gsap.to(features, {
-          opacity: 1,
-          y: 0,
-          duration: 0.9,
-          ease: "back.out(1.5)",
-          delay: 1.0,
-        });
-      }
 
       const scrollTl = gsap.timeline({
         scrollTrigger: {
@@ -633,24 +639,6 @@ const HeroMenuruTitle = ({
         0
       );
 
-      // Features ikut fixed ke kiri atas bersama title saat scroll
-      if (features) {
-        scrollTl.to(
-          features,
-          {
-            position: "fixed",
-            top: `${NAV_TOP + NAV_HEIGHT + 4}px`,
-            left: `${NAV_LEFT}px`,
-            fontSize: "13px",
-            fontWeight: 700,
-            letterSpacing: "0.15em",
-            duration: 1,
-            ease: "power2.inOut",
-          },
-          0
-        );
-      }
-
       scrollTl.to(
         container,
         {
@@ -684,59 +672,28 @@ const HeroMenuruTitle = ({
         paddingTop: "110px",
       }}
     >
-      <div
+      <h1
+        ref={titleRef}
         style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "flex-start",
-          position: "relative",
+          fontFamily: FONT_FAMILY,
+          fontSize: "600px",
+          fontWeight: 700,
+          color: "#0D3CFC",
+          letterSpacing: "-0.05em",
+          lineHeight: 0.85,
+          margin: 0,
+          textAlign: "center",
+          userSelect: "none",
+          whiteSpace: "nowrap",
+          display: "inline-block",
+          WebkitFontSmoothing: "antialiased",
+          MozOsxFontSmoothing: "grayscale",
+          willChange: "transform, font-size, top, left",
+          zIndex: 8999,
         }}
       >
-        <h1
-          ref={titleRef}
-          style={{
-            fontFamily: FONT_FAMILY,
-            fontSize: "600px",
-            fontWeight: 700,
-            color: "#0D3CFC",
-            letterSpacing: "-0.05em",
-            lineHeight: 0.85,
-            margin: 0,
-            textAlign: "left",
-            userSelect: "none",
-            whiteSpace: "nowrap",
-            display: "inline-block",
-            WebkitFontSmoothing: "antialiased",
-            MozOsxFontSmoothing: "grayscale",
-            willChange: "transform, font-size, top, left",
-            zIndex: 8999,
-          }}
-        >
-          Menuru
-        </h1>
-        <span
-          ref={featuresRef}
-          style={{
-            fontFamily: FONT_FAMILY,
-            fontSize: "18px",
-            fontWeight: 700,
-            color: "#0D3CFC",
-            letterSpacing: "0.2em",
-            textTransform: "uppercase",
-            lineHeight: 1,
-            marginTop: "12px",
-            display: "inline-block",
-            userSelect: "none",
-            whiteSpace: "nowrap",
-            WebkitFontSmoothing: "antialiased",
-            MozOsxFontSmoothing: "grayscale",
-            willChange: "transform, font-size, top, left, opacity",
-            zIndex: 8999,
-          }}
-        >
-          Features
-        </span>
-      </div>
+        Menuru
+      </h1>
     </div>
   );
 };
@@ -4062,6 +4019,37 @@ export default function HomePage(): React.JSX.Element {
         }}
       >
         <HeroMenuruTitle onNavbarShiftChange={setNavbarShifted} />
+
+        {/* ===== FEATURES TITLE (tidak ikut scroll hero, posisi kiri, sejajar dengan Live Chat Agent) ===== */}
+        <div
+          style={{
+            padding: "0 40px",
+            maxWidth: "1600px",
+            margin: "0 auto",
+            width: "100%",
+            position: "relative",
+            zIndex: 2,
+            marginTop: "-40px",
+          }}
+        >
+          <h2
+            style={{
+              fontFamily: FONT_FAMILY,
+              fontSize: "80px",
+              fontWeight: 700,
+              color: BLUE,
+              letterSpacing: "-0.03em",
+              lineHeight: 1.1,
+              margin: 0,
+              marginBottom: "20px",
+              textAlign: "left",
+              WebkitFontSmoothing: "antialiased",
+              MozOsxFontSmoothing: "grayscale",
+            }}
+          >
+            Features
+          </h2>
+        </div>
 
         <div
           style={{
