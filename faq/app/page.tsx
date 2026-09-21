@@ -307,8 +307,7 @@ const BLUE = "#0D3CFC";
 const WHITE = "#FFFFFF";
 const BLACK = "#000000";
 
-// ===== STATUS STYLES (BG PUTIH / BG HITAM + BORDER KOTAK) =====
-// Untuk list chat agent & user: putih/hitam solid bg + border teks biru/putih full
+// ===== STATUS STYLES =====
 const STATUS_STYLES: {
   [key: string]: {
     label: string;
@@ -343,7 +342,7 @@ const STATUS_STYLES: {
   },
 };
 
-// ===== TOPIC STYLES (BG PUTIH / BG HITAM + BORDER KOTAK) =====
+// ===== TOPIC STYLES =====
 const TOPIC_STYLES: {
   [key: string]: {
     bg: string;
@@ -446,7 +445,7 @@ const BrandIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: st
   </svg>
 );
 
-// ===== STABILO BADGE (BG PUTIH/HITAM + BORDER KOTAK + TEKS BIRU/PUTIH FULL) =====
+// ===== STABILO BADGE =====
 const StabiloBadge = ({
   label,
   bg,
@@ -552,6 +551,152 @@ interface TourStep {
   position?: "top" | "bottom" | "left" | "right";
   isLoginStep?: boolean;
 }
+
+// ===== STICKY SCROLL CARDS (3 ITEM) =====
+const StickyScrollCards = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const card1Ref = useRef<HTMLDivElement>(null);
+  const card2Ref = useRef<HTMLDivElement>(null);
+  const card3Ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!containerRef.current) return;
+
+    const cards = [card1Ref.current, card2Ref.current, card3Ref.current].filter(Boolean);
+
+    const ctx = gsap.context(() => {
+      cards.forEach((card, i) => {
+        gsap.fromTo(
+          card,
+          { y: 80, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.9,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: card,
+              start: "top 90%",
+              end: "top 60%",
+              scrub: 1,
+              toggleActions: "play none none reverse",
+            },
+          }
+        );
+      });
+
+      // Parallax stacking effect: card 2 & 3 overlap card sebelumnya saat scroll
+      gsap.to(card2Ref.current, {
+        y: -40,
+        scrollTrigger: {
+          trigger: card2Ref.current,
+          start: "top 80%",
+          end: "top 30%",
+          scrub: 1,
+        },
+      });
+
+      gsap.to(card3Ref.current, {
+        y: -80,
+        scrollTrigger: {
+          trigger: card3Ref.current,
+          start: "top 80%",
+          end: "top 30%",
+          scrub: 1,
+        },
+      });
+    }, containerRef);
+
+    return () => ctx.revert();
+  }, []);
+
+  const items = [
+    {
+      title: "Kualitas Tanpa Kompromi",
+      description:
+        "Setiap produk Menuru dirancang dengan standar kualitas tertinggi, menggunakan material pilihan dan proses produksi yang teliti untuk memastikan kepuasan Anda.",
+      ref: card1Ref,
+    },
+    {
+      title: "Desain yang Bermakna",
+      description:
+        "Kami percaya desain bukan sekadar estetika. Setiap detail memiliki cerita dan tujuan, menghadirkan pengalaman yang bermakna bagi setiap pengguna.",
+      ref: card2Ref,
+    },
+    {
+      title: "Komunitas yang Tumbuh",
+      description:
+        "Menuru adalah rumah bagi individu yang peduli pada diri sendiri dan sesama. Bergabunglah dengan komunitas kami dan tumbuh bersama.",
+      ref: card3Ref,
+    },
+  ];
+
+  return (
+    <div
+      ref={containerRef}
+      style={{
+        width: "100%",
+        backgroundColor: WHITE,
+        padding: "80px 40px 120px 40px",
+        display: "flex",
+        flexDirection: "column",
+        gap: "60px",
+        position: "relative",
+        fontFamily: FONT_FAMILY,
+      }}
+    >
+      {items.map((item, i) => (
+        <div
+          key={i}
+          ref={item.ref}
+          style={{
+            width: "100%",
+            maxWidth: "900px",
+            backgroundColor: WHITE,
+            border: `1.5px solid ${BLUE}`,
+            borderRadius: "16px",
+            padding: "48px 56px",
+            position: "relative",
+            zIndex: 3 - i,
+            marginLeft: i === 1 ? "80px" : i === 2 ? "160px" : "0",
+            marginTop: i > 0 ? "-20px" : "0",
+            boxShadow: "0 20px 60px rgba(13, 60, 252, 0.08)",
+            willChange: "transform, opacity",
+          }}
+        >
+          <h3
+            style={{
+              fontFamily: FONT_FAMILY,
+              fontSize: "clamp(28px, 4vw, 48px)",
+              fontWeight: 700,
+              color: BLUE,
+              letterSpacing: "-0.03em",
+              lineHeight: 1.1,
+              margin: 0,
+              marginBottom: "20px",
+            }}
+          >
+            {item.title}
+          </h3>
+          <p
+            style={{
+              fontFamily: FONT_FAMILY,
+              fontSize: "clamp(15px, 1.6vw, 18px)",
+              fontWeight: 400,
+              color: BLACK,
+              lineHeight: 1.6,
+              margin: 0,
+              maxWidth: "680px",
+            }}
+          >
+            {item.description}
+          </p>
+        </div>
+      ))}
+    </div>
+  );
+};
 
 // ===== HERO MENURU TITLE =====
 const HeroMenuruTitle = ({
@@ -695,168 +840,6 @@ const HeroMenuruTitle = ({
       >
         Menuru
       </h1>
-    </div>
-  );
-};
-
-// ===== STICKY SCROLL WITH GSAP SCROLLTRIGGER =====
-const StickyScrollSection = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const stickyRef = useRef<HTMLDivElement>(null);
-  const itemsRef = useRef<(HTMLDivElement | null)[]>([]);
-
-  const items = [
-    {
-      title: "Crafted with Purpose",
-      description:
-        "Every product we create begins with a simple question: how can we make everyday life feel more intentional? We design with purpose, stripping away the unnecessary to reveal what truly matters.",
-    },
-    {
-      title: "Built to Last",
-      description:
-        "We believe in objects that endure. From material selection to construction, every detail is considered to ensure our products stand the test of time — both in form and function.",
-    },
-    {
-      title: "Made for You",
-      description:
-        "Menuru is more than a brand; it is a companion for your journey. We create tools that adapt to your rhythm, helping you find clarity and calm in a world that never stops moving.",
-    },
-  ];
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (!containerRef.current || !stickyRef.current) return;
-
-    const container = containerRef.current;
-    const sticky = stickyRef.current;
-    const itemEls = itemsRef.current.filter(Boolean) as HTMLDivElement[];
-
-    if (itemEls.length === 0) return;
-
-    const ctx = gsap.context(() => {
-      // Set initial state: first item visible, others hidden
-      gsap.set(itemEls, { opacity: 0, y: 60 });
-      gsap.set(itemEls[0], { opacity: 1, y: 0 });
-
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: container,
-          start: "top top",
-          end: () => `+=${items.length * 100}%`,
-          scrub: 1,
-          pin: sticky,
-          pinSpacing: true,
-          anticipatePin: 1,
-          invalidateOnRefresh: true,
-        },
-      });
-
-      itemEls.forEach((el, i) => {
-        if (i === 0) return; // first item already visible
-
-        // Animate previous item out
-        tl.to(
-          itemEls[i - 1],
-          {
-            opacity: 0,
-            y: -60,
-            duration: 0.5,
-            ease: "power2.inOut",
-          },
-          `step-${i}`
-        );
-
-        // Animate current item in
-        tl.fromTo(
-          el,
-          { opacity: 0, y: 60 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.5,
-            ease: "power2.out",
-          },
-          `step-${i}+=0.25`
-        );
-      });
-    }, containerRef);
-
-    return () => ctx.revert();
-  }, []);
-
-  return (
-    <div
-      ref={containerRef}
-      style={{
-        width: "100%",
-        position: "relative",
-        backgroundColor: WHITE,
-        padding: "0 40px",
-        maxWidth: "1600px",
-        margin: "0 auto",
-        overflow: "visible",
-      }}
-    >
-      <div
-        ref={stickyRef}
-        style={{
-          height: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "flex-start",
-          position: "relative",
-        }}
-      >
-        <div style={{ width: "100%", maxWidth: "1200px", position: "relative" }}>
-          {items.map((item, index) => (
-            <div
-              key={index}
-              ref={(el) => {
-                itemsRef.current[index] = el;
-              }}
-              style={{
-                position: index === 0 ? "relative" : "absolute",
-                top: 0,
-                left: 0,
-                width: "100%",
-                display: "flex",
-                flexDirection: "column",
-                gap: "20px",
-                willChange: "transform, opacity",
-              }}
-            >
-              <h2
-                style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: "clamp(40px, 6vw, 80px)",
-                  fontWeight: 700,
-                  color: BLUE,
-                  letterSpacing: "-0.03em",
-                  lineHeight: 1.1,
-                  margin: 0,
-                  maxWidth: "800px",
-                }}
-              >
-                {item.title}
-              </h2>
-              <p
-                style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: "clamp(16px, 1.5vw, 20px)",
-                  fontWeight: 400,
-                  color: BLACK,
-                  lineHeight: 1.6,
-                  margin: 0,
-                  maxWidth: "680px",
-                  opacity: 0.85,
-                }}
-              >
-                {item.description}
-              </p>
-            </div>
-          ))}
-        </div>
-      </div>
     </div>
   );
 };
@@ -1916,7 +1899,7 @@ const RollingNewMessage = ({
   );
 };
 
-// ===== CLOSE BUTTON WITH GSAP (putih full, tanpa modal) =====
+// ===== CLOSE BUTTON WITH GSAP =====
 const CloseRoomButton = ({
   onConfirm,
   disabled,
@@ -2034,7 +2017,6 @@ const LiveChatAgent = ({
   const [showTour, setShowTour] = useState(false);
   const [tourStep, setTourStep] = useState(0);
 
-  // ✅ Inline confirm (bukan modal): muncul di bawah tombol close
   const [showCloseConfirm, setShowCloseConfirm] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -2635,7 +2617,6 @@ const LiveChatAgent = ({
     }
   };
 
-  // ✅ Close room — langsung (tanpa modal), ada toast inline
   const handleCloseRoom = async () => {
     if (!db || !selectedTicket) return;
     try {
@@ -2702,7 +2683,6 @@ const LiveChatAgent = ({
           overflow: "hidden",
         }}
       >
-        {/* ✅ Header biru, teks putih full */}
         <div
           style={{
             padding: "14px 16px",
@@ -2750,7 +2730,6 @@ const LiveChatAgent = ({
                   fontFamily: FONT_FAMILY,
                 }}
               >
-                {/* ✅ Avatar biru + teks putih */}
                 <div
                   style={{
                     width: "36px",
@@ -2787,7 +2766,6 @@ const LiveChatAgent = ({
                   >
                     {u.displayName}
                   </div>
-                  {/* ✅ Status online: teks biru full, tanpa titik bulat */}
                   <span
                     style={{
                       display: "inline-block",
@@ -3343,7 +3321,6 @@ const LiveChatAgent = ({
   const resolvedTickets = filterTicketsBySearch(resolvedTicketsRaw);
   const typingText = selectedTicket ? getTypingText(selectedTicket) : null;
 
-  // ✅ List chat item: status & topik pakai bg putih/hitam + border kotak
   const renderChatListItem = (ticket: Ticket, options?: { onExtraClick?: () => void }) => {
     const isActive = selectedTicket?.id === ticket.id;
     const ticketId = generateTicketId(ticket.createdAt);
@@ -3371,7 +3348,6 @@ const LiveChatAgent = ({
             {ticket.userName}
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "6px", flexShrink: 0 }}>
-            {/* ✅ Status badge bg putih/hitam + border kotak + teks biru/putih */}
             <StabiloBadge
               label={statusStyle.label}
               bg={statusStyle.bg}
@@ -3382,7 +3358,6 @@ const LiveChatAgent = ({
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "8px", flexWrap: "wrap" }}>
-          {/* ✅ Topik badge bg putih/hitam + border kotak */}
           <StabiloBadge
             label={ticket.topic}
             bg={topicStyle.bg}
@@ -3725,7 +3700,6 @@ const LiveChatAgent = ({
                     </div>
                   </div>
 
-                  {/* ✅ Action buttons: Resolve (admin) + Close (X) putih full + GSAP */}
                   <div style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
                     {isAdmin && selectedTicket.status !== "resolved" && selectedTicket.status !== "closed" && (
                       <button
@@ -3753,7 +3727,6 @@ const LiveChatAgent = ({
                   </div>
                 </div>
 
-                {/* ✅ Toast konfirmasi inline (bukan modal) */}
                 {showCloseConfirm && (
                   <div
                     style={{
@@ -4193,8 +4166,8 @@ export default function HomePage(): React.JSX.Element {
       >
         <HeroMenuruTitle onNavbarShiftChange={setNavbarShifted} />
 
-        {/* ===== STICKY SCROLL SECTION (DI BAWAH HERO TITLE) ===== */}
-        <StickyScrollSection />
+        {/* ===== STICKY SCROLL CARDS (3 ITEM) ===== */}
+        <StickyScrollCards />
 
         <div style={{ padding: "0 40px", maxWidth: "1600px", margin: "0 auto", width: "100%" }}>
           <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} />
