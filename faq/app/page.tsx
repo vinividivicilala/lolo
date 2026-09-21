@@ -560,6 +560,7 @@ const HeroMenuruTitle = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
+  const featuresRef = useRef<HTMLSpanElement>(null);
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -604,6 +605,21 @@ const HeroMenuruTitle = ({
         delay: 0.2,
       });
 
+      // Animasi untuk teks "Features"
+      if (featuresRef.current) {
+        gsap.set(featuresRef.current, {
+          opacity: 0,
+          y: 20,
+        });
+        gsap.to(featuresRef.current, {
+          opacity: 1,
+          y: 0,
+          duration: 1,
+          delay: 1.2,
+          ease: "back.out(1.7)",
+        });
+      }
+
       const scrollTl = gsap.timeline({
         scrollTrigger: {
           trigger: container,
@@ -639,6 +655,20 @@ const HeroMenuruTitle = ({
         0
       );
 
+      // Sembunyikan "Features" saat scroll (biar tidak mengganggu navbar)
+      if (featuresRef.current) {
+        scrollTl.to(
+          featuresRef.current,
+          {
+            opacity: 0,
+            y: -10,
+            duration: 0.4,
+            ease: "power2.in",
+          },
+          0
+        );
+      }
+
       scrollTl.to(
         container,
         {
@@ -672,28 +702,61 @@ const HeroMenuruTitle = ({
         paddingTop: "110px",
       }}
     >
-      <h1
-        ref={titleRef}
+      <div
         style={{
-          fontFamily: FONT_FAMILY,
-          fontSize: "600px",
-          fontWeight: 700,
-          color: "#0D3CFC",
-          letterSpacing: "-0.05em",
-          lineHeight: 0.85,
-          margin: 0,
-          textAlign: "center",
-          userSelect: "none",
-          whiteSpace: "nowrap",
-          display: "inline-block",
-          WebkitFontSmoothing: "antialiased",
-          MozOsxFontSmoothing: "grayscale",
-          willChange: "transform, font-size, top, left",
-          zIndex: 8999,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "0px",
         }}
       >
-        Menuru
-      </h1>
+        <h1
+          ref={titleRef}
+          style={{
+            fontFamily: FONT_FAMILY,
+            fontSize: "600px",
+            fontWeight: 700,
+            color: "#0D3CFC",
+            letterSpacing: "-0.05em",
+            lineHeight: 0.85,
+            margin: 0,
+            textAlign: "center",
+            userSelect: "none",
+            whiteSpace: "nowrap",
+            display: "inline-block",
+            WebkitFontSmoothing: "antialiased",
+            MozOsxFontSmoothing: "grayscale",
+            willChange: "transform, font-size, top, left",
+            zIndex: 8999,
+          }}
+        >
+          Menuru
+        </h1>
+
+        {/* ===== TEKS KECIL "FEATURES" DI BAWAH MENURU ===== */}
+        <span
+          ref={featuresRef}
+          style={{
+            fontFamily: FONT_FAMILY,
+            fontSize: "28px",
+            fontWeight: 600,
+            color: "#0D3CFC",
+            letterSpacing: "0.35em",
+            textTransform: "uppercase",
+            marginTop: "0px",
+            lineHeight: 1.2,
+            display: "inline-block",
+            whiteSpace: "nowrap",
+            userSelect: "none",
+            WebkitFontSmoothing: "antialiased",
+            MozOsxFontSmoothing: "grayscale",
+            willChange: "transform, opacity",
+          }}
+        >
+          Features
+        </span>
+      </div>
     </div>
   );
 };
