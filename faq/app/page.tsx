@@ -528,7 +528,7 @@ interface TourStep {
   isLoginStep?: boolean;
 }
 
-// ===== HERO MENURU TITLE (ditinggikan) =====
+// ===== HERO MENURU TITLE =====
 const HeroMenuruTitle = ({
   onNavbarShiftChange,
 }: {
@@ -3996,7 +3996,7 @@ export default function HomePage(): React.JSX.Element {
       >
         <HeroMenuruTitle onNavbarShiftChange={setNavbarShifted} />
 
-        {/* ===== FEATURES + 01 NOTES TRUST ===== */}
+        {/* ===== FEATURES + 01 NOTES TRUST + KOTAK BIRU BESAR ===== */}
         <div
           style={{
             padding: "0 40px",
@@ -4065,7 +4065,7 @@ export default function HomePage(): React.JSX.Element {
               </span>
             </div>
 
-            {/* Trust — digeser ke kiri lagi & dinaikkan lagi (di tengah Features & Notes) */}
+            {/* Trust — di kanan, naik ke atas (di tengah Features & Notes) */}
             <span
               style={{
                 display: "inline-flex",
@@ -4089,6 +4089,26 @@ export default function HomePage(): React.JSX.Element {
             >
               Trust
             </span>
+          </div>
+
+          {/* ===== KOTAK BIRU BESAR DI BAWAH NOTES ===== */}
+          <div
+            style={{
+              width: "100%",
+              backgroundColor: BLUE,
+              borderRadius: "0px",
+              border: `2px solid ${BLUE}`,
+              padding: "80px 60px",
+              minHeight: "480px",
+              marginBottom: "60px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              position: "relative",
+              boxSizing: "border-box",
+            }}
+          >
+            {/* Konten di dalam kotak bisa ditambahkan di sini */}
           </div>
         </div>
 
