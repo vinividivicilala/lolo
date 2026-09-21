@@ -307,7 +307,7 @@ const BLUE = "#0D3CFC";
 const WHITE = "#FFFFFF";
 const BLACK = "#000000";
 
-// ===== STATUS STYLES (BG PUTIH / BG HITAM + BORDER KOTAK) =====
+// ===== STATUS STYLES =====
 const STATUS_STYLES: {
   [key: string]: {
     label: string;
@@ -316,33 +316,13 @@ const STATUS_STYLES: {
     border: string;
   };
 } = {
-  waiting: {
-    label: "Waiting",
-    bg: WHITE,
-    text: BLUE,
-    border: BLUE,
-  },
-  active: {
-    label: "Active",
-    bg: BLACK,
-    text: WHITE,
-    border: WHITE,
-  },
-  resolved: {
-    label: "Resolved",
-    bg: WHITE,
-    text: BLUE,
-    border: BLUE,
-  },
-  closed: {
-    label: "Closed",
-    bg: BLACK,
-    text: WHITE,
-    border: WHITE,
-  },
+  waiting: { label: "Waiting", bg: WHITE, text: BLUE, border: BLUE },
+  active: { label: "Active", bg: BLACK, text: WHITE, border: WHITE },
+  resolved: { label: "Resolved", bg: WHITE, text: BLUE, border: BLUE },
+  closed: { label: "Closed", bg: BLACK, text: WHITE, border: WHITE },
 };
 
-// ===== TOPIC STYLES (BG PUTIH / BG HITAM + BORDER KOTAK) =====
+// ===== TOPIC STYLES =====
 const TOPIC_STYLES: {
   [key: string]: {
     bg: string;
@@ -573,6 +553,7 @@ const HeroMenuruTitle = ({
 
     const container = containerRef.current;
     const title = titleRef.current;
+    const features = featuresRef.current;
 
     const NAV_TOP = 10;
     const NAV_LEFT = 40;
@@ -605,18 +586,15 @@ const HeroMenuruTitle = ({
         delay: 0.2,
       });
 
-      // Animasi untuk teks "Features"
-      if (featuresRef.current) {
-        gsap.set(featuresRef.current, {
-          opacity: 0,
-          y: 20,
-        });
-        gsap.to(featuresRef.current, {
+      // Animate Features text
+      if (features) {
+        gsap.set(features, { opacity: 0, y: 30 });
+        gsap.to(features, {
           opacity: 1,
           y: 0,
-          duration: 1,
-          delay: 1.2,
-          ease: "back.out(1.7)",
+          duration: 0.9,
+          ease: "back.out(1.5)",
+          delay: 1.0,
         });
       }
 
@@ -655,15 +633,19 @@ const HeroMenuruTitle = ({
         0
       );
 
-      // Sembunyikan "Features" saat scroll (biar tidak mengganggu navbar)
-      if (featuresRef.current) {
+      // Features ikut fixed ke kiri atas bersama title saat scroll
+      if (features) {
         scrollTl.to(
-          featuresRef.current,
+          features,
           {
-            opacity: 0,
-            y: -10,
-            duration: 0.4,
-            ease: "power2.in",
+            position: "fixed",
+            top: `${NAV_TOP + NAV_HEIGHT + 4}px`,
+            left: `${NAV_LEFT}px`,
+            fontSize: "13px",
+            fontWeight: 700,
+            letterSpacing: "0.15em",
+            duration: 1,
+            ease: "power2.inOut",
           },
           0
         );
@@ -706,9 +688,8 @@ const HeroMenuruTitle = ({
         style={{
           display: "flex",
           flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: "0px",
+          alignItems: "flex-start",
+          position: "relative",
         }}
       >
         <h1
@@ -721,7 +702,7 @@ const HeroMenuruTitle = ({
             letterSpacing: "-0.05em",
             lineHeight: 0.85,
             margin: 0,
-            textAlign: "center",
+            textAlign: "left",
             userSelect: "none",
             whiteSpace: "nowrap",
             display: "inline-block",
@@ -733,25 +714,24 @@ const HeroMenuruTitle = ({
         >
           Menuru
         </h1>
-
-        {/* ===== TEKS KECIL "FEATURES" DI BAWAH MENURU ===== */}
         <span
           ref={featuresRef}
           style={{
             fontFamily: FONT_FAMILY,
-            fontSize: "28px",
-            fontWeight: 600,
+            fontSize: "18px",
+            fontWeight: 700,
             color: "#0D3CFC",
-            letterSpacing: "0.35em",
+            letterSpacing: "0.2em",
             textTransform: "uppercase",
-            marginTop: "0px",
-            lineHeight: 1.2,
+            lineHeight: 1,
+            marginTop: "12px",
             display: "inline-block",
-            whiteSpace: "nowrap",
             userSelect: "none",
+            whiteSpace: "nowrap",
             WebkitFontSmoothing: "antialiased",
             MozOsxFontSmoothing: "grayscale",
-            willChange: "transform, opacity",
+            willChange: "transform, font-size, top, left, opacity",
+            zIndex: 8999,
           }}
         >
           Features
