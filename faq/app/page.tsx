@@ -4026,91 +4026,102 @@ export default function HomePage(): React.JSX.Element {
             Features
           </h2>
 
-          {/* ===== WRAPPER: 01 NOTES TRUST + BG KOTAK BIRU ===== */}
+          {/* ===== BARIS 01 NOTES TRUST ===== */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              width: "100%",
+              flexWrap: "wrap",
+              position: "relative",
+              zIndex: 2,
+              marginBottom: "40px",
+            }}
+          >
+            {/* 01 + Notes — jarak jauh */}
+            <div style={{ display: "flex", alignItems: "baseline", gap: "140px" }}>
+              <span
+                style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: "90px",
+                  fontWeight: 700,
+                  color: BLUE,
+                  letterSpacing: "-0.04em",
+                  lineHeight: 1,
+                }}
+              >
+                01
+              </span>
+              <span
+                style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: "90px",
+                  fontWeight: 700,
+                  color: BLACK,
+                  letterSpacing: "-0.04em",
+                  lineHeight: 1,
+                }}
+              >
+                Notes
+              </span>
+            </div>
+
+            {/* Trust — digeser lebih ke kiri lagi */}
+            <span
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "6px 16px",
+                backgroundColor: BLUE,
+                color: WHITE,
+                borderRadius: "4px",
+                fontSize: "16px",
+                fontWeight: 800,
+                letterSpacing: "0.8px",
+                textTransform: "uppercase",
+                fontFamily: FONT_FAMILY,
+                lineHeight: 1.3,
+                marginLeft: "auto",
+                marginRight: "360px",
+                marginTop: "-45px",
+                whiteSpace: "nowrap",
+              }}
+            >
+              Trust
+            </span>
+          </div>
+
+          {/* ===== BG KOTAK BIRU =====
+              - Ujung kiri SEJAJAR dengan "Notes" (bukan "01")
+              - Ujung kanan SEJAJAR dengan sisi kiri badge "Trust"
+              - Tinggi lebih gemuk (420px)
+              - Tidak menutupi "Live Chat Agent" karena absolute + zIndex di bawah konten
+          */}
           <div
             style={{
               position: "relative",
               width: "100%",
-              marginBottom: "40px",
+              height: "420px",
+              marginBottom: "60px",
+              zIndex: 1,
             }}
           >
-            {/* BARIS 01 NOTES TRUST */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                width: "100%",
-                flexWrap: "wrap",
-                position: "relative",
-                zIndex: 2,
-              }}
-            >
-              {/* 01 + Notes — jarak lebih jauh */}
-              <div style={{ display: "flex", alignItems: "baseline", gap: "140px" }}>
-                <span
-                  style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: "90px",
-                    fontWeight: 700,
-                    color: BLUE,
-                    letterSpacing: "-0.04em",
-                    lineHeight: 1,
-                  }}
-                >
-                  01
-                </span>
-                <span
-                  style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: "90px",
-                    fontWeight: 700,
-                    color: BLACK,
-                    letterSpacing: "-0.04em",
-                    lineHeight: 1,
-                  }}
-                >
-                  Notes
-                </span>
-              </div>
-
-              {/* Trust — digeser lebih ke kiri lagi */}
-              <span
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  padding: "6px 16px",
-                  backgroundColor: BLUE,
-                  color: WHITE,
-                  borderRadius: "4px",
-                  fontSize: "16px",
-                  fontWeight: 800,
-                  letterSpacing: "0.8px",
-                  textTransform: "uppercase",
-                  fontFamily: FONT_FAMILY,
-                  lineHeight: 1.3,
-                  marginLeft: "auto",
-                  marginRight: "260px",
-                  marginTop: "-45px",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                Trust
-              </span>
-            </div>
-
-            {/* ===== BG KOTAK BIRU (sejajar dari Notes sampai Trust) ===== */}
             <div
               style={{
                 position: "absolute",
-                top: "110px",
-                left: "0px",
-                right: "260px",
-                height: "260px",
+                top: "0px",
+                /* kiri: sejajar dengan "Notes"
+                   "01" fontSize 90px ≈ lebar ~110px
+                   gap 140px → Notes mulai sekitar 110 + 140 = 250px dari kiri container */
+                left: "250px",
+                /* kanan: sejajar dengan sisi kiri badge Trust
+                   Trust marginRight 360px → ujung kanan bg berhenti 360px dari kanan container */
+                right: "360px",
+                height: "420px",
                 backgroundColor: BLUE,
-                borderRadius: "20px",
+                borderRadius: "24px",
                 border: `2px solid ${BLUE}`,
-                zIndex: 1,
               }}
             />
           </div>
