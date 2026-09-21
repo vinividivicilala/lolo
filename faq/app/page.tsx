@@ -4020,7 +4020,7 @@ export default function HomePage(): React.JSX.Element {
       >
         <HeroMenuruTitle onNavbarShiftChange={setNavbarShifted} />
 
-        {/* ===== FEATURES TITLE ===== */}
+        {/* ===== FEATURES + 01 NOTES TRUST ===== */}
         <div
           style={{
             padding: "0 40px",
@@ -4041,7 +4041,7 @@ export default function HomePage(): React.JSX.Element {
               letterSpacing: "-0.03em",
               lineHeight: 1.1,
               margin: 0,
-              marginBottom: "20px",
+              marginBottom: "30px",
               textAlign: "left",
               WebkitFontSmoothing: "antialiased",
               MozOsxFontSmoothing: "grayscale",
@@ -4055,50 +4055,60 @@ export default function HomePage(): React.JSX.Element {
             style={{
               display: "flex",
               alignItems: "center",
-              gap: "14px",
-              marginBottom: "30px",
+              marginBottom: "40px",
+              width: "100%",
               flexWrap: "wrap",
+              position: "relative",
             }}
           >
-            <span
-              style={{
-                fontFamily: FONT_FAMILY,
-                fontSize: "28px",
-                fontWeight: 700,
-                color: BLUE,
-                letterSpacing: "-0.02em",
-                lineHeight: 1,
-              }}
-            >
-              01
-            </span>
-            <span
-              style={{
-                fontFamily: FONT_FAMILY,
-                fontSize: "28px",
-                fontWeight: 700,
-                color: BLACK,
-                letterSpacing: "-0.02em",
-                lineHeight: 1,
-              }}
-            >
-              Notes
-            </span>
+            {/* 01 + Notes — di kiri, jarak jauh */}
+            <div style={{ display: "flex", alignItems: "baseline", gap: "60px" }}>
+              <span
+                style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: "90px",
+                  fontWeight: 700,
+                  color: BLUE,
+                  letterSpacing: "-0.04em",
+                  lineHeight: 1,
+                }}
+              >
+                01
+              </span>
+              <span
+                style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: "90px",
+                  fontWeight: 700,
+                  color: BLACK,
+                  letterSpacing: "-0.04em",
+                  lineHeight: 1,
+                }}
+              >
+                Notes
+              </span>
+            </div>
+
+            {/* Trust — di kanan, naik ke atas dikit, tidak dekat layar kanan */}
             <span
               style={{
                 display: "inline-flex",
                 alignItems: "center",
                 justifyContent: "center",
-                padding: "4px 12px",
+                padding: "6px 16px",
                 backgroundColor: BLUE,
                 color: WHITE,
                 borderRadius: "4px",
-                fontSize: "13px",
+                fontSize: "16px",
                 fontWeight: 800,
                 letterSpacing: "0.8px",
                 textTransform: "uppercase",
                 fontFamily: FONT_FAMILY,
                 lineHeight: 1.3,
+                marginLeft: "auto",
+                marginRight: "80px",
+                marginTop: "-20px",
+                whiteSpace: "nowrap",
               }}
             >
               Trust
