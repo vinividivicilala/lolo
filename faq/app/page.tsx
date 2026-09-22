@@ -335,16 +335,36 @@ const TOPIC_STYLES: {
 };
 
 // ===== SVG ICONS =====
-const ArrowRight = ({ size = 20, color = "currentColor" }: { size?: number; color?: string }) => (
+// ===== NORTH EAST ARROW (↗) =====
+const NorthEastArrow = ({ size = 20, color = "currentColor" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M7 17L17 7M17 7H8M17 7V16" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
-const ChevronDownIcon = ({ size = 14, color = "currentColor" }: { size?: number; color?: string }) => (
+
+// ===== SOUTH WEST ARROW (↙) =====
+const SouthWestArrow = ({ size = 20, color = "currentColor" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <path d="M6 9L12 15L18 9" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M17 7L7 17M7 17H16M7 17V8" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
+
+// ===== NORTH WEST ARROW (↖) =====
+const NorthWestArrow = ({ size = 20, color = "currentColor" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <path d="M17 17L7 7M7 7V16M7 7H16" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+// ===== LOGOUT ICON =====
+const LogoutIcon = ({ size = 20, color = "currentColor" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <path d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M16 17L21 12L16 7" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M21 12H9" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
 const CheckIcon = ({ size = 12, color = "currentColor" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <path d="M20 6L9 17L4 12" stroke={color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
@@ -1370,31 +1390,43 @@ const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
   );
 };
 
-// ===== RIGHT NAVBAR (Login / User) =====
+// ===== RIGHT NAVBAR (Login / User dengan Rolling Text GSAP) =====
 const RightNavbar = ({ user, auth, db }: { user: any; auth: any; db: any }) => {
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const rollingRef = useRef<HTMLDivElement>(null);
+  const [rollingIndex, setRollingIndex] = useState(0);
+
+  const displayName = user?.displayName || user?.email?.split("@")[0] || "User";
+  const photoURL = user?.photoURL || "";
+
+  // Rolling animation: bergantian antara 3 slide
+  useEffect(() => {
+    if (!user) return;
+    if (!rollingRef.current) return;
+
+    const interval = setInterval(() => {
+      setRollingIndex((prev) => (prev + 1) % 3);
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [user]);
 
   useEffect(() => {
-    if (!dropdownOpen) return;
-    const handleClickOutside = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setDropdownOpen(false);
-      }
+    if (!user) return;
+    if (!rollingRef.current) return;
+
+    const el = rollingRef.current;
+    gsap.killTweensOf(el);
+
+    gsap.fromTo(
+      el,
+      { yPercent: 100, opacity: 0, rotateX: -90, transformOrigin: "50% 100%" },
+      { yPercent: 0, opacity: 1, rotateX: 0, duration: 0.6, ease: "back.out(1.7)" }
+    );
+
+    return () => {
+      gsap.killTweensOf(el);
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [dropdownOpen]);
-
-  useEffect(() => {
-    if (dropdownOpen && dropdownRef.current) {
-      gsap.fromTo(
-        dropdownRef.current,
-        { opacity: 0, y: -10, scale: 0.96 },
-        { opacity: 1, y: 0, scale: 1, duration: 0.3, ease: "power3.out" }
-      );
-    }
-  }, [dropdownOpen]);
+  }, [rollingIndex, user]);
 
   const handleLogout = async () => {
     if (!auth) return;
@@ -1406,13 +1438,12 @@ const RightNavbar = ({ user, auth, db }: { user: any; auth: any; db: any }) => {
         });
       }
       await signOut(auth);
-      setDropdownOpen(false);
     } catch (error) {
       console.error("Logout error:", error);
     }
   };
 
-  // ===== BELUM LOGIN: tombol "Log In" dengan bg hitam =====
+  // ===== BELUM LOGIN: tombol "Log In" =====
   if (!user) {
     return (
       <div
@@ -1453,169 +1484,147 @@ const RightNavbar = ({ user, auth, db }: { user: any; auth: any; db: any }) => {
     );
   }
 
-  // ===== SUDAH LOGIN: foto + nama user (teks biru, TANPA BG) =====
-  const displayName = user.displayName || user.email?.split("@")[0] || "User";
-  const photoURL = user.photoURL || "";
-
+  // ===== SUDAH LOGIN: Rolling text (3 slide bergantian) =====
   return (
     <div
-      ref={dropdownRef}
       style={{
         position: "fixed",
         top: "20px",
         right: "24px",
         zIndex: 9000,
         fontFamily: FONT_FAMILY,
+        display: "flex",
+        alignItems: "center",
+        gap: "10px",
       }}
     >
-      {/* Trigger: foto + nama user (TANPA BG) */}
+      {/* Rolling container */}
       <div
-        onClick={() => setDropdownOpen((prev) => !prev)}
         style={{
+          position: "relative",
+          height: "90px",
+          overflow: "hidden",
           display: "flex",
           alignItems: "center",
-          gap: "10px",
-          padding: "6px 8px",
-          backgroundColor: "transparent",
-          cursor: "pointer",
+          justifyContent: "flex-end",
+          minWidth: "260px",
         }}
       >
-        {/* Foto profil dari Gmail */}
         <div
+          ref={rollingRef}
           style={{
-            width: "32px",
-            height: "32px",
-            borderRadius: "50%",
-            overflow: "hidden",
-            backgroundColor: BLUE,
             display: "flex",
             alignItems: "center",
-            justifyContent: "center",
-            flexShrink: 0,
+            justifyContent: "flex-end",
+            gap: "12px",
+            width: "100%",
           }}
         >
-          {photoURL ? (
-            <img
-              src={photoURL}
-              alt={displayName}
-              style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-              referrerPolicy="no-referrer"
-            />
-          ) : (
-            <span style={{ fontSize: "14px", fontWeight: 800, color: WHITE }}>
-              {displayName.charAt(0).toUpperCase()}
-            </span>
+          {/* SLIDE 1: Nama user + foto profil (ukuran 70px) */}
+          {rollingIndex === 0 && (
+            <>
+              <span
+                style={{
+                  color: BLUE,
+                  fontSize: "70px",
+                  fontWeight: 700,
+                  letterSpacing: "-0.03em",
+                  lineHeight: 1,
+                  whiteSpace: "nowrap",
+                  fontFamily: FONT_FAMILY,
+                }}
+              >
+                {displayName}
+              </span>
+              <div
+                style={{
+                  width: "70px",
+                  height: "70px",
+                  borderRadius: "50%",
+                  overflow: "hidden",
+                  backgroundColor: BLUE,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                }}
+              >
+                {photoURL ? (
+                  <img
+                    src={photoURL}
+                    alt={displayName}
+                    style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <span style={{ fontSize: "30px", fontWeight: 800, color: WHITE }}>
+                    {displayName.charAt(0).toUpperCase()}
+                  </span>
+                )}
+              </div>
+            </>
+          )}
+
+          {/* SLIDE 2: Dashboard + panah SVG ukuran 50px */}
+          {rollingIndex === 1 && (
+            <Link
+              href="/dashboard"
+              style={{
+                textDecoration: "none",
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                whiteSpace: "nowrap",
+              }}
+            >
+              <span
+                style={{
+                  color: BLUE,
+                  fontSize: "70px",
+                  fontWeight: 700,
+                  letterSpacing: "-0.03em",
+                  lineHeight: 1,
+                  fontFamily: FONT_FAMILY,
+                }}
+              >
+                Dashboard
+              </span>
+              <NorthEastArrow size={50} color={BLUE} />
+            </Link>
+          )}
+
+          {/* SLIDE 3: Logout + icon SVG */}
+          {rollingIndex === 2 && (
+            <button
+              onClick={handleLogout}
+              style={{
+                background: "transparent",
+                border: "none",
+                padding: 0,
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                whiteSpace: "nowrap",
+                fontFamily: FONT_FAMILY,
+              }}
+            >
+              <span
+                style={{
+                  color: BLUE,
+                  fontSize: "70px",
+                  fontWeight: 700,
+                  letterSpacing: "-0.03em",
+                  lineHeight: 1,
+                }}
+              >
+                Logout
+              </span>
+              <LogoutIcon size={50} color={BLUE} />
+            </button>
           )}
         </div>
-
-        {/* Nama user — teks biru */}
-        <span
-          style={{
-            color: BLUE,
-            fontSize: "14px",
-            fontWeight: 700,
-            letterSpacing: "0.02em",
-            whiteSpace: "nowrap",
-            maxWidth: "180px",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-          }}
-        >
-          {displayName}
-        </span>
-
-        {/* Panah minimalist */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            transform: dropdownOpen ? "rotate(180deg)" : "rotate(0deg)",
-            transition: "transform 0.25s ease",
-          }}
-        >
-          <ChevronDownIcon size={14} color={BLUE} />
-        </div>
       </div>
-
-      {/* Dropdown: Dashboard + Logout (TANPA BG, teks biru) */}
-      {dropdownOpen && (
-        <div
-          style={{
-            position: "absolute",
-            top: "calc(100% + 10px)",
-            right: "0px",
-            minWidth: "200px",
-            backgroundColor: "transparent",
-            borderRadius: "0px",
-            border: "none",
-            boxShadow: "none",
-            padding: "4px 0",
-            display: "flex",
-            flexDirection: "column",
-            gap: "2px",
-            zIndex: 9001,
-          }}
-        >
-          <Link
-            href="/dashboard"
-            style={{
-              textDecoration: "none",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "flex-end",
-              gap: "10px",
-              padding: "8px 6px",
-              color: BLUE,
-              fontSize: "15px",
-              fontWeight: 700,
-              fontFamily: FONT_FAMILY,
-              backgroundColor: "transparent",
-              transition: "opacity 0.2s ease",
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLAnchorElement).style.opacity = "0.6";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLAnchorElement).style.opacity = "1";
-            }}
-            onClick={() => setDropdownOpen(false)}
-          >
-            <span>Dashboard</span>
-            <ArrowRight size={16} color={BLUE} />
-          </Link>
-
-          <button
-            onClick={handleLogout}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "flex-end",
-              gap: "10px",
-              padding: "8px 6px",
-              color: BLUE,
-              fontSize: "15px",
-              fontWeight: 700,
-              fontFamily: FONT_FAMILY,
-              backgroundColor: "transparent",
-              border: "none",
-              cursor: "pointer",
-              textAlign: "right",
-              width: "100%",
-              transition: "opacity 0.2s ease",
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.opacity = "0.6";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.opacity = "1";
-            }}
-          >
-            <span>Logout</span>
-            <ArrowRight size={16} color={BLUE} />
-          </button>
-        </div>
-      )}
     </div>
   );
 };
@@ -1833,7 +1842,7 @@ const OnboardingTour = ({
             }}
           >
             {currentStep === steps.length - 1 ? "Finish" : "Next"}
-            <ArrowRight size={14} color="#0D3CFC" />
+            <NorthEastArrow size={14} color="#0D3CFC" />
           </button>
         </div>
 
@@ -1945,7 +1954,7 @@ const RollingNewMessage = ({
   );
 };
 
-// ===== CLOSE BUTTON WITH GSAP =====
+// ===== CLOSE BUTTON WITH GSAP (FULL HITAM) =====
 const CloseRoomButton = ({
   onConfirm,
   disabled,
@@ -2008,8 +2017,8 @@ const CloseRoomButton = ({
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: WHITE,
-        border: `1.5px solid ${WHITE}`,
+        backgroundColor: BLACK,
+        border: `1.5px solid ${BLACK}`,
         borderRadius: "8px",
         cursor: disabled ? "not-allowed" : "pointer",
         padding: 0,
@@ -2018,7 +2027,7 @@ const CloseRoomButton = ({
       }}
     >
       <div ref={iconRef} style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <CloseIcon size={16} color={BLUE} />
+        <CloseIcon size={16} color={WHITE} />
       </div>
     </button>
   );
@@ -3123,7 +3132,7 @@ const LiveChatAgent = ({
             }}
           >
             <span>Logout</span>
-            <ArrowRight size={20} color={BLUE} />
+            <NorthEastArrow size={20} color={BLUE} />
           </button>
         </div>
         <div
@@ -3186,7 +3195,7 @@ const LiveChatAgent = ({
               }}
             >
               <span>Logout</span>
-              <ArrowRight size={20} color={BLUE} />
+              <NorthEastArrow size={20} color={BLUE} />
             </button>
           </div>
 
@@ -3295,7 +3304,7 @@ const LiveChatAgent = ({
             }}
           >
             <span>Logout</span>
-            <ArrowRight size={20} color={BLUE} />
+            <NorthEastArrow size={20} color={BLUE} />
           </button>
         </div>
         <div style={{ maxWidth: "400px" }}>
@@ -3482,7 +3491,7 @@ const LiveChatAgent = ({
               }}
             >
               <span>Logout</span>
-              <ArrowRight size={20} color={BLUE} />
+              <NorthEastArrow size={20} color={BLUE} />
             </button>
             {!isAdmin && (
               <button
@@ -4311,10 +4320,7 @@ export default function HomePage(): React.JSX.Element {
             </span>
           </div>
 
-          {/* ===== BG KOTAK BIRU =====
-              - Ujung kiri tepat di bawah huruf "N" pada "Notes"
-              - Ujung kanan sejajar dengan sisi kiri badge "Trust"
-          */}
+          {/* ===== BG KOTAK BIRU (kiri tepat di bawah huruf "N" pada "Notes") ===== */}
           <div
             style={{
               position: "relative",
@@ -4328,8 +4334,6 @@ export default function HomePage(): React.JSX.Element {
               style={{
                 position: "absolute",
                 top: "0px",
-                /* Huruf "N" pada "Notes" berada di sekitar 260px dari kiri container
-                   (01: ~110px + gap 140px = 250px, huruf N mulai sedikit setelahnya ≈ 260px) */
                 left: "260px",
                 right: "360px",
                 height: "420px",
