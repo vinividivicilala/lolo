@@ -19,6 +19,7 @@ import {
   getDoc,
   setDoc,
   limit,
+  getDocs,
 } from "firebase/firestore";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -332,31 +333,28 @@ const TOPIC_STYLES: {
   "Donation": { bg: BLACK, text: WHITE, border: WHITE },
   "Partnership": { bg: WHITE, text: BLUE, border: BLUE },
   "Other": { bg: BLACK, text: WHITE, border: WHITE },
+  "Chat with Admin": { bg: WHITE, text: BLUE, border: BLUE },
 };
 
 // ===== SVG ICONS =====
-// ===== NORTH EAST ARROW (↗) =====
 const NorthEastArrow = ({ size = 20, color = "currentColor" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <path d="M7 17L17 7M17 7H8M17 7V16" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
-// ===== SOUTH WEST ARROW (↙) =====
 const SouthWestArrow = ({ size = 20, color = "currentColor" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <path d="M17 7L7 17M7 17H16M7 17V8" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
-// ===== NORTH WEST ARROW (↖) =====
 const NorthWestArrow = ({ size = 20, color = "currentColor" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <path d="M17 17L7 7M7 7V16M7 7H16" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
-// ===== LOGOUT ICON =====
 const LogoutIcon = ({ size = 20, color = "currentColor" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <path d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -517,7 +515,14 @@ interface Ticket {
   typingUserName?: string | null;
   isAnnouncement?: boolean;
   isBroadcast?: boolean;
+  isBannedUser?: boolean;
+  bannedReason?: string;
+  isAutoChatWithAdmin?: boolean;
+  adminId?: string;
+  adminName?: string;
+  adminEmail?: string;
 }
+
 interface ChatMessage {
   id: string;
   senderId: string;
@@ -528,7 +533,15 @@ interface ChatMessage {
   isEncrypted?: boolean;
   isBotDetected?: boolean;
   deliveryStatus?: "sending" | "sent" | "delivered" | "read" | "failed";
+  isSystemMessage?: boolean;
+  isBannedInfo?: boolean;
+  replyTo?: {
+    messageId: string;
+    senderName: string;
+    text: string;
+  } | null;
 }
+
 interface OnlineUser {
   uid: string;
   displayName: string;
@@ -537,12 +550,23 @@ interface OnlineUser {
   online: boolean;
   lastSeen?: any;
   isAgent?: boolean;
+  isAdmin?: boolean;
 }
+
 interface LastMessagePreview {
   text: string;
   senderName: string;
   timestamp: any;
   isFromAgent: boolean;
+}
+
+interface BannedUserInfo {
+  userId: string;
+  userEmail: string;
+  userName: string;
+  reason: string;
+  bannedAt: string;
+  message: string;
 }
 
 interface TourStep {
@@ -1398,7 +1422,6 @@ const RightNavbar = ({ user, auth, db }: { user: any; auth: any; db: any }) => {
   const displayName = user?.displayName || user?.email?.split("@")[0] || "User";
   const photoURL = user?.photoURL || "";
 
-  // Rolling animation: bergantian antara 3 slide
   useEffect(() => {
     if (!user) return;
     if (!rollingRef.current) return;
@@ -1443,7 +1466,6 @@ const RightNavbar = ({ user, auth, db }: { user: any; auth: any; db: any }) => {
     }
   };
 
-  // ===== BELUM LOGIN: tombol "Log In" =====
   if (!user) {
     return (
       <div
@@ -1484,7 +1506,6 @@ const RightNavbar = ({ user, auth, db }: { user: any; auth: any; db: any }) => {
     );
   }
 
-  // ===== SUDAH LOGIN: Rolling text (3 slide bergantian) =====
   return (
     <div
       style={{
@@ -1498,7 +1519,6 @@ const RightNavbar = ({ user, auth, db }: { user: any; auth: any; db: any }) => {
         gap: "10px",
       }}
     >
-      {/* Rolling container */}
       <div
         style={{
           position: "relative",
@@ -1520,7 +1540,6 @@ const RightNavbar = ({ user, auth, db }: { user: any; auth: any; db: any }) => {
             width: "100%",
           }}
         >
-          {/* SLIDE 1: Nama user + foto profil (ukuran 70px) */}
           {rollingIndex === 0 && (
             <>
               <span
@@ -1565,7 +1584,6 @@ const RightNavbar = ({ user, auth, db }: { user: any; auth: any; db: any }) => {
             </>
           )}
 
-          {/* SLIDE 2: Dashboard + panah SVG ukuran 50px */}
           {rollingIndex === 1 && (
             <Link
               href="/dashboard"
@@ -1593,7 +1611,6 @@ const RightNavbar = ({ user, auth, db }: { user: any; auth: any; db: any }) => {
             </Link>
           )}
 
-          {/* SLIDE 3: Logout + icon SVG */}
           {rollingIndex === 2 && (
             <button
               onClick={handleLogout}
@@ -1954,7 +1971,7 @@ const RollingNewMessage = ({
   );
 };
 
-// ===== CLOSE BUTTON WITH GSAP (FULL HITAM) =====
+// ===== CLOSE BUTTON WITH GSAP =====
 const CloseRoomButton = ({
   onConfirm,
   disabled,
@@ -2033,6 +2050,119 @@ const CloseRoomButton = ({
   );
 };
 
+// ===== BANNED INFO PANEL (Blue BG, White Text) =====
+const BannedInfoPanel = ({ reason, message }: { reason: string; message: string }) => {
+  return (
+    <div
+      style={{
+        backgroundColor: BLUE,
+        borderRadius: "12px",
+        padding: "20px 24px",
+        margin: "12px 0",
+        border: `2px solid ${BLUE}`,
+        fontFamily: FONT_FAMILY,
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "10px",
+          marginBottom: "12px",
+        }}
+      >
+        <div
+          style={{
+            width: "28px",
+            height: "28px",
+            borderRadius: "50%",
+            backgroundColor: WHITE,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+          }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="10" stroke={BLUE} strokeWidth="2.5" />
+            <path d="M12 8V12" stroke={BLUE} strokeWidth="2.5" strokeLinecap="round" />
+            <circle cx="12" cy="16" r="1" fill={BLUE} />
+          </svg>
+        </div>
+        <span style={{ fontSize: "16px", fontWeight: 800, color: WHITE, letterSpacing: "0.5px", textTransform: "uppercase" }}>
+          Account Banned
+        </span>
+      </div>
+      <div style={{ fontSize: "14px", color: WHITE, fontWeight: 600, marginBottom: "6px", lineHeight: 1.5 }}>
+        Reason: {reason || "Suspicious Activity"}
+      </div>
+      {message && (
+        <div style={{ fontSize: "13px", color: "rgba(255,255,255,0.9)", fontWeight: 400, lineHeight: 1.5, fontStyle: "italic" }}>
+          "{message}"
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ===== REPLY PREVIEW COMPONENT =====
+const ReplyPreview = ({
+  replyTo,
+  onCancel,
+}: {
+  replyTo: { messageId: string; senderName: string; text: string };
+  onCancel: () => void;
+}) => {
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "10px",
+        padding: "8px 12px",
+        backgroundColor: "#f0f4ff",
+        borderRadius: "8px",
+        borderLeft: `3px solid ${BLUE}`,
+        marginBottom: "8px",
+        fontFamily: FONT_FAMILY,
+      }}
+    >
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: "11px", fontWeight: 700, color: BLUE, marginBottom: "2px" }}>
+          Replying to {replyTo.senderName}
+        </div>
+        <div
+          style={{
+            fontSize: "12px",
+            color: "#666",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {replyTo.text.length > 60 ? replyTo.text.substring(0, 60) + "..." : replyTo.text}
+        </div>
+      </div>
+      <button
+        onClick={onCancel}
+        style={{
+          background: "transparent",
+          border: "none",
+          cursor: "pointer",
+          color: "#999",
+          fontSize: "16px",
+          padding: "4px",
+          lineHeight: 1,
+          fontFamily: FONT_FAMILY,
+        }}
+        aria-label="Cancel reply"
+      >
+        ×
+      </button>
+    </div>
+  );
+};
+
 // ===== LIVE CHAT AGENT COMPONENT =====
 const LiveChatAgent = ({
   user,
@@ -2062,9 +2192,11 @@ const LiveChatAgent = ({
 
   const [onlineAgents, setOnlineAgents] = useState<OnlineUser[]>([]);
   const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
+  const [onlineAdmins, setOnlineAdmins] = useState<OnlineUser[]>([]);
   const [ticketPreviews, setTicketPreviews] = useState<{ [ticketId: string]: LastMessagePreview[] }>({});
   const [ticketMsgCounts, setTicketMsgCounts] = useState<{ [ticketId: string]: number }>({});
   const [searchQuery, setSearchQuery] = useState("");
+  const [bannedUsersList, setBannedUsersList] = useState<BannedUserInfo[]>([]);
 
   const [latestRollingMessage, setLatestRollingMessage] = useState<LastMessagePreview | null>(null);
   const [rollingKey, setRollingKey] = useState(0);
@@ -2073,6 +2205,7 @@ const LiveChatAgent = ({
   const [tourStep, setTourStep] = useState(0);
 
   const [showCloseConfirm, setShowCloseConfirm] = useState(false);
+  const [replyTo, setReplyTo] = useState<{ messageId: string; senderName: string; text: string } | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatMessagesContainerRef = useRef<HTMLDivElement>(null);
@@ -2254,12 +2387,36 @@ const LiveChatAgent = ({
     }
   };
 
+  // Fetch banned users list for agent
+  useEffect(() => {
+    if (!db || !isAdmin || !isMounted) return;
+    const q = query(collection(db, "bot_blocks"), where("isBlocked", "==", true));
+    const unsubscribe = onSnapshot(q, (snapshot: any) => {
+      const banned: BannedUserInfo[] = [];
+      snapshot.forEach((docSnap: any) => {
+        const data = docSnap.data();
+        banned.push({
+          userId: docSnap.id,
+          userEmail: data.userEmail || "",
+          userName: data.userName || "Unknown",
+          reason: data.blockedReason || "Suspicious Activity",
+          bannedAt: data.blockedAt || "",
+          message: data.blockedMessage || "",
+        });
+      });
+      setBannedUsersList(banned);
+    });
+    return () => unsubscribe();
+  }, [db, isAdmin, isMounted]);
+
+  // Online users/agents/admins real-time
   useEffect(() => {
     if (!db || !isMounted) return;
     const q = query(collection(db, "users"), where("online", "==", true));
     const unsubscribe = onSnapshot(q, (snapshot: any) => {
       const agents: OnlineUser[] = [];
       const users: OnlineUser[] = [];
+      const admins: OnlineUser[] = [];
       snapshot.forEach((docSnap: any) => {
         const data = docSnap.data();
         const item: OnlineUser = {
@@ -2270,12 +2427,18 @@ const LiveChatAgent = ({
           online: data.online || false,
           lastSeen: data.lastSeen,
           isAgent: data.email === ADMIN_EMAIL,
+          isAdmin: data.email === ADMIN_EMAIL,
         };
-        if (item.isAgent) agents.push(item);
-        else users.push(item);
+        if (item.isAgent) {
+          agents.push(item);
+          admins.push(item);
+        } else {
+          users.push(item);
+        }
       });
       setOnlineAgents(agents);
       setOnlineUsers(users);
+      setOnlineAdmins(admins);
     });
     return () => unsubscribe();
   }, [db, isMounted]);
@@ -2407,10 +2570,21 @@ const LiveChatAgent = ({
     setLatestRollingMessage(null);
     prevMessagesLenRef.current = messagesCacheRef.current[selectedTicket?.id || ""]?.length || 0;
     setShowCloseConfirm(false);
+    setReplyTo(null);
   }, [selectedTicket?.id]);
 
   useEffect(() => {
     if (!db || !selectedTicket || !user || !isAdmin || !isMounted) return;
+    const unread = messages.filter((m) => m.senderId !== user.uid && !m.read);
+    unread.forEach(async (msg) => {
+      const msgRef = doc(db, "livechat_tickets", selectedTicket.id, "messages", msg.id);
+      await updateDoc(msgRef, { read: true, deliveryStatus: "read" });
+    });
+  }, [messages, selectedTicket, db, user, isAdmin, isMounted]);
+
+  // Mark messages as read when user opens ticket
+  useEffect(() => {
+    if (!db || !selectedTicket || !user || isAdmin || !isMounted) return;
     const unread = messages.filter((m) => m.senderId !== user.uid && !m.read);
     unread.forEach(async (msg) => {
       const msgRef = doc(db, "livechat_tickets", selectedTicket.id, "messages", msg.id);
@@ -2559,6 +2733,7 @@ const LiveChatAgent = ({
         typingUserName: null,
         isAnnouncement: false,
         isBroadcast: false,
+        isBannedUser: false,
       });
       const initialMessage = `Hello, I would like to ask about: ${selectedTopic}`;
       const encryptedMessage = await encryptMessage(initialMessage);
@@ -2587,11 +2762,77 @@ const LiveChatAgent = ({
     }
   };
 
+  // Auto chat with admin
+  const startChatWithAdmin = async (admin: OnlineUser) => {
+    if (!db || !user) return;
+    const isBannedNow = await checkBanBeforeAction();
+    if (isBannedNow) return;
+    if (!canCreateTicket) {
+      setBanMessage("YOU DO NOT HAVE PERMISSION TO CREATE A NEW TICKET");
+      return;
+    }
+    if (!encryptionReady) {
+      alert("Encryption is being initialized, please wait a moment.");
+      return;
+    }
+    const hasActiveTicket = tickets.some(
+      (t) => t.userId === user.uid && (t.status === "waiting" || t.status === "active") && !t.isAnnouncement && !t.isBroadcast
+    );
+    if (hasActiveTicket) {
+      alert("You still have an active chat with an agent. Please wait until it is finished.");
+      return;
+    }
+    try {
+      const ticketRef = await addDoc(collection(db, "livechat_tickets"), {
+        userId: user.uid,
+        userName: user.displayName || user.email || "User",
+        userEmail: user.email,
+        userPhoto: user.photoURL || "",
+        status: "waiting",
+        topic: "Chat with Admin",
+        createdAt: serverTimestamp(),
+        unreadCount: 0,
+        typing: false,
+        typingUserId: null,
+        typingUserName: null,
+        isAnnouncement: false,
+        isBroadcast: false,
+        isBannedUser: false,
+        isAutoChatWithAdmin: true,
+        adminId: admin.uid,
+        adminName: admin.displayName,
+        adminEmail: admin.email,
+      });
+      const initialMessage = `Hello Admin ${admin.displayName}, I need help.`;
+      const encryptedMessage = await encryptMessage(initialMessage);
+      await addDoc(collection(db, "livechat_tickets", ticketRef.id, "messages"), {
+        senderId: user.uid,
+        senderName: user.displayName || user.email || "User",
+        text: encryptedMessage,
+        timestamp: serverTimestamp(),
+        read: false,
+        isEncrypted: true,
+        isBotDetected: false,
+        deliveryStatus: "sent",
+      });
+      await updateDoc(ticketRef, {
+        lastMessage: initialMessage,
+        lastMessageTime: serverTimestamp(),
+        lastMessageSender: user.displayName || user.email || "User",
+      });
+      hasAutoSelectedRef.current = false;
+    } catch (error) {
+      console.error("Error starting chat with admin:", error);
+      alert("An error occurred while starting the chat. Please try again.");
+    }
+  };
+
   const sendMessage = async () => {
     if (!db || !selectedTicket || !messageText.trim() || !user) return;
     const isBannedNow = await checkBanBeforeAction();
     if (isBannedNow) {
       setMessageText("");
+      setReplyTo(null);
       return;
     }
     if (!canSendMessage) {
@@ -2608,6 +2849,7 @@ const LiveChatAgent = ({
       setCanSendMessage(false);
       setBanMessage(`YOUR ACCOUNT HAS BEEN PERMANENTLY BANNED\n\nReason: ${checkResult.reason}\n\nMessage sent: "${messageText}"`);
       setMessageText("");
+      setReplyTo(null);
       return;
     }
     if (!encryptionReady) {
@@ -2623,7 +2865,7 @@ const LiveChatAgent = ({
       await updateDoc(ticketRef, { typing: false, typingUserId: null, typingUserName: null });
       const senderName = isAdmin ? AGENT_NAME : user.displayName || user.email || "User";
       const encryptedMessage = await encryptMessage(messageText.trim());
-      await addDoc(collection(db, "livechat_tickets", selectedTicket.id, "messages"), {
+      const msgData: any = {
         senderId: user.uid,
         senderName: senderName,
         text: encryptedMessage,
@@ -2632,7 +2874,11 @@ const LiveChatAgent = ({
         isEncrypted: true,
         isBotDetected: false,
         deliveryStatus: "sent",
-      });
+      };
+      if (replyTo) {
+        msgData.replyTo = replyTo;
+      }
+      await addDoc(collection(db, "livechat_tickets", selectedTicket.id, "messages"), msgData);
       await updateDoc(ticketRef, {
         lastMessage: messageText.trim(),
         lastMessageTime: serverTimestamp(),
@@ -2642,6 +2888,7 @@ const LiveChatAgent = ({
         agentName: isAdmin ? AGENT_NAME : selectedTicket.agentName,
       });
       setMessageText("");
+      setReplyTo(null);
       setBanMessage(null);
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     } catch (error) {
@@ -2681,6 +2928,14 @@ const LiveChatAgent = ({
     } catch (error) {
       console.error("Error closing ticket:", error);
     }
+  };
+
+  const handleReply = (msg: ChatMessage) => {
+    setReplyTo({
+      messageId: msg.id,
+      senderName: msg.senderName,
+      text: msg.text,
+    });
   };
 
   const renderDeliveryStatus = (msg: ChatMessage, isMine: boolean) => {
@@ -2834,6 +3089,26 @@ const LiveChatAgent = ({
                     Online
                   </span>
                 </div>
+                {!isAdmin && u.isAgent && (
+                  <button
+                    onClick={() => startChatWithAdmin(u)}
+                    style={{
+                      padding: "4px 10px",
+                      backgroundColor: BLUE,
+                      color: WHITE,
+                      border: "none",
+                      borderRadius: "6px",
+                      fontSize: "10px",
+                      fontWeight: 700,
+                      cursor: "pointer",
+                      fontFamily: FONT_FAMILY,
+                      letterSpacing: "0.3px",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    Chat
+                  </button>
+                )}
               </div>
             ))
           )}
@@ -3030,6 +3305,87 @@ const LiveChatAgent = ({
     );
   };
 
+  // Banned users list for agent
+  const renderBannedUsersList = () => {
+    if (!isAdmin || bannedUsersList.length === 0) return null;
+    const filteredBanned = bannedUsersList.filter((u) => {
+      if (!searchQuery) return true;
+      const q = searchQuery.toLowerCase();
+      return u.userName.toLowerCase().includes(q) || u.userEmail.toLowerCase().includes(q) || u.reason.toLowerCase().includes(q);
+    });
+    if (filteredBanned.length === 0) return null;
+    return (
+      <div style={{ marginBottom: "16px" }}>
+        <div
+          style={{
+            padding: "10px 16px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            borderBottom: "1px solid rgba(255,255,255,0.1)",
+          }}
+        >
+          <StabiloBadge
+            label={`Banned (${filteredBanned.length})`}
+            bg={BLACK}
+            text={WHITE}
+            border={WHITE}
+            size="md"
+          />
+        </div>
+        {filteredBanned.map((u) => (
+          <div
+            key={u.userId}
+            style={{
+              padding: "12px 16px",
+              borderBottom: "1px solid rgba(255,255,255,0.08)",
+              fontFamily: FONT_FAMILY,
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+              <span style={{ fontSize: "13px", fontWeight: 700, color: WHITE }}>{u.userName}</span>
+              <span
+                style={{
+                  fontSize: "9px",
+                  fontWeight: 800,
+                  color: WHITE,
+                  backgroundColor: BLACK,
+                  padding: "2px 6px",
+                  borderRadius: "4px",
+                  letterSpacing: "0.5px",
+                  textTransform: "uppercase",
+                }}
+              >
+                Banned
+              </span>
+            </div>
+            <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.8)", marginBottom: "2px" }}>
+              {u.userEmail}
+            </div>
+            <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.7)", fontStyle: "italic" }}>
+              Reason: {u.reason}
+            </div>
+            {u.message && (
+              <div
+                style={{
+                  fontSize: "10px",
+                  color: "rgba(255,255,255,0.6)",
+                  fontStyle: "italic",
+                  marginTop: "3px",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                "{u.message.length > 50 ? u.message.substring(0, 50) + "..." : u.message}"
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   if (checkingBan) {
     return (
       <div style={{ marginTop: "80px", paddingTop: "30px" }}>
@@ -3108,6 +3464,7 @@ const LiveChatAgent = ({
     );
   }
 
+  // Banned user view for non-admin
   if (!isAdmin && isBanned) {
     return (
       <div style={{ marginTop: "80px", paddingTop: "30px" }}>
@@ -3135,6 +3492,9 @@ const LiveChatAgent = ({
             <NorthEastArrow size={20} color={BLUE} />
           </button>
         </div>
+
+        <BannedInfoPanel reason={banReason} message={banMessage || ""} />
+
         <div
           style={{
             color: BLUE,
@@ -3230,6 +3590,24 @@ const LiveChatAgent = ({
                 >
                   <span style={{ fontSize: "13px", fontWeight: 700, color: WHITE }}>{a.displayName}</span>
                   <span style={{ fontSize: "10px", fontWeight: 800, color: WHITE, letterSpacing: "0.5px" }}>ONLINE</span>
+                  <button
+                    onClick={() => startChatWithAdmin(a)}
+                    style={{
+                      padding: "4px 10px",
+                      backgroundColor: WHITE,
+                      color: BLUE,
+                      border: "none",
+                      borderRadius: "6px",
+                      fontSize: "10px",
+                      fontWeight: 700,
+                      cursor: "pointer",
+                      fontFamily: FONT_FAMILY,
+                      letterSpacing: "0.3px",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    Chat
+                  </button>
                 </div>
               ))}
               {onlineAgents.length === 0 && (
@@ -3579,6 +3957,7 @@ const LiveChatAgent = ({
             <div style={{ overflowY: "auto", flex: 1, minHeight: 0 }}>
               {isAdmin ? (
                 <>
+                  {renderBannedUsersList()}
                   {waitingTickets.length > 0 && (
                     <div>
                       <div
@@ -3832,6 +4211,19 @@ const LiveChatAgent = ({
                     minHeight: 0,
                   }}
                 >
+                  {/* Banned info banner inside chat room for banned user */}
+                  {!isAdmin && isBanned && (
+                    <BannedInfoPanel reason={banReason} message={banMessage || ""} />
+                  )}
+
+                  {/* Banned info banner inside chat room for agent viewing banned user's ticket */}
+                  {isAdmin && selectedTicket.isBannedUser && (
+                    <BannedInfoPanel
+                      reason={selectedTicket.bannedReason || "Suspicious Activity"}
+                      message=""
+                    />
+                  )}
+
                   {messages.length === 0 ? (
                     <div
                       style={{
@@ -3849,16 +4241,46 @@ const LiveChatAgent = ({
                       const isMine = msg.senderId === user.uid;
                       return (
                         <div key={msg.id || idx} style={{ alignSelf: isMine ? "flex-end" : "flex-start", maxWidth: "70%" }}>
+                          {msg.replyTo && (
+                            <div
+                              style={{
+                                padding: "6px 10px",
+                                backgroundColor: isMine ? "rgba(13,60,252,0.1)" : "#e8edff",
+                                borderRadius: "8px 8px 0 0",
+                                borderLeft: `3px solid ${BLUE}`,
+                                marginBottom: "2px",
+                                fontFamily: FONT_FAMILY,
+                              }}
+                            >
+                              <div style={{ fontSize: "10px", fontWeight: 700, color: BLUE, marginBottom: "1px" }}>
+                                {msg.replyTo.senderName}
+                              </div>
+                              <div
+                                style={{
+                                  fontSize: "11px",
+                                  color: "#666",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {msg.replyTo.text.length > 50
+                                  ? msg.replyTo.text.substring(0, 50) + "..."
+                                  : msg.replyTo.text}
+                              </div>
+                            </div>
+                          )}
                           <div
                             style={{
                               padding: "12px 16px",
-                              borderRadius: "12px",
+                              borderRadius: msg.replyTo ? "0 0 12px 12px" : "12px",
                               backgroundColor: isMine ? BLUE : "#f4f4f5",
                               color: isMine ? WHITE : BLACK,
                               fontSize: "15px",
                               fontFamily: FONT_FAMILY,
                               wordBreak: "break-word",
                               border: isMine ? "none" : "1px solid rgba(0,0,0,0.05)",
+                              position: "relative",
                             }}
                           >
                             {!isMine && (
@@ -3881,6 +4303,33 @@ const LiveChatAgent = ({
                                 {formatTime(msg.timestamp)}
                               </span>
                             </div>
+                            {/* Reply button */}
+                            <button
+                              onClick={() => handleReply(msg)}
+                              style={{
+                                position: "absolute",
+                                top: "6px",
+                                right: isMine ? "auto" : "6px",
+                                left: isMine ? "6px" : "auto",
+                                background: "transparent",
+                                border: "none",
+                                cursor: "pointer",
+                                color: isMine ? "rgba(255,255,255,0.7)" : "#999",
+                                fontSize: "11px",
+                                padding: "2px 4px",
+                                fontFamily: FONT_FAMILY,
+                                opacity: 0.7,
+                              }}
+                              onMouseEnter={(e) => {
+                                (e.currentTarget as HTMLButtonElement).style.opacity = "1";
+                              }}
+                              onMouseLeave={(e) => {
+                                (e.currentTarget as HTMLButtonElement).style.opacity = "0.7";
+                              }}
+                              title="Reply"
+                            >
+                              ↩
+                            </button>
                           </div>
                         </div>
                       );
@@ -3925,63 +4374,69 @@ const LiveChatAgent = ({
                   <div ref={messagesEndRef} />
                 </div>
 
-                {selectedTicket.status !== "resolved" && selectedTicket.status !== "closed" ? (
+                {selectedTicket.status !== "resolved" && selectedTicket.status !== "closed" && !isBanned ? (
                   <div
                     style={{
                       padding: "16px 24px",
                       borderTop: "1px solid rgba(0,0,0,0.06)",
                       display: "flex",
-                      gap: "12px",
+                      flexDirection: "column",
+                      gap: "8px",
                       backgroundColor: WHITE,
                       flexShrink: 0,
                     }}
                   >
-                    <input
-                      type="text"
-                      value={messageText}
-                      onChange={handleTyping}
-                      onKeyPress={(e) => {
-                        if (e.key === "Enter" && !e.shiftKey && messageText.trim()) {
-                          e.preventDefault();
-                          sendMessage();
+                    {replyTo && (
+                      <ReplyPreview replyTo={replyTo} onCancel={() => setReplyTo(null)} />
+                    )}
+                    <div style={{ display: "flex", gap: "12px" }}>
+                      <input
+                        type="text"
+                        value={messageText}
+                        onChange={handleTyping}
+                        onKeyPress={(e) => {
+                          if (e.key === "Enter" && !e.shiftKey && messageText.trim()) {
+                            e.preventDefault();
+                            sendMessage();
+                          }
+                        }}
+                        placeholder={
+                          selectedTicket.status === "waiting" && !isAdmin ? "Waiting for agent..." : "Type a message..."
                         }
-                      }}
-                      placeholder={
-                        selectedTicket.status === "waiting" && !isAdmin ? "Waiting for agent..." : "Type a message..."
-                      }
-                      disabled={selectedTicket.status === "waiting" && !isAdmin}
-                      style={{
-                        flex: 1,
-                        padding: "12px 16px",
-                        border: "1px solid rgba(0,0,0,0.1)",
-                        borderRadius: "10px",
-                        fontSize: "15px",
-                        outline: "none",
-                        fontFamily: FONT_FAMILY,
-                        backgroundColor: selectedTicket.status === "waiting" && !isAdmin ? "#f5f5f5" : WHITE,
-                      }}
-                    />
-                    <button
-                      onClick={sendMessage}
-                      disabled={(selectedTicket.status === "waiting" && !isAdmin) || !messageText.trim()}
-                      style={{
-                        padding: "12px 24px",
-                        backgroundColor:
-                          (selectedTicket.status === "waiting" && !isAdmin) || !messageText.trim() ? "#ccc" : BLUE,
-                        color: WHITE,
-                        border: "none",
-                        borderRadius: "10px",
-                        cursor:
-                          (selectedTicket.status === "waiting" && !isAdmin) || !messageText.trim() ? "not-allowed" : "pointer",
-                        fontFamily: FONT_FAMILY,
-                        fontSize: "14px",
-                        fontWeight: 800,
-                        letterSpacing: "0.5px",
-                        textTransform: "uppercase",
-                      }}
-                    >
-                      Send
-                    </button>
+                        disabled={selectedTicket.status === "waiting" && !isAdmin}
+                        style={{
+                          flex: 1,
+                          padding: "12px 16px",
+                          border: "1px solid rgba(0,0,0,0.1)",
+                          borderRadius: "10px",
+                          fontSize: "15px",
+                          outline: "none",
+                          fontFamily: FONT_FAMILY,
+                          backgroundColor: selectedTicket.status === "waiting" && !isAdmin ? "#f5f5f5" : WHITE,
+                        }}
+                      />
+                      <button
+                        onClick={sendMessage}
+                        disabled={(selectedTicket.status === "waiting" && !isAdmin) || !messageText.trim()}
+                        style={{
+                          padding: "12px 24px",
+                          backgroundColor:
+                            (selectedTicket.status === "waiting" && !isAdmin) || !messageText.trim() ? "#ccc" : BLUE,
+                          color: WHITE,
+                          border: "none",
+                          borderRadius: "10px",
+                          cursor:
+                            (selectedTicket.status === "waiting" && !isAdmin) || !messageText.trim() ? "not-allowed" : "pointer",
+                          fontFamily: FONT_FAMILY,
+                          fontSize: "14px",
+                          fontWeight: 800,
+                          letterSpacing: "0.5px",
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        Send
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   <div
@@ -3997,7 +4452,9 @@ const LiveChatAgent = ({
                       fontWeight: 700,
                     }}
                   >
-                    Room ini telah {selectedTicket.status === "closed" ? "ditutup" : "diselesaikan"}. Buat room baru untuk melanjutkan.
+                    {isBanned && !isAdmin
+                      ? "Anda telah dibanned. Tidak dapat mengirim pesan."
+                      : `Room ini telah ${selectedTicket.status === "closed" ? "ditutup" : "diselesaikan"}. Buat room baru untuk melanjutkan.`}
                   </div>
                 )}
               </>
@@ -4266,7 +4723,6 @@ export default function HomePage(): React.JSX.Element {
               marginBottom: "40px",
             }}
           >
-            {/* 01 + Notes — jarak jauh */}
             <div style={{ display: "flex", alignItems: "baseline", gap: "140px" }}>
               <span
                 style={{
@@ -4294,7 +4750,6 @@ export default function HomePage(): React.JSX.Element {
               </span>
             </div>
 
-            {/* Trust — digeser lebih ke kiri lagi */}
             <span
               style={{
                 display: "inline-flex",
@@ -4332,7 +4787,6 @@ export default function HomePage(): React.JSX.Element {
               zIndex: 2,
             }}
           >
-            {/* Teks kiri: Notes for the next era of techology system */}
             <div
               style={{
                 marginLeft: "auto",
@@ -4358,7 +4812,6 @@ export default function HomePage(): React.JSX.Element {
               </p>
             </div>
 
-            {/* Panah SVG minimalist besar di sisi kanan */}
             <div
               style={{
                 position: "absolute",
@@ -4386,7 +4839,7 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </div>
 
-          {/* ===== BG KOTAK BIRU (kiri tepat di bawah huruf "N" pada "Notes") ===== */}
+          {/* ===== BG KOTAK BIRU ===== */}
           <div
             style={{
               position: "relative",
