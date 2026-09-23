@@ -256,7 +256,7 @@ async function banUserPermanent(
       timestamp: serverTimestamp(), resolved: false, isBan: true,
     });
 
-    // Create a support ticket for the banned user so admin can see them in chat
+    // Create a support ticket for the banned user so admin can see them in chat list
     const ticketRef = await addDoc(collection(db, "livechat_tickets"), {
       userId,
       userName,
@@ -271,14 +271,13 @@ async function banUserPermanent(
       typingUserName: null,
       isAnnouncement: false,
       isBroadcast: false,
-      isAppeal: true,
       isBannedUser: true,
       banReason: reason,
       banMessage: message,
     });
 
-    // Add initial system message
-    const initialMessage = `ACCOUNT BANNED\n\nReason: ${reason}\n\nViolating message: "${message}"\n\nYou can reply here to appeal this decision.`;
+    // Add initial system warning message
+    const initialMessage = `⚠️ PERINGATAN: Akun ini telah di-BANNED.\n\nAlasan: ${reason}\n\nPesan yang melanggar: "${message}"`;
     const encryptedMessage = await encryptMessage(initialMessage);
     await addDoc(collection(db, "livechat_tickets", ticketRef.id, "messages"), {
       senderId: "system",
@@ -379,6 +378,7 @@ const WHITE = "#FFFFFF";
 const BLACK = "#000000";
 
 // ===== STATUS STYLES =====
+// Active: bg BLACK full, text WHITE, border BLACK (no visible white line)
 const STATUS_STYLES: {
   [key: string]: {
     label: string;
@@ -388,9 +388,9 @@ const STATUS_STYLES: {
   };
 } = {
   waiting: { label: "Waiting", bg: WHITE, text: BLUE, border: BLUE },
-  active: { label: "Active", bg: BLACK, text: WHITE, border: WHITE },
+  active: { label: "Active", bg: BLACK, text: WHITE, border: BLACK },
   resolved: { label: "Resolved", bg: WHITE, text: BLUE, border: BLUE },
-  closed: { label: "Closed", bg: BLACK, text: WHITE, border: WHITE },
+  closed: { label: "Closed", bg: BLACK, text: WHITE, border: BLACK },
 };
 
 // ===== TOPIC STYLES =====
@@ -398,11 +398,18 @@ const TOPIC_STYLES: {
   [key: string]: { bg: string; text: string; border: string };
 } = {
   "Product Inquiry": { bg: WHITE, text: BLUE, border: BLUE },
-  "Technical Support": { bg: BLACK, text: WHITE, border: WHITE },
+  "Technical Support": { bg: BLACK, text: WHITE, border: BLACK },
   "Account Issues": { bg: WHITE, text: BLUE, border: BLUE },
-  "Donation": { bg: BLACK, text: WHITE, border: WHITE },
+  "Donation": { bg: BLACK, text: WHITE, border: BLACK },
   "Partnership": { bg: WHITE, text: BLUE, border: BLUE },
-  "Other": { bg: BLACK, text: WHITE, border: WHITE },
+  "Other": { bg: BLACK, text: WHITE, border: BLACK },
+};
+
+// ===== BANNED BADGE STYLE (bg biru, teks putih, no border) =====
+const BANNED_BADGE_STYLE = {
+  bg: BLUE,
+  text: WHITE,
+  border: BLUE,
 };
 
 // ===== SVG ICONS =====
@@ -513,6 +520,15 @@ const BrandIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: st
   </svg>
 );
 
+// ===== WARNING ICON =====
+const WarningIcon = ({ size = 14, color = "currentColor" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <path d="M10.29 3.86L1.82 18A2 2 0 0 0 3.54 21H20.46A2 2 0 0 0 22.18 18L13.71 3.86A2 2 0 0 0 10.29 3.86Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M12 9V13" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <circle cx="12" cy="17" r="1" fill={color} />
+  </svg>
+);
+
 // ===== STABILO BADGE =====
 const StabiloBadge = ({
   label,
@@ -520,12 +536,14 @@ const StabiloBadge = ({
   text,
   border,
   size = "sm",
+  showBorder = true,
 }: {
   label: string;
   bg: string;
   text: string;
   border: string;
   size?: "sm" | "md";
+  showBorder?: boolean;
 }) => {
   const isSmall = size === "sm";
   return (
@@ -536,7 +554,7 @@ const StabiloBadge = ({
         justifyContent: "center",
         padding: isSmall ? "3px 9px" : "4px 11px",
         borderRadius: "4px",
-        border: `1.5px solid ${border}`,
+        border: showBorder ? `1.5px solid ${border}` : "none",
         backgroundColor: bg,
         color: text,
         fontSize: isSmall ? "10px" : "11px",
@@ -584,7 +602,6 @@ interface Ticket {
   typingUserName?: string | null;
   isAnnouncement?: boolean;
   isBroadcast?: boolean;
-  isAppeal?: boolean;
   isBannedUser?: boolean;
   banReason?: string;
   banMessage?: string;
@@ -2111,7 +2128,6 @@ const BannedUserChat = ({
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [messageText, setMessageText] = useState("");
   const [sending, setSending] = useState(false);
-  const [typing, setTyping] = useState(false);
   const [ticketId, setTicketId] = useState<string>("");
   const [encryptionReady, setEncryptionReady] = useState(false);
 
@@ -2132,7 +2148,6 @@ const BannedUserChat = ({
       setTicketId(banInfo.banTicketId);
       return;
     }
-    // Fallback: find ticket by userId + isBannedUser
     const q = query(
       collection(db, "livechat_tickets"),
       where("userId", "==", user.uid),
@@ -2200,7 +2215,6 @@ const BannedUserChat = ({
     if (!ticketId || !db) return;
     const ticketRef = doc(db, "livechat_tickets", ticketId);
     if (value.length > 0) {
-      setTyping(true);
       try {
         await updateDoc(ticketRef, {
           typing: true,
@@ -2209,7 +2223,6 @@ const BannedUserChat = ({
         });
       } catch (e) {}
     } else {
-      setTyping(false);
       try {
         await updateDoc(ticketRef, {
           typing: false,
@@ -2220,7 +2233,6 @@ const BannedUserChat = ({
     }
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     typingTimeoutRef.current = setTimeout(async () => {
-      setTyping(false);
       try {
         await updateDoc(ticketRef, {
           typing: false,
@@ -2265,7 +2277,6 @@ const BannedUserChat = ({
       });
 
       setMessageText("");
-      setTyping(false);
     } catch (error) {
       console.error("Error sending message:", error);
       alert("Failed to send message. Please try again.");
@@ -2383,19 +2394,17 @@ const BannedUserChat = ({
         </span>
       </div>
 
-      {/* Info bar */}
+      {/* Info bar — TANPA BACKGROUND COLOR */}
       <div
         style={{
           padding: "10px 22px",
-          backgroundColor: "rgba(13,60,252,0.06)",
-          borderBottom: `1px solid ${BLUE}22`,
           fontSize: "12px",
           color: BLUE,
           fontWeight: 600,
           lineHeight: 1.5,
         }}
       >
-        Kirim pesan Anda di sini untuk mengajukan banding. Tim admin akan merespon secepatnya.
+        Kirim pesan Anda di sini untuk mengajukan banding.
       </div>
 
       {/* Messages */}
@@ -3196,7 +3205,6 @@ const LiveChatAgent = ({
   const unbanUser = async (ticketId: string, targetUserId: string) => {
     if (!db || !isAdmin) return;
     try {
-      // Unban the user
       await updateDoc(doc(db, "users", targetUserId), {
         botBlocked: false,
         canCreateTicket: true,
@@ -3216,7 +3224,6 @@ const LiveChatAgent = ({
         // bot_blocks may not exist
       }
 
-      // Add system message in the ticket
       const sysMsg = `✅ Your appeal has been APPROVED. Your account has been unbanned. You can now use all features again.`;
       const encryptedSys = await encryptMessage(sysMsg);
       await addDoc(collection(db, "livechat_tickets", ticketId, "messages"), {
@@ -3960,17 +3967,13 @@ const LiveChatAgent = ({
     );
   }
 
-  // ===== SPLIT TICKETS: banned users shown separately for admin =====
-  const bannedUserTickets = tickets.filter((t) => t.isBannedUser);
-  const normalTickets = tickets.filter((t) => !t.isBannedUser);
-
-  const waitingTicketsRaw = normalTickets.filter((t) => t.status === "waiting");
-  const activeTicketsRaw = normalTickets.filter((t) => t.status === "active");
-  const resolvedTicketsRaw = normalTickets.filter((t) => t.status === "resolved" || t.status === "closed");
+  // ===== ADMIN: banned user tickets stay in normal sections with a BANNED badge =====
+  const waitingTicketsRaw = tickets.filter((t) => t.status === "waiting");
+  const activeTicketsRaw = tickets.filter((t) => t.status === "active");
+  const resolvedTicketsRaw = tickets.filter((t) => t.status === "resolved" || t.status === "closed");
   const waitingTickets = filterTicketsBySearch(waitingTicketsRaw);
   const activeTickets = filterTicketsBySearch(activeTicketsRaw);
   const resolvedTickets = filterTicketsBySearch(resolvedTicketsRaw);
-  const bannedFiltered = filterTicketsBySearch(bannedUserTickets);
   const typingText = selectedTicket ? getTypingText(selectedTicket) : null;
 
   const renderChatListItem = (ticket: Ticket, options?: { onExtraClick?: () => void }) => {
@@ -3978,6 +3981,9 @@ const LiveChatAgent = ({
     const ticketId = generateTicketId(ticket.createdAt);
     const statusStyle = STATUS_STYLES[ticket.status] || STATUS_STYLES.active;
     const topicStyle = TOPIC_STYLES[ticket.topic] || TOPIC_STYLES["Other"];
+
+    // Cek apakah user ini banned
+    const isBannedUser = ticket.isBannedUser === true;
 
     return (
       <div
@@ -3998,11 +4004,6 @@ const LiveChatAgent = ({
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px", gap: "8px", flexWrap: "wrap" }}>
           <div style={{ fontWeight: 700, fontSize: "14px", color: WHITE, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: "1 1 auto" }}>
             {ticket.userName}
-            {ticket.isBannedUser && (
-              <span style={{ marginLeft: "6px" }}>
-                <StabiloBadge label="BANNED" bg={BLACK} text={WHITE} border={WHITE} size="sm" />
-              </span>
-            )}
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "6px", flexShrink: 0 }}>
             <StabiloBadge
@@ -4011,7 +4012,19 @@ const LiveChatAgent = ({
               text={statusStyle.text}
               border={statusStyle.border}
               size="sm"
+              showBorder={ticket.status !== "active" && ticket.status !== "closed"}
             />
+            {/* BANNED badge — bg biru, teks putih, no border */}
+            {isBannedUser && (
+              <StabiloBadge
+                label="BANNED"
+                bg={BANNED_BADGE_STYLE.bg}
+                text={BANNED_BADGE_STYLE.text}
+                border={BANNED_BADGE_STYLE.border}
+                size="sm"
+                showBorder={false}
+              />
+            )}
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "8px", flexWrap: "wrap" }}>
@@ -4021,11 +4034,42 @@ const LiveChatAgent = ({
             text={topicStyle.text}
             border={topicStyle.border}
             size="sm"
+            showBorder={ticket.topic !== "Technical Support" && ticket.topic !== "Donation" && ticket.topic !== "Other"}
           />
           <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.75)", fontWeight: 700 }}>
             {ticketMsgCounts[ticket.id] || 0} msgs
           </span>
         </div>
+
+        {/* Peringatan otomatis kalau user banned */}
+        {isBannedUser && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              marginBottom: "6px",
+              padding: "6px 10px",
+              backgroundColor: BLUE,
+              borderRadius: "6px",
+            }}
+          >
+            <WarningIcon size={13} color={WHITE} />
+            <span
+              style={{
+                fontSize: "10px",
+                fontWeight: 800,
+                color: WHITE,
+                letterSpacing: "0.4px",
+                textTransform: "uppercase",
+                fontFamily: FONT_FAMILY,
+              }}
+            >
+              Akun ini terkena banned
+            </span>
+          </div>
+        )}
+
         {renderTicketPreview(ticket.id)}
         <div style={{ marginTop: "6px" }}>
           <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.65)", fontWeight: 700, letterSpacing: "0.3px" }}>{ticketId}</span>
@@ -4178,31 +4222,6 @@ const LiveChatAgent = ({
             <div style={{ overflowY: "auto", flex: 1, minHeight: 0 }}>
               {isAdmin ? (
                 <>
-                  {/* Banned Users Section (admin only) */}
-                  {bannedFiltered.length > 0 && (
-                    <div>
-                      <div
-                        style={{
-                          padding: "10px 16px",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "8px",
-                          borderBottom: "1px solid rgba(255,255,255,0.1)",
-                          backgroundColor: "rgba(0,0,0,0.15)",
-                        }}
-                      >
-                        <StabiloBadge
-                          label={`Banned Users (${bannedFiltered.length})`}
-                          bg={BLACK}
-                          text={WHITE}
-                          border={WHITE}
-                          size="md"
-                        />
-                      </div>
-                      {bannedFiltered.map((ticket) => renderChatListItem(ticket))}
-                    </div>
-                  )}
-
                   {waitingTickets.length > 0 && (
                     <div>
                       <div
@@ -4244,6 +4263,7 @@ const LiveChatAgent = ({
                           text={STATUS_STYLES.active.text}
                           border={STATUS_STYLES.active.border}
                           size="md"
+                          showBorder={false}
                         />
                       </div>
                       {activeTickets.map((ticket) => renderChatListItem(ticket))}
@@ -4271,7 +4291,7 @@ const LiveChatAgent = ({
                       {resolvedTickets.map((ticket) => renderChatListItem(ticket))}
                     </div>
                   )}
-                  {bannedFiltered.length === 0 && waitingTickets.length === 0 && activeTickets.length === 0 && resolvedTickets.length === 0 && (
+                  {waitingTickets.length === 0 && activeTickets.length === 0 && resolvedTickets.length === 0 && (
                     <div style={{ padding: "30px 16px", textAlign: "center", color: WHITE, fontSize: "13px" }}>
                       {searchQuery ? "No results found" : "No incoming chats"}
                     </div>
@@ -4354,7 +4374,7 @@ const LiveChatAgent = ({
                     <div style={{ fontWeight: 700, fontSize: "17px", color: WHITE, fontFamily: FONT_FAMILY, marginBottom: "6px", display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
                       {selectedTicket.userName}
                       {selectedTicket.isBannedUser && (
-                        <StabiloBadge label="BANNED USER" bg={BLACK} text={WHITE} border={WHITE} size="sm" />
+                        <StabiloBadge label="BANNED" bg={BANNED_BADGE_STYLE.bg} text={BANNED_BADGE_STYLE.text} border={BANNED_BADGE_STYLE.border} size="sm" showBorder={false} />
                       )}
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
@@ -4364,6 +4384,7 @@ const LiveChatAgent = ({
                         text={(STATUS_STYLES[selectedTicket.status] || STATUS_STYLES.active).text}
                         border={(STATUS_STYLES[selectedTicket.status] || STATUS_STYLES.active).border}
                         size="sm"
+                        showBorder={selectedTicket.status !== "active" && selectedTicket.status !== "closed"}
                       />
                       <StabiloBadge
                         label={selectedTicket.topic}
@@ -4371,6 +4392,7 @@ const LiveChatAgent = ({
                         text={(TOPIC_STYLES[selectedTicket.topic] || TOPIC_STYLES["Other"]).text}
                         border={(TOPIC_STYLES[selectedTicket.topic] || TOPIC_STYLES["Other"]).border}
                         size="sm"
+                        showBorder={selectedTicket.topic !== "Technical Support" && selectedTicket.topic !== "Donation" && selectedTicket.topic !== "Other"}
                       />
                       {selectedTicket.typing && selectedTicket.status !== "resolved" && (
                         <span style={{ fontSize: "12px", color: WHITE, fontStyle: "italic", fontWeight: 700 }}>
@@ -4600,7 +4622,7 @@ const LiveChatAgent = ({
                       <RollingNewMessage
                         key={rollingKey}
                         senderName={latestRollingMessage.senderName}
-                        message={latestRollingMessage.message || latestRollingMessage.text}
+                        message={latestRollingMessage.text}
                         isFromAgent={latestRollingMessage.isFromAgent}
                       />
                     </div>
