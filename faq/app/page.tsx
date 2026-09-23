@@ -257,12 +257,9 @@ async function banUserPermanent(
       timestamp: serverTimestamp(), resolved: false, isBan: true,
     });
 
-    // Jika ada existing ticket (room yang sedang aktif), TANDAI ticket itu sebagai banned
-    // dan tambahkan pesan peringatan otomatis ke dalam body chat.
     if (existingTicketId) {
       const ticketRef = doc(db, "livechat_tickets", existingTicketId);
 
-      // Tandai ticket sebagai banned user
       await updateDoc(ticketRef, {
         isBannedUser: true,
         banReason: reason,
@@ -270,7 +267,6 @@ async function banUserPermanent(
         status: "active",
       });
 
-      // Tambahkan pesan peringatan otomatis ke dalam body chat
       const warningText = `⚠️ PERINGATAN SISTEM\n\nAkun ini telah di-BANNED secara permanen.\n\nAlasan: ${reason}\n\nPesan yang melanggar: "${message}"\n\nUser dapat mengajukan banding melalui halaman utama.`;
       const encryptedWarning = await encryptMessage(warningText);
       await addDoc(collection(db, "livechat_tickets", existingTicketId, "messages"), {
@@ -292,7 +288,6 @@ async function banUserPermanent(
         lastMessageSender: "System",
       });
 
-      // Simpan ticketId ke ban record
       await updateDoc(doc(db, "bot_blocks", userId), {
         banTicketId: existingTicketId,
       });
@@ -300,7 +295,6 @@ async function banUserPermanent(
         banTicketId: existingTicketId,
       });
     } else {
-      // Jika tidak ada ticket existing, buat ticket baru khusus banned user
       const ticketRef = await addDoc(collection(db, "livechat_tickets"), {
         userId,
         userName,
@@ -579,6 +573,14 @@ const ShieldIcon = ({ size = 20, color = "currentColor" }: { size?: number; colo
   </svg>
 );
 
+// ===== REPLY ICON =====
+const ReplyIcon = ({ size = 16, color = "currentColor" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <path d="M9 17L4 12L9 7" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M4 12H15C18.3137 12 21 14.6863 21 18V19" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
 // ===== STABILO BADGE =====
 const StabiloBadge = ({
   label,
@@ -668,6 +670,11 @@ interface ChatMessage {
   deliveryStatus?: "sending" | "sent" | "delivered" | "read" | "failed";
   isSystemMessage?: boolean;
   isBanWarning?: boolean;
+  replyTo?: {
+    messageId: string;
+    senderName: string;
+    text: string;
+  };
 }
 interface OnlineUser {
   uid: string;
@@ -2166,6 +2173,63 @@ const CloseRoomButton = ({
   );
 };
 
+// ===== REPLY PREVIEW =====
+const ReplyPreview = ({
+  replyTo,
+  onCancel,
+}: {
+  replyTo: { messageId: string; senderName: string; text: string };
+  onCancel: () => void;
+}) => {
+  return (
+    <div
+      style={{
+        padding: "8px 12px",
+        backgroundColor: "rgba(13,60,252,0.08)",
+        borderLeft: `3px solid ${BLUE}`,
+        borderRadius: "6px",
+        display: "flex",
+        alignItems: "flex-start",
+        gap: "10px",
+        marginBottom: "8px",
+        fontFamily: FONT_FAMILY,
+      }}
+    >
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: "11px", fontWeight: 700, color: BLUE, marginBottom: "3px" }}>
+          Replying to {replyTo.senderName}
+        </div>
+        <div
+          style={{
+            fontSize: "12px",
+            color: "#666",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {replyTo.text.length > 50 ? replyTo.text.substring(0, 50) + "..." : replyTo.text}
+        </div>
+      </div>
+      <button
+        onClick={onCancel}
+        style={{
+          background: "transparent",
+          border: "none",
+          color: BLUE,
+          cursor: "pointer",
+          padding: 0,
+          fontSize: "16px",
+          lineHeight: 1,
+          fontFamily: FONT_FAMILY,
+        }}
+      >
+        ×
+      </button>
+    </div>
+  );
+};
+
 // ===== BANNED USER CHAT (Direct chat with admin, no modal) =====
 const BannedUserChat = ({
   user,
@@ -2181,6 +2245,7 @@ const BannedUserChat = ({
   const [sending, setSending] = useState(false);
   const [ticketId, setTicketId] = useState<string>("");
   const [encryptionReady, setEncryptionReady] = useState(false);
+  const [replyTo, setReplyTo] = useState<{ messageId: string; senderName: string; text: string } | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -2305,7 +2370,7 @@ const BannedUserChat = ({
       const encryptedMessage = await encryptMessage(messageText.trim());
       const senderName = user.displayName || user.email || "User";
 
-      await addDoc(collection(db, "livechat_tickets", ticketId, "messages"), {
+      const messageData: any = {
         senderId: user.uid,
         senderName,
         text: encryptedMessage,
@@ -2315,7 +2380,13 @@ const BannedUserChat = ({
         isBotDetected: false,
         deliveryStatus: "sent",
         isSystemMessage: false,
-      });
+      };
+
+      if (replyTo) {
+        messageData.replyTo = replyTo;
+      }
+
+      await addDoc(collection(db, "livechat_tickets", ticketId, "messages"), messageData);
 
       await updateDoc(ticketRef, {
         lastMessage: messageText.trim(),
@@ -2325,6 +2396,7 @@ const BannedUserChat = ({
       });
 
       setMessageText("");
+      setReplyTo(null);
     } catch (error) {
       console.error("Error sending message:", error);
       alert("Failed to send message. Please try again.");
@@ -2507,8 +2579,27 @@ const BannedUserChat = ({
                     wordBreak: "break-word",
                     border: isSystem ? `1px dashed ${BLUE}` : isMine ? "none" : "1px solid rgba(0,0,0,0.05)",
                     fontStyle: isSystem ? "italic" : "normal",
+                    position: "relative",
                   }}
                 >
+                  {msg.replyTo && (
+                    <div
+                      style={{
+                        padding: "6px 10px",
+                        backgroundColor: isMine ? "rgba(255,255,255,0.15)" : "rgba(13,60,252,0.08)",
+                        borderLeft: `3px solid ${isMine ? WHITE : BLUE}`,
+                        borderRadius: "4px",
+                        marginBottom: "8px",
+                      }}
+                    >
+                      <div style={{ fontSize: "10px", fontWeight: 700, color: isMine ? WHITE : BLUE, marginBottom: "2px" }}>
+                        {msg.replyTo.senderName}
+                      </div>
+                      <div style={{ fontSize: "11px", color: isMine ? "rgba(255,255,255,0.8)" : "#666" }}>
+                        {msg.replyTo.text}
+                      </div>
+                    </div>
+                  )}
                   {!isMine && !isSystem && (
                     <div style={{ fontSize: "12px", fontWeight: 700, color: BLUE, marginBottom: "5px" }}>
                       {msg.senderName}
@@ -2525,6 +2616,22 @@ const BannedUserChat = ({
                         marginTop: "5px",
                       }}
                     >
+                      <button
+                        onClick={() => setReplyTo({ messageId: msg.id, senderName: msg.senderName, text: msg.text })}
+                        style={{
+                          background: "transparent",
+                          border: "none",
+                          color: isMine ? WHITE : BLUE,
+                          cursor: "pointer",
+                          padding: "2px",
+                          display: "flex",
+                          alignItems: "center",
+                          opacity: 0.7,
+                        }}
+                        title="Reply"
+                      >
+                        <ReplyIcon size={12} color={isMine ? WHITE : BLUE} />
+                      </button>
                       {renderDeliveryStatus(msg, isMine)}
                       <span style={{ fontSize: "10px", color: isMine ? WHITE : "#999" }}>
                         {formatTime(msg.timestamp)}
@@ -2544,54 +2651,63 @@ const BannedUserChat = ({
           padding: "14px 22px",
           borderTop: "1px solid rgba(0,0,0,0.06)",
           display: "flex",
-          gap: "12px",
+          flexDirection: "column",
+          gap: "8px",
           backgroundColor: WHITE,
           flexShrink: 0,
         }}
       >
-        <input
-          type="text"
-          value={messageText}
-          onChange={(e) => handleTyping(e.target.value)}
-          onKeyPress={(e) => {
-            if (e.key === "Enter" && !e.shiftKey && messageText.trim()) {
-              e.preventDefault();
-              sendMessage();
-            }
-          }}
-          placeholder="Tulis pesan banding Anda..."
-          disabled={sending}
-          style={{
-            flex: 1,
-            padding: "12px 16px",
-            border: "1px solid rgba(0,0,0,0.1)",
-            borderRadius: "10px",
-            fontSize: "14px",
-            outline: "none",
-            fontFamily: FONT_FAMILY,
-            backgroundColor: WHITE,
-            color: BLACK,
-          }}
-        />
-        <button
-          onClick={sendMessage}
-          disabled={!messageText.trim() || sending}
-          style={{
-            padding: "12px 24px",
-            backgroundColor: !messageText.trim() || sending ? "#ccc" : BLUE,
-            color: WHITE,
-            border: "none",
-            borderRadius: "10px",
-            cursor: !messageText.trim() || sending ? "not-allowed" : "pointer",
-            fontFamily: FONT_FAMILY,
-            fontSize: "13px",
-            fontWeight: 800,
-            letterSpacing: "0.5px",
-            textTransform: "uppercase",
-          }}
-        >
-          {sending ? "..." : "Send"}
-        </button>
+        {replyTo && (
+          <ReplyPreview
+            replyTo={replyTo}
+            onCancel={() => setReplyTo(null)}
+          />
+        )}
+        <div style={{ display: "flex", gap: "12px" }}>
+          <input
+            type="text"
+            value={messageText}
+            onChange={(e) => handleTyping(e.target.value)}
+            onKeyPress={(e) => {
+              if (e.key === "Enter" && !e.shiftKey && messageText.trim()) {
+                e.preventDefault();
+                sendMessage();
+              }
+            }}
+            placeholder="Tulis pesan banding Anda..."
+            disabled={sending}
+            style={{
+              flex: 1,
+              padding: "12px 16px",
+              border: "1px solid rgba(0,0,0,0.1)",
+              borderRadius: "10px",
+              fontSize: "14px",
+              outline: "none",
+              fontFamily: FONT_FAMILY,
+              backgroundColor: WHITE,
+              color: BLACK,
+            }}
+          />
+          <button
+            onClick={sendMessage}
+            disabled={!messageText.trim() || sending}
+            style={{
+              padding: "12px 24px",
+              backgroundColor: !messageText.trim() || sending ? "#ccc" : BLUE,
+              color: WHITE,
+              border: "none",
+              borderRadius: "10px",
+              cursor: !messageText.trim() || sending ? "not-allowed" : "pointer",
+              fontFamily: FONT_FAMILY,
+              fontSize: "13px",
+              fontWeight: 800,
+              letterSpacing: "0.5px",
+              textTransform: "uppercase",
+            }}
+          >
+            {sending ? "..." : "Send"}
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -2639,6 +2755,8 @@ const LiveChatAgent = ({
   const [tourStep, setTourStep] = useState(0);
 
   const [showCloseConfirm, setShowCloseConfirm] = useState(false);
+
+  const [replyTo, setReplyTo] = useState<{ messageId: string; senderName: string; text: string } | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatMessagesContainerRef = useRef<HTMLDivElement>(null);
@@ -2979,6 +3097,7 @@ const LiveChatAgent = ({
     setLatestRollingMessage(null);
     prevMessagesLenRef.current = messagesCacheRef.current[selectedTicket?.id || ""]?.length || 0;
     setShowCloseConfirm(false);
+    setReplyTo(null);
   }, [selectedTicket?.id]);
 
   useEffect(() => {
@@ -3174,7 +3293,6 @@ const LiveChatAgent = ({
     }
     const checkResult = containsBannedContent(messageText);
     if (checkResult.isBanned) {
-      // Kirim ban dengan existing ticket ID supaya warning masuk ke room yang sama
       await banUserPermanent(
         user.uid,
         user.email || "",
@@ -3206,7 +3324,8 @@ const LiveChatAgent = ({
       await updateDoc(ticketRef, { typing: false, typingUserId: null, typingUserName: null });
       const senderName = isAdmin ? AGENT_NAME : user.displayName || user.email || "User";
       const encryptedMessage = await encryptMessage(messageText.trim());
-      await addDoc(collection(db, "livechat_tickets", selectedTicket.id, "messages"), {
+
+      const messageData: any = {
         senderId: user.uid,
         senderName: senderName,
         text: encryptedMessage,
@@ -3215,7 +3334,14 @@ const LiveChatAgent = ({
         isEncrypted: true,
         isBotDetected: false,
         deliveryStatus: "sent",
-      });
+      };
+
+      if (replyTo) {
+        messageData.replyTo = replyTo;
+      }
+
+      await addDoc(collection(db, "livechat_tickets", selectedTicket.id, "messages"), messageData);
+
       await updateDoc(ticketRef, {
         lastMessage: messageText.trim(),
         lastMessageTime: serverTimestamp(),
@@ -3226,6 +3352,7 @@ const LiveChatAgent = ({
       });
       setMessageText("");
       setBanMessage(null);
+      setReplyTo(null);
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     } catch (error) {
       console.error("Error sending message:", error);
@@ -4586,8 +4713,8 @@ const LiveChatAgent = ({
                         style={{
                           padding: "14px 18px",
                           borderRadius: "12px",
-                          backgroundColor: "rgba(13,60,252,0.08)",
-                          border: `1.5px dashed ${BLUE}`,
+                          backgroundColor: BLUE,
+                          border: "none",
                           display: "flex",
                           alignItems: "flex-start",
                           gap: "12px",
@@ -4599,21 +4726,21 @@ const LiveChatAgent = ({
                             width: "32px",
                             height: "32px",
                             borderRadius: "50%",
-                            backgroundColor: BLUE,
+                            backgroundColor: WHITE,
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
                             flexShrink: 0,
                           }}
                         >
-                          <WarningIcon size={18} color={WHITE} />
+                          <WarningIcon size={18} color={BLUE} />
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div
                             style={{
                               fontSize: "11px",
                               fontWeight: 800,
-                              color: BLUE,
+                              color: WHITE,
                               letterSpacing: "0.6px",
                               textTransform: "uppercase",
                               marginBottom: "6px",
@@ -4624,7 +4751,7 @@ const LiveChatAgent = ({
                           <div
                             style={{
                               fontSize: "13px",
-                              color: BLACK,
+                              color: WHITE,
                               lineHeight: 1.6,
                               fontWeight: 500,
                               whiteSpace: "pre-wrap",
@@ -4678,8 +4805,27 @@ const LiveChatAgent = ({
                               wordBreak: "break-word",
                               border: isSystem ? `1px dashed ${BLUE}` : isMine ? "none" : "1px solid rgba(0,0,0,0.05)",
                               fontStyle: isSystem ? "italic" : "normal",
+                              position: "relative",
                             }}
                           >
+                            {msg.replyTo && (
+                              <div
+                                style={{
+                                  padding: "6px 10px",
+                                  backgroundColor: isMine ? "rgba(255,255,255,0.15)" : "rgba(13,60,252,0.08)",
+                                  borderLeft: `3px solid ${isMine ? WHITE : BLUE}`,
+                                  borderRadius: "4px",
+                                  marginBottom: "8px",
+                                }}
+                              >
+                                <div style={{ fontSize: "10px", fontWeight: 700, color: isMine ? WHITE : BLUE, marginBottom: "2px" }}>
+                                  {msg.replyTo.senderName}
+                                </div>
+                                <div style={{ fontSize: "11px", color: isMine ? "rgba(255,255,255,0.8)" : "#666" }}>
+                                  {msg.replyTo.text}
+                                </div>
+                              </div>
+                            )}
                             {!isMine && !isSystem && (
                               <div style={{ fontSize: "12px", fontWeight: 700, color: BLUE, marginBottom: "5px" }}>
                                 {msg.senderName}
@@ -4696,6 +4842,22 @@ const LiveChatAgent = ({
                                   marginTop: "5px",
                                 }}
                               >
+                                <button
+                                  onClick={() => setReplyTo({ messageId: msg.id, senderName: msg.senderName, text: msg.text })}
+                                  style={{
+                                    background: "transparent",
+                                    border: "none",
+                                    color: isMine ? WHITE : BLUE,
+                                    cursor: "pointer",
+                                    padding: "2px",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    opacity: 0.7,
+                                  }}
+                                  title="Reply"
+                                >
+                                  <ReplyIcon size={12} color={isMine ? WHITE : BLUE} />
+                                </button>
                                 {renderDeliveryStatus(msg, isMine)}
                                 <span style={{ fontSize: "10px", color: isMine ? WHITE : "#999" }}>
                                   {formatTime(msg.timestamp)}
@@ -4752,52 +4914,61 @@ const LiveChatAgent = ({
                       padding: "16px 24px",
                       borderTop: "1px solid rgba(0,0,0,0.06)",
                       display: "flex",
-                      gap: "12px",
+                      flexDirection: "column",
+                      gap: "8px",
                       backgroundColor: WHITE,
                       flexShrink: 0,
                     }}
                   >
-                    <input
-                      type="text"
-                      value={messageText}
-                      onChange={handleTyping}
-                      onKeyPress={(e) => {
-                        if (e.key === "Enter" && !e.shiftKey && messageText.trim()) {
-                          e.preventDefault();
-                          sendMessage();
-                        }
-                      }}
-                      placeholder="Type a message..."
-                      style={{
-                        flex: 1,
-                        padding: "12px 16px",
-                        border: "1px solid rgba(0,0,0,0.1)",
-                        borderRadius: "10px",
-                        fontSize: "15px",
-                        outline: "none",
-                        fontFamily: FONT_FAMILY,
-                        backgroundColor: WHITE,
-                      }}
-                    />
-                    <button
-                      onClick={sendMessage}
-                      disabled={!messageText.trim()}
-                      style={{
-                        padding: "12px 24px",
-                        backgroundColor: !messageText.trim() ? "#ccc" : BLUE,
-                        color: WHITE,
-                        border: "none",
-                        borderRadius: "10px",
-                        cursor: !messageText.trim() ? "not-allowed" : "pointer",
-                        fontFamily: FONT_FAMILY,
-                        fontSize: "14px",
-                        fontWeight: 800,
-                        letterSpacing: "0.5px",
-                        textTransform: "uppercase",
-                      }}
-                    >
-                      Send
-                    </button>
+                    {replyTo && (
+                      <ReplyPreview
+                        replyTo={replyTo}
+                        onCancel={() => setReplyTo(null)}
+                      />
+                    )}
+                    <div style={{ display: "flex", gap: "12px" }}>
+                      <input
+                        type="text"
+                        value={messageText}
+                        onChange={handleTyping}
+                        onKeyPress={(e) => {
+                          if (e.key === "Enter" && !e.shiftKey && messageText.trim()) {
+                            e.preventDefault();
+                            sendMessage();
+                          }
+                        }}
+                        placeholder="Type a message..."
+                        style={{
+                          flex: 1,
+                          padding: "12px 16px",
+                          border: "1px solid rgba(0,0,0,0.1)",
+                          borderRadius: "10px",
+                          fontSize: "15px",
+                          outline: "none",
+                          fontFamily: FONT_FAMILY,
+                          backgroundColor: WHITE,
+                        }}
+                      />
+                      <button
+                        onClick={sendMessage}
+                        disabled={!messageText.trim()}
+                        style={{
+                          padding: "12px 24px",
+                          backgroundColor: !messageText.trim() ? "#ccc" : BLUE,
+                          color: WHITE,
+                          border: "none",
+                          borderRadius: "10px",
+                          cursor: !messageText.trim() ? "not-allowed" : "pointer",
+                          fontFamily: FONT_FAMILY,
+                          fontSize: "14px",
+                          fontWeight: 800,
+                          letterSpacing: "0.5px",
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        Send
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   <div
