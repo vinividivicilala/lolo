@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { initializeApp, getApps } from "firebase/app";
@@ -19,10 +19,6 @@ import {
   getDoc,
   setDoc,
   limit,
-  increment,
-  arrayUnion,
-  deleteDoc,
-  getDocs,
 } from "firebase/firestore";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -162,7 +158,7 @@ async function decryptMessage(encrypted: string): Promise<string> {
   }
 }
 
-// ===== ADVANCED ANTI-BOT & ANTI-FRAUD SYSTEM =====
+// ===== ANTI-BOT KEYWORDS =====
 const BAN_KEYWORDS = {
   JUDOL: [
     "judi", "slot", "poker", "casino", "roulette", "blackjack", "baccarat",
@@ -201,426 +197,114 @@ const BAN_KEYWORDS = {
   ],
 };
 
-// ===== SPAM PATTERNS =====
-const SPAM_PATTERNS = {
-  REPEATED_CHARS: /(.)\1{4,}/g,
-  REPEATED_WORDS: /\b(\w+)\b(?:\s+\1\b){3,}/gi,
-  EXCESSIVE_CAPS: /[A-Z]{10,}/g,
-  EXCESSIVE_EMOJI: /[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}]{5,}/gu,
-  PHONE_NUMBERS: /(\+?62|0)[0-9]{9,13}/g,
-  EMAIL_PATTERNS: /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g,
-  CRYPTO_WALLETS: /(0x[a-fA-F0-9]{40}|[13][a-km-zA-HJ-NP-Z1-9]{25,34})/g,
-  URL_PATTERNS: /(https?:\/\/[^\s]+)/gi,
-};
-
-// ===== USER BEHAVIOR TRACKING =====
-interface UserBehaviorData {
-  messageCount: number;
-  lastMessageTime: number;
-  violations: number;
-  warningCount: number;
-  typingSpeed: number[];
-  lastTypingTime: number;
-  sessionStart: number;
-  linkCount: number;
-  capsRatio: number;
-  emojiCount: number;
-}
-
-const behaviorTracker: { [userId: string]: UserBehaviorData } = {};
-
-function initializeBehaviorTracking(userId: string): void {
-  if (!behaviorTracker[userId]) {
-    behaviorTracker[userId] = {
-      messageCount: 0,
-      lastMessageTime: 0,
-      violations: 0,
-      warningCount: 0,
-      typingSpeed: [],
-      lastTypingTime: 0,
-      sessionStart: Date.now(),
-      linkCount: 0,
-      capsRatio: 0,
-      emojiCount: 0,
-    };
-  }
-}
-
-// ===== ADVANCED CONTENT ANALYSIS =====
-interface AnalysisResult {
-  isBanned: boolean;
-  reason: string;
-  severity: "low" | "medium" | "high" | "critical";
-  category: string;
-  matchedKeyword?: string;
-  confidence: number;
-}
-
-function analyzeContent(text: string, userId: string): AnalysisResult {
+function containsBannedContent(text: string): { isBanned: boolean; reason: string } {
   const lowerText = text.toLowerCase();
-  initializeBehaviorTracking(userId);
-  const behavior = behaviorTracker[userId];
-
-  // Check banned keywords with severity levels
   for (const keyword of BAN_KEYWORDS.JUDOL) {
-    if (lowerText.includes(keyword)) {
-      behavior.violations++;
-      return {
-        isBanned: true,
-        reason: `Online Gambling (${keyword})`,
-        severity: "critical",
-        category: "JUDOL",
-        matchedKeyword: keyword,
-        confidence: 95,
-      };
-    }
+    if (lowerText.includes(keyword)) return { isBanned: true, reason: `Online Gambling (${keyword})` };
   }
-
   for (const keyword of BAN_KEYWORDS.PHISHING) {
-    if (lowerText.includes(keyword)) {
-      behavior.violations++;
-      return {
-        isBanned: true,
-        reason: `Phishing/Scam (${keyword})`,
-        severity: "critical",
-        category: "PHISHING",
-        matchedKeyword: keyword,
-        confidence: 90,
-      };
-    }
+    if (lowerText.includes(keyword)) return { isBanned: true, reason: `Phishing/Scam (${keyword})` };
   }
-
   for (const keyword of BAN_KEYWORDS.MALICIOUS) {
-    if (lowerText.includes(keyword)) {
-      behavior.violations++;
-      return {
-        isBanned: true,
-        reason: `Malicious Content (${keyword})`,
-        severity: "critical",
-        category: "MALICIOUS",
-        matchedKeyword: keyword,
-        confidence: 100,
-      };
-    }
+    if (lowerText.includes(keyword)) return { isBanned: true, reason: `Malicious Content (${keyword})` };
   }
-
   for (const keyword of BAN_KEYWORDS.SUSPICIOUS_LINKS) {
-    if (lowerText.includes(keyword)) {
-      behavior.linkCount++;
-      if (behavior.linkCount >= 2) {
-        return {
-          isBanned: true,
-          reason: `Multiple Suspicious Links (${keyword})`,
-          severity: "high",
-          category: "SUSPICIOUS_LINKS",
-          matchedKeyword: keyword,
-          confidence: 85,
-        };
-      }
-      return {
-        isBanned: false,
-        reason: `Suspicious Link detected (${keyword})`,
-        severity: "medium",
-        category: "SUSPICIOUS_LINKS",
-        matchedKeyword: keyword,
-        confidence: 70,
-      };
-    }
+    if (lowerText.includes(keyword)) return { isBanned: true, reason: `Suspicious Link (${keyword})` };
   }
-
-  // IP Address detection
   const ipPattern = /[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+/;
-  if (ipPattern.test(lowerText)) {
-    behavior.violations++;
-    return {
-      isBanned: true,
-      reason: "Suspicious IP Address",
-      severity: "high",
-      category: "IP_DETECTION",
-      confidence: 80,
-    };
-  }
-
-  // Long number detection (phone, account numbers)
+  if (ipPattern.test(lowerText)) return { isBanned: true, reason: "Suspicious IP Address" };
   const repeatedNumber = /[0-9]{10,}/;
-  if (repeatedNumber.test(lowerText)) {
-    behavior.violations++;
-    return {
-      isBanned: true,
-      reason: "Suspicious Number Pattern",
-      severity: "medium",
-      category: "NUMBER_PATTERN",
-      confidence: 75,
-    };
-  }
-
-  // Transfer/Payment patterns
+  if (repeatedNumber.test(lowerText)) return { isBanned: true, reason: "Suspicious Number" };
   const transferPatterns = [
     /kirim ke rek/i, /transfer ke/i, /bayar ke/i, /setor ke/i,
     /minta kirim/i, /mohon kirim/i, /tolong kirim/i,
-    /kirim uang/i, /transfer uang/i, /bayar uang/i,
   ];
   for (const pattern of transferPatterns) {
-    if (pattern.test(lowerText)) {
-      behavior.violations++;
-      return {
-        isBanned: true,
-        reason: "Transfer/Payment Request",
-        severity: "high",
-        category: "TRANSFER_REQUEST",
-        confidence: 85,
-      };
-    }
+    if (pattern.test(lowerText)) return { isBanned: true, reason: "Transfer/Payment Request" };
   }
-
-  // Phone number detection
-  const phoneMatch = text.match(SPAM_PATTERNS.PHONE_NUMBERS);
-  if (phoneMatch && phoneMatch.length > 0) {
-    behavior.violations++;
-    return {
-      isBanned: true,
-      reason: `Phone Number Detected (${phoneMatch[0]})`,
-      severity: "medium",
-      category: "PHONE_NUMBER",
-      confidence: 80,
-    };
-  }
-
-  // Crypto wallet detection
-  const cryptoMatch = text.match(SPAM_PATTERNS.CRYPTO_WALLETS);
-  if (cryptoMatch) {
-    behavior.violations++;
-    return {
-      isBanned: true,
-      reason: "Cryptocurrency Wallet Address Detected",
-      severity: "critical",
-      category: "CRYPTO_WALLET",
-      confidence: 95,
-    };
-  }
-
-  // Email spam detection (more than 2 emails)
-  const emailMatches = text.match(SPAM_PATTERNS.EMAIL_PATTERNS);
-  if (emailMatches && emailMatches.length > 2) {
-    behavior.violations++;
-    return {
-      isBanned: true,
-      reason: "Multiple Email Addresses Detected (Spam)",
-      severity: "medium",
-      category: "EMAIL_SPAM",
-      confidence: 70,
-    };
-  }
-
-  // Excessive caps detection
-  const capsMatches = text.match(SPAM_PATTERNS.EXCESSIVE_CAPS);
-  if (capsMatches) {
-    behavior.capsRatio = text.replace(/[^A-Z]/g, "").length / text.length;
-    if (behavior.capsRatio > 0.7 && text.length > 20) {
-      return {
-        isBanned: false,
-        reason: "Excessive Capital Letters",
-        severity: "low",
-        category: "EXCESSIVE_CAPS",
-        confidence: 60,
-      };
-    }
-  }
-
-  // Repeated characters spam
-  const repeatedCharsMatch = text.match(SPAM_PATTERNS.REPEATED_CHARS);
-  if (repeatedCharsMatch && repeatedCharsMatch.length > 3) {
-    return {
-      isBanned: false,
-      reason: "Spam-like repeated characters",
-      severity: "low",
-      category: "SPAM_PATTERN",
-      confidence: 50,
-    };
-  }
-
-  // Rate limiting check
-  const now = Date.now();
-  const timeSinceLastMessage = now - behavior.lastMessageTime;
-  behavior.messageCount++;
-  
-  if (behavior.messageCount > 20 && timeSinceLastMessage < 1000) {
-    behavior.violations++;
-    return {
-      isBanned: true,
-      reason: "Message Flooding Detected",
-      severity: "high",
-      category: "RATE_LIMIT",
-      confidence: 90,
-    };
-  }
-
-  behavior.lastMessageTime = now;
-
-  return {
-    isBanned: false,
-    reason: "",
-    severity: "low",
-    category: "CLEAN",
-    confidence: 0,
-  };
+  return { isBanned: false, reason: "" };
 }
 
-// ===== WARNING SYSTEM =====
-async function issueWarning(
-  userId: string,
-  userEmail: string,
-  userName: string,
-  reason: string,
-  message: string,
-  severity: string
-) {
-  if (!db) return;
-  try {
-    const now = new Date().toISOString();
-    const warningRef = doc(collection(db, "user_warnings"));
-    await setDoc(warningRef, {
-      userId,
-      userEmail,
-      userName,
-      reason,
-      message,
-      severity,
-      timestamp: serverTimestamp(),
-      acknowledged: false,
-      warningId: warningRef.id,
-    });
-
-    // Also log to violations
-    await addDoc(collection(db, "bot_violations_log"), {
-      userId,
-      userEmail,
-      userName,
-      violation: {
-        type: "WARNING",
-        reason,
-        timestamp: now,
-        message,
-        severity,
-        confidence: 70,
-      },
-      timestamp: serverTimestamp(),
-      resolved: false,
-      isBan: false,
-      isWarning: true,
-    });
-  } catch (error) {
-    console.error("Error issuing warning:", error);
-  }
-}
-
-// ===== BAN USER PERMANENT WITH APPEAL SUPPORT =====
+// ===== BAN USER PERMANENT =====
 async function banUserPermanent(
   userId: string,
   userEmail: string,
   userName: string,
   reason: string,
-  message: string,
-  severity: string = "critical",
-  category: string = "VIOLATION"
+  message: string
 ) {
   if (!db) return;
   try {
     const now = new Date().toISOString();
-    
-    // Create ban record
     await setDoc(doc(db, "bot_blocks", userId), {
-      userId,
-      userEmail,
-      userName,
-      isBlocked: true,
-      blockedAt: now,
-      blockedReason: reason,
-      blockedMessage: message,
-      blockedSeverity: severity,
-      blockedCategory: category,
-      canCreateTicket: false,
-      canSendMessage: false,
-      canAppeal: true,
-      appealStatus: "none", // none, pending, approved, rejected
-      appealDeadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days
-      violations: [{
-        type: "BANNED",
-        reason,
-        timestamp: now,
-        message,
-        severity,
-        category,
-        confidence: 100,
-      }],
-      totalViolations: 1,
-      warningCount: 0,
-      firstViolation: now,
-      lastViolation: now,
+      userId, userEmail, userName,
+      isBlocked: true, blockedAt: now, blockedReason: reason, blockedMessage: message,
+      canCreateTicket: false, canSendMessage: false,
+      canAppeal: true, appealStatus: "none",
+      violations: [{ type: "BANNED", reason, timestamp: now, message, confidence: 100 }],
+      totalViolations: 1, warningCount: 0, firstViolation: now, lastViolation: now,
     });
-
-    // Update user record
     await updateDoc(doc(db, "users", userId), {
-      botBlocked: true,
-      botBlockedAt: serverTimestamp(),
-      botBlockedReason: reason,
-      botBlockedMessage: message,
-      botBlockedSeverity: severity,
-      botBlockedCategory: category,
-      canCreateTicket: false,
-      canSendMessage: false,
-      canAppeal: true,
-      appealStatus: "none",
+      botBlocked: true, botBlockedAt: serverTimestamp(),
+      botBlockedReason: reason, botBlockedMessage: message,
+      canCreateTicket: false, canSendMessage: false,
+      canAppeal: true, appealStatus: "none",
     });
-
-    // Log violation
     await addDoc(collection(db, "bot_violations_log"), {
+      userId, userEmail, userName,
+      violation: { type: "BANNED", reason, timestamp: now, message, confidence: 100 },
+      timestamp: serverTimestamp(), resolved: false, isBan: true,
+    });
+
+    // Create a support ticket for the banned user so admin can see them in chat
+    const ticketRef = await addDoc(collection(db, "livechat_tickets"), {
       userId,
-      userEmail,
       userName,
-      violation: {
-        type: "BANNED",
-        reason,
-        timestamp: now,
-        message,
-        severity,
-        category,
-        confidence: 100,
-      },
+      userEmail,
+      userPhoto: "",
+      status: "waiting",
+      topic: "Account Issues",
+      createdAt: serverTimestamp(),
+      unreadCount: 0,
+      typing: false,
+      typingUserId: null,
+      typingUserName: null,
+      isAnnouncement: false,
+      isBroadcast: false,
+      isAppeal: true,
+      isBannedUser: true,
+      banReason: reason,
+      banMessage: message,
+    });
+
+    // Add initial system message
+    const initialMessage = `ACCOUNT BANNED\n\nReason: ${reason}\n\nViolating message: "${message}"\n\nYou can reply here to appeal this decision.`;
+    const encryptedMessage = await encryptMessage(initialMessage);
+    await addDoc(collection(db, "livechat_tickets", ticketRef.id, "messages"), {
+      senderId: "system",
+      senderName: "System",
+      text: encryptedMessage,
       timestamp: serverTimestamp(),
-      resolved: false,
-      isBan: true,
-      isWarning: false,
-    });
-
-    // Create notification for user
-    await addDoc(collection(db, "user_notifications"), {
-      userId,
-      type: "BAN",
-      title: "Account Permanently Banned",
-      message: `Your account has been permanently banned.\nReason: ${reason}\n\nYou can appeal this decision within 30 days.`,
-      severity: "critical",
       read: false,
-      createdAt: serverTimestamp(),
-      actionUrl: "/appeal",
-      actionLabel: "Submit Appeal",
+      isEncrypted: true,
+      isBotDetected: false,
+      deliveryStatus: "sent",
+      isSystemMessage: true,
     });
 
-    // Create notification for admin
-    await addDoc(collection(db, "admin_notifications"), {
-      type: "USER_BANNED",
-      title: "User Banned",
-      message: `User ${userName} (${userEmail}) has been banned.\nReason: ${reason}`,
-      userId,
-      userEmail,
-      userName,
-      reason,
-      severity,
-      category,
-      read: false,
-      createdAt: serverTimestamp(),
+    await updateDoc(ticketRef, {
+      lastMessage: initialMessage,
+      lastMessageTime: serverTimestamp(),
+      lastMessageSender: "System",
     });
 
+    // Store ticket ID on the ban record so we can find it later
+    await updateDoc(doc(db, "bot_blocks", userId), {
+      banTicketId: ticketRef.id,
+    });
+    await updateDoc(doc(db, "users", userId), {
+      banTicketId: ticketRef.id,
+    });
   } catch (error) {
     console.error("Error banning user:", error);
   }
@@ -628,28 +312,15 @@ async function banUserPermanent(
 
 // ===== CHECK BAN STATUS =====
 async function checkBanStatus(userId: string): Promise<{
-  isBanned: boolean;
-  reason: string;
-  message: string;
-  canCreateTicket: boolean;
-  canSendMessage: boolean;
-  canAppeal: boolean;
-  appealStatus: string;
-  appealDeadline: string;
-  severity: string;
+  isBanned: boolean; reason: string; message: string;
+  canCreateTicket: boolean; canSendMessage: boolean;
+  canAppeal: boolean; appealStatus: string; banTicketId: string;
 }> {
   if (!db) return {
-    isBanned: false,
-    reason: "",
-    message: "",
-    canCreateTicket: true,
-    canSendMessage: true,
-    canAppeal: false,
-    appealStatus: "none",
-    appealDeadline: "",
-    severity: "",
+    isBanned: false, reason: "", message: "",
+    canCreateTicket: true, canSendMessage: true,
+    canAppeal: false, appealStatus: "none", banTicketId: "",
   };
-  
   try {
     const botDoc = await getDoc(doc(db, "bot_blocks", userId));
     if (botDoc.exists()) {
@@ -662,11 +333,9 @@ async function checkBanStatus(userId: string): Promise<{
         canSendMessage: data.canSendMessage !== false,
         canAppeal: data.canAppeal !== false,
         appealStatus: data.appealStatus || "none",
-        appealDeadline: data.appealDeadline || "",
-        severity: data.blockedSeverity || "critical",
+        banTicketId: data.banTicketId || "",
       };
     }
-    
     const userDoc = await getDoc(doc(db, "users", userId));
     if (userDoc.exists()) {
       const userData = userDoc.data();
@@ -679,35 +348,21 @@ async function checkBanStatus(userId: string): Promise<{
           canSendMessage: userData.canSendMessage !== false,
           canAppeal: userData.canAppeal !== false,
           appealStatus: userData.appealStatus || "none",
-          appealDeadline: userData.appealDeadline || "",
-          severity: userData.botBlockedSeverity || "critical",
+          banTicketId: userData.banTicketId || "",
         };
       }
     }
-    
     return {
-      isBanned: false,
-      reason: "",
-      message: "",
-      canCreateTicket: true,
-      canSendMessage: true,
-      canAppeal: false,
-      appealStatus: "none",
-      appealDeadline: "",
-      severity: "",
+      isBanned: false, reason: "", message: "",
+      canCreateTicket: true, canSendMessage: true,
+      canAppeal: false, appealStatus: "none", banTicketId: "",
     };
   } catch (error) {
     console.error("Error checking ban status:", error);
     return {
-      isBanned: false,
-      reason: "",
-      message: "",
-      canCreateTicket: true,
-      canSendMessage: true,
-      canAppeal: false,
-      appealStatus: "none",
-      appealDeadline: "",
-      severity: "",
+      isBanned: false, reason: "", message: "",
+      canCreateTicket: true, canSendMessage: true,
+      canAppeal: false, appealStatus: "none", banTicketId: "",
     };
   }
 }
@@ -722,9 +377,6 @@ const COOKIE_CONSENT_STORAGE_KEY = "menuru_cookie_consent_v1";
 const BLUE = "#0D3CFC";
 const WHITE = "#FFFFFF";
 const BLACK = "#000000";
-const RED = "#DC2626";
-const GREEN = "#16A34A";
-const YELLOW = "#F59E0B";
 
 // ===== STATUS STYLES =====
 const STATUS_STYLES: {
@@ -751,7 +403,6 @@ const TOPIC_STYLES: {
   "Donation": { bg: BLACK, text: WHITE, border: WHITE },
   "Partnership": { bg: WHITE, text: BLUE, border: BLUE },
   "Other": { bg: BLACK, text: WHITE, border: WHITE },
-  "Appeal": { bg: YELLOW, text: BLACK, border: BLACK },
 };
 
 // ===== SVG ICONS =====
@@ -786,21 +437,18 @@ const CheckIcon = ({ size = 12, color = "currentColor" }: { size?: number; color
     <path d="M20 6L9 17L4 12" stroke={color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
-
 const DoubleCheckIcon = ({ size = 12, color = "currentColor" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <path d="M1 12L5 16L13 8" stroke={color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
     <path d="M11 12L15 16L23 8" stroke={color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
-
 const ClockIcon = ({ size = 12, color = "currentColor" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <circle cx="12" cy="12" r="10" stroke={color} strokeWidth="2.5" />
     <path d="M12 6V12L16 14" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
-
 const ErrorIcon = ({ size = 12, color = "currentColor" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <circle cx="12" cy="12" r="10" stroke={color} strokeWidth="2.5" />
@@ -808,14 +456,12 @@ const ErrorIcon = ({ size = 12, color = "currentColor" }: { size?: number; color
     <circle cx="12" cy="16" r="1" fill={color} />
   </svg>
 );
-
 const SearchIcon = ({ size = 16, color = "currentColor" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <circle cx="11" cy="11" r="8" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     <path d="M21 21L16.65 16.65" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
-
 const CloseIcon = ({ size = 18, color = "currentColor" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <path d="M6 6L18 18M18 6L6 18" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -864,30 +510,6 @@ const BrandIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: st
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M20.59 13.41L11 3.83C10.6 3.43 10.06 3.2 9.5 3.2H4C2.9 3.2 2 4.1 2 5.2V10.7C2 11.26 2.22 11.8 2.63 12.2L12.21 21.79C13 22.57 14.27 22.57 15.06 21.79L20.59 16.26C21.37 15.47 21.37 14.2 20.59 13.41Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     <circle cx="7" cy="7" r="1.5" fill={color} />
-  </svg>
-);
-
-// ===== NOTIFICATION ICON =====
-const NotificationIcon = ({ size = 20, color = "currentColor" }: { size?: number; color?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <path d="M18 8C18 6.4087 17.3679 4.88258 16.2426 3.75736C15.1174 2.63214 13.5913 2 12 2C10.4087 2 8.88258 2.63214 7.75736 3.75736C6.63214 4.88258 6 6.4087 6 8C6 15 3 17 3 17H21C21 17 18 15 18 8Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M13.73 21C13.5542 21.3031 13.3019 21.5547 12.9982 21.7295C12.6946 21.9044 12.3504 21.9965 12 21.9965C11.6496 21.9965 11.3054 21.9044 11.0018 21.7295C10.6982 21.5547 10.4458 21.3031 10.27 21" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-
-// ===== SHIELD ICON =====
-const ShieldIcon = ({ size = 20, color = "currentColor" }: { size?: number; color?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <path d="M12 22C12 22 20 18 20 12V5L12 2L4 5V12C4 18 12 22 12 22Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-
-// ===== APPEAL ICON =====
-const AppealIcon = ({ size = 20, color = "currentColor" }: { size?: number; color?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M12 8V12" stroke={color} strokeWidth="2" strokeLinecap="round" />
-    <circle cx="12" cy="16" r="1" fill={color} />
   </svg>
 );
 
@@ -963,9 +585,10 @@ interface Ticket {
   isAnnouncement?: boolean;
   isBroadcast?: boolean;
   isAppeal?: boolean;
-  appealId?: string;
+  isBannedUser?: boolean;
+  banReason?: string;
+  banMessage?: string;
 }
-
 interface ChatMessage {
   id: string;
   senderId: string;
@@ -978,7 +601,6 @@ interface ChatMessage {
   deliveryStatus?: "sending" | "sent" | "delivered" | "read" | "failed";
   isSystemMessage?: boolean;
 }
-
 interface OnlineUser {
   uid: string;
   displayName: string;
@@ -988,7 +610,6 @@ interface OnlineUser {
   lastSeen?: any;
   isAgent?: boolean;
 }
-
 interface LastMessagePreview {
   text: string;
   senderName: string;
@@ -1003,287 +624,6 @@ interface TourStep {
   position?: "top" | "bottom" | "left" | "right";
   isLoginStep?: boolean;
 }
-
-interface Notification {
-  id: string;
-  userId: string;
-  type: string;
-  title: string;
-  message: string;
-  severity: string;
-  read: boolean;
-  createdAt: any;
-  actionUrl?: string;
-  actionLabel?: string;
-}
-
-interface Appeal {
-  id: string;
-  userId: string;
-  userEmail: string;
-  userName: string;
-  banReason: string;
-  banMessage: string;
-  appealMessage: string;
-  status: "pending" | "reviewing" | "approved" | "rejected";
-  createdAt: any;
-  reviewedAt?: any;
-  reviewedBy?: string;
-  adminResponse?: string;
-  chatTicketId?: string;
-}
-
-// ===== USER NOTIFICATION COMPONENT =====
-const UserNotifications = ({
-  user,
-  db,
-  isMounted,
-}: {
-  user: any;
-  db: any;
-  isMounted: boolean;
-}) => {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [showPanel, setShowPanel] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const panelRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!db || !user || !isMounted) return;
-
-    const q = query(
-      collection(db, "user_notifications"),
-      where("userId", "==", user.uid),
-      orderBy("createdAt", "desc"),
-      limit(20)
-    );
-
-    const unsubscribe = onSnapshot(q, (snapshot: any) => {
-      const notifs: Notification[] = [];
-      let unread = 0;
-      snapshot.forEach((docSnap: any) => {
-        const data = docSnap.data();
-        notifs.push({ id: docSnap.id, ...data } as Notification);
-        if (!data.read) unread++;
-      });
-      setNotifications(notifs);
-      setUnreadCount(unread);
-    });
-
-    return () => unsubscribe();
-  }, [db, user, isMounted]);
-
-  useEffect(() => {
-    if (showPanel && panelRef.current) {
-      gsap.fromTo(
-        panelRef.current,
-        { opacity: 0, y: -10, scale: 0.95 },
-        { opacity: 1, y: 0, scale: 1, duration: 0.3, ease: "power3.out" }
-      );
-    }
-  }, [showPanel]);
-
-  const markAsRead = async (notifId: string) => {
-    if (!db) return;
-    try {
-      await updateDoc(doc(db, "user_notifications", notifId), { read: true });
-    } catch (error) {
-      console.error("Error marking notification as read:", error);
-    }
-  };
-
-  const markAllAsRead = async () => {
-    if (!db || !user) return;
-    try {
-      const unreadNotifs = notifications.filter((n) => !n.read);
-      for (const notif of unreadNotifs) {
-        await updateDoc(doc(db, "user_notifications", notif.id), { read: true });
-      }
-    } catch (error) {
-      console.error("Error marking all as read:", error);
-    }
-  };
-
-  if (!user || notifications.length === 0) return null;
-
-  const getSeverityColor = (severity: string) => {
-    switch (severity) {
-      case "critical": return RED;
-      case "high": return "#EA580C";
-      case "medium": return YELLOW;
-      default: return BLUE;
-    }
-  };
-
-  return (
-    <div style={{ position: "relative" }}>
-      <button
-        onClick={() => setShowPanel(!showPanel)}
-        style={{
-          position: "relative",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          width: "40px",
-          height: "40px",
-          backgroundColor: showPanel ? BLUE : "rgba(0,0,0,0.75)",
-          backdropFilter: "blur(20px)",
-          WebkitBackdropFilter: "blur(20px)",
-          border: "1px solid rgba(255,255,255,0.15)",
-          borderRadius: "10px",
-          cursor: "pointer",
-          transition: "background-color 0.2s ease",
-        }}
-      >
-        <NotificationIcon size={20} color={WHITE} />
-        {unreadCount > 0 && (
-          <span
-            style={{
-              position: "absolute",
-              top: "-4px",
-              right: "-4px",
-              minWidth: "18px",
-              height: "18px",
-              borderRadius: "9px",
-              backgroundColor: RED,
-              color: WHITE,
-              fontSize: "10px",
-              fontWeight: 800,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontFamily: FONT_FAMILY,
-              padding: "0 4px",
-            }}
-          >
-            {unreadCount > 9 ? "9+" : unreadCount}
-          </span>
-        )}
-      </button>
-
-      {showPanel && (
-        <div
-          ref={panelRef}
-          style={{
-            position: "absolute",
-            top: "calc(100% + 10px)",
-            right: "0",
-            width: "360px",
-            maxHeight: "480px",
-            backgroundColor: WHITE,
-            borderRadius: "14px",
-            border: "1px solid rgba(0,0,0,0.08)",
-            boxShadow: "0 12px 40px rgba(0,0,0,0.15)",
-            overflow: "hidden",
-            zIndex: 10001,
-            fontFamily: FONT_FAMILY,
-          }}
-        >
-          <div
-            style={{
-              padding: "16px 20px",
-              borderBottom: "1px solid rgba(0,0,0,0.06)",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              backgroundColor: BLUE,
-            }}
-          >
-            <span style={{ fontSize: "15px", fontWeight: 700, color: WHITE }}>
-              Notifications
-            </span>
-            {unreadCount > 0 && (
-              <button
-                onClick={markAllAsRead}
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  color: WHITE,
-                  fontSize: "11px",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                  fontFamily: FONT_FAMILY,
-                  textDecoration: "underline",
-                  opacity: 0.9,
-                }}
-              >
-                Mark all as read
-              </button>
-            )}
-          </div>
-
-          <div style={{ maxHeight: "400px", overflowY: "auto" }}>
-            {notifications.map((notif) => (
-              <div
-                key={notif.id}
-                onClick={() => markAsRead(notif.id)}
-                style={{
-                  padding: "14px 20px",
-                  borderBottom: "1px solid rgba(0,0,0,0.05)",
-                  backgroundColor: notif.read ? WHITE : "rgba(13,60,252,0.04)",
-                  cursor: "pointer",
-                  transition: "background-color 0.2s ease",
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
-                  <span
-                    style={{
-                      width: "8px",
-                      height: "8px",
-                      borderRadius: "50%",
-                      backgroundColor: getSeverityColor(notif.severity),
-                      flexShrink: 0,
-                    }}
-                  />
-                  <span style={{ fontSize: "13px", fontWeight: 700, color: BLACK, flex: 1 }}>
-                    {notif.title}
-                  </span>
-                  {!notif.read && (
-                    <span
-                      style={{
-                        width: "6px",
-                        height: "6px",
-                        borderRadius: "50%",
-                        backgroundColor: BLUE,
-                      }}
-                    />
-                  )}
-                </div>
-                <p
-                  style={{
-                    fontSize: "12px",
-                    color: "#666",
-                    margin: 0,
-                    lineHeight: 1.5,
-                    whiteSpace: "pre-wrap",
-                  }}
-                >
-                  {notif.message}
-                </p>
-                {notif.actionUrl && (
-                  <Link href={notif.actionUrl}>
-                    <span
-                      style={{
-                        display: "inline-block",
-                        marginTop: "8px",
-                        fontSize: "11px",
-                        fontWeight: 700,
-                        color: BLUE,
-                        textDecoration: "underline",
-                      }}
-                    >
-                      {notif.actionLabel || "View Details"} →
-                    </span>
-                  </Link>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
 
 // ===== HERO MENURU TITLE =====
 const HeroMenuruTitle = ({
@@ -2123,17 +1463,7 @@ const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
 };
 
 // ===== RIGHT NAVBAR (Login / User dengan Rolling Text GSAP) =====
-const RightNavbar = ({
-  user,
-  auth,
-  db,
-  isMounted,
-}: {
-  user: any;
-  auth: any;
-  db: any;
-  isMounted: boolean;
-}) => {
+const RightNavbar = ({ user, auth, db }: { user: any; auth: any; db: any }) => {
   const rollingRef = useRef<HTMLDivElement>(null);
   const [rollingIndex, setRollingIndex] = useState(0);
 
@@ -2195,39 +1525,31 @@ const RightNavbar = ({
           display: "flex",
           alignItems: "center",
           gap: "10px",
+          padding: "10px 18px 10px 16px",
+          backgroundColor: "rgba(0, 0, 0, 0.75)",
+          backdropFilter: "blur(20px)",
+          WebkitBackdropFilter: "blur(20px)",
+          borderRadius: "10px",
+          border: "1px solid rgba(255,255,255,0.15)",
+          boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
+          fontFamily: FONT_FAMILY,
         }}
       >
-        <div
+        <PeopleIcon size={20} color="#ffffff" />
+        <Link
+          href="/signin"
           style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-            padding: "10px 18px 10px 16px",
-            backgroundColor: "rgba(0, 0, 0, 0.75)",
-            backdropFilter: "blur(20px)",
-            WebkitBackdropFilter: "blur(20px)",
-            borderRadius: "10px",
-            border: "1px solid rgba(255,255,255,0.15)",
-            boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
+            textDecoration: "none",
+            color: "#ffffff",
+            fontSize: "14px",
+            fontWeight: 600,
+            letterSpacing: "0.02em",
             fontFamily: FONT_FAMILY,
+            whiteSpace: "nowrap",
           }}
         >
-          <PeopleIcon size={20} color="#ffffff" />
-          <Link
-            href="/signin"
-            style={{
-              textDecoration: "none",
-              color: "#ffffff",
-              fontSize: "14px",
-              fontWeight: 600,
-              letterSpacing: "0.02em",
-              fontFamily: FONT_FAMILY,
-              whiteSpace: "nowrap",
-            }}
-          >
-            Log In
-          </Link>
-        </div>
+          Log In
+        </Link>
       </div>
     );
   }
@@ -2245,8 +1567,6 @@ const RightNavbar = ({
         gap: "10px",
       }}
     >
-      <UserNotifications user={user} db={db} isMounted={isMounted} />
-
       <div
         style={{
           position: "relative",
@@ -2778,84 +2098,156 @@ const CloseRoomButton = ({
   );
 };
 
-// ===== APPEAL MODAL COMPONENT =====
-const AppealModal = ({
-  isOpen,
-  onClose,
+// ===== BANNED USER CHAT (Direct chat with admin, no modal) =====
+const BannedUserChat = ({
   user,
   db,
   banInfo,
-  onSubmit,
 }: {
-  isOpen: boolean;
-  onClose: () => void;
   user: any;
   db: any;
-  banInfo: any;
-  onSubmit: () => void;
+  banInfo: { reason: string; message: string; banTicketId: string };
 }) => {
-  const [appealMessage, setAppealMessage] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
-  const modalRef = useRef<HTMLDivElement>(null);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messageText, setMessageText] = useState("");
+  const [sending, setSending] = useState(false);
+  const [typing, setTyping] = useState(false);
+  const [ticketId, setTicketId] = useState<string>("");
+  const [encryptionReady, setEncryptionReady] = useState(false);
+
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    if (isOpen && modalRef.current) {
-      gsap.fromTo(
-        modalRef.current,
-        { opacity: 0, scale: 0.9, y: 20 },
-        { opacity: 1, scale: 1, y: 0, duration: 0.4, ease: "back.out(1.5)" }
-      );
+    getCryptoKey()
+      .then(() => setEncryptionReady(true))
+      .catch(() => setEncryptionReady(true));
+  }, []);
+
+  // Resolve ticket ID: use stored banTicketId, or fallback to querying tickets
+  useEffect(() => {
+    if (!db || !user) return;
+    if (banInfo.banTicketId) {
+      setTicketId(banInfo.banTicketId);
+      return;
     }
-  }, [isOpen]);
+    // Fallback: find ticket by userId + isBannedUser
+    const q = query(
+      collection(db, "livechat_tickets"),
+      where("userId", "==", user.uid),
+      where("isBannedUser", "==", true),
+      orderBy("createdAt", "desc"),
+      limit(1)
+    );
+    const unsub = onSnapshot(q, (snap: any) => {
+      if (!snap.empty) {
+        setTicketId(snap.docs[0].id);
+      }
+    });
+    return () => unsub();
+  }, [db, user, banInfo.banTicketId]);
 
-  const handleSubmit = async () => {
-    if (!db || !user || !appealMessage.trim() || submitting) return;
-    setSubmitting(true);
+  // Subscribe to messages
+  useEffect(() => {
+    if (!db || !ticketId) return;
+    const q = query(
+      collection(db, "livechat_tickets", ticketId, "messages"),
+      orderBy("timestamp", "asc")
+    );
+    const unsub = onSnapshot(q, async (snapshot: any) => {
+      const list: ChatMessage[] = [];
+      for (const docSnap of snapshot.docs) {
+        const data = docSnap.data();
+        let text = data.text || "";
+        if (data.isEncrypted) {
+          try {
+            text = await decryptMessage(text);
+          } catch {
+            text = "[Encrypted message]";
+          }
+        }
+        list.push({ id: docSnap.id, ...data, text } as ChatMessage);
+      }
+      setMessages(list);
+      requestAnimationFrame(() => {
+        if (chatContainerRef.current) {
+          chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+        }
+      });
+    });
+    return () => unsub();
+  }, [db, ticketId]);
 
+  // Mark messages as read (for admin response)
+  useEffect(() => {
+    if (!db || !ticketId || !user) return;
+    const unread = messages.filter((m) => m.senderId !== user.uid && !m.read && !m.isSystemMessage);
+    unread.forEach(async (msg) => {
+      try {
+        await updateDoc(doc(db, "livechat_tickets", ticketId, "messages", msg.id), {
+          read: true,
+          deliveryStatus: "read",
+        });
+      } catch (e) {
+        // ignore
+      }
+    });
+  }, [messages, db, ticketId, user]);
+
+  const handleTyping = async (value: string) => {
+    setMessageText(value);
+    if (!ticketId || !db) return;
+    const ticketRef = doc(db, "livechat_tickets", ticketId);
+    if (value.length > 0) {
+      setTyping(true);
+      try {
+        await updateDoc(ticketRef, {
+          typing: true,
+          typingUserId: user.uid,
+          typingUserName: user.displayName || user.email || "User",
+        });
+      } catch (e) {}
+    } else {
+      setTyping(false);
+      try {
+        await updateDoc(ticketRef, {
+          typing: false,
+          typingUserId: null,
+          typingUserName: null,
+        });
+      } catch (e) {}
+    }
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    typingTimeoutRef.current = setTimeout(async () => {
+      setTyping(false);
+      try {
+        await updateDoc(ticketRef, {
+          typing: false,
+          typingUserId: null,
+          typingUserName: null,
+        });
+      } catch (e) {}
+    }, 2000);
+  };
+
+  const sendMessage = async () => {
+    if (!db || !ticketId || !messageText.trim() || !user || sending) return;
+    if (!encryptionReady) {
+      alert("Encryption is being initialized, please wait a moment.");
+      return;
+    }
+    setSending(true);
     try {
-      // Create appeal record
-      const appealRef = await addDoc(collection(db, "user_appeals"), {
-        userId: user.uid,
-        userEmail: user.email || "",
-        userName: user.displayName || user.email || "User",
-        banReason: banInfo.reason,
-        banMessage: banInfo.message,
-        appealMessage: appealMessage.trim(),
-        status: "pending",
-        createdAt: serverTimestamp(),
-      });
+      const ticketRef = doc(db, "livechat_tickets", ticketId);
+      await updateDoc(ticketRef, { typing: false, typingUserId: null, typingUserName: null });
 
-      // Create a chat ticket for the appeal
-      const ticketRef = await addDoc(collection(db, "livechat_tickets"), {
-        userId: user.uid,
-        userName: user.displayName || user.email || "User",
-        userEmail: user.email,
-        userPhoto: user.photoURL || "",
-        status: "waiting",
-        topic: "Appeal",
-        createdAt: serverTimestamp(),
-        unreadCount: 0,
-        typing: false,
-        typingUserId: null,
-        typingUserName: null,
-        isAnnouncement: false,
-        isBroadcast: false,
-        isAppeal: true,
-        appealId: appealRef.id,
-      });
+      const encryptedMessage = await encryptMessage(messageText.trim());
+      const senderName = user.displayName || user.email || "User";
 
-      // Update appeal with ticket ID
-      await updateDoc(doc(db, "user_appeals", appealRef.id), {
-        chatTicketId: ticketRef.id,
-      });
-
-      // Add initial message to ticket
-      const initialMessage = `APPEAL SUBMISSION\n\nOriginal Ban Reason: ${banInfo.reason}\n\nAppeal Message:\n${appealMessage.trim()}`;
-      const encryptedMessage = await encryptMessage(initialMessage);
-      await addDoc(collection(db, "livechat_tickets", ticketRef.id, "messages"), {
+      await addDoc(collection(db, "livechat_tickets", ticketId, "messages"), {
         senderId: user.uid,
-        senderName: user.displayName || user.email || "User",
+        senderName,
         text: encryptedMessage,
         timestamp: serverTimestamp(),
         read: false,
@@ -2865,254 +2257,294 @@ const AppealModal = ({
         isSystemMessage: false,
       });
 
-      // Update ticket with last message
       await updateDoc(ticketRef, {
-        lastMessage: "Appeal submitted",
+        lastMessage: messageText.trim(),
         lastMessageTime: serverTimestamp(),
-        lastMessageSender: user.displayName || user.email || "User",
+        lastMessageSender: senderName,
+        status: "active",
       });
 
-      // Update user record with appeal status
-      await updateDoc(doc(db, "users", user.uid), {
-        appealStatus: "pending",
-        appealSubmittedAt: serverTimestamp(),
-        appealId: appealRef.id,
-      });
-
-      // Update bot_blocks record
-      try {
-        await updateDoc(doc(db, "bot_blocks", user.uid), {
-          appealStatus: "pending",
-          appealSubmittedAt: serverTimestamp(),
-          appealId: appealRef.id,
-        });
-      } catch (e) {
-        // bot_blocks might not exist, ignore
-      }
-
-      // Create admin notification
-      await addDoc(collection(db, "admin_notifications"), {
-        type: "APPEAL_SUBMITTED",
-        title: "New Appeal Submitted",
-        message: `User ${user.displayName || user.email} has submitted an appeal for their ban.\n\nOriginal Ban: ${banInfo.reason}`,
-        userId: user.uid,
-        userEmail: user.email,
-        userName: user.displayName || user.email,
-        appealId: appealRef.id,
-        ticketId: ticketRef.id,
-        read: false,
-        createdAt: serverTimestamp(),
-      });
-
-      setSubmitted(true);
-      setTimeout(() => {
-        onSubmit();
-        onClose();
-      }, 2000);
+      setMessageText("");
+      setTyping(false);
     } catch (error) {
-      console.error("Error submitting appeal:", error);
-      alert("Failed to submit appeal. Please try again.");
+      console.error("Error sending message:", error);
+      alert("Failed to send message. Please try again.");
     } finally {
-      setSubmitting(false);
+      setSending(false);
     }
   };
 
-  if (!isOpen) return null;
+  const renderDeliveryStatus = (msg: ChatMessage, isMine: boolean) => {
+    if (!isMine) return null;
+    let label = "Sent";
+    let icon = <CheckIcon size={11} color="#ffffff" />;
+    if (msg.read) {
+      label = "Read";
+      icon = <DoubleCheckIcon size={11} color="#ffffff" />;
+    } else if (msg.deliveryStatus === "delivered") {
+      label = "Delivered";
+      icon = <DoubleCheckIcon size={11} color="#ffffff" />;
+    } else if (msg.deliveryStatus === "sending") {
+      label = "Sending";
+      icon = <ClockIcon size={11} color="#ffffff" />;
+    } else if (msg.deliveryStatus === "failed") {
+      label = "Failed";
+      icon = <ErrorIcon size={11} color="#ffffff" />;
+    }
+    return (
+      <span
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: "3px",
+          fontSize: "10px",
+          color: "#ffffff",
+          fontFamily: FONT_FAMILY,
+          fontWeight: 500,
+        }}
+      >
+        {label}
+        {icon}
+      </span>
+    );
+  };
+
+  const formatTime = (timestamp: any) => {
+    if (!timestamp) return "";
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    return date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+  };
 
   return (
     <div
       style={{
-        position: "fixed",
-        inset: 0,
-        backgroundColor: "rgba(0,0,0,0.6)",
-        backdropFilter: "blur(4px)",
-        WebkitBackdropFilter: "blur(4px)",
-        zIndex: 10002,
+        marginTop: "32px",
+        backgroundColor: WHITE,
+        border: `1.5px solid ${BLUE}`,
+        borderRadius: "16px",
+        overflow: "hidden",
+        fontFamily: FONT_FAMILY,
         display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "24px",
+        flexDirection: "column",
+        maxWidth: "900px",
       }}
-      onClick={onClose}
     >
+      {/* Header */}
       <div
-        ref={modalRef}
-        onClick={(e) => e.stopPropagation()}
         style={{
-          width: "100%",
-          maxWidth: "520px",
-          backgroundColor: WHITE,
-          borderRadius: "20px",
-          overflow: "hidden",
-          fontFamily: FONT_FAMILY,
-          boxShadow: "0 24px 80px rgba(0,0,0,0.3)",
+          padding: "16px 22px",
+          backgroundColor: BLUE,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          flexShrink: 0,
         }}
       >
-        {submitted ? (
-          <div style={{ padding: "60px 40px", textAlign: "center" }}>
-            <div
-              style={{
-                width: "80px",
-                height: "80px",
-                borderRadius: "50%",
-                backgroundColor: GREEN,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                margin: "0 auto 24px",
-              }}
-            >
-              <CheckIcon size={40} color={WHITE} />
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <div
+            style={{
+              width: "36px",
+              height: "36px",
+              borderRadius: "50%",
+              backgroundColor: WHITE,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+            }}
+          >
+            <span style={{ fontSize: "16px", fontWeight: 800, color: BLUE }}>
+              {AGENT_NAME.charAt(0).toUpperCase()}
+            </span>
+          </div>
+          <div>
+            <div style={{ fontSize: "15px", fontWeight: 700, color: WHITE, lineHeight: 1.2 }}>
+              Chat with Admin
             </div>
-            <h3 style={{ fontSize: "24px", fontWeight: 700, color: BLACK, margin: "0 0 12px 0" }}>
-              Appeal Submitted
-            </h3>
-            <p style={{ fontSize: "15px", color: "#666", margin: 0, lineHeight: 1.6 }}>
-              Your appeal has been submitted successfully. Our team will review it within 24-48 hours. You will receive a notification once a decision has been made.
-            </p>
+            <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.85)", marginTop: "2px" }}>
+              {AGENT_NAME} • Support Team
+            </div>
+          </div>
+        </div>
+        <span
+          style={{
+            fontSize: "10px",
+            fontWeight: 800,
+            color: WHITE,
+            letterSpacing: "0.6px",
+            textTransform: "uppercase",
+            padding: "4px 10px",
+            border: `1.5px solid ${WHITE}`,
+            borderRadius: "4px",
+            backgroundColor: "rgba(255,255,255,0.12)",
+          }}
+        >
+          Appeal Channel
+        </span>
+      </div>
+
+      {/* Info bar */}
+      <div
+        style={{
+          padding: "10px 22px",
+          backgroundColor: "rgba(13,60,252,0.06)",
+          borderBottom: `1px solid ${BLUE}22`,
+          fontSize: "12px",
+          color: BLUE,
+          fontWeight: 600,
+          lineHeight: 1.5,
+        }}
+      >
+        Kirim pesan Anda di sini untuk mengajukan banding. Tim admin akan merespon secepatnya.
+      </div>
+
+      {/* Messages */}
+      <div
+        ref={chatContainerRef}
+        className="chat-messages-container"
+        style={{
+          flex: 1,
+          overflowY: "auto",
+          overflowX: "hidden",
+          padding: "20px 22px",
+          display: "flex",
+          flexDirection: "column",
+          gap: "12px",
+          minHeight: "320px",
+          maxHeight: "440px",
+        }}
+      >
+        {messages.length === 0 ? (
+          <div
+            style={{
+              textAlign: "center",
+              color: "#999",
+              fontSize: "14px",
+              padding: "40px 0",
+              fontFamily: FONT_FAMILY,
+            }}
+          >
+            No messages yet. Send your appeal below.
           </div>
         ) : (
-          <>
-            <div
-              style={{
-                padding: "24px 28px",
-                backgroundColor: BLUE,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                <AppealIcon size={24} color={WHITE} />
-                <span style={{ fontSize: "18px", fontWeight: 700, color: WHITE }}>
-                  Submit Appeal
-                </span>
-              </div>
-              <button
-                onClick={onClose}
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  color: WHITE,
-                  cursor: "pointer",
-                  padding: "4px",
-                  display: "flex",
-                }}
-              >
-                <CloseIcon size={20} color={WHITE} />
-              </button>
-            </div>
-
-            <div style={{ padding: "28px" }}>
+          messages.map((msg, idx) => {
+            const isMine = msg.senderId === user.uid;
+            const isSystem = msg.isSystemMessage;
+            return (
               <div
+                key={msg.id || idx}
                 style={{
-                  padding: "16px",
-                  backgroundColor: "rgba(220,38,38,0.08)",
-                  borderRadius: "12px",
-                  border: `1px solid ${RED}`,
-                  marginBottom: "20px",
+                  alignSelf: isSystem ? "center" : isMine ? "flex-end" : "flex-start",
+                  maxWidth: isSystem ? "90%" : "72%",
                 }}
               >
-                <div style={{ fontSize: "12px", fontWeight: 700, color: RED, marginBottom: "6px", textTransform: "uppercase", letterSpacing: "0.5px" }}>
-                  Ban Reason
-                </div>
-                <div style={{ fontSize: "14px", color: BLACK, fontWeight: 600 }}>
-                  {banInfo.reason}
-                </div>
-                {banInfo.message && (
-                  <div style={{ fontSize: "12px", color: "#666", marginTop: "8px", lineHeight: 1.5 }}>
-                    Your message: "{banInfo.message}"
-                  </div>
-                )}
-              </div>
-
-              <label
-                style={{
-                  display: "block",
-                  fontSize: "14px",
-                  fontWeight: 700,
-                  color: BLACK,
-                  marginBottom: "10px",
-                }}
-              >
-                Why should we reconsider your ban?
-              </label>
-              <textarea
-                value={appealMessage}
-                onChange={(e) => setAppealMessage(e.target.value)}
-                placeholder="Explain your situation and why you believe this ban was a mistake..."
-                rows={5}
-                style={{
-                  width: "100%",
-                  padding: "14px",
-                  border: "1.5px solid rgba(0,0,0,0.15)",
-                  borderRadius: "12px",
-                  fontSize: "14px",
-                  fontFamily: FONT_FAMILY,
-                  resize: "vertical",
-                  outline: "none",
-                  color: BLACK,
-                  lineHeight: 1.5,
-                }}
-                onFocus={(e) => {
-                  e.currentTarget.style.borderColor = BLUE;
-                }}
-                onBlur={(e) => {
-                  e.currentTarget.style.borderColor = "rgba(0,0,0,0.15)";
-                }}
-              />
-
-              <div style={{ display: "flex", gap: "12px", marginTop: "24px" }}>
-                <button
-                  onClick={onClose}
+                <div
                   style={{
-                    flex: 1,
-                    padding: "14px",
-                    backgroundColor: "transparent",
-                    color: "#666",
-                    border: "1.5px solid rgba(0,0,0,0.15)",
+                    padding: isSystem ? "10px 14px" : "12px 16px",
                     borderRadius: "12px",
-                    fontSize: "14px",
-                    fontWeight: 700,
-                    cursor: "pointer",
+                    backgroundColor: isSystem
+                      ? "rgba(13,60,252,0.08)"
+                      : isMine
+                      ? BLUE
+                      : "#f4f4f5",
+                    color: isSystem ? BLUE : isMine ? WHITE : BLACK,
+                    fontSize: isSystem ? "12px" : "14px",
                     fontFamily: FONT_FAMILY,
+                    wordBreak: "break-word",
+                    border: isSystem ? `1px dashed ${BLUE}` : isMine ? "none" : "1px solid rgba(0,0,0,0.05)",
+                    fontStyle: isSystem ? "italic" : "normal",
                   }}
                 >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSubmit}
-                  disabled={!appealMessage.trim() || submitting}
-                  style={{
-                    flex: 2,
-                    padding: "14px",
-                    backgroundColor: !appealMessage.trim() || submitting ? "#ccc" : BLUE,
-                    color: WHITE,
-                    border: "none",
-                    borderRadius: "12px",
-                    fontSize: "14px",
-                    fontWeight: 700,
-                    cursor: !appealMessage.trim() || submitting ? "not-allowed" : "pointer",
-                    fontFamily: FONT_FAMILY,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "8px",
-                  }}
-                >
-                  {submitting ? "Submitting..." : "Submit Appeal"}
-                  {!submitting && <NorthEastArrow size={16} color={WHITE} />}
-                </button>
+                  {!isMine && !isSystem && (
+                    <div style={{ fontSize: "12px", fontWeight: 700, color: BLUE, marginBottom: "5px" }}>
+                      {msg.senderName}
+                    </div>
+                  )}
+                  <div style={{ whiteSpace: "pre-wrap" }}>{msg.text}</div>
+                  {!isSystem && (
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "flex-end",
+                        alignItems: "center",
+                        gap: "6px",
+                        marginTop: "5px",
+                      }}
+                    >
+                      {renderDeliveryStatus(msg, isMine)}
+                      <span style={{ fontSize: "10px", color: isMine ? WHITE : "#999" }}>
+                        {formatTime(msg.timestamp)}
+                      </span>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          </>
+            );
+          })
         )}
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* Input */}
+      <div
+        style={{
+          padding: "14px 22px",
+          borderTop: "1px solid rgba(0,0,0,0.06)",
+          display: "flex",
+          gap: "12px",
+          backgroundColor: WHITE,
+          flexShrink: 0,
+        }}
+      >
+        <input
+          type="text"
+          value={messageText}
+          onChange={(e) => handleTyping(e.target.value)}
+          onKeyPress={(e) => {
+            if (e.key === "Enter" && !e.shiftKey && messageText.trim()) {
+              e.preventDefault();
+              sendMessage();
+            }
+          }}
+          placeholder="Tulis pesan banding Anda..."
+          disabled={sending}
+          style={{
+            flex: 1,
+            padding: "12px 16px",
+            border: "1px solid rgba(0,0,0,0.1)",
+            borderRadius: "10px",
+            fontSize: "14px",
+            outline: "none",
+            fontFamily: FONT_FAMILY,
+            backgroundColor: WHITE,
+            color: BLACK,
+          }}
+        />
+        <button
+          onClick={sendMessage}
+          disabled={!messageText.trim() || sending}
+          style={{
+            padding: "12px 24px",
+            backgroundColor: !messageText.trim() || sending ? "#ccc" : BLUE,
+            color: WHITE,
+            border: "none",
+            borderRadius: "10px",
+            cursor: !messageText.trim() || sending ? "not-allowed" : "pointer",
+            fontFamily: FONT_FAMILY,
+            fontSize: "13px",
+            fontWeight: 800,
+            letterSpacing: "0.5px",
+            textTransform: "uppercase",
+          }}
+        >
+          {sending ? "..." : "Send"}
+        </button>
       </div>
     </div>
   );
 };
 
-// ===== LIVE CHAT AGENT COMPONENT (WITH APPEAL SUPPORT) =====
+// ===== LIVE CHAT AGENT COMPONENT =====
 const LiveChatAgent = ({
   user,
   isAdmin,
@@ -3138,19 +2570,8 @@ const LiveChatAgent = ({
   const [checkingBan, setCheckingBan] = useState(true);
   const [canCreateTicket, setCanCreateTicket] = useState(true);
   const [canSendMessage, setCanSendMessage] = useState(true);
-
-  // Appeal states
-  const [showAppealModal, setShowAppealModal] = useState(false);
-  const [banInfo, setBanInfo] = useState<any>({
-    reason: "",
-    message: "",
-    severity: "",
-    category: "",
-    canAppeal: false,
-    appealStatus: "none",
-    appealDeadline: "",
-  });
-  const [appealSubmitted, setAppealSubmitted] = useState(false);
+  const [banTicketId, setBanTicketId] = useState<string>("");
+  const [banOriginalMessage, setBanOriginalMessage] = useState<string>("");
 
   const [onlineAgents, setOnlineAgents] = useState<OnlineUser[]>([]);
   const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
@@ -3310,24 +2731,17 @@ const LiveChatAgent = ({
           setBanReason(status.reason);
           setCanCreateTicket(status.canCreateTicket);
           setCanSendMessage(status.canSendMessage);
-          setBanInfo({
-            reason: status.reason,
-            message: status.message,
-            severity: status.severity,
-            category: "",
-            canAppeal: status.canAppeal,
-            appealStatus: status.appealStatus,
-            appealDeadline: status.appealDeadline,
-          });
-          setAppealSubmitted(status.appealStatus === "pending" || status.appealStatus === "approved");
+          setBanTicketId(status.banTicketId || "");
+          setBanOriginalMessage(status.message || "");
           setBanMessage(`YOUR ACCOUNT HAS BEEN PERMANENTLY BANNED\n\nReason: ${status.reason}`);
         } else {
           setIsBanned(false);
           setBanReason("");
           setCanCreateTicket(true);
           setCanSendMessage(true);
+          setBanTicketId("");
+          setBanOriginalMessage("");
           setBanMessage(null);
-          setAppealSubmitted(false);
         }
       } catch (error) {
         console.error("Error checking ban:", error);
@@ -3347,16 +2761,8 @@ const LiveChatAgent = ({
         setBanReason(status.reason);
         setCanCreateTicket(status.canCreateTicket);
         setCanSendMessage(status.canSendMessage);
-        setBanInfo({
-          reason: status.reason,
-          message: status.message,
-          severity: status.severity,
-          category: "",
-          canAppeal: status.canAppeal,
-          appealStatus: status.appealStatus,
-          appealDeadline: status.appealDeadline,
-        });
-        setAppealSubmitted(status.appealStatus === "pending" || status.appealStatus === "approved");
+        setBanTicketId(status.banTicketId || "");
+        setBanOriginalMessage(status.message || "");
         setBanMessage(`YOUR ACCOUNT HAS BEEN PERMANENTLY BANNED\n\nReason: ${status.reason}`);
         return true;
       }
@@ -3651,7 +3057,7 @@ const LiveChatAgent = ({
       return;
     }
     const hasActiveTicket = tickets.some(
-      (t) => t.userId === user.uid && (t.status === "waiting" || t.status === "active") && !t.isAnnouncement && !t.isBroadcast && !t.isAppeal
+      (t) => t.userId === user.uid && (t.status === "waiting" || t.status === "active") && !t.isAnnouncement && !t.isBroadcast && !t.isBannedUser
     );
     if (hasActiveTicket) {
       alert("You still have an active chat with an agent. Please wait until it is finished.");
@@ -3672,7 +3078,7 @@ const LiveChatAgent = ({
         typingUserName: null,
         isAnnouncement: false,
         isBroadcast: false,
-        isAppeal: false,
+        isBannedUser: false,
       });
       const initialMessage = `Hello, I would like to ask about: ${selectedTopic}`;
       const encryptedMessage = await encryptMessage(initialMessage);
@@ -3713,50 +3119,18 @@ const LiveChatAgent = ({
       setMessageText("");
       return;
     }
-
-    // Advanced content analysis
-    const checkResult = analyzeContent(messageText, user.uid);
-    
+    const checkResult = containsBannedContent(messageText);
     if (checkResult.isBanned) {
-      await banUserPermanent(
-        user.uid,
-        user.email || "",
-        user.displayName || "User",
-        checkResult.reason,
-        messageText,
-        checkResult.severity,
-        checkResult.category
-      );
+      await banUserPermanent(user.uid, user.email || "", user.displayName || "User", checkResult.reason, messageText);
       setIsBanned(true);
       setBanReason(checkResult.reason);
       setCanCreateTicket(false);
       setCanSendMessage(false);
-      setBanInfo({
-        reason: checkResult.reason,
-        message: messageText,
-        severity: checkResult.severity,
-        category: checkResult.category,
-        canAppeal: true,
-        appealStatus: "none",
-        appealDeadline: "",
-      });
-      setBanMessage(`YOUR ACCOUNT HAS BEEN PERMANENTLY BANNED\n\nReason: ${checkResult.reason}\n\nSeverity: ${checkResult.severity.toUpperCase()}\nCategory: ${checkResult.category}\n\nMessage sent: "${messageText}"`);
+      setBanOriginalMessage(messageText);
+      setBanMessage(`YOUR ACCOUNT HAS BEEN PERMANENTLY BANNED\n\nReason: ${checkResult.reason}\n\nMessage sent: "${messageText}"`);
       setMessageText("");
       return;
     }
-
-    // Issue warning for medium severity issues
-    if (checkResult.severity === "medium" || checkResult.severity === "low") {
-      await issueWarning(
-        user.uid,
-        user.email || "",
-        user.displayName || "User",
-        checkResult.reason,
-        messageText,
-        checkResult.severity
-      );
-    }
-
     if (!encryptionReady) {
       alert("Encryption is being initialized, please wait a moment.");
       return;
@@ -3816,6 +3190,56 @@ const LiveChatAgent = ({
       await updateDoc(doc(db, "livechat_tickets", ticketId), { status: "resolved" });
     } catch (error) {
       console.error("Error resolving ticket:", error);
+    }
+  };
+
+  const unbanUser = async (ticketId: string, targetUserId: string) => {
+    if (!db || !isAdmin) return;
+    try {
+      // Unban the user
+      await updateDoc(doc(db, "users", targetUserId), {
+        botBlocked: false,
+        canCreateTicket: true,
+        canSendMessage: true,
+        appealStatus: "approved",
+        unblockedAt: serverTimestamp(),
+      });
+      try {
+        await updateDoc(doc(db, "bot_blocks", targetUserId), {
+          isBlocked: false,
+          canCreateTicket: true,
+          canSendMessage: true,
+          appealStatus: "approved",
+          unblockedAt: serverTimestamp(),
+        });
+      } catch (e) {
+        // bot_blocks may not exist
+      }
+
+      // Add system message in the ticket
+      const sysMsg = `✅ Your appeal has been APPROVED. Your account has been unbanned. You can now use all features again.`;
+      const encryptedSys = await encryptMessage(sysMsg);
+      await addDoc(collection(db, "livechat_tickets", ticketId, "messages"), {
+        senderId: "system",
+        senderName: "System",
+        text: encryptedSys,
+        timestamp: serverTimestamp(),
+        read: false,
+        isEncrypted: true,
+        isBotDetected: false,
+        deliveryStatus: "sent",
+        isSystemMessage: true,
+      });
+
+      await updateDoc(doc(db, "livechat_tickets", ticketId), {
+        status: "resolved",
+        lastMessage: sysMsg,
+        lastMessageTime: serverTimestamp(),
+        lastMessageSender: "System",
+      });
+    } catch (error) {
+      console.error("Error unbanning user:", error);
+      alert("Failed to unban user. Please try again.");
     }
   };
 
@@ -4177,74 +3601,6 @@ const LiveChatAgent = ({
     );
   };
 
-  const renderAppealsSection = () => {
-    if (!isAdmin) return null;
-    const appealTickets = tickets.filter((t) => t.isAppeal);
-    if (appealTickets.length === 0) return null;
-    return (
-      <div style={{ marginBottom: "20px" }}>
-        <div
-          style={{
-            backgroundColor: YELLOW,
-            borderRadius: "12px",
-            padding: "16px 20px",
-            color: BLACK,
-            fontFamily: FONT_FAMILY,
-          }}
-        >
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <AppealIcon size={20} color={BLACK} />
-              <div style={{ fontSize: "16px", fontWeight: 700, color: BLACK }}>User Appeals</div>
-            </div>
-            <div
-              style={{
-                fontSize: "10px",
-                border: `1.5px solid ${BLACK}`,
-                backgroundColor: BLACK,
-                color: WHITE,
-                padding: "2px 8px",
-                borderRadius: "4px",
-                fontWeight: 800,
-                letterSpacing: "0.5px",
-              }}
-            >
-              {appealTickets.length} PENDING
-            </div>
-          </div>
-          {appealTickets.slice(0, 5).map((t) => (
-            <div
-              key={t.id}
-              onClick={() => setSelectedTicket(t)}
-              style={{
-                padding: "10px 0",
-                borderTop: "1px solid rgba(0,0,0,0.1)",
-                cursor: "pointer",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <div>
-                <div style={{ fontSize: "13px", fontWeight: 700, color: BLACK, marginBottom: "3px" }}>{t.userName}</div>
-                <div style={{ fontSize: "11px", color: "#333", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                  {t.userEmail}
-                </div>
-              </div>
-              <StabiloBadge
-                label={t.status}
-                bg={WHITE}
-                text={BLUE}
-                border={BLUE}
-                size="sm"
-              />
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  };
-
   if (checkingBan) {
     return (
       <div style={{ marginTop: "80px", paddingTop: "30px" }}>
@@ -4323,195 +3679,68 @@ const LiveChatAgent = ({
     );
   }
 
+  // ===== BANNED USER VIEW (with direct chat box, no modal) =====
   if (!isAdmin && isBanned) {
     return (
-      <>
-        <AppealModal
-          isOpen={showAppealModal}
-          onClose={() => setShowAppealModal(false)}
-          user={user}
-          db={db}
-          banInfo={banInfo}
-          onSubmit={() => setAppealSubmitted(true)}
-        />
-        <div style={{ marginTop: "80px", paddingTop: "30px" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "20px" }}>
-            <h3 style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1 }}>
-              Live Chat Agent
-            </h3>
-            <button
-              onClick={handleLogout}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                padding: "0",
-                backgroundColor: "transparent",
-                color: BLUE,
-                border: "none",
-                fontSize: "20px",
-                fontWeight: 700,
-                cursor: "pointer",
-                fontFamily: FONT_FAMILY,
-              }}
-            >
-              <span>Logout</span>
-              <NorthEastArrow size={20} color={BLUE} />
-            </button>
-          </div>
-
-          <div
+      <div style={{ marginTop: "80px", paddingTop: "30px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "20px" }}>
+          <h3 style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1 }}>
+            Live Chat Agent
+          </h3>
+          <button
+            onClick={handleLogout}
             style={{
-              backgroundColor: "rgba(220,38,38,0.08)",
-              border: `1.5px solid ${RED}`,
-              borderRadius: "16px",
-              padding: "28px",
-              marginBottom: "24px",
-              maxWidth: "800px",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              padding: "0",
+              backgroundColor: "transparent",
+              color: BLUE,
+              border: "none",
+              fontSize: "20px",
+              fontWeight: 700,
+              cursor: "pointer",
+              fontFamily: FONT_FAMILY,
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: "14px", marginBottom: "16px" }}>
-              <div
-                style={{
-                  width: "48px",
-                  height: "48px",
-                  borderRadius: "50%",
-                  backgroundColor: RED,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexShrink: 0,
-                }}
-              >
-                <ShieldIcon size={24} color={WHITE} />
-              </div>
-              <div>
-                <div style={{ fontSize: "22px", fontWeight: 800, color: RED, fontFamily: FONT_FAMILY, letterSpacing: "-0.02em" }}>
-                  ACCOUNT PERMANENTLY BANNED
-                </div>
-                <div style={{ fontSize: "13px", color: "#666", fontFamily: FONT_FAMILY, marginTop: "2px" }}>
-                  Your account has been suspended by our security system
-                </div>
-              </div>
-            </div>
-
-            <div
-              style={{
-                backgroundColor: WHITE,
-                borderRadius: "12px",
-                padding: "20px",
-                marginBottom: "20px",
-                border: "1px solid rgba(0,0,0,0.06)",
-              }}
-            >
-              <div style={{ fontSize: "12px", fontWeight: 700, color: RED, marginBottom: "8px", textTransform: "uppercase", letterSpacing: "0.5px" }}>
-                Ban Reason
-              </div>
-              <div style={{ fontSize: "18px", fontWeight: 700, color: BLACK, fontFamily: FONT_FAMILY, marginBottom: "8px" }}>
-                {banReason || "SUSPICIOUS ACTIVITY"}
-              </div>
-              {banInfo.message && (
-                <div style={{ fontSize: "13px", color: "#666", fontFamily: FONT_FAMILY, lineHeight: 1.6, marginTop: "10px" }}>
-                  <strong>Violating message:</strong> "{banInfo.message}"
-                </div>
-              )}
-              {banInfo.severity && (
-                <div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "12px" }}>
-                  <span style={{ fontSize: "11px", fontWeight: 700, color: "#666", textTransform: "uppercase" }}>Severity:</span>
-                  <StabiloBadge
-                    label={banInfo.severity}
-                    bg={banInfo.severity === "critical" ? RED : banInfo.severity === "high" ? "#EA580C" : YELLOW}
-                    text={WHITE}
-                    border={banInfo.severity === "critical" ? RED : banInfo.severity === "high" ? "#EA580C" : YELLOW}
-                    size="sm"
-                  />
-                </div>
-              )}
-            </div>
-
-            {appealSubmitted ? (
-              <div
-                style={{
-                  backgroundColor: "rgba(22,163,74,0.08)",
-                  border: `1.5px solid ${GREEN}`,
-                  borderRadius: "12px",
-                  padding: "20px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "14px",
-                }}
-              >
-                <div
-                  style={{
-                    width: "40px",
-                    height: "40px",
-                    borderRadius: "50%",
-                    backgroundColor: GREEN,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    flexShrink: 0,
-                  }}
-                >
-                  <CheckIcon size={20} color={WHITE} />
-                </div>
-                <div>
-                  <div style={{ fontSize: "16px", fontWeight: 700, color: GREEN, fontFamily: FONT_FAMILY }}>
-                    Appeal Submitted
-                  </div>
-                  <div style={{ fontSize: "13px", color: "#666", fontFamily: FONT_FAMILY, marginTop: "4px", lineHeight: 1.5 }}>
-                    Your appeal is being reviewed by our team. You will be notified once a decision has been made.
-                    You can also check the status in the chat section below.
-                  </div>
-                </div>
-              </div>
-            ) : banInfo.canAppeal ? (
-              <div>
-                <p style={{ fontSize: "14px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "16px", lineHeight: 1.6 }}>
-                  If you believe this ban was made in error, you can submit an appeal to our team.
-                  We will review your case carefully and respond within 24-48 hours.
-                </p>
-                <button
-                  onClick={() => setShowAppealModal(true)}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "10px",
-                    padding: "14px 28px",
-                    backgroundColor: BLUE,
-                    color: WHITE,
-                    border: "none",
-                    borderRadius: "12px",
-                    fontSize: "15px",
-                    fontWeight: 700,
-                    cursor: "pointer",
-                    fontFamily: FONT_FAMILY,
-                    boxShadow: "0 8px 24px rgba(13,60,252,0.3)",
-                  }}
-                >
-                  <AppealIcon size={20} color={WHITE} />
-                  Submit Appeal
-                </button>
-              </div>
-            ) : (
-              <div
-                style={{
-                  backgroundColor: "rgba(220,38,38,0.08)",
-                  border: `1.5px solid ${RED}`,
-                  borderRadius: "12px",
-                  padding: "20px",
-                  fontSize: "14px",
-                  color: RED,
-                  fontWeight: 600,
-                  fontFamily: FONT_FAMILY,
-                }}
-              >
-                The appeal period for this ban has expired. You can no longer submit an appeal.
-              </div>
-            )}
-          </div>
+            <span>Logout</span>
+            <NorthEastArrow size={20} color={BLUE} />
+          </button>
         </div>
-      </>
+
+        <div
+          style={{
+            color: BLUE,
+            fontSize: "50px",
+            fontWeight: 700,
+            fontFamily: FONT_FAMILY,
+            lineHeight: 1.2,
+            marginBottom: "12px",
+            letterSpacing: "-0.02em",
+          }}
+        >
+          YOUR ACCOUNT HAS BEEN PERMANENTLY BANNED
+        </div>
+        <div style={{ color: BLUE, fontSize: "22px", fontWeight: 400, fontFamily: FONT_FAMILY, marginBottom: "6px" }}>
+          REASON: {banReason || "SUSPICIOUS ACTIVITY"}
+        </div>
+        {banOriginalMessage && (
+          <div style={{ color: "#666", fontSize: "14px", fontFamily: FONT_FAMILY, marginTop: "10px", maxWidth: "700px", lineHeight: 1.6 }}>
+            <strong style={{ color: BLUE }}>Violating message:</strong> "{banOriginalMessage}"
+          </div>
+        )}
+
+        {/* Direct chat with admin (no modal) */}
+        <BannedUserChat
+          user={user}
+          db={db}
+          banInfo={{
+            reason: banReason,
+            message: banOriginalMessage,
+            banTicketId: banTicketId,
+          }}
+        />
+      </div>
     );
   }
 
@@ -4731,12 +3960,17 @@ const LiveChatAgent = ({
     );
   }
 
-  const waitingTicketsRaw = tickets.filter((t) => t.status === "waiting");
-  const activeTicketsRaw = tickets.filter((t) => t.status === "active");
-  const resolvedTicketsRaw = tickets.filter((t) => t.status === "resolved" || t.status === "closed");
+  // ===== SPLIT TICKETS: banned users shown separately for admin =====
+  const bannedUserTickets = tickets.filter((t) => t.isBannedUser);
+  const normalTickets = tickets.filter((t) => !t.isBannedUser);
+
+  const waitingTicketsRaw = normalTickets.filter((t) => t.status === "waiting");
+  const activeTicketsRaw = normalTickets.filter((t) => t.status === "active");
+  const resolvedTicketsRaw = normalTickets.filter((t) => t.status === "resolved" || t.status === "closed");
   const waitingTickets = filterTicketsBySearch(waitingTicketsRaw);
   const activeTickets = filterTicketsBySearch(activeTicketsRaw);
   const resolvedTickets = filterTicketsBySearch(resolvedTicketsRaw);
+  const bannedFiltered = filterTicketsBySearch(bannedUserTickets);
   const typingText = selectedTicket ? getTypingText(selectedTicket) : null;
 
   const renderChatListItem = (ticket: Ticket, options?: { onExtraClick?: () => void }) => {
@@ -4764,9 +3998,9 @@ const LiveChatAgent = ({
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px", gap: "8px", flexWrap: "wrap" }}>
           <div style={{ fontWeight: 700, fontSize: "14px", color: WHITE, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: "1 1 auto" }}>
             {ticket.userName}
-            {ticket.isAppeal && (
-              <span style={{ marginLeft: "8px" }}>
-                <StabiloBadge label="APPEAL" bg={YELLOW} text={BLACK} border={BLACK} size="sm" />
+            {ticket.isBannedUser && (
+              <span style={{ marginLeft: "6px" }}>
+                <StabiloBadge label="BANNED" bg={BLACK} text={WHITE} border={WHITE} size="sm" />
               </span>
             )}
           </div>
@@ -4879,7 +4113,6 @@ const LiveChatAgent = ({
         </div>
 
         {renderAnnouncementBroadcastSection()}
-        {renderAppealsSection()}
 
         <div
           style={{
@@ -4945,6 +4178,31 @@ const LiveChatAgent = ({
             <div style={{ overflowY: "auto", flex: 1, minHeight: 0 }}>
               {isAdmin ? (
                 <>
+                  {/* Banned Users Section (admin only) */}
+                  {bannedFiltered.length > 0 && (
+                    <div>
+                      <div
+                        style={{
+                          padding: "10px 16px",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "8px",
+                          borderBottom: "1px solid rgba(255,255,255,0.1)",
+                          backgroundColor: "rgba(0,0,0,0.15)",
+                        }}
+                      >
+                        <StabiloBadge
+                          label={`Banned Users (${bannedFiltered.length})`}
+                          bg={BLACK}
+                          text={WHITE}
+                          border={WHITE}
+                          size="md"
+                        />
+                      </div>
+                      {bannedFiltered.map((ticket) => renderChatListItem(ticket))}
+                    </div>
+                  )}
+
                   {waitingTickets.length > 0 && (
                     <div>
                       <div
@@ -5013,7 +4271,7 @@ const LiveChatAgent = ({
                       {resolvedTickets.map((ticket) => renderChatListItem(ticket))}
                     </div>
                   )}
-                  {waitingTickets.length === 0 && activeTickets.length === 0 && resolvedTickets.length === 0 && (
+                  {bannedFiltered.length === 0 && waitingTickets.length === 0 && activeTickets.length === 0 && resolvedTickets.length === 0 && (
                     <div style={{ padding: "30px 16px", textAlign: "center", color: WHITE, fontSize: "13px" }}>
                       {searchQuery ? "No results found" : "No incoming chats"}
                     </div>
@@ -5093,12 +4351,10 @@ const LiveChatAgent = ({
                   }}
                 >
                   <div style={{ minWidth: 0, flex: 1 }}>
-                    <div style={{ fontWeight: 700, fontSize: "17px", color: WHITE, fontFamily: FONT_FAMILY, marginBottom: "6px" }}>
+                    <div style={{ fontWeight: 700, fontSize: "17px", color: WHITE, fontFamily: FONT_FAMILY, marginBottom: "6px", display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
                       {selectedTicket.userName}
-                      {selectedTicket.isAppeal && (
-                        <span style={{ marginLeft: "10px" }}>
-                          <StabiloBadge label="APPEAL" bg={YELLOW} text={BLACK} border={BLACK} size="sm" />
-                        </span>
+                      {selectedTicket.isBannedUser && (
+                        <StabiloBadge label="BANNED USER" bg={BLACK} text={WHITE} border={WHITE} size="sm" />
                       )}
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
@@ -5128,7 +4384,27 @@ const LiveChatAgent = ({
                   </div>
 
                   <div style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
-                    {isAdmin && selectedTicket.status !== "resolved" && selectedTicket.status !== "closed" && (
+                    {isAdmin && selectedTicket.isBannedUser && selectedTicket.status !== "resolved" && (
+                      <button
+                        onClick={() => unbanUser(selectedTicket.id, selectedTicket.userId)}
+                        style={{
+                          padding: "8px 16px",
+                          backgroundColor: WHITE,
+                          color: BLUE,
+                          border: `1.5px solid ${WHITE}`,
+                          borderRadius: "8px",
+                          fontSize: "12px",
+                          fontWeight: 800,
+                          cursor: "pointer",
+                          fontFamily: FONT_FAMILY,
+                          letterSpacing: "0.5px",
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        Unban
+                      </button>
+                    )}
+                    {isAdmin && !selectedTicket.isBannedUser && selectedTicket.status !== "resolved" && selectedTicket.status !== "closed" && (
                       <button
                         onClick={() => resolveTicket(selectedTicket.id)}
                         style={{
@@ -5153,6 +4429,29 @@ const LiveChatAgent = ({
                     )}
                   </div>
                 </div>
+
+                {selectedTicket.isBannedUser && selectedTicket.banReason && (
+                  <div
+                    style={{
+                      padding: "12px 20px",
+                      backgroundColor: "rgba(0,0,0,0.04)",
+                      borderBottom: `1.5px solid ${BLUE}22`,
+                      flexShrink: 0,
+                    }}
+                  >
+                    <div style={{ fontSize: "11px", fontWeight: 800, color: BLUE, letterSpacing: "0.6px", textTransform: "uppercase", marginBottom: "4px" }}>
+                      Ban Reason
+                    </div>
+                    <div style={{ fontSize: "13px", color: BLACK, fontFamily: FONT_FAMILY, fontWeight: 600 }}>
+                      {selectedTicket.banReason}
+                    </div>
+                    {selectedTicket.banMessage && (
+                      <div style={{ fontSize: "11px", color: "#666", fontFamily: FONT_FAMILY, marginTop: "6px", fontStyle: "italic" }}>
+                        Violating message: "{selectedTicket.banMessage}"
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {showCloseConfirm && (
                   <div
@@ -5218,40 +4517,54 @@ const LiveChatAgent = ({
                   ) : (
                     messages.map((msg, idx) => {
                       const isMine = msg.senderId === user.uid;
+                      const isSystem = msg.isSystemMessage;
                       return (
-                        <div key={msg.id || idx} style={{ alignSelf: isMine ? "flex-end" : "flex-start", maxWidth: "70%" }}>
+                        <div
+                          key={msg.id || idx}
+                          style={{
+                            alignSelf: isSystem ? "center" : isMine ? "flex-end" : "flex-start",
+                            maxWidth: isSystem ? "90%" : "70%",
+                          }}
+                        >
                           <div
                             style={{
-                              padding: "12px 16px",
+                              padding: isSystem ? "10px 14px" : "12px 16px",
                               borderRadius: "12px",
-                              backgroundColor: isMine ? BLUE : "#f4f4f5",
-                              color: isMine ? WHITE : BLACK,
-                              fontSize: "15px",
+                              backgroundColor: isSystem
+                                ? "rgba(13,60,252,0.08)"
+                                : isMine
+                                ? BLUE
+                                : "#f4f4f5",
+                              color: isSystem ? BLUE : isMine ? WHITE : BLACK,
+                              fontSize: isSystem ? "12px" : "15px",
                               fontFamily: FONT_FAMILY,
                               wordBreak: "break-word",
-                              border: isMine ? "none" : "1px solid rgba(0,0,0,0.05)",
+                              border: isSystem ? `1px dashed ${BLUE}` : isMine ? "none" : "1px solid rgba(0,0,0,0.05)",
+                              fontStyle: isSystem ? "italic" : "normal",
                             }}
                           >
-                            {!isMine && (
+                            {!isMine && !isSystem && (
                               <div style={{ fontSize: "12px", fontWeight: 700, color: BLUE, marginBottom: "5px" }}>
                                 {msg.senderName}
                               </div>
                             )}
                             <div style={{ whiteSpace: "pre-wrap" }}>{msg.text}</div>
-                            <div
-                              style={{
-                                display: "flex",
-                                justifyContent: "flex-end",
-                                alignItems: "center",
-                                gap: "6px",
-                                marginTop: "5px",
-                              }}
-                            >
-                              {renderDeliveryStatus(msg, isMine)}
-                              <span style={{ fontSize: "10px", color: isMine ? WHITE : "#999" }}>
-                                {formatTime(msg.timestamp)}
-                              </span>
-                            </div>
+                            {!isSystem && (
+                              <div
+                                style={{
+                                  display: "flex",
+                                  justifyContent: "flex-end",
+                                  alignItems: "center",
+                                  gap: "6px",
+                                  marginTop: "5px",
+                                }}
+                              >
+                                {renderDeliveryStatus(msg, isMine)}
+                                <span style={{ fontSize: "10px", color: isMine ? WHITE : "#999" }}>
+                                  {formatTime(msg.timestamp)}
+                                </span>
+                              </div>
+                            )}
                           </div>
                         </div>
                       );
@@ -5287,7 +4600,7 @@ const LiveChatAgent = ({
                       <RollingNewMessage
                         key={rollingKey}
                         senderName={latestRollingMessage.senderName}
-                        message={latestRollingMessage.text}
+                        message={latestRollingMessage.message || latestRollingMessage.text}
                         isFromAgent={latestRollingMessage.isFromAgent}
                       />
                     </div>
@@ -5317,10 +4630,7 @@ const LiveChatAgent = ({
                           sendMessage();
                         }
                       }}
-                      placeholder={
-                        selectedTicket.status === "waiting" && !isAdmin ? "Waiting for agent..." : "Type a message..."
-                      }
-                      disabled={selectedTicket.status === "waiting" && !isAdmin}
+                      placeholder="Type a message..."
                       style={{
                         flex: 1,
                         padding: "12px 16px",
@@ -5329,21 +4639,19 @@ const LiveChatAgent = ({
                         fontSize: "15px",
                         outline: "none",
                         fontFamily: FONT_FAMILY,
-                        backgroundColor: selectedTicket.status === "waiting" && !isAdmin ? "#f5f5f5" : WHITE,
+                        backgroundColor: WHITE,
                       }}
                     />
                     <button
                       onClick={sendMessage}
-                      disabled={(selectedTicket.status === "waiting" && !isAdmin) || !messageText.trim()}
+                      disabled={!messageText.trim()}
                       style={{
                         padding: "12px 24px",
-                        backgroundColor:
-                          (selectedTicket.status === "waiting" && !isAdmin) || !messageText.trim() ? "#ccc" : BLUE,
+                        backgroundColor: !messageText.trim() ? "#ccc" : BLUE,
                         color: WHITE,
                         border: "none",
                         borderRadius: "10px",
-                        cursor:
-                          (selectedTicket.status === "waiting" && !isAdmin) || !messageText.trim() ? "not-allowed" : "pointer",
+                        cursor: !messageText.trim() ? "not-allowed" : "pointer",
                         fontFamily: FONT_FAMILY,
                         fontSize: "14px",
                         fontWeight: 800,
@@ -5576,7 +4884,7 @@ export default function HomePage(): React.JSX.Element {
       </Head>
 
       <LeftNavbar shifted={navbarShifted} />
-      <RightNavbar user={user} auth={auth} db={db} isMounted={isMounted} />
+      <RightNavbar user={user} auth={auth} db={db} />
 
       <CookieConsentPopup user={user} db={db} isMounted={isMounted} />
 
