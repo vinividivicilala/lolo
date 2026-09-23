@@ -4320,6 +4320,72 @@ export default function HomePage(): React.JSX.Element {
             </span>
           </div>
 
+          {/* ===== TEKS BARU DI BAWAH TRUST ===== */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "flex-start",
+              justifyContent: "space-between",
+              width: "100%",
+              marginBottom: "20px",
+              position: "relative",
+              zIndex: 2,
+            }}
+          >
+            {/* Teks kiri: Notes for the next era of techology system */}
+            <div
+              style={{
+                marginLeft: "auto",
+                marginRight: "360px",
+                maxWidth: "420px",
+                textAlign: "right",
+                marginTop: "-20px",
+              }}
+            >
+              <p
+                style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: "18px",
+                  fontWeight: 600,
+                  color: BLUE,
+                  letterSpacing: "-0.01em",
+                  lineHeight: 1.4,
+                  margin: 0,
+                  textTransform: "none",
+                }}
+              >
+                Notes for the next era of techology system
+              </p>
+            </div>
+
+            {/* Panah SVG minimalist besar di sisi kanan */}
+            <div
+              style={{
+                position: "absolute",
+                right: "40px",
+                top: "0",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "120px",
+                height: "120px",
+                backgroundColor: BLUE,
+                borderRadius: "20px",
+                flexShrink: 0,
+              }}
+            >
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M7 17L17 7M17 7H8M17 7V16"
+                  stroke={WHITE}
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </div>
+          </div>
+
           {/* ===== BG KOTAK BIRU (kiri tepat di bawah huruf "N" pada "Notes") ===== */}
           <div
             style={{
