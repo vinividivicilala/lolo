@@ -231,8 +231,7 @@ async function banUserPermanent(
   userEmail: string,
   userName: string,
   reason: string,
-  message: string,
-  existingTicketId?: string
+  message: string
 ) {
   if (!db) return;
   try {
@@ -241,7 +240,6 @@ async function banUserPermanent(
       userId, userEmail, userName,
       isBlocked: true, blockedAt: now, blockedReason: reason, blockedMessage: message,
       canCreateTicket: false, canSendMessage: false,
-      canAppeal: true, appealStatus: "none",
       violations: [{ type: "BANNED", reason, timestamp: now, message, confidence: 100 }],
       totalViolations: 1, warningCount: 0, firstViolation: now, lastViolation: now,
     });
@@ -249,99 +247,12 @@ async function banUserPermanent(
       botBlocked: true, botBlockedAt: serverTimestamp(),
       botBlockedReason: reason, botBlockedMessage: message,
       canCreateTicket: false, canSendMessage: false,
-      canAppeal: true, appealStatus: "none",
     });
     await addDoc(collection(db, "bot_violations_log"), {
       userId, userEmail, userName,
       violation: { type: "BANNED", reason, timestamp: now, message, confidence: 100 },
       timestamp: serverTimestamp(), resolved: false, isBan: true,
     });
-
-    if (existingTicketId) {
-      const ticketRef = doc(db, "livechat_tickets", existingTicketId);
-
-      await updateDoc(ticketRef, {
-        isBannedUser: true,
-        banReason: reason,
-        banMessage: message,
-        status: "active",
-      });
-
-      const warningText = `⚠️ PERINGATAN SISTEM\n\nAkun ini telah di-BANNED secara permanen.\n\nAlasan: ${reason}\n\nPesan yang melanggar: "${message}"\n\nUser dapat mengajukan banding melalui halaman utama.`;
-      const encryptedWarning = await encryptMessage(warningText);
-      await addDoc(collection(db, "livechat_tickets", existingTicketId, "messages"), {
-        senderId: "system",
-        senderName: "System",
-        text: encryptedWarning,
-        timestamp: serverTimestamp(),
-        read: false,
-        isEncrypted: true,
-        isBotDetected: false,
-        deliveryStatus: "sent",
-        isSystemMessage: true,
-        isBanWarning: true,
-      });
-
-      await updateDoc(ticketRef, {
-        lastMessage: warningText,
-        lastMessageTime: serverTimestamp(),
-        lastMessageSender: "System",
-      });
-
-      await updateDoc(doc(db, "bot_blocks", userId), {
-        banTicketId: existingTicketId,
-      });
-      await updateDoc(doc(db, "users", userId), {
-        banTicketId: existingTicketId,
-      });
-    } else {
-      const ticketRef = await addDoc(collection(db, "livechat_tickets"), {
-        userId,
-        userName,
-        userEmail,
-        userPhoto: "",
-        status: "waiting",
-        topic: "Account Issues",
-        createdAt: serverTimestamp(),
-        unreadCount: 0,
-        typing: false,
-        typingUserId: null,
-        typingUserName: null,
-        isAnnouncement: false,
-        isBroadcast: false,
-        isBannedUser: true,
-        banReason: reason,
-        banMessage: message,
-      });
-
-      const initialMessage = `⚠️ PERINGATAN SISTEM\n\nAkun ini telah di-BANNED secara permanen.\n\nAlasan: ${reason}\n\nPesan yang melanggar: "${message}"\n\nUser dapat mengajukan banding melalui halaman utama.`;
-      const encryptedMessage = await encryptMessage(initialMessage);
-      await addDoc(collection(db, "livechat_tickets", ticketRef.id, "messages"), {
-        senderId: "system",
-        senderName: "System",
-        text: encryptedMessage,
-        timestamp: serverTimestamp(),
-        read: false,
-        isEncrypted: true,
-        isBotDetected: false,
-        deliveryStatus: "sent",
-        isSystemMessage: true,
-        isBanWarning: true,
-      });
-
-      await updateDoc(ticketRef, {
-        lastMessage: initialMessage,
-        lastMessageTime: serverTimestamp(),
-        lastMessageSender: "System",
-      });
-
-      await updateDoc(doc(db, "bot_blocks", userId), {
-        banTicketId: ticketRef.id,
-      });
-      await updateDoc(doc(db, "users", userId), {
-        banTicketId: ticketRef.id,
-      });
-    }
   } catch (error) {
     console.error("Error banning user:", error);
   }
@@ -351,13 +262,8 @@ async function banUserPermanent(
 async function checkBanStatus(userId: string): Promise<{
   isBanned: boolean; reason: string; message: string;
   canCreateTicket: boolean; canSendMessage: boolean;
-  canAppeal: boolean; appealStatus: string; banTicketId: string;
 }> {
-  if (!db) return {
-    isBanned: false, reason: "", message: "",
-    canCreateTicket: true, canSendMessage: true,
-    canAppeal: false, appealStatus: "none", banTicketId: "",
-  };
+  if (!db) return { isBanned: false, reason: "", message: "", canCreateTicket: true, canSendMessage: true };
   try {
     const botDoc = await getDoc(doc(db, "bot_blocks", userId));
     if (botDoc.exists()) {
@@ -368,9 +274,6 @@ async function checkBanStatus(userId: string): Promise<{
         message: data.blockedMessage || "",
         canCreateTicket: data.canCreateTicket !== false,
         canSendMessage: data.canSendMessage !== false,
-        canAppeal: data.canAppeal !== false,
-        appealStatus: data.appealStatus || "none",
-        banTicketId: data.banTicketId || "",
       };
     }
     const userDoc = await getDoc(doc(db, "users", userId));
@@ -383,24 +286,13 @@ async function checkBanStatus(userId: string): Promise<{
           message: userData.botBlockedMessage || "",
           canCreateTicket: userData.canCreateTicket !== false,
           canSendMessage: userData.canSendMessage !== false,
-          canAppeal: userData.canAppeal !== false,
-          appealStatus: userData.appealStatus || "none",
-          banTicketId: userData.banTicketId || "",
         };
       }
     }
-    return {
-      isBanned: false, reason: "", message: "",
-      canCreateTicket: true, canSendMessage: true,
-      canAppeal: false, appealStatus: "none", banTicketId: "",
-    };
+    return { isBanned: false, reason: "", message: "", canCreateTicket: true, canSendMessage: true };
   } catch (error) {
     console.error("Error checking ban status:", error);
-    return {
-      isBanned: false, reason: "", message: "",
-      canCreateTicket: true, canSendMessage: true,
-      canAppeal: false, appealStatus: "none", banTicketId: "",
-    };
+    return { isBanned: false, reason: "", message: "", canCreateTicket: true, canSendMessage: true };
   }
 }
 
@@ -425,9 +317,9 @@ const STATUS_STYLES: {
   };
 } = {
   waiting: { label: "Waiting", bg: WHITE, text: BLUE, border: BLUE },
-  active: { label: "Active", bg: BLACK, text: WHITE, border: BLACK },
+  active: { label: "Active", bg: BLACK, text: WHITE, border: WHITE },
   resolved: { label: "Resolved", bg: WHITE, text: BLUE, border: BLUE },
-  closed: { label: "Closed", bg: BLACK, text: WHITE, border: BLACK },
+  closed: { label: "Closed", bg: BLACK, text: WHITE, border: WHITE },
 };
 
 // ===== TOPIC STYLES =====
@@ -435,39 +327,36 @@ const TOPIC_STYLES: {
   [key: string]: { bg: string; text: string; border: string };
 } = {
   "Product Inquiry": { bg: WHITE, text: BLUE, border: BLUE },
-  "Technical Support": { bg: BLACK, text: WHITE, border: BLACK },
+  "Technical Support": { bg: BLACK, text: WHITE, border: WHITE },
   "Account Issues": { bg: WHITE, text: BLUE, border: BLUE },
-  "Donation": { bg: BLACK, text: WHITE, border: BLACK },
+  "Donation": { bg: BLACK, text: WHITE, border: WHITE },
   "Partnership": { bg: WHITE, text: BLUE, border: BLUE },
-  "Other": { bg: BLACK, text: WHITE, border: BLACK },
-};
-
-// ===== BANNED BADGE STYLE (bg biru, teks putih, no border) =====
-const BANNED_BADGE_STYLE = {
-  bg: BLUE,
-  text: WHITE,
-  border: BLUE,
+  "Other": { bg: BLACK, text: WHITE, border: WHITE },
 };
 
 // ===== SVG ICONS =====
+// ===== NORTH EAST ARROW (↗) =====
 const NorthEastArrow = ({ size = 20, color = "currentColor" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <path d="M7 17L17 7M17 7H8M17 7V16" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
+// ===== SOUTH WEST ARROW (↙) =====
 const SouthWestArrow = ({ size = 20, color = "currentColor" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <path d="M17 7L7 17M7 17H16M7 17V8" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
+// ===== NORTH WEST ARROW (↖) =====
 const NorthWestArrow = ({ size = 20, color = "currentColor" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <path d="M17 17L7 7M7 7V16M7 7H16" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
+// ===== LOGOUT ICON =====
 const LogoutIcon = ({ size = 20, color = "currentColor" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <path d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -557,30 +446,6 @@ const BrandIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: st
   </svg>
 );
 
-// ===== WARNING ICON =====
-const WarningIcon = ({ size = 14, color = "currentColor" }: { size?: number; color?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <path d="M10.29 3.86L1.82 18A2 2 0 0 0 3.54 21H20.46A2 2 0 0 0 22.18 18L13.71 3.86A2 2 0 0 0 10.29 3.86Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M12 9V13" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    <circle cx="12" cy="17" r="1" fill={color} />
-  </svg>
-);
-
-// ===== SHIELD ICON =====
-const ShieldIcon = ({ size = 20, color = "currentColor" }: { size?: number; color?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <path d="M12 22C12 22 20 18 20 12V5L12 2L4 5V12C4 18 12 22 12 22Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-
-// ===== REPLY ICON =====
-const ReplyIcon = ({ size = 16, color = "currentColor" }: { size?: number; color?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <path d="M9 17L4 12L9 7" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M4 12H15C18.3137 12 21 14.6863 21 18V19" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-
 // ===== STABILO BADGE =====
 const StabiloBadge = ({
   label,
@@ -588,14 +453,12 @@ const StabiloBadge = ({
   text,
   border,
   size = "sm",
-  showBorder = true,
 }: {
   label: string;
   bg: string;
   text: string;
   border: string;
   size?: "sm" | "md";
-  showBorder?: boolean;
 }) => {
   const isSmall = size === "sm";
   return (
@@ -606,7 +469,7 @@ const StabiloBadge = ({
         justifyContent: "center",
         padding: isSmall ? "3px 9px" : "4px 11px",
         borderRadius: "4px",
-        border: showBorder ? `1.5px solid ${border}` : "none",
+        border: `1.5px solid ${border}`,
         backgroundColor: bg,
         color: text,
         fontSize: isSmall ? "10px" : "11px",
@@ -654,9 +517,6 @@ interface Ticket {
   typingUserName?: string | null;
   isAnnouncement?: boolean;
   isBroadcast?: boolean;
-  isBannedUser?: boolean;
-  banReason?: string;
-  banMessage?: string;
 }
 interface ChatMessage {
   id: string;
@@ -668,13 +528,6 @@ interface ChatMessage {
   isEncrypted?: boolean;
   isBotDetected?: boolean;
   deliveryStatus?: "sending" | "sent" | "delivered" | "read" | "failed";
-  isSystemMessage?: boolean;
-  isBanWarning?: boolean;
-  replyTo?: {
-    messageId: string;
-    senderName: string;
-    text: string;
-  };
 }
 interface OnlineUser {
   uid: string;
@@ -1545,6 +1398,7 @@ const RightNavbar = ({ user, auth, db }: { user: any; auth: any; db: any }) => {
   const displayName = user?.displayName || user?.email?.split("@")[0] || "User";
   const photoURL = user?.photoURL || "";
 
+  // Rolling animation: bergantian antara 3 slide
   useEffect(() => {
     if (!user) return;
     if (!rollingRef.current) return;
@@ -1589,6 +1443,7 @@ const RightNavbar = ({ user, auth, db }: { user: any; auth: any; db: any }) => {
     }
   };
 
+  // ===== BELUM LOGIN: tombol "Log In" =====
   if (!user) {
     return (
       <div
@@ -1629,6 +1484,7 @@ const RightNavbar = ({ user, auth, db }: { user: any; auth: any; db: any }) => {
     );
   }
 
+  // ===== SUDAH LOGIN: Rolling text (3 slide bergantian) =====
   return (
     <div
       style={{
@@ -1642,6 +1498,7 @@ const RightNavbar = ({ user, auth, db }: { user: any; auth: any; db: any }) => {
         gap: "10px",
       }}
     >
+      {/* Rolling container */}
       <div
         style={{
           position: "relative",
@@ -1663,6 +1520,7 @@ const RightNavbar = ({ user, auth, db }: { user: any; auth: any; db: any }) => {
             width: "100%",
           }}
         >
+          {/* SLIDE 1: Nama user + foto profil (ukuran 70px) */}
           {rollingIndex === 0 && (
             <>
               <span
@@ -1707,6 +1565,7 @@ const RightNavbar = ({ user, auth, db }: { user: any; auth: any; db: any }) => {
             </>
           )}
 
+          {/* SLIDE 2: Dashboard + panah SVG ukuran 50px */}
           {rollingIndex === 1 && (
             <Link
               href="/dashboard"
@@ -1734,6 +1593,7 @@ const RightNavbar = ({ user, auth, db }: { user: any; auth: any; db: any }) => {
             </Link>
           )}
 
+          {/* SLIDE 3: Logout + icon SVG */}
           {rollingIndex === 2 && (
             <button
               onClick={handleLogout}
@@ -2173,546 +2033,6 @@ const CloseRoomButton = ({
   );
 };
 
-// ===== REPLY PREVIEW =====
-const ReplyPreview = ({
-  replyTo,
-  onCancel,
-}: {
-  replyTo: { messageId: string; senderName: string; text: string };
-  onCancel: () => void;
-}) => {
-  return (
-    <div
-      style={{
-        padding: "8px 12px",
-        backgroundColor: "rgba(13,60,252,0.08)",
-        borderLeft: `3px solid ${BLUE}`,
-        borderRadius: "6px",
-        display: "flex",
-        alignItems: "flex-start",
-        gap: "10px",
-        marginBottom: "8px",
-        fontFamily: FONT_FAMILY,
-      }}
-    >
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: "11px", fontWeight: 700, color: BLUE, marginBottom: "3px" }}>
-          Replying to {replyTo.senderName}
-        </div>
-        <div
-          style={{
-            fontSize: "12px",
-            color: "#666",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-          }}
-        >
-          {replyTo.text.length > 50 ? replyTo.text.substring(0, 50) + "..." : replyTo.text}
-        </div>
-      </div>
-      <button
-        onClick={onCancel}
-        style={{
-          background: "transparent",
-          border: "none",
-          color: BLUE,
-          cursor: "pointer",
-          padding: 0,
-          fontSize: "16px",
-          lineHeight: 1,
-          fontFamily: FONT_FAMILY,
-        }}
-      >
-        ×
-      </button>
-    </div>
-  );
-};
-
-// ===== BANNED USER CHAT (Direct chat with admin, no modal) =====
-const BannedUserChat = ({
-  user,
-  db,
-  banInfo,
-}: {
-  user: any;
-  db: any;
-  banInfo: { reason: string; message: string; banTicketId: string };
-}) => {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [messageText, setMessageText] = useState("");
-  const [sending, setSending] = useState(false);
-  const [ticketId, setTicketId] = useState<string>("");
-  const [encryptionReady, setEncryptionReady] = useState(false);
-  const [replyTo, setReplyTo] = useState<{ messageId: string; senderName: string; text: string } | null>(null);
-
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const chatContainerRef = useRef<HTMLDivElement>(null);
-  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    getCryptoKey()
-      .then(() => setEncryptionReady(true))
-      .catch(() => setEncryptionReady(true));
-  }, []);
-
-  useEffect(() => {
-    if (!db || !user) return;
-    if (banInfo.banTicketId) {
-      setTicketId(banInfo.banTicketId);
-      return;
-    }
-    const q = query(
-      collection(db, "livechat_tickets"),
-      where("userId", "==", user.uid),
-      where("isBannedUser", "==", true),
-      orderBy("createdAt", "desc"),
-      limit(1)
-    );
-    const unsub = onSnapshot(q, (snap: any) => {
-      if (!snap.empty) {
-        setTicketId(snap.docs[0].id);
-      }
-    });
-    return () => unsub();
-  }, [db, user, banInfo.banTicketId]);
-
-  useEffect(() => {
-    if (!db || !ticketId) return;
-    const q = query(
-      collection(db, "livechat_tickets", ticketId, "messages"),
-      orderBy("timestamp", "asc")
-    );
-    const unsub = onSnapshot(q, async (snapshot: any) => {
-      const list: ChatMessage[] = [];
-      for (const docSnap of snapshot.docs) {
-        const data = docSnap.data();
-        let text = data.text || "";
-        if (data.isEncrypted) {
-          try {
-            text = await decryptMessage(text);
-          } catch {
-            text = "[Encrypted message]";
-          }
-        }
-        list.push({ id: docSnap.id, ...data, text } as ChatMessage);
-      }
-      setMessages(list);
-      requestAnimationFrame(() => {
-        if (chatContainerRef.current) {
-          chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
-        }
-      });
-    });
-    return () => unsub();
-  }, [db, ticketId]);
-
-  useEffect(() => {
-    if (!db || !ticketId || !user) return;
-    const unread = messages.filter((m) => m.senderId !== user.uid && !m.read && !m.isSystemMessage);
-    unread.forEach(async (msg) => {
-      try {
-        await updateDoc(doc(db, "livechat_tickets", ticketId, "messages", msg.id), {
-          read: true,
-          deliveryStatus: "read",
-        });
-      } catch (e) {
-        // ignore
-      }
-    });
-  }, [messages, db, ticketId, user]);
-
-  const handleTyping = async (value: string) => {
-    setMessageText(value);
-    if (!ticketId || !db) return;
-    const ticketRef = doc(db, "livechat_tickets", ticketId);
-    if (value.length > 0) {
-      try {
-        await updateDoc(ticketRef, {
-          typing: true,
-          typingUserId: user.uid,
-          typingUserName: user.displayName || user.email || "User",
-        });
-      } catch (e) {}
-    } else {
-      try {
-        await updateDoc(ticketRef, {
-          typing: false,
-          typingUserId: null,
-          typingUserName: null,
-        });
-      } catch (e) {}
-    }
-    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-    typingTimeoutRef.current = setTimeout(async () => {
-      try {
-        await updateDoc(ticketRef, {
-          typing: false,
-          typingUserId: null,
-          typingUserName: null,
-        });
-      } catch (e) {}
-    }, 2000);
-  };
-
-  const sendMessage = async () => {
-    if (!db || !ticketId || !messageText.trim() || !user || sending) return;
-    if (!encryptionReady) {
-      alert("Encryption is being initialized, please wait a moment.");
-      return;
-    }
-    setSending(true);
-    try {
-      const ticketRef = doc(db, "livechat_tickets", ticketId);
-      await updateDoc(ticketRef, { typing: false, typingUserId: null, typingUserName: null });
-
-      const encryptedMessage = await encryptMessage(messageText.trim());
-      const senderName = user.displayName || user.email || "User";
-
-      const messageData: any = {
-        senderId: user.uid,
-        senderName,
-        text: encryptedMessage,
-        timestamp: serverTimestamp(),
-        read: false,
-        isEncrypted: true,
-        isBotDetected: false,
-        deliveryStatus: "sent",
-        isSystemMessage: false,
-      };
-
-      if (replyTo) {
-        messageData.replyTo = replyTo;
-      }
-
-      await addDoc(collection(db, "livechat_tickets", ticketId, "messages"), messageData);
-
-      await updateDoc(ticketRef, {
-        lastMessage: messageText.trim(),
-        lastMessageTime: serverTimestamp(),
-        lastMessageSender: senderName,
-        status: "active",
-      });
-
-      setMessageText("");
-      setReplyTo(null);
-    } catch (error) {
-      console.error("Error sending message:", error);
-      alert("Failed to send message. Please try again.");
-    } finally {
-      setSending(false);
-    }
-  };
-
-  const renderDeliveryStatus = (msg: ChatMessage, isMine: boolean) => {
-    if (!isMine) return null;
-    let label = "Sent";
-    let icon = <CheckIcon size={11} color="#ffffff" />;
-    if (msg.read) {
-      label = "Read";
-      icon = <DoubleCheckIcon size={11} color="#ffffff" />;
-    } else if (msg.deliveryStatus === "delivered") {
-      label = "Delivered";
-      icon = <DoubleCheckIcon size={11} color="#ffffff" />;
-    } else if (msg.deliveryStatus === "sending") {
-      label = "Sending";
-      icon = <ClockIcon size={11} color="#ffffff" />;
-    } else if (msg.deliveryStatus === "failed") {
-      label = "Failed";
-      icon = <ErrorIcon size={11} color="#ffffff" />;
-    }
-    return (
-      <span
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: "3px",
-          fontSize: "10px",
-          color: "#ffffff",
-          fontFamily: FONT_FAMILY,
-          fontWeight: 500,
-        }}
-      >
-        {label}
-        {icon}
-      </span>
-    );
-  };
-
-  const formatTime = (timestamp: any) => {
-    if (!timestamp) return "";
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    return date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
-  };
-
-  return (
-    <div
-      style={{
-        marginTop: "32px",
-        backgroundColor: WHITE,
-        border: `1.5px solid ${BLUE}`,
-        borderRadius: "16px",
-        overflow: "hidden",
-        fontFamily: FONT_FAMILY,
-        display: "flex",
-        flexDirection: "column",
-        maxWidth: "900px",
-      }}
-    >
-      <div
-        style={{
-          padding: "16px 22px",
-          backgroundColor: BLUE,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          flexShrink: 0,
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <div
-            style={{
-              width: "36px",
-              height: "36px",
-              borderRadius: "50%",
-              backgroundColor: WHITE,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-            }}
-          >
-            <span style={{ fontSize: "16px", fontWeight: 800, color: BLUE }}>
-              {AGENT_NAME.charAt(0).toUpperCase()}
-            </span>
-          </div>
-          <div>
-            <div style={{ fontSize: "15px", fontWeight: 700, color: WHITE, lineHeight: 1.2 }}>
-              Chat with Admin
-            </div>
-            <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.85)", marginTop: "2px" }}>
-              {AGENT_NAME} • Support Team
-            </div>
-          </div>
-        </div>
-        <span
-          style={{
-            fontSize: "10px",
-            fontWeight: 800,
-            color: WHITE,
-            letterSpacing: "0.6px",
-            textTransform: "uppercase",
-            padding: "4px 10px",
-            border: `1.5px solid ${WHITE}`,
-            borderRadius: "4px",
-            backgroundColor: "rgba(255,255,255,0.12)",
-          }}
-        >
-          Appeal Channel
-        </span>
-      </div>
-
-      <div
-        style={{
-          padding: "10px 22px",
-          fontSize: "12px",
-          color: BLUE,
-          fontWeight: 600,
-          lineHeight: 1.5,
-        }}
-      >
-        Kirim pesan Anda di sini untuk mengajukan banding.
-      </div>
-
-      <div
-        ref={chatContainerRef}
-        className="chat-messages-container"
-        style={{
-          flex: 1,
-          overflowY: "auto",
-          overflowX: "hidden",
-          padding: "20px 22px",
-          display: "flex",
-          flexDirection: "column",
-          gap: "12px",
-          minHeight: "320px",
-          maxHeight: "440px",
-        }}
-      >
-        {messages.length === 0 ? (
-          <div
-            style={{
-              textAlign: "center",
-              color: "#999",
-              fontSize: "14px",
-              padding: "40px 0",
-              fontFamily: FONT_FAMILY,
-            }}
-          >
-            No messages yet. Send your appeal below.
-          </div>
-        ) : (
-          messages.map((msg, idx) => {
-            const isMine = msg.senderId === user.uid;
-            const isSystem = msg.isSystemMessage;
-            return (
-              <div
-                key={msg.id || idx}
-                style={{
-                  alignSelf: isSystem ? "center" : isMine ? "flex-end" : "flex-start",
-                  maxWidth: isSystem ? "90%" : "72%",
-                }}
-              >
-                <div
-                  style={{
-                    padding: isSystem ? "10px 14px" : "12px 16px",
-                    borderRadius: "12px",
-                    backgroundColor: isSystem
-                      ? "rgba(13,60,252,0.08)"
-                      : isMine
-                      ? BLUE
-                      : "#f4f4f5",
-                    color: isSystem ? BLUE : isMine ? WHITE : BLACK,
-                    fontSize: isSystem ? "12px" : "14px",
-                    fontFamily: FONT_FAMILY,
-                    wordBreak: "break-word",
-                    border: isSystem ? `1px dashed ${BLUE}` : isMine ? "none" : "1px solid rgba(0,0,0,0.05)",
-                    fontStyle: isSystem ? "italic" : "normal",
-                    position: "relative",
-                  }}
-                >
-                  {msg.replyTo && (
-                    <div
-                      style={{
-                        padding: "6px 10px",
-                        backgroundColor: isMine ? "rgba(255,255,255,0.15)" : "rgba(13,60,252,0.08)",
-                        borderLeft: `3px solid ${isMine ? WHITE : BLUE}`,
-                        borderRadius: "4px",
-                        marginBottom: "8px",
-                      }}
-                    >
-                      <div style={{ fontSize: "10px", fontWeight: 700, color: isMine ? WHITE : BLUE, marginBottom: "2px" }}>
-                        {msg.replyTo.senderName}
-                      </div>
-                      <div style={{ fontSize: "11px", color: isMine ? "rgba(255,255,255,0.8)" : "#666" }}>
-                        {msg.replyTo.text}
-                      </div>
-                    </div>
-                  )}
-                  {!isMine && !isSystem && (
-                    <div style={{ fontSize: "12px", fontWeight: 700, color: BLUE, marginBottom: "5px" }}>
-                      {msg.senderName}
-                    </div>
-                  )}
-                  <div style={{ whiteSpace: "pre-wrap" }}>{msg.text}</div>
-                  {!isSystem && (
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "flex-end",
-                        alignItems: "center",
-                        gap: "6px",
-                        marginTop: "5px",
-                      }}
-                    >
-                      <button
-                        onClick={() => setReplyTo({ messageId: msg.id, senderName: msg.senderName, text: msg.text })}
-                        style={{
-                          background: "transparent",
-                          border: "none",
-                          color: isMine ? WHITE : BLUE,
-                          cursor: "pointer",
-                          padding: "2px",
-                          display: "flex",
-                          alignItems: "center",
-                          opacity: 0.7,
-                        }}
-                        title="Reply"
-                      >
-                        <ReplyIcon size={12} color={isMine ? WHITE : BLUE} />
-                      </button>
-                      {renderDeliveryStatus(msg, isMine)}
-                      <span style={{ fontSize: "10px", color: isMine ? WHITE : "#999" }}>
-                        {formatTime(msg.timestamp)}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })
-        )}
-        <div ref={messagesEndRef} />
-      </div>
-
-      <div
-        style={{
-          padding: "14px 22px",
-          borderTop: "1px solid rgba(0,0,0,0.06)",
-          display: "flex",
-          flexDirection: "column",
-          gap: "8px",
-          backgroundColor: WHITE,
-          flexShrink: 0,
-        }}
-      >
-        {replyTo && (
-          <ReplyPreview
-            replyTo={replyTo}
-            onCancel={() => setReplyTo(null)}
-          />
-        )}
-        <div style={{ display: "flex", gap: "12px" }}>
-          <input
-            type="text"
-            value={messageText}
-            onChange={(e) => handleTyping(e.target.value)}
-            onKeyPress={(e) => {
-              if (e.key === "Enter" && !e.shiftKey && messageText.trim()) {
-                e.preventDefault();
-                sendMessage();
-              }
-            }}
-            placeholder="Tulis pesan banding Anda..."
-            disabled={sending}
-            style={{
-              flex: 1,
-              padding: "12px 16px",
-              border: "1px solid rgba(0,0,0,0.1)",
-              borderRadius: "10px",
-              fontSize: "14px",
-              outline: "none",
-              fontFamily: FONT_FAMILY,
-              backgroundColor: WHITE,
-              color: BLACK,
-            }}
-          />
-          <button
-            onClick={sendMessage}
-            disabled={!messageText.trim() || sending}
-            style={{
-              padding: "12px 24px",
-              backgroundColor: !messageText.trim() || sending ? "#ccc" : BLUE,
-              color: WHITE,
-              border: "none",
-              borderRadius: "10px",
-              cursor: !messageText.trim() || sending ? "not-allowed" : "pointer",
-              fontFamily: FONT_FAMILY,
-              fontSize: "13px",
-              fontWeight: 800,
-              letterSpacing: "0.5px",
-              textTransform: "uppercase",
-            }}
-          >
-            {sending ? "..." : "Send"}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
 // ===== LIVE CHAT AGENT COMPONENT =====
 const LiveChatAgent = ({
   user,
@@ -2739,8 +2059,6 @@ const LiveChatAgent = ({
   const [checkingBan, setCheckingBan] = useState(true);
   const [canCreateTicket, setCanCreateTicket] = useState(true);
   const [canSendMessage, setCanSendMessage] = useState(true);
-  const [banTicketId, setBanTicketId] = useState<string>("");
-  const [banOriginalMessage, setBanOriginalMessage] = useState<string>("");
 
   const [onlineAgents, setOnlineAgents] = useState<OnlineUser[]>([]);
   const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
@@ -2755,8 +2073,6 @@ const LiveChatAgent = ({
   const [tourStep, setTourStep] = useState(0);
 
   const [showCloseConfirm, setShowCloseConfirm] = useState(false);
-
-  const [replyTo, setReplyTo] = useState<{ messageId: string; senderName: string; text: string } | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatMessagesContainerRef = useRef<HTMLDivElement>(null);
@@ -2902,16 +2218,12 @@ const LiveChatAgent = ({
           setBanReason(status.reason);
           setCanCreateTicket(status.canCreateTicket);
           setCanSendMessage(status.canSendMessage);
-          setBanTicketId(status.banTicketId || "");
-          setBanOriginalMessage(status.message || "");
           setBanMessage(`YOUR ACCOUNT HAS BEEN PERMANENTLY BANNED\n\nReason: ${status.reason}`);
         } else {
           setIsBanned(false);
           setBanReason("");
           setCanCreateTicket(true);
           setCanSendMessage(true);
-          setBanTicketId("");
-          setBanOriginalMessage("");
           setBanMessage(null);
         }
       } catch (error) {
@@ -2932,8 +2244,6 @@ const LiveChatAgent = ({
         setBanReason(status.reason);
         setCanCreateTicket(status.canCreateTicket);
         setCanSendMessage(status.canSendMessage);
-        setBanTicketId(status.banTicketId || "");
-        setBanOriginalMessage(status.message || "");
         setBanMessage(`YOUR ACCOUNT HAS BEEN PERMANENTLY BANNED\n\nReason: ${status.reason}`);
         return true;
       }
@@ -3097,7 +2407,6 @@ const LiveChatAgent = ({
     setLatestRollingMessage(null);
     prevMessagesLenRef.current = messagesCacheRef.current[selectedTicket?.id || ""]?.length || 0;
     setShowCloseConfirm(false);
-    setReplyTo(null);
   }, [selectedTicket?.id]);
 
   useEffect(() => {
@@ -3229,7 +2538,7 @@ const LiveChatAgent = ({
       return;
     }
     const hasActiveTicket = tickets.some(
-      (t) => t.userId === user.uid && (t.status === "waiting" || t.status === "active") && !t.isAnnouncement && !t.isBroadcast && !t.isBannedUser
+      (t) => t.userId === user.uid && (t.status === "waiting" || t.status === "active") && !t.isAnnouncement && !t.isBroadcast
     );
     if (hasActiveTicket) {
       alert("You still have an active chat with an agent. Please wait until it is finished.");
@@ -3250,7 +2559,6 @@ const LiveChatAgent = ({
         typingUserName: null,
         isAnnouncement: false,
         isBroadcast: false,
-        isBannedUser: false,
       });
       const initialMessage = `Hello, I would like to ask about: ${selectedTopic}`;
       const encryptedMessage = await encryptMessage(initialMessage);
@@ -3293,20 +2601,11 @@ const LiveChatAgent = ({
     }
     const checkResult = containsBannedContent(messageText);
     if (checkResult.isBanned) {
-      await banUserPermanent(
-        user.uid,
-        user.email || "",
-        user.displayName || "User",
-        checkResult.reason,
-        messageText,
-        selectedTicket.id
-      );
+      await banUserPermanent(user.uid, user.email || "", user.displayName || "User", checkResult.reason, messageText);
       setIsBanned(true);
       setBanReason(checkResult.reason);
       setCanCreateTicket(false);
       setCanSendMessage(false);
-      setBanOriginalMessage(messageText);
-      setBanTicketId(selectedTicket.id);
       setBanMessage(`YOUR ACCOUNT HAS BEEN PERMANENTLY BANNED\n\nReason: ${checkResult.reason}\n\nMessage sent: "${messageText}"`);
       setMessageText("");
       return;
@@ -3324,8 +2623,7 @@ const LiveChatAgent = ({
       await updateDoc(ticketRef, { typing: false, typingUserId: null, typingUserName: null });
       const senderName = isAdmin ? AGENT_NAME : user.displayName || user.email || "User";
       const encryptedMessage = await encryptMessage(messageText.trim());
-
-      const messageData: any = {
+      await addDoc(collection(db, "livechat_tickets", selectedTicket.id, "messages"), {
         senderId: user.uid,
         senderName: senderName,
         text: encryptedMessage,
@@ -3334,14 +2632,7 @@ const LiveChatAgent = ({
         isEncrypted: true,
         isBotDetected: false,
         deliveryStatus: "sent",
-      };
-
-      if (replyTo) {
-        messageData.replyTo = replyTo;
-      }
-
-      await addDoc(collection(db, "livechat_tickets", selectedTicket.id, "messages"), messageData);
-
+      });
       await updateDoc(ticketRef, {
         lastMessage: messageText.trim(),
         lastMessageTime: serverTimestamp(),
@@ -3352,7 +2643,6 @@ const LiveChatAgent = ({
       });
       setMessageText("");
       setBanMessage(null);
-      setReplyTo(null);
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     } catch (error) {
       console.error("Error sending message:", error);
@@ -3379,54 +2669,6 @@ const LiveChatAgent = ({
       await updateDoc(doc(db, "livechat_tickets", ticketId), { status: "resolved" });
     } catch (error) {
       console.error("Error resolving ticket:", error);
-    }
-  };
-
-  const unbanUser = async (ticketId: string, targetUserId: string) => {
-    if (!db || !isAdmin) return;
-    try {
-      await updateDoc(doc(db, "users", targetUserId), {
-        botBlocked: false,
-        canCreateTicket: true,
-        canSendMessage: true,
-        appealStatus: "approved",
-        unblockedAt: serverTimestamp(),
-      });
-      try {
-        await updateDoc(doc(db, "bot_blocks", targetUserId), {
-          isBlocked: false,
-          canCreateTicket: true,
-          canSendMessage: true,
-          appealStatus: "approved",
-          unblockedAt: serverTimestamp(),
-        });
-      } catch (e) {
-        // bot_blocks may not exist
-      }
-
-      const sysMsg = `✅ Your appeal has been APPROVED. Your account has been unbanned. You can now use all features again.`;
-      const encryptedSys = await encryptMessage(sysMsg);
-      await addDoc(collection(db, "livechat_tickets", ticketId, "messages"), {
-        senderId: "system",
-        senderName: "System",
-        text: encryptedSys,
-        timestamp: serverTimestamp(),
-        read: false,
-        isEncrypted: true,
-        isBotDetected: false,
-        deliveryStatus: "sent",
-        isSystemMessage: true,
-      });
-
-      await updateDoc(doc(db, "livechat_tickets", ticketId), {
-        status: "resolved",
-        lastMessage: sysMsg,
-        lastMessageTime: serverTimestamp(),
-        lastMessageSender: "System",
-      });
-    } catch (error) {
-      console.error("Error unbanning user:", error);
-      alert("Failed to unban user. Please try again.");
     }
   };
 
@@ -3866,7 +3108,6 @@ const LiveChatAgent = ({
     );
   }
 
-  // ===== BANNED USER VIEW (with direct chat box, no modal) =====
   if (!isAdmin && isBanned) {
     return (
       <div style={{ marginTop: "80px", paddingTop: "30px" }}>
@@ -3894,7 +3135,6 @@ const LiveChatAgent = ({
             <NorthEastArrow size={20} color={BLUE} />
           </button>
         </div>
-
         <div
           style={{
             color: BLUE,
@@ -3911,21 +3151,6 @@ const LiveChatAgent = ({
         <div style={{ color: BLUE, fontSize: "22px", fontWeight: 400, fontFamily: FONT_FAMILY, marginBottom: "6px" }}>
           REASON: {banReason || "SUSPICIOUS ACTIVITY"}
         </div>
-        {banOriginalMessage && (
-          <div style={{ color: "#666", fontSize: "14px", fontFamily: FONT_FAMILY, marginTop: "10px", maxWidth: "700px", lineHeight: 1.6 }}>
-            <strong style={{ color: BLUE }}>Violating message:</strong> "{banOriginalMessage}"
-          </div>
-        )}
-
-        <BannedUserChat
-          user={user}
-          db={db}
-          banInfo={{
-            reason: banReason,
-            message: banOriginalMessage,
-            banTicketId: banTicketId,
-          }}
-        />
       </div>
     );
   }
@@ -4146,7 +3371,6 @@ const LiveChatAgent = ({
     );
   }
 
-  // ===== ADMIN: banned user tickets stay in normal sections with a BANNED badge =====
   const waitingTicketsRaw = tickets.filter((t) => t.status === "waiting");
   const activeTicketsRaw = tickets.filter((t) => t.status === "active");
   const resolvedTicketsRaw = tickets.filter((t) => t.status === "resolved" || t.status === "closed");
@@ -4160,8 +3384,6 @@ const LiveChatAgent = ({
     const ticketId = generateTicketId(ticket.createdAt);
     const statusStyle = STATUS_STYLES[ticket.status] || STATUS_STYLES.active;
     const topicStyle = TOPIC_STYLES[ticket.topic] || TOPIC_STYLES["Other"];
-
-    const isBannedUser = ticket.isBannedUser === true;
 
     return (
       <div
@@ -4190,18 +3412,7 @@ const LiveChatAgent = ({
               text={statusStyle.text}
               border={statusStyle.border}
               size="sm"
-              showBorder={ticket.status !== "active" && ticket.status !== "closed"}
             />
-            {isBannedUser && (
-              <StabiloBadge
-                label="BANNED"
-                bg={BANNED_BADGE_STYLE.bg}
-                text={BANNED_BADGE_STYLE.text}
-                border={BANNED_BADGE_STYLE.border}
-                size="sm"
-                showBorder={false}
-              />
-            )}
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "8px", flexWrap: "wrap" }}>
@@ -4211,41 +3422,11 @@ const LiveChatAgent = ({
             text={topicStyle.text}
             border={topicStyle.border}
             size="sm"
-            showBorder={ticket.topic !== "Technical Support" && ticket.topic !== "Donation" && ticket.topic !== "Other"}
           />
           <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.75)", fontWeight: 700 }}>
             {ticketMsgCounts[ticket.id] || 0} msgs
           </span>
         </div>
-
-        {isBannedUser && (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
-              marginBottom: "6px",
-              padding: "6px 10px",
-              backgroundColor: BLUE,
-              borderRadius: "6px",
-            }}
-          >
-            <WarningIcon size={13} color={WHITE} />
-            <span
-              style={{
-                fontSize: "10px",
-                fontWeight: 800,
-                color: WHITE,
-                letterSpacing: "0.4px",
-                textTransform: "uppercase",
-                fontFamily: FONT_FAMILY,
-              }}
-            >
-              Akun ini terkena banned
-            </span>
-          </div>
-        )}
-
         {renderTicketPreview(ticket.id)}
         <div style={{ marginTop: "6px" }}>
           <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.65)", fontWeight: 700, letterSpacing: "0.3px" }}>{ticketId}</span>
@@ -4439,7 +3620,6 @@ const LiveChatAgent = ({
                           text={STATUS_STYLES.active.text}
                           border={STATUS_STYLES.active.border}
                           size="md"
-                          showBorder={false}
                         />
                       </div>
                       {activeTickets.map((ticket) => renderChatListItem(ticket))}
@@ -4547,11 +3727,8 @@ const LiveChatAgent = ({
                   }}
                 >
                   <div style={{ minWidth: 0, flex: 1 }}>
-                    <div style={{ fontWeight: 700, fontSize: "17px", color: WHITE, fontFamily: FONT_FAMILY, marginBottom: "6px", display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+                    <div style={{ fontWeight: 700, fontSize: "17px", color: WHITE, fontFamily: FONT_FAMILY, marginBottom: "6px" }}>
                       {selectedTicket.userName}
-                      {selectedTicket.isBannedUser && (
-                        <StabiloBadge label="BANNED" bg={BANNED_BADGE_STYLE.bg} text={BANNED_BADGE_STYLE.text} border={BANNED_BADGE_STYLE.border} size="sm" showBorder={false} />
-                      )}
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
                       <StabiloBadge
@@ -4560,7 +3737,6 @@ const LiveChatAgent = ({
                         text={(STATUS_STYLES[selectedTicket.status] || STATUS_STYLES.active).text}
                         border={(STATUS_STYLES[selectedTicket.status] || STATUS_STYLES.active).border}
                         size="sm"
-                        showBorder={selectedTicket.status !== "active" && selectedTicket.status !== "closed"}
                       />
                       <StabiloBadge
                         label={selectedTicket.topic}
@@ -4568,7 +3744,6 @@ const LiveChatAgent = ({
                         text={(TOPIC_STYLES[selectedTicket.topic] || TOPIC_STYLES["Other"]).text}
                         border={(TOPIC_STYLES[selectedTicket.topic] || TOPIC_STYLES["Other"]).border}
                         size="sm"
-                        showBorder={selectedTicket.topic !== "Technical Support" && selectedTicket.topic !== "Donation" && selectedTicket.topic !== "Other"}
                       />
                       {selectedTicket.typing && selectedTicket.status !== "resolved" && (
                         <span style={{ fontSize: "12px", color: WHITE, fontStyle: "italic", fontWeight: 700 }}>
@@ -4582,27 +3757,7 @@ const LiveChatAgent = ({
                   </div>
 
                   <div style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
-                    {isAdmin && selectedTicket.isBannedUser && selectedTicket.status !== "resolved" && (
-                      <button
-                        onClick={() => unbanUser(selectedTicket.id, selectedTicket.userId)}
-                        style={{
-                          padding: "8px 16px",
-                          backgroundColor: WHITE,
-                          color: BLUE,
-                          border: `1.5px solid ${WHITE}`,
-                          borderRadius: "8px",
-                          fontSize: "12px",
-                          fontWeight: 800,
-                          cursor: "pointer",
-                          fontFamily: FONT_FAMILY,
-                          letterSpacing: "0.5px",
-                          textTransform: "uppercase",
-                        }}
-                      >
-                        Unban
-                      </button>
-                    )}
-                    {isAdmin && !selectedTicket.isBannedUser && selectedTicket.status !== "resolved" && selectedTicket.status !== "closed" && (
+                    {isAdmin && selectedTicket.status !== "resolved" && selectedTicket.status !== "closed" && (
                       <button
                         onClick={() => resolveTicket(selectedTicket.id)}
                         style={{
@@ -4627,29 +3782,6 @@ const LiveChatAgent = ({
                     )}
                   </div>
                 </div>
-
-                {selectedTicket.isBannedUser && selectedTicket.banReason && (
-                  <div
-                    style={{
-                      padding: "12px 20px",
-                      backgroundColor: "rgba(0,0,0,0.04)",
-                      borderBottom: `1.5px solid ${BLUE}22`,
-                      flexShrink: 0,
-                    }}
-                  >
-                    <div style={{ fontSize: "11px", fontWeight: 800, color: BLUE, letterSpacing: "0.6px", textTransform: "uppercase", marginBottom: "4px" }}>
-                      Ban Reason
-                    </div>
-                    <div style={{ fontSize: "13px", color: BLACK, fontFamily: FONT_FAMILY, fontWeight: 600 }}>
-                      {selectedTicket.banReason}
-                    </div>
-                    {selectedTicket.banMessage && (
-                      <div style={{ fontSize: "11px", color: "#666", fontFamily: FONT_FAMILY, marginTop: "6px", fontStyle: "italic" }}>
-                        Violating message: "{selectedTicket.banMessage}"
-                      </div>
-                    )}
-                  </div>
-                )}
 
                 {showCloseConfirm && (
                   <div
@@ -4700,72 +3832,6 @@ const LiveChatAgent = ({
                     minHeight: 0,
                   }}
                 >
-                  {/* ===== AUTO WARNING MESSAGE UNTUK BANNED USER DI BODY CHAT ===== */}
-                  {selectedTicket.isBannedUser && (
-                    <div
-                      style={{
-                        alignSelf: "center",
-                        maxWidth: "90%",
-                        width: "100%",
-                      }}
-                    >
-                      <div
-                        style={{
-                          padding: "14px 18px",
-                          borderRadius: "12px",
-                          backgroundColor: BLUE,
-                          border: "none",
-                          display: "flex",
-                          alignItems: "flex-start",
-                          gap: "12px",
-                          fontFamily: FONT_FAMILY,
-                        }}
-                      >
-                        <div
-                          style={{
-                            width: "32px",
-                            height: "32px",
-                            borderRadius: "50%",
-                            backgroundColor: WHITE,
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            flexShrink: 0,
-                          }}
-                        >
-                          <WarningIcon size={18} color={BLUE} />
-                        </div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div
-                            style={{
-                              fontSize: "11px",
-                              fontWeight: 800,
-                              color: WHITE,
-                              letterSpacing: "0.6px",
-                              textTransform: "uppercase",
-                              marginBottom: "6px",
-                            }}
-                          >
-                            System Warning — Akun Terkena Banned
-                          </div>
-                          <div
-                            style={{
-                              fontSize: "13px",
-                              color: WHITE,
-                              lineHeight: 1.6,
-                              fontWeight: 500,
-                              whiteSpace: "pre-wrap",
-                            }}
-                          >
-                            {`User "${selectedTicket.userName}" telah di-BANNED secara permanen oleh sistem keamanan.\n\nAlasan: ${selectedTicket.banReason || "SUSPICIOUS ACTIVITY"}`}
-                            {selectedTicket.banMessage ? `\n\nPesan yang melanggar: "${selectedTicket.banMessage}"` : ""}
-                            {`\n\nUser dapat mengajukan banding melalui chat ini.`}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
                   {messages.length === 0 ? (
                     <div
                       style={{
@@ -4781,89 +3847,40 @@ const LiveChatAgent = ({
                   ) : (
                     messages.map((msg, idx) => {
                       const isMine = msg.senderId === user.uid;
-                      const isSystem = msg.isSystemMessage;
                       return (
-                        <div
-                          key={msg.id || idx}
-                          style={{
-                            alignSelf: isSystem ? "center" : isMine ? "flex-end" : "flex-start",
-                            maxWidth: isSystem ? "90%" : "70%",
-                          }}
-                        >
+                        <div key={msg.id || idx} style={{ alignSelf: isMine ? "flex-end" : "flex-start", maxWidth: "70%" }}>
                           <div
                             style={{
-                              padding: isSystem ? "10px 14px" : "12px 16px",
+                              padding: "12px 16px",
                               borderRadius: "12px",
-                              backgroundColor: isSystem
-                                ? "rgba(13,60,252,0.08)"
-                                : isMine
-                                ? BLUE
-                                : "#f4f4f5",
-                              color: isSystem ? BLUE : isMine ? WHITE : BLACK,
-                              fontSize: isSystem ? "12px" : "15px",
+                              backgroundColor: isMine ? BLUE : "#f4f4f5",
+                              color: isMine ? WHITE : BLACK,
+                              fontSize: "15px",
                               fontFamily: FONT_FAMILY,
                               wordBreak: "break-word",
-                              border: isSystem ? `1px dashed ${BLUE}` : isMine ? "none" : "1px solid rgba(0,0,0,0.05)",
-                              fontStyle: isSystem ? "italic" : "normal",
-                              position: "relative",
+                              border: isMine ? "none" : "1px solid rgba(0,0,0,0.05)",
                             }}
                           >
-                            {msg.replyTo && (
-                              <div
-                                style={{
-                                  padding: "6px 10px",
-                                  backgroundColor: isMine ? "rgba(255,255,255,0.15)" : "rgba(13,60,252,0.08)",
-                                  borderLeft: `3px solid ${isMine ? WHITE : BLUE}`,
-                                  borderRadius: "4px",
-                                  marginBottom: "8px",
-                                }}
-                              >
-                                <div style={{ fontSize: "10px", fontWeight: 700, color: isMine ? WHITE : BLUE, marginBottom: "2px" }}>
-                                  {msg.replyTo.senderName}
-                                </div>
-                                <div style={{ fontSize: "11px", color: isMine ? "rgba(255,255,255,0.8)" : "#666" }}>
-                                  {msg.replyTo.text}
-                                </div>
-                              </div>
-                            )}
-                            {!isMine && !isSystem && (
+                            {!isMine && (
                               <div style={{ fontSize: "12px", fontWeight: 700, color: BLUE, marginBottom: "5px" }}>
                                 {msg.senderName}
                               </div>
                             )}
-                            <div style={{ whiteSpace: "pre-wrap" }}>{msg.text}</div>
-                            {!isSystem && (
-                              <div
-                                style={{
-                                  display: "flex",
-                                  justifyContent: "flex-end",
-                                  alignItems: "center",
-                                  gap: "6px",
-                                  marginTop: "5px",
-                                }}
-                              >
-                                <button
-                                  onClick={() => setReplyTo({ messageId: msg.id, senderName: msg.senderName, text: msg.text })}
-                                  style={{
-                                    background: "transparent",
-                                    border: "none",
-                                    color: isMine ? WHITE : BLUE,
-                                    cursor: "pointer",
-                                    padding: "2px",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    opacity: 0.7,
-                                  }}
-                                  title="Reply"
-                                >
-                                  <ReplyIcon size={12} color={isMine ? WHITE : BLUE} />
-                                </button>
-                                {renderDeliveryStatus(msg, isMine)}
-                                <span style={{ fontSize: "10px", color: isMine ? WHITE : "#999" }}>
-                                  {formatTime(msg.timestamp)}
-                                </span>
-                              </div>
-                            )}
+                            <div>{msg.text}</div>
+                            <div
+                              style={{
+                                display: "flex",
+                                justifyContent: "flex-end",
+                                alignItems: "center",
+                                gap: "6px",
+                                marginTop: "5px",
+                              }}
+                            >
+                              {renderDeliveryStatus(msg, isMine)}
+                              <span style={{ fontSize: "10px", color: isMine ? WHITE : "#999" }}>
+                                {formatTime(msg.timestamp)}
+                              </span>
+                            </div>
                           </div>
                         </div>
                       );
@@ -4914,61 +3931,57 @@ const LiveChatAgent = ({
                       padding: "16px 24px",
                       borderTop: "1px solid rgba(0,0,0,0.06)",
                       display: "flex",
-                      flexDirection: "column",
-                      gap: "8px",
+                      gap: "12px",
                       backgroundColor: WHITE,
                       flexShrink: 0,
                     }}
                   >
-                    {replyTo && (
-                      <ReplyPreview
-                        replyTo={replyTo}
-                        onCancel={() => setReplyTo(null)}
-                      />
-                    )}
-                    <div style={{ display: "flex", gap: "12px" }}>
-                      <input
-                        type="text"
-                        value={messageText}
-                        onChange={handleTyping}
-                        onKeyPress={(e) => {
-                          if (e.key === "Enter" && !e.shiftKey && messageText.trim()) {
-                            e.preventDefault();
-                            sendMessage();
-                          }
-                        }}
-                        placeholder="Type a message..."
-                        style={{
-                          flex: 1,
-                          padding: "12px 16px",
-                          border: "1px solid rgba(0,0,0,0.1)",
-                          borderRadius: "10px",
-                          fontSize: "15px",
-                          outline: "none",
-                          fontFamily: FONT_FAMILY,
-                          backgroundColor: WHITE,
-                        }}
-                      />
-                      <button
-                        onClick={sendMessage}
-                        disabled={!messageText.trim()}
-                        style={{
-                          padding: "12px 24px",
-                          backgroundColor: !messageText.trim() ? "#ccc" : BLUE,
-                          color: WHITE,
-                          border: "none",
-                          borderRadius: "10px",
-                          cursor: !messageText.trim() ? "not-allowed" : "pointer",
-                          fontFamily: FONT_FAMILY,
-                          fontSize: "14px",
-                          fontWeight: 800,
-                          letterSpacing: "0.5px",
-                          textTransform: "uppercase",
-                        }}
-                      >
-                        Send
-                      </button>
-                    </div>
+                    <input
+                      type="text"
+                      value={messageText}
+                      onChange={handleTyping}
+                      onKeyPress={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey && messageText.trim()) {
+                          e.preventDefault();
+                          sendMessage();
+                        }
+                      }}
+                      placeholder={
+                        selectedTicket.status === "waiting" && !isAdmin ? "Waiting for agent..." : "Type a message..."
+                      }
+                      disabled={selectedTicket.status === "waiting" && !isAdmin}
+                      style={{
+                        flex: 1,
+                        padding: "12px 16px",
+                        border: "1px solid rgba(0,0,0,0.1)",
+                        borderRadius: "10px",
+                        fontSize: "15px",
+                        outline: "none",
+                        fontFamily: FONT_FAMILY,
+                        backgroundColor: selectedTicket.status === "waiting" && !isAdmin ? "#f5f5f5" : WHITE,
+                      }}
+                    />
+                    <button
+                      onClick={sendMessage}
+                      disabled={(selectedTicket.status === "waiting" && !isAdmin) || !messageText.trim()}
+                      style={{
+                        padding: "12px 24px",
+                        backgroundColor:
+                          (selectedTicket.status === "waiting" && !isAdmin) || !messageText.trim() ? "#ccc" : BLUE,
+                        color: WHITE,
+                        border: "none",
+                        borderRadius: "10px",
+                        cursor:
+                          (selectedTicket.status === "waiting" && !isAdmin) || !messageText.trim() ? "not-allowed" : "pointer",
+                        fontFamily: FONT_FAMILY,
+                        fontSize: "14px",
+                        fontWeight: 800,
+                        letterSpacing: "0.5px",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      Send
+                    </button>
                   </div>
                 ) : (
                   <div
@@ -5211,6 +4224,7 @@ export default function HomePage(): React.JSX.Element {
       >
         <HeroMenuruTitle onNavbarShiftChange={setNavbarShifted} />
 
+        {/* ===== FEATURES + 01 NOTES TRUST + BG KOTAK BIRU ===== */}
         <div
           style={{
             padding: "0 40px",
@@ -5240,6 +4254,7 @@ export default function HomePage(): React.JSX.Element {
             Features
           </h2>
 
+          {/* ===== BARIS 01 NOTES TRUST ===== */}
           <div
             style={{
               display: "flex",
@@ -5251,6 +4266,7 @@ export default function HomePage(): React.JSX.Element {
               marginBottom: "40px",
             }}
           >
+            {/* 01 + Notes — jarak jauh */}
             <div style={{ display: "flex", alignItems: "baseline", gap: "140px" }}>
               <span
                 style={{
@@ -5278,6 +4294,7 @@ export default function HomePage(): React.JSX.Element {
               </span>
             </div>
 
+            {/* Trust — digeser lebih ke kiri lagi */}
             <span
               style={{
                 display: "inline-flex",
@@ -5303,6 +4320,7 @@ export default function HomePage(): React.JSX.Element {
             </span>
           </div>
 
+          {/* ===== TEKS BARU DI BAWAH TRUST ===== */}
           <div
             style={{
               display: "flex",
@@ -5314,6 +4332,7 @@ export default function HomePage(): React.JSX.Element {
               zIndex: 2,
             }}
           >
+            {/* Teks kiri: Notes for the next era of techology system */}
             <div
               style={{
                 marginLeft: "auto",
@@ -5339,6 +4358,7 @@ export default function HomePage(): React.JSX.Element {
               </p>
             </div>
 
+            {/* Panah SVG minimalist besar di sisi kanan */}
             <div
               style={{
                 position: "absolute",
@@ -5366,6 +4386,7 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </div>
 
+          {/* ===== BG KOTAK BIRU (kiri tepat di bawah huruf "N" pada "Notes") ===== */}
           <div
             style={{
               position: "relative",
