@@ -231,7 +231,8 @@ async function banUserPermanent(
   userEmail: string,
   userName: string,
   reason: string,
-  message: string
+  message: string,
+  existingTicketId?: string
 ) {
   if (!db) return;
   try {
@@ -256,54 +257,97 @@ async function banUserPermanent(
       timestamp: serverTimestamp(), resolved: false, isBan: true,
     });
 
-    // Create a support ticket for the banned user so admin can see them in chat list
-    const ticketRef = await addDoc(collection(db, "livechat_tickets"), {
-      userId,
-      userName,
-      userEmail,
-      userPhoto: "",
-      status: "waiting",
-      topic: "Account Issues",
-      createdAt: serverTimestamp(),
-      unreadCount: 0,
-      typing: false,
-      typingUserId: null,
-      typingUserName: null,
-      isAnnouncement: false,
-      isBroadcast: false,
-      isBannedUser: true,
-      banReason: reason,
-      banMessage: message,
-    });
+    // Jika ada existing ticket (room yang sedang aktif), TANDAI ticket itu sebagai banned
+    // dan tambahkan pesan peringatan otomatis ke dalam body chat.
+    if (existingTicketId) {
+      const ticketRef = doc(db, "livechat_tickets", existingTicketId);
 
-    // Add initial system warning message
-    const initialMessage = `⚠️ PERINGATAN: Akun ini telah di-BANNED.\n\nAlasan: ${reason}\n\nPesan yang melanggar: "${message}"`;
-    const encryptedMessage = await encryptMessage(initialMessage);
-    await addDoc(collection(db, "livechat_tickets", ticketRef.id, "messages"), {
-      senderId: "system",
-      senderName: "System",
-      text: encryptedMessage,
-      timestamp: serverTimestamp(),
-      read: false,
-      isEncrypted: true,
-      isBotDetected: false,
-      deliveryStatus: "sent",
-      isSystemMessage: true,
-    });
+      // Tandai ticket sebagai banned user
+      await updateDoc(ticketRef, {
+        isBannedUser: true,
+        banReason: reason,
+        banMessage: message,
+        status: "active",
+      });
 
-    await updateDoc(ticketRef, {
-      lastMessage: initialMessage,
-      lastMessageTime: serverTimestamp(),
-      lastMessageSender: "System",
-    });
+      // Tambahkan pesan peringatan otomatis ke dalam body chat
+      const warningText = `⚠️ PERINGATAN SISTEM\n\nAkun ini telah di-BANNED secara permanen.\n\nAlasan: ${reason}\n\nPesan yang melanggar: "${message}"\n\nUser dapat mengajukan banding melalui halaman utama.`;
+      const encryptedWarning = await encryptMessage(warningText);
+      await addDoc(collection(db, "livechat_tickets", existingTicketId, "messages"), {
+        senderId: "system",
+        senderName: "System",
+        text: encryptedWarning,
+        timestamp: serverTimestamp(),
+        read: false,
+        isEncrypted: true,
+        isBotDetected: false,
+        deliveryStatus: "sent",
+        isSystemMessage: true,
+        isBanWarning: true,
+      });
 
-    // Store ticket ID on the ban record so we can find it later
-    await updateDoc(doc(db, "bot_blocks", userId), {
-      banTicketId: ticketRef.id,
-    });
-    await updateDoc(doc(db, "users", userId), {
-      banTicketId: ticketRef.id,
-    });
+      await updateDoc(ticketRef, {
+        lastMessage: warningText,
+        lastMessageTime: serverTimestamp(),
+        lastMessageSender: "System",
+      });
+
+      // Simpan ticketId ke ban record
+      await updateDoc(doc(db, "bot_blocks", userId), {
+        banTicketId: existingTicketId,
+      });
+      await updateDoc(doc(db, "users", userId), {
+        banTicketId: existingTicketId,
+      });
+    } else {
+      // Jika tidak ada ticket existing, buat ticket baru khusus banned user
+      const ticketRef = await addDoc(collection(db, "livechat_tickets"), {
+        userId,
+        userName,
+        userEmail,
+        userPhoto: "",
+        status: "waiting",
+        topic: "Account Issues",
+        createdAt: serverTimestamp(),
+        unreadCount: 0,
+        typing: false,
+        typingUserId: null,
+        typingUserName: null,
+        isAnnouncement: false,
+        isBroadcast: false,
+        isBannedUser: true,
+        banReason: reason,
+        banMessage: message,
+      });
+
+      const initialMessage = `⚠️ PERINGATAN SISTEM\n\nAkun ini telah di-BANNED secara permanen.\n\nAlasan: ${reason}\n\nPesan yang melanggar: "${message}"\n\nUser dapat mengajukan banding melalui halaman utama.`;
+      const encryptedMessage = await encryptMessage(initialMessage);
+      await addDoc(collection(db, "livechat_tickets", ticketRef.id, "messages"), {
+        senderId: "system",
+        senderName: "System",
+        text: encryptedMessage,
+        timestamp: serverTimestamp(),
+        read: false,
+        isEncrypted: true,
+        isBotDetected: false,
+        deliveryStatus: "sent",
+        isSystemMessage: true,
+        isBanWarning: true,
+      });
+
+      await updateDoc(ticketRef, {
+        lastMessage: initialMessage,
+        lastMessageTime: serverTimestamp(),
+        lastMessageSender: "System",
+      });
+
+      await updateDoc(doc(db, "bot_blocks", userId), {
+        banTicketId: ticketRef.id,
+      });
+      await updateDoc(doc(db, "users", userId), {
+        banTicketId: ticketRef.id,
+      });
+    }
   } catch (error) {
     console.error("Error banning user:", error);
   }
@@ -378,7 +422,6 @@ const WHITE = "#FFFFFF";
 const BLACK = "#000000";
 
 // ===== STATUS STYLES =====
-// Active: bg BLACK full, text WHITE, border BLACK (no visible white line)
 const STATUS_STYLES: {
   [key: string]: {
     label: string;
@@ -529,6 +572,13 @@ const WarningIcon = ({ size = 14, color = "currentColor" }: { size?: number; col
   </svg>
 );
 
+// ===== SHIELD ICON =====
+const ShieldIcon = ({ size = 20, color = "currentColor" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <path d="M12 22C12 22 20 18 20 12V5L12 2L4 5V12C4 18 12 22 12 22Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
 // ===== STABILO BADGE =====
 const StabiloBadge = ({
   label,
@@ -617,6 +667,7 @@ interface ChatMessage {
   isBotDetected?: boolean;
   deliveryStatus?: "sending" | "sent" | "delivered" | "read" | "failed";
   isSystemMessage?: boolean;
+  isBanWarning?: boolean;
 }
 interface OnlineUser {
   uid: string;
@@ -2141,7 +2192,6 @@ const BannedUserChat = ({
       .catch(() => setEncryptionReady(true));
   }, []);
 
-  // Resolve ticket ID: use stored banTicketId, or fallback to querying tickets
   useEffect(() => {
     if (!db || !user) return;
     if (banInfo.banTicketId) {
@@ -2163,7 +2213,6 @@ const BannedUserChat = ({
     return () => unsub();
   }, [db, user, banInfo.banTicketId]);
 
-  // Subscribe to messages
   useEffect(() => {
     if (!db || !ticketId) return;
     const q = query(
@@ -2194,7 +2243,6 @@ const BannedUserChat = ({
     return () => unsub();
   }, [db, ticketId]);
 
-  // Mark messages as read (for admin response)
   useEffect(() => {
     if (!db || !ticketId || !user) return;
     const unread = messages.filter((m) => m.senderId !== user.uid && !m.read && !m.isSystemMessage);
@@ -2340,7 +2388,6 @@ const BannedUserChat = ({
         maxWidth: "900px",
       }}
     >
-      {/* Header */}
       <div
         style={{
           padding: "16px 22px",
@@ -2394,7 +2441,6 @@ const BannedUserChat = ({
         </span>
       </div>
 
-      {/* Info bar — TANPA BACKGROUND COLOR */}
       <div
         style={{
           padding: "10px 22px",
@@ -2407,7 +2453,6 @@ const BannedUserChat = ({
         Kirim pesan Anda di sini untuk mengajukan banding.
       </div>
 
-      {/* Messages */}
       <div
         ref={chatContainerRef}
         className="chat-messages-container"
@@ -2494,7 +2539,6 @@ const BannedUserChat = ({
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
       <div
         style={{
           padding: "14px 22px",
@@ -3130,12 +3174,21 @@ const LiveChatAgent = ({
     }
     const checkResult = containsBannedContent(messageText);
     if (checkResult.isBanned) {
-      await banUserPermanent(user.uid, user.email || "", user.displayName || "User", checkResult.reason, messageText);
+      // Kirim ban dengan existing ticket ID supaya warning masuk ke room yang sama
+      await banUserPermanent(
+        user.uid,
+        user.email || "",
+        user.displayName || "User",
+        checkResult.reason,
+        messageText,
+        selectedTicket.id
+      );
       setIsBanned(true);
       setBanReason(checkResult.reason);
       setCanCreateTicket(false);
       setCanSendMessage(false);
       setBanOriginalMessage(messageText);
+      setBanTicketId(selectedTicket.id);
       setBanMessage(`YOUR ACCOUNT HAS BEEN PERMANENTLY BANNED\n\nReason: ${checkResult.reason}\n\nMessage sent: "${messageText}"`);
       setMessageText("");
       return;
@@ -3737,7 +3790,6 @@ const LiveChatAgent = ({
           </div>
         )}
 
-        {/* Direct chat with admin (no modal) */}
         <BannedUserChat
           user={user}
           db={db}
@@ -3982,7 +4034,6 @@ const LiveChatAgent = ({
     const statusStyle = STATUS_STYLES[ticket.status] || STATUS_STYLES.active;
     const topicStyle = TOPIC_STYLES[ticket.topic] || TOPIC_STYLES["Other"];
 
-    // Cek apakah user ini banned
     const isBannedUser = ticket.isBannedUser === true;
 
     return (
@@ -4014,7 +4065,6 @@ const LiveChatAgent = ({
               size="sm"
               showBorder={ticket.status !== "active" && ticket.status !== "closed"}
             />
-            {/* BANNED badge — bg biru, teks putih, no border */}
             {isBannedUser && (
               <StabiloBadge
                 label="BANNED"
@@ -4041,7 +4091,6 @@ const LiveChatAgent = ({
           </span>
         </div>
 
-        {/* Peringatan otomatis kalau user banned */}
         {isBannedUser && (
           <div
             style={{
@@ -4524,6 +4573,72 @@ const LiveChatAgent = ({
                     minHeight: 0,
                   }}
                 >
+                  {/* ===== AUTO WARNING MESSAGE UNTUK BANNED USER DI BODY CHAT ===== */}
+                  {selectedTicket.isBannedUser && (
+                    <div
+                      style={{
+                        alignSelf: "center",
+                        maxWidth: "90%",
+                        width: "100%",
+                      }}
+                    >
+                      <div
+                        style={{
+                          padding: "14px 18px",
+                          borderRadius: "12px",
+                          backgroundColor: "rgba(13,60,252,0.08)",
+                          border: `1.5px dashed ${BLUE}`,
+                          display: "flex",
+                          alignItems: "flex-start",
+                          gap: "12px",
+                          fontFamily: FONT_FAMILY,
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: "32px",
+                            height: "32px",
+                            borderRadius: "50%",
+                            backgroundColor: BLUE,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            flexShrink: 0,
+                          }}
+                        >
+                          <WarningIcon size={18} color={WHITE} />
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div
+                            style={{
+                              fontSize: "11px",
+                              fontWeight: 800,
+                              color: BLUE,
+                              letterSpacing: "0.6px",
+                              textTransform: "uppercase",
+                              marginBottom: "6px",
+                            }}
+                          >
+                            System Warning — Akun Terkena Banned
+                          </div>
+                          <div
+                            style={{
+                              fontSize: "13px",
+                              color: BLACK,
+                              lineHeight: 1.6,
+                              fontWeight: 500,
+                              whiteSpace: "pre-wrap",
+                            }}
+                          >
+                            {`User "${selectedTicket.userName}" telah di-BANNED secara permanen oleh sistem keamanan.\n\nAlasan: ${selectedTicket.banReason || "SUSPICIOUS ACTIVITY"}`}
+                            {selectedTicket.banMessage ? `\n\nPesan yang melanggar: "${selectedTicket.banMessage}"` : ""}
+                            {`\n\nUser dapat mengajukan banding melalui chat ini.`}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   {messages.length === 0 ? (
                     <div
                       style={{
