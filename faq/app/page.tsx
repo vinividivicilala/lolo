@@ -5691,26 +5691,26 @@ export default function HomePage(): React.JSX.Element {
                 borderRadius: "24px",
                 border: `2px solid ${BLUE}`,
                 overflow: "hidden",
-                position: "relative",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
               }}
             >
-              {/* Foto sfggz.JPG — nyatu dengan bg biru, cover full */}
+              {/* Foto sfggz.JPG — diperbesar, tidak di-crop, nyatu dengan bg biru */}
               <img
                 src="/images/sfggz.JPG"
                 alt="Note"
                 style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                  objectPosition: "center",
+                  maxWidth: "95%",
+                  maxHeight: "95%",
+                  width: "auto",
+                  height: "auto",
+                  objectFit: "contain",
+                  display: "block",
                   opacity: noteHovered ? 0.25 : 1,
                   transition: "opacity 0.4s ease",
                   pointerEvents: "none",
                   userSelect: "none",
-                  display: "block",
                 }}
               />
 
