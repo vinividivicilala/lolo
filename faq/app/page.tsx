@@ -3949,8 +3949,7 @@ const LiveChatAgent = ({
     );
   }
 
-  // ===== BANNED USER VIEW (USER & AGENT SAMA) =====
-  // Section terpisah di bawah Live Chat Agent, bukan di dalam layout live chat.
+  // ===== BANNED USER VIEW =====
   if (!isAdmin && isBanned) {
     return (
       <div style={{ marginTop: "80px", paddingTop: "30px" }}>
@@ -3979,7 +3978,6 @@ const LiveChatAgent = ({
           </button>
         </div>
 
-        {/* Banned Info Banner in Body */}
         <BannedInfoBanner
           banReason={banReason}
           banMessage={banMessage || ""}
@@ -3987,7 +3985,6 @@ const LiveChatAgent = ({
           hasAppeal={hasAppeal}
         />
 
-        {/* Appeal Chat Room - SECTION TERPISAH DI BAWAH LIVE CHAT AGENT */}
         {appealTickets.length > 0 && (
           <div style={{ marginTop: "20px" }}>
             <div style={{ fontSize: "16px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, marginBottom: "12px" }}>
@@ -4079,7 +4076,6 @@ const LiveChatAgent = ({
             </button>
           </div>
 
-          {/* Chat with Admin section */}
           {onlineAdmins.length > 0 && (
             <div style={{ marginBottom: "24px" }}>
               <div
@@ -4221,7 +4217,6 @@ const LiveChatAgent = ({
           </div>
         </div>
 
-        {/* Admin Chat Modal */}
         {showAdminChat && selectedAdmin && (
           <div
             style={{
@@ -4487,7 +4482,6 @@ const LiveChatAgent = ({
   const resolvedTickets = filterTicketsBySearch(resolvedTicketsRaw);
   const typingText = selectedTicket ? getTypingText(selectedTicket) : null;
 
-  // Admin: filter banned users in waiting
   const bannedUsersInWaiting = waitingTickets.filter((t) => t.isBanned);
 
   const renderChatListItem = (ticket: Ticket, options?: { onExtraClick?: () => void }) => {
@@ -4809,7 +4803,6 @@ const LiveChatAgent = ({
                 </>
               )}
 
-              {/* Appeal Tickets for Admin */}
               {isAdmin && appealTickets.length > 0 && (
                 <div style={{ marginTop: "20px" }}>
                   <div
@@ -5025,7 +5018,6 @@ const LiveChatAgent = ({
                   </div>
                 )}
 
-                {/* Banned Info Banner in Body Chat - untuk user/agent yang di-ban saat di dalam room */}
                 {!isAdmin && isBanned && (
                   <BannedInfoBanner
                     banReason={banReason}
@@ -5320,6 +5312,7 @@ export default function HomePage(): React.JSX.Element {
   const [loading, setLoading] = useState(true);
   const [isMounted, setIsMounted] = useState(false);
   const [navbarShifted, setNavbarShifted] = useState(false);
+  const [noteHovered, setNoteHovered] = useState(false);
 
   // Section terpisah untuk appeal chat (di luar LiveChatAgent)
   const [adminAppealTicket, setAdminAppealTicket] = useState<AppealTicket | null>(null);
@@ -5558,7 +5551,7 @@ export default function HomePage(): React.JSX.Element {
               flexWrap: "wrap",
               position: "relative",
               zIndex: 2,
-              marginBottom: "40px",
+              marginBottom: "10px",
             }}
           >
             <div style={{ display: "flex", alignItems: "baseline", gap: "140px" }}>
@@ -5613,7 +5606,7 @@ export default function HomePage(): React.JSX.Element {
             </span>
           </div>
 
-          {/* ===== TEKS BARU DI BAWAH TRUST ===== */}
+          {/* ===== TEKS DI BAWAH LABEL TRUST ===== */}
           <div
             style={{
               display: "flex",
@@ -5625,13 +5618,14 @@ export default function HomePage(): React.JSX.Element {
               zIndex: 2,
             }}
           >
+            {/* Teks tepat di bawah label TRUST (rata kiri sejajar label) */}
             <div
               style={{
                 marginLeft: "auto",
                 marginRight: "360px",
                 maxWidth: "420px",
-                textAlign: "right",
-                marginTop: "-20px",
+                textAlign: "left",
+                marginTop: "8px",
               }}
             >
               <p
@@ -5646,10 +5640,11 @@ export default function HomePage(): React.JSX.Element {
                   textTransform: "none",
                 }}
               >
-                Notes for the next era of techology system
+                Notes for the next era of technology system
               </p>
             </div>
 
+            {/* Kotak biru dengan ikon panah di kanan */}
             <div
               style={{
                 position: "absolute",
@@ -5677,7 +5672,7 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </div>
 
-          {/* ===== BG KOTAK BIRU ===== */}
+          {/* ===== BG KOTAK BIRU NOTE ===== */}
           <div
             style={{
               position: "relative",
@@ -5686,6 +5681,8 @@ export default function HomePage(): React.JSX.Element {
               marginBottom: "60px",
               zIndex: 1,
             }}
+            onMouseEnter={() => setNoteHovered(true)}
+            onMouseLeave={() => setNoteHovered(false)}
           >
             <div
               style={{
@@ -5697,8 +5694,71 @@ export default function HomePage(): React.JSX.Element {
                 backgroundColor: BLUE,
                 borderRadius: "24px",
                 border: `2px solid ${BLUE}`,
+                overflow: "hidden",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
               }}
-            />
+            >
+              {/* Foto sfggz.JPG besar di tengah */}
+              <img
+                src="/images/sfggz.JPG"
+                alt="Note"
+                style={{
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
+                  width: "70%",
+                  height: "auto",
+                  maxHeight: "90%",
+                  objectFit: "contain",
+                  opacity: noteHovered ? 0.35 : 1,
+                  transition: "opacity 0.4s ease",
+                  pointerEvents: "none",
+                  userSelect: "none",
+                }}
+              />
+
+              {/* Teks Comingsoon bergerak ke kiri saat hover */}
+              <div
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  overflow: "hidden",
+                  pointerEvents: "none",
+                  opacity: noteHovered ? 1 : 0,
+                  transition: "opacity 0.4s ease",
+                }}
+              >
+                <div
+                  style={{
+                    display: "inline-flex",
+                    whiteSpace: "nowrap",
+                    animation: noteHovered
+                      ? "comingsoon-marquee 8s linear infinite"
+                      : "none",
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "140px",
+                    fontWeight: 800,
+                    color: WHITE,
+                    letterSpacing: "-0.04em",
+                    textTransform: "uppercase",
+                    lineHeight: 1,
+                  }}
+                >
+                  <span style={{ paddingRight: "80px" }}>Comingsoon</span>
+                  <span style={{ paddingRight: "80px" }}>Comingsoon</span>
+                  <span style={{ paddingRight: "80px" }}>Comingsoon</span>
+                  <span style={{ paddingRight: "80px" }}>Comingsoon</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -5727,7 +5787,6 @@ export default function HomePage(): React.JSX.Element {
             />
 
             {/* ===== SECTION TERPISAH: CHAT AJUKAN BANDING (ADMIN) ===== */}
-            {/* Muncul di bawah Live Chat Agent, bukan di dalam layout live chat */}
             {isAdmin && showAdminAppealSection && adminAppealTicket && (
               <div style={{ marginTop: "30px", height: "600px" }}>
                 <div
@@ -5757,7 +5816,6 @@ export default function HomePage(): React.JSX.Element {
             )}
 
             {/* ===== SECTION TERPISAH: CHAT AJUKAN BANDING (BANNED USER/AGENT) ===== */}
-            {/* Muncul di bawah Live Chat Agent, bukan di dalam layout live chat */}
             {!isAdmin && showBannedAppealSection && bannedAppealTicket && (
               <div style={{ marginTop: "30px", height: "600px" }}>
                 <div
@@ -6023,6 +6081,14 @@ export default function HomePage(): React.JSX.Element {
         .online-panel-container > div {
           scrollbar-width: none !important;
           -ms-overflow-style: none !important;
+        }
+        @keyframes comingsoon-marquee {
+          0% {
+            transform: translateX(0);
+          }
+          100% {
+            transform: translateX(-50%);
+          }
         }
       `}</style>
     </>
