@@ -2677,11 +2677,15 @@ const LiveChatAgent = ({
   isAdmin,
   db,
   auth,
+  onOpenAppealChat,
+  onOpenBannedAppealChat,
 }: {
   user: any;
   isAdmin: boolean;
   db: any;
   auth: any;
+  onOpenAppealChat: (ticket: AppealTicket) => void;
+  onOpenBannedAppealChat: (ticket: AppealTicket) => void;
 }) => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
@@ -2702,7 +2706,6 @@ const LiveChatAgent = ({
   // Appeal states
   const [appealTickets, setAppealTickets] = useState<AppealTicket[]>([]);
   const [selectedAppealTicket, setSelectedAppealTicket] = useState<AppealTicket | null>(null);
-  const [showAppealChat, setShowAppealChat] = useState(false);
   const [hasAppeal, setHasAppeal] = useState(false);
 
   // Admin chat states
@@ -3470,7 +3473,7 @@ const LiveChatAgent = ({
       const existingAppeal = appealTickets.find((t) => t.userId === user.uid && t.status !== "closed" && t.status !== "resolved");
       if (existingAppeal) {
         setSelectedAppealTicket(existingAppeal);
-        setShowAppealChat(true);
+        onOpenBannedAppealChat(existingAppeal);
         return;
       }
       const ticketRef = await addDoc(collection(db, "appeal_tickets"), {
@@ -3519,7 +3522,7 @@ const LiveChatAgent = ({
         typing: false,
       };
       setSelectedAppealTicket(newTicket);
-      setShowAppealChat(true);
+      onOpenBannedAppealChat(newTicket);
       setHasAppeal(true);
     } catch (error) {
       console.error("Error creating appeal ticket:", error);
@@ -3953,8 +3956,7 @@ const LiveChatAgent = ({
   }
 
   // ===== BANNED USER VIEW (USER & AGENT SAMA) =====
-  // Jika user atau agent terkena banned, tampilkan banner banned + appeal chat
-  // di posisi yang sama seperti user biasa (di bawah Live Chat Agent title).
+  // Section terpisah di bawah Live Chat Agent, bukan di dalam layout live chat.
   if (!isAdmin && isBanned) {
     return (
       <div style={{ marginTop: "80px", paddingTop: "30px" }}>
@@ -3991,7 +3993,7 @@ const LiveChatAgent = ({
           hasAppeal={hasAppeal}
         />
 
-        {/* Appeal Chat Room - SAME DESIGN FOR USER & AGENT */}
+        {/* Appeal Chat Room - SECTION TERPISAH DI BAWAH LIVE CHAT AGENT */}
         {showAppealChat && selectedAppealTicket && (
           <div style={{ marginTop: "20px", height: "500px" }}>
             <AppealChatRoom
@@ -4853,7 +4855,7 @@ const LiveChatAgent = ({
                       key={t.id}
                       onClick={() => {
                         setSelectedAppealTicket(t);
-                        setShowAppealChat(true);
+                        onOpenAppealChat(t);
                       }}
                       style={{
                         padding: "14px 16px",
@@ -4930,19 +4932,7 @@ const LiveChatAgent = ({
               minWidth: 0,
             }}
           >
-            {/* If Appeal Chat is selected for admin, show appeal chat */}
-            {isAdmin && showAppealChat && selectedAppealTicket ? (
-              <AppealChatRoom
-                user={user}
-                isAdmin={isAdmin}
-                db={db}
-                appealTicket={selectedAppealTicket}
-                onClose={() => {
-                  setShowAppealChat(false);
-                  setSelectedAppealTicket(null);
-                }}
-              />
-            ) : selectedTicket ? (
+            {selectedTicket ? (
               <>
                 <div
                   style={{
@@ -5352,6 +5342,12 @@ export default function HomePage(): React.JSX.Element {
   const [isMounted, setIsMounted] = useState(false);
   const [navbarShifted, setNavbarShifted] = useState(false);
 
+  // Section terpisah untuk appeal chat (di luar LiveChatAgent)
+  const [adminAppealTicket, setAdminAppealTicket] = useState<AppealTicket | null>(null);
+  const [showAdminAppealSection, setShowAdminAppealSection] = useState(false);
+  const [bannedAppealTicket, setBannedAppealTicket] = useState<AppealTicket | null>(null);
+  const [showBannedAppealSection, setShowBannedAppealSection] = useState(false);
+
   const preloaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
 
@@ -5634,7 +5630,8 @@ export default function HomePage(): React.JSX.Element {
                 whiteSpace: "nowrap",
               }}
             >
-              Trust            </span>
+              Trust
+            </span>
           </div>
 
           {/* ===== TEKS BARU DI BAWAH TRUST ===== */}
@@ -5735,7 +5732,80 @@ export default function HomePage(): React.JSX.Element {
           }}
         >
           <div style={{ padding: "0 40px", maxWidth: "1600px", margin: "0 auto", width: "100%" }}>
-            <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} />
+            <LiveChatAgent
+              user={user}
+              isAdmin={isAdmin}
+              db={db}
+              auth={auth}
+              onOpenAppealChat={(ticket) => {
+                setAdminAppealTicket(ticket);
+                setShowAdminAppealSection(true);
+              }}
+              onOpenBannedAppealChat={(ticket) => {
+                setBannedAppealTicket(ticket);
+                setShowBannedAppealSection(true);
+              }}
+            />
+
+            {/* ===== SECTION TERPISAH: CHAT AJUKAN BANDING (ADMIN) ===== */}
+            {/* Muncul di bawah Live Chat Agent, bukan di dalam layout live chat */}
+            {isAdmin && showAdminAppealSection && adminAppealTicket && (
+              <div style={{ marginTop: "30px", height: "600px" }}>
+                <div
+                  style={{
+                    fontSize: "13px",
+                    fontWeight: 800,
+                    color: BLUE,
+                    fontFamily: FONT_FAMILY,
+                    letterSpacing: "0.5px",
+                    textTransform: "uppercase",
+                    marginBottom: "12px",
+                  }}
+                >
+                  Chat Ajukan Banding
+                </div>
+                <AppealChatRoom
+                  user={user}
+                  isAdmin={true}
+                  db={db}
+                  appealTicket={adminAppealTicket}
+                  onClose={() => {
+                    setShowAdminAppealSection(false);
+                    setAdminAppealTicket(null);
+                  }}
+                />
+              </div>
+            )}
+
+            {/* ===== SECTION TERPISAH: CHAT AJUKAN BANDING (BANNED USER/AGENT) ===== */}
+            {/* Muncul di bawah Live Chat Agent, bukan di dalam layout live chat */}
+            {!isAdmin && showBannedAppealSection && bannedAppealTicket && (
+              <div style={{ marginTop: "30px", height: "600px" }}>
+                <div
+                  style={{
+                    fontSize: "13px",
+                    fontWeight: 800,
+                    color: BLUE,
+                    fontFamily: FONT_FAMILY,
+                    letterSpacing: "0.5px",
+                    textTransform: "uppercase",
+                    marginBottom: "12px",
+                  }}
+                >
+                  Chat Ajukan Banding
+                </div>
+                <AppealChatRoom
+                  user={user}
+                  isAdmin={false}
+                  db={db}
+                  appealTicket={bannedAppealTicket}
+                  onClose={() => {
+                    setShowBannedAppealSection(false);
+                    setBannedAppealTicket(null);
+                  }}
+                />
+              </div>
+            )}
           </div>
 
           <div
