@@ -307,7 +307,7 @@ const BLUE = "#0D3CFC";
 const WHITE = "#FFFFFF";
 const BLACK = "#000000";
 
-// ===== STATUS STYLES =====
+// ===== STATUS STYLES (SEMUA PUTIH + TEKS BIRU) =====
 const STATUS_STYLES: {
   [key: string]: {
     label: string;
@@ -317,21 +317,21 @@ const STATUS_STYLES: {
   };
 } = {
   waiting: { label: "Waiting", bg: WHITE, text: BLUE, border: BLUE },
-  active: { label: "Active", bg: BLACK, text: WHITE, border: WHITE },
+  active: { label: "Active", bg: WHITE, text: BLUE, border: BLUE },
   resolved: { label: "Resolved", bg: WHITE, text: BLUE, border: BLUE },
-  closed: { label: "Closed", bg: BLACK, text: WHITE, border: WHITE },
+  closed: { label: "Closed", bg: WHITE, text: BLUE, border: BLUE },
 };
 
-// ===== TOPIC STYLES =====
+// ===== TOPIC STYLES (SEMUA PUTIH + TEKS BIRU) =====
 const TOPIC_STYLES: {
   [key: string]: { bg: string; text: string; border: string };
 } = {
   "Product Inquiry": { bg: WHITE, text: BLUE, border: BLUE },
-  "Technical Support": { bg: BLACK, text: WHITE, border: WHITE },
+  "Technical Support": { bg: WHITE, text: BLUE, border: BLUE },
   "Account Issues": { bg: WHITE, text: BLUE, border: BLUE },
-  "Donation": { bg: BLACK, text: WHITE, border: WHITE },
+  "Donation": { bg: WHITE, text: BLUE, border: BLUE },
   "Partnership": { bg: WHITE, text: BLUE, border: BLUE },
-  "Other": { bg: BLACK, text: WHITE, border: WHITE },
+  "Other": { bg: WHITE, text: BLUE, border: BLUE },
 };
 
 // ===== SVG ICONS =====
@@ -2058,8 +2058,8 @@ const CloseRoomButton = ({
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: BLACK,
-        border: `1.5px solid ${BLACK}`,
+        backgroundColor: WHITE,
+        border: `1.5px solid ${WHITE}`,
         borderRadius: "8px",
         cursor: disabled ? "not-allowed" : "pointer",
         padding: 0,
@@ -2068,7 +2068,7 @@ const CloseRoomButton = ({
       }}
     >
       <div ref={iconRef} style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <CloseIcon size={16} color={WHITE} />
+        <CloseIcon size={16} color={BLUE} />
       </div>
     </button>
   );
@@ -2181,9 +2181,9 @@ const BannedInfoBanner = ({
           style={{
             alignSelf: "flex-start",
             padding: "8px 16px",
-            backgroundColor: "rgba(255,255,255,0.2)",
-            color: WHITE,
-            border: `1.5px solid rgba(255,255,255,0.5)`,
+            backgroundColor: WHITE,
+            color: BLUE,
+            border: `1.5px solid ${WHITE}`,
             borderRadius: "8px",
             fontSize: "12px",
             fontWeight: 700,
@@ -2705,7 +2705,6 @@ const LiveChatAgent = ({
 
   // Appeal states
   const [appealTickets, setAppealTickets] = useState<AppealTicket[]>([]);
-  const [selectedAppealTicket, setSelectedAppealTicket] = useState<AppealTicket | null>(null);
   const [hasAppeal, setHasAppeal] = useState(false);
 
   // Admin chat states
@@ -2926,10 +2925,6 @@ const LiveChatAgent = ({
         list.push({ id: docSnap.id, ...docSnap.data() } as AppealTicket);
       });
       setAppealTickets(list);
-      setSelectedAppealTicket((prev) => {
-        if (!prev) return prev;
-        return list.find((t) => t.id === prev.id) || prev;
-      });
     });
     return () => unsub();
   }, [db, user, isAdmin, isMounted]);
@@ -3472,7 +3467,6 @@ const LiveChatAgent = ({
     try {
       const existingAppeal = appealTickets.find((t) => t.userId === user.uid && t.status !== "closed" && t.status !== "resolved");
       if (existingAppeal) {
-        setSelectedAppealTicket(existingAppeal);
         onOpenBannedAppealChat(existingAppeal);
         return;
       }
@@ -3521,7 +3515,6 @@ const LiveChatAgent = ({
         unreadCount: 0,
         typing: false,
       };
-      setSelectedAppealTicket(newTicket);
       onOpenBannedAppealChat(newTicket);
       setHasAppeal(true);
     } catch (error) {
@@ -3603,9 +3596,10 @@ const LiveChatAgent = ({
           <span
             style={{
               fontSize: "11px",
-              color: WHITE,
+              color: BLUE,
               padding: "2px 8px",
               borderRadius: "4px",
+              backgroundColor: WHITE,
               border: `1.5px solid ${WHITE}`,
               fontWeight: 700,
               letterSpacing: "0.5px",
@@ -3994,19 +3988,7 @@ const LiveChatAgent = ({
         />
 
         {/* Appeal Chat Room - SECTION TERPISAH DI BAWAH LIVE CHAT AGENT */}
-        {showAppealChat && selectedAppealTicket && (
-          <div style={{ marginTop: "20px", height: "500px" }}>
-            <AppealChatRoom
-              user={user}
-              isAdmin={false}
-              db={db}
-              appealTicket={selectedAppealTicket}
-              onClose={() => setShowAppealChat(false)}
-            />
-          </div>
-        )}
-
-        {!showAppealChat && appealTickets.length > 0 && (
+        {appealTickets.length > 0 && (
           <div style={{ marginTop: "20px" }}>
             <div style={{ fontSize: "16px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, marginBottom: "12px" }}>
               Tiket Banding Anda
@@ -4014,10 +3996,7 @@ const LiveChatAgent = ({
             {appealTickets.map((t) => (
               <div
                 key={t.id}
-                onClick={() => {
-                  setSelectedAppealTicket(t);
-                  setShowAppealChat(true);
-                }}
+                onClick={() => onOpenBannedAppealChat(t)}
                 style={{
                   padding: "14px 16px",
                   backgroundColor: BLUE,
@@ -4047,7 +4026,7 @@ const LiveChatAgent = ({
           </div>
         )}
 
-        {!showAppealChat && appealTickets.length === 0 && (
+        {appealTickets.length === 0 && (
           <div style={{ marginTop: "20px", padding: "30px", textAlign: "center", color: "#999", fontFamily: FONT_FAMILY }}>
             Klik tombol "Ajukan Banding" di atas untuk memulai proses banding.
           </div>
@@ -4602,8 +4581,9 @@ const LiveChatAgent = ({
               style={{
                 fontSize: "13px",
                 fontWeight: 800,
-                color: onlineAgents.length > 0 ? WHITE : "#999",
-                backgroundColor: onlineAgents.length > 0 ? BLUE : "transparent",
+                color: onlineAgents.length > 0 ? BLUE : "#999",
+                backgroundColor: onlineAgents.length > 0 ? WHITE : "transparent",
+                border: onlineAgents.length > 0 ? `1.5px solid ${BLUE}` : "none",
                 fontFamily: FONT_FAMILY,
                 letterSpacing: "0.5px",
                 textTransform: "uppercase",
@@ -4702,11 +4682,11 @@ const LiveChatAgent = ({
               <span
                 style={{
                   fontSize: "11px",
-                  color: WHITE,
+                  color: BLUE,
                   padding: "2px 8px",
                   borderRadius: "4px",
+                  backgroundColor: WHITE,
                   border: `1.5px solid ${WHITE}`,
-                  backgroundColor: "rgba(255,255,255,0.12)",
                   fontWeight: 800,
                   letterSpacing: "0.5px",
                 }}
@@ -4854,15 +4834,14 @@ const LiveChatAgent = ({
                     <div
                       key={t.id}
                       onClick={() => {
-                        setSelectedAppealTicket(t);
                         onOpenAppealChat(t);
                       }}
                       style={{
                         padding: "14px 16px",
                         borderBottom: "1px solid rgba(255,255,255,0.08)",
                         cursor: "pointer",
-                        backgroundColor: selectedAppealTicket?.id === t.id ? "rgba(255,255,255,0.14)" : "transparent",
-                        borderLeft: selectedAppealTicket?.id === t.id ? `3px solid ${WHITE}` : "3px solid transparent",
+                        backgroundColor: "transparent",
+                        borderLeft: "3px solid transparent",
                       }}
                     >
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
@@ -4871,9 +4850,9 @@ const LiveChatAgent = ({
                         </span>
                         <StabiloBadge
                           label={t.status === "waiting" ? "Waiting" : t.status === "active" ? "Active" : "Closed"}
-                          bg={t.status === "waiting" ? STATUS_STYLES.waiting.bg : t.status === "active" ? STATUS_STYLES.active.bg : STATUS_STYLES.resolved.bg}
-                          text={t.status === "waiting" ? STATUS_STYLES.waiting.text : t.status === "active" ? STATUS_STYLES.active.text : STATUS_STYLES.resolved.text}
-                          border={t.status === "waiting" ? STATUS_STYLES.waiting.border : t.status === "active" ? STATUS_STYLES.active.border : STATUS_STYLES.resolved.border}
+                          bg={WHITE}
+                          text={BLUE}
+                          border={WHITE}
                           size="sm"
                         />
                       </div>
@@ -5916,9 +5895,9 @@ export default function HomePage(): React.JSX.Element {
                           {isStories && (
                             <span
                               style={{
-                                backgroundColor: BLACK,
-                                border: `1.5px solid ${BLACK}`,
-                                color: WHITE,
+                                backgroundColor: WHITE,
+                                border: `1.5px solid ${BLUE}`,
+                                color: BLUE,
                                 padding: "2px 8px",
                                 borderRadius: "4px",
                                 fontSize: "10px",
