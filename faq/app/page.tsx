@@ -5542,106 +5542,102 @@ export default function HomePage(): React.JSX.Element {
             Features
           </h2>
 
-          {/* ===== BARIS 01 NOTES TRUST ===== */}
+          {/* ===== BARIS 01 NOTES TRUST + TEKS DI BAWAH TRUST ===== */}
           <div
             style={{
-              display: "flex",
-              alignItems: "center",
               width: "100%",
-              flexWrap: "wrap",
               position: "relative",
               zIndex: 2,
-              marginBottom: "10px",
+              marginBottom: "40px",
             }}
           >
-            <div style={{ display: "flex", alignItems: "baseline", gap: "140px" }}>
-              <span
-                style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: "90px",
-                  fontWeight: 700,
-                  color: BLUE,
-                  letterSpacing: "-0.04em",
-                  lineHeight: 1,
-                }}
-              >
-                01
-              </span>
-              <span
-                style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: "90px",
-                  fontWeight: 700,
-                  color: BLACK,
-                  letterSpacing: "-0.04em",
-                  lineHeight: 1,
-                }}
-              >
-                Notes
-              </span>
-            </div>
-
-            <span
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                padding: "6px 16px",
-                backgroundColor: BLUE,
-                color: WHITE,
-                borderRadius: "4px",
-                fontSize: "16px",
-                fontWeight: 800,
-                letterSpacing: "0.8px",
-                textTransform: "uppercase",
-                fontFamily: FONT_FAMILY,
-                lineHeight: 1.3,
-                marginLeft: "auto",
-                marginRight: "360px",
-                marginTop: "-45px",
-                whiteSpace: "nowrap",
-              }}
-            >
-              Trust
-            </span>
-          </div>
-
-          {/* ===== TEKS DI BAWAH LABEL TRUST ===== */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "flex-start",
-              justifyContent: "space-between",
-              width: "100%",
-              marginBottom: "20px",
-              position: "relative",
-              zIndex: 2,
-            }}
-          >
-            {/* Teks tepat di bawah label TRUST (rata kiri sejajar label) */}
+            {/* Baris utama: 01 Notes + label TRUST */}
             <div
               style={{
-                marginLeft: "auto",
-                marginRight: "360px",
-                maxWidth: "420px",
-                textAlign: "left",
-                marginTop: "8px",
+                display: "flex",
+                alignItems: "center",
+                width: "100%",
+                flexWrap: "wrap",
               }}
             >
-              <p
+              <div style={{ display: "flex", alignItems: "baseline", gap: "140px" }}>
+                <span
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "90px",
+                    fontWeight: 700,
+                    color: BLUE,
+                    letterSpacing: "-0.04em",
+                    lineHeight: 1,
+                  }}
+                >
+                  01
+                </span>
+                <span
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "90px",
+                    fontWeight: 700,
+                    color: BLACK,
+                    letterSpacing: "-0.04em",
+                    lineHeight: 1,
+                  }}
+                >
+                  Notes
+                </span>
+              </div>
+
+              {/* Wrapper label TRUST + teks di bawahnya */}
+              <div
                 style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: "18px",
-                  fontWeight: 600,
-                  color: BLUE,
-                  letterSpacing: "-0.01em",
-                  lineHeight: 1.4,
-                  margin: 0,
-                  textTransform: "none",
+                  marginLeft: "auto",
+                  marginRight: "360px",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-start",
+                  gap: "8px",
+                  marginTop: "-45px",
                 }}
               >
-                Notes for the next era of technology system
-              </p>
+                <span
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: "6px 16px",
+                    backgroundColor: BLUE,
+                    color: WHITE,
+                    borderRadius: "4px",
+                    fontSize: "16px",
+                    fontWeight: 800,
+                    letterSpacing: "0.8px",
+                    textTransform: "uppercase",
+                    fontFamily: FONT_FAMILY,
+                    lineHeight: 1.3,
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  Trust
+                </span>
+
+                {/* Teks tepat di bawah label TRUST, rata kiri sejajar */}
+                <p
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "18px",
+                    fontWeight: 600,
+                    color: BLUE,
+                    letterSpacing: "-0.01em",
+                    lineHeight: 1.4,
+                    margin: 0,
+                    textTransform: "none",
+                    maxWidth: "420px",
+                    textAlign: "left",
+                  }}
+                >
+                  Notes for the next era of technology system
+                </p>
+              </div>
             </div>
 
             {/* Kotak biru dengan ikon panah di kanan */}
@@ -5695,28 +5691,26 @@ export default function HomePage(): React.JSX.Element {
                 borderRadius: "24px",
                 border: `2px solid ${BLUE}`,
                 overflow: "hidden",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
+                position: "relative",
               }}
             >
-              {/* Foto sfggz.JPG besar di tengah */}
+              {/* Foto sfggz.JPG — nyatu dengan bg biru, cover full */}
               <img
                 src="/images/sfggz.JPG"
                 alt="Note"
                 style={{
                   position: "absolute",
-                  top: "50%",
-                  left: "50%",
-                  transform: "translate(-50%, -50%)",
-                  width: "70%",
-                  height: "auto",
-                  maxHeight: "90%",
-                  objectFit: "contain",
-                  opacity: noteHovered ? 0.35 : 1,
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  objectPosition: "center",
+                  opacity: noteHovered ? 0.25 : 1,
                   transition: "opacity 0.4s ease",
                   pointerEvents: "none",
                   userSelect: "none",
+                  display: "block",
                 }}
               />
 
