@@ -3952,7 +3952,9 @@ const LiveChatAgent = ({
     );
   }
 
-  // If user is banned, show banned info + appeal chat
+  // ===== BANNED USER VIEW (USER & AGENT SAMA) =====
+  // Jika user atau agent terkena banned, tampilkan banner banned + appeal chat
+  // di posisi yang sama seperti user biasa (di bawah Live Chat Agent title).
   if (!isAdmin && isBanned) {
     return (
       <div style={{ marginTop: "80px", paddingTop: "30px" }}>
@@ -3989,12 +3991,12 @@ const LiveChatAgent = ({
           hasAppeal={hasAppeal}
         />
 
-        {/* Appeal Chat Room */}
+        {/* Appeal Chat Room - SAME DESIGN FOR USER & AGENT */}
         {showAppealChat && selectedAppealTicket && (
           <div style={{ marginTop: "20px", height: "500px" }}>
             <AppealChatRoom
               user={user}
-              isAdmin={isAdmin}
+              isAdmin={false}
               db={db}
               appealTicket={selectedAppealTicket}
               onClose={() => setShowAppealChat(false)}
@@ -5054,7 +5056,7 @@ const LiveChatAgent = ({
                   </div>
                 )}
 
-                {/* Banned Info Banner in Body Chat */}
+                {/* Banned Info Banner in Body Chat - untuk user/agent yang di-ban saat di dalam room */}
                 {!isAdmin && isBanned && (
                   <BannedInfoBanner
                     banReason={banReason}
@@ -5632,8 +5634,7 @@ export default function HomePage(): React.JSX.Element {
                 whiteSpace: "nowrap",
               }}
             >
-              Trust
-            </span>
+              Trust            </span>
           </div>
 
           {/* ===== TEKS BARU DI BAWAH TRUST ===== */}
