@@ -25,7 +25,6 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 import { Physics2DPlugin } from "gsap/Physics2DPlugin";
 
-// Register GSAP plugins
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, SplitText, Physics2DPlugin);
 }
@@ -52,24 +51,20 @@ if (typeof window !== "undefined") {
   db = getFirestore(app);
 }
 
-// ===== ENCRYPTION AES-256-GCM =====
+// ===== ENCRYPTION =====
 const ENCRYPTION_KEY_BASE64 = "bWVudXJ1LXNlY3JldC1rZXktMjAyNi0zMmJ5dGVzISEh";
 const IV_LENGTH = 12;
 
 function base64ToUint8Array(base64: string): Uint8Array {
   const binaryString = atob(base64);
   const bytes = new Uint8Array(binaryString.length);
-  for (let i = 0; i < binaryString.length; i++) {
-    bytes[i] = binaryString.charCodeAt(i);
-  }
+  for (let i = 0; i < binaryString.length; i++) bytes[i] = binaryString.charCodeAt(i);
   return bytes;
 }
 
 function uint8ArrayToBase64(uint8Array: Uint8Array): string {
   let binary = "";
-  for (let i = 0; i < uint8Array.length; i++) {
-    binary += String.fromCharCode(uint8Array[i]);
-  }
+  for (let i = 0; i < uint8Array.length; i++) binary += String.fromCharCode(uint8Array[i]);
   return btoa(binary);
 }
 
@@ -79,13 +74,7 @@ async function getCryptoKey(): Promise<CryptoKey> {
   if (cryptoKey) return cryptoKey;
   const keyData = base64ToUint8Array(ENCRYPTION_KEY_BASE64);
   const keyBytes = keyData.slice(0, 32);
-  cryptoKey = await window.crypto.subtle.importKey(
-    "raw",
-    keyBytes,
-    { name: "AES-GCM" },
-    false,
-    ["encrypt", "decrypt"]
-  );
+  cryptoKey = await window.crypto.subtle.importKey("raw", keyBytes, { name: "AES-GCM" }, false, ["encrypt", "decrypt"]);
   return cryptoKey;
 }
 
@@ -98,11 +87,7 @@ async function encryptMessage(text: string): Promise<string> {
     const encoder = new TextEncoder();
     const data = encoder.encode(text);
     const iv = window.crypto.getRandomValues(new Uint8Array(IV_LENGTH));
-    const encrypted = await window.crypto.subtle.encrypt(
-      { name: "AES-GCM", iv: iv, tagLength: 128 },
-      key,
-      data
-    );
+    const encrypted = await window.crypto.subtle.encrypt({ name: "AES-GCM", iv: iv, tagLength: 128 }, key, data);
     const encryptedArray = new Uint8Array(encrypted);
     const combined = new Uint8Array(iv.length + encryptedArray.length);
     combined.set(iv, 0);
@@ -127,28 +112,20 @@ async function decryptMessage(encrypted: string): Promise<string> {
       const encoded = encrypted.substring("plain:".length);
       return decodeURIComponent(escape(atob(encoded)));
     }
-    if (!encrypted.startsWith("encrypted:")) {
-      return encrypted;
-    }
+    if (!encrypted.startsWith("encrypted:")) return encrypted;
     const base64Data = encrypted.substring("encrypted:".length);
     const combined = base64ToUint8Array(base64Data);
     const iv = combined.slice(0, IV_LENGTH);
     const encryptedData = combined.slice(IV_LENGTH);
     const key = await getCryptoKey();
-    const decrypted = await window.crypto.subtle.decrypt(
-      { name: "AES-GCM", iv: iv, tagLength: 128 },
-      key,
-      encryptedData
-    );
+    const decrypted = await window.crypto.subtle.decrypt({ name: "AES-GCM", iv: iv, tagLength: 128 }, key, encryptedData);
     const decoder = new TextDecoder();
     return decoder.decode(decrypted);
   } catch (error) {
     console.error("Decryption error:", error);
     if (encrypted.startsWith("encrypted:") || encrypted.startsWith("plain:")) {
       try {
-        const encoded = encrypted.includes(":")
-          ? encrypted.split(":")[1]
-          : encrypted;
+        const encoded = encrypted.includes(":") ? encrypted.split(":")[1] : encrypted;
         return decodeURIComponent(escape(atob(encoded)));
       } catch {
         return "[Message cannot be decrypted]";
@@ -226,13 +203,7 @@ function containsBannedContent(text: string): { isBanned: boolean; reason: strin
 }
 
 // ===== BAN USER PERMANENT =====
-async function banUserPermanent(
-  userId: string,
-  userEmail: string,
-  userName: string,
-  reason: string,
-  message: string
-) {
+async function banUserPermanent(userId: string, userEmail: string, userName: string, reason: string, message: string) {
   if (!db) return;
   try {
     const now = new Date().toISOString();
@@ -275,16 +246,8 @@ async function banUserPermanent(
 }
 
 // ===== CHECK BAN STATUS =====
-async function checkBanStatus(userId: string): Promise<{
-  isBanned: boolean;
-  reason: string;
-  message: string;
-  canCreateTicket: boolean;
-  canSendMessage: boolean;
-}> {
-  if (!db) {
-    return { isBanned: false, reason: "", message: "", canCreateTicket: true, canSendMessage: true };
-  }
+async function checkBanStatus(userId: string): Promise<any> {
+  if (!db) return { isBanned: false, reason: "", message: "", canCreateTicket: true, canSendMessage: true };
   try {
     const botDoc = await getDoc(doc(db, "bot_blocks", userId));
     if (botDoc.exists()) {
@@ -312,7 +275,7 @@ async function checkBanStatus(userId: string): Promise<{
     }
     return { isBanned: false, reason: "", message: "", canCreateTicket: true, canSendMessage: true };
   } catch (error) {
-    console.error("Error checking ban status:", error);
+    console.error("Error checking ban:", error);
     return { isBanned: false, reason: "", message: "", canCreateTicket: true, canSendMessage: true };
   }
 }
@@ -323,25 +286,18 @@ const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 const AGENT_NAME = "Farid Ardiansyah";
 const TOUR_STORAGE_KEY = "menuru_livechat_tour_completed_v1";
 const COOKIE_CONSENT_STORAGE_KEY = "menuru_cookie_consent_v1";
-
 const BLUE = "#0D3CFC";
 const WHITE = "#FFFFFF";
 const BLACK = "#000000";
 
-// ===== STATUS STYLES =====
-const STATUS_STYLES: {
-  [key: string]: { label: string; bg: string; text: string; border: string };
-} = {
+const STATUS_STYLES: any = {
   waiting: { label: "Waiting", bg: WHITE, text: BLUE, border: BLUE },
   active: { label: "Active", bg: WHITE, text: BLUE, border: BLUE },
   resolved: { label: "Resolved", bg: WHITE, text: BLUE, border: BLUE },
   closed: { label: "Closed", bg: WHITE, text: BLUE, border: BLUE },
 };
 
-// ===== TOPIC STYLES =====
-const TOPIC_STYLES: {
-  [key: string]: { bg: string; text: string; border: string };
-} = {
+const TOPIC_STYLES: any = {
   "Product Inquiry": { bg: WHITE, text: BLUE, border: BLUE },
   "Technical Support": { bg: WHITE, text: BLUE, border: BLUE },
   "Account Issues": { bg: WHITE, text: BLUE, border: BLUE },
@@ -1014,7 +970,6 @@ const CookieConsentPopup = ({ user, db, isMounted }: { user: any; db: any; isMou
         style={{
           backgroundColor: "rgba(255,255,255,0.85)",
           backdropFilter: "blur(20px)",
-          WebkitBackdropFilter: "blur(20px)",
           borderRadius: "16px",
           border: "1px solid rgba(255,255,255,0.5)",
           boxShadow: "0 12px 40px rgba(0,0,0,0.15)",
@@ -1045,9 +1000,7 @@ const CookieConsentPopup = ({ user, db, isMounted }: { user: any; db: any; isMou
               <circle cx="9.5" cy="15.5" r="1" fill="#ffffff" />
             </svg>
           </div>
-          <span style={{ fontSize: "15px", fontWeight: 700, color: "#000000", letterSpacing: "-0.01em" }}>
-            Cookies
-          </span>
+          <span style={{ fontSize: "15px", fontWeight: 700, color: "#000000" }}>Cookies</span>
         </div>
         <p style={{ fontSize: "13px", lineHeight: 1.55, color: "#333333", margin: 0 }}>
           We use cookies to improve your experience and analyse site usage.{" "}
@@ -1069,7 +1022,6 @@ const CookieConsentPopup = ({ user, db, isMounted }: { user: any; db: any; isMou
             fontWeight: 700,
             cursor: saving ? "not-allowed" : "pointer",
             fontFamily: FONT_FAMILY,
-            transition: "background-color 0.2s ease",
           }}
         >
           {saving ? "Saving..." : "Accept"}
@@ -1984,7 +1936,6 @@ const RollingNewMessage = ({
       { yPercent: 0, opacity: 1, rotateX: 0, duration: 0.6, ease: "back.out(1.7)" },
       "-=0.2"
     );
-
     return () => {
       tl.kill();
     };
@@ -2058,7 +2009,8 @@ const CloseRoomButton = ({ onConfirm, disabled }: { onConfirm: () => void; disab
   const handleClick = () => {
     if (disabled) return;
     if (btnRef.current) {
-      gsap.timeline()
+      gsap
+        .timeline()
         .to(btnRef.current, { scale: 0.92, duration: 0.12, ease: "power2.in" })
         .to(btnRef.current, { scale: 1, duration: 0.2, ease: "back.out(2)" });
     }
@@ -2219,7 +2171,9 @@ const AppealChatRoom = ({ user, isAdmin, db, appealTicket, onClose }: any) => {
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    getCryptoKey().then(() => setEncryptionReady(true)).catch(() => setEncryptionReady(true));
+    getCryptoKey()
+      .then(() => setEncryptionReady(true))
+      .catch(() => setEncryptionReady(true));
   }, []);
 
   useEffect(() => {
@@ -2294,7 +2248,7 @@ const AppealChatRoom = ({ user, isAdmin, db, appealTicket, onClose }: any) => {
   const sendMessage = async () => {
     if (!db || !appealTicket || !messageText.trim() || !user) return;
     if (!encryptionReady) {
-      alert("Encryption is being initialized, please wait a moment.");
+      alert("Encryption is being initialized.");
       return;
     }
     try {
@@ -2304,7 +2258,7 @@ const AppealChatRoom = ({ user, isAdmin, db, appealTicket, onClose }: any) => {
       const encryptedMessage = await encryptMessage(messageText.trim());
       await addDoc(collection(db, "appeal_tickets", appealTicket.id, "messages"), {
         senderId: user.uid,
-        senderName: senderName,
+        senderName,
         text: encryptedMessage,
         timestamp: serverTimestamp(),
         read: false,
@@ -2330,8 +2284,8 @@ const AppealChatRoom = ({ user, isAdmin, db, appealTicket, onClose }: any) => {
       setReplyTo(null);
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     } catch (error) {
-      console.error("Error sending appeal message:", error);
-      alert("An error occurred while sending the message.");
+      console.error(error);
+      alert("An error occurred.");
     }
   };
 
@@ -2428,14 +2382,7 @@ const AppealChatRoom = ({ user, isAdmin, db, appealTicket, onClose }: any) => {
           Tutup
         </button>
       </div>
-      <div
-        style={{
-          padding: "12px 20px",
-          backgroundColor: "rgba(13,60,252,0.08)",
-          borderBottom: `1px solid ${BLUE}30`,
-          flexShrink: 0,
-        }}
-      >
+      <div style={{ padding: "12px 20px", backgroundColor: "rgba(13,60,252,0.08)", borderBottom: `1px solid ${BLUE}30`, flexShrink: 0 }}>
         <div style={{ fontSize: "12px", color: BLUE, fontFamily: FONT_FAMILY, fontWeight: 600 }}>
           <strong>Alasan banned:</strong> {appealTicket.banReason || "Suspicious Activity"}
         </div>
@@ -2480,9 +2427,7 @@ const AppealChatRoom = ({ user, isAdmin, db, appealTicket, onClose }: any) => {
                   }}
                 >
                   {!isMine && (
-                    <div style={{ fontSize: "12px", fontWeight: 700, color: BLUE, marginBottom: "4px" }}>
-                      {msg.senderName}
-                    </div>
+                    <div style={{ fontSize: "12px", fontWeight: 700, color: BLUE, marginBottom: "4px" }}>{msg.senderName}</div>
                   )}
                   {msg.replyTo && (
                     <div
@@ -2502,19 +2447,9 @@ const AppealChatRoom = ({ user, isAdmin, db, appealTicket, onClose }: any) => {
                     </div>
                   )}
                   <div>{msg.text}</div>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "flex-end",
-                      alignItems: "center",
-                      gap: "6px",
-                      marginTop: "5px",
-                    }}
-                  >
+                  <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "6px", marginTop: "5px" }}>
                     {renderDeliveryStatus(msg, isMine)}
-                    <span style={{ fontSize: "10px", color: isMine ? WHITE : "#999" }}>
-                      {formatTime(msg.timestamp)}
-                    </span>
+                    <span style={{ fontSize: "10px", color: isMine ? WHITE : "#999" }}>{formatTime(msg.timestamp)}</span>
                   </div>
                 </div>
                 <button
@@ -2733,7 +2668,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
     getCryptoKey()
       .then(() => setEncryptionReady(true))
       .catch((err) => {
-        console.error("Failed to initialize encryption:", err);
+        console.error("Failed to init encryption:", err);
         setEncryptionReady(true);
       });
   }, []);
@@ -2773,10 +2708,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
   useEffect(() => {
     if (!isMounted) return;
     if (liveChatTitleRef.current) {
-      const splitTitle = new SplitText(liveChatTitleRef.current, {
-        type: "chars",
-        charsClass: "split-char-livechat",
-      });
+      const splitTitle = new SplitText(liveChatTitleRef.current, { type: "chars", charsClass: "split-char-livechat" });
       gsap.fromTo(
         splitTitle.chars,
         { opacity: 0, y: 30, filter: "blur(8px)" },
@@ -2925,11 +2857,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
     if (!db || !tickets.length || !isMounted) return;
     const unsubscribes: (() => void)[] = [];
     tickets.forEach((ticket) => {
-      const q = query(
-        collection(db, "livechat_tickets", ticket.id, "messages"),
-        orderBy("timestamp", "desc"),
-        limit(3)
-      );
+      const q = query(collection(db, "livechat_tickets", ticket.id, "messages"), orderBy("timestamp", "desc"), limit(3));
       const unsub = onSnapshot(q, async (snapshot: any) => {
         const count = snapshot.size;
         setTicketMsgCounts((prev) => ({ ...prev, [ticket.id]: count }));
@@ -2967,10 +2895,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
       setMessages(messagesCacheRef.current[ticketId]);
       prevMessagesLenRef.current = messagesCacheRef.current[ticketId].length;
     }
-    const q = query(
-      collection(db, "livechat_tickets", ticketId, "messages"),
-      orderBy("timestamp", "asc")
-    );
+    const q = query(collection(db, "livechat_tickets", ticketId, "messages"), orderBy("timestamp", "asc"));
     const unsubscribe = onSnapshot(q, async (snapshot: any) => {
       const msgList: ChatMessage[] = [];
       for (const docSnap of snapshot.docs) {
@@ -3051,10 +2976,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
   useEffect(() => {
     if (!db || !user || !selectedAdmin || !isMounted) return;
     const chatId = [user.uid, selectedAdmin.uid].sort().join("_");
-    const q = query(
-      collection(db, "admin_chats", chatId, "messages"),
-      orderBy("timestamp", "asc")
-    );
+    const q = query(collection(db, "admin_chats", chatId, "messages"), orderBy("timestamp", "asc"));
     const unsub = onSnapshot(q, async (snapshot: any) => {
       const msgList: ChatMessage[] = [];
       for (const docSnap of snapshot.docs) {
@@ -3100,11 +3022,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
   const handleLogout = async () => {
     if (!auth) return;
     try {
-      await updateDoc(doc(db, "users", user.uid), {
-        online: false,
-        lastSeen: serverTimestamp(),
-        typing: false,
-      });
+      await updateDoc(doc(db, "users", user.uid), { online: false, lastSeen: serverTimestamp(), typing: false });
       await signOut(auth);
     } catch (error) {
       console.error("Logout error:", error);
@@ -3181,7 +3099,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
       return;
     }
     if (!encryptionReady) {
-      alert("Encryption is being initialized, please wait a moment.");
+      alert("Encryption is being initialized.");
       return;
     }
     const hasActiveTicket = tickets.some(
@@ -3192,7 +3110,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
         !t.isBroadcast
     );
     if (hasActiveTicket) {
-      alert("You still have an active chat with an agent. Please wait until it is finished.");
+      alert("You still have an active chat with an agent.");
       return;
     }
     try {
@@ -3233,8 +3151,8 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
       setBanMessage(null);
       hasAutoSelectedRef.current = false;
     } catch (error) {
-      console.error("Error starting chat:", error);
-      alert("An error occurred while starting the chat.");
+      console.error(error);
+      alert("An error occurred.");
     }
   };
 
@@ -3276,7 +3194,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
       const encryptedMessage = await encryptMessage(messageText.trim());
       await addDoc(collection(db, "livechat_tickets", selectedTicket.id, "messages"), {
         senderId: user.uid,
-        senderName: senderName,
+        senderName,
         text: encryptedMessage,
         timestamp: serverTimestamp(),
         read: false,
@@ -3304,7 +3222,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
       setReplyTo(null);
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     } catch (error) {
-      console.error("Error sending message:", error);
+      console.error(error);
       alert("An error occurred.");
     }
   };
@@ -3338,7 +3256,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
       setAdminChatText("");
       setAdminChatReplyTo(null);
     } catch (error) {
-      console.error("Error sending admin chat message:", error);
+      console.error(error);
     }
   };
 
@@ -3392,7 +3310,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
         userPhoto: user.photoURL || "",
         status: "waiting",
         topic: "Banding Banned",
-        banReason: banReason,
+        banReason,
         banMessage: banMessage || "",
         createdAt: serverTimestamp(),
         unreadCount: 0,
@@ -3424,7 +3342,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
         userPhoto: user.photoURL || "",
         status: "waiting",
         topic: "Banding Banned",
-        banReason: banReason,
+        banReason,
         banMessage: banMessage || "",
         createdAt: new Date(),
         unreadCount: 0,
@@ -4256,7 +4174,15 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
                 }}
               >
                 {adminChatMessages.length === 0 ? (
-                  <div style={{ textAlign: "center", color: "#999", fontSize: "14px", fontFamily: FONT_FAMILY, padding: "30px 0" }}>
+                  <div
+                    style={{
+                      textAlign: "center",
+                      color: "#999",
+                      fontSize: "14px",
+                      fontFamily: FONT_FAMILY,
+                      padding: "30px 0",
+                    }}
+                  >
                     Mulai percakapan dengan admin
                   </div>
                 ) : (
@@ -4508,14 +4434,24 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
             {ticket.userName}
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "6px", flexShrink: 0 }}>
-            {ticket.isBanned && (
-              <StabiloBadge label="BANNED" bg={WHITE} text={BLUE} border={WHITE} size="sm" />
-            )}
-            <StabiloBadge label={statusStyle.label} bg={statusStyle.bg} text={statusStyle.text} border={statusStyle.border} size="sm" />
+            {ticket.isBanned && <StabiloBadge label="BANNED" bg={WHITE} text={BLUE} border={WHITE} size="sm" />}
+            <StabiloBadge
+              label={statusStyle.label}
+              bg={statusStyle.bg}
+              text={statusStyle.text}
+              border={statusStyle.border}
+              size="sm"
+            />
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "8px", flexWrap: "wrap" }}>
-          <StabiloBadge label={ticket.topic} bg={topicStyle.bg} text={topicStyle.text} border={topicStyle.border} size="sm" />
+          <StabiloBadge
+            label={ticket.topic}
+            bg={topicStyle.bg}
+            text={topicStyle.text}
+            border={topicStyle.border}
+            size="sm"
+          />
           <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.75)", fontWeight: 700 }}>
             {ticketMsgCounts[ticket.id] || 0} msgs
           </span>
@@ -5061,14 +4997,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
                             }}
                           >
                             {!isMine && (
-                              <div
-                                style={{
-                                  fontSize: "12px",
-                                  fontWeight: 700,
-                                  color: BLUE,
-                                  marginBottom: "5px",
-                                }}
-                              >
+                              <div style={{ fontSize: "12px", fontWeight: 700, color: BLUE, marginBottom: "5px" }}>
                                 {msg.senderName}
                               </div>
                             )}
@@ -5076,9 +5005,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
                               <div
                                 style={{
                                   padding: "6px 10px",
-                                  backgroundColor: isMine
-                                    ? "rgba(255,255,255,0.2)"
-                                    : "rgba(13,60,252,0.1)",
+                                  backgroundColor: isMine ? "rgba(255,255,255,0.2)" : "rgba(13,60,252,0.1)",
                                   borderLeft: `3px solid ${isMine ? WHITE : BLUE}`,
                                   borderRadius: "4px",
                                   marginBottom: "6px",
@@ -5330,10 +5257,9 @@ export default function HomePage(): React.JSX.Element {
   const [navbarShifted, setNavbarShifted] = useState(false);
   const [noteHovered, setNoteHovered] = useState(false);
 
-  // ===== STATE UNTUK SECTION "BERGABUNG BERSAMA KAMI" =====
+  // State section "Bergabung bersama kami"
   const [noteUsers, setNoteUsers] = useState<NoteEntry[]>([]);
   const [hasSubmittedNote, setHasSubmittedNote] = useState(false);
-  const [userNote, setUserNote] = useState<NoteEntry | null>(null);
 
   // Section terpisah untuk appeal chat
   const [adminAppealTicket, setAdminAppealTicket] = useState<AppealTicket | null>(null);
@@ -5344,6 +5270,8 @@ export default function HomePage(): React.JSX.Element {
   const preloaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
   const noteJoinRef = useRef<HTMLDivElement>(null);
+  const noteTitleRef = useRef<HTMLHeadingElement>(null);
+  const noteButtonRef = useRef<HTMLButtonElement>(null);
   const noteUserListRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -5370,7 +5298,7 @@ export default function HomePage(): React.JSX.Element {
     return () => unsubscribe();
   }, [isMounted]);
 
-  // ===== LOAD USERS YANG SUDAH SUBMIT NOTE =====
+  // Load users yang sudah submit note
   useEffect(() => {
     if (!db || !isMounted) return;
     const q = query(collection(db, "notes"), orderBy("createdAt", "desc"), limit(20));
@@ -5384,18 +5312,13 @@ export default function HomePage(): React.JSX.Element {
     return () => unsub();
   }, [db, isMounted]);
 
-  // ===== CEK APAKAH USER SUDAH SUBMIT NOTE =====
+  // Cek apakah user sudah submit note
   useEffect(() => {
     if (!db || !user || !isMounted) return;
     const q = query(collection(db, "notes"), where("userId", "==", user.uid), limit(1));
     const unsub = onSnapshot(q, (snapshot: any) => {
-      if (!snapshot.empty) {
-        setHasSubmittedNote(true);
-        setUserNote({ id: snapshot.docs[0].id, ...snapshot.docs[0].data() } as NoteEntry);
-      } else {
-        setHasSubmittedNote(false);
-        setUserNote(null);
-      }
+      if (!snapshot.empty) setHasSubmittedNote(true);
+      else setHasSubmittedNote(false);
     });
     return () => unsub();
   }, [db, user, isMounted]);
@@ -5405,52 +5328,82 @@ export default function HomePage(): React.JSX.Element {
     setTimeout(() => startPreloaderAnimation(), 500);
   }, [isMounted, loading]);
 
-  // ===== GSAP ANIMATION UNTUK SECTION BERGABUNG BERSAMA KAMI =====
+  // GSAP animation section "Bergabung bersama kami"
   useEffect(() => {
     if (!isMounted || !showMain) return;
     if (!noteJoinRef.current) return;
 
     const ctx = gsap.context(() => {
-      gsap.fromTo(
-        noteJoinRef.current,
-        { opacity: 0, y: 60, filter: "blur(8px)" },
-        {
-          opacity: 1,
-          y: 0,
-          filter: "blur(0px)",
-          duration: 1.2,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: noteJoinRef.current,
-            start: "top 85%",
-            end: "top 50%",
-            toggleActions: "play none none reverse",
-          },
-        }
-      );
-
-      if (noteUserListRef.current) {
-        const items = noteUserListRef.current.querySelectorAll(".note-user-item");
+      if (noteTitleRef.current) {
         gsap.fromTo(
-          items,
-          { opacity: 0, x: -40 },
+          noteTitleRef.current,
+          { opacity: 0, y: 80, filter: "blur(12px)", scale: 0.9 },
           {
             opacity: 1,
-            x: 0,
-            duration: 0.8,
-            stagger: 0.1,
-            ease: "power2.out",
+            y: 0,
+            filter: "blur(0px)",
+            scale: 1,
+            duration: 1.4,
+            ease: "power4.out",
             scrollTrigger: {
-              trigger: noteUserListRef.current,
+              trigger: noteTitleRef.current,
               start: "top 85%",
+              end: "top 50%",
               toggleActions: "play none none reverse",
             },
           }
         );
       }
-    });
+
+      if (noteButtonRef.current) {
+        gsap.fromTo(
+          noteButtonRef.current,
+          { opacity: 0, y: 40, scale: 0.85 },
+          {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            duration: 1,
+            delay: 0.2,
+            ease: "back.out(1.7)",
+            scrollTrigger: {
+              trigger: noteButtonRef.current,
+              start: "top 90%",
+              toggleActions: "play none none reverse",
+            },
+          }
+        );
+      }
+    }, noteJoinRef);
 
     return () => ctx.revert();
+  }, [isMounted, showMain]);
+
+  // GSAP animation untuk list user (setiap kali noteUsers berubah)
+  useEffect(() => {
+    if (!isMounted || !showMain) return;
+    if (!noteUserListRef.current) return;
+
+    const items = noteUserListRef.current.querySelectorAll(".note-user-item");
+    if (items.length === 0) return;
+
+    gsap.fromTo(
+      items,
+      { opacity: 0, x: -60, filter: "blur(6px)" },
+      {
+        opacity: 1,
+        x: 0,
+        filter: "blur(0px)",
+        duration: 0.9,
+        stagger: 0.12,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: noteUserListRef.current,
+          start: "top 90%",
+          toggleActions: "play none none reverse",
+        },
+      }
+    );
   }, [isMounted, showMain, noteUsers]);
 
   const startPreloaderAnimation = () => {
@@ -5815,7 +5768,7 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </div>
 
-          {/* ===== SECTION BARU: BERGABUNG BERSAMA KAMI DI FITUR NOTE ===== */}
+          {/* ===== SECTION BARU: BERGABUNG BERSAMA KAMI ===== */}
           <div
             ref={noteJoinRef}
             style={{
@@ -5825,38 +5778,77 @@ export default function HomePage(): React.JSX.Element {
               paddingLeft: "260px",
               paddingRight: "360px",
               fontFamily: FONT_FAMILY,
+              position: "relative",
             }}
           >
-            <p
+            <h3
+              ref={noteTitleRef}
               style={{
                 fontFamily: FONT_FAMILY,
-                fontSize: "28px",
+                fontSize: "60px",
                 fontWeight: 700,
                 color: BLUE,
-                letterSpacing: "-0.02em",
-                lineHeight: 1.3,
+                letterSpacing: "-0.03em",
+                lineHeight: 1.1,
                 margin: 0,
-                marginBottom: "24px",
+                marginBottom: "32px",
                 textAlign: "left",
+                willChange: "transform, opacity, filter",
               }}
             >
               Bergabung bersama kami di fitur Note
-            </p>
+            </h3>
+
+            <button
+              ref={noteButtonRef}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "12px",
+                padding: "14px 28px",
+                backgroundColor: BLUE,
+                color: WHITE,
+                border: "none",
+                borderRadius: "12px",
+                fontFamily: FONT_FAMILY,
+                fontSize: "18px",
+                fontWeight: 700,
+                letterSpacing: "0.01em",
+                cursor: "pointer",
+                marginBottom: "32px",
+                transition: "background-color 0.25s ease",
+                willChange: "transform",
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.backgroundColor = BLACK;
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.backgroundColor = BLUE;
+              }}
+            >
+              <span>Bergabung</span>
+              <NorthEastArrow size={22} color={WHITE} />
+            </button>
 
             {user && (
               <div
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: "12px",
-                  marginBottom: "20px",
+                  gap: "10px",
+                  marginBottom: "24px",
                   fontFamily: FONT_FAMILY,
+                  flexWrap: "wrap",
                 }}
               >
+                <span style={{ fontSize: "16px", fontWeight: 600, color: BLUE }}>from</span>
+                <span style={{ fontSize: "16px", fontWeight: 700, color: BLUE }}>
+                  {user.displayName || user.email?.split("@")[0] || "User"}
+                </span>
                 <div
                   style={{
-                    width: "48px",
-                    height: "48px",
+                    width: "32px",
+                    height: "32px",
                     borderRadius: "50%",
                     overflow: "hidden",
                     backgroundColor: BLUE,
@@ -5869,145 +5861,61 @@ export default function HomePage(): React.JSX.Element {
                   {user.photoURL ? (
                     <img
                       src={user.photoURL}
-                      alt={user.displayName || "User"}
+                      alt="User"
                       style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
                       referrerPolicy="no-referrer"
                     />
                   ) : (
-                    <span style={{ fontSize: "20px", fontWeight: 800, color: WHITE }}>
+                    <span style={{ fontSize: "14px", fontWeight: 800, color: WHITE }}>
                       {(user.displayName || user.email || "U").charAt(0).toUpperCase()}
                     </span>
                   )}
                 </div>
-
-                <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-                  <span
-                    style={{
-                      fontFamily: FONT_FAMILY,
-                      fontSize: "16px",
-                      fontWeight: 700,
-                      color: BLUE,
-                      letterSpacing: "-0.01em",
-                    }}
-                  >
-                    {user.displayName || user.email?.split("@")[0] || "User"}
-                  </span>
-                  <span
-                    style={{
-                      fontFamily: FONT_FAMILY,
-                      fontSize: "13px",
-                      fontWeight: 400,
-                      color: BLUE,
-                      opacity: 0.75,
-                      letterSpacing: "0.01em",
-                    }}
-                  >
-                    {user.email}
-                  </span>
-                  <span
-                    style={{
-                      fontFamily: FONT_FAMILY,
-                      fontSize: "13px",
-                      fontWeight: 600,
-                      color: BLUE,
-                      letterSpacing: "0.01em",
-                      marginTop: "2px",
-                    }}
-                  >
-                    {hasSubmittedNote ? "✓ Sudah bergabung" : "Belum bergabung"}
-                  </span>
-                </div>
+                <span style={{ fontSize: "14px", fontWeight: 600, color: BLUE }}>
+                  {hasSubmittedNote ? "✓ Sudah bergabung" : "Belum bergabung"}
+                </span>
               </div>
             )}
 
-            <div ref={noteUserListRef} style={{ width: "100%" }}>
+            <div
+              ref={noteUserListRef}
+              style={{
+                width: "100%",
+                display: "flex",
+                flexWrap: "wrap",
+                alignItems: "center",
+                gap: "12px 20px",
+              }}
+            >
               {noteUsers.length === 0 ? (
-                <p
-                  style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: "15px",
-                    fontWeight: 400,
-                    color: BLUE,
-                    opacity: 0.6,
-                    margin: 0,
-                    letterSpacing: "0.01em",
-                  }}
-                >
+                <span style={{ fontFamily: FONT_FAMILY, fontSize: "16px", fontWeight: 500, color: BLUE, opacity: 0.7 }}>
                   Belum ada yang bergabung
-                </p>
+                </span>
               ) : (
-                noteUsers.map((n) => (
+                noteUsers.map((n, idx) => (
                   <div
                     key={n.id}
                     className="note-user-item"
                     style={{
-                      display: "flex",
+                      display: "inline-flex",
                       alignItems: "center",
-                      gap: "10px",
-                      marginBottom: "12px",
+                      gap: "6px",
                       fontFamily: FONT_FAMILY,
+                      color: BLUE,
                     }}
                   >
-                    <div
-                      style={{
-                        width: "32px",
-                        height: "32px",
-                        borderRadius: "50%",
-                        overflow: "hidden",
-                        backgroundColor: BLUE,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        flexShrink: 0,
-                      }}
-                    >
-                      {n.userPhoto ? (
-                        <img
-                          src={n.userPhoto}
-                          alt={n.userName || "User"}
-                          style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-                          referrerPolicy="no-referrer"
-                        />
-                      ) : (
-                        <span style={{ fontSize: "14px", fontWeight: 800, color: WHITE }}>
-                          {(n.userName || n.userEmail || "U").charAt(0).toUpperCase()}
-                        </span>
-                      )}
-                    </div>
-
                     <span
                       style={{
                         fontFamily: FONT_FAMILY,
-                        fontSize: "15px",
-                        fontWeight: 600,
+                        fontSize: "18px",
+                        fontWeight: 700,
                         color: BLUE,
                         letterSpacing: "-0.01em",
+                        whiteSpace: "nowrap",
                       }}
                     >
                       {n.userName || n.userEmail?.split("@")[0] || "User"}
-                    </span>
-                    <span
-                      style={{
-                        fontFamily: FONT_FAMILY,
-                        fontSize: "13px",
-                        fontWeight: 400,
-                        color: BLUE,
-                        opacity: 0.7,
-                        letterSpacing: "0.01em",
-                      }}
-                    >
-                      {n.userEmail}
-                    </span>
-                    <span
-                      style={{
-                        fontFamily: FONT_FAMILY,
-                        fontSize: "13px",
-                        fontWeight: 600,
-                        color: BLUE,
-                        letterSpacing: "0.01em",
-                      }}
-                    >
-                      ✓ Sudah bergabung
+                      {idx < noteUsers.length - 1 ? "," : ""}
                     </span>
                   </div>
                 ))
