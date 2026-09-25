@@ -5696,16 +5696,18 @@ export default function HomePage(): React.JSX.Element {
                 justifyContent: "center",
               }}
             >
-              {/* Foto sfggz.JPG — bg biru di foto di-multiply dengan bg biru container
-                  supaya nyatu, tidak terlihat 2 lapis biru */}
+              {/* Foto plj.JPG — pakai mixBlendMode screen supaya bg biru foto
+                  jadi transparan/hilang dan nyatu dengan bg biru container */}
               <img
-                src="/images/sfggz.JPG"
+                src="/images/plj.JPG"
                 alt="Note"
                 style={{
-                  width: "90%",
-                  height: "90%",
+                  maxWidth: "95%",
+                  maxHeight: "95%",
+                  width: "auto",
+                  height: "auto",
                   objectFit: "contain",
-                  mixBlendMode: "multiply",
+                  mixBlendMode: "screen",
                   display: "block",
                   opacity: noteHovered ? 0.35 : 1,
                   transition: "opacity 0.4s ease",
