@@ -74,7 +74,13 @@ async function getCryptoKey(): Promise<CryptoKey> {
   if (cryptoKey) return cryptoKey;
   const keyData = base64ToUint8Array(ENCRYPTION_KEY_BASE64);
   const keyBytes = keyData.slice(0, 32);
-  cryptoKey = await window.crypto.subtle.importKey("raw", keyBytes, { name: "AES-GCM" }, false, ["encrypt", "decrypt"]);
+  cryptoKey = await window.crypto.subtle.importKey(
+    "raw",
+    keyBytes,
+    { name: "AES-GCM" },
+    false,
+    ["encrypt", "decrypt"]
+  );
   return cryptoKey;
 }
 
@@ -87,7 +93,11 @@ async function encryptMessage(text: string): Promise<string> {
     const encoder = new TextEncoder();
     const data = encoder.encode(text);
     const iv = window.crypto.getRandomValues(new Uint8Array(IV_LENGTH));
-    const encrypted = await window.crypto.subtle.encrypt({ name: "AES-GCM", iv: iv, tagLength: 128 }, key, data);
+    const encrypted = await window.crypto.subtle.encrypt(
+      { name: "AES-GCM", iv: iv, tagLength: 128 },
+      key,
+      data
+    );
     const encryptedArray = new Uint8Array(encrypted);
     const combined = new Uint8Array(iv.length + encryptedArray.length);
     combined.set(iv, 0);
@@ -113,12 +123,17 @@ async function decryptMessage(encrypted: string): Promise<string> {
       return decodeURIComponent(escape(atob(encoded)));
     }
     if (!encrypted.startsWith("encrypted:")) return encrypted;
+
     const base64Data = encrypted.substring("encrypted:".length);
     const combined = base64ToUint8Array(base64Data);
     const iv = combined.slice(0, IV_LENGTH);
     const encryptedData = combined.slice(IV_LENGTH);
     const key = await getCryptoKey();
-    const decrypted = await window.crypto.subtle.decrypt({ name: "AES-GCM", iv: iv, tagLength: 128 }, key, encryptedData);
+    const decrypted = await window.crypto.subtle.decrypt(
+      { name: "AES-GCM", iv: iv, tagLength: 128 },
+      key,
+      encryptedData
+    );
     const decoder = new TextDecoder();
     return decoder.decode(decrypted);
   } catch (error) {
@@ -203,7 +218,13 @@ function containsBannedContent(text: string): { isBanned: boolean; reason: strin
 }
 
 // ===== BAN USER PERMANENT =====
-async function banUserPermanent(userId: string, userEmail: string, userName: string, reason: string, message: string) {
+async function banUserPermanent(
+  userId: string,
+  userEmail: string,
+  userName: string,
+  reason: string,
+  message: string
+) {
   if (!db) return;
   try {
     const now = new Date().toISOString();
@@ -247,7 +268,9 @@ async function banUserPermanent(userId: string, userEmail: string, userName: str
 
 // ===== CHECK BAN STATUS =====
 async function checkBanStatus(userId: string): Promise<any> {
-  if (!db) return { isBanned: false, reason: "", message: "", canCreateTicket: true, canSendMessage: true };
+  if (!db) {
+    return { isBanned: false, reason: "", message: "", canCreateTicket: true, canSendMessage: true };
+  }
   try {
     const botDoc = await getDoc(doc(db, "bot_blocks", userId));
     if (botDoc.exists()) {
@@ -863,7 +886,7 @@ const CookieConsentPopup = ({ user, db, isMounted }: { user: any; db: any; isMou
             }
           }
         } catch (err) {
-          console.error("Error checking cookie consent:", err);
+          console.error("Error:", err);
         }
       }
       try {
@@ -3551,8 +3574,8 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
     );
   };
 
+  // ===== SEARCH BAR: BG PUTIH + TEKS BIRU untuk semua role =====
   const renderSearchBar = () => {
-    const isAgentSearch = isAdmin;
     return (
       <div
         data-tour="search-bar"
@@ -3568,12 +3591,12 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
             alignItems: "center",
             gap: "8px",
             padding: "8px 12px",
-            backgroundColor: isAgentSearch ? "rgba(255,255,255,0.15)" : "#ffffff",
-            border: isAgentSearch ? "1px solid rgba(255,255,255,0.25)" : "1px solid #ffffff",
+            backgroundColor: "#ffffff",
+            border: "1px solid #ffffff",
             borderRadius: "8px",
           }}
         >
-          <SearchIcon size={14} color={isAgentSearch ? "#ffffff" : BLUE} />
+          <SearchIcon size={14} color={BLUE} />
           <input
             type="text"
             value={searchQuery}
@@ -3584,11 +3607,11 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
               background: "transparent",
               border: "none",
               outline: "none",
-              color: isAgentSearch ? "#ffffff" : BLUE,
+              color: BLUE,
               fontSize: "12px",
               fontFamily: FONT_FAMILY,
               padding: 0,
-              caretColor: isAgentSearch ? "#ffffff" : BLUE,
+              caretColor: BLUE,
               fontWeight: 600,
             }}
           />
@@ -3598,7 +3621,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
               style={{
                 background: "transparent",
                 border: "none",
-                color: isAgentSearch ? "#ffffff" : BLUE,
+                color: BLUE,
                 cursor: "pointer",
                 fontSize: "14px",
                 padding: 0,
@@ -5257,11 +5280,10 @@ export default function HomePage(): React.JSX.Element {
   const [navbarShifted, setNavbarShifted] = useState(false);
   const [noteHovered, setNoteHovered] = useState(false);
 
-  // State section "Bergabung bersama kami"
   const [noteUsers, setNoteUsers] = useState<NoteEntry[]>([]);
   const [hasSubmittedNote, setHasSubmittedNote] = useState(false);
+  const [activeNoteUser, setActiveNoteUser] = useState<string | null>(null);
 
-  // Section terpisah untuk appeal chat
   const [adminAppealTicket, setAdminAppealTicket] = useState<AppealTicket | null>(null);
   const [showAdminAppealSection, setShowAdminAppealSection] = useState(false);
   const [bannedAppealTicket, setBannedAppealTicket] = useState<AppealTicket | null>(null);
@@ -5295,7 +5317,6 @@ export default function HomePage(): React.JSX.Element {
     return () => unsubscribe();
   }, [isMounted]);
 
-  // Load users yang sudah submit note
   useEffect(() => {
     if (!db || !isMounted) return;
     const q = query(collection(db, "notes"), orderBy("createdAt", "desc"), limit(20));
@@ -5309,7 +5330,6 @@ export default function HomePage(): React.JSX.Element {
     return () => unsub();
   }, [db, isMounted]);
 
-  // Cek apakah user sudah submit note
   useEffect(() => {
     if (!db || !user || !isMounted) return;
     const q = query(collection(db, "notes"), where("userId", "==", user.uid), limit(1));
@@ -5325,7 +5345,6 @@ export default function HomePage(): React.JSX.Element {
     setTimeout(() => startPreloaderAnimation(), 500);
   }, [isMounted, loading]);
 
-  // GSAP animation sederhana untuk section (TANPA SplitText)
   useEffect(() => {
     if (!isMounted || !showMain) return;
     if (!noteJoinRef.current) return;
@@ -5347,31 +5366,33 @@ export default function HomePage(): React.JSX.Element {
           },
         }
       );
-
-      const items = noteJoinRef.current.querySelectorAll(".note-user-item");
-      if (items.length > 0) {
-        gsap.fromTo(
-          items,
-          { opacity: 0, x: -40 },
-          {
-            opacity: 1,
-            x: 0,
-            duration: 0.8,
-            stagger: 0.08,
-            ease: "power2.out",
-            scrollTrigger: {
-              trigger: noteJoinRef.current,
-              start: "top 85%",
-              toggleActions: "play none none none",
-              once: true,
-            },
-          }
-        );
-      }
     }, noteJoinRef);
 
     return () => ctx.revert();
+  }, [isMounted, showMain]);
+
+  useEffect(() => {
+    if (!isMounted || !showMain) return;
+    const items = document.querySelectorAll(".note-user-fp");
+    if (items.length === 0) return;
+    gsap.fromTo(
+      items,
+      { opacity: 0, scale: 0.5 },
+      { opacity: 1, scale: 1, duration: 0.6, stagger: 0.08, ease: "back.out(1.7)" }
+    );
   }, [isMounted, showMain, noteUsers]);
+
+  useEffect(() => {
+    if (!activeNoteUser) return;
+    const el = document.querySelector(`.note-user-name-${activeNoteUser}`);
+    if (el) {
+      gsap.fromTo(
+        el,
+        { opacity: 0, x: -30, scale: 0.8 },
+        { opacity: 1, x: 0, scale: 1, duration: 0.5, ease: "back.out(1.7)" }
+      );
+    }
+  }, [activeNoteUser]);
 
   const startPreloaderAnimation = () => {
     const tl = gsap.timeline({
@@ -5735,7 +5756,7 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </div>
 
-          {/* ===== SECTION BARU: BERGABUNG BERSAMA KAMI (TANPA SPLITTEXT) ===== */}
+          {/* ===== SECTION: BERGABUNG BERSAMA KAMI ===== */}
           <div
             ref={noteJoinRef}
             style={{
@@ -5748,155 +5769,195 @@ export default function HomePage(): React.JSX.Element {
               position: "relative",
             }}
           >
-            {/* Judul 70px biru full — TANPA SplitText */}
-            <h3
+            {/* Baris 1: Judul + Tombol Bergabung */}
+            <div
               style={{
-                fontFamily: FONT_FAMILY,
-                fontSize: "70px",
-                fontWeight: 700,
-                color: BLUE,
-                letterSpacing: "-0.03em",
-                lineHeight: 1.1,
-                margin: 0,
-                marginBottom: "32px",
-                textAlign: "left",
-              }}
-            >
-              Bergabung bersama kami di fitur Note
-            </h3>
-
-            {/* Tombol Bergabung dengan panah */}
-            <button
-              style={{
-                display: "inline-flex",
+                display: "flex",
                 alignItems: "center",
-                gap: "14px",
-                padding: "16px 32px",
-                backgroundColor: BLUE,
-                color: WHITE,
-                border: "none",
-                borderRadius: "12px",
-                fontFamily: FONT_FAMILY,
-                fontSize: "70px",
-                fontWeight: 700,
-                letterSpacing: "-0.02em",
-                cursor: "pointer",
-                marginBottom: "32px",
-                transition: "background-color 0.25s ease",
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.backgroundColor = BLACK;
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.backgroundColor = BLUE;
+                gap: "24px",
+                marginBottom: "24px",
+                flexWrap: "wrap",
               }}
             >
-              <span>Bergabung</span>
-              <NorthEastArrow size={60} color={WHITE} />
-            </button>
+              <h3
+                style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: "35px",
+                  fontWeight: 700,
+                  color: BLUE,
+                  letterSpacing: "-0.02em",
+                  lineHeight: 1.1,
+                  margin: 0,
+                }}
+              >
+                Bergabung bersama kami di fitur Note
+              </h3>
+              <button
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  padding: "8px 18px",
+                  backgroundColor: BLUE,
+                  color: WHITE,
+                  border: "none",
+                  borderRadius: "10px",
+                  fontFamily: FONT_FAMILY,
+                  fontSize: "35px",
+                  fontWeight: 700,
+                  letterSpacing: "-0.02em",
+                  lineHeight: 1.1,
+                  cursor: "pointer",
+                  transition: "background-color 0.25s ease",
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLButtonElement).style.backgroundColor = BLACK;
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLButtonElement).style.backgroundColor = BLUE;
+                }}
+              >
+                <span>Bergabung</span>
+                <NorthEastArrow size={32} color={WHITE} />
+              </button>
+            </div>
 
-            {/* Status user login + from */}
-            {user && (
+            {/* Baris 2: BG biru + teks putih full */}
+            <div
+              style={{
+                width: "100%",
+                backgroundColor: BLUE,
+                borderRadius: "12px",
+                padding: "16px 24px",
+                display: "flex",
+                alignItems: "center",
+                gap: "16px",
+                flexWrap: "wrap",
+                minHeight: "70px",
+              }}
+            >
+              {user && (
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    fontFamily: FONT_FAMILY,
+                    color: WHITE,
+                  }}
+                >
+                  <span style={{ fontSize: "35px", fontWeight: 600, color: WHITE, letterSpacing: "-0.02em", lineHeight: 1.1 }}>
+                    from
+                  </span>
+                  <span style={{ fontSize: "35px", fontWeight: 700, color: WHITE, letterSpacing: "-0.02em", lineHeight: 1.1 }}>
+                    {user.displayName || user.email?.split("@")[0] || "User"}
+                  </span>
+                  <div
+                    style={{
+                      width: "48px",
+                      height: "48px",
+                      borderRadius: "50%",
+                      overflow: "hidden",
+                      backgroundColor: WHITE,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexShrink: 0,
+                    }}
+                  >
+                    {user.photoURL ? (
+                      <img
+                        src={user.photoURL}
+                        alt="User"
+                        style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                        referrerPolicy="no-referrer"
+                      />
+                    ) : (
+                      <span style={{ fontSize: "24px", fontWeight: 800, color: BLUE }}>
+                        {(user.displayName || user.email || "U").charAt(0).toUpperCase()}
+                      </span>
+                    )}
+                  </div>
+                  <span style={{ fontSize: "35px", fontWeight: 700, color: WHITE, letterSpacing: "-0.02em", lineHeight: 1.1 }}>
+                    {hasSubmittedNote ? "✓ Sudah bergabung" : "Belum bergabung"}
+                  </span>
+                </div>
+              )}
+
               <div
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: "14px",
-                  marginBottom: "32px",
-                  fontFamily: FONT_FAMILY,
+                  gap: "12px",
                   flexWrap: "wrap",
+                  marginLeft: user ? "auto" : "0",
                 }}
               >
-                <span style={{ fontSize: "70px", fontWeight: 600, color: BLUE, letterSpacing: "-0.03em", lineHeight: 1 }}>
-                  from
-                </span>
-                <span style={{ fontSize: "70px", fontWeight: 700, color: BLUE, letterSpacing: "-0.03em", lineHeight: 1 }}>
-                  {user.displayName || user.email?.split("@")[0] || "User"}
-                </span>
-                <div
-                  style={{
-                    width: "90px",
-                    height: "90px",
-                    borderRadius: "50%",
-                    overflow: "hidden",
-                    backgroundColor: BLUE,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    flexShrink: 0,
-                  }}
-                >
-                  {user.photoURL ? (
-                    <img
-                      src={user.photoURL}
-                      alt="User"
-                      style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-                      referrerPolicy="no-referrer"
-                    />
-                  ) : (
-                    <span style={{ fontSize: "40px", fontWeight: 800, color: WHITE }}>
-                      {(user.displayName || user.email || "U").charAt(0).toUpperCase()}
-                    </span>
-                  )}
-                </div>
-                <span
-                  style={{
-                    fontSize: "70px",
-                    fontWeight: 700,
-                    color: BLUE,
-                    letterSpacing: "-0.03em",
-                    lineHeight: 1,
-                  }}
-                >
-                  {hasSubmittedNote ? "✓ Sudah bergabung" : "Belum bergabung"}
-                </span>
-              </div>
-            )}
-
-            {/* List nama user berjejer warna biru full */}
-            <div
-              style={{
-                width: "100%",
-                display: "flex",
-                flexWrap: "wrap",
-                alignItems: "center",
-                gap: "16px 32px",
-              }}
-            >
-              {noteUsers.length === 0 ? (
-                <span style={{ fontFamily: FONT_FAMILY, fontSize: "70px", fontWeight: 500, color: BLUE, opacity: 0.7 }}>
-                  Belum ada yang bergabung
-                </span>
-              ) : (
-                noteUsers.map((n, idx) => (
-                  <div
-                    key={n.id}
-                    className="note-user-item"
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: "8px",
-                      fontFamily: FONT_FAMILY,
-                      color: BLUE,
-                    }}
-                  >
-                    <span
+                {noteUsers.length > 0 &&
+                  noteUsers.map((n) => (
+                    <div
+                      key={n.id}
                       style={{
-                        fontFamily: FONT_FAMILY,
-                        fontSize: "70px",
-                        fontWeight: 700,
-                        color: BLUE,
-                        letterSpacing: "-0.03em",
-                        lineHeight: 1.1,
-                        whiteSpace: "nowrap",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
                       }}
                     >
-                      {n.userName || n.userEmail?.split("@")[0] || "User"}
-                      {idx < noteUsers.length - 1 ? "," : ""}
-                    </span>
-                  </div>
-                ))
-              )}
+                      <div
+                        className="note-user-fp"
+                        onClick={() => setActiveNoteUser(activeNoteUser === n.id ? null : n.id)}
+                        style={{
+                          width: "48px",
+                          height: "48px",
+                          borderRadius: "50%",
+                          overflow: "hidden",
+                          backgroundColor: WHITE,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          flexShrink: 0,
+                          cursor: "pointer",
+                          transition: "transform 0.2s ease",
+                        }}
+                        onMouseEnter={(e) => {
+                          (e.currentTarget as HTMLDivElement).style.transform = "scale(1.15)";
+                        }}
+                        onMouseLeave={(e) => {
+                          (e.currentTarget as HTMLDivElement).style.transform = "scale(1)";
+                        }}
+                      >
+                        {n.userPhoto ? (
+                          <img
+                            src={n.userPhoto}
+                            alt="User"
+                            style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                            referrerPolicy="no-referrer"
+                          />
+                        ) : (
+                          <span style={{ fontSize: "20px", fontWeight: 800, color: BLUE }}>
+                            {(n.userName || n.userEmail || "U").charAt(0).toUpperCase()}
+                          </span>
+                        )}
+                      </div>
+
+                      {activeNoteUser === n.id && (
+                        <span
+                          className={`note-user-name-${n.id}`}
+                          style={{
+                            fontSize: "35px",
+                            fontWeight: 700,
+                            color: WHITE,
+                            letterSpacing: "-0.02em",
+                            lineHeight: 1.1,
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {n.userName || n.userEmail?.split("@")[0] || "User"}
+                        </span>
+                      )}
+                    </div>
+                  ))}
+              </div>
             </div>
           </div>
         </div>
