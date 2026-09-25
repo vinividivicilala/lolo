@@ -5280,7 +5280,7 @@ export default function HomePage(): React.JSX.Element {
   const [navbarShifted, setNavbarShifted] = useState(false);
   const [noteHovered, setNoteHovered] = useState(false);
 
-  const [noteUsers, setNoteUsers] = useState<NoteEntry[]>([]);
+  const [registeredUsers, setRegisteredUsers] = useState<NoteEntry[]>([]);
   const [hasSubmittedNote, setHasSubmittedNote] = useState(false);
   const [activeNoteUser, setActiveNoteUser] = useState<string | null>(null);
 
@@ -5317,15 +5317,25 @@ export default function HomePage(): React.JSX.Element {
     return () => unsubscribe();
   }, [isMounted]);
 
+  // ===== SISTEM MENGUMPULKAN USER YANG TERDAFTAR SAAT LOGIN =====
   useEffect(() => {
     if (!db || !isMounted) return;
-    const q = query(collection(db, "notes"), orderBy("createdAt", "desc"), limit(20));
+    const q = query(collection(db, "users"), orderBy("lastSeen", "desc"), limit(50));
     const unsub = onSnapshot(q, (snapshot: any) => {
       const list: NoteEntry[] = [];
       snapshot.forEach((docSnap: any) => {
-        list.push({ id: docSnap.id, ...docSnap.data() } as NoteEntry);
+        const data = docSnap.data();
+        list.push({
+          id: docSnap.id,
+          userId: docSnap.id,
+          userName: data.displayName || data.name || data.email?.split("@")[0] || "User",
+          userEmail: data.email || "",
+          userPhoto: data.photoURL || "",
+          text: data.text || "",
+          createdAt: data.createdAt || data.lastSeen || null,
+        } as NoteEntry);
       });
-      setNoteUsers(list);
+      setRegisteredUsers(list);
     });
     return () => unsub();
   }, [db, isMounted]);
@@ -5380,7 +5390,7 @@ export default function HomePage(): React.JSX.Element {
       { opacity: 0, scale: 0.5 },
       { opacity: 1, scale: 1, duration: 0.6, stagger: 0.08, ease: "back.out(1.7)" }
     );
-  }, [isMounted, showMain, noteUsers]);
+  }, [isMounted, showMain, registeredUsers]);
 
   useEffect(() => {
     if (!activeNoteUser) return;
@@ -5822,7 +5832,7 @@ export default function HomePage(): React.JSX.Element {
               </button>
             </div>
 
-            {/* Baris 2: BG biru + teks putih full - SEMUA USER DIGABUNG */}
+            {/* Baris 2: BG biru + SEMUA USER TERDAFTAR (dari sistem login) */}
             <div
               style={{
                 width: "100%",
@@ -5836,7 +5846,7 @@ export default function HomePage(): React.JSX.Element {
                 minHeight: "70px",
               }}
             >
-              {/* Semua user digabung dalam satu baris */}
+              {/* Semua user terdaftar digabung: user login di posisi pertama */}
               <div
                 style={{
                   display: "flex",
@@ -5845,13 +5855,13 @@ export default function HomePage(): React.JSX.Element {
                   flexWrap: "wrap",
                 }}
               >
-                {noteUsers.length === 0 && (
+                {registeredUsers.length === 0 && (
                   <span style={{ fontSize: "35px", fontWeight: 700, color: WHITE, letterSpacing: "-0.02em", lineHeight: 1.1 }}>
                     Belum ada yang bergabung
                   </span>
                 )}
 
-                {noteUsers.map((n, index) => {
+                {registeredUsers.map((n) => {
                   const isCurrentUser = user && n.userId === user.uid;
                   return (
                     <div
@@ -5946,7 +5956,7 @@ export default function HomePage(): React.JSX.Element {
                         </span>
                       )}
 
-                      {/* Nama user muncul saat FP di klik (untuk user selain login) */}
+                      {/* Nama user muncul PERMANENT saat FP di klik (untuk user selain login) */}
                       {!isCurrentUser && activeNoteUser === n.id && (
                         <span
                           className={`note-user-name-${n.id}`}
