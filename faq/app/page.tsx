@@ -5822,7 +5822,7 @@ export default function HomePage(): React.JSX.Element {
               </button>
             </div>
 
-            {/* Baris 2: BG biru + teks putih full - user pertama nama + FP, sisanya FP saja */}
+            {/* Baris 2: BG biru + teks putih full - user login nama + FP, sisanya FP saja */}
             <div
               style={{
                 width: "100%",
@@ -5836,78 +5836,46 @@ export default function HomePage(): React.JSX.Element {
                 minHeight: "70px",
               }}
             >
-              {user && (
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "10px",
-                    fontFamily: FONT_FAMILY,
-                    color: WHITE,
-                  }}
-                >
-                  <span style={{ fontSize: "35px", fontWeight: 600, color: WHITE, letterSpacing: "-0.02em", lineHeight: 1.1 }}>
-                    from
-                  </span>
-                  <span style={{ fontSize: "35px", fontWeight: 700, color: WHITE, letterSpacing: "-0.02em", lineHeight: 1.1 }}>
-                    {user.displayName || user.email?.split("@")[0] || "User"}
-                  </span>
-                  <div
-                    style={{
-                      width: "48px",
-                      height: "48px",
-                      borderRadius: "50%",
-                      overflow: "hidden",
-                      backgroundColor: WHITE,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      flexShrink: 0,
-                    }}
-                  >
-                    {user.photoURL ? (
-                      <img
-                        src={user.photoURL}
-                        alt="User"
-                        style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-                        referrerPolicy="no-referrer"
-                      />
-                    ) : (
-                      <span style={{ fontSize: "24px", fontWeight: 800, color: BLUE }}>
-                        {(user.displayName || user.email || "U").charAt(0).toUpperCase()}
-                      </span>
-                    )}
-                  </div>
-                  <span style={{ fontSize: "35px", fontWeight: 700, color: WHITE, letterSpacing: "-0.02em", lineHeight: 1.1 }}>
-                    {hasSubmittedNote ? "✓ Sudah bergabung" : "Belum bergabung"}
-                  </span>
-                </div>
-              )}
-
-              {/* List user: user pertama nama + FP, sisanya FP saja */}
+              {/* Semua user digabung: user login di posisi pertama, sisanya FP saja */}
               <div
                 style={{
                   display: "flex",
                   alignItems: "center",
                   gap: "12px",
                   flexWrap: "wrap",
-                  marginLeft: user ? "auto" : "0",
                 }}
               >
-                {noteUsers.length > 0 &&
-                  noteUsers.map((n, idx) => {
-                    const isFirstUser = idx === 0;
-                    return (
-                      <div
-                        key={n.id}
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "8px",
-                        }}
-                      >
-                        {/* User pertama: nama + FP. Sisanya: FP saja */}
-                        {isFirstUser && (
+                {noteUsers.length === 0 && (
+                  <span style={{ fontSize: "35px", fontWeight: 700, color: WHITE, letterSpacing: "-0.02em", lineHeight: 1.1 }}>
+                    Belum ada yang bergabung
+                  </span>
+                )}
+
+                {noteUsers.map((n) => {
+                  const isCurrentUser = user && n.userId === user.uid;
+                  return (
+                    <div
+                      key={n.id}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                      }}
+                    >
+                      {/* Nama + status hanya untuk user login saat ini */}
+                      {isCurrentUser && (
+                        <>
+                          <span
+                            style={{
+                              fontSize: "35px",
+                              fontWeight: 600,
+                              color: WHITE,
+                              letterSpacing: "-0.02em",
+                              lineHeight: 1.1,
+                            }}
+                          >
+                            from
+                          </span>
                           <span
                             style={{
                               fontSize: "35px",
@@ -5920,63 +5888,83 @@ export default function HomePage(): React.JSX.Element {
                           >
                             {n.userName || n.userEmail?.split("@")[0] || "User"}
                           </span>
-                        )}
-                        <div
-                          className="note-user-fp"
-                          onClick={() => setActiveNoteUser(activeNoteUser === n.id ? null : n.id)}
-                          style={{
-                            width: "48px",
-                            height: "48px",
-                            borderRadius: "50%",
-                            overflow: "hidden",
-                            backgroundColor: WHITE,
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            flexShrink: 0,
-                            cursor: "pointer",
-                            transition: "transform 0.2s ease",
-                          }}
-                          onMouseEnter={(e) => {
-                            (e.currentTarget as HTMLDivElement).style.transform = "scale(1.15)";
-                          }}
-                          onMouseLeave={(e) => {
-                            (e.currentTarget as HTMLDivElement).style.transform = "scale(1)";
-                          }}
-                        >
-                          {n.userPhoto ? (
-                            <img
-                              src={n.userPhoto}
-                              alt="User"
-                              style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-                              referrerPolicy="no-referrer"
-                            />
-                          ) : (
-                            <span style={{ fontSize: "20px", fontWeight: 800, color: BLUE }}>
-                              {(n.userName || n.userEmail || "U").charAt(0).toUpperCase()}
-                            </span>
-                          )}
-                        </div>
+                        </>
+                      )}
 
-                        {/* Nama user muncul saat FP di klik (untuk user selain pertama) */}
-                        {!isFirstUser && activeNoteUser === n.id && (
-                          <span
-                            className={`note-user-name-${n.id}`}
-                            style={{
-                              fontSize: "35px",
-                              fontWeight: 700,
-                              color: WHITE,
-                              letterSpacing: "-0.02em",
-                              lineHeight: 1.1,
-                              whiteSpace: "nowrap",
-                            }}
-                          >
-                            {n.userName || n.userEmail?.split("@")[0] || "User"}
+                      {/* Foto Profil user */}
+                      <div
+                        className="note-user-fp"
+                        onClick={() => setActiveNoteUser(activeNoteUser === n.id ? null : n.id)}
+                        style={{
+                          width: "48px",
+                          height: "48px",
+                          borderRadius: "50%",
+                          overflow: "hidden",
+                          backgroundColor: WHITE,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          flexShrink: 0,
+                          cursor: "pointer",
+                          transition: "transform 0.2s ease",
+                          border: isCurrentUser ? `3px solid ${WHITE}` : "none",
+                        }}
+                        onMouseEnter={(e) => {
+                          (e.currentTarget as HTMLDivElement).style.transform = "scale(1.15)";
+                        }}
+                        onMouseLeave={(e) => {
+                          (e.currentTarget as HTMLDivElement).style.transform = "scale(1)";
+                        }}
+                      >
+                        {n.userPhoto ? (
+                          <img
+                            src={n.userPhoto}
+                            alt="User"
+                            style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                            referrerPolicy="no-referrer"
+                          />
+                        ) : (
+                          <span style={{ fontSize: "20px", fontWeight: 800, color: BLUE }}>
+                            {(n.userName || n.userEmail || "U").charAt(0).toUpperCase()}
                           </span>
                         )}
                       </div>
-                    );
-                  })}
+
+                      {/* Status untuk user login saat ini */}
+                      {isCurrentUser && (
+                        <span
+                          style={{
+                            fontSize: "35px",
+                            fontWeight: 700,
+                            color: WHITE,
+                            letterSpacing: "-0.02em",
+                            lineHeight: 1.1,
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {hasSubmittedNote ? "✓ Sudah bergabung" : "Belum bergabung"}
+                        </span>
+                      )}
+
+                      {/* Nama user muncul saat FP di klik (untuk user selain login) */}
+                      {!isCurrentUser && activeNoteUser === n.id && (
+                        <span
+                          className={`note-user-name-${n.id}`}
+                          style={{
+                            fontSize: "35px",
+                            fontWeight: 700,
+                            color: WHITE,
+                            letterSpacing: "-0.02em",
+                            lineHeight: 1.1,
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {n.userName || n.userEmail?.split("@")[0] || "User"}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
