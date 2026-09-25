@@ -5822,7 +5822,7 @@ export default function HomePage(): React.JSX.Element {
               </button>
             </div>
 
-            {/* Baris 2: BG biru + teks putih full - user login nama + FP, sisanya FP saja */}
+            {/* Baris 2: BG biru + teks putih full - SEMUA USER DIGABUNG */}
             <div
               style={{
                 width: "100%",
@@ -5836,7 +5836,7 @@ export default function HomePage(): React.JSX.Element {
                 minHeight: "70px",
               }}
             >
-              {/* Semua user digabung: user login di posisi pertama, sisanya FP saja */}
+              {/* Semua user digabung dalam satu baris */}
               <div
                 style={{
                   display: "flex",
@@ -5851,7 +5851,7 @@ export default function HomePage(): React.JSX.Element {
                   </span>
                 )}
 
-                {noteUsers.map((n) => {
+                {noteUsers.map((n, index) => {
                   const isCurrentUser = user && n.userId === user.uid;
                   return (
                     <div
@@ -5862,7 +5862,7 @@ export default function HomePage(): React.JSX.Element {
                         gap: "8px",
                       }}
                     >
-                      {/* Nama + status hanya untuk user login saat ini */}
+                      {/* User yang login: tampilkan "from [Nama User]" */}
                       {isCurrentUser && (
                         <>
                           <span
@@ -5891,7 +5891,7 @@ export default function HomePage(): React.JSX.Element {
                         </>
                       )}
 
-                      {/* Foto Profil user */}
+                      {/* Foto Profil user (FP 1, FP 2, dst) */}
                       <div
                         className="note-user-fp"
                         onClick={() => setActiveNoteUser(activeNoteUser === n.id ? null : n.id)}
