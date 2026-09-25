@@ -30,7 +30,7 @@ if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, SplitText, Physics2DPlugin);
 }
 
-// Firebase Config
+// ===== FIREBASE CONFIG =====
 const firebaseConfig = {
   apiKey: "AIzaSyD_htQZ1TClnXKZGRJ4izbMQ02y6V3aNAQ",
   authDomain: "wawa44-58d1e.firebaseapp.com",
@@ -237,21 +237,37 @@ async function banUserPermanent(
   try {
     const now = new Date().toISOString();
     await setDoc(doc(db, "bot_blocks", userId), {
-      userId, userEmail, userName,
-      isBlocked: true, blockedAt: now, blockedReason: reason, blockedMessage: message,
-      canCreateTicket: false, canSendMessage: false,
+      userId,
+      userEmail,
+      userName,
+      isBlocked: true,
+      blockedAt: now,
+      blockedReason: reason,
+      blockedMessage: message,
+      canCreateTicket: false,
+      canSendMessage: false,
       violations: [{ type: "BANNED", reason, timestamp: now, message, confidence: 100 }],
-      totalViolations: 1, warningCount: 0, firstViolation: now, lastViolation: now,
+      totalViolations: 1,
+      warningCount: 0,
+      firstViolation: now,
+      lastViolation: now,
     });
     await updateDoc(doc(db, "users", userId), {
-      botBlocked: true, botBlockedAt: serverTimestamp(),
-      botBlockedReason: reason, botBlockedMessage: message,
-      canCreateTicket: false, canSendMessage: false,
+      botBlocked: true,
+      botBlockedAt: serverTimestamp(),
+      botBlockedReason: reason,
+      botBlockedMessage: message,
+      canCreateTicket: false,
+      canSendMessage: false,
     });
     await addDoc(collection(db, "bot_violations_log"), {
-      userId, userEmail, userName,
+      userId,
+      userEmail,
+      userName,
       violation: { type: "BANNED", reason, timestamp: now, message, confidence: 100 },
-      timestamp: serverTimestamp(), resolved: false, isBan: true,
+      timestamp: serverTimestamp(),
+      resolved: false,
+      isBan: true,
     });
   } catch (error) {
     console.error("Error banning user:", error);
@@ -260,10 +276,15 @@ async function banUserPermanent(
 
 // ===== CHECK BAN STATUS =====
 async function checkBanStatus(userId: string): Promise<{
-  isBanned: boolean; reason: string; message: string;
-  canCreateTicket: boolean; canSendMessage: boolean;
+  isBanned: boolean;
+  reason: string;
+  message: string;
+  canCreateTicket: boolean;
+  canSendMessage: boolean;
 }> {
-  if (!db) return { isBanned: false, reason: "", message: "", canCreateTicket: true, canSendMessage: true };
+  if (!db) {
+    return { isBanned: false, reason: "", message: "", canCreateTicket: true, canSendMessage: true };
+  }
   try {
     const botDoc = await getDoc(doc(db, "bot_blocks", userId));
     if (botDoc.exists()) {
@@ -296,25 +317,20 @@ async function checkBanStatus(userId: string): Promise<{
   }
 }
 
+// ===== CONSTANTS =====
 const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
 const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 const AGENT_NAME = "Farid Ardiansyah";
 const TOUR_STORAGE_KEY = "menuru_livechat_tour_completed_v1";
 const COOKIE_CONSENT_STORAGE_KEY = "menuru_cookie_consent_v1";
 
-// ===== CORE COLORS =====
 const BLUE = "#0D3CFC";
 const WHITE = "#FFFFFF";
 const BLACK = "#000000";
 
-// ===== STATUS STYLES (SEMUA PUTIH + TEKS BIRU) =====
+// ===== STATUS STYLES =====
 const STATUS_STYLES: {
-  [key: string]: {
-    label: string;
-    bg: string;
-    text: string;
-    border: string;
-  };
+  [key: string]: { label: string; bg: string; text: string; border: string };
 } = {
   waiting: { label: "Waiting", bg: WHITE, text: BLUE, border: BLUE },
   active: { label: "Active", bg: WHITE, text: BLUE, border: BLUE },
@@ -322,7 +338,7 @@ const STATUS_STYLES: {
   closed: { label: "Closed", bg: WHITE, text: BLUE, border: BLUE },
 };
 
-// ===== TOPIC STYLES (SEMUA PUTIH + TEKS BIRU) =====
+// ===== TOPIC STYLES =====
 const TOPIC_STYLES: {
   [key: string]: { bg: string; text: string; border: string };
 } = {
@@ -354,18 +370,21 @@ const CheckIcon = ({ size = 12, color = "currentColor" }: { size?: number; color
     <path d="M20 6L9 17L4 12" stroke={color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
+
 const DoubleCheckIcon = ({ size = 12, color = "currentColor" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <path d="M1 12L5 16L13 8" stroke={color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
     <path d="M11 12L15 16L23 8" stroke={color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
+
 const ClockIcon = ({ size = 12, color = "currentColor" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <circle cx="12" cy="12" r="10" stroke={color} strokeWidth="2.5" />
     <path d="M12 6V12L16 14" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
+
 const ErrorIcon = ({ size = 12, color = "currentColor" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <circle cx="12" cy="12" r="10" stroke={color} strokeWidth="2.5" />
@@ -373,12 +392,14 @@ const ErrorIcon = ({ size = 12, color = "currentColor" }: { size?: number; color
     <circle cx="12" cy="16" r="1" fill={color} />
   </svg>
 );
+
 const SearchIcon = ({ size = 16, color = "currentColor" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <circle cx="11" cy="11" r="8" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     <path d="M21 21L16.65 16.65" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
+
 const CloseIcon = ({ size = 18, color = "currentColor" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <path d="M6 6L18 18M18 6L6 18" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -492,7 +513,10 @@ const footerLinks = [
     title: "Product",
     links: ["Shop", "Note", "Calendar", "Blog", "Donation", "Community", "Live Chat Agent", "Stories"],
   },
-  { title: "Attention", links: ["Privacy Policy", "Terms & Conditions", "About Us", "Terms of Use", "Help Center"] },
+  {
+    title: "Attention",
+    links: ["Privacy Policy", "Terms & Conditions", "About Us", "Terms of Use", "Help Center"],
+  },
 ];
 
 // ===== INTERFACES =====
@@ -531,11 +555,7 @@ interface ChatMessage {
   isEncrypted?: boolean;
   isBotDetected?: boolean;
   deliveryStatus?: "sending" | "sent" | "delivered" | "read" | "failed";
-  replyTo?: {
-    messageId: string;
-    senderName: string;
-    text: string;
-  } | null;
+  replyTo?: { messageId: string; senderName: string; text: string } | null;
 }
 
 interface OnlineUser {
@@ -572,11 +592,7 @@ interface AppealMessage {
   read: boolean;
   isEncrypted?: boolean;
   deliveryStatus?: "sending" | "sent" | "delivered" | "read" | "failed";
-  replyTo?: {
-    messageId: string;
-    senderName: string;
-    text: string;
-  } | null;
+  replyTo?: { messageId: string; senderName: string; text: string } | null;
 }
 
 interface AppealTicket {
@@ -601,23 +617,18 @@ interface AppealTicket {
   typingUserName?: string | null;
 }
 
-interface NoteJoinUser {
+interface NoteEntry {
   id: string;
   userId: string;
   userName: string;
   userEmail: string;
   userPhoto?: string;
-  noteText: string;
-  joinedAt: any;
-  status: "joined" | "pending";
+  text?: string;
+  createdAt: any;
 }
 
 // ===== HERO MENURU TITLE =====
-const HeroMenuruTitle = ({
-  onNavbarShiftChange,
-}: {
-  onNavbarShiftChange: (shifted: boolean) => void;
-}) => {
+const HeroMenuruTitle = ({ onNavbarShiftChange }: { onNavbarShiftChange: (shifted: boolean) => void }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const [isMounted, setIsMounted] = useState(false);
@@ -632,17 +643,13 @@ const HeroMenuruTitle = ({
 
     const container = containerRef.current;
     const title = titleRef.current;
-
     const NAV_TOP = 10;
     const NAV_LEFT = 40;
     const NAV_FONT_SIZE = 70;
     const NAV_HEIGHT = 60;
 
     const ctx = gsap.context(() => {
-      const split = new SplitText(title, {
-        type: "chars",
-        charsClass: "hero-menuru-char",
-      });
+      const split = new SplitText(title, { type: "chars", charsClass: "hero-menuru-char" });
 
       gsap.set(split.chars, {
         opacity: 0,
@@ -699,15 +706,7 @@ const HeroMenuruTitle = ({
         0
       );
 
-      scrollTl.to(
-        container,
-        {
-          height: "80px",
-          duration: 1,
-          ease: "power2.inOut",
-        },
-        0
-      );
+      scrollTl.to(container, { height: "80px", duration: 1, ease: "power2.inOut" }, 0);
 
       return () => {
         if (split) split.revert();
@@ -772,10 +771,7 @@ const FooterMenuruTitle = () => {
     let ctx: any = null;
 
     const setup = () => {
-      split = new SplitText(title, {
-        type: "chars",
-        charsClass: "footer-menuru-char",
-      });
+      split = new SplitText(title, { type: "chars", charsClass: "footer-menuru-char" });
 
       ctx = gsap.context(() => {
         gsap.set(split.chars, {
@@ -854,7 +850,6 @@ const FooterMenuruTitle = () => {
           fontWeight: 700,
           color: "#0D3CFC",
           letterSpacing: "-0.05em",
-          textTransform: "none",
           lineHeight: "0.85",
           display: "block",
           textAlign: "left",
@@ -870,15 +865,7 @@ const FooterMenuruTitle = () => {
       >
         Menuru
       </span>
-
-      <div
-        style={{
-          width: "100%",
-          display: "flex",
-          justifyContent: "flex-start",
-          marginTop: "10px",
-        }}
-      >
+      <div style={{ width: "100%", display: "flex", justifyContent: "flex-start", marginTop: "10px" }}>
         <span
           style={{
             fontFamily: FONT_FAMILY,
@@ -897,15 +884,7 @@ const FooterMenuruTitle = () => {
 };
 
 // ===== COOKIE CONSENT POPUP =====
-const CookieConsentPopup = ({
-  user,
-  db,
-  isMounted,
-}: {
-  user: any;
-  db: any;
-  isMounted: boolean;
-}) => {
+const CookieConsentPopup = ({ user, db, isMounted }: { user: any; db: any; isMounted: boolean }) => {
   const [visible, setVisible] = useState(false);
   const [saving, setSaving] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -928,10 +907,9 @@ const CookieConsentPopup = ({
             }
           }
         } catch (err) {
-          console.error("Error checking cookie consent in Firestore:", err);
+          console.error("Error checking cookie consent:", err);
         }
       }
-
       try {
         const local = localStorage.getItem(COOKIE_CONSENT_STORAGE_KEY);
         if (local === "accepted") {
@@ -941,7 +919,6 @@ const CookieConsentPopup = ({
       } catch (e) {
         // ignore
       }
-
       if (!cancelled) setVisible(true);
     };
 
@@ -978,13 +955,9 @@ const CookieConsentPopup = ({
         const userRef = doc(db, "users", user.uid);
         await setDoc(
           userRef,
-          {
-            cookieConsent: consentPayload,
-            cookieConsentUpdatedAt: serverTimestamp(),
-          },
+          { cookieConsent: consentPayload, cookieConsentUpdatedAt: serverTimestamp() },
           { merge: true }
         );
-
         try {
           await addDoc(collection(db, "cookie_consents_log"), {
             userId: user.uid,
@@ -994,10 +967,10 @@ const CookieConsentPopup = ({
             timestamp: serverTimestamp(),
           });
         } catch (logErr) {
-          console.error("Error writing cookie consent log:", logErr);
+          console.error(logErr);
         }
       } catch (err) {
-        console.error("Error saving cookie consent to Firestore:", err);
+        console.error(err);
       }
     }
 
@@ -1076,14 +1049,12 @@ const CookieConsentPopup = ({
             Cookies
           </span>
         </div>
-
         <p style={{ fontSize: "13px", lineHeight: 1.55, color: "#333333", margin: 0 }}>
           We use cookies to improve your experience and analyse site usage.{" "}
           <Link href="/cookie-policy" style={{ color: "#0D3CFC", textDecoration: "underline", fontWeight: 600 }}>
             Cookie Policy
           </Link>
         </p>
-
         <button
           onClick={handleAccept}
           disabled={saving}
@@ -1098,13 +1069,7 @@ const CookieConsentPopup = ({
             fontWeight: 700,
             cursor: saving ? "not-allowed" : "pointer",
             fontFamily: FONT_FAMILY,
-            transition: "background-color 0.2s ease, transform 0.15s ease",
-          }}
-          onMouseEnter={(e) => {
-            if (!saving) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#000000";
-          }}
-          onMouseLeave={(e) => {
-            if (!saving) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#0D3CFC";
+            transition: "background-color 0.2s ease",
           }}
         >
           {saving ? "Saving..." : "Accept"}
@@ -1114,7 +1079,7 @@ const CookieConsentPopup = ({
   );
 };
 
-// ===== NAVBAR BUTTON COMPONENT =====
+// ===== NAVBAR BUTTON =====
 const NavbarButton = ({
   label,
   panelTitle,
@@ -1138,30 +1103,7 @@ const NavbarButton = ({
   descriptionTextColor = "rgba(255,255,255,0.9)",
   iconComponent,
   isResources = false,
-}: {
-  label: string;
-  panelTitle: string;
-  panelDescription: string;
-  panelImage: string;
-  panelRightTitle: string;
-  panelRightDescription: string;
-  iconType: "trust" | "career" | "resources";
-  bigPanelWidth?: number;
-  bigPanelHeight?: number;
-  buttonColor?: string;
-  buttonHoverColor?: string;
-  panelColor?: string;
-  iconButtonColor?: string;
-  iconButtonHoverColor?: string;
-  panelBoxColor?: string;
-  panelBoxBorder?: string;
-  labelTextColor?: string;
-  labelTextHoverColor?: string;
-  titleTextColor?: string;
-  descriptionTextColor?: string;
-  iconComponent?: React.ReactNode;
-  isResources?: boolean;
-}) => {
+}: any) => {
   const [open, setOpen] = useState(false);
   const linesTopRef = useRef<SVGLineElement>(null);
   const linesBottomRef = useRef<SVGLineElement>(null);
@@ -1231,11 +1173,10 @@ const NavbarButton = ({
           padding: "10px 16px",
           backgroundColor: open ? buttonHoverColor : buttonColor,
           backdropFilter: "blur(20px)",
-          WebkitBackdropFilter: "blur(20px)",
           borderRadius: "10px",
           border: "1px solid rgba(255,255,255,0.18)",
           boxShadow: open ? "0 8px 24px rgba(0,0,0,0.35)" : `0 8px 24px ${buttonColor}55`,
-          transition: "background-color 0.25s ease, box-shadow 0.25s ease",
+          transition: "background-color 0.25s ease",
           cursor: "pointer",
           position: "relative",
           zIndex: 2,
@@ -1249,7 +1190,6 @@ const NavbarButton = ({
             letterSpacing: "0.02em",
             fontFamily: FONT_FAMILY,
             whiteSpace: "nowrap",
-            transition: "color 0.25s ease",
           }}
         >
           {label}
@@ -1263,10 +1203,9 @@ const NavbarButton = ({
             height: "22px",
             backgroundColor: open ? iconButtonHoverColor : iconButtonColor,
             borderRadius: "6px",
-            transition: "background-color 0.25s ease",
           }}
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ display: "block" }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{ display: "block" }}>
             <line ref={linesTopRef} x1="4" y1="7" x2="20" y2="7" stroke={strokeColor} strokeWidth="2.5" strokeLinecap="round" />
             <line ref={linesBottomRef} x1="4" y1="17" x2="20" y2="17" stroke={strokeColor} strokeWidth="2.5" strokeLinecap="round" />
           </svg>
@@ -1286,7 +1225,6 @@ const NavbarButton = ({
             minHeight: `${bigPanelHeight}px`,
             backgroundColor: panelColor,
             backdropFilter: "blur(24px)",
-            WebkitBackdropFilter: "blur(24px)",
             borderRadius: "10px",
             border: "1px solid rgba(255,255,255,0.2)",
             boxShadow: `0 8px 32px ${panelColor}55`,
@@ -1305,17 +1243,20 @@ const NavbarButton = ({
                 <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                     <DocsIcon size={22} color={titleTextColor} />
-                    <span style={{ fontSize: "16px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>Docs</span>
+                    <span style={{ fontSize: "16px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>
+                      Docs
+                    </span>
                   </div>
                   <p style={{ fontSize: "12px", lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY, maxWidth: "340px" }}>
                     Dokumentasi lengkap panduan produk, API, dan tutorial Menuru.
                   </p>
                 </div>
-
                 <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                     <BrandIcon size={22} color={titleTextColor} />
-                    <span style={{ fontSize: "16px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>Brand</span>
+                    <span style={{ fontSize: "16px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>
+                      Brand
+                    </span>
                   </div>
                   <p style={{ fontSize: "12px", lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY, maxWidth: "340px" }}>
                     Aset visual, logo, dan panduan identitas brand Menuru.
@@ -1325,7 +1266,9 @@ const NavbarButton = ({
             ) : (
               <>
                 <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                  {iconComponent ? iconComponent : iconType === "trust" ? (
+                  {iconComponent ? (
+                    iconComponent
+                  ) : iconType === "trust" ? (
                     <TrustIcon size={26} color={titleTextColor} />
                   ) : iconType === "career" ? (
                     <CareerIcon size={26} color={titleTextColor} />
@@ -1336,35 +1279,66 @@ const NavbarButton = ({
                     {panelTitle}
                   </span>
                 </div>
-
                 <p style={{ fontSize: "13px", lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY, maxWidth: "340px" }}>
                   {panelDescription}
                 </p>
               </>
             )}
           </div>
-
           <div style={{ flex: "0 0 380px", display: "flex", flexDirection: "column", gap: "12px" }}>
             {isResources ? (
               <>
-                <div style={{ backgroundColor: panelBoxColor, border: `1px solid ${panelBoxBorder}`, borderRadius: "12px", padding: "12px", display: "flex", flexDirection: "column", gap: "8px" }}>
+                <div
+                  style={{
+                    backgroundColor: panelBoxColor,
+                    border: `1px solid ${panelBoxBorder}`,
+                    borderRadius: "12px",
+                    padding: "12px",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "8px",
+                  }}
+                >
                   <img src={panelImage} alt="Docs" style={{ width: "100%", height: "120px", objectFit: "contain", display: "block", borderRadius: "8px" }} />
-                  <span style={{ fontSize: "14px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>Docs Guide</span>
+                  <span style={{ fontSize: "14px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>
+                    Docs Guide
+                  </span>
                   <p style={{ fontSize: "12px", lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY }}>
                     Panduan lengkap dan referensi teknis.
                   </p>
                 </div>
-
-                <div style={{ backgroundColor: panelBoxColor, border: `1px solid ${panelBoxBorder}`, borderRadius: "12px", padding: "12px", display: "flex", flexDirection: "column", gap: "8px" }}>
+                <div
+                  style={{
+                    backgroundColor: panelBoxColor,
+                    border: `1px solid ${panelBoxBorder}`,
+                    borderRadius: "12px",
+                    padding: "12px",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "8px",
+                  }}
+                >
                   <img src={panelImage} alt="Brand" style={{ width: "100%", height: "120px", objectFit: "contain", display: "block", borderRadius: "8px" }} />
-                  <span style={{ fontSize: "14px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>Brand Assets</span>
+                  <span style={{ fontSize: "14px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>
+                    Brand Assets
+                  </span>
                   <p style={{ fontSize: "12px", lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY }}>
                     Logo, palet warna, dan identitas visual.
                   </p>
                 </div>
               </>
             ) : (
-              <div style={{ backgroundColor: panelBoxColor, border: `1px solid ${panelBoxBorder}`, borderRadius: "12px", padding: "14px", display: "flex", flexDirection: "column", gap: "10px" }}>
+              <div
+                style={{
+                  backgroundColor: panelBoxColor,
+                  border: `1px solid ${panelBoxBorder}`,
+                  borderRadius: "12px",
+                  padding: "14px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "10px",
+                }}
+              >
                 <img src={panelImage} alt={panelTitle} style={{ width: "100%", height: "170px", objectFit: "contain", display: "block", borderRadius: "10px" }} />
                 <span style={{ fontSize: "15px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>
                   {panelRightTitle}
@@ -1409,7 +1383,6 @@ const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
         bigPanelWidth={850}
         bigPanelHeight={260}
       />
-
       <NavbarButton
         label="Individual"
         panelTitle="Careers"
@@ -1421,7 +1394,6 @@ const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
         bigPanelWidth={850}
         bigPanelHeight={260}
       />
-
       <NavbarButton
         label="Resources"
         panelTitle="Docs & Brand"
@@ -1449,38 +1421,30 @@ const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
   );
 };
 
-// ===== RIGHT NAVBAR (Login / User dengan Rolling Text GSAP) =====
+// ===== RIGHT NAVBAR =====
 const RightNavbar = ({ user, auth, db }: { user: any; auth: any; db: any }) => {
   const rollingRef = useRef<HTMLDivElement>(null);
   const [rollingIndex, setRollingIndex] = useState(0);
-
   const displayName = user?.displayName || user?.email?.split("@")[0] || "User";
   const photoURL = user?.photoURL || "";
 
   useEffect(() => {
     if (!user) return;
-    if (!rollingRef.current) return;
-
     const interval = setInterval(() => {
       setRollingIndex((prev) => (prev + 1) % 3);
     }, 3000);
-
     return () => clearInterval(interval);
   }, [user]);
 
   useEffect(() => {
-    if (!user) return;
-    if (!rollingRef.current) return;
-
+    if (!user || !rollingRef.current) return;
     const el = rollingRef.current;
     gsap.killTweensOf(el);
-
     gsap.fromTo(
       el,
       { yPercent: 100, opacity: 0, rotateX: -90, transformOrigin: "50% 100%" },
       { yPercent: 0, opacity: 1, rotateX: 0, duration: 0.6, ease: "back.out(1.7)" }
     );
-
     return () => {
       gsap.killTweensOf(el);
     };
@@ -1515,7 +1479,6 @@ const RightNavbar = ({ user, auth, db }: { user: any; auth: any; db: any }) => {
           padding: "10px 18px 10px 16px",
           backgroundColor: "rgba(0, 0, 0, 0.75)",
           backdropFilter: "blur(20px)",
-          WebkitBackdropFilter: "blur(20px)",
           borderRadius: "10px",
           border: "1px solid rgba(255,255,255,0.15)",
           boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
@@ -1618,7 +1581,6 @@ const RightNavbar = ({ user, auth, db }: { user: any; auth: any; db: any }) => {
               </div>
             </>
           )}
-
           {rollingIndex === 1 && (
             <Link
               href="/dashboard"
@@ -1645,7 +1607,6 @@ const RightNavbar = ({ user, auth, db }: { user: any; auth: any; db: any }) => {
               <NorthEastArrow size={50} color={BLUE} />
             </Link>
           )}
-
           {rollingIndex === 2 && (
             <button
               onClick={handleLogout}
@@ -1661,15 +1622,7 @@ const RightNavbar = ({ user, auth, db }: { user: any; auth: any; db: any }) => {
                 fontFamily: FONT_FAMILY,
               }}
             >
-              <span
-                style={{
-                  color: BLUE,
-                  fontSize: "70px",
-                  fontWeight: 700,
-                  letterSpacing: "-0.03em",
-                  lineHeight: 1,
-                }}
-              >
+              <span style={{ color: BLUE, fontSize: "70px", fontWeight: 700, letterSpacing: "-0.03em", lineHeight: 1 }}>
                 Logout
               </span>
               <LogoutIcon size={50} color={BLUE} />
@@ -1682,23 +1635,10 @@ const RightNavbar = ({ user, auth, db }: { user: any; auth: any; db: any }) => {
 };
 
 // ===== ONBOARDING TOUR =====
-const OnboardingTour = ({
-  steps,
-  onComplete,
-  isActive,
-  currentStep,
-  setCurrentStep,
-}: {
-  steps: TourStep[];
-  onComplete: () => void;
-  isActive: boolean;
-  currentStep: number;
-  setCurrentStep: (n: number) => void;
-}) => {
+const OnboardingTour = ({ steps, onComplete, isActive, currentStep, setCurrentStep }: any) => {
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
   const [tooltipPos, setTooltipPos] = useState({ top: 0, left: 0 });
   const [arrowPos, setArrowPos] = useState<"top" | "bottom" | "left" | "right">("bottom");
-
   const step = steps[currentStep];
 
   useEffect(() => {
@@ -1794,18 +1734,73 @@ const OnboardingTour = ({
       borderStyle: "solid",
       pointerEvents: "none",
     };
-
-    if (arrowPos === "top") return <div style={{ ...baseStyle, top: -arrowSize, left: "50%", marginLeft: -arrowSize, borderWidth: `0 ${arrowSize}px ${arrowSize}px ${arrowSize}px`, borderColor: `transparent transparent #0D3CFC transparent` }} />;
-    if (arrowPos === "bottom") return <div style={{ ...baseStyle, bottom: -arrowSize, left: "50%", marginLeft: -arrowSize, borderWidth: `${arrowSize}px ${arrowSize}px 0 ${arrowSize}px`, borderColor: `#0D3CFC transparent transparent transparent` }} />;
-    if (arrowPos === "left") return <div style={{ ...baseStyle, left: -arrowSize, top: "50%", marginTop: -arrowSize, borderWidth: `${arrowSize}px ${arrowSize}px ${arrowSize}px 0`, borderColor: `transparent #0D3CFC transparent transparent` }} />;
-    if (arrowPos === "right") return <div style={{ ...baseStyle, right: -arrowSize, top: "50%", marginTop: -arrowSize, borderWidth: `${arrowSize}px 0 ${arrowSize}px ${arrowSize}px`, borderColor: `transparent transparent transparent #0D3CFC` }} />;
+    if (arrowPos === "top")
+      return (
+        <div
+          style={{
+            ...baseStyle,
+            top: -arrowSize,
+            left: "50%",
+            marginLeft: -arrowSize,
+            borderWidth: `0 ${arrowSize}px ${arrowSize}px ${arrowSize}px`,
+            borderColor: `transparent transparent #0D3CFC transparent`,
+          }}
+        />
+      );
+    if (arrowPos === "bottom")
+      return (
+        <div
+          style={{
+            ...baseStyle,
+            bottom: -arrowSize,
+            left: "50%",
+            marginLeft: -arrowSize,
+            borderWidth: `${arrowSize}px ${arrowSize}px 0 ${arrowSize}px`,
+            borderColor: `#0D3CFC transparent transparent transparent`,
+          }}
+        />
+      );
+    if (arrowPos === "left")
+      return (
+        <div
+          style={{
+            ...baseStyle,
+            left: -arrowSize,
+            top: "50%",
+            marginTop: -arrowSize,
+            borderWidth: `${arrowSize}px ${arrowSize}px ${arrowSize}px 0`,
+            borderColor: `transparent #0D3CFC transparent transparent`,
+          }}
+        />
+      );
+    if (arrowPos === "right")
+      return (
+        <div
+          style={{
+            ...baseStyle,
+            right: -arrowSize,
+            top: "50%",
+            marginTop: -arrowSize,
+            borderWidth: `${arrowSize}px 0 ${arrowSize}px ${arrowSize}px`,
+            borderColor: `transparent transparent transparent #0D3CFC`,
+          }}
+        />
+      );
     return null;
   };
 
   return (
     <>
-      <div onClick={handleSkip} style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.6)", zIndex: 9998, pointerEvents: "auto" }} />
-
+      <div
+        onClick={handleSkip}
+        style={{
+          position: "fixed",
+          inset: 0,
+          backgroundColor: "rgba(0,0,0,0.6)",
+          zIndex: 9998,
+          pointerEvents: "auto",
+        }}
+      />
       {targetRect && (
         <div
           style={{
@@ -1822,7 +1817,6 @@ const OnboardingTour = ({
           }}
         />
       )}
-
       <div
         style={{
           position: "fixed",
@@ -1834,27 +1828,56 @@ const OnboardingTour = ({
           padding: "22px 24px",
           zIndex: 10000,
           fontFamily: FONT_FAMILY,
-          boxShadow: "none",
-          border: "none",
           transition: "all 0.3s ease",
         }}
       >
         {renderArrow()}
-
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
-          <span style={{ fontSize: "11px", fontWeight: 700, color: "#ffffff", letterSpacing: "0.1em", textTransform: "uppercase", opacity: 0.9 }}>
+          <span
+            style={{
+              fontSize: "11px",
+              fontWeight: 700,
+              color: "#ffffff",
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              opacity: 0.9,
+            }}
+          >
             Step {currentStep + 1} of {steps.length}
           </span>
-          <button onClick={handleSkip} style={{ background: "transparent", border: "none", color: "#ffffff", cursor: "pointer", fontSize: "18px", fontFamily: FONT_FAMILY, padding: 0, lineHeight: 1, opacity: 0.9 }} aria-label="Skip tour">
+          <button
+            onClick={handleSkip}
+            style={{
+              background: "transparent",
+              border: "none",
+              color: "#ffffff",
+              cursor: "pointer",
+              fontSize: "18px",
+              fontFamily: FONT_FAMILY,
+              padding: 0,
+              lineHeight: 1,
+              opacity: 0.9,
+            }}
+          >
             ×
           </button>
         </div>
-
-        <h4 style={{ fontSize: "18px", fontWeight: 700, color: "#ffffff", margin: 0, marginBottom: "8px" }}>{step.title}</h4>
-        <p style={{ fontSize: "13px", fontWeight: 400, color: "#ffffff", margin: 0, marginBottom: "18px", lineHeight: 1.5, opacity: 0.95 }}>
+        <h4 style={{ fontSize: "18px", fontWeight: 700, color: "#ffffff", margin: 0, marginBottom: "8px" }}>
+          {step.title}
+        </h4>
+        <p
+          style={{
+            fontSize: "13px",
+            fontWeight: 400,
+            color: "#ffffff",
+            margin: 0,
+            marginBottom: "18px",
+            lineHeight: 1.5,
+            opacity: 0.95,
+          }}
+        >
           {step.content}
         </p>
-
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px" }}>
           <button
             onClick={handlePrev}
@@ -1873,7 +1896,21 @@ const OnboardingTour = ({
           >
             Back
           </button>
-          <button onClick={handleSkip} style={{ padding: "7px 14px", backgroundColor: "transparent", color: "#ffffff", border: "none", borderRadius: "8px", fontSize: "12px", fontWeight: 500, cursor: "pointer", fontFamily: FONT_FAMILY, opacity: 0.8 }}>
+          <button
+            onClick={handleSkip}
+            style={{
+              padding: "7px 14px",
+              backgroundColor: "transparent",
+              color: "#ffffff",
+              border: "none",
+              borderRadius: "8px",
+              fontSize: "12px",
+              fontWeight: 500,
+              cursor: "pointer",
+              fontFamily: FONT_FAMILY,
+              opacity: 0.8,
+            }}
+          >
             Skip Tour
           </button>
           <button
@@ -1897,9 +1934,8 @@ const OnboardingTour = ({
             <NorthEastArrow size={14} color="#0D3CFC" />
           </button>
         </div>
-
         <div style={{ display: "flex", justifyContent: "center", gap: "5px", marginTop: "14px" }}>
-          {steps.map((_, i) => (
+          {steps.map((_: any, i: number) => (
             <div
               key={i}
               style={{
@@ -1938,27 +1974,14 @@ const RollingNewMessage = ({
 
     const container = containerRef.current;
     const textEl = textRef.current;
-
     gsap.killTweensOf([container, textEl]);
-
     gsap.set(container, { height: 0, opacity: 0 });
     gsap.set(textEl, { yPercent: 120, opacity: 0, rotateX: -90, transformOrigin: "50% 100%" });
 
     const tl = gsap.timeline();
-    tl.to(container, {
-      height: 24,
-      opacity: 1,
-      duration: 0.4,
-      ease: "power2.out",
-    }).to(
+    tl.to(container, { height: 24, opacity: 1, duration: 0.4, ease: "power2.out" }).to(
       textEl,
-      {
-        yPercent: 0,
-        opacity: 1,
-        rotateX: 0,
-        duration: 0.6,
-        ease: "back.out(1.7)",
-      },
+      { yPercent: 0, opacity: 1, rotateX: 0, duration: 0.6, ease: "back.out(1.7)" },
       "-=0.2"
     );
 
@@ -2006,14 +2029,8 @@ const RollingNewMessage = ({
   );
 };
 
-// ===== CLOSE BUTTON WITH GSAP =====
-const CloseRoomButton = ({
-  onConfirm,
-  disabled,
-}: {
-  onConfirm: () => void;
-  disabled?: boolean;
-}) => {
+// ===== CLOSE BUTTON =====
+const CloseRoomButton = ({ onConfirm, disabled }: { onConfirm: () => void; disabled?: boolean }) => {
   const btnRef = useRef<HTMLButtonElement>(null);
   const iconRef = useRef<HTMLDivElement>(null);
 
@@ -2029,19 +2046,13 @@ const CloseRoomButton = ({
 
   const handleEnter = () => {
     if (disabled) return;
-    if (btnRef.current) {
-      gsap.to(btnRef.current, { scale: 1.08, duration: 0.25, ease: "power2.out" });
-    }
-    if (iconRef.current) {
-      gsap.to(iconRef.current, { rotate: "+=90", duration: 0.35, ease: "power2.out" });
-    }
+    if (btnRef.current) gsap.to(btnRef.current, { scale: 1.08, duration: 0.25, ease: "power2.out" });
+    if (iconRef.current) gsap.to(iconRef.current, { rotate: "+=90", duration: 0.35, ease: "power2.out" });
   };
 
   const handleLeave = () => {
     if (disabled) return;
-    if (btnRef.current) {
-      gsap.to(btnRef.current, { scale: 1, duration: 0.25, ease: "power2.out" });
-    }
+    if (btnRef.current) gsap.to(btnRef.current, { scale: 1, duration: 0.25, ease: "power2.out" });
   };
 
   const handleClick = () => {
@@ -2061,8 +2072,6 @@ const CloseRoomButton = ({
       onMouseEnter={handleEnter}
       onMouseLeave={handleLeave}
       disabled={disabled}
-      title="Close room"
-      aria-label="Close room"
       style={{
         width: "36px",
         height: "36px",
@@ -2075,7 +2084,6 @@ const CloseRoomButton = ({
         cursor: disabled ? "not-allowed" : "pointer",
         padding: 0,
         opacity: disabled ? 0.4 : 1,
-        transition: "background-color 0.2s ease",
       }}
     >
       <div ref={iconRef} style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -2085,7 +2093,7 @@ const CloseRoomButton = ({
   );
 };
 
-// ===== BANNED INFO BANNER (BODY CHAT) =====
+// ===== BANNED INFO BANNER =====
 const BannedInfoBanner = ({
   banReason,
   banMessage,
@@ -2101,11 +2109,7 @@ const BannedInfoBanner = ({
 
   useEffect(() => {
     if (bannerRef.current) {
-      gsap.fromTo(
-        bannerRef.current,
-        { opacity: 0, y: -20 },
-        { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }
-      );
+      gsap.fromTo(bannerRef.current, { opacity: 0, y: -20 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" });
     }
   }, []);
 
@@ -2137,15 +2141,7 @@ const BannedInfoBanner = ({
           Account Permanently Banned
         </span>
       </div>
-      <div
-        style={{
-          fontSize: "14px",
-          color: WHITE,
-          fontFamily: FONT_FAMILY,
-          lineHeight: 1.5,
-          opacity: 0.95,
-        }}
-      >
+      <div style={{ fontSize: "14px", color: WHITE, fontFamily: FONT_FAMILY, lineHeight: 1.5, opacity: 0.95 }}>
         <strong>Reason:</strong> {banReason || "Suspicious Activity"}
       </div>
       {banMessage && (
@@ -2210,20 +2206,8 @@ const BannedInfoBanner = ({
   );
 };
 
-// ===== APPEAL CHAT ROOM (BANDING) =====
-const AppealChatRoom = ({
-  user,
-  isAdmin,
-  db,
-  appealTicket,
-  onClose,
-}: {
-  user: any;
-  isAdmin: boolean;
-  db: any;
-  appealTicket: AppealTicket;
-  onClose: () => void;
-}) => {
+// ===== APPEAL CHAT ROOM =====
+const AppealChatRoom = ({ user, isAdmin, db, appealTicket, onClose }: any) => {
   const [messages, setMessages] = useState<AppealMessage[]>([]);
   const [messageText, setMessageText] = useState("");
   const [replyTo, setReplyTo] = useState<AppealMessage | null>(null);
@@ -2233,20 +2217,14 @@ const AppealChatRoom = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatMessagesContainerRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const prevMessagesLenRef = useRef<number>(0);
 
   useEffect(() => {
-    getCryptoKey()
-      .then(() => setEncryptionReady(true))
-      .catch(() => setEncryptionReady(true));
+    getCryptoKey().then(() => setEncryptionReady(true)).catch(() => setEncryptionReady(true));
   }, []);
 
   useEffect(() => {
     if (!db || !appealTicket) return;
-    const q = query(
-      collection(db, "appeal_tickets", appealTicket.id, "messages"),
-      orderBy("timestamp", "asc")
-    );
+    const q = query(collection(db, "appeal_tickets", appealTicket.id, "messages"), orderBy("timestamp", "asc"));
     const unsubscribe = onSnapshot(q, async (snapshot: any) => {
       const msgList: AppealMessage[] = [];
       for (const docSnap of snapshot.docs) {
@@ -2261,7 +2239,6 @@ const AppealChatRoom = ({
         }
         msgList.push({ id: docSnap.id, ...data, text } as AppealMessage);
       }
-      prevMessagesLenRef.current = msgList.length;
       setMessages(msgList);
       requestAnimationFrame(() => {
         if (chatMessagesContainerRef.current) {
@@ -2272,7 +2249,6 @@ const AppealChatRoom = ({
     return () => unsubscribe();
   }, [db, appealTicket]);
 
-  // Mark as read
   useEffect(() => {
     if (!db || !appealTicket || !user) return;
     const unread = messages.filter((m) => m.senderId !== user.uid && !m.read);
@@ -2282,7 +2258,6 @@ const AppealChatRoom = ({
     });
   }, [messages, appealTicket, db, user]);
 
-  // Typing indicator
   useEffect(() => {
     if (!db || !appealTicket) return;
     const ticketRef = doc(db, "appeal_tickets", appealTicket.id);
@@ -2308,19 +2283,11 @@ const AppealChatRoom = ({
         typingUserName: user.displayName || user.email || "User",
       });
     } else {
-      await updateDoc(ticketRef, {
-        typing: false,
-        typingUserId: null,
-        typingUserName: null,
-      });
+      await updateDoc(ticketRef, { typing: false, typingUserId: null, typingUserName: null });
     }
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     typingTimeoutRef.current = setTimeout(async () => {
-      await updateDoc(ticketRef, {
-        typing: false,
-        typingUserId: null,
-        typingUserName: null,
-      });
+      await updateDoc(ticketRef, { typing: false, typingUserId: null, typingUserName: null });
     }, 2000);
   };
 
@@ -2364,7 +2331,7 @@ const AppealChatRoom = ({
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     } catch (error) {
       console.error("Error sending appeal message:", error);
-      alert("An error occurred while sending the message. Please try again.");
+      alert("An error occurred while sending the message.");
     }
   };
 
@@ -2421,7 +2388,6 @@ const AppealChatRoom = ({
         border: `2px solid ${BLUE}`,
       }}
     >
-      {/* Header */}
       <div
         style={{
           padding: "16px 20px",
@@ -2437,13 +2403,7 @@ const AppealChatRoom = ({
             {isAdmin ? `Banding: ${appealTicket.userName}` : "Chat Banding dengan Admin"}
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-            <StabiloBadge
-              label="Banding"
-              bg={WHITE}
-              text={BLUE}
-              border={WHITE}
-              size="sm"
-            />
+            <StabiloBadge label="Banding" bg={WHITE} text={BLUE} border={WHITE} size="sm" />
             {typing && (
               <span style={{ fontSize: "12px", color: WHITE, fontStyle: "italic", fontWeight: 700 }}>
                 {typingUserName} is typing...
@@ -2468,8 +2428,6 @@ const AppealChatRoom = ({
           Tutup
         </button>
       </div>
-
-      {/* Ban Info */}
       <div
         style={{
           padding: "12px 20px",
@@ -2487,8 +2445,6 @@ const AppealChatRoom = ({
           </div>
         )}
       </div>
-
-      {/* Messages */}
       <div
         ref={chatMessagesContainerRef}
         className="chat-messages-container"
@@ -2561,7 +2517,6 @@ const AppealChatRoom = ({
                     </span>
                   </div>
                 </div>
-                {/* Reply button */}
                 <button
                   onClick={() => setReplyTo(msg)}
                   style={{
@@ -2588,8 +2543,6 @@ const AppealChatRoom = ({
         )}
         <div ref={messagesEndRef} />
       </div>
-
-      {/* Reply Preview */}
       {replyTo && (
         <div
           style={{
@@ -2603,8 +2556,18 @@ const AppealChatRoom = ({
           }}
         >
           <ReplyIcon size={14} color={BLUE} />
-          <div style={{ flex: 1, fontSize: "12px", color: BLUE, fontFamily: FONT_FAMILY, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-            <strong>{replyTo.senderName}:</strong> {replyTo.text.length > 50 ? replyTo.text.substring(0, 50) + "..." : replyTo.text}
+          <div
+            style={{
+              flex: 1,
+              fontSize: "12px",
+              color: BLUE,
+              fontFamily: FONT_FAMILY,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
+            <strong>{replyTo.senderName}:</strong> {replyTo.text}
           </div>
           <button
             onClick={() => setReplyTo(null)}
@@ -2623,8 +2586,6 @@ const AppealChatRoom = ({
           </button>
         </div>
       )}
-
-      {/* Input */}
       <div
         style={{
           padding: "14px 20px",
@@ -2682,560 +2643,8 @@ const AppealChatRoom = ({
   );
 };
 
-// ===== JOIN NOTE SECTION (AYO BERGABUNG BERSAMA FITUR NOTES KAMI) =====
-const JoinNoteSection = ({
-  user,
-  db,
-  isMounted,
-}: {
-  user: any;
-  db: any;
-  isMounted: boolean;
-}) => {
-  const [noteText, setNoteText] = useState("");
-  const [joining, setJoining] = useState(false);
-  const [joined, setJoined] = useState(false);
-  const [joinUsers, setJoinUsers] = useState<NoteJoinUser[]>([]);
-  const [loadingUsers, setLoadingUsers] = useState(true);
-
-  const titleRef = useRef<HTMLHeadingElement>(null);
-  const subtitleRef = useRef<HTMLParagraphElement>(null);
-  const userInfoRef = useRef<HTMLDivElement>(null);
-  const listRef = useRef<HTMLDivElement>(null);
-
-  // Load users yang sudah bergabung
-  useEffect(() => {
-    if (!db || !isMounted) return;
-    const q = query(
-      collection(db, "note_joins"),
-      orderBy("joinedAt", "desc"),
-      limit(50)
-    );
-    const unsub = onSnapshot(q, (snapshot: any) => {
-      const list: NoteJoinUser[] = [];
-      snapshot.forEach((docSnap: any) => {
-        list.push({ id: docSnap.id, ...docSnap.data() } as NoteJoinUser);
-      });
-      setJoinUsers(list);
-      setLoadingUsers(false);
-    });
-    return () => unsub();
-  }, [db, isMounted]);
-
-  // Cek apakah user sudah bergabung
-  useEffect(() => {
-    if (!db || !user || !isMounted) {
-      setJoined(false);
-      return;
-    }
-    const q = query(
-      collection(db, "note_joins"),
-      where("userId", "==", user.uid),
-      limit(1)
-    );
-    const unsub = onSnapshot(q, (snapshot: any) => {
-      setJoined(!snapshot.empty);
-    });
-    return () => unsub();
-  }, [db, user, isMounted]);
-
-  // GSAP Animation untuk title reveal
-  useEffect(() => {
-    if (!isMounted) return;
-    if (!titleRef.current) return;
-
-    const ctx = gsap.context(() => {
-      const split = new SplitText(titleRef.current, {
-        type: "chars, words",
-        charsClass: "join-note-char",
-      });
-
-      gsap.set(split.chars, {
-        opacity: 0,
-        yPercent: 120,
-        rotationX: -90,
-        transformOrigin: "50% 100%",
-        force3D: true,
-      });
-
-      gsap.to(split.chars, {
-        opacity: 1,
-        yPercent: 0,
-        rotationX: 0,
-        duration: 1,
-        stagger: 0.03,
-        ease: "back.out(1.7)",
-        scrollTrigger: {
-          trigger: titleRef.current,
-          start: "top 85%",
-          end: "top 50%",
-          toggleActions: "play none none reverse",
-          invalidateOnRefresh: true,
-        },
-      });
-    }, titleRef);
-
-    return () => ctx.revert();
-  }, [isMounted]);
-
-  // GSAP Animation untuk subtitle
-  useEffect(() => {
-    if (!isMounted) return;
-    if (!subtitleRef.current) return;
-
-    const el = subtitleRef.current;
-    gsap.fromTo(
-      el,
-      { opacity: 0, y: 30, filter: "blur(8px)" },
-      {
-        opacity: 1,
-        y: 0,
-        filter: "blur(0px)",
-        duration: 1,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: el,
-          start: "top 90%",
-          toggleActions: "play none none reverse",
-        },
-      }
-    );
-
-    return () => {
-      gsap.killTweensOf(el);
-    };
-  }, [isMounted]);
-
-  // GSAP Animation untuk user info
-  useEffect(() => {
-    if (!isMounted) return;
-    if (!userInfoRef.current) return;
-
-    const el = userInfoRef.current;
-    gsap.fromTo(
-      el,
-      { opacity: 0, y: 40, scale: 0.95 },
-      {
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        duration: 0.8,
-        ease: "back.out(1.7)",
-        scrollTrigger: {
-          trigger: el,
-          start: "top 90%",
-          toggleActions: "play none none reverse",
-        },
-      }
-    );
-
-    return () => {
-      gsap.killTweensOf(el);
-    };
-  }, [isMounted]);
-
-  // GSAP Animation untuk list users
-  useEffect(() => {
-    if (!isMounted) return;
-    if (!listRef.current) return;
-    if (joinUsers.length === 0) return;
-
-    const cards = listRef.current.querySelectorAll(".join-note-card");
-    if (cards.length === 0) return;
-
-    gsap.fromTo(
-      cards,
-      { opacity: 0, y: 30, scale: 0.9 },
-      {
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        duration: 0.6,
-        stagger: 0.06,
-        ease: "back.out(1.7)",
-        scrollTrigger: {
-          trigger: listRef.current,
-          start: "top 90%",
-          toggleActions: "play none none reverse",
-        },
-      }
-    );
-
-    return () => {
-      gsap.killTweensOf(cards);
-    };
-  }, [isMounted, joinUsers.length]);
-
-  const handleJoin = async () => {
-    if (!db || !user || joining || joined) return;
-    setJoining(true);
-    try {
-      await addDoc(collection(db, "note_joins"), {
-        userId: user.uid,
-        userName: user.displayName || user.email?.split("@")[0] || "User",
-        userEmail: user.email || "",
-        userPhoto: user.photoURL || "",
-        noteText: noteText.trim() || "Saya ingin bergabung di fitur Note!",
-        joinedAt: serverTimestamp(),
-        status: "joined",
-      });
-      setNoteText("");
-    } catch (error) {
-      console.error("Error joining note:", error);
-      alert("Gagal bergabung. Silakan coba lagi.");
-    } finally {
-      setJoining(false);
-    }
-  };
-
-  const displayName = user?.displayName || user?.email?.split("@")[0] || "User";
-  const photoURL = user?.photoURL || "";
-  const email = user?.email || "";
-
-  return (
-    <div
-      style={{
-        marginTop: "60px",
-        marginBottom: "40px",
-        fontFamily: FONT_FAMILY,
-      }}
-    >
-      {/* ===== TITLE dengan GSAP Reveal ===== */}
-      <h3
-        ref={titleRef}
-        style={{
-          fontFamily: FONT_FAMILY,
-          fontSize: "72px",
-          fontWeight: 700,
-          color: BLUE,
-          letterSpacing: "-0.04em",
-          lineHeight: 1.05,
-          margin: 0,
-          marginBottom: "20px",
-          textAlign: "left",
-          WebkitFontSmoothing: "antialiased",
-          MozOsxFontSmoothing: "grayscale",
-        }}
-      >
-        Ayo bergabung bersama fitur Notes kami
-      </h3>
-
-      {/* ===== SUBTITLE dengan GSAP Reveal ===== */}
-      <p
-        ref={subtitleRef}
-        style={{
-          fontFamily: FONT_FAMILY,
-          fontSize: "18px",
-          fontWeight: 500,
-          color: "#333",
-          lineHeight: 1.5,
-          margin: 0,
-          marginBottom: "40px",
-          maxWidth: "720px",
-        }}
-      >
-        Bagikan catatan Anda dan jadilah bagian dari komunitas Menuru Note.
-      </p>
-
-      {/* ===== USER INFO (dari Firebase) dengan GSAP Reveal ===== */}
-      {user && (
-        <div
-          ref={userInfoRef}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "16px",
-            marginBottom: "32px",
-            flexWrap: "wrap",
-          }}
-        >
-          {/* FP User */}
-          <div
-            style={{
-              width: "72px",
-              height: "72px",
-              borderRadius: "50%",
-              overflow: "hidden",
-              backgroundColor: BLUE,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-              border: `2px solid ${BLUE}`,
-            }}
-          >
-            {photoURL ? (
-              <img
-                src={photoURL}
-                alt={displayName}
-                style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-                referrerPolicy="no-referrer"
-              />
-            ) : (
-              <span style={{ fontSize: "28px", fontWeight: 800, color: WHITE }}>
-                {displayName.charAt(0).toUpperCase()}
-              </span>
-            )}
-          </div>
-
-          {/* Nama + Email */}
-          <div style={{ flex: "1 1 200px", minWidth: 0 }}>
-            <div
-              style={{
-                fontSize: "22px",
-                fontWeight: 700,
-                color: BLUE,
-                marginBottom: "4px",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {displayName}
-            </div>
-            <div
-              style={{
-                fontSize: "14px",
-                fontWeight: 500,
-                color: "#666",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {email}
-            </div>
-          </div>
-
-          {/* Status Sudah Bergabung */}
-          {joined && (
-            <div
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "8px",
-                padding: "10px 18px",
-                backgroundColor: BLUE,
-                borderRadius: "100px",
-                flexShrink: 0,
-              }}
-            >
-              <CheckIcon size={16} color={WHITE} />
-              <span
-                style={{
-                  fontSize: "13px",
-                  fontWeight: 700,
-                  color: WHITE,
-                  fontFamily: FONT_FAMILY,
-                  letterSpacing: "0.5px",
-                  textTransform: "uppercase",
-                }}
-              >
-                Sudah Bergabung
-              </span>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* ===== FORM KIRIM NOTE ===== */}
-      {user && !joined && (
-        <div style={{ marginBottom: "40px" }}>
-          <textarea
-            value={noteText}
-            onChange={(e) => setNoteText(e.target.value)}
-            placeholder="Tulis catatan atau pesan Anda untuk komunitas Note..."
-            rows={3}
-            style={{
-              width: "100%",
-              maxWidth: "720px",
-              padding: "16px 20px",
-              border: `1.5px solid ${BLUE}40`,
-              borderRadius: "12px",
-              fontSize: "15px",
-              fontFamily: FONT_FAMILY,
-              outline: "none",
-              resize: "vertical",
-              backgroundColor: WHITE,
-              color: "#000",
-              boxSizing: "border-box",
-              marginBottom: "12px",
-            }}
-          />
-          <button
-            onClick={handleJoin}
-            disabled={joining}
-            style={{
-              padding: "14px 32px",
-              backgroundColor: joining ? "#7d97f7" : BLUE,
-              color: WHITE,
-              border: "none",
-              borderRadius: "100px",
-              fontSize: "14px",
-              fontWeight: 800,
-              cursor: joining ? "not-allowed" : "pointer",
-              fontFamily: FONT_FAMILY,
-              letterSpacing: "0.5px",
-              textTransform: "uppercase",
-            }}
-          >
-            {joining ? "Mengirim..." : "Kirim & Bergabung"}
-          </button>
-        </div>
-      )}
-
-      {/* ===== DAFTAR SUDAH BERGABUNG (dari Firebase) ===== */}
-      {joinUsers.length > 0 && (
-        <div ref={listRef}>
-          <div
-            style={{
-              fontSize: "14px",
-              fontWeight: 800,
-              color: BLUE,
-              marginBottom: "18px",
-              letterSpacing: "0.5px",
-              textTransform: "uppercase",
-            }}
-          >
-            Sudah Bergabung ({joinUsers.length})
-          </div>
-
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: "16px",
-            }}
-          >
-            {joinUsers.map((u) => (
-              <div
-                key={u.id}
-                className="join-note-card"
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "12px",
-                  padding: "12px 18px",
-                  backgroundColor: "#F7F8FF",
-                  borderRadius: "100px",
-                  border: `1.5px solid ${BLUE}20`,
-                }}
-              >
-                <div
-                  style={{
-                    width: "40px",
-                    height: "40px",
-                    borderRadius: "50%",
-                    overflow: "hidden",
-                    backgroundColor: BLUE,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    flexShrink: 0,
-                    border: `1.5px solid ${BLUE}`,
-                  }}
-                >
-                  {u.userPhoto ? (
-                    <img
-                      src={u.userPhoto}
-                      alt={u.userName}
-                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                      referrerPolicy="no-referrer"
-                    />
-                  ) : (
-                    <span style={{ fontSize: "16px", fontWeight: 800, color: WHITE }}>
-                      {(u.userName || "U").charAt(0).toUpperCase()}
-                    </span>
-                  )}
-                </div>
-                <div style={{ minWidth: 0 }}>
-                  <div
-                    style={{
-                      fontSize: "14px",
-                      fontWeight: 700,
-                      color: BLUE,
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                      maxWidth: "180px",
-                    }}
-                  >
-                    {u.userName}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: "11px",
-                      color: "#666",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                      maxWidth: "180px",
-                    }}
-                  >
-                    {u.userEmail}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* ===== JIKA BELUM LOGIN ===== */}
-      {!user && (
-        <div
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "12px",
-            padding: "14px 24px",
-            backgroundColor: "#F7F8FF",
-            borderRadius: "100px",
-            border: `1.5px solid ${BLUE}20`,
-          }}
-        >
-          <span style={{ fontSize: "14px", color: "#333", fontWeight: 500 }}>
-            Silakan login untuk bergabung
-          </span>
-          <Link href="/signin" style={{ textDecoration: "none" }}>
-            <button
-              style={{
-                padding: "8px 20px",
-                backgroundColor: BLUE,
-                color: WHITE,
-                border: "none",
-                borderRadius: "100px",
-                fontSize: "13px",
-                fontWeight: 700,
-                cursor: "pointer",
-                fontFamily: FONT_FAMILY,
-              }}
-            >
-              Login
-            </button>
-          </Link>
-        </div>
-      )}
-    </div>
-  );
-};
-
-// ===== LIVE CHAT AGENT COMPONENT =====
-const LiveChatAgent = ({
-  user,
-  isAdmin,
-  db,
-  auth,
-  onOpenAppealChat,
-  onOpenBannedAppealChat,
-}: {
-  user: any;
-  isAdmin: boolean;
-  db: any;
-  auth: any;
-  onOpenAppealChat: (ticket: AppealTicket) => void;
-  onOpenBannedAppealChat: (ticket: AppealTicket) => void;
-}) => {
+// ===== LIVE CHAT AGENT =====
+const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBannedAppealChat }: any) => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -3251,31 +2660,23 @@ const LiveChatAgent = ({
   const [canCreateTicket, setCanCreateTicket] = useState(true);
   const [canSendMessage, setCanSendMessage] = useState(true);
   const [replyTo, setReplyTo] = useState<ChatMessage | null>(null);
-
-  // Appeal states
   const [appealTickets, setAppealTickets] = useState<AppealTicket[]>([]);
   const [hasAppeal, setHasAppeal] = useState(false);
-
-  // Admin chat states
   const [onlineAdmins, setOnlineAdmins] = useState<OnlineUser[]>([]);
   const [selectedAdmin, setSelectedAdmin] = useState<OnlineUser | null>(null);
   const [adminChatMessages, setAdminChatMessages] = useState<ChatMessage[]>([]);
   const [adminChatText, setAdminChatText] = useState("");
   const [showAdminChat, setShowAdminChat] = useState(false);
   const [adminChatReplyTo, setAdminChatReplyTo] = useState<ChatMessage | null>(null);
-
   const [onlineAgents, setOnlineAgents] = useState<OnlineUser[]>([]);
   const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
   const [ticketPreviews, setTicketPreviews] = useState<{ [ticketId: string]: LastMessagePreview[] }>({});
   const [ticketMsgCounts, setTicketMsgCounts] = useState<{ [ticketId: string]: number }>({});
   const [searchQuery, setSearchQuery] = useState("");
-
   const [latestRollingMessage, setLatestRollingMessage] = useState<LastMessagePreview | null>(null);
   const [rollingKey, setRollingKey] = useState(0);
-
   const [showTour, setShowTour] = useState(false);
   const [tourStep, setTourStep] = useState(0);
-
   const [showCloseConfirm, setShowCloseConfirm] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -3283,17 +2684,9 @@ const LiveChatAgent = ({
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const liveChatTitleRef = useRef<HTMLHeadingElement>(null);
   const prevMessagesLenRef = useRef<number>(0);
-
   const messagesCacheRef = useRef<{ [ticketId: string]: ChatMessage[] }>({});
 
-  const topics = [
-    "Product Inquiry",
-    "Technical Support",
-    "Account Issues",
-    "Donation",
-    "Partnership",
-    "Other",
-  ];
+  const topics = ["Product Inquiry", "Technical Support", "Account Issues", "Donation", "Partnership", "Other"];
 
   const tourSteps: TourStep[] = [
     {
@@ -3408,7 +2801,6 @@ const LiveChatAgent = ({
     };
   }, [isMounted]);
 
-  // Check ban status
   useEffect(() => {
     if (!user || !isMounted) {
       setCheckingBan(false);
@@ -3440,7 +2832,6 @@ const LiveChatAgent = ({
     checkBan();
   }, [user, isMounted]);
 
-  // Check appeal status
   useEffect(() => {
     if (!db || !user || !isMounted) return;
     const q = query(
@@ -3450,16 +2841,12 @@ const LiveChatAgent = ({
       limit(1)
     );
     const unsub = onSnapshot(q, (snapshot: any) => {
-      if (!snapshot.empty) {
-        setHasAppeal(true);
-      } else {
-        setHasAppeal(false);
-      }
+      if (!snapshot.empty) setHasAppeal(true);
+      else setHasAppeal(false);
     });
     return () => unsub();
   }, [db, user, isMounted]);
 
-  // Load appeal tickets for user or admin
   useEffect(() => {
     if (!db || !user || !isMounted) return;
     let q;
@@ -3478,7 +2865,6 @@ const LiveChatAgent = ({
     return () => unsub();
   }, [db, user, isAdmin, isMounted]);
 
-  // Load online admins
   useEffect(() => {
     if (!db || !isMounted) return;
     const q = query(collection(db, "users"), where("online", "==", true));
@@ -3511,17 +2897,14 @@ const LiveChatAgent = ({
     return () => unsub();
   }, [db, isMounted]);
 
-  // Load livechat tickets
   useEffect(() => {
     if (!db || !user || !isMounted) return;
-
     let q;
     if (isAdmin) {
       q = query(collection(db, "livechat_tickets"), orderBy("createdAt", "desc"));
     } else {
       q = query(collection(db, "livechat_tickets"), where("userId", "==", user.uid), orderBy("createdAt", "desc"));
     }
-
     const unsubscribe = onSnapshot(q, (snapshot: any) => {
       const ticketList: Ticket[] = [];
       snapshot.forEach((docSnap: any) => {
@@ -3538,7 +2921,6 @@ const LiveChatAgent = ({
     return () => unsubscribe();
   }, [db, user, isAdmin, isMounted]);
 
-  // Load ticket previews
   useEffect(() => {
     if (!db || !tickets.length || !isMounted) return;
     const unsubscribes: (() => void)[] = [];
@@ -3578,17 +2960,13 @@ const LiveChatAgent = ({
     };
   }, [db, tickets, isMounted]);
 
-  // Load messages for selected ticket
   useEffect(() => {
     if (!db || !selectedTicket || !isMounted) return;
-
     const ticketId = selectedTicket.id;
-
     if (messagesCacheRef.current[ticketId]) {
       setMessages(messagesCacheRef.current[ticketId]);
       prevMessagesLenRef.current = messagesCacheRef.current[ticketId].length;
     }
-
     const q = query(
       collection(db, "livechat_tickets", ticketId, "messages"),
       orderBy("timestamp", "asc")
@@ -3602,13 +2980,12 @@ const LiveChatAgent = ({
           try {
             text = await decryptMessage(text);
           } catch (e) {
-            console.error("Failed to decrypt message:", e);
+            console.error("Failed to decrypt:", e);
             text = "[Encrypted message]";
           }
         }
         msgList.push({ id: docSnap.id, ...data, text } as ChatMessage);
       }
-
       const newLen = msgList.length;
       if (prevMessagesLenRef.current > 0 && newLen > prevMessagesLenRef.current) {
         const newestMsg = msgList[newLen - 1];
@@ -3624,10 +3001,8 @@ const LiveChatAgent = ({
         }
       }
       prevMessagesLenRef.current = newLen;
-
       messagesCacheRef.current[ticketId] = msgList;
       setMessages(msgList);
-
       requestAnimationFrame(() => {
         if (chatMessagesContainerRef.current) {
           chatMessagesContainerRef.current.scrollTop = chatMessagesContainerRef.current.scrollHeight;
@@ -3637,7 +3012,6 @@ const LiveChatAgent = ({
     return () => unsubscribe();
   }, [db, selectedTicket, isMounted]);
 
-  // Reset rolling message on ticket change
   useEffect(() => {
     setLatestRollingMessage(null);
     prevMessagesLenRef.current = messagesCacheRef.current[selectedTicket?.id || ""]?.length || 0;
@@ -3645,7 +3019,6 @@ const LiveChatAgent = ({
     setReplyTo(null);
   }, [selectedTicket?.id]);
 
-  // Mark messages as read
   useEffect(() => {
     if (!db || !selectedTicket || !user || !isAdmin || !isMounted) return;
     const unread = messages.filter((m) => m.senderId !== user.uid && !m.read);
@@ -3655,7 +3028,6 @@ const LiveChatAgent = ({
     });
   }, [messages, selectedTicket, db, user, isAdmin, isMounted]);
 
-  // Auto select ticket for user
   const hasAutoSelectedRef = useRef(false);
   useEffect(() => {
     if (!user || isAdmin || !isMounted) return;
@@ -3676,7 +3048,6 @@ const LiveChatAgent = ({
     }
   }, [tickets, user, isAdmin, selectedTicket, isMounted]);
 
-  // Load admin chat messages
   useEffect(() => {
     if (!db || !user || !selectedAdmin || !isMounted) return;
     const chatId = [user.uid, selectedAdmin.uid].sort().join("_");
@@ -3771,19 +3142,11 @@ const LiveChatAgent = ({
         typingUserName: user.displayName || user.email || "User",
       });
     } else {
-      await updateDoc(ticketRef, {
-        typing: false,
-        typingUserId: null,
-        typingUserName: null,
-      });
+      await updateDoc(ticketRef, { typing: false, typingUserId: null, typingUserName: null });
     }
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     typingTimeoutRef.current = setTimeout(async () => {
-      await updateDoc(ticketRef, {
-        typing: false,
-        typingUserId: null,
-        typingUserName: null,
-      });
+      await updateDoc(ticketRef, { typing: false, typingUserId: null, typingUserName: null });
     }, 2000);
   };
 
@@ -3801,7 +3164,7 @@ const LiveChatAgent = ({
       }
       return false;
     } catch (error) {
-      console.error("Error checking ban before action:", error);
+      console.error("Error checking ban:", error);
       return false;
     }
   };
@@ -3822,7 +3185,11 @@ const LiveChatAgent = ({
       return;
     }
     const hasActiveTicket = tickets.some(
-      (t) => t.userId === user.uid && (t.status === "waiting" || t.status === "active") && !t.isAnnouncement && !t.isBroadcast
+      (t) =>
+        t.userId === user.uid &&
+        (t.status === "waiting" || t.status === "active") &&
+        !t.isAnnouncement &&
+        !t.isBroadcast
     );
     if (hasActiveTicket) {
       alert("You still have an active chat with an agent. Please wait until it is finished.");
@@ -3867,7 +3234,7 @@ const LiveChatAgent = ({
       hasAutoSelectedRef.current = false;
     } catch (error) {
       console.error("Error starting chat:", error);
-      alert("An error occurred while starting the chat. Please try again.");
+      alert("An error occurred while starting the chat.");
     }
   };
 
@@ -3895,11 +3262,11 @@ const LiveChatAgent = ({
       return;
     }
     if (!encryptionReady) {
-      alert("Encryption is being initialized, please wait a moment.");
+      alert("Encryption is being initialized.");
       return;
     }
     if (selectedTicket.status === "resolved" || selectedTicket.status === "closed") {
-      alert("This chat is finished. Please create a new ticket.");
+      alert("This chat is finished.");
       return;
     }
     try {
@@ -3938,7 +3305,7 @@ const LiveChatAgent = ({
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     } catch (error) {
       console.error("Error sending message:", error);
-      alert("An error occurred while sending the message. Please try again.");
+      alert("An error occurred.");
     }
   };
 
@@ -3949,10 +3316,7 @@ const LiveChatAgent = ({
       const chatRef = doc(db, "admin_chats", chatId);
       const chatSnap = await getDoc(chatRef);
       if (!chatSnap.exists()) {
-        await setDoc(chatRef, {
-          participants: [user.uid, selectedAdmin.uid],
-          createdAt: serverTimestamp(),
-        });
+        await setDoc(chatRef, { participants: [user.uid, selectedAdmin.uid], createdAt: serverTimestamp() });
       }
       const encryptedMessage = await encryptMessage(adminChatText.trim());
       await addDoc(collection(db, "admin_chats", chatId, "messages"), {
@@ -3987,7 +3351,7 @@ const LiveChatAgent = ({
         status: "active",
       });
     } catch (error) {
-      console.error("Error taking ticket:", error);
+      console.error(error);
     }
   };
 
@@ -3996,7 +3360,7 @@ const LiveChatAgent = ({
     try {
       await updateDoc(doc(db, "livechat_tickets", ticketId), { status: "resolved" });
     } catch (error) {
-      console.error("Error resolving ticket:", error);
+      console.error(error);
     }
   };
 
@@ -4007,14 +3371,16 @@ const LiveChatAgent = ({
       setShowCloseConfirm(true);
       setTimeout(() => setShowCloseConfirm(false), 2200);
     } catch (error) {
-      console.error("Error closing ticket:", error);
+      console.error(error);
     }
   };
 
   const createAppealTicket = async () => {
     if (!db || !user || !isBanned) return;
     try {
-      const existingAppeal = appealTickets.find((t) => t.userId === user.uid && t.status !== "closed" && t.status !== "resolved");
+      const existingAppeal = appealTickets.find(
+        (t) => t.userId === user.uid && t.status !== "closed" && t.status !== "resolved"
+      );
       if (existingAppeal) {
         onOpenBannedAppealChat(existingAppeal);
         return;
@@ -4067,8 +3433,8 @@ const LiveChatAgent = ({
       onOpenBannedAppealChat(newTicket);
       setHasAppeal(true);
     } catch (error) {
-      console.error("Error creating appeal ticket:", error);
-      alert("Gagal membuat tiket banding. Silakan coba lagi.");
+      console.error(error);
+      alert("Gagal membuat tiket banding.");
     }
   };
 
@@ -4368,9 +3734,21 @@ const LiveChatAgent = ({
                 </div>
               </div>
               {announcementTickets.slice(0, 3).map((t) => (
-                <div key={t.id} onClick={() => setSelectedTicket(t)} style={{ padding: "8px 0", borderTop: "1px solid rgba(255,255,255,0.15)", cursor: "pointer" }}>
+                <div
+                  key={t.id}
+                  onClick={() => setSelectedTicket(t)}
+                  style={{ padding: "8px 0", borderTop: "1px solid rgba(255,255,255,0.15)", cursor: "pointer" }}
+                >
                   <div style={{ fontSize: "13px", fontWeight: 600, color: WHITE, marginBottom: "3px" }}>{t.userName}</div>
-                  <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.85)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  <div
+                    style={{
+                      fontSize: "11px",
+                      color: "rgba(255,255,255,0.85)",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
                     {t.topic}
                   </div>
                 </div>
@@ -4406,9 +3784,21 @@ const LiveChatAgent = ({
                 </div>
               </div>
               {broadcastTickets.slice(0, 3).map((t) => (
-                <div key={t.id} onClick={() => setSelectedTicket(t)} style={{ padding: "8px 0", borderTop: "1px solid rgba(255,255,255,0.15)", cursor: "pointer" }}>
+                <div
+                  key={t.id}
+                  onClick={() => setSelectedTicket(t)}
+                  style={{ padding: "8px 0", borderTop: "1px solid rgba(255,255,255,0.15)", cursor: "pointer" }}
+                >
                   <div style={{ fontSize: "13px", fontWeight: 600, color: WHITE, marginBottom: "3px" }}>{t.userName}</div>
-                  <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.85)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  <div
+                    style={{
+                      fontSize: "11px",
+                      color: "rgba(255,255,255,0.85)",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
                     {t.topic}
                   </div>
                 </div>
@@ -4423,7 +3813,17 @@ const LiveChatAgent = ({
   if (checkingBan) {
     return (
       <div style={{ marginTop: "80px", paddingTop: "30px" }}>
-        <h3 style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1 }}>
+        <h3
+          style={{
+            fontSize: "80px",
+            fontWeight: 700,
+            color: BLUE,
+            fontFamily: FONT_FAMILY,
+            letterSpacing: "-0.03em",
+            margin: 0,
+            lineHeight: 1.1,
+          }}
+        >
           Live Chat Agent
         </h3>
         <div style={{ padding: "20px", textAlign: "center", color: "#666", fontFamily: FONT_FAMILY }}>
@@ -4437,7 +3837,13 @@ const LiveChatAgent = ({
   if (!user) {
     return (
       <>
-        <OnboardingTour steps={tourSteps} onComplete={completeTour} isActive={showTour} currentStep={tourStep} setCurrentStep={setTourStep} />
+        <OnboardingTour
+          steps={tourSteps}
+          onComplete={completeTour}
+          isActive={showTour}
+          currentStep={tourStep}
+          setCurrentStep={setTourStep}
+        />
         <div style={{ marginTop: "80px", paddingTop: "30px" }}>
           <h3
             ref={liveChatTitleRef}
@@ -4498,12 +3904,21 @@ const LiveChatAgent = ({
     );
   }
 
-  // ===== BANNED USER VIEW =====
   if (!isAdmin && isBanned) {
     return (
       <div style={{ marginTop: "80px", paddingTop: "30px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "20px" }}>
-          <h3 style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1 }}>
+          <h3
+            style={{
+              fontSize: "80px",
+              fontWeight: 700,
+              color: BLUE,
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "-0.03em",
+              margin: 0,
+              lineHeight: 1.1,
+            }}
+          >
             Live Chat Agent
           </h3>
           <button
@@ -4526,14 +3941,12 @@ const LiveChatAgent = ({
             <NorthEastArrow size={20} color={BLUE} />
           </button>
         </div>
-
         <BannedInfoBanner
           banReason={banReason}
           banMessage={banMessage || ""}
           onAppeal={createAppealTicket}
           hasAppeal={hasAppeal}
         />
-
         {appealTickets.length > 0 && (
           <div style={{ marginTop: "20px" }}>
             <div style={{ fontSize: "16px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, marginBottom: "12px" }}>
@@ -4553,9 +3966,7 @@ const LiveChatAgent = ({
                 }}
               >
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span style={{ fontSize: "14px", fontWeight: 700, color: WHITE }}>
-                    Banding #{t.id.slice(-6)}
-                  </span>
+                  <span style={{ fontSize: "14px", fontWeight: 700, color: WHITE }}>Banding #{t.id.slice(-6)}</span>
                   <StabiloBadge
                     label={t.status === "waiting" ? "Waiting" : t.status === "active" ? "Active" : "Closed"}
                     bg={WHITE}
@@ -4571,7 +3982,6 @@ const LiveChatAgent = ({
             ))}
           </div>
         )}
-
         {appealTickets.length === 0 && (
           <div style={{ marginTop: "20px", padding: "30px", textAlign: "center", color: "#999", fontFamily: FONT_FAMILY }}>
             Klik tombol "Ajukan Banding" di atas untuk memulai proses banding.
@@ -4586,7 +3996,13 @@ const LiveChatAgent = ({
   if (!isAdmin && userTickets.length === 0 && !showStartChat) {
     return (
       <>
-        <OnboardingTour steps={tourSteps} onComplete={completeTour} isActive={showTour} currentStep={tourStep} setCurrentStep={setTourStep} />
+        <OnboardingTour
+          steps={tourSteps}
+          onComplete={completeTour}
+          isActive={showTour}
+          currentStep={tourStep}
+          setCurrentStep={setTourStep}
+        />
         <div style={{ marginTop: "80px", paddingTop: "30px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "20px" }}>
             <h3
@@ -4936,7 +4352,17 @@ const LiveChatAgent = ({
     return (
       <div style={{ marginTop: "80px", paddingTop: "30px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "20px" }}>
-          <h3 style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1 }}>
+          <h3
+            style={{
+              fontSize: "80px",
+              fontWeight: 700,
+              color: BLUE,
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "-0.03em",
+              margin: 0,
+              lineHeight: 1.1,
+            }}
+          >
             Live Chat Agent
           </h3>
           <button
@@ -4960,7 +4386,9 @@ const LiveChatAgent = ({
           </button>
         </div>
         <div style={{ maxWidth: "400px" }}>
-          <div style={{ fontSize: "15px", marginBottom: "10px", fontFamily: FONT_FAMILY, fontWeight: 700, color: BLUE }}>Select your issue topic:</div>
+          <div style={{ fontSize: "15px", marginBottom: "10px", fontFamily: FONT_FAMILY, fontWeight: 700, color: BLUE }}>
+            Select your issue topic:
+          </div>
           <select
             value={selectedTopic}
             onChange={(e) => setSelectedTopic(e.target.value)}
@@ -4980,7 +4408,9 @@ const LiveChatAgent = ({
           >
             <option value="">-- Select topic --</option>
             {topics.map((t) => (
-              <option key={t} value={t}>{t}</option>
+              <option key={t} value={t}>
+                {t}
+              </option>
             ))}
           </select>
           <div style={{ display: "flex", gap: "10px" }}>
@@ -5030,7 +4460,6 @@ const LiveChatAgent = ({
   const activeTickets = filterTicketsBySearch(activeTicketsRaw);
   const resolvedTickets = filterTicketsBySearch(resolvedTicketsRaw);
   const typingText = selectedTicket ? getTypingText(selectedTicket) : null;
-
   const bannedUsersInWaiting = waitingTickets.filter((t) => t.isBanned);
 
   const renderChatListItem = (ticket: Ticket, options?: { onExtraClick?: () => void }) => {
@@ -5038,7 +4467,6 @@ const LiveChatAgent = ({
     const ticketId = generateTicketId(ticket.createdAt);
     const statusStyle = STATUS_STYLES[ticket.status] || STATUS_STYLES.active;
     const topicStyle = TOPIC_STYLES[ticket.topic] || TOPIC_STYLES["Other"];
-
     return (
       <div
         key={ticket.id}
@@ -5055,44 +4483,48 @@ const LiveChatAgent = ({
           transition: "background-color 0.2s ease",
         }}
       >
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px", gap: "8px", flexWrap: "wrap" }}>
-          <div style={{ fontWeight: 700, fontSize: "14px", color: WHITE, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: "1 1 auto" }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "6px",
+            gap: "8px",
+            flexWrap: "wrap",
+          }}
+        >
+          <div
+            style={{
+              fontWeight: 700,
+              fontSize: "14px",
+              color: WHITE,
+              minWidth: 0,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              flex: "1 1 auto",
+            }}
+          >
             {ticket.userName}
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "6px", flexShrink: 0 }}>
             {ticket.isBanned && (
-              <StabiloBadge
-                label="BANNED"
-                bg={WHITE}
-                text={BLUE}
-                border={WHITE}
-                size="sm"
-              />
+              <StabiloBadge label="BANNED" bg={WHITE} text={BLUE} border={WHITE} size="sm" />
             )}
-            <StabiloBadge
-              label={statusStyle.label}
-              bg={statusStyle.bg}
-              text={statusStyle.text}
-              border={statusStyle.border}
-              size="sm"
-            />
+            <StabiloBadge label={statusStyle.label} bg={statusStyle.bg} text={statusStyle.text} border={statusStyle.border} size="sm" />
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "8px", flexWrap: "wrap" }}>
-          <StabiloBadge
-            label={ticket.topic}
-            bg={topicStyle.bg}
-            text={topicStyle.text}
-            border={topicStyle.border}
-            size="sm"
-          />
+          <StabiloBadge label={ticket.topic} bg={topicStyle.bg} text={topicStyle.text} border={topicStyle.border} size="sm" />
           <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.75)", fontWeight: 700 }}>
             {ticketMsgCounts[ticket.id] || 0} msgs
           </span>
         </div>
         {renderTicketPreview(ticket.id)}
         <div style={{ marginTop: "6px" }}>
-          <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.65)", fontWeight: 700, letterSpacing: "0.3px" }}>{ticketId}</span>
+          <span style={{ fontSize: "9px", color: "rgba(255,255,255,0.65)", fontWeight: 700, letterSpacing: "0.3px" }}>
+            {ticketId}
+          </span>
         </div>
       </div>
     );
@@ -5100,8 +4532,13 @@ const LiveChatAgent = ({
 
   return (
     <>
-      <OnboardingTour steps={tourSteps} onComplete={completeTour} isActive={showTour} currentStep={tourStep} setCurrentStep={setTourStep} />
-
+      <OnboardingTour
+        steps={tourSteps}
+        onComplete={completeTour}
+        isActive={showTour}
+        currentStep={tourStep}
+        setCurrentStep={setTourStep}
+      />
       <div style={{ marginTop: "80px", paddingTop: "30px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "20px" }}>
           <h3
@@ -5179,16 +4616,7 @@ const LiveChatAgent = ({
 
         {renderAnnouncementBroadcastSection()}
 
-        <div
-          style={{
-            display: "flex",
-            gap: "16px",
-            height: "700px",
-            width: "100%",
-            overflow: "hidden",
-            borderRadius: "12px",
-          }}
-        >
+        <div style={{ display: "flex", gap: "16px", height: "700px", width: "100%", overflow: "hidden", borderRadius: "12px" }}>
           {renderOnlinePanel()}
 
           <div
@@ -5333,11 +4761,14 @@ const LiveChatAgent = ({
                       {resolvedTickets.map((ticket) => renderChatListItem(ticket))}
                     </div>
                   )}
-                  {waitingTickets.length === 0 && activeTickets.length === 0 && resolvedTickets.length === 0 && bannedUsersInWaiting.length === 0 && (
-                    <div style={{ padding: "30px 16px", textAlign: "center", color: WHITE, fontSize: "13px" }}>
-                      {searchQuery ? "No results found" : "No incoming chats"}
-                    </div>
-                  )}
+                  {waitingTickets.length === 0 &&
+                    activeTickets.length === 0 &&
+                    resolvedTickets.length === 0 &&
+                    bannedUsersInWaiting.length === 0 && (
+                      <div style={{ padding: "30px 16px", textAlign: "center", color: WHITE, fontSize: "13px" }}>
+                        {searchQuery ? "No results found" : "No incoming chats"}
+                      </div>
+                    )}
                 </>
               ) : (
                 <>
@@ -5375,9 +4806,7 @@ const LiveChatAgent = ({
                   {appealTickets.map((t) => (
                     <div
                       key={t.id}
-                      onClick={() => {
-                        onOpenAppealChat(t);
-                      }}
+                      onClick={() => onOpenAppealChat(t)}
                       style={{
                         padding: "14px 16px",
                         borderBottom: "1px solid rgba(255,255,255,0.08)",
@@ -5386,10 +4815,15 @@ const LiveChatAgent = ({
                         borderLeft: "3px solid transparent",
                       }}
                     >
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
-                        <span style={{ fontSize: "14px", fontWeight: 700, color: WHITE }}>
-                          {t.userName}
-                        </span>
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          marginBottom: "6px",
+                        }}
+                      >
+                        <span style={{ fontSize: "14px", fontWeight: 700, color: WHITE }}>{t.userName}</span>
                         <StabiloBadge
                           label={t.status === "waiting" ? "Waiting" : t.status === "active" ? "Active" : "Closed"}
                           bg={WHITE}
@@ -5467,7 +4901,15 @@ const LiveChatAgent = ({
                   }}
                 >
                   <div style={{ minWidth: 0, flex: 1 }}>
-                    <div style={{ fontWeight: 700, fontSize: "17px", color: WHITE, fontFamily: FONT_FAMILY, marginBottom: "6px" }}>
+                    <div
+                      style={{
+                        fontWeight: 700,
+                        fontSize: "17px",
+                        color: WHITE,
+                        fontFamily: FONT_FAMILY,
+                        marginBottom: "6px",
+                      }}
+                    >
                       {selectedTicket.userName}
                     </div>
                     <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
@@ -5486,20 +4928,21 @@ const LiveChatAgent = ({
                         size="sm"
                       />
                       {selectedTicket.isBanned && (
-                        <StabiloBadge
-                          label="BANNED"
-                          bg={WHITE}
-                          text={BLUE}
-                          border={WHITE}
-                          size="sm"
-                        />
+                        <StabiloBadge label="BANNED" bg={WHITE} text={BLUE} border={WHITE} size="sm" />
                       )}
                       {selectedTicket.typing && selectedTicket.status !== "resolved" && (
                         <span style={{ fontSize: "12px", color: WHITE, fontStyle: "italic", fontWeight: 700 }}>
                           {selectedTicket.typingUserName} is typing...
                         </span>
                       )}
-                      <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.75)", fontWeight: 700, letterSpacing: "0.3px" }}>
+                      <span
+                        style={{
+                          fontSize: "10px",
+                          color: "rgba(255,255,255,0.75)",
+                          fontWeight: 700,
+                          letterSpacing: "0.3px",
+                        }}
+                      >
                         {generateTicketId(selectedTicket.createdAt)}
                       </span>
                     </div>
@@ -5526,9 +4969,7 @@ const LiveChatAgent = ({
                         Resolve
                       </button>
                     )}
-                    {selectedTicket.status !== "closed" && (
-                      <CloseRoomButton onConfirm={handleCloseRoom} />
-                    )}
+                    {selectedTicket.status !== "closed" && <CloseRoomButton onConfirm={handleCloseRoom} />}
                   </div>
                 </div>
 
@@ -5620,7 +5061,14 @@ const LiveChatAgent = ({
                             }}
                           >
                             {!isMine && (
-                              <div style={{ fontSize: "12px", fontWeight: 700, color: BLUE, marginBottom: "5px" }}>
+                              <div
+                                style={{
+                                  fontSize: "12px",
+                                  fontWeight: 700,
+                                  color: BLUE,
+                                  marginBottom: "5px",
+                                }}
+                              >
                                 {msg.senderName}
                               </div>
                             )}
@@ -5628,7 +5076,9 @@ const LiveChatAgent = ({
                               <div
                                 style={{
                                   padding: "6px 10px",
-                                  backgroundColor: isMine ? "rgba(255,255,255,0.2)" : "rgba(13,60,252,0.1)",
+                                  backgroundColor: isMine
+                                    ? "rgba(255,255,255,0.2)"
+                                    : "rgba(13,60,252,0.1)",
                                   borderLeft: `3px solid ${isMine ? WHITE : BLUE}`,
                                   borderRadius: "4px",
                                   marginBottom: "6px",
@@ -5735,8 +5185,18 @@ const LiveChatAgent = ({
                         }}
                       >
                         <ReplyIcon size={14} color={BLUE} />
-                        <div style={{ flex: 1, fontSize: "12px", color: BLUE, fontFamily: FONT_FAMILY, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                          <strong>{replyTo.senderName}:</strong> {replyTo.text.length > 50 ? replyTo.text.substring(0, 50) + "..." : replyTo.text}
+                        <div
+                          style={{
+                            flex: 1,
+                            fontSize: "12px",
+                            color: BLUE,
+                            fontFamily: FONT_FAMILY,
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          <strong>{replyTo.senderName}:</strong> {replyTo.text}
                         </div>
                         <button
                           onClick={() => setReplyTo(null)}
@@ -5776,7 +5236,9 @@ const LiveChatAgent = ({
                           }
                         }}
                         placeholder={
-                          selectedTicket.status === "waiting" && !isAdmin ? "Waiting for agent..." : "Type a message..."
+                          selectedTicket.status === "waiting" && !isAdmin
+                            ? "Waiting for agent..."
+                            : "Type a message..."
                         }
                         disabled={selectedTicket.status === "waiting" && !isAdmin}
                         style={{
@@ -5787,7 +5249,8 @@ const LiveChatAgent = ({
                           fontSize: "15px",
                           outline: "none",
                           fontFamily: FONT_FAMILY,
-                          backgroundColor: selectedTicket.status === "waiting" && !isAdmin ? "#f5f5f5" : WHITE,
+                          backgroundColor:
+                            selectedTicket.status === "waiting" && !isAdmin ? "#f5f5f5" : WHITE,
                         }}
                       />
                       <button
@@ -5796,12 +5259,16 @@ const LiveChatAgent = ({
                         style={{
                           padding: "12px 24px",
                           backgroundColor:
-                            (selectedTicket.status === "waiting" && !isAdmin) || !messageText.trim() ? "#ccc" : BLUE,
+                            (selectedTicket.status === "waiting" && !isAdmin) || !messageText.trim()
+                              ? "#ccc"
+                              : BLUE,
                           color: WHITE,
                           border: "none",
                           borderRadius: "10px",
                           cursor:
-                            (selectedTicket.status === "waiting" && !isAdmin) || !messageText.trim() ? "not-allowed" : "pointer",
+                            (selectedTicket.status === "waiting" && !isAdmin) || !messageText.trim()
+                              ? "not-allowed"
+                              : "pointer",
                           fontFamily: FONT_FAMILY,
                           fontSize: "14px",
                           fontWeight: 800,
@@ -5863,7 +5330,12 @@ export default function HomePage(): React.JSX.Element {
   const [navbarShifted, setNavbarShifted] = useState(false);
   const [noteHovered, setNoteHovered] = useState(false);
 
-  // Section terpisah untuk appeal chat (di luar LiveChatAgent)
+  // ===== STATE UNTUK SECTION "BERGABUNG BERSAMA KAMI" =====
+  const [noteUsers, setNoteUsers] = useState<NoteEntry[]>([]);
+  const [hasSubmittedNote, setHasSubmittedNote] = useState(false);
+  const [userNote, setUserNote] = useState<NoteEntry | null>(null);
+
+  // Section terpisah untuk appeal chat
   const [adminAppealTicket, setAdminAppealTicket] = useState<AppealTicket | null>(null);
   const [showAdminAppealSection, setShowAdminAppealSection] = useState(false);
   const [bannedAppealTicket, setBannedAppealTicket] = useState<AppealTicket | null>(null);
@@ -5871,6 +5343,8 @@ export default function HomePage(): React.JSX.Element {
 
   const preloaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
+  const noteJoinRef = useRef<HTMLDivElement>(null);
+  const noteUserListRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setIsMounted(true);
@@ -5896,10 +5370,88 @@ export default function HomePage(): React.JSX.Element {
     return () => unsubscribe();
   }, [isMounted]);
 
+  // ===== LOAD USERS YANG SUDAH SUBMIT NOTE =====
+  useEffect(() => {
+    if (!db || !isMounted) return;
+    const q = query(collection(db, "notes"), orderBy("createdAt", "desc"), limit(20));
+    const unsub = onSnapshot(q, (snapshot: any) => {
+      const list: NoteEntry[] = [];
+      snapshot.forEach((docSnap: any) => {
+        list.push({ id: docSnap.id, ...docSnap.data() } as NoteEntry);
+      });
+      setNoteUsers(list);
+    });
+    return () => unsub();
+  }, [db, isMounted]);
+
+  // ===== CEK APAKAH USER SUDAH SUBMIT NOTE =====
+  useEffect(() => {
+    if (!db || !user || !isMounted) return;
+    const q = query(collection(db, "notes"), where("userId", "==", user.uid), limit(1));
+    const unsub = onSnapshot(q, (snapshot: any) => {
+      if (!snapshot.empty) {
+        setHasSubmittedNote(true);
+        setUserNote({ id: snapshot.docs[0].id, ...snapshot.docs[0].data() } as NoteEntry);
+      } else {
+        setHasSubmittedNote(false);
+        setUserNote(null);
+      }
+    });
+    return () => unsub();
+  }, [db, user, isMounted]);
+
   useEffect(() => {
     if (!isMounted || loading) return;
     setTimeout(() => startPreloaderAnimation(), 500);
   }, [isMounted, loading]);
+
+  // ===== GSAP ANIMATION UNTUK SECTION BERGABUNG BERSAMA KAMI =====
+  useEffect(() => {
+    if (!isMounted || !showMain) return;
+    if (!noteJoinRef.current) return;
+
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        noteJoinRef.current,
+        { opacity: 0, y: 60, filter: "blur(8px)" },
+        {
+          opacity: 1,
+          y: 0,
+          filter: "blur(0px)",
+          duration: 1.2,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: noteJoinRef.current,
+            start: "top 85%",
+            end: "top 50%",
+            toggleActions: "play none none reverse",
+          },
+        }
+      );
+
+      if (noteUserListRef.current) {
+        const items = noteUserListRef.current.querySelectorAll(".note-user-item");
+        gsap.fromTo(
+          items,
+          { opacity: 0, x: -40 },
+          {
+            opacity: 1,
+            x: 0,
+            duration: 0.8,
+            stagger: 0.1,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: noteUserListRef.current,
+              start: "top 85%",
+              toggleActions: "play none none reverse",
+            },
+          }
+        );
+      }
+    });
+
+    return () => ctx.revert();
+  }, [isMounted, showMain, noteUsers]);
 
   const startPreloaderAnimation = () => {
     const tl = gsap.timeline({
@@ -6043,7 +5595,6 @@ export default function HomePage(): React.JSX.Element {
 
       <LeftNavbar shifted={navbarShifted} />
       <RightNavbar user={user} auth={auth} db={db} />
-
       <CookieConsentPopup user={user} db={db} isMounted={isMounted} />
 
       <div
@@ -6061,7 +5612,6 @@ export default function HomePage(): React.JSX.Element {
       >
         <HeroMenuruTitle onNavbarShiftChange={setNavbarShifted} />
 
-        {/* ===== FEATURES + 01 NOTES TRUST + BG KOTAK BIRU ===== */}
         <div
           style={{
             padding: "0 40px",
@@ -6091,23 +5641,8 @@ export default function HomePage(): React.JSX.Element {
             Features
           </h2>
 
-          {/* ===== BARIS 01 NOTES TRUST + TEKS DI BAWAH TRUST ===== */}
-          <div
-            style={{
-              width: "100%",
-              position: "relative",
-              zIndex: 2,
-              marginBottom: "40px",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                width: "100%",
-                flexWrap: "wrap",
-              }}
-            >
+          <div style={{ width: "100%", position: "relative", zIndex: 2, marginBottom: "40px" }}>
+            <div style={{ display: "flex", alignItems: "center", width: "100%", flexWrap: "wrap" }}>
               <div style={{ display: "flex", alignItems: "baseline", gap: "140px" }}>
                 <span
                   style={{
@@ -6134,7 +5669,6 @@ export default function HomePage(): React.JSX.Element {
                   Notes
                 </span>
               </div>
-
               <div
                 style={{
                   marginLeft: "auto",
@@ -6166,7 +5700,6 @@ export default function HomePage(): React.JSX.Element {
                 >
                   Trust
                 </span>
-
                 <p
                   style={{
                     fontFamily: FONT_FAMILY,
@@ -6176,7 +5709,6 @@ export default function HomePage(): React.JSX.Element {
                     letterSpacing: "-0.01em",
                     lineHeight: 1.4,
                     margin: 0,
-                    textTransform: "none",
                     maxWidth: "420px",
                     textAlign: "left",
                   }}
@@ -6185,7 +5717,6 @@ export default function HomePage(): React.JSX.Element {
                 </p>
               </div>
             </div>
-
             <div
               style={{
                 position: "absolute",
@@ -6202,26 +5733,14 @@ export default function HomePage(): React.JSX.Element {
               }}
             >
               <svg width="64" height="64" viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M7 17L17 7M17 7H8M17 7V16"
-                  stroke={WHITE}
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
+                <path d="M7 17L17 7M17 7H8M17 7V16" stroke={WHITE} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </div>
           </div>
 
           {/* ===== BG KOTAK BIRU NOTE ===== */}
           <div
-            style={{
-              position: "relative",
-              width: "100%",
-              height: "420px",
-              marginBottom: "60px",
-              zIndex: 1,
-            }}
+            style={{ position: "relative", width: "100%", height: "420px", marginBottom: "60px", zIndex: 1 }}
             onMouseEnter={() => setNoteHovered(true)}
             onMouseLeave={() => setNoteHovered(false)}
           >
@@ -6258,7 +5777,6 @@ export default function HomePage(): React.JSX.Element {
                   userSelect: "none",
                 }}
               />
-
               <div
                 style={{
                   position: "absolute",
@@ -6278,9 +5796,7 @@ export default function HomePage(): React.JSX.Element {
                   style={{
                     display: "inline-flex",
                     whiteSpace: "nowrap",
-                    animation: noteHovered
-                      ? "comingsoon-marquee 8s linear infinite"
-                      : "none",
+                    animation: noteHovered ? "comingsoon-marquee 8s linear infinite" : "none",
                     fontFamily: FONT_FAMILY,
                     fontSize: "140px",
                     fontWeight: 800,
@@ -6299,35 +5815,224 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </div>
 
-          {/* ===== SECTION AYO BERGABUNG BERSAMA FITUR NOTES KAMI ===== */}
-          <JoinNoteSection user={user} db={db} isMounted={isMounted} />
+          {/* ===== SECTION BARU: BERGABUNG BERSAMA KAMI DI FITUR NOTE ===== */}
+          <div
+            ref={noteJoinRef}
+            style={{
+              width: "100%",
+              marginTop: "0px",
+              marginBottom: "60px",
+              paddingLeft: "260px",
+              paddingRight: "360px",
+              fontFamily: FONT_FAMILY,
+            }}
+          >
+            <p
+              style={{
+                fontFamily: FONT_FAMILY,
+                fontSize: "28px",
+                fontWeight: 700,
+                color: BLUE,
+                letterSpacing: "-0.02em",
+                lineHeight: 1.3,
+                margin: 0,
+                marginBottom: "24px",
+                textAlign: "left",
+              }}
+            >
+              Bergabung bersama kami di fitur Note
+            </p>
+
+            {user && (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "12px",
+                  marginBottom: "20px",
+                  fontFamily: FONT_FAMILY,
+                }}
+              >
+                <div
+                  style={{
+                    width: "48px",
+                    height: "48px",
+                    borderRadius: "50%",
+                    overflow: "hidden",
+                    backgroundColor: BLUE,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                  }}
+                >
+                  {user.photoURL ? (
+                    <img
+                      src={user.photoURL}
+                      alt={user.displayName || "User"}
+                      style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                      referrerPolicy="no-referrer"
+                    />
+                  ) : (
+                    <span style={{ fontSize: "20px", fontWeight: 800, color: WHITE }}>
+                      {(user.displayName || user.email || "U").charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                </div>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+                  <span
+                    style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: "16px",
+                      fontWeight: 700,
+                      color: BLUE,
+                      letterSpacing: "-0.01em",
+                    }}
+                  >
+                    {user.displayName || user.email?.split("@")[0] || "User"}
+                  </span>
+                  <span
+                    style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: "13px",
+                      fontWeight: 400,
+                      color: BLUE,
+                      opacity: 0.75,
+                      letterSpacing: "0.01em",
+                    }}
+                  >
+                    {user.email}
+                  </span>
+                  <span
+                    style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: "13px",
+                      fontWeight: 600,
+                      color: BLUE,
+                      letterSpacing: "0.01em",
+                      marginTop: "2px",
+                    }}
+                  >
+                    {hasSubmittedNote ? "✓ Sudah bergabung" : "Belum bergabung"}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            <div ref={noteUserListRef} style={{ width: "100%" }}>
+              {noteUsers.length === 0 ? (
+                <p
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "15px",
+                    fontWeight: 400,
+                    color: BLUE,
+                    opacity: 0.6,
+                    margin: 0,
+                    letterSpacing: "0.01em",
+                  }}
+                >
+                  Belum ada yang bergabung
+                </p>
+              ) : (
+                noteUsers.map((n) => (
+                  <div
+                    key={n.id}
+                    className="note-user-item"
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                      marginBottom: "12px",
+                      fontFamily: FONT_FAMILY,
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: "32px",
+                        height: "32px",
+                        borderRadius: "50%",
+                        overflow: "hidden",
+                        backgroundColor: BLUE,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexShrink: 0,
+                      }}
+                    >
+                      {n.userPhoto ? (
+                        <img
+                          src={n.userPhoto}
+                          alt={n.userName || "User"}
+                          style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                          referrerPolicy="no-referrer"
+                        />
+                      ) : (
+                        <span style={{ fontSize: "14px", fontWeight: 800, color: WHITE }}>
+                          {(n.userName || n.userEmail || "U").charAt(0).toUpperCase()}
+                        </span>
+                      )}
+                    </div>
+
+                    <span
+                      style={{
+                        fontFamily: FONT_FAMILY,
+                        fontSize: "15px",
+                        fontWeight: 600,
+                        color: BLUE,
+                        letterSpacing: "-0.01em",
+                      }}
+                    >
+                      {n.userName || n.userEmail?.split("@")[0] || "User"}
+                    </span>
+                    <span
+                      style={{
+                        fontFamily: FONT_FAMILY,
+                        fontSize: "13px",
+                        fontWeight: 400,
+                        color: BLUE,
+                        opacity: 0.7,
+                        letterSpacing: "0.01em",
+                      }}
+                    >
+                      {n.userEmail}
+                    </span>
+                    <span
+                      style={{
+                        fontFamily: FONT_FAMILY,
+                        fontSize: "13px",
+                        fontWeight: 600,
+                        color: BLUE,
+                        letterSpacing: "0.01em",
+                      }}
+                    >
+                      ✓ Sudah bergabung
+                    </span>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
         </div>
 
-        <div
-          style={{
-            position: "relative",
-            zIndex: 1,
-            flex: "1 0 auto",
-            backgroundColor: WHITE,
-          }}
-        >
+        <div style={{ position: "relative", zIndex: 1, flex: "1 0 auto", backgroundColor: WHITE }}>
           <div style={{ padding: "0 40px", maxWidth: "1600px", margin: "0 auto", width: "100%" }}>
             <LiveChatAgent
               user={user}
               isAdmin={isAdmin}
               db={db}
               auth={auth}
-              onOpenAppealChat={(ticket) => {
+              onOpenAppealChat={(ticket: AppealTicket) => {
                 setAdminAppealTicket(ticket);
                 setShowAdminAppealSection(true);
               }}
-              onOpenBannedAppealChat={(ticket) => {
+              onOpenBannedAppealChat={(ticket: AppealTicket) => {
                 setBannedAppealTicket(ticket);
                 setShowBannedAppealSection(true);
               }}
             />
 
-            {/* ===== SECTION TERPISAH: CHAT AJUKAN BANDING (ADMIN) ===== */}
             {isAdmin && showAdminAppealSection && adminAppealTicket && (
               <div style={{ marginTop: "30px", height: "600px" }}>
                 <div
@@ -6356,7 +6061,6 @@ export default function HomePage(): React.JSX.Element {
               </div>
             )}
 
-            {/* ===== SECTION TERPISAH: CHAT AJUKAN BANDING (BANNED USER/AGENT) ===== */}
             {!isAdmin && showBannedAppealSection && bannedAppealTicket && (
               <div style={{ marginTop: "30px", height: "600px" }}>
                 <div
@@ -6397,10 +6101,30 @@ export default function HomePage(): React.JSX.Element {
               overflow: "hidden",
             }}
           >
-            <div style={{ position: "absolute", left: "40px", top: "50%", transform: "translateY(-50%)", width: "200px", height: "auto", opacity: 0.8 }}>
+            <div
+              style={{
+                position: "absolute",
+                left: "40px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                width: "200px",
+                height: "auto",
+                opacity: 0.8,
+              }}
+            >
               <img src="/images/p0l.jpg" alt="" style={{ width: "100%", height: "auto", display: "block", objectFit: "cover" }} />
             </div>
-            <div style={{ position: "absolute", right: "40px", top: "50%", transform: "translateY(-50%)", width: "200px", height: "auto", opacity: 0.8 }}>
+            <div
+              style={{
+                position: "absolute",
+                right: "40px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                width: "200px",
+                height: "auto",
+                opacity: 0.8,
+              }}
+            >
               <img src="/images/xxz.jpg" alt="" style={{ width: "100%", height: "auto", display: "block", objectFit: "cover" }} />
             </div>
 
@@ -6428,7 +6152,6 @@ export default function HomePage(): React.JSX.Element {
                       margin: 0,
                       marginBottom: "16px",
                       letterSpacing: "-0.01em",
-                      textTransform: "none",
                     }}
                   >
                     {section.title}
@@ -6442,12 +6165,22 @@ export default function HomePage(): React.JSX.Element {
                       else if (link === "Live Chat") linkHref = "/live-chat";
                       else if (link === "Live Chat Agent") linkHref = "/live-chat-agent";
                       else if (link === "Help Center") linkHref = "/pusat-bantuan";
-                      else if (link === "About Us") { linkHref = "/profile"; isAttention = true; }
-                      else if (link === "Privacy Policy") { linkHref = "/privacy-policy"; isAttention = true; }
-                      else if (link === "Terms & Conditions") { linkHref = "/terms-of-services"; isAttention = true; }
-                      else if (link === "Terms of Use") { linkHref = "/terms-of-use"; isAttention = true; }
-                      else if (link === "Stories") { linkHref = "/stories"; isStories = true; }
-                      else if (link === "Shop") linkHref = "/shop";
+                      else if (link === "About Us") {
+                        linkHref = "/profile";
+                        isAttention = true;
+                      } else if (link === "Privacy Policy") {
+                        linkHref = "/privacy-policy";
+                        isAttention = true;
+                      } else if (link === "Terms & Conditions") {
+                        linkHref = "/terms-of-services";
+                        isAttention = true;
+                      } else if (link === "Terms of Use") {
+                        linkHref = "/terms-of-use";
+                        isAttention = true;
+                      } else if (link === "Stories") {
+                        linkHref = "/stories";
+                        isStories = true;
+                      } else if (link === "Shop") linkHref = "/shop";
                       else if (link === "Note") linkHref = "/note";
                       else if (link === "Calendar") linkHref = "/calendar";
                       else if (link === "Blog") linkHref = "/blog";
@@ -6466,7 +6199,6 @@ export default function HomePage(): React.JSX.Element {
                                 color: BLUE,
                                 letterSpacing: "-0.01em",
                                 cursor: "pointer",
-                                textTransform: "none",
                               }}
                             >
                               {link}
@@ -6605,12 +6337,6 @@ export default function HomePage(): React.JSX.Element {
           transform-origin: center center;
           opacity: 1 !important;
           visibility: visible !important;
-        }
-        .join-note-char {
-          display: inline-block;
-          will-change: transform, opacity;
-          color: #0D3CFC !important;
-          transform-origin: 50% 100%;
         }
         .chat-messages-container::-webkit-scrollbar,
         .chat-list-container::-webkit-scrollbar,
