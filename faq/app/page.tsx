@@ -601,6 +601,17 @@ interface AppealTicket {
   typingUserName?: string | null;
 }
 
+interface NoteJoinUser {
+  id: string;
+  userId: string;
+  userName: string;
+  userEmail: string;
+  userPhoto?: string;
+  noteText: string;
+  joinedAt: any;
+  status: "joined" | "pending";
+}
+
 // ===== HERO MENURU TITLE =====
 const HeroMenuruTitle = ({
   onNavbarShiftChange,
@@ -2666,6 +2677,468 @@ const AppealChatRoom = ({
         >
           Kirim
         </button>
+      </div>
+    </div>
+  );
+};
+
+// ===== JOIN NOTE SECTION (BERGABUNG BERSAMA KAMI) =====
+const JoinNoteSection = ({
+  user,
+  db,
+  isMounted,
+}: {
+  user: any;
+  db: any;
+  isMounted: boolean;
+}) => {
+  const [noteText, setNoteText] = useState("");
+  const [joining, setJoining] = useState(false);
+  const [joined, setJoined] = useState(false);
+  const [joinUsers, setJoinUsers] = useState<NoteJoinUser[]>([]);
+  const [loadingUsers, setLoadingUsers] = useState(true);
+
+  // Load users yang sudah bergabung
+  useEffect(() => {
+    if (!db || !isMounted) return;
+    const q = query(
+      collection(db, "note_joins"),
+      orderBy("joinedAt", "desc"),
+      limit(50)
+    );
+    const unsub = onSnapshot(q, (snapshot: any) => {
+      const list: NoteJoinUser[] = [];
+      snapshot.forEach((docSnap: any) => {
+        list.push({ id: docSnap.id, ...docSnap.data() } as NoteJoinUser);
+      });
+      setJoinUsers(list);
+      setLoadingUsers(false);
+    });
+    return () => unsub();
+  }, [db, isMounted]);
+
+  // Cek apakah user sudah bergabung
+  useEffect(() => {
+    if (!db || !user || !isMounted) {
+      setJoined(false);
+      return;
+    }
+    const q = query(
+      collection(db, "note_joins"),
+      where("userId", "==", user.uid),
+      limit(1)
+    );
+    const unsub = onSnapshot(q, (snapshot: any) => {
+      setJoined(!snapshot.empty);
+    });
+    return () => unsub();
+  }, [db, user, isMounted]);
+
+  const handleJoin = async () => {
+    if (!db || !user || joining || joined) return;
+    setJoining(true);
+    try {
+      await addDoc(collection(db, "note_joins"), {
+        userId: user.uid,
+        userName: user.displayName || user.email?.split("@")[0] || "User",
+        userEmail: user.email || "",
+        userPhoto: user.photoURL || "",
+        noteText: noteText.trim() || "Saya ingin bergabung di fitur Note!",
+        joinedAt: serverTimestamp(),
+        status: "joined",
+      });
+      setNoteText("");
+    } catch (error) {
+      console.error("Error joining note:", error);
+      alert("Gagal bergabung. Silakan coba lagi.");
+    } finally {
+      setJoining(false);
+    }
+  };
+
+  const displayName = user?.displayName || user?.email?.split("@")[0] || "User";
+  const photoURL = user?.photoURL || "";
+  const email = user?.email || "";
+
+  return (
+    <div
+      style={{
+        marginTop: "60px",
+        marginBottom: "40px",
+        padding: "40px",
+        backgroundColor: "#F7F8FF",
+        borderRadius: "24px",
+        border: `1px solid ${BLUE}20`,
+        fontFamily: FONT_FAMILY,
+      }}
+    >
+      {/* Title */}
+      <div style={{ marginBottom: "24px" }}>
+        <h3
+          style={{
+            fontFamily: FONT_FAMILY,
+            fontSize: "48px",
+            fontWeight: 700,
+            color: BLUE,
+            letterSpacing: "-0.03em",
+            lineHeight: 1.1,
+            margin: 0,
+            marginBottom: "12px",
+          }}
+        >
+          Bergabung bersama kami di fitur Note
+        </h3>
+        <p
+          style={{
+            fontSize: "16px",
+            fontWeight: 500,
+            color: "#333",
+            margin: 0,
+            lineHeight: 1.5,
+          }}
+        >
+          Bagikan catatan Anda dan jadilah bagian dari komunitas Menuru Note.
+        </p>
+      </div>
+
+      {/* User Card (jika login) */}
+      {user ? (
+        <div
+          style={{
+            backgroundColor: WHITE,
+            borderRadius: "16px",
+            padding: "20px 24px",
+            marginBottom: "20px",
+            border: `1.5px solid ${BLUE}30`,
+            display: "flex",
+            alignItems: "center",
+            gap: "16px",
+            flexWrap: "wrap",
+          }}
+        >
+          {/* Foto Profil */}
+          <div
+            style={{
+              width: "64px",
+              height: "64px",
+              borderRadius: "50%",
+              overflow: "hidden",
+              backgroundColor: BLUE,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+              border: `2px solid ${BLUE}`,
+            }}
+          >
+            {photoURL ? (
+              <img
+                src={photoURL}
+                alt={displayName}
+                style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                referrerPolicy="no-referrer"
+              />
+            ) : (
+              <span style={{ fontSize: "26px", fontWeight: 800, color: WHITE }}>
+                {displayName.charAt(0).toUpperCase()}
+              </span>
+            )}
+          </div>
+
+          {/* Nama + Email */}
+          <div style={{ flex: "1 1 200px", minWidth: 0 }}>
+            <div
+              style={{
+                fontSize: "18px",
+                fontWeight: 700,
+                color: BLUE,
+                marginBottom: "4px",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {displayName}
+            </div>
+            <div
+              style={{
+                fontSize: "13px",
+                fontWeight: 500,
+                color: "#666",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {email}
+            </div>
+          </div>
+
+          {/* Status Badge */}
+          <div style={{ flexShrink: 0 }}>
+            {joined ? (
+              <StabiloBadge
+                label="Sudah Bergabung"
+                bg={BLUE}
+                text={WHITE}
+                border={BLUE}
+                size="md"
+              />
+            ) : (
+              <StabiloBadge
+                label="Belum Bergabung"
+                bg={WHITE}
+                text={BLUE}
+                border={BLUE}
+                size="md"
+              />
+            )}
+          </div>
+        </div>
+      ) : (
+        <div
+          style={{
+            backgroundColor: WHITE,
+            borderRadius: "16px",
+            padding: "20px 24px",
+            marginBottom: "20px",
+            border: `1.5px solid ${BLUE}30`,
+            textAlign: "center",
+          }}
+        >
+          <p style={{ fontSize: "14px", color: "#666", margin: 0, marginBottom: "12px" }}>
+            Silakan login terlebih dahulu untuk bergabung di fitur Note
+          </p>
+          <Link href="/signin" style={{ textDecoration: "none" }}>
+            <button
+              style={{
+                padding: "10px 24px",
+                backgroundColor: BLUE,
+                color: WHITE,
+                border: "none",
+                borderRadius: "8px",
+                fontSize: "14px",
+                fontWeight: 700,
+                cursor: "pointer",
+                fontFamily: FONT_FAMILY,
+              }}
+            >
+              Login
+            </button>
+          </Link>
+        </div>
+      )}
+
+      {/* Form kirim note */}
+      {user && !joined && (
+        <div
+          style={{
+            backgroundColor: WHITE,
+            borderRadius: "16px",
+            padding: "20px 24px",
+            marginBottom: "24px",
+            border: `1.5px solid ${BLUE}30`,
+          }}
+        >
+          <div
+            style={{
+              fontSize: "14px",
+              fontWeight: 700,
+              color: BLUE,
+              marginBottom: "10px",
+            }}
+          >
+            Tulis catatan Anda:
+          </div>
+          <textarea
+            value={noteText}
+            onChange={(e) => setNoteText(e.target.value)}
+            placeholder="Tulis catatan atau pesan Anda untuk komunitas Note..."
+            rows={3}
+            style={{
+              width: "100%",
+              padding: "12px 16px",
+              border: `1.5px solid ${BLUE}40`,
+              borderRadius: "10px",
+              fontSize: "14px",
+              fontFamily: FONT_FAMILY,
+              outline: "none",
+              resize: "vertical",
+              backgroundColor: WHITE,
+              color: "#000",
+              boxSizing: "border-box",
+              marginBottom: "12px",
+            }}
+          />
+          <button
+            onClick={handleJoin}
+            disabled={joining}
+            style={{
+              padding: "12px 28px",
+              backgroundColor: joining ? "#7d97f7" : BLUE,
+              color: WHITE,
+              border: "none",
+              borderRadius: "10px",
+              fontSize: "14px",
+              fontWeight: 800,
+              cursor: joining ? "not-allowed" : "pointer",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "0.5px",
+              textTransform: "uppercase",
+            }}
+          >
+            {joining ? "Mengirim..." : "Kirim & Bergabung"}
+          </button>
+        </div>
+      )}
+
+      {/* Pesan sukses jika sudah bergabung */}
+      {user && joined && (
+        <div
+          style={{
+            backgroundColor: BLUE,
+            borderRadius: "16px",
+            padding: "20px 24px",
+            marginBottom: "24px",
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
+          }}
+        >
+          <div
+            style={{
+              width: "40px",
+              height: "40px",
+              borderRadius: "50%",
+              backgroundColor: WHITE,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+            }}
+          >
+            <CheckIcon size={20} color={BLUE} />
+          </div>
+          <div>
+            <div style={{ fontSize: "16px", fontWeight: 700, color: WHITE, marginBottom: "2px" }}>
+              Terima kasih sudah bergabung!
+            </div>
+            <div style={{ fontSize: "13px", color: "rgba(255,255,255,0.85)" }}>
+              Catatan Anda sudah terkirim dan Anda resmi bergabung di fitur Note.
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Daftar user yang sudah bergabung */}
+      <div>
+        <div
+          style={{
+            fontSize: "14px",
+            fontWeight: 800,
+            color: BLUE,
+            marginBottom: "14px",
+            letterSpacing: "0.5px",
+            textTransform: "uppercase",
+          }}
+        >
+          Sudah Bergabung ({joinUsers.length})
+        </div>
+
+        {loadingUsers ? (
+          <div style={{ fontSize: "13px", color: "#999", padding: "20px 0" }}>
+            Memuat...
+          </div>
+        ) : joinUsers.length === 0 ? (
+          <div
+            style={{
+              fontSize: "13px",
+              color: "#999",
+              padding: "20px 0",
+              textAlign: "center",
+              fontStyle: "italic",
+            }}
+          >
+            Belum ada yang bergabung. Jadilah yang pertama!
+          </div>
+        ) : (
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
+              gap: "12px",
+            }}
+          >
+            {joinUsers.map((u) => (
+              <div
+                key={u.id}
+                style={{
+                  backgroundColor: WHITE,
+                  borderRadius: "12px",
+                  padding: "14px",
+                  border: `1px solid ${BLUE}20`,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "12px",
+                }}
+              >
+                <div
+                  style={{
+                    width: "44px",
+                    height: "44px",
+                    borderRadius: "50%",
+                    overflow: "hidden",
+                    backgroundColor: BLUE,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                    border: `1.5px solid ${BLUE}`,
+                  }}
+                >
+                  {u.userPhoto ? (
+                    <img
+                      src={u.userPhoto}
+                      alt={u.userName}
+                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                      referrerPolicy="no-referrer"
+                    />
+                  ) : (
+                    <span style={{ fontSize: "18px", fontWeight: 800, color: WHITE }}>
+                      {(u.userName || "U").charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div
+                    style={{
+                      fontSize: "13px",
+                      fontWeight: 700,
+                      color: "#000",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                      marginBottom: "2px",
+                    }}
+                  >
+                    {u.userName}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "11px",
+                      color: "#666",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {u.userEmail}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -5551,7 +6024,6 @@ export default function HomePage(): React.JSX.Element {
               marginBottom: "40px",
             }}
           >
-            {/* Baris utama: 01 Notes + label TRUST */}
             <div
               style={{
                 display: "flex",
@@ -5587,7 +6059,6 @@ export default function HomePage(): React.JSX.Element {
                 </span>
               </div>
 
-              {/* Wrapper label TRUST + teks di bawahnya */}
               <div
                 style={{
                   marginLeft: "auto",
@@ -5620,7 +6091,6 @@ export default function HomePage(): React.JSX.Element {
                   Trust
                 </span>
 
-                {/* Teks tepat di bawah label TRUST, rata kiri sejajar */}
                 <p
                   style={{
                     fontFamily: FONT_FAMILY,
@@ -5640,7 +6110,6 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* Kotak biru dengan ikon panah di kanan */}
             <div
               style={{
                 position: "absolute",
@@ -5696,8 +6165,6 @@ export default function HomePage(): React.JSX.Element {
                 justifyContent: "center",
               }}
             >
-              {/* Foto plj.JPG — pakai mixBlendMode screen supaya bg biru foto
-                  jadi transparan/hilang dan nyatu dengan bg biru container */}
               <img
                 src="/images/plj.JPG"
                 alt="Note"
@@ -5716,7 +6183,6 @@ export default function HomePage(): React.JSX.Element {
                 }}
               />
 
-              {/* Teks Comingsoon bergerak ke kiri saat hover */}
               <div
                 style={{
                   position: "absolute",
@@ -5756,6 +6222,9 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
           </div>
+
+          {/* ===== SECTION BERGABUNG BERSAMA KAMI DI FITUR NOTE ===== */}
+          <JoinNoteSection user={user} db={db} isMounted={isMounted} />
         </div>
 
         <div
