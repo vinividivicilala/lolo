@@ -2682,7 +2682,7 @@ const AppealChatRoom = ({
   );
 };
 
-// ===== JOIN NOTE SECTION (BERGABUNG BERSAMA KAMI) =====
+// ===== JOIN NOTE SECTION (AYO BERGABUNG BERSAMA FITUR NOTES KAMI) =====
 const JoinNoteSection = ({
   user,
   db,
@@ -2697,6 +2697,11 @@ const JoinNoteSection = ({
   const [joined, setJoined] = useState(false);
   const [joinUsers, setJoinUsers] = useState<NoteJoinUser[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(true);
+
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const subtitleRef = useRef<HTMLParagraphElement>(null);
+  const userInfoRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
 
   // Load users yang sudah bergabung
   useEffect(() => {
@@ -2734,6 +2739,133 @@ const JoinNoteSection = ({
     return () => unsub();
   }, [db, user, isMounted]);
 
+  // GSAP Animation untuk title reveal
+  useEffect(() => {
+    if (!isMounted) return;
+    if (!titleRef.current) return;
+
+    const ctx = gsap.context(() => {
+      const split = new SplitText(titleRef.current, {
+        type: "chars, words",
+        charsClass: "join-note-char",
+      });
+
+      gsap.set(split.chars, {
+        opacity: 0,
+        yPercent: 120,
+        rotationX: -90,
+        transformOrigin: "50% 100%",
+        force3D: true,
+      });
+
+      gsap.to(split.chars, {
+        opacity: 1,
+        yPercent: 0,
+        rotationX: 0,
+        duration: 1,
+        stagger: 0.03,
+        ease: "back.out(1.7)",
+        scrollTrigger: {
+          trigger: titleRef.current,
+          start: "top 85%",
+          end: "top 50%",
+          toggleActions: "play none none reverse",
+          invalidateOnRefresh: true,
+        },
+      });
+    }, titleRef);
+
+    return () => ctx.revert();
+  }, [isMounted]);
+
+  // GSAP Animation untuk subtitle
+  useEffect(() => {
+    if (!isMounted) return;
+    if (!subtitleRef.current) return;
+
+    const el = subtitleRef.current;
+    gsap.fromTo(
+      el,
+      { opacity: 0, y: 30, filter: "blur(8px)" },
+      {
+        opacity: 1,
+        y: 0,
+        filter: "blur(0px)",
+        duration: 1,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: el,
+          start: "top 90%",
+          toggleActions: "play none none reverse",
+        },
+      }
+    );
+
+    return () => {
+      gsap.killTweensOf(el);
+    };
+  }, [isMounted]);
+
+  // GSAP Animation untuk user info
+  useEffect(() => {
+    if (!isMounted) return;
+    if (!userInfoRef.current) return;
+
+    const el = userInfoRef.current;
+    gsap.fromTo(
+      el,
+      { opacity: 0, y: 40, scale: 0.95 },
+      {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        duration: 0.8,
+        ease: "back.out(1.7)",
+        scrollTrigger: {
+          trigger: el,
+          start: "top 90%",
+          toggleActions: "play none none reverse",
+        },
+      }
+    );
+
+    return () => {
+      gsap.killTweensOf(el);
+    };
+  }, [isMounted]);
+
+  // GSAP Animation untuk list users
+  useEffect(() => {
+    if (!isMounted) return;
+    if (!listRef.current) return;
+    if (joinUsers.length === 0) return;
+
+    const cards = listRef.current.querySelectorAll(".join-note-card");
+    if (cards.length === 0) return;
+
+    gsap.fromTo(
+      cards,
+      { opacity: 0, y: 30, scale: 0.9 },
+      {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        duration: 0.6,
+        stagger: 0.06,
+        ease: "back.out(1.7)",
+        scrollTrigger: {
+          trigger: listRef.current,
+          start: "top 90%",
+          toggleActions: "play none none reverse",
+        },
+      }
+    );
+
+    return () => {
+      gsap.killTweensOf(cards);
+    };
+  }, [isMounted, joinUsers.length]);
+
   const handleJoin = async () => {
     if (!db || !user || joining || joined) return;
     setJoining(true);
@@ -2765,62 +2897,63 @@ const JoinNoteSection = ({
       style={{
         marginTop: "60px",
         marginBottom: "40px",
-        padding: "40px",
-        backgroundColor: "#F7F8FF",
-        borderRadius: "24px",
-        border: `1px solid ${BLUE}20`,
         fontFamily: FONT_FAMILY,
       }}
     >
-      {/* Title */}
-      <div style={{ marginBottom: "24px" }}>
-        <h3
-          style={{
-            fontFamily: FONT_FAMILY,
-            fontSize: "48px",
-            fontWeight: 700,
-            color: BLUE,
-            letterSpacing: "-0.03em",
-            lineHeight: 1.1,
-            margin: 0,
-            marginBottom: "12px",
-          }}
-        >
-          Bergabung bersama kami di fitur Note
-        </h3>
-        <p
-          style={{
-            fontSize: "16px",
-            fontWeight: 500,
-            color: "#333",
-            margin: 0,
-            lineHeight: 1.5,
-          }}
-        >
-          Bagikan catatan Anda dan jadilah bagian dari komunitas Menuru Note.
-        </p>
-      </div>
+      {/* ===== TITLE dengan GSAP Reveal ===== */}
+      <h3
+        ref={titleRef}
+        style={{
+          fontFamily: FONT_FAMILY,
+          fontSize: "72px",
+          fontWeight: 700,
+          color: BLUE,
+          letterSpacing: "-0.04em",
+          lineHeight: 1.05,
+          margin: 0,
+          marginBottom: "20px",
+          textAlign: "left",
+          WebkitFontSmoothing: "antialiased",
+          MozOsxFontSmoothing: "grayscale",
+        }}
+      >
+        Ayo bergabung bersama fitur Notes kami
+      </h3>
 
-      {/* User Card (jika login) */}
-      {user ? (
+      {/* ===== SUBTITLE dengan GSAP Reveal ===== */}
+      <p
+        ref={subtitleRef}
+        style={{
+          fontFamily: FONT_FAMILY,
+          fontSize: "18px",
+          fontWeight: 500,
+          color: "#333",
+          lineHeight: 1.5,
+          margin: 0,
+          marginBottom: "40px",
+          maxWidth: "720px",
+        }}
+      >
+        Bagikan catatan Anda dan jadilah bagian dari komunitas Menuru Note.
+      </p>
+
+      {/* ===== USER INFO (dari Firebase) dengan GSAP Reveal ===== */}
+      {user && (
         <div
+          ref={userInfoRef}
           style={{
-            backgroundColor: WHITE,
-            borderRadius: "16px",
-            padding: "20px 24px",
-            marginBottom: "20px",
-            border: `1.5px solid ${BLUE}30`,
             display: "flex",
             alignItems: "center",
             gap: "16px",
+            marginBottom: "32px",
             flexWrap: "wrap",
           }}
         >
-          {/* Foto Profil */}
+          {/* FP User */}
           <div
             style={{
-              width: "64px",
-              height: "64px",
+              width: "72px",
+              height: "72px",
               borderRadius: "50%",
               overflow: "hidden",
               backgroundColor: BLUE,
@@ -2839,7 +2972,7 @@ const JoinNoteSection = ({
                 referrerPolicy="no-referrer"
               />
             ) : (
-              <span style={{ fontSize: "26px", fontWeight: 800, color: WHITE }}>
+              <span style={{ fontSize: "28px", fontWeight: 800, color: WHITE }}>
                 {displayName.charAt(0).toUpperCase()}
               </span>
             )}
@@ -2849,7 +2982,7 @@ const JoinNoteSection = ({
           <div style={{ flex: "1 1 200px", minWidth: 0 }}>
             <div
               style={{
-                fontSize: "18px",
+                fontSize: "22px",
                 fontWeight: 700,
                 color: BLUE,
                 marginBottom: "4px",
@@ -2862,7 +2995,7 @@ const JoinNoteSection = ({
             </div>
             <div
               style={{
-                fontSize: "13px",
+                fontSize: "14px",
                 fontWeight: 500,
                 color: "#666",
                 overflow: "hidden",
@@ -2874,82 +3007,40 @@ const JoinNoteSection = ({
             </div>
           </div>
 
-          {/* Status Badge */}
-          <div style={{ flexShrink: 0 }}>
-            {joined ? (
-              <StabiloBadge
-                label="Sudah Bergabung"
-                bg={BLUE}
-                text={WHITE}
-                border={BLUE}
-                size="md"
-              />
-            ) : (
-              <StabiloBadge
-                label="Belum Bergabung"
-                bg={WHITE}
-                text={BLUE}
-                border={BLUE}
-                size="md"
-              />
-            )}
-          </div>
-        </div>
-      ) : (
-        <div
-          style={{
-            backgroundColor: WHITE,
-            borderRadius: "16px",
-            padding: "20px 24px",
-            marginBottom: "20px",
-            border: `1.5px solid ${BLUE}30`,
-            textAlign: "center",
-          }}
-        >
-          <p style={{ fontSize: "14px", color: "#666", margin: 0, marginBottom: "12px" }}>
-            Silakan login terlebih dahulu untuk bergabung di fitur Note
-          </p>
-          <Link href="/signin" style={{ textDecoration: "none" }}>
-            <button
+          {/* Status Sudah Bergabung */}
+          {joined && (
+            <div
               style={{
-                padding: "10px 24px",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "10px 18px",
                 backgroundColor: BLUE,
-                color: WHITE,
-                border: "none",
-                borderRadius: "8px",
-                fontSize: "14px",
-                fontWeight: 700,
-                cursor: "pointer",
-                fontFamily: FONT_FAMILY,
+                borderRadius: "100px",
+                flexShrink: 0,
               }}
             >
-              Login
-            </button>
-          </Link>
+              <CheckIcon size={16} color={WHITE} />
+              <span
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: WHITE,
+                  fontFamily: FONT_FAMILY,
+                  letterSpacing: "0.5px",
+                  textTransform: "uppercase",
+                }}
+              >
+                Sudah Bergabung
+              </span>
+            </div>
+          )}
         </div>
       )}
 
-      {/* Form kirim note */}
+      {/* ===== FORM KIRIM NOTE ===== */}
       {user && !joined && (
-        <div
-          style={{
-            backgroundColor: WHITE,
-            borderRadius: "16px",
-            padding: "20px 24px",
-            marginBottom: "24px",
-            border: `1.5px solid ${BLUE}30`,
-          }}
-        >
-          <div
-            style={{
-              fontSize: "14px",
-              fontWeight: 700,
-              color: BLUE,
-              marginBottom: "10px",
-            }}
-          >
-            Tulis catatan Anda:
-          </div>
+        <div style={{ marginBottom: "40px" }}>
           <textarea
             value={noteText}
             onChange={(e) => setNoteText(e.target.value)}
@@ -2957,10 +3048,11 @@ const JoinNoteSection = ({
             rows={3}
             style={{
               width: "100%",
-              padding: "12px 16px",
+              maxWidth: "720px",
+              padding: "16px 20px",
               border: `1.5px solid ${BLUE}40`,
-              borderRadius: "10px",
-              fontSize: "14px",
+              borderRadius: "12px",
+              fontSize: "15px",
               fontFamily: FONT_FAMILY,
               outline: "none",
               resize: "vertical",
@@ -2974,11 +3066,11 @@ const JoinNoteSection = ({
             onClick={handleJoin}
             disabled={joining}
             style={{
-              padding: "12px 28px",
+              padding: "14px 32px",
               backgroundColor: joining ? "#7d97f7" : BLUE,
               color: WHITE,
               border: "none",
-              borderRadius: "10px",
+              borderRadius: "100px",
               fontSize: "14px",
               fontWeight: 800,
               cursor: joining ? "not-allowed" : "pointer",
@@ -2992,100 +3084,47 @@ const JoinNoteSection = ({
         </div>
       )}
 
-      {/* Pesan sukses jika sudah bergabung */}
-      {user && joined && (
-        <div
-          style={{
-            backgroundColor: BLUE,
-            borderRadius: "16px",
-            padding: "20px 24px",
-            marginBottom: "24px",
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-          }}
-        >
+      {/* ===== DAFTAR SUDAH BERGABUNG (dari Firebase) ===== */}
+      {joinUsers.length > 0 && (
+        <div ref={listRef}>
           <div
             style={{
-              width: "40px",
-              height: "40px",
-              borderRadius: "50%",
-              backgroundColor: WHITE,
+              fontSize: "14px",
+              fontWeight: 800,
+              color: BLUE,
+              marginBottom: "18px",
+              letterSpacing: "0.5px",
+              textTransform: "uppercase",
+            }}
+          >
+            Sudah Bergabung ({joinUsers.length})
+          </div>
+
+          <div
+            style={{
               display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-            }}
-          >
-            <CheckIcon size={20} color={BLUE} />
-          </div>
-          <div>
-            <div style={{ fontSize: "16px", fontWeight: 700, color: WHITE, marginBottom: "2px" }}>
-              Terima kasih sudah bergabung!
-            </div>
-            <div style={{ fontSize: "13px", color: "rgba(255,255,255,0.85)" }}>
-              Catatan Anda sudah terkirim dan Anda resmi bergabung di fitur Note.
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Daftar user yang sudah bergabung */}
-      <div>
-        <div
-          style={{
-            fontSize: "14px",
-            fontWeight: 800,
-            color: BLUE,
-            marginBottom: "14px",
-            letterSpacing: "0.5px",
-            textTransform: "uppercase",
-          }}
-        >
-          Sudah Bergabung ({joinUsers.length})
-        </div>
-
-        {loadingUsers ? (
-          <div style={{ fontSize: "13px", color: "#999", padding: "20px 0" }}>
-            Memuat...
-          </div>
-        ) : joinUsers.length === 0 ? (
-          <div
-            style={{
-              fontSize: "13px",
-              color: "#999",
-              padding: "20px 0",
-              textAlign: "center",
-              fontStyle: "italic",
-            }}
-          >
-            Belum ada yang bergabung. Jadilah yang pertama!
-          </div>
-        ) : (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-              gap: "12px",
+              flexWrap: "wrap",
+              gap: "16px",
             }}
           >
             {joinUsers.map((u) => (
               <div
                 key={u.id}
+                className="join-note-card"
                 style={{
-                  backgroundColor: WHITE,
-                  borderRadius: "12px",
-                  padding: "14px",
-                  border: `1px solid ${BLUE}20`,
                   display: "flex",
                   alignItems: "center",
                   gap: "12px",
+                  padding: "12px 18px",
+                  backgroundColor: "#F7F8FF",
+                  borderRadius: "100px",
+                  border: `1.5px solid ${BLUE}20`,
                 }}
               >
                 <div
                   style={{
-                    width: "44px",
-                    height: "44px",
+                    width: "40px",
+                    height: "40px",
                     borderRadius: "50%",
                     overflow: "hidden",
                     backgroundColor: BLUE,
@@ -3104,21 +3143,21 @@ const JoinNoteSection = ({
                       referrerPolicy="no-referrer"
                     />
                   ) : (
-                    <span style={{ fontSize: "18px", fontWeight: 800, color: WHITE }}>
+                    <span style={{ fontSize: "16px", fontWeight: 800, color: WHITE }}>
                       {(u.userName || "U").charAt(0).toUpperCase()}
                     </span>
                   )}
                 </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ minWidth: 0 }}>
                   <div
                     style={{
-                      fontSize: "13px",
+                      fontSize: "14px",
                       fontWeight: 700,
-                      color: "#000",
+                      color: BLUE,
                       overflow: "hidden",
                       textOverflow: "ellipsis",
                       whiteSpace: "nowrap",
-                      marginBottom: "2px",
+                      maxWidth: "180px",
                     }}
                   >
                     {u.userName}
@@ -3130,6 +3169,7 @@ const JoinNoteSection = ({
                       overflow: "hidden",
                       textOverflow: "ellipsis",
                       whiteSpace: "nowrap",
+                      maxWidth: "180px",
                     }}
                   >
                     {u.userEmail}
@@ -3138,8 +3178,44 @@ const JoinNoteSection = ({
               </div>
             ))}
           </div>
-        )}
-      </div>
+        </div>
+      )}
+
+      {/* ===== JIKA BELUM LOGIN ===== */}
+      {!user && (
+        <div
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "12px",
+            padding: "14px 24px",
+            backgroundColor: "#F7F8FF",
+            borderRadius: "100px",
+            border: `1.5px solid ${BLUE}20`,
+          }}
+        >
+          <span style={{ fontSize: "14px", color: "#333", fontWeight: 500 }}>
+            Silakan login untuk bergabung
+          </span>
+          <Link href="/signin" style={{ textDecoration: "none" }}>
+            <button
+              style={{
+                padding: "8px 20px",
+                backgroundColor: BLUE,
+                color: WHITE,
+                border: "none",
+                borderRadius: "100px",
+                fontSize: "13px",
+                fontWeight: 700,
+                cursor: "pointer",
+                fontFamily: FONT_FAMILY,
+              }}
+            >
+              Login
+            </button>
+          </Link>
+        </div>
+      )}
     </div>
   );
 };
@@ -6223,7 +6299,7 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </div>
 
-          {/* ===== SECTION BERGABUNG BERSAMA KAMI DI FITUR NOTE ===== */}
+          {/* ===== SECTION AYO BERGABUNG BERSAMA FITUR NOTES KAMI ===== */}
           <JoinNoteSection user={user} db={db} isMounted={isMounted} />
         </div>
 
@@ -6529,6 +6605,12 @@ export default function HomePage(): React.JSX.Element {
           transform-origin: center center;
           opacity: 1 !important;
           visibility: visible !important;
+        }
+        .join-note-char {
+          display: inline-block;
+          will-change: transform, opacity;
+          color: #0D3CFC !important;
+          transform-origin: 50% 100%;
         }
         .chat-messages-container::-webkit-scrollbar,
         .chat-list-container::-webkit-scrollbar,
