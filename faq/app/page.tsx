@@ -5696,18 +5696,18 @@ export default function HomePage(): React.JSX.Element {
                 justifyContent: "center",
               }}
             >
-              {/* Foto sfggz.JPG — diperbesar, tidak di-crop, nyatu dengan bg biru */}
+              {/* Foto sfggz.JPG — bg biru di foto di-multiply dengan bg biru container
+                  supaya nyatu, tidak terlihat 2 lapis biru */}
               <img
                 src="/images/sfggz.JPG"
                 alt="Note"
                 style={{
-                  maxWidth: "95%",
-                  maxHeight: "95%",
-                  width: "auto",
-                  height: "auto",
+                  width: "90%",
+                  height: "90%",
                   objectFit: "contain",
+                  mixBlendMode: "multiply",
                   display: "block",
-                  opacity: noteHovered ? 0.25 : 1,
+                  opacity: noteHovered ? 0.35 : 1,
                   transition: "opacity 0.4s ease",
                   pointerEvents: "none",
                   userSelect: "none",
