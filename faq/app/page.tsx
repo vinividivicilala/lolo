@@ -5270,9 +5270,6 @@ export default function HomePage(): React.JSX.Element {
   const preloaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
   const noteJoinRef = useRef<HTMLDivElement>(null);
-  const noteTitleRef = useRef<HTMLHeadingElement>(null);
-  const noteButtonRef = useRef<HTMLButtonElement>(null);
-  const noteUserListRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setIsMounted(true);
@@ -5328,48 +5325,45 @@ export default function HomePage(): React.JSX.Element {
     setTimeout(() => startPreloaderAnimation(), 500);
   }, [isMounted, loading]);
 
-  // GSAP animation section "Bergabung bersama kami"
+  // GSAP animation sederhana untuk section (TANPA SplitText)
   useEffect(() => {
     if (!isMounted || !showMain) return;
     if (!noteJoinRef.current) return;
 
     const ctx = gsap.context(() => {
-      if (noteTitleRef.current) {
-        gsap.fromTo(
-          noteTitleRef.current,
-          { opacity: 0, y: 80, filter: "blur(12px)", scale: 0.9 },
-          {
-            opacity: 1,
-            y: 0,
-            filter: "blur(0px)",
-            scale: 1,
-            duration: 1.4,
-            ease: "power4.out",
-            scrollTrigger: {
-              trigger: noteTitleRef.current,
-              start: "top 85%",
-              end: "top 50%",
-              toggleActions: "play none none reverse",
-            },
-          }
-        );
-      }
+      gsap.fromTo(
+        noteJoinRef.current,
+        { opacity: 0, y: 60 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 1.2,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: noteJoinRef.current,
+            start: "top 85%",
+            toggleActions: "play none none none",
+            once: true,
+          },
+        }
+      );
 
-      if (noteButtonRef.current) {
+      const items = noteJoinRef.current.querySelectorAll(".note-user-item");
+      if (items.length > 0) {
         gsap.fromTo(
-          noteButtonRef.current,
-          { opacity: 0, y: 40, scale: 0.85 },
+          items,
+          { opacity: 0, x: -40 },
           {
             opacity: 1,
-            y: 0,
-            scale: 1,
-            duration: 1,
-            delay: 0.2,
-            ease: "back.out(1.7)",
+            x: 0,
+            duration: 0.8,
+            stagger: 0.08,
+            ease: "power2.out",
             scrollTrigger: {
-              trigger: noteButtonRef.current,
-              start: "top 90%",
-              toggleActions: "play none none reverse",
+              trigger: noteJoinRef.current,
+              start: "top 85%",
+              toggleActions: "play none none none",
+              once: true,
             },
           }
         );
@@ -5377,33 +5371,6 @@ export default function HomePage(): React.JSX.Element {
     }, noteJoinRef);
 
     return () => ctx.revert();
-  }, [isMounted, showMain]);
-
-  // GSAP animation untuk list user (setiap kali noteUsers berubah)
-  useEffect(() => {
-    if (!isMounted || !showMain) return;
-    if (!noteUserListRef.current) return;
-
-    const items = noteUserListRef.current.querySelectorAll(".note-user-item");
-    if (items.length === 0) return;
-
-    gsap.fromTo(
-      items,
-      { opacity: 0, x: -60, filter: "blur(6px)" },
-      {
-        opacity: 1,
-        x: 0,
-        filter: "blur(0px)",
-        duration: 0.9,
-        stagger: 0.12,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: noteUserListRef.current,
-          start: "top 90%",
-          toggleActions: "play none none reverse",
-        },
-      }
-    );
   }, [isMounted, showMain, noteUsers]);
 
   const startPreloaderAnimation = () => {
@@ -5768,7 +5735,7 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </div>
 
-          {/* ===== SECTION BARU: BERGABUNG BERSAMA KAMI ===== */}
+          {/* ===== SECTION BARU: BERGABUNG BERSAMA KAMI (TANPA SPLITTEXT) ===== */}
           <div
             ref={noteJoinRef}
             style={{
@@ -5781,11 +5748,11 @@ export default function HomePage(): React.JSX.Element {
               position: "relative",
             }}
           >
+            {/* Judul 70px biru full — TANPA SplitText */}
             <h3
-              ref={noteTitleRef}
               style={{
                 fontFamily: FONT_FAMILY,
-                fontSize: "60px",
+                fontSize: "70px",
                 fontWeight: 700,
                 color: BLUE,
                 letterSpacing: "-0.03em",
@@ -5793,31 +5760,29 @@ export default function HomePage(): React.JSX.Element {
                 margin: 0,
                 marginBottom: "32px",
                 textAlign: "left",
-                willChange: "transform, opacity, filter",
               }}
             >
               Bergabung bersama kami di fitur Note
             </h3>
 
+            {/* Tombol Bergabung dengan panah */}
             <button
-              ref={noteButtonRef}
               style={{
                 display: "inline-flex",
                 alignItems: "center",
-                gap: "12px",
-                padding: "14px 28px",
+                gap: "14px",
+                padding: "16px 32px",
                 backgroundColor: BLUE,
                 color: WHITE,
                 border: "none",
                 borderRadius: "12px",
                 fontFamily: FONT_FAMILY,
-                fontSize: "18px",
+                fontSize: "70px",
                 fontWeight: 700,
-                letterSpacing: "0.01em",
+                letterSpacing: "-0.02em",
                 cursor: "pointer",
                 marginBottom: "32px",
                 transition: "background-color 0.25s ease",
-                willChange: "transform",
               }}
               onMouseEnter={(e) => {
                 (e.currentTarget as HTMLButtonElement).style.backgroundColor = BLACK;
@@ -5827,28 +5792,31 @@ export default function HomePage(): React.JSX.Element {
               }}
             >
               <span>Bergabung</span>
-              <NorthEastArrow size={22} color={WHITE} />
+              <NorthEastArrow size={60} color={WHITE} />
             </button>
 
+            {/* Status user login + from */}
             {user && (
               <div
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: "10px",
-                  marginBottom: "24px",
+                  gap: "14px",
+                  marginBottom: "32px",
                   fontFamily: FONT_FAMILY,
                   flexWrap: "wrap",
                 }}
               >
-                <span style={{ fontSize: "16px", fontWeight: 600, color: BLUE }}>from</span>
-                <span style={{ fontSize: "16px", fontWeight: 700, color: BLUE }}>
+                <span style={{ fontSize: "70px", fontWeight: 600, color: BLUE, letterSpacing: "-0.03em", lineHeight: 1 }}>
+                  from
+                </span>
+                <span style={{ fontSize: "70px", fontWeight: 700, color: BLUE, letterSpacing: "-0.03em", lineHeight: 1 }}>
                   {user.displayName || user.email?.split("@")[0] || "User"}
                 </span>
                 <div
                   style={{
-                    width: "32px",
-                    height: "32px",
+                    width: "90px",
+                    height: "90px",
                     borderRadius: "50%",
                     overflow: "hidden",
                     backgroundColor: BLUE,
@@ -5866,29 +5834,37 @@ export default function HomePage(): React.JSX.Element {
                       referrerPolicy="no-referrer"
                     />
                   ) : (
-                    <span style={{ fontSize: "14px", fontWeight: 800, color: WHITE }}>
+                    <span style={{ fontSize: "40px", fontWeight: 800, color: WHITE }}>
                       {(user.displayName || user.email || "U").charAt(0).toUpperCase()}
                     </span>
                   )}
                 </div>
-                <span style={{ fontSize: "14px", fontWeight: 600, color: BLUE }}>
+                <span
+                  style={{
+                    fontSize: "70px",
+                    fontWeight: 700,
+                    color: BLUE,
+                    letterSpacing: "-0.03em",
+                    lineHeight: 1,
+                  }}
+                >
                   {hasSubmittedNote ? "✓ Sudah bergabung" : "Belum bergabung"}
                 </span>
               </div>
             )}
 
+            {/* List nama user berjejer warna biru full */}
             <div
-              ref={noteUserListRef}
               style={{
                 width: "100%",
                 display: "flex",
                 flexWrap: "wrap",
                 alignItems: "center",
-                gap: "12px 20px",
+                gap: "16px 32px",
               }}
             >
               {noteUsers.length === 0 ? (
-                <span style={{ fontFamily: FONT_FAMILY, fontSize: "16px", fontWeight: 500, color: BLUE, opacity: 0.7 }}>
+                <span style={{ fontFamily: FONT_FAMILY, fontSize: "70px", fontWeight: 500, color: BLUE, opacity: 0.7 }}>
                   Belum ada yang bergabung
                 </span>
               ) : (
@@ -5899,7 +5875,7 @@ export default function HomePage(): React.JSX.Element {
                     style={{
                       display: "inline-flex",
                       alignItems: "center",
-                      gap: "6px",
+                      gap: "8px",
                       fontFamily: FONT_FAMILY,
                       color: BLUE,
                     }}
@@ -5907,10 +5883,11 @@ export default function HomePage(): React.JSX.Element {
                     <span
                       style={{
                         fontFamily: FONT_FAMILY,
-                        fontSize: "18px",
+                        fontSize: "70px",
                         fontWeight: 700,
                         color: BLUE,
-                        letterSpacing: "-0.01em",
+                        letterSpacing: "-0.03em",
+                        lineHeight: 1.1,
                         whiteSpace: "nowrap",
                       }}
                     >
