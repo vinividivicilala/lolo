@@ -104,6 +104,21 @@ export const metadata: Metadata = {
   applicationName: 'Menuru Studio',
   category: 'technology',
 
+  // ===== PWA MANIFEST =====
+  manifest: '/manifest.json',
+
+  // ===== APPLE WEB APP =====
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'Menuru',
+  },
+
+  // ===== FORMAT DETECTION =====
+  formatDetection: {
+    telephone: false,
+  },
+
   // ===== VERIFICATION (ISI SETELAH DAFTAR GOOGLE SEARCH CONSOLE) =====
   verification: {
     google: 'MASUKKAN_KODE_VERIFIKASI_GOOGLE_DISINI',
@@ -122,6 +137,10 @@ export const metadata: Metadata = {
     'msapplication-config': '/browserconfig.xml',
   },
 }
+
+// ===== IMPORT PWA COMPONENTS =====
+import ServiceWorkerRegister from '@/components/ServiceWorkerRegister'
+import PWAInstallPrompt from '@/components/PWAInstallPrompt'
 
 export default function RootLayout({
   children,
@@ -149,6 +168,9 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://menuru-studio.netlify.app" />
 
+        {/* ===== PWA MANIFEST ===== */}
+        <link rel="manifest" href="/manifest.json" />
+
         {/* ===== Meta tambahan ===== */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta
@@ -158,6 +180,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="Menuru" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="format-detection" content="telephone=no" />
+        <meta name="theme-color" content="#8be9fd" />
 
         {/* ===== Favicon ===== */}
         <link rel="icon" href="/images/ai.jpg" type="image/jpeg" />
@@ -453,6 +476,10 @@ export default function RootLayout({
         }}
       >
         {children}
+
+        {/* ===== PWA COMPONENTS ===== */}
+        <ServiceWorkerRegister />
+        <PWAInstallPrompt />
       </body>
     </html>
   )
