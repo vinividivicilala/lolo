@@ -396,6 +396,14 @@ const PeopleIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: s
   </svg>
 );
 
+const AgentIcon = ({ size = 18, color = "#ffffff" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="12" cy="8" r="4" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M4 21V19C4 16.7909 5.79086 15 8 15H16C18.2091 15 20 16.7909 20 19V21" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <circle cx="12" cy="8" r="1.5" fill={color} />
+  </svg>
+);
+
 const TrustIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M12 2L4 5V11C4 16 8 20 12 22C16 20 20 16 20 11V5L12 2Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -690,7 +698,7 @@ const ServiceWorkerRegister = () => {
         fontWeight: 600,
       }}
     >
-      <span>🚀 Versi baru tersedia!</span>
+      <span>Versi baru tersedia!</span>
       <button
         onClick={handleUpdate}
         style={{
@@ -831,7 +839,7 @@ const PWAInstallPrompt = () => {
           >
             Untuk install di iPhone/iPad:
             <br />
-            1. Tap ikon <strong>Share</strong> ⬆️ di Safari
+            1. Tap ikon <strong>Share</strong> di Safari
             <br />
             2. Pilih <strong>&quot;Add to Home Screen&quot;</strong>
             <br />
@@ -2984,12 +2992,28 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
   // ===== PWA NOTIFIKASI LIVE CHAT: STATE =====
   const [notifEnabled, setNotifEnabled] = useState(false);
 
-  // ===== PWA NOTIFIKASI LIVE CHAT: BACA PREFERENSI DARI LOCALSTORAGE =====
+  // ===== PWA NOTIFIKASI LIVE CHAT: BACA PREFERENSI DARI FIREBASE =====
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const saved = localStorage.getItem("menuru_livechat_notif_enabled");
-    setNotifEnabled(saved === "true" && Notification.permission === "granted");
-  }, []);
+    if (!user || !db) return;
+    let cancelled = false;
+    const loadPref = async () => {
+      try {
+        const snap = await getDoc(doc(db, "users", user.uid));
+        if (cancelled || !snap.exists()) return;
+        const data = snap.data();
+        const firebaseEnabled = data?.liveChatNotifEnabled === true;
+        const permissionOk = Notification.permission === "granted";
+        setNotifEnabled(firebaseEnabled && permissionOk);
+      } catch (e) {
+        console.warn("Load notif pref error:", e);
+      }
+    };
+    loadPref();
+    return () => {
+      cancelled = true;
+    };
+  }, [user, db]);
 
   // ===== PWA NOTIFIKASI LIVE CHAT: HOOK NOTIFIKASI =====
   useLiveChatNotification({
@@ -3068,6 +3092,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
       });
   }, []);
 
+  // ===== TOUR: HANYA SEKALI PAKAI =====
   useEffect(() => {
     if (!isMounted) return;
     if (isAdmin) return;
@@ -3093,11 +3118,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
     }
     setShowTour(false);
     setTourStep(0);
-  }, []);
-
-  const restartTour = useCallback(() => {
-    setTourStep(0);
-    setShowTour(true);
   }, []);
 
   useEffect(() => {
@@ -3412,16 +3432,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
     if (!ticket || !ticket.typing) return null;
     const name = ticket.typingUserName || "Someone";
     return `${name} is typing...`;
-  };
-
-  const handleLogout = async () => {
-    if (!auth) return;
-    try {
-      await updateDoc(doc(db, "users", user.uid), { online: false, lastSeen: serverTimestamp(), typing: false });
-      await signOut(auth);
-    } catch (error) {
-      console.error("Logout error:", error);
-    }
   };
 
   const filterTicketsBySearch = useCallback(
@@ -4195,23 +4205,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
               Login
             </button>
           </Link>
-          <div style={{ marginTop: "16px" }}>
-            <button
-              onClick={restartTour}
-              style={{
-                background: "transparent",
-                border: "none",
-                color: BLUE,
-                fontSize: "13px",
-                fontFamily: FONT_FAMILY,
-                cursor: "pointer",
-                textDecoration: "underline",
-                padding: 0,
-              }}
-            >
-              Restart Tour
-            </button>
-          </div>
         </div>
       </>
     );
@@ -4220,40 +4213,20 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
   if (!isAdmin && isBanned) {
     return (
       <div style={{ marginTop: "80px", paddingTop: "30px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "20px" }}>
-          <h3
-            style={{
-              fontSize: "80px",
-              fontWeight: 700,
-              color: BLUE,
-              fontFamily: FONT_FAMILY,
-              letterSpacing: "-0.03em",
-              margin: 0,
-              lineHeight: 1.1,
-            }}
-          >
-            Live Chat Agent
-          </h3>
-          <button
-            onClick={handleLogout}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              padding: "0",
-              backgroundColor: "transparent",
-              color: BLUE,
-              border: "none",
-              fontSize: "20px",
-              fontWeight: 700,
-              cursor: "pointer",
-              fontFamily: FONT_FAMILY,
-            }}
-          >
-            <span>Logout</span>
-            <NorthEastArrow size={20} color={BLUE} />
-          </button>
-        </div>
+        <h3
+          style={{
+            fontSize: "80px",
+            fontWeight: 700,
+            color: BLUE,
+            fontFamily: FONT_FAMILY,
+            letterSpacing: "-0.03em",
+            margin: 0,
+            lineHeight: 1.1,
+            marginBottom: "20px",
+          }}
+        >
+          Live Chat Agent
+        </h3>
         <BannedInfoBanner
           banReason={banReason}
           banMessage={banMessage || ""}
@@ -4317,46 +4290,22 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
           setCurrentStep={setTourStep}
         />
         <div style={{ marginTop: "80px", paddingTop: "30px" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "20px" }}>
-            <h3
-              ref={liveChatTitleRef}
-              data-tour="livechat-title"
-              style={{
-                fontSize: "80px",
-                fontWeight: 700,
-                color: BLUE,
-                fontFamily: FONT_FAMILY,
-                letterSpacing: "-0.03em",
-                margin: 0,
-                lineHeight: 1.1,
-              }}
-            >
-              Live Chat Agent
-            </h3>
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "10px" }}>
-              {/* ===== PWA NOTIFIKASI LIVE CHAT: TOGGLE ===== */}
-              {user && <LiveChatNotificationToggle user={user} db={db} />}
-              <button
-                onClick={handleLogout}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  padding: "0",
-                  backgroundColor: "transparent",
-                  color: BLUE,
-                  border: "none",
-                  fontSize: "20px",
-                  fontWeight: 700,
-                  cursor: "pointer",
-                  fontFamily: FONT_FAMILY,
-                }}
-              >
-                <span>Logout</span>
-                <NorthEastArrow size={20} color={BLUE} />
-              </button>
-            </div>
-          </div>
+          <h3
+            ref={liveChatTitleRef}
+            data-tour="livechat-title"
+            style={{
+              fontSize: "80px",
+              fontWeight: 700,
+              color: BLUE,
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "-0.03em",
+              margin: 0,
+              lineHeight: 1.1,
+              marginBottom: "20px",
+            }}
+          >
+            Live Chat Agent
+          </h3>
 
           {onlineAdmins.length > 0 && (
             <div style={{ marginBottom: "24px" }}>
@@ -4450,6 +4399,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
                     fontFamily: FONT_FAMILY,
                   }}
                 >
+                  <AgentIcon size={18} color={WHITE} />
                   <span style={{ fontSize: "13px", fontWeight: 700, color: WHITE }}>{a.displayName}</span>
                   <span style={{ fontSize: "10px", fontWeight: 800, color: WHITE, letterSpacing: "0.5px" }}>ONLINE</span>
                 </div>
@@ -4480,23 +4430,13 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
           >
             Start Live Chat
           </button>
-          <div style={{ marginTop: "16px" }}>
-            <button
-              onClick={restartTour}
-              style={{
-                background: "transparent",
-                border: "none",
-                color: BLUE,
-                fontSize: "13px",
-                fontFamily: FONT_FAMILY,
-                cursor: "pointer",
-                textDecoration: "underline",
-                padding: 0,
-              }}
-            >
-              Restart Tour
-            </button>
-          </div>
+
+          {/* ===== TOGGLE NOTIFIKASI — ATAS TENGAH ===== */}
+          {user && (
+            <div style={{ width: "100%", display: "flex", justifyContent: "center" }}>
+              <LiveChatNotificationToggle user={user} db={db} />
+            </div>
+          )}
         </div>
 
         {showAdminChat && selectedAdmin && (
@@ -4676,40 +4616,20 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
   if (!isAdmin && showStartChat) {
     return (
       <div style={{ marginTop: "80px", paddingTop: "30px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "20px" }}>
-          <h3
-            style={{
-              fontSize: "80px",
-              fontWeight: 700,
-              color: BLUE,
-              fontFamily: FONT_FAMILY,
-              letterSpacing: "-0.03em",
-              margin: 0,
-              lineHeight: 1.1,
-            }}
-          >
-            Live Chat Agent
-          </h3>
-          <button
-            onClick={handleLogout}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              padding: "0",
-              backgroundColor: "transparent",
-              color: BLUE,
-              border: "none",
-              fontSize: "20px",
-              fontWeight: 700,
-              cursor: "pointer",
-              fontFamily: FONT_FAMILY,
-            }}
-          >
-            <span>Logout</span>
-            <NorthEastArrow size={20} color={BLUE} />
-          </button>
-        </div>
+        <h3
+          style={{
+            fontSize: "80px",
+            fontWeight: 700,
+            color: BLUE,
+            fontFamily: FONT_FAMILY,
+            letterSpacing: "-0.03em",
+            margin: 0,
+            lineHeight: 1.1,
+            marginBottom: "20px",
+          }}
+        >
+          Live Chat Agent
+        </h3>
         <div style={{ maxWidth: "400px" }}>
           <div style={{ fontSize: "15px", marginBottom: "10px", fontFamily: FONT_FAMILY, fontWeight: 700, color: BLUE }}>
             Select your issue topic:
@@ -4875,81 +4795,52 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
         setCurrentStep={setTourStep}
       />
       <div style={{ marginTop: "80px", paddingTop: "30px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "20px" }}>
-          <h3
-            ref={liveChatTitleRef}
-            data-tour="livechat-title"
+        {/* ===== TITLE ===== */}
+        <h3
+          ref={liveChatTitleRef}
+          data-tour="livechat-title"
+          style={{
+            fontSize: "80px",
+            fontWeight: 700,
+            color: BLUE,
+            fontFamily: FONT_FAMILY,
+            letterSpacing: "-0.03em",
+            margin: 0,
+            lineHeight: 1.1,
+            marginBottom: "20px",
+          }}
+        >
+          Live Chat Agent
+        </h3>
+
+        {/* ===== STATUS AGENT ONLINE (TANPA LOGOUT) ===== */}
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: "20px" }}>
+          <span
             style={{
-              fontSize: "80px",
-              fontWeight: 700,
-              color: BLUE,
+              fontSize: "13px",
+              fontWeight: 800,
+              color: onlineAgents.length > 0 ? BLUE : "#999",
+              backgroundColor: onlineAgents.length > 0 ? WHITE : "transparent",
+              border: onlineAgents.length > 0 ? `1.5px solid ${BLUE}` : "none",
               fontFamily: FONT_FAMILY,
-              letterSpacing: "-0.03em",
-              margin: 0,
-              lineHeight: 1.1,
+              letterSpacing: "0.5px",
+              textTransform: "uppercase",
+              padding: onlineAgents.length > 0 ? "4px 10px" : "0",
+              borderRadius: "4px",
             }}
           >
-            Live Chat Agent
-          </h3>
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "10px", paddingTop: "10px" }}>
-            {/* ===== PWA NOTIFIKASI LIVE CHAT: TOGGLE ===== */}
-            {user && <LiveChatNotificationToggle user={user} db={db} />}
-            <span
-              style={{
-                fontSize: "13px",
-                fontWeight: 800,
-                color: onlineAgents.length > 0 ? BLUE : "#999",
-                backgroundColor: onlineAgents.length > 0 ? WHITE : "transparent",
-                border: onlineAgents.length > 0 ? `1.5px solid ${BLUE}` : "none",
-                fontFamily: FONT_FAMILY,
-                letterSpacing: "0.5px",
-                textTransform: "uppercase",
-                padding: onlineAgents.length > 0 ? "4px 10px" : "0",
-                borderRadius: "4px",
-              }}
-            >
-              {onlineAgents.length > 0
-                ? `${onlineAgents.length} Agent${onlineAgents.length !== 1 ? "s" : ""} Online`
-                : "No Agents Online"}
-            </span>
-            <button
-              onClick={handleLogout}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                padding: "0",
-                backgroundColor: "transparent",
-                color: BLUE,
-                border: "none",
-                fontSize: "20px",
-                fontWeight: 700,
-                cursor: "pointer",
-                fontFamily: FONT_FAMILY,
-              }}
-            >
-              <span>Logout</span>
-              <NorthEastArrow size={20} color={BLUE} />
-            </button>
-            {!isAdmin && (
-              <button
-                onClick={restartTour}
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  color: BLUE,
-                  fontSize: "12px",
-                  fontFamily: FONT_FAMILY,
-                  cursor: "pointer",
-                  textDecoration: "underline",
-                  padding: 0,
-                }}
-              >
-                Restart Tour
-              </button>
-            )}
-          </div>
+            {onlineAgents.length > 0
+              ? `${onlineAgents.length} Agent${onlineAgents.length !== 1 ? "s" : ""} Online`
+              : "No Agents Online"}
+          </span>
         </div>
+
+        {/* ===== TOGGLE NOTIFIKASI — ATAS TENGAH ===== */}
+        {user && (
+          <div style={{ width: "100%", display: "flex", justifyContent: "center" }}>
+            <LiveChatNotificationToggle user={user} db={db} />
+          </div>
+        )}
 
         {renderAnnouncementBroadcastSection()}
 
