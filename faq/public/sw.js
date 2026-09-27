@@ -1,8 +1,9 @@
-// ===== SERVICE WORKER - MENURU PWA v1.0.1 =====
+// ===== SERVICE WORKER - MENURU PWA v1.0.2 =====
 // v1.0.1: Tambah handler notifikasi Live Chat Agent
-const CACHE_NAME = "menuru-pwa-v1.0.1";
-const RUNTIME_CACHE = "menuru-runtime-v1.0.1";
-const IMAGE_CACHE = "menuru-images-v1.0.1";
+// v1.0.2: Fix push notification parse (support JSON + text + FCM)
+const CACHE_NAME = "menuru-pwa-v1.0.2";
+const RUNTIME_CACHE = "menuru-runtime-v1.0.2";
+const IMAGE_CACHE = "menuru-images-v1.0.2";
 
 // File yang di-cache saat install (offline-first)
 const PRECACHE_URLS = [
@@ -15,7 +16,7 @@ const PRECACHE_URLS = [
 
 // ===== INSTALL EVENT =====
 self.addEventListener("install", (event) => {
-  console.log("[SW] Installing... v1.0.1");
+  console.log("[SW] Installing... v1.0.2");
   event.waitUntil(
     caches
       .open(CACHE_NAME)
@@ -30,7 +31,7 @@ self.addEventListener("install", (event) => {
 
 // ===== ACTIVATE EVENT =====
 self.addEventListener("activate", (event) => {
-  console.log("[SW] Activating... v1.0.1");
+  console.log("[SW] Activating... v1.0.2");
   event.waitUntil(
     caches
       .keys()
@@ -59,10 +60,8 @@ self.addEventListener("fetch", (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Skip non-GET requests
   if (request.method !== "GET") return;
 
-  // Skip Firebase & external API calls (biar tidak error)
   if (
     url.hostname.includes("firebase") ||
     url.hostname.includes("googleapis") ||
@@ -73,10 +72,9 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Skip Chrome extensions
   if (url.protocol === "chrome-extension:") return;
 
-  // ===== IMAGES: Cache-first =====
+  // IMAGES: Cache-first
   if (
     request.destination === "image" ||
     /\.(png|jpg|jpeg|gif|webp|svg|ico)$/i.test(url.pathname)
@@ -99,7 +97,7 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // ===== STATIC ASSETS (JS, CSS): Stale-while-revalidate =====
+  // STATIC ASSETS: Stale-while-revalidate
   if (
     request.destination === "script" ||
     request.destination === "style" ||
@@ -123,7 +121,7 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // ===== HTML / NAVIGATION: Network-first, fallback ke cache =====
+  // HTML / NAVIGATION: Network-first
   if (request.mode === "navigate") {
     event.respondWith(
       fetch(request)
@@ -143,7 +141,7 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // ===== DEFAULT: Network-first dengan cache fallback =====
+  // DEFAULT: Network-first
   event.respondWith(
     fetch(request)
       .then((response) => {
@@ -162,18 +160,15 @@ self.addEventListener("fetch", (event) => {
 });
 
 // ===== MESSAGE EVENT =====
-// Handle: SKIP_WAITING, CLEAR_CACHE, SHOW_NOTIFICATION, CLOSE_NOTIFICATION, GET_NOTIFICATIONS
 self.addEventListener("message", (event) => {
   const data = event.data || {};
 
-  // ----- SKIP WAITING (update SW) -----
   if (data.type === "SKIP_WAITING") {
     console.log("[SW] Skip waiting, activating new version");
     self.skipWaiting();
     return;
   }
 
-  // ----- CLEAR CACHE -----
   if (data.type === "CLEAR_CACHE") {
     caches.keys().then((names) => {
       names.forEach((name) => caches.delete(name));
@@ -181,7 +176,6 @@ self.addEventListener("message", (event) => {
     return;
   }
 
-  // ----- SHOW NOTIFICATION (Live Chat Agent) -----
   if (data.type === "SHOW_NOTIFICATION") {
     const payload = data.payload || {};
     const {
@@ -203,9 +197,9 @@ self.addEventListener("message", (event) => {
       body,
       icon: senderPhoto || icon,
       badge,
-      tag, // tag sama = notifikasi replace, tidak menumpuk
-      renotify: true, // tetap getar walau tag sama
-      requireInteraction, // true = notifikasi tidak auto-hilang
+      tag,
+      renotify: true,
+      requireInteraction,
       silent,
       vibrate: [200, 100, 200],
       data: {
@@ -223,7 +217,6 @@ self.addEventListener("message", (event) => {
     return;
   }
 
-  // ----- CLOSE NOTIFICATION (by tag prefix) -----
   if (data.type === "CLOSE_NOTIFICATION") {
     const tagPrefix = data.tagPrefix || "livechat-";
     event.waitUntil(
@@ -239,7 +232,6 @@ self.addEventListener("message", (event) => {
     return;
   }
 
-  // ----- GET NOTIFICATIONS (debug) -----
   if (data.type === "GET_NOTIFICATIONS") {
     event.waitUntil(
       self.registration.getNotifications().then((notifications) => {
@@ -256,29 +248,70 @@ self.addEventListener("message", (event) => {
 // ===== PUSH NOTIFICATION (dari server, opsional) =====
 self.addEventListener("push", (event) => {
   console.log("[SW] Push received");
-  let data = { title: "Menuru", body: "Ada notifikasi baru!" };
-  try {
-    if (event.data) data = event.data.json();
-  } catch (e) {
-    console.error("[SW] Push parse error:", e);
-  }
-  const options = {
-    body: data.body,
+
+  let data = {
+    title: "Menuru",
+    body: "Ada notifikasi baru!",
     icon: "/icons/icon-192x192.png",
     badge: "/icons/icon-192x192.png",
-    vibrate: [200, 100, 200],
-    data: { url: data.url || "/" },
+    url: "/",
   };
-  event.waitUntil(self.registration.showNotification(data.title, options));
+
+  if (event.data) {
+    // ===== Coba parse sebagai JSON =====
+    try {
+      const parsed = event.data.json();
+      console.log("[SW] Push parsed as JSON:", parsed);
+      data = { ...data, ...parsed };
+
+      // Support format FCM: { notification: { title, body }, data: { url } }
+      if (parsed.notification) {
+        data.title = parsed.notification.title || data.title;
+        data.body = parsed.notification.body || data.body;
+        data.icon = parsed.notification.icon || data.icon;
+        data.badge = parsed.notification.badge || data.badge;
+      }
+      if (parsed.data && parsed.data.url) {
+        data.url = parsed.data.url;
+      }
+    } catch (jsonError) {
+      // ===== JSON gagal, coba sebagai text biasa =====
+      try {
+        const textData = event.data.text();
+        console.log("[SW] Push parsed as text:", textData);
+        data.body = textData || data.body;
+        data.title = "Menuru";
+      } catch (textError) {
+        console.error("[SW] Push parse failed (both JSON & text):", textError);
+      }
+    }
+  }
+
+  console.log("[SW] Final push data:", data);
+
+  const options = {
+    body: data.body,
+    icon: data.icon || "/icons/icon-192x192.png",
+    badge: data.badge || "/icons/icon-192x192.png",
+    vibrate: [200, 100, 200],
+    tag: data.tag || "push-" + Date.now(),
+    renotify: true,
+    data: {
+      url: data.url || "/",
+      ...(data.data || {}),
+    },
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(data.title || "Menuru", options)
+  );
 });
 
 // ===== NOTIFICATION CLICK =====
-// Handle: cari tab existing → fokus + navigasi. Kalau tidak ada → buka tab baru.
 self.addEventListener("notificationclick", (event) => {
   console.log("[SW] Notification clicked:", event.notification.tag, "action:", event.action);
   event.notification.close();
 
-  // Kalau user klik tombol "Tutup", jangan buka apa-apa
   if (event.action === "close") return;
 
   const urlToOpen = event.notification.data?.url || "/";
@@ -287,17 +320,14 @@ self.addEventListener("notificationclick", (event) => {
     clients
       .matchAll({ type: "window", includeUncontrolled: true })
       .then((clientList) => {
-        // Cari tab Menuru yang sudah terbuka
         for (const client of clientList) {
           if (client.url.includes(self.location.origin) && "focus" in client) {
-            // Fokus ke tab itu, lalu navigasi ke URL yang diminta
             if ("navigate" in client) {
               client.navigate(urlToOpen);
             }
             return client.focus();
           }
         }
-        // Kalau tidak ada tab yang terbuka, buka tab baru
         if (clients.openWindow) {
           return clients.openWindow(urlToOpen);
         }
