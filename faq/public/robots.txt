@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://menuru.netlify.app/sitemap.xml
+Sitemap: https://menuru-studio.netlify.app/sitemap.xml
