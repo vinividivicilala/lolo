@@ -25,6 +25,10 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 import { Physics2DPlugin } from "gsap/Physics2DPlugin";
 
+// ===== PWA NOTIFIKASI LIVE CHAT (IMPORT) =====
+import LiveChatNotificationToggle from "components/LiveChatNotificationToggle";
+import { useLiveChatNotification } from "hooks/useLiveChatNotification";
+
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, SplitText, Physics2DPlugin);
 }
@@ -2977,6 +2981,41 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
   const prevMessagesLenRef = useRef<number>(0);
   const messagesCacheRef = useRef<{ [ticketId: string]: ChatMessage[] }>({});
 
+  // ===== PWA NOTIFIKASI LIVE CHAT: STATE =====
+  const [notifEnabled, setNotifEnabled] = useState(false);
+
+  // ===== PWA NOTIFIKASI LIVE CHAT: BACA PREFERENSI DARI LOCALSTORAGE =====
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const saved = localStorage.getItem("menuru_livechat_notif_enabled");
+    setNotifEnabled(saved === "true" && Notification.permission === "granted");
+  }, []);
+
+  // ===== PWA NOTIFIKASI LIVE CHAT: HOOK NOTIFIKASI =====
+  useLiveChatNotification({
+    user,
+    isAdmin,
+    db,
+    enabled: notifEnabled,
+    currentTicketId: selectedTicket?.id || null,
+  });
+
+  // ===== PWA NOTIFIKASI LIVE CHAT: AUTO-OPEN TICKET DARI URL =====
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!tickets.length) return;
+
+    const params = new URLSearchParams(window.location.search);
+    const ticketId = params.get("ticket");
+    if (!ticketId) return;
+
+    const target = tickets.find((t) => t.id === ticketId);
+    if (target) {
+      setSelectedTicket(target);
+      window.history.replaceState({}, "", "/live-chat-agent");
+    }
+  }, [tickets]);
+
   const topics = ["Product Inquiry", "Technical Support", "Account Issues", "Donation", "Partnership", "Other"];
 
   const tourSteps: TourStep[] = [
@@ -4294,25 +4333,29 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
             >
               Live Chat Agent
             </h3>
-            <button
-              onClick={handleLogout}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                padding: "0",
-                backgroundColor: "transparent",
-                color: BLUE,
-                border: "none",
-                fontSize: "20px",
-                fontWeight: 700,
-                cursor: "pointer",
-                fontFamily: FONT_FAMILY,
-              }}
-            >
-              <span>Logout</span>
-              <NorthEastArrow size={20} color={BLUE} />
-            </button>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "10px" }}>
+              {/* ===== PWA NOTIFIKASI LIVE CHAT: TOGGLE ===== */}
+              {user && <LiveChatNotificationToggle user={user} db={db} />}
+              <button
+                onClick={handleLogout}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  padding: "0",
+                  backgroundColor: "transparent",
+                  color: BLUE,
+                  border: "none",
+                  fontSize: "20px",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  fontFamily: FONT_FAMILY,
+                }}
+              >
+                <span>Logout</span>
+                <NorthEastArrow size={20} color={BLUE} />
+              </button>
+            </div>
           </div>
 
           {onlineAdmins.length > 0 && (
@@ -4849,6 +4892,8 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
             Live Chat Agent
           </h3>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "10px", paddingTop: "10px" }}>
+            {/* ===== PWA NOTIFIKASI LIVE CHAT: TOGGLE ===== */}
+            {user && <LiveChatNotificationToggle user={user} db={db} />}
             <span
               style={{
                 fontSize: "13px",
