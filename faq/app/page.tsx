@@ -26,8 +26,8 @@ import { SplitText } from "gsap/SplitText";
 import { Physics2DPlugin } from "gsap/Physics2DPlugin";
 
 // ===== PWA NOTIFIKASI LIVE CHAT (IMPORT) =====
-import LiveChatNotificationToggle from "components/LiveChatNotificationToggle";
-import { useLiveChatNotification } from "hooks/useLiveChatNotification";
+import LiveChatNotificationToggle from "../components/LiveChatNotificationToggle";
+import { useLiveChatNotification } from "../hooks/useLiveChatNotification";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, SplitText, Physics2DPlugin);
