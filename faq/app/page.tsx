@@ -606,6 +606,339 @@ interface NoteEntry {
   createdAt: any;
 }
 
+// ===== PWA: SERVICE WORKER REGISTER =====
+const ServiceWorkerRegister = () => {
+  const [updateAvailable, setUpdateAvailable] = useState(false);
+  const [waitingWorker, setWaitingWorker] = useState<ServiceWorker | null>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!("serviceWorker" in navigator)) {
+      console.warn("[PWA] Service Worker tidak didukung browser ini");
+      return;
+    }
+
+    const registerSW = async () => {
+      try {
+        const registration = await navigator.serviceWorker.register("/sw.js", {
+          scope: "/",
+        });
+        console.log("[PWA] Service Worker registered:", registration);
+
+        registration.onupdatefound = () => {
+          const installingWorker = registration.installing;
+          if (!installingWorker) return;
+
+          installingWorker.onstatechange = () => {
+            if (installingWorker.state === "installed") {
+              if (navigator.serviceWorker.controller) {
+                console.log("[PWA] New content available, please refresh.");
+                setUpdateAvailable(true);
+                setWaitingWorker(installingWorker);
+              } else {
+                console.log("[PWA] Content cached for offline use.");
+              }
+            }
+          };
+        };
+      } catch (error) {
+        console.error("[PWA] Service Worker registration failed:", error);
+      }
+    };
+
+    registerSW();
+
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (refreshing) return;
+      refreshing = true;
+      window.location.reload();
+    });
+  }, []);
+
+  const handleUpdate = () => {
+    if (waitingWorker) {
+      waitingWorker.postMessage({ type: "SKIP_WAITING" });
+      setUpdateAvailable(false);
+    }
+  };
+
+  if (!updateAvailable) return null;
+
+  return (
+    <div
+      style={{
+        position: "fixed",
+        bottom: "24px",
+        left: "50%",
+        transform: "translateX(-50%)",
+        zIndex: 99999,
+        backgroundColor: BLUE,
+        color: WHITE,
+        padding: "14px 24px",
+        borderRadius: "12px",
+        display: "flex",
+        alignItems: "center",
+        gap: "14px",
+        boxShadow: "0 12px 40px rgba(13,60,252,0.4)",
+        fontFamily: FONT_FAMILY,
+        fontSize: "14px",
+        fontWeight: 600,
+      }}
+    >
+      <span>🚀 Versi baru tersedia!</span>
+      <button
+        onClick={handleUpdate}
+        style={{
+          padding: "8px 16px",
+          backgroundColor: WHITE,
+          color: BLUE,
+          border: "none",
+          borderRadius: "8px",
+          fontSize: "13px",
+          fontWeight: 800,
+          cursor: "pointer",
+          fontFamily: FONT_FAMILY,
+        }}
+      >
+        Refresh
+      </button>
+    </div>
+  );
+};
+
+// ===== PWA: INSTALL PROMPT =====
+const PWAInstallPrompt = () => {
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [showPrompt, setShowPrompt] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
+  const [showIOSGuide, setShowIOSGuide] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const dismissed = localStorage.getItem("pwa_install_dismissed");
+    if (dismissed === "true") return;
+
+    const iOS =
+      /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+    setIsIOS(iOS);
+
+    if (iOS) {
+      const isStandalone = (window.navigator as any).standalone === true;
+      if (!isStandalone) {
+        setTimeout(() => setShowPrompt(true), 3000);
+      }
+      return;
+    }
+
+    const handleBeforeInstall = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setTimeout(() => setShowPrompt(true), 3000);
+    };
+
+    window.addEventListener("beforeinstallprompt", handleBeforeInstall);
+
+    window.addEventListener("appinstalled", () => {
+      console.log("[PWA] App installed");
+      setShowPrompt(false);
+      setDeferredPrompt(null);
+      localStorage.setItem("pwa_install_dismissed", "true");
+    });
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstall);
+    };
+  }, []);
+
+  const handleInstall = async () => {
+    if (isIOS) {
+      setShowIOSGuide(true);
+      return;
+    }
+    if (!deferredPrompt) return;
+    try {
+      await deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      console.log("[PWA] User choice:", outcome);
+      if (outcome === "accepted") {
+        setShowPrompt(false);
+        localStorage.setItem("pwa_install_dismissed", "true");
+      }
+      setDeferredPrompt(null);
+    } catch (error) {
+      console.error("[PWA] Install error:", error);
+    }
+  };
+
+  const handleDismiss = () => {
+    setShowPrompt(false);
+    localStorage.setItem("pwa_install_dismissed", "true");
+  };
+
+  if (!showPrompt) return null;
+
+  if (showIOSGuide) {
+    return (
+      <div
+        style={{
+          position: "fixed",
+          inset: 0,
+          backgroundColor: "rgba(0,0,0,0.7)",
+          zIndex: 99999,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "20px",
+          fontFamily: FONT_FAMILY,
+        }}
+        onClick={() => setShowIOSGuide(false)}
+      >
+        <div
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            backgroundColor: WHITE,
+            borderRadius: "16px",
+            padding: "28px 24px",
+            maxWidth: "380px",
+            width: "100%",
+            textAlign: "center",
+          }}
+        >
+          <div style={{ fontSize: "48px", marginBottom: "12px" }}>📱</div>
+          <h3
+            style={{
+              fontSize: "20px",
+              fontWeight: 700,
+              color: BLACK,
+              marginBottom: "8px",
+            }}
+          >
+            Install Menuru di iPhone
+          </h3>
+          <p
+            style={{
+              fontSize: "14px",
+              color: "#666",
+              lineHeight: 1.6,
+              marginBottom: "20px",
+            }}
+          >
+            Untuk install di iPhone/iPad:
+            <br />
+            1. Tap ikon <strong>Share</strong> ⬆️ di Safari
+            <br />
+            2. Pilih <strong>&quot;Add to Home Screen&quot;</strong>
+            <br />
+            3. Tap <strong>&quot;Add&quot;</strong>
+          </p>
+          <button
+            onClick={() => setShowIOSGuide(false)}
+            style={{
+              padding: "10px 24px",
+              backgroundColor: BLUE,
+              color: WHITE,
+              border: "none",
+              borderRadius: "10px",
+              fontSize: "14px",
+              fontWeight: 700,
+              cursor: "pointer",
+              fontFamily: FONT_FAMILY,
+            }}
+          >
+            Mengerti
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      style={{
+        position: "fixed",
+        bottom: "24px",
+        left: "24px",
+        right: "24px",
+        maxWidth: "420px",
+        margin: "0 auto",
+        zIndex: 99998,
+        backgroundColor: BLUE,
+        color: WHITE,
+        borderRadius: "16px",
+        padding: "18px 20px",
+        display: "flex",
+        alignItems: "center",
+        gap: "14px",
+        boxShadow: "0 12px 40px rgba(13,60,252,0.4)",
+        fontFamily: FONT_FAMILY,
+      }}
+    >
+      <div
+        style={{
+          width: "48px",
+          height: "48px",
+          borderRadius: "12px",
+          backgroundColor: WHITE,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexShrink: 0,
+          overflow: "hidden",
+        }}
+      >
+        <img
+          src="/images/ai.jpg"
+          alt="Menuru"
+          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+        />
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: "15px", fontWeight: 700, marginBottom: "2px" }}>
+          Install Menuru
+        </div>
+        <div style={{ fontSize: "12px", opacity: 0.9 }}>
+          Akses cepat dari home screen Anda
+        </div>
+      </div>
+      <button
+        onClick={handleInstall}
+        style={{
+          padding: "8px 16px",
+          backgroundColor: WHITE,
+          color: BLUE,
+          border: "none",
+          borderRadius: "8px",
+          fontSize: "13px",
+          fontWeight: 800,
+          cursor: "pointer",
+          fontFamily: FONT_FAMILY,
+          flexShrink: 0,
+        }}
+      >
+        Install
+      </button>
+      <button
+        onClick={handleDismiss}
+        style={{
+          background: "transparent",
+          border: "none",
+          color: WHITE,
+          fontSize: "20px",
+          cursor: "pointer",
+          padding: 0,
+          lineHeight: 1,
+          opacity: 0.7,
+          flexShrink: 0,
+        }}
+      >
+        ×
+      </button>
+    </div>
+  );
+};
+
 // ===== HERO MENURU TITLE =====
 const HeroMenuruTitle = ({ onNavbarShiftChange }: { onNavbarShiftChange: (shifted: boolean) => void }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -5531,6 +5864,7 @@ export default function HomePage(): React.JSX.Element {
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Menuru" />
         <meta name="mobile-web-app-capable" content="yes" />
+        <link rel="manifest" href="/manifest.json" />
         <link rel="icon" href="/images/ai.jpg" type="image/jpeg" />
         <link rel="apple-touch-icon" href="/images/ai.jpg" />
         <meta property="og:title" content="Menuru Official | Home" />
@@ -6243,6 +6577,10 @@ export default function HomePage(): React.JSX.Element {
           <FooterMenuruTitle />
         </div>
       </div>
+
+      {/* ===== PWA COMPONENTS ===== */}
+      <ServiceWorkerRegister />
+      <PWAInstallPrompt />
 
       <style jsx global>{`
         html {
