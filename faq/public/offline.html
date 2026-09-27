@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Menuru - Offline</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Poppins", -apple-system, BlinkMacSystemFont, sans-serif;
+        background: #ffffff;
+        color: #0d3cfc;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        text-align: center;
+      }
+      .icon {
+        font-size: 80px;
+        margin-bottom: 20px;
+        animation: pulse 2s ease-in-out infinite;
+      }
+      h1 {
+        font-size: 48px;
+        font-weight: 700;
+        letter-spacing: -0.03em;
+        margin-bottom: 12px;
+      }
+      p {
+        font-size: 16px;
+        color: #666;
+        max-width: 400px;
+        line-height: 1.6;
+        margin-bottom: 24px;
+      }
+      button {
+        padding: 12px 32px;
+        background: #0d3cfc;
+        color: #ffffff;
+        border: none;
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        font-family: inherit;
+        transition: background-color 0.25s ease;
+      }
+      button:hover {
+        background: #000000;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.1);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="icon">📡</div>
+    <h1>Offline</h1>
+    <p>
+      Anda sedang offline. Silakan periksa koneksi internet Anda dan coba lagi.
+    </p>
+    <button onclick="window.location.reload()">Coba Lagi</button>
+  </body>
+</html>
