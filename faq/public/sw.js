@@ -1,7 +1,8 @@
-// ===== SERVICE WORKER - MENURU PWA =====
-const CACHE_NAME = "menuru-pwa-v1.0.0";
-const RUNTIME_CACHE = "menuru-runtime-v1.0.0";
-const IMAGE_CACHE = "menuru-images-v1.0.0";
+// ===== SERVICE WORKER - MENURU PWA v1.0.1 =====
+// v1.0.1: Tambah handler notifikasi Live Chat Agent
+const CACHE_NAME = "menuru-pwa-v1.0.1";
+const RUNTIME_CACHE = "menuru-runtime-v1.0.1";
+const IMAGE_CACHE = "menuru-images-v1.0.1";
 
 // File yang di-cache saat install (offline-first)
 const PRECACHE_URLS = [
@@ -14,7 +15,7 @@ const PRECACHE_URLS = [
 
 // ===== INSTALL EVENT =====
 self.addEventListener("install", (event) => {
-  console.log("[SW] Installing...");
+  console.log("[SW] Installing... v1.0.1");
   event.waitUntil(
     caches
       .open(CACHE_NAME)
@@ -29,7 +30,7 @@ self.addEventListener("install", (event) => {
 
 // ===== ACTIVATE EVENT =====
 self.addEventListener("activate", (event) => {
-  console.log("[SW] Activating...");
+  console.log("[SW] Activating... v1.0.1");
   event.waitUntil(
     caches
       .keys()
@@ -160,20 +161,101 @@ self.addEventListener("fetch", (event) => {
   );
 });
 
-// ===== MESSAGE EVENT (untuk skipWaiting) =====
+// ===== MESSAGE EVENT =====
+// Handle: SKIP_WAITING, CLEAR_CACHE, SHOW_NOTIFICATION, CLOSE_NOTIFICATION, GET_NOTIFICATIONS
 self.addEventListener("message", (event) => {
-  if (event.data && event.data.type === "SKIP_WAITING") {
+  const data = event.data || {};
+
+  // ----- SKIP WAITING (update SW) -----
+  if (data.type === "SKIP_WAITING") {
+    console.log("[SW] Skip waiting, activating new version");
     self.skipWaiting();
+    return;
   }
-  if (event.data && event.data.type === "CLEAR_CACHE") {
+
+  // ----- CLEAR CACHE -----
+  if (data.type === "CLEAR_CACHE") {
     caches.keys().then((names) => {
       names.forEach((name) => caches.delete(name));
     });
+    return;
+  }
+
+  // ----- SHOW NOTIFICATION (Live Chat Agent) -----
+  if (data.type === "SHOW_NOTIFICATION") {
+    const payload = data.payload || {};
+    const {
+      title = "Menuru Live Chat",
+      body = "Ada pesan baru",
+      icon = "/icons/icon-192x192.png",
+      badge = "/icons/icon-192x192.png",
+      tag = "livechat-" + Date.now(),
+      url = "/live-chat-agent",
+      requireInteraction = false,
+      silent = false,
+      senderName = "",
+      senderPhoto = "",
+    } = payload;
+
+    console.log("[SW] Show notification:", title, "|", body);
+
+    const options = {
+      body,
+      icon: senderPhoto || icon,
+      badge,
+      tag, // tag sama = notifikasi replace, tidak menumpuk
+      renotify: true, // tetap getar walau tag sama
+      requireInteraction, // true = notifikasi tidak auto-hilang
+      silent,
+      vibrate: [200, 100, 200],
+      data: {
+        url,
+        senderName,
+        timestamp: Date.now(),
+      },
+      actions: [
+        { action: "open", title: "💬 Buka Chat" },
+        { action: "close", title: "Tutup" },
+      ],
+    };
+
+    event.waitUntil(self.registration.showNotification(title, options));
+    return;
+  }
+
+  // ----- CLOSE NOTIFICATION (by tag prefix) -----
+  if (data.type === "CLOSE_NOTIFICATION") {
+    const tagPrefix = data.tagPrefix || "livechat-";
+    event.waitUntil(
+      self.registration.getNotifications().then((notifications) => {
+        notifications.forEach((n) => {
+          if (n.tag && n.tag.startsWith(tagPrefix)) {
+            console.log("[SW] Closing notification:", n.tag);
+            n.close();
+          }
+        });
+      })
+    );
+    return;
+  }
+
+  // ----- GET NOTIFICATIONS (debug) -----
+  if (data.type === "GET_NOTIFICATIONS") {
+    event.waitUntil(
+      self.registration.getNotifications().then((notifications) => {
+        console.log("[SW] Active notifications:", notifications.length);
+        notifications.forEach((n) => {
+          console.log("[SW] -", n.tag, "|", n.title);
+        });
+      })
+    );
+    return;
   }
 });
 
-// ===== PUSH NOTIFICATION (opsional) =====
+// ===== PUSH NOTIFICATION (dari server, opsional) =====
 self.addEventListener("push", (event) => {
+  console.log("[SW] Push received");
   let data = { title: "Menuru", body: "Ada notifikasi baru!" };
   try {
     if (event.data) data = event.data.json();
@@ -183,7 +265,7 @@ self.addEventListener("push", (event) => {
   const options = {
     body: data.body,
     icon: "/icons/icon-192x192.png",
-    badge: "/icons/icon-96x96.png",
+    badge: "/icons/icon-192x192.png",
     vibrate: [200, 100, 200],
     data: { url: data.url || "/" },
   };
@@ -191,19 +273,39 @@ self.addEventListener("push", (event) => {
 });
 
 // ===== NOTIFICATION CLICK =====
+// Handle: cari tab existing → fokus + navigasi. Kalau tidak ada → buka tab baru.
 self.addEventListener("notificationclick", (event) => {
+  console.log("[SW] Notification clicked:", event.notification.tag, "action:", event.action);
   event.notification.close();
+
+  // Kalau user klik tombol "Tutup", jangan buka apa-apa
+  if (event.action === "close") return;
+
+  const urlToOpen = event.notification.data?.url || "/";
+
   event.waitUntil(
     clients
       .matchAll({ type: "window", includeUncontrolled: true })
       .then((clientList) => {
-        const urlToOpen = event.notification.data.url || "/";
+        // Cari tab Menuru yang sudah terbuka
         for (const client of clientList) {
-          if (client.url === urlToOpen && "focus" in client) {
+          if (client.url.includes(self.location.origin) && "focus" in client) {
+            // Fokus ke tab itu, lalu navigasi ke URL yang diminta
+            if ("navigate" in client) {
+              client.navigate(urlToOpen);
+            }
             return client.focus();
           }
         }
-        if (clients.openWindow) return clients.openWindow(urlToOpen);
+        // Kalau tidak ada tab yang terbuka, buka tab baru
+        if (clients.openWindow) {
+          return clients.openWindow(urlToOpen);
+        }
       })
   );
+});
+
+// ===== NOTIFICATION CLOSE (cleanup) =====
+self.addEventListener("notificationclose", (event) => {
+  console.log("[SW] Notification closed by user:", event.notification.tag);
 });
