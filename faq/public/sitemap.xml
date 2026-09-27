@@ -1,34 +1,149 @@
-urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-<url>
-<loc>https://menuru-studio.netlify.app/</loc>
-<priority>1.0</priority>
-</url>
-<url>
-<loc>https://menuru-studio.netlify.app/signin</loc>
-<priority>0.9</priority>
-</url>
-<url>
-<loc>https://menuru-studio.netlify.app/signup</loc>
-<priority>0.9</priority>
-</url>
-<url>
-<loc>https://menuru-studio.netlify.app/dashboard</loc>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://menuru-studio.netlify.app/note</loc>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://menuru-studio.netlify.app/live-chat</loc>
-<priority>0.8</priority>
-</url>
-<url>
-<loc>https://menuru-studio.netlify.app/shop</loc>
-<priority>0.7</priority>
-</url>
-<url>
-<loc>https://menuru-studio.netlify.app/contact</loc>
-<priority>0.7</priority>
-</url>
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+
+  <!-- ===== HOMEPAGE ===== -->
+  <url>
+    <loc>https://menuru-studio.netlify.app/</loc>
+    <lastmod>2026-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- ===== AUTH PAGES (PALING PENTING untuk Sitelinks) ===== -->
+  <url>
+    <loc>https://menuru-studio.netlify.app/signin</loc>
+    <lastmod>2026-09-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://menuru-studio.netlify.app/signup</loc>
+    <lastmod>2026-09-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://menuru-studio.netlify.app/login</loc>
+    <lastmod>2026-09-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- ===== DASHBOARD & FITUR UTAMA ===== -->
+  <url>
+    <loc>https://menuru-studio.netlify.app/dashboard</loc>
+    <lastmod>2026-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://menuru-studio.netlify.app/note</loc>
+    <lastmod>2026-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://menuru-studio.netlify.app/live-chat</loc>
+    <lastmod>2026-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://menuru-studio.netlify.app/live-chat-agent</loc>
+    <lastmod>2026-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://menuru-studio.netlify.app/calendar</loc>
+    <lastmod>2026-09-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- ===== PRODUCT & COMMERCE ===== -->
+  <url>
+    <loc>https://menuru-studio.netlify.app/shop</loc>
+    <lastmod>2026-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://menuru-studio.netlify.app/donation</loc>
+    <lastmod>2026-09-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- ===== COMMUNITY & CONTENT ===== -->
+  <url>
+    <loc>https://menuru-studio.netlify.app/community</loc>
+    <lastmod>2026-09-27</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://menuru-studio.netlify.app/stories</loc>
+    <lastmod>2026-09-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://menuru-studio.netlify.app/blog</loc>
+    <lastmod>2026-09-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- ===== ABOUT & CONTACT ===== -->
+  <url>
+    <loc>https://menuru-studio.netlify.app/profile</loc>
+    <lastmod>2026-09-27</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://menuru-studio.netlify.app/contact</loc>
+    <lastmod>2026-09-27</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- ===== HELP & SUPPORT ===== -->
+  <url>
+    <loc>https://menuru-studio.netlify.app/pusat-bantuan</loc>
+    <lastmod>2026-09-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- ===== LEGAL ===== -->
+  <url>
+    <loc>https://menuru-studio.netlify.app/privacy-policy</loc>
+    <lastmod>2026-09-27</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://menuru-studio.netlify.app/terms-of-services</loc>
+    <lastmod>2026-09-27</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://menuru-studio.netlify.app/terms-of-use</loc>
+    <lastmod>2026-09-27</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://menuru-studio.netlify.app/cookie-policy</loc>
+    <lastmod>2026-09-27</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
 </urlset>
