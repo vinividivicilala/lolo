@@ -163,24 +163,28 @@ self.addEventListener("message", (event) => {
     const icon = payload.icon || "/icons/icon-192x192.png";
     const badge = payload.badge || "/icons/icon-192x192.png";
     const senderPhoto = payload.senderPhoto || icon;
+    const senderName = payload.senderName || "";
 
     console.log("[SW] Show notification:", title, "|", body);
 
+    // ===== FORMAT KONSISTEN UNTUK DESKTOP/LAPTOP & HP =====
+    // Title: nama sender/agent
+    // Body : [Topic] User: pesan  (sudah dibuild di hook)
     const options = {
       body,
       icon: senderPhoto,
       badge,
       tag,
       renotify: true,
-      requireInteraction: true, // penting: notif tetap muncul sampai user klik
+      requireInteraction: true, // notif tetap muncul sampai user klik
       vibrate: [200, 100, 200, 100, 200],
       data: {
         url,
-        senderName: payload.senderName || "",
+        senderName,
         timestamp: Date.now(),
       },
       actions: [
-        { action: "open", title: "💬 Buka Chat" },
+        { action: "open", title: "Buka Chat" },
         { action: "close", title: "Tutup" },
       ],
     };
