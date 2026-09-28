@@ -7,7 +7,7 @@ import gsap from "gsap";
 const BLUE = "#0D3CFC";
 const WHITE = "#FFFFFF";
 const BLACK = "#000000";
-const STRIPER_FONT = "'Striper'";
+const FONT_FAMILY = "'Plus Jakarta Sans'";
 
 // ===== SVG ICONS =====
 const BellIcon = ({ size = 18, color = "currentColor" }: { size?: number; color?: string }) => (
@@ -267,7 +267,7 @@ export default function LiveChatNotificationToggle({ user, db }: Props) {
       <div style={{ display: "flex", flexDirection: "column", gap: "4px", minWidth: 0, flex: 1 }}>
         <div
           style={{
-            fontFamily: STRIPER_FONT,
+            fontFamily: FONT_FAMILY,
             fontSize: "32px",
             fontWeight: 400,
             color: BLUE,
