@@ -139,8 +139,8 @@ export const metadata: Metadata = {
 }
 
 // ===== IMPORT PWA COMPONENTS =====
-import ServiceWorkerRegister from '@/components/ServiceWorkerRegister'
-import PWAInstallPrompt from '@/components/PWAInstallPrompt'
+import ServiceWorkerRegister from '../components/ServiceWorkerRegister'
+import PWAInstallPrompt from '../components/PWAInstallPrompt'
 
 export default function RootLayout({
   children,
@@ -159,7 +159,7 @@ export default function RootLayout({
       <head>
         {/* ===== Google Fonts CDN - Poppins ===== */}
         <link
-          href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Plus Jakarta Sans:wght@400;600;700;800&display=swap"
           rel="stylesheet"
         />
 
