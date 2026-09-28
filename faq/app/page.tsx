@@ -309,6 +309,7 @@ async function checkBanStatus(userId: string): Promise<any> {
 
 // ===== CONSTANTS =====
 const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
+const STRIPER_FONT = "'Striper', 'Poppins', sans-serif";
 const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 const AGENT_NAME = "Farid Ardiansyah";
 const TOUR_STORAGE_KEY = "menuru_livechat_tour_completed_v1";
@@ -403,6 +404,21 @@ const AgentIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: st
     <path d="M5 21V19C5 16.7909 6.79086 15 9 15H15C17.2091 15 19 16.7909 19 19V21" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     <path d="M16 3L18 5L16 7" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     <path d="M18 5H14" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+// ===== STRIPER ICON (meniru gaya Striper Fontshare) =====
+const StriperIcon = ({ size = 22, color = "#ffffff" }: { size?: number; color?: string }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path d="M3 6H21" stroke={color} strokeWidth="3.5" strokeLinecap="round" />
+    <path d="M3 12H21" stroke={color} strokeWidth="3.5" strokeLinecap="round" />
+    <path d="M3 18H21" stroke={color} strokeWidth="3.5" strokeLinecap="round" />
   </svg>
 );
 
@@ -953,7 +969,7 @@ const PWAInstallPrompt = () => {
   );
 };
 
-// ===== HERO MENURU TITLE =====
+// ===== HERO MENURU TITLE (Font Striper) =====
 const HeroMenuruTitle = ({ onNavbarShiftChange }: { onNavbarShiftChange: (shifted: boolean) => void }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -1019,7 +1035,7 @@ const HeroMenuruTitle = ({ onNavbarShiftChange }: { onNavbarShiftChange: (shifte
           top: `${NAV_TOP}px`,
           left: `${NAV_LEFT}px`,
           fontSize: `${NAV_FONT_SIZE}px`,
-          fontWeight: 700,
+          fontWeight: 400,
           letterSpacing: "-0.03em",
           lineHeight: 1,
           height: `${NAV_HEIGHT}px`,
@@ -1060,9 +1076,9 @@ const HeroMenuruTitle = ({ onNavbarShiftChange }: { onNavbarShiftChange: (shifte
       <h1
         ref={titleRef}
         style={{
-          fontFamily: FONT_FAMILY,
+          fontFamily: STRIPER_FONT,
           fontSize: "600px",
-          fontWeight: 700,
+          fontWeight: 400,
           color: "#0D3CFC",
           letterSpacing: "-0.05em",
           lineHeight: 0.85,
@@ -1083,7 +1099,7 @@ const HeroMenuruTitle = ({ onNavbarShiftChange }: { onNavbarShiftChange: (shifte
   );
 };
 
-// ===== FOOTER MENURU TITLE =====
+// ===== FOOTER MENURU TITLE (Font Striper) =====
 const FooterMenuruTitle = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLSpanElement>(null);
@@ -1171,9 +1187,9 @@ const FooterMenuruTitle = () => {
       <span
         ref={titleRef}
         style={{
-          fontFamily: FONT_FAMILY,
+          fontFamily: STRIPER_FONT,
           fontSize: "600px",
-          fontWeight: 700,
+          fontWeight: 400,
           color: "#0D3CFC",
           letterSpacing: "-0.05em",
           lineHeight: "0.85",
@@ -1423,7 +1439,7 @@ const NavbarButton = ({
   labelTextHoverColor = "#ffffff",
   titleTextColor = "#ffffff",
   descriptionTextColor = "rgba(255,255,255,0.9)",
-  iconComponent,
+  iconComponent = null,
   isResources = false,
 }: any) => {
   const [open, setOpen] = useState(false);
@@ -1527,10 +1543,16 @@ const NavbarButton = ({
             borderRadius: "6px",
           }}
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{ display: "block" }}>
-            <line ref={linesTopRef} x1="4" y1="7" x2="20" y2="7" stroke={strokeColor} strokeWidth="2.5" strokeLinecap="round" />
-            <line ref={linesBottomRef} x1="4" y1="17" x2="20" y2="17" stroke={strokeColor} strokeWidth="2.5" strokeLinecap="round" />
-          </svg>
+          {iconComponent ? (
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <StriperIcon size={14} color={strokeColor} />
+            </div>
+          ) : (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{ display: "block" }}>
+              <line ref={linesTopRef} x1="4" y1="7" x2="20" y2="7" stroke={strokeColor} strokeWidth="2.5" strokeLinecap="round" />
+              <line ref={linesBottomRef} x1="4" y1="17" x2="20" y2="17" stroke={strokeColor} strokeWidth="2.5" strokeLinecap="round" />
+            </svg>
+          )}
         </div>
       </div>
 
@@ -1724,6 +1746,7 @@ const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
         panelRightTitle="Docs & Brand"
         panelRightDescription="Panduan, aset visual, dan referensi resmi brand Menuru."
         iconType="resources"
+        iconComponent={<StriperIcon size={22} color="#ffffff" />}
         bigPanelWidth={850}
         bigPanelHeight={340}
         buttonColor="#0D3CFC"
@@ -2984,17 +3007,14 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
   const prevMessagesLenRef = useRef<number>(0);
   const messagesCacheRef = useRef<{ [ticketId: string]: ChatMessage[] }>({});
 
-  // ===== PWA NOTIFIKASI LIVE CHAT: STATE =====
   const [notifEnabled, setNotifEnabled] = useState(false);
 
-  // ===== PWA NOTIFIKASI LIVE CHAT: BACA PREFERENSI DARI LOCALSTORAGE =====
   useEffect(() => {
     if (typeof window === "undefined") return;
     const saved = localStorage.getItem("menuru_livechat_notif_enabled");
     setNotifEnabled(saved === "true" && Notification.permission === "granted");
   }, []);
 
-  // ===== PWA NOTIFIKASI LIVE CHAT: HOOK NOTIFIKASI =====
   useLiveChatNotification({
     user,
     isAdmin,
@@ -3003,7 +3023,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
     currentTicketId: selectedTicket?.id || null,
   });
 
-  // ===== PWA NOTIFIKASI LIVE CHAT: AUTO-OPEN TICKET DARI URL =====
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (!tickets.length) return;
@@ -3512,7 +3531,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
   const sendMessage = async () => {
     if (!db || !selectedTicket || !messageText.trim() || !user) return;
 
-    // Admin (agent) tidak perlu cek ban — hanya user biasa
     if (!isAdmin) {
       const isBannedNow = await checkBanBeforeAction();
       if (isBannedNow) {
@@ -3568,7 +3586,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
           : null,
       });
 
-      // ===== PENTING: Admin auto-claim ticket saat kirim pesan =====
       await updateDoc(ticketRef, {
         lastMessage: messageText.trim(),
         lastMessageTime: serverTimestamp(),
@@ -3722,7 +3739,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
   };
 
   const renderOnlinePanel = () => {
-    // Hanya tampil untuk admin
     if (!isAdmin) return null;
 
     const list = onlineUsers;
@@ -4235,7 +4251,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
               Live Chat Agent
             </h3>
             <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "10px" }}>
-              {/* ===== PWA NOTIFIKASI LIVE CHAT: TOGGLE ===== */}
               {user && <LiveChatNotificationToggle user={user} db={db} />}
             </div>
           </div>
@@ -4465,7 +4480,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
             Live Chat Agent
           </h3>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "10px", paddingTop: "10px" }}>
-            {/* ===== PWA NOTIFIKASI LIVE CHAT: TOGGLE ===== */}
             {user && <LiveChatNotificationToggle user={user} db={db} />}
           </div>
         </div>
@@ -5008,7 +5022,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
                       <RollingNewMessage
                         key={rollingKey}
                         senderName={latestRollingMessage.senderName}
-                        message={latestRollingMessage.text}
+                        message={latestRollingMessage.message}
                         isFromAgent={latestRollingMessage.isFromAgent}
                       />
                     </div>
@@ -5214,7 +5228,6 @@ export default function HomePage(): React.JSX.Element {
     return () => unsubscribe();
   }, [isMounted]);
 
-  // ===== SISTEM MENGUMPULKAN USER YANG TERDAFTAR SAAT LOGIN =====
   useEffect(() => {
     if (!db || !isMounted) return;
     const q = query(collection(db, "users"), orderBy("lastSeen", "desc"), limit(50));
@@ -5354,7 +5367,7 @@ export default function HomePage(): React.JSX.Element {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "40px", overflow: "hidden" }}>
-          <span style={{ fontSize: "100px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em" }}>
+          <span style={{ fontSize: "100px", fontWeight: 400, color: BLUE, fontFamily: STRIPER_FONT, letterSpacing: "-0.03em" }}>
             Menuru
           </span>
           <span
@@ -5395,7 +5408,7 @@ export default function HomePage(): React.JSX.Element {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "40px", overflow: "hidden" }}>
-          <span style={{ fontSize: "100px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em" }}>
+          <span style={{ fontSize: "100px", fontWeight: 400, color: BLUE, fontFamily: STRIPER_FONT, letterSpacing: "-0.03em" }}>
             Menuru
           </span>
           <span
@@ -5431,6 +5444,11 @@ export default function HomePage(): React.JSX.Element {
         <link rel="manifest" href="/manifest.json" />
         <link rel="icon" href="/images/ai.jpg" type="image/jpeg" />
         <link rel="apple-touch-icon" href="/images/ai.jpg" />
+        {/* ===== FONT STRIPER DARI FONTSHARE ===== */}
+        <link
+          href="https://api.fontshare.com/v2/css?f[]=striper@400&display=swap"
+          rel="stylesheet"
+        />
         <meta property="og:title" content="Menuru Official | Home" />
         <meta property="og:description" content="Menuru Brand from Love yourself" />
         <meta property="og:image" content="/images/ai.jpg" />
@@ -5587,7 +5605,6 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </div>
 
-          {/* ===== BG KOTAK BIRU NOTE ===== */}
           <div
             style={{ position: "relative", width: "100%", height: "420px", marginBottom: "60px", zIndex: 1 }}
             onMouseEnter={() => setNoteHovered(true)}
@@ -5664,7 +5681,6 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </div>
 
-          {/* ===== SECTION: BERGABUNG BERSAMA KAMI ===== */}
           <div
             ref={noteJoinRef}
             style={{
@@ -5677,7 +5693,6 @@ export default function HomePage(): React.JSX.Element {
               position: "relative",
             }}
           >
-            {/* Baris 1: Judul + Tombol Bergabung */}
             <div
               style={{
                 display: "flex",
@@ -5730,7 +5745,6 @@ export default function HomePage(): React.JSX.Element {
               </button>
             </div>
 
-            {/* Baris 2: BG biru + SEMUA USER TERDAFTAR (dari sistem login) */}
             <div
               style={{
                 width: "100%",
@@ -5744,7 +5758,6 @@ export default function HomePage(): React.JSX.Element {
                 minHeight: "70px",
               }}
             >
-              {/* Semua user terdaftar digabung: user login di posisi pertama */}
               <div
                 style={{
                   display: "flex",
@@ -5770,7 +5783,6 @@ export default function HomePage(): React.JSX.Element {
                         gap: "8px",
                       }}
                     >
-                      {/* User yang login: tampilkan "from [Nama User]" */}
                       {isCurrentUser && (
                         <>
                           <span
@@ -5799,7 +5811,6 @@ export default function HomePage(): React.JSX.Element {
                         </>
                       )}
 
-                      {/* Foto Profil user (FP 1, FP 2, dst) */}
                       <div
                         className="note-user-fp"
                         onClick={() => setActiveNoteUser(activeNoteUser === n.id ? null : n.id)}
@@ -5838,7 +5849,6 @@ export default function HomePage(): React.JSX.Element {
                         )}
                       </div>
 
-                      {/* Status untuk user login saat ini */}
                       {isCurrentUser && (
                         <span
                           style={{
@@ -5854,7 +5864,6 @@ export default function HomePage(): React.JSX.Element {
                         </span>
                       )}
 
-                      {/* Nama user muncul PERMANENT saat FP di klik (untuk user selain login) */}
                       {!isCurrentUser && activeNoteUser === n.id && (
                         <span
                           className={`note-user-name-${n.id}`}
@@ -6145,7 +6154,6 @@ export default function HomePage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* ===== PWA COMPONENTS ===== */}
       <ServiceWorkerRegister />
       <PWAInstallPrompt />
 
@@ -6178,6 +6186,13 @@ export default function HomePage(): React.JSX.Element {
         }
         * {
           background-color: transparent;
+        }
+        @font-face {
+          font-family: 'Striper';
+          src: local('Striper'), url('https://api.fontshare.com/v2/css?f[]=striper@400') format('woff2');
+          font-display: swap;
+          font-weight: 400;
+          font-style: normal;
         }
         .menuru-char {
           display: inline-block;
