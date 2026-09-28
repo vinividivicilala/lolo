@@ -9,25 +9,6 @@ const WHITE = "#FFFFFF";
 const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
 
 // ===== SVG ICONS =====
-const NorthEastArrow = ({ size = 16, color = "currentColor" }: { size?: number; color?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <path
-      d="M7 17L17 7M17 7H8M17 7V16"
-      stroke={color}
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-
-const LoadingSpinner = ({ size = 16, color = "currentColor" }: { size?: number; color?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <circle cx="12" cy="12" r="10" stroke={color} strokeWidth="3" strokeOpacity="0.25" />
-    <path d="M22 12A10 10 0 0 0 12 2" stroke={color} strokeWidth="3" strokeLinecap="round" />
-  </svg>
-);
-
 const BellIcon = ({ size = 18, color = "currentColor" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <path
@@ -75,6 +56,25 @@ const BellOffIcon = ({ size = 18, color = "currentColor" }: { size?: number; col
   </svg>
 );
 
+const NorthEastArrow = ({ size = 16, color = "currentColor" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <path
+      d="M7 17L17 7M17 7H8M17 7V16"
+      stroke={color}
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+const LoadingSpinner = ({ size = 16, color = "currentColor" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <circle cx="12" cy="12" r="10" stroke={color} strokeWidth="3" strokeOpacity="0.25" />
+    <path d="M22 12A10 10 0 0 0 12 2" stroke={color} strokeWidth="3" strokeLinecap="round" />
+  </svg>
+);
+
 interface Props {
   user: any;
   db: any;
@@ -84,8 +84,8 @@ export default function LiveChatNotificationToggle({ user, db }: Props) {
   const { supported, requestPermission } = useNotificationPermission();
   const [enabled, setEnabled] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [visible, setVisible] = useState(true);
 
-  const containerRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const iconRef = useRef<HTMLDivElement>(null);
   const arrowRef = useRef<HTMLDivElement>(null);
@@ -113,23 +113,23 @@ export default function LiveChatNotificationToggle({ user, db }: Props) {
     };
   }, [user, db]);
 
-  // ===== GSAP ANIMASI MASUK =====
+  // ===== GSAP ANIMASI MASUK (sekali saja, tanpa hover) =====
   useEffect(() => {
-    if (!containerRef.current || !buttonRef.current) return;
+    if (!buttonRef.current) return;
     const ctx = gsap.context(() => {
       gsap.fromTo(
         buttonRef.current,
-        { opacity: 0, y: 20, scale: 0.95 },
-        { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: "back.out(1.7)", delay: 0.2 }
+        { opacity: 0, y: -20, scale: 0.94 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.8, ease: "back.out(1.7)", delay: 0.3 }
       );
       if (iconRef.current) {
         gsap.fromTo(
           iconRef.current,
           { rotate: -25, scale: 0.6, opacity: 0 },
-          { rotate: 0, scale: 1, opacity: 1, duration: 0.8, ease: "back.out(2)", delay: 0.5 }
+          { rotate: 0, scale: 1, opacity: 1, duration: 0.8, ease: "back.out(2)", delay: 0.6 }
         );
       }
-    }, containerRef);
+    });
     return () => ctx.revert();
   }, []);
 
@@ -179,8 +179,8 @@ export default function LiveChatNotificationToggle({ user, db }: Props) {
         navigator.serviceWorker.controller.postMessage({
           type: "SHOW_NOTIFICATION",
           payload: {
-            title: "from Menuru",
-            body: "Live Chat Agent\nNotifikasi Live Chat Aktif. Anda akan menerima notifikasi saat ada pesan baru.",
+            title: "Live Chat Agent",
+            body: "Notifikasi Live Chat Aktif\nAnda akan menerima notifikasi saat ada pesan baru.",
             tag: "test-notif-" + Date.now(),
             url: "/live-chat-agent",
             requireInteraction: false,
@@ -219,33 +219,21 @@ export default function LiveChatNotificationToggle({ user, db }: Props) {
     }
   };
 
-  const handleEnter = () => {
-    if (loading) return;
-    if (arrowRef.current) gsap.to(arrowRef.current, { x: 4, duration: 0.25, ease: "power2.out" });
-  };
-  const handleLeave = () => {
-    if (loading) return;
-    if (arrowRef.current) gsap.to(arrowRef.current, { x: 0, duration: 0.25, ease: "power2.out" });
-  };
+  if (!supported || !visible) return null;
 
-  if (!supported) return null;
-
+  // Tombol inline dengan BG biru, nyatu sama halaman utama
   return (
     <div
-      ref={containerRef}
       style={{
-        display: "flex",
-        justifyContent: "center",
+        display: "inline-flex",
         alignItems: "center",
-        width: "100%",
+        justifyContent: "center",
         fontFamily: FONT_FAMILY,
       }}
     >
       <button
         ref={buttonRef}
         onClick={enabled ? handleDisable : handleEnable}
-        onMouseEnter={handleEnter}
-        onMouseLeave={handleLeave}
         disabled={loading}
         style={{
           display: "inline-flex",
@@ -255,7 +243,7 @@ export default function LiveChatNotificationToggle({ user, db }: Props) {
           padding: "12px 24px",
           backgroundColor: BLUE,
           color: WHITE,
-          border: `1.5px solid ${BLUE}`,
+          border: "none",
           borderRadius: "10px",
           fontSize: "14px",
           fontWeight: 700,
@@ -263,7 +251,7 @@ export default function LiveChatNotificationToggle({ user, db }: Props) {
           fontFamily: FONT_FAMILY,
           letterSpacing: "0.3px",
           opacity: loading ? 0.7 : 1,
-          boxShadow: "0 8px 24px rgba(13,60,252,0.3)",
+          boxShadow: "0 8px 24px rgba(13,60,252,0.25)",
         }}
       >
         <div ref={iconRef} style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
