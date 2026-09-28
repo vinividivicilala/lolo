@@ -9,11 +9,11 @@ interface Options {
   currentTicketId?: string | null;
 }
 
+const AGENT_NAME = "Farid Ardiansyah";
+
 // ===== HELPER: Generate nama room ticket otomatis =====
 function generateRoomName(ticket: any): string {
-  // Prioritas: topic yang ada di ticket
   if (ticket?.topic) return ticket.topic;
-  // Fallback: ID ticket
   if (ticket?.id) return `#TICKET-${ticket.id.slice(-6).toUpperCase()}`;
   return "Live Chat Agent";
 }
@@ -61,6 +61,7 @@ export function useLiveChatNotification({
 
         let q;
         if (isAdmin) {
+          // ADMIN (AGENT): pantau semua ticket waiting & active
           q = query(
             collection(db, "livechat_tickets"),
             where("status", "in", ["waiting", "active"]),
@@ -68,6 +69,7 @@ export function useLiveChatNotification({
             limit(30)
           );
         } else {
+          // USER BIASA: pantau ticket milik sendiri
           q = query(
             collection(db, "livechat_tickets"),
             where("userId", "==", user.uid),
@@ -93,9 +95,12 @@ export function useLiveChatNotification({
 
               if (currentTicketIdRef.current === ticket.id) return;
 
+              // Tentukan nama diri sendiri sesuai role
               const myName = isAdmin
-                ? "Farid Ardiansyah"
+                ? AGENT_NAME
                 : user.displayName || user.email || "User";
+
+              // Skip pesan dari diri sendiri
               if (ticket.lastMessageSender === myName) return;
 
               let msgTime = 0;
@@ -113,13 +118,13 @@ export function useLiveChatNotification({
               if (lastNotifiedRef.current[ticket.id] === msgTime) return;
               lastNotifiedRef.current[ticket.id] = msgTime;
 
-              // ===== FORMAT NOTIFIKASI =====
-              // Baris 1: Nama User / Agent
-              // Baris 2: Nama Room Ticket (otomatis)
+              // ===== FORMAT NOTIFIKASI (3 BARIS) =====
+              // Baris 1: Nama User biasa ATAU Nama Agent
+              // Baris 2: Nama Ticket Room (otomatis dari topic / ID)
               // Baris 3: Nama Pesan
-              const senderName = ticket.lastMessageSender || "User";
+              const senderName = ticket.lastMessageSender || (isAdmin ? "User" : AGENT_NAME);
               const roomName = generateRoomName(ticket);
-              const messageText = (ticket.lastMessage || "").substring(0, 100) || "Ada pesan baru";
+              const messageText = (ticket.lastMessage || "").substring(0, 120) || "Ada pesan baru";
 
               const title = senderName;
               const body = `${roomName}\n${messageText}`;
@@ -131,11 +136,11 @@ export function useLiveChatNotification({
                 navigator.serviceWorker.controller.postMessage({
                   type: "SHOW_NOTIFICATION",
                   payload: {
+                    senderName,
+                    roomName,
+                    messageText,
                     title,
                     body,
-                    roomName,
-                    senderName,
-                    messageText,
                     icon: "/icons/icon-192x192.png",
                     badge: "/icons/icon-192x192.png",
                     tag: `livechat-${ticket.id}`,
