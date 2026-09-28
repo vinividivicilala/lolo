@@ -1,8 +1,8 @@
-// ===== SERVICE WORKER - MENURU PWA v2.3.0 =====
-// v2.3.0: Notifikasi 3 baris (User/Agent + Room + Message), side kanan layar
-const CACHE_NAME = "menuru-pwa-v2.3.0";
-const RUNTIME_CACHE = "menuru-runtime-v2.3.0";
-const IMAGE_CACHE = "menuru-images-v2.3.0";
+// ===== SERVICE WORKER - MENURU PWA v2.1.0 =====
+// v2.1.0: Notifikasi tanpa emoticon + title/body format "from [Nama] • [Ticket] • [Pesan]"
+const CACHE_NAME = "menuru-pwa-v2.1.0";
+const RUNTIME_CACHE = "menuru-runtime-v2.1.0";
+const IMAGE_CACHE = "menuru-images-v2.1.0";
 
 const PRECACHE_URLS = [
   "/",
@@ -14,7 +14,7 @@ const PRECACHE_URLS = [
 
 // ===== INSTALL =====
 self.addEventListener("install", (event) => {
-  console.log("[SW] Installing v2.3.0...");
+  console.log("[SW] Installing v2.1.0...");
   event.waitUntil(
     caches
       .open(CACHE_NAME)
@@ -26,7 +26,7 @@ self.addEventListener("install", (event) => {
 
 // ===== ACTIVATE =====
 self.addEventListener("activate", (event) => {
-  console.log("[SW] Activating v2.3.0...");
+  console.log("[SW] Activating v2.1.0...");
   event.waitUntil(
     caches
       .keys()
@@ -151,24 +151,27 @@ self.addEventListener("message", (event) => {
 
   if (data.type === "SHOW_NOTIFICATION") {
     const payload = data.payload || {};
-    const senderName = payload.senderName || payload.title || "User";
-    const roomName = payload.roomName || "Live Chat Agent";
-    const messageText = payload.messageText || payload.body || "Ada pesan baru";
+    const senderName = payload.senderName || "User";
+    const ticketName = payload.ticketName || "Live Chat";
+    const messageText = payload.body || "Ada pesan baru";
 
-    // Format 3 baris: [User/Agent] \n [Room Ticket] \n [Message]
-    const title = senderName;
-    const body = `${roomName}\n${messageText}`;
+    // Format title: "from [Nama] • [Ticket]"
+    const title = `from ${senderName} • ${ticketName}`;
+
+    // Format body: pesan masuk
+    const body = messageText;
 
     const tag = payload.tag || "livechat-" + Date.now();
     const url = payload.url || "/live-chat-agent";
     const icon = payload.icon || "/icons/icon-192x192.png";
     const badge = payload.badge || "/icons/icon-192x192.png";
+    const senderPhoto = payload.senderPhoto || icon;
 
     console.log("[SW] Show notification:", title, "|", body);
 
     const options = {
       body,
-      icon,
+      icon: senderPhoto,
       badge,
       tag,
       renotify: true,
@@ -177,8 +180,7 @@ self.addEventListener("message", (event) => {
       data: {
         url,
         senderName,
-        roomName,
-        messageText,
+        ticketName,
         timestamp: Date.now(),
       },
       actions: [
@@ -245,35 +247,26 @@ self.addEventListener("notificationclose", (event) => {
   console.log("[SW] Notification closed:", event.notification.tag);
 });
 
-// ===== PUSH (fallback) =====
+// ===== PUSH (fallback, tanpa FCM/VAPID) =====
 self.addEventListener("push", (event) => {
-  let data = {
-    senderName: "Live Chat Agent",
-    roomName: "Live Chat Agent",
-    messageText: "Ada notifikasi baru!",
-    url: "/live-chat-agent",
-  };
+  let data = { title: "Menuru", body: "Ada notifikasi baru!", url: "/" };
   if (event.data) {
     try {
       data = { ...data, ...event.data.json() };
     } catch (e) {
       try {
-        data.messageText = event.data.text();
+        data.body = event.data.text();
       } catch (_) {}
     }
   }
-
-  const title = data.senderName || "Live Chat Agent";
-  const body = `${data.roomName || "Live Chat Agent"}\n${data.messageText || "Ada notifikasi baru!"}`;
-
   const options = {
-    body,
+    body: data.body,
     icon: data.icon || "/icons/icon-192x192.png",
     badge: "/icons/icon-192x192.png",
     vibrate: [200, 100, 200],
     tag: data.tag || "push-" + Date.now(),
     renotify: true,
-    data: { url: data.url || "/live-chat-agent" },
+    data: { url: data.url || "/" },
   };
-  event.waitUntil(self.registration.showNotification(title, options));
+  event.waitUntil(self.registration.showNotification(data.title, options));
 });
