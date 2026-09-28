@@ -14,14 +14,12 @@ const FIREBASE_PROJECT_ID = "wawa44-58d1e";
 
 // ===== HELPER: Buat URL auto-create index untuk USER =====
 function getUserIndexUrl(): string {
-  // Index: livechat_tickets (userId ASC, lastMessageTime DESC)
   const encoded = "ClVwcm9qZWN0cy93YXdhNDQtNThkMWUvZGF0YWJhc2VzLyhkZWZhdWx0KS9jb2xsZWN0aW9uR3JvdXBzL2xpdmVjaGF0X3RpY2tldHMvaW5kZXhlcy9fEAEaCgoGdXNlcklkEAEaEwoPbGFzdE1lc3NhZ2VUaW1lEAIaDAoIX19uYW1lX18QAg";
   return `https://console.firebase.google.com/v1/r/project/${FIREBASE_PROJECT_ID}/firestore/indexes?create_composite=${encoded}`;
 }
 
 // ===== HELPER: Buat URL auto-create index untuk ADMIN =====
 function getAdminIndexUrl(): string {
-  // Index: livechat_tickets (status ASC, lastMessageTime DESC)
   const encoded = "ClVwcm9qZWN0cy93YXdhNDQtNThkMWUvZGF0YWJhc2VzLyhkZWZhdWx0KS9jb2xsZWN0aW9uR3JvdXBzL2xpdmVjaGF0X3RpY2tldHMvaW5kZXhlcy9fEAEaCgoGc3RhdHVzEAEaEwoPbGFzdE1lc3NhZ2VUaW1lEAIaDAoIX19uYW1lX18QAg";
   return `https://console.firebase.google.com/v1/r/project/${FIREBASE_PROJECT_ID}/firestore/indexes?create_composite=${encoded}`;
 }
@@ -59,7 +57,6 @@ function tryAutoOpenIndex(role: "USER" | "ADMIN") {
 
   const url = role === "ADMIN" ? getAdminIndexUrl() : getUserIndexUrl();
 
-  // Hanya auto-open kalau user setuju (pakai konfirmasi)
   const shouldOpen = window.confirm(
     `⚠️ Notifikasi Live Chat butuh Firebase Composite Index.\n\n` +
     `Klik OK untuk membuka halaman auto-create index (${role}).\n` +
@@ -73,6 +70,39 @@ function tryAutoOpenIndex(role: "USER" | "ADMIN") {
   } else {
     console.log(`[LiveChatNotif] ⏸️ User memilih manual. Link:\n${url}`);
   }
+}
+
+// ===== HELPER: Ambil sender photo (jika ada) =====
+function getSenderPhotoFromTicket(ticket: any, isAdmin: boolean): string {
+  if (isAdmin) {
+    return ticket.userPhoto || "";
+  }
+  return "";
+}
+
+// ===== HELPER: Format pesan notifikasi (KONSISTEN untuk HP & DESKTOP) =====
+function buildNotificationPayload(ticket: any, isAdmin: boolean, user: any) {
+  const senderName = ticket.lastMessageSender || "User";
+  const topic = ticket.topic || "Pesan Baru";
+  const userName = ticket.userName || "User";
+  const messagePreview = (ticket.lastMessage || "").substring(0, 120);
+
+  // Title: nama sender/agent
+  // Body: [Topic] - User: pesan
+  let title = "";
+  let body = "";
+
+  if (isAdmin) {
+    // ADMIN: yang kirim = user biasa
+    title = `${senderName}`;
+    body = `[${topic}] ${userName}: ${messagePreview}`;
+  } else {
+    // USER: yang kirim = agent/admin
+    title = `${senderName}`;
+    body = `[${topic}] ${messagePreview}`;
+  }
+
+  return { title, body, senderName, topic, userName, messagePreview };
 }
 
 export function useLiveChatNotification({
@@ -103,7 +133,6 @@ export function useLiveChatNotification({
       return;
     }
 
-    // Prevent double-setup
     if (isSetupRef.current) return;
     isSetupRef.current = true;
 
@@ -121,7 +150,6 @@ export function useLiveChatNotification({
 
         let q;
         if (isAdmin) {
-          // ADMIN: pantau ticket waiting & active
           q = query(
             collection(db, "livechat_tickets"),
             where("status", "in", ["waiting", "active"]),
@@ -129,7 +157,6 @@ export function useLiveChatNotification({
             limit(30)
           );
         } else {
-          // USER: pantau ticket milik sendiri
           q = query(
             collection(db, "livechat_tickets"),
             where("userId", "==", user.uid),
@@ -144,7 +171,7 @@ export function useLiveChatNotification({
           q,
           (snapshot: any) => {
             if (!isMounted) return;
-            retryCountRef.current = 0; // reset retry count kalau sukses
+            retryCountRef.current = 0;
 
             const changes = snapshot.docChanges();
             if (changes.length > 0) {
@@ -157,10 +184,8 @@ export function useLiveChatNotification({
               const ticket = { id: change.doc.id, ...change.doc.data() } as any;
               if (!ticket.lastMessageTime) return;
 
-              // Skip kalau user lagi buka ticket ini
               if (currentTicketIdRef.current === ticket.id) return;
 
-              // Skip pesan dari diri sendiri
               const myName = isAdmin
                 ? "Farid Ardiansyah"
                 : user.displayName || user.email || "User";
@@ -181,15 +206,9 @@ export function useLiveChatNotification({
               if (lastNotifiedRef.current[ticket.id] === msgTime) return;
               lastNotifiedRef.current[ticket.id] = msgTime;
 
-              const senderName = ticket.lastMessageSender || "User";
-              const messagePreview = (ticket.lastMessage || "").substring(0, 80);
-              const senderPhoto = isAdmin ? ticket.userPhoto || "" : "";
-
-              const title = isAdmin
-                ? `💬 ${ticket.userName} — ${ticket.topic || "Pesan Baru"}`
-                : `💬 ${senderName}`;
-
-              const body = messagePreview || "Ada pesan baru untuk Anda";
+              // ===== BUILD PAYLOAD DENGAN FORMAT KONSISTEN =====
+              const { title, body, senderName } = buildNotificationPayload(ticket, isAdmin, user);
+              const senderPhoto = getSenderPhotoFromTicket(ticket, isAdmin);
               const url = `/live-chat-agent?ticket=${ticket.id}`;
 
               console.log("[LiveChatNotif] 🔔 SENDING:", title, "|", body);
@@ -234,21 +253,16 @@ export function useLiveChatNotification({
           (error: any) => {
             console.error("[LiveChatNotif] Snapshot error:", error);
 
-            // ===== DETEKSI ERROR INDEX =====
             const isIndexError =
               error?.message?.includes("requires an index") ||
               error?.code === "failed-precondition";
 
             if (isIndexError) {
-              // 1. Print banner besar di Console dengan link
               printIndexBanner(isAdmin ? "ADMIN" : "USER");
-
-              // 2. Auto-open tab Firebase Console (hanya 1x per session)
               tryAutoOpenIndex(isAdmin ? "ADMIN" : "USER");
 
-              // 3. Auto-retry setiap 10 detik sampai index siap
               retryCountRef.current++;
-              const retryIn = 10000; // 10 detik
+              const retryIn = 10000;
 
               console.log(
                 `[LiveChatNotif] ⏳ Auto-retry #${retryCountRef.current} dalam ${retryIn / 1000}s...`
@@ -259,7 +273,7 @@ export function useLiveChatNotification({
                 if (!isMounted) return;
                 console.log("[LiveChatNotif] 🔄 Retrying query...");
                 if (unsubscribe) unsubscribe();
-                isSetupRef.current = false; // reset supaya bisa re-setup
+                isSetupRef.current = false;
                 setupListener();
               }, retryIn);
             }
