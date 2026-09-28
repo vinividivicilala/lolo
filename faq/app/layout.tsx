@@ -157,9 +157,9 @@ export default function RootLayout({
       }}
     >
       <head>
-        {/* ===== Google Fonts CDN - Poppins ===== */}
+        {/* ===== Google Fonts CDN - Plus Jakarta Sans ===== */}
         <link
-          href="https://fonts.googleapis.com/css2?family=Plus Jakarta Sans:wght@400;600;700;800&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap"
           rel="stylesheet"
         />
 
@@ -470,7 +470,7 @@ export default function RootLayout({
           padding: 0,
           height: '100%',
           background: '#000',
-          fontFamily: "'Poppins', 'Poppins Fallback'",
+          fontFamily: "'Plus Jakarta Sans', 'Plus Jakarta Sans Fallback'",
           WebkitFontSmoothing: 'antialiased',
           MozOsxFontSmoothing: 'grayscale',
         }}
