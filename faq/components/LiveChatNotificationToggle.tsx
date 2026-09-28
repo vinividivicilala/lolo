@@ -233,12 +233,12 @@ export default function LiveChatNotificationToggle({ user, db }: Props) {
       <div
         style={{
           fontSize: "12px",
-          color: BLUE,
+          color: WHITE,
           fontFamily: FONT_FAMILY,
           padding: "8px 12px",
-          backgroundColor: "rgba(13,60,252,0.08)",
+          backgroundColor: "rgba(255,255,255,0.15)",
           borderRadius: "8px",
-          border: `1px solid ${BLUE}30`,
+          border: `1px solid ${WHITE}40`,
         }}
       >
         Browser tidak mendukung notifikasi
@@ -255,10 +255,42 @@ export default function LiveChatNotificationToggle({ user, db }: Props) {
         alignItems: "center",
         justifyContent: "center",
         width: "100%",
-        gap: "8px",
+        gap: "6px",
+        padding: "16px 20px",
+        backgroundColor: BLUE,
+        borderRadius: "12px",
+        fontFamily: FONT_FAMILY,
       }}
     >
-      {/* ===== MAIN TOGGLE BUTTON ===== */}
+      {/* ===== JUDUL ===== */}
+      <div
+        style={{
+          fontSize: "16px",
+          fontWeight: 800,
+          color: WHITE,
+          letterSpacing: "0.3px",
+          textAlign: "center",
+        }}
+      >
+        Notifikasi Live Chat
+      </div>
+
+      {/* ===== DESKRIPSI ===== */}
+      <div
+        style={{
+          fontSize: "12px",
+          fontWeight: 400,
+          color: "rgba(255,255,255,0.85)",
+          textAlign: "center",
+          marginBottom: "4px",
+          lineHeight: 1.4,
+          maxWidth: "420px",
+        }}
+      >
+        Aktifkan notifikasi agar Anda tidak ketinggalan pesan dari customer atau agent.
+      </div>
+
+      {/* ===== MAIN TOGGLE BUTTON (menyatu dengan BG utama) ===== */}
       <button
         ref={buttonRef}
         onClick={enabled ? handleDisable : handleEnable}
@@ -270,10 +302,10 @@ export default function LiveChatNotificationToggle({ user, db }: Props) {
           alignItems: "center",
           justifyContent: "center",
           gap: "10px",
-          padding: "12px 24px",
-          backgroundColor: BLUE,
+          padding: "10px 22px",
+          backgroundColor: enabled ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.15)",
           color: WHITE,
-          border: `1.5px solid ${BLUE}`,
+          border: `1.5px solid ${WHITE}`,
           borderRadius: "10px",
           fontSize: "14px",
           fontWeight: 700,
@@ -281,7 +313,6 @@ export default function LiveChatNotificationToggle({ user, db }: Props) {
           fontFamily: FONT_FAMILY,
           letterSpacing: "0.3px",
           opacity: loading ? 0.7 : 1,
-          boxShadow: "0 8px 24px rgba(13,60,252,0.3)",
           transition: "background-color 0.2s ease",
         }}
       >
@@ -298,8 +329,8 @@ export default function LiveChatNotificationToggle({ user, db }: Props) {
           {loading
             ? "Loading..."
             : enabled
-            ? "Notifikasi Live Chat Aktif"
-            : "Aktifkan Notifikasi Live Chat"}
+            ? "Notifikasi Aktif"
+            : "Aktifkan Notifikasi"}
         </span>
         {!loading && (
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
