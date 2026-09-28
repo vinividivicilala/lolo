@@ -1,8 +1,8 @@
-// ===== SERVICE WORKER - MENURU PWA v2.0.0 =====
-// v2.0.0: Firebase-driven notifications + auto-trigger dari Firestore
-const CACHE_NAME = "menuru-pwa-v2.0.0";
-const RUNTIME_CACHE = "menuru-runtime-v2.0.0";
-const IMAGE_CACHE = "menuru-images-v2.0.0";
+// ===== SERVICE WORKER - MENURU PWA v2.1.0 =====
+// v2.1.0: Format notifikasi "from [User] — Live Chat Agent — [Message]"
+const CACHE_NAME = "menuru-pwa-v2.1.0";
+const RUNTIME_CACHE = "menuru-runtime-v2.1.0";
+const IMAGE_CACHE = "menuru-images-v2.1.0";
 
 const PRECACHE_URLS = [
   "/",
@@ -14,7 +14,7 @@ const PRECACHE_URLS = [
 
 // ===== INSTALL =====
 self.addEventListener("install", (event) => {
-  console.log("[SW] Installing v2.0.0...");
+  console.log("[SW] Installing v2.1.0...");
   event.waitUntil(
     caches
       .open(CACHE_NAME)
@@ -26,7 +26,7 @@ self.addEventListener("install", (event) => {
 
 // ===== ACTIVATE =====
 self.addEventListener("activate", (event) => {
-  console.log("[SW] Activating v2.0.0...");
+  console.log("[SW] Activating v2.1.0...");
   event.waitUntil(
     caches
       .keys()
@@ -53,7 +53,6 @@ self.addEventListener("fetch", (event) => {
 
   if (request.method !== "GET") return;
 
-  // Skip Firebase & external
   if (
     url.hostname.includes("firebase") ||
     url.hostname.includes("googleapis") ||
@@ -67,7 +66,6 @@ self.addEventListener("fetch", (event) => {
 
   if (url.protocol === "chrome-extension:") return;
 
-  // Images: Cache-first
   if (
     request.destination === "image" ||
     /\.(png|jpg|jpeg|gif|webp|svg|ico)$/i.test(url.pathname)
@@ -88,7 +86,6 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Static assets: Stale-while-revalidate
   if (
     request.destination === "script" ||
     request.destination === "style" ||
@@ -110,7 +107,6 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // HTML: Network-first
   if (request.mode === "navigate") {
     event.respondWith(
       fetch(request)
@@ -126,7 +122,6 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Default: Network-first
   event.respondWith(
     fetch(request)
       .then((response) => {
@@ -156,23 +151,22 @@ self.addEventListener("message", (event) => {
 
   if (data.type === "SHOW_NOTIFICATION") {
     const payload = data.payload || {};
-    const title = payload.title || "Menuru Live Chat";
+    const title = payload.title || "Live Chat Agent";
     const body = payload.body || "Ada pesan baru";
     const tag = payload.tag || "livechat-" + Date.now();
     const url = payload.url || "/live-chat-agent";
     const icon = payload.icon || "/icons/icon-192x192.png";
     const badge = payload.badge || "/icons/icon-192x192.png";
-    const senderPhoto = payload.senderPhoto || icon;
 
     console.log("[SW] Show notification:", title, "|", body);
 
     const options = {
       body,
-      icon: senderPhoto,
+      icon,
       badge,
       tag,
       renotify: true,
-      requireInteraction: true, // penting: notif tetap muncul sampai user klik
+      requireInteraction: true,
       vibrate: [200, 100, 200, 100, 200],
       data: {
         url,
@@ -180,7 +174,7 @@ self.addEventListener("message", (event) => {
         timestamp: Date.now(),
       },
       actions: [
-        { action: "open", title: "💬 Buka Chat" },
+        { action: "open", title: "Buka Chat" },
         { action: "close", title: "Tutup" },
       ],
     };
@@ -243,9 +237,9 @@ self.addEventListener("notificationclose", (event) => {
   console.log("[SW] Notification closed:", event.notification.tag);
 });
 
-// ===== PUSH (fallback, tanpa FCM/VAPID) =====
+// ===== PUSH (fallback) =====
 self.addEventListener("push", (event) => {
-  let data = { title: "Menuru", body: "Ada notifikasi baru!", url: "/" };
+  let data = { title: "from Menuru", body: "Live Chat Agent\nAda notifikasi baru!", url: "/live-chat-agent" };
   if (event.data) {
     try {
       data = { ...data, ...event.data.json() };
@@ -262,7 +256,7 @@ self.addEventListener("push", (event) => {
     vibrate: [200, 100, 200],
     tag: data.tag || "push-" + Date.now(),
     renotify: true,
-    data: { url: data.url || "/" },
+    data: { url: data.url || "/live-chat-agent" },
   };
   event.waitUntil(self.registration.showNotification(data.title, options));
 });
