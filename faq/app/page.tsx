@@ -308,8 +308,7 @@ async function checkBanStatus(userId: string): Promise<any> {
 }
 
 // ===== CONSTANTS =====
-const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
-const STRIPER_FONT = "'Striper', serif";
+const FONT_FAMILY = "'Plus Jakarta Sans'";
 const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 const AGENT_NAME = "Farid Ardiansyah";
 const TOUR_STORAGE_KEY = "menuru_livechat_tour_completed_v1";
