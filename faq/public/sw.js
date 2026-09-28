@@ -1,8 +1,8 @@
-// ===== SERVICE WORKER - MENURU PWA v2.1.0 =====
-// v2.1.0: Format notifikasi "from [User] — Live Chat Agent — [Message]"
-const CACHE_NAME = "menuru-pwa-v2.1.0";
-const RUNTIME_CACHE = "menuru-runtime-v2.1.0";
-const IMAGE_CACHE = "menuru-images-v2.1.0";
+// ===== SERVICE WORKER - MENURU PWA v2.2.0 =====
+// v2.2.0: Format notifikasi 3 baris (User + Room + Message)
+const CACHE_NAME = "menuru-pwa-v2.2.0";
+const RUNTIME_CACHE = "menuru-runtime-v2.2.0";
+const IMAGE_CACHE = "menuru-images-v2.2.0";
 
 const PRECACHE_URLS = [
   "/",
@@ -14,7 +14,7 @@ const PRECACHE_URLS = [
 
 // ===== INSTALL =====
 self.addEventListener("install", (event) => {
-  console.log("[SW] Installing v2.1.0...");
+  console.log("[SW] Installing v2.2.0...");
   event.waitUntil(
     caches
       .open(CACHE_NAME)
@@ -26,7 +26,7 @@ self.addEventListener("install", (event) => {
 
 // ===== ACTIVATE =====
 self.addEventListener("activate", (event) => {
-  console.log("[SW] Activating v2.1.0...");
+  console.log("[SW] Activating v2.2.0...");
   event.waitUntil(
     caches
       .keys()
@@ -151,8 +151,14 @@ self.addEventListener("message", (event) => {
 
   if (data.type === "SHOW_NOTIFICATION") {
     const payload = data.payload || {};
-    const title = payload.title || "Live Chat Agent";
-    const body = payload.body || "Ada pesan baru";
+    const senderName = payload.senderName || payload.title || "User";
+    const roomName = payload.roomName || "Live Chat Agent";
+    const messageText = payload.messageText || payload.body || "Ada pesan baru";
+
+    // Format 3 baris: [User] \n [Room] \n [Message]
+    const title = senderName;
+    const body = `${roomName}\n${messageText}`;
+
     const tag = payload.tag || "livechat-" + Date.now();
     const url = payload.url || "/live-chat-agent";
     const icon = payload.icon || "/icons/icon-192x192.png";
@@ -170,7 +176,9 @@ self.addEventListener("message", (event) => {
       vibrate: [200, 100, 200, 100, 200],
       data: {
         url,
-        senderName: payload.senderName || "",
+        senderName,
+        roomName,
+        messageText,
         timestamp: Date.now(),
       },
       actions: [
@@ -239,7 +247,11 @@ self.addEventListener("notificationclose", (event) => {
 
 // ===== PUSH (fallback) =====
 self.addEventListener("push", (event) => {
-  let data = { title: "from Menuru", body: "Live Chat Agent\nAda notifikasi baru!", url: "/live-chat-agent" };
+  let data = {
+    title: "Live Chat Agent",
+    body: "Live Chat Agent\nAda notifikasi baru!",
+    url: "/live-chat-agent",
+  };
   if (event.data) {
     try {
       data = { ...data, ...event.data.json() };
