@@ -968,7 +968,7 @@ const PWAInstallPrompt = () => {
   );
 };
 
-// ===== HERO MENURU TITLE (Font Striper ONLY) =====
+// ===== HERO MENURU TITLE (Font Plus Jakarta Sans) =====
 const HeroMenuruTitle = ({ onNavbarShiftChange }: { onNavbarShiftChange: (shifted: boolean) => void }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -1075,7 +1075,7 @@ const HeroMenuruTitle = ({ onNavbarShiftChange }: { onNavbarShiftChange: (shifte
       <h1
         ref={titleRef}
         style={{
-          fontFamily: STRIPER_FONT,
+          fontFamily: FONT_FAMILY,
           fontSize: "600px",
           fontWeight: 400,
           color: "#0D3CFC",
@@ -1186,7 +1186,7 @@ const FooterMenuruTitle = () => {
       <span
         ref={titleRef}
         style={{
-          fontFamily: STRIPER_FONT,
+          fontFamily: FONT_FAMILY,
           fontSize: "600px",
           fontWeight: 400,
           color: "#0D3CFC",
@@ -1698,8 +1698,7 @@ const NavbarButton = ({
   );
 };
 
-// ===== LEFT NAVBAR =====
-const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
+// ===== LEFT NAVBAR =====const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
   return (
     <div
       style={{
@@ -1748,8 +1747,8 @@ const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
         iconComponent={<StriperIcon size={22} color="#ffffff" />}
         bigPanelWidth={850}
         bigPanelHeight={340}
-        buttonColor="#000000"
-        buttonHoverColor="#000000"
+        buttonColor="#0D3CFC"
+        buttonHoverColor="#0D3CFC"
         panelColor="#000000"
         iconButtonColor="#000000"
         iconButtonHoverColor="#000000"
@@ -4343,7 +4342,8 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
             >
               Start Chat
             </button>
-            <button              onClick={() => setShowStartChat(false)}
+            <button
+              onClick={() => setShowStartChat(false)}
               style={{
                 padding: "8px 20px",
                 backgroundColor: "transparent",
@@ -5369,7 +5369,7 @@ export default function HomePage(): React.JSX.Element {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "40px", overflow: "hidden" }}>
-          <span style={{ fontSize: "100px", fontWeight: 400, color: BLUE, fontFamily: STRIPER_FONT, letterSpacing: "-0.03em" }}>
+          <span style={{ fontSize: "100px", fontWeight: 400, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em" }}>
             Menuru
           </span>
           <span
@@ -5410,7 +5410,7 @@ export default function HomePage(): React.JSX.Element {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "40px", overflow: "hidden" }}>
-          <span style={{ fontSize: "100px", fontWeight: 400, color: BLUE, fontFamily: STRIPER_FONT, letterSpacing: "-0.03em" }}>
+          <span style={{ fontSize: "100px", fontWeight: 400, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em" }}>
             Menuru
           </span>
           <span
@@ -5446,11 +5446,6 @@ export default function HomePage(): React.JSX.Element {
         <link rel="manifest" href="/manifest.json" />
         <link rel="icon" href="/images/ai.jpg" type="image/jpeg" />
         <link rel="apple-touch-icon" href="/images/ai.jpg" />
-        {/* ===== FONT STRIPER DARI FONTSHARE ===== */}
-        <link
-          href="https://api.fontshare.com/v2/css?f[]=striper@400&display=swap"
-          rel="stylesheet"
-        />
         <meta property="og:title" content="Menuru Official | Home" />
         <meta property="og:description" content="Menuru Brand from Love yourself" />
         <meta property="og:image" content="/images/ai.jpg" />
@@ -6188,13 +6183,6 @@ export default function HomePage(): React.JSX.Element {
         }
         * {
           background-color: transparent;
-        }
-        @font-face {
-          font-family: 'Striper';
-          src: url('https://api.fontshare.com/v2/css?f[]=striper@400') format('woff2');
-          font-display: swap;
-          font-weight: 400;
-          font-style: normal;
         }
         .menuru-char {
           display: inline-block;
