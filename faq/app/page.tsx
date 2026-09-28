@@ -508,7 +508,7 @@ const footerLinks = [
   },
   {
     title: "Attention",
-    links: ["Privacy Policy", "Terms & Conditions", "About Us", "Terms of Use", "Help Center"],
+    links: ["Privacy Policy", "Terms & Conditions", "About Us", "Terms of Use", "Cookies Policy", "Help Center"],
   },
 ];
 
@@ -1729,7 +1729,7 @@ const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
         buttonColor="#F2EA6B"
         buttonHoverColor="#000000"
         panelColor="#F04E23"
-        iconButtonColor="#000000"
+        iconButtonColor="#0D3CFC"
         iconButtonHoverColor="#F2EA6B"
         panelBoxColor="rgba(255,255,255,0.15)"
         panelBoxBorder="rgba(255,255,255,0.3)"
@@ -2973,7 +2973,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
   const [adminChatText, setAdminChatText] = useState("");
   const [showAdminChat, setShowAdminChat] = useState(false);
   const [adminChatReplyTo, setAdminChatReplyTo] = useState<ChatMessage | null>(null);
-  const [onlineAgents, setOnlineAgents] = useState<OnlineUser[]>([]);
   const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
   const [ticketPreviews, setTicketPreviews] = useState<{ [ticketId: string]: LastMessagePreview[] }>({});
   const [ticketMsgCounts, setTicketMsgCounts] = useState<{ [ticketId: string]: number }>({});
@@ -3202,7 +3201,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
     const q = query(collection(db, "users"), where("online", "==", true));
     const unsub = onSnapshot(q, (snapshot: any) => {
       const admins: OnlineUser[] = [];
-      const agents: OnlineUser[] = [];
       const users: OnlineUser[] = [];
       snapshot.forEach((docSnap: any) => {
         const data = docSnap.data();
@@ -3217,13 +3215,11 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
         };
         if (item.isAgent) {
           admins.push(item);
-          agents.push(item);
         } else {
           users.push(item);
         }
       });
       setOnlineAdmins(admins);
-      setOnlineAgents(agents);
       setOnlineUsers(users);
     });
     return () => unsub();
@@ -3447,7 +3443,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
       await updateDoc(ticketRef, {
         typing: true,
         typingUserId: user.uid,
-        typingUserName: user.displayName || user.email || "User",
+        typingUserName: isAdmin ? AGENT_NAME : user.displayName || user.email || "User",
       });
     } else {
       await updateDoc(ticketRef, { typing: false, typingUserId: null, typingUserName: null });
@@ -3548,27 +3544,32 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
 
   const sendMessage = async () => {
     if (!db || !selectedTicket || !messageText.trim() || !user) return;
-    const isBannedNow = await checkBanBeforeAction();
-    if (isBannedNow) {
-      setMessageText("");
-      return;
+
+    // Admin (agent) tidak perlu cek ban — hanya user biasa
+    if (!isAdmin) {
+      const isBannedNow = await checkBanBeforeAction();
+      if (isBannedNow) {
+        setMessageText("");
+        return;
+      }
+      if (!canSendMessage) {
+        setBanMessage("YOU DO NOT HAVE PERMISSION TO SEND MESSAGES");
+        setMessageText("");
+        return;
+      }
+      const checkResult = containsBannedContent(messageText);
+      if (checkResult.isBanned) {
+        await banUserPermanent(user.uid, user.email || "", user.displayName || "User", checkResult.reason, messageText);
+        setIsBanned(true);
+        setBanReason(checkResult.reason);
+        setCanCreateTicket(false);
+        setCanSendMessage(false);
+        setBanMessage(`YOUR ACCOUNT HAS BEEN PERMANENTLY BANNED\n\nReason: ${checkResult.reason}\n\nMessage sent: "${messageText}"`);
+        setMessageText("");
+        return;
+      }
     }
-    if (!canSendMessage) {
-      setBanMessage("YOU DO NOT HAVE PERMISSION TO SEND MESSAGES");
-      setMessageText("");
-      return;
-    }
-    const checkResult = containsBannedContent(messageText);
-    if (checkResult.isBanned) {
-      await banUserPermanent(user.uid, user.email || "", user.displayName || "User", checkResult.reason, messageText);
-      setIsBanned(true);
-      setBanReason(checkResult.reason);
-      setCanCreateTicket(false);
-      setCanSendMessage(false);
-      setBanMessage(`YOUR ACCOUNT HAS BEEN PERMANENTLY BANNED\n\nReason: ${checkResult.reason}\n\nMessage sent: "${messageText}"`);
-      setMessageText("");
-      return;
-    }
+
     if (!encryptionReady) {
       alert("Encryption is being initialized.");
       return;
@@ -3599,13 +3600,18 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
             }
           : null,
       });
+
+      // ===== PENTING: Admin auto-claim ticket saat kirim pesan =====
       await updateDoc(ticketRef, {
         lastMessage: messageText.trim(),
         lastMessageTime: serverTimestamp(),
         lastMessageSender: senderName,
         ...(selectedTicket.status === "waiting" && { status: "active" }),
-        agentId: isAdmin ? user.uid : selectedTicket.agentId,
-        agentName: isAdmin ? AGENT_NAME : selectedTicket.agentName,
+        ...(isAdmin && {
+          agentId: user.uid,
+          agentName: AGENT_NAME,
+          status: selectedTicket.status === "waiting" ? "active" : selectedTicket.status,
+        }),
       });
       setMessageText("");
       setBanMessage(null);
@@ -3782,9 +3788,9 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
   };
 
   const renderOnlinePanel = () => {
-    const list = isAdmin ? onlineUsers : onlineAgents;
-    const title = isAdmin ? "Online Users" : "Online Agents";
-    const emptyText = isAdmin ? "No users online" : "No agents online";
+    const list = isAdmin ? onlineUsers : onlineAdmins;
+    const title = isAdmin ? "Online Users" : "Online Admins";
+    const emptyText = isAdmin ? "No users online" : "No admins online";
     return (
       <div
         data-tour="online-panel"
@@ -4360,46 +4366,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
             </div>
           )}
 
-          <div style={{ marginBottom: "20px" }} data-tour="online-panel">
-            <div
-              style={{
-                fontSize: "13px",
-                fontWeight: 700,
-                color: BLUE,
-                fontFamily: FONT_FAMILY,
-                marginBottom: "12px",
-                letterSpacing: "0.5px",
-                textTransform: "uppercase",
-              }}
-            >
-              {onlineAgents.length} Agent{onlineAgents.length !== 1 ? "s" : ""} Online
-            </div>
-            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-              {onlineAgents.map((a) => (
-                <div
-                  key={a.uid}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "10px",
-                    padding: "8px 14px",
-                    backgroundColor: BLUE,
-                    border: `1.5px solid ${BLUE}`,
-                    borderRadius: "8px",
-                    fontFamily: FONT_FAMILY,
-                  }}
-                >
-                  <AgentIcon size={16} color={WHITE} />
-                  <span style={{ fontSize: "13px", fontWeight: 700, color: WHITE }}>{a.displayName}</span>
-                  <span style={{ fontSize: "10px", fontWeight: 800, color: WHITE, letterSpacing: "0.5px" }}>ONLINE</span>
-                </div>
-              ))}
-              {onlineAgents.length === 0 && (
-                <span style={{ fontSize: "13px", color: "#999", fontFamily: FONT_FAMILY }}>No agents online</span>
-              )}
-            </div>
-          </div>
-
           <p style={{ fontSize: "15px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "16px" }}>
             Need help? Chat directly with our agent.
           </p>
@@ -4802,19 +4768,19 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
               style={{
                 fontSize: "13px",
                 fontWeight: 800,
-                color: onlineAgents.length > 0 ? BLUE : "#999",
-                backgroundColor: onlineAgents.length > 0 ? WHITE : "transparent",
-                border: onlineAgents.length > 0 ? `1.5px solid ${BLUE}` : "none",
+                color: onlineAdmins.length > 0 ? BLUE : "#999",
+                backgroundColor: onlineAdmins.length > 0 ? WHITE : "transparent",
+                border: onlineAdmins.length > 0 ? `1.5px solid ${BLUE}` : "none",
                 fontFamily: FONT_FAMILY,
                 letterSpacing: "0.5px",
                 textTransform: "uppercase",
-                padding: onlineAgents.length > 0 ? "4px 10px" : "0",
+                padding: onlineAdmins.length > 0 ? "4px 10px" : "0",
                 borderRadius: "4px",
               }}
             >
-              {onlineAgents.length > 0
-                ? `${onlineAgents.length} Agent${onlineAgents.length !== 1 ? "s" : ""} Online`
-                : "No Agents Online"}
+              {onlineAdmins.length > 0
+                ? `${onlineAdmins.length} Admin${onlineAdmins.length !== 1 ? "s" : ""} Online`
+                : "No Admins Online"}
             </span>
           </div>
         </div>
@@ -6387,6 +6353,9 @@ export default function HomePage(): React.JSX.Element {
                         isAttention = true;
                       } else if (link === "Terms of Use") {
                         linkHref = "/terms-of-use";
+                        isAttention = true;
+                      } else if (link === "Cookies Policy") {
+                        linkHref = "/cookie-policy";
                         isAttention = true;
                       } else if (link === "Stories") {
                         linkHref = "/stories";
