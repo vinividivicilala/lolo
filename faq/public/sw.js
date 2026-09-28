@@ -1,8 +1,8 @@
-// ===== SERVICE WORKER - MENURU PWA v2.1.0 =====
-// v2.1.0: Notifikasi tanpa emoticon + title/body format "from [Nama] • [Ticket] • [Pesan]"
-const CACHE_NAME = "menuru-pwa-v2.1.0";
-const RUNTIME_CACHE = "menuru-runtime-v2.1.0";
-const IMAGE_CACHE = "menuru-images-v2.1.0";
+// ===== SERVICE WORKER - MENURU PWA v2.0.0 =====
+// v2.0.0: Firebase-driven notifications + auto-trigger dari Firestore
+const CACHE_NAME = "menuru-pwa-v2.0.0";
+const RUNTIME_CACHE = "menuru-runtime-v2.0.0";
+const IMAGE_CACHE = "menuru-images-v2.0.0";
 
 const PRECACHE_URLS = [
   "/",
@@ -14,7 +14,7 @@ const PRECACHE_URLS = [
 
 // ===== INSTALL =====
 self.addEventListener("install", (event) => {
-  console.log("[SW] Installing v2.1.0...");
+  console.log("[SW] Installing v2.0.0...");
   event.waitUntil(
     caches
       .open(CACHE_NAME)
@@ -26,7 +26,7 @@ self.addEventListener("install", (event) => {
 
 // ===== ACTIVATE =====
 self.addEventListener("activate", (event) => {
-  console.log("[SW] Activating v2.1.0...");
+  console.log("[SW] Activating v2.0.0...");
   event.waitUntil(
     caches
       .keys()
@@ -53,6 +53,7 @@ self.addEventListener("fetch", (event) => {
 
   if (request.method !== "GET") return;
 
+  // Skip Firebase & external
   if (
     url.hostname.includes("firebase") ||
     url.hostname.includes("googleapis") ||
@@ -66,6 +67,7 @@ self.addEventListener("fetch", (event) => {
 
   if (url.protocol === "chrome-extension:") return;
 
+  // Images: Cache-first
   if (
     request.destination === "image" ||
     /\.(png|jpg|jpeg|gif|webp|svg|ico)$/i.test(url.pathname)
@@ -86,6 +88,7 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
+  // Static assets: Stale-while-revalidate
   if (
     request.destination === "script" ||
     request.destination === "style" ||
@@ -107,6 +110,7 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
+  // HTML: Network-first
   if (request.mode === "navigate") {
     event.respondWith(
       fetch(request)
@@ -122,6 +126,7 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
+  // Default: Network-first
   event.respondWith(
     fetch(request)
       .then((response) => {
@@ -151,16 +156,8 @@ self.addEventListener("message", (event) => {
 
   if (data.type === "SHOW_NOTIFICATION") {
     const payload = data.payload || {};
-    const senderName = payload.senderName || "User";
-    const ticketName = payload.ticketName || "Live Chat";
-    const messageText = payload.body || "Ada pesan baru";
-
-    // Format title: "from [Nama] • [Ticket]"
-    const title = `from ${senderName} • ${ticketName}`;
-
-    // Format body: pesan masuk
-    const body = messageText;
-
+    const title = payload.title || "Menuru Live Chat";
+    const body = payload.body || "Ada pesan baru";
     const tag = payload.tag || "livechat-" + Date.now();
     const url = payload.url || "/live-chat-agent";
     const icon = payload.icon || "/icons/icon-192x192.png";
@@ -175,16 +172,15 @@ self.addEventListener("message", (event) => {
       badge,
       tag,
       renotify: true,
-      requireInteraction: true,
+      requireInteraction: true, // penting: notif tetap muncul sampai user klik
       vibrate: [200, 100, 200, 100, 200],
       data: {
         url,
-        senderName,
-        ticketName,
+        senderName: payload.senderName || "",
         timestamp: Date.now(),
       },
       actions: [
-        { action: "open", title: "Buka Chat" },
+        { action: "open", title: "💬 Buka Chat" },
         { action: "close", title: "Tutup" },
       ],
     };
