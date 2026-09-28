@@ -9,6 +9,15 @@ interface Options {
   currentTicketId?: string | null;
 }
 
+// ===== HELPER: Generate nama room ticket otomatis =====
+function generateRoomName(ticket: any): string {
+  // Prioritas: topic yang ada di ticket
+  if (ticket?.topic) return ticket.topic;
+  // Fallback: ID ticket
+  if (ticket?.id) return `#TICKET-${ticket.id.slice(-6).toUpperCase()}`;
+  return "Live Chat Agent";
+}
+
 export function useLiveChatNotification({
   user,
   isAdmin,
@@ -75,9 +84,6 @@ export function useLiveChatNotification({
             if (!isMounted) return;
 
             const changes = snapshot.docChanges();
-            if (changes.length > 0) {
-              console.log("[LiveChatNotif] Snapshot changes:", changes.length);
-            }
 
             changes.forEach((change: any) => {
               if (change.type !== "modified" && change.type !== "added") return;
@@ -107,14 +113,16 @@ export function useLiveChatNotification({
               if (lastNotifiedRef.current[ticket.id] === msgTime) return;
               lastNotifiedRef.current[ticket.id] = msgTime;
 
-              // ===== FORMAT NOTIFIKASI BARU =====
-              // from [Nama User] — [Nama Room Live Chat Agent] — [Nama Pesan]
+              // ===== FORMAT NOTIFIKASI =====
+              // Baris 1: Nama User / Agent
+              // Baris 2: Nama Room Ticket (otomatis)
+              // Baris 3: Nama Pesan
               const senderName = ticket.lastMessageSender || "User";
-              const roomName = "Live Chat Agent";
-              const messagePreview = (ticket.lastMessage || "").substring(0, 80) || "Ada pesan baru";
+              const roomName = generateRoomName(ticket);
+              const messageText = (ticket.lastMessage || "").substring(0, 100) || "Ada pesan baru";
 
-              const title = `from ${senderName}`;
-              const body = `${roomName}\n${messagePreview}`;
+              const title = senderName;
+              const body = `${roomName}\n${messageText}`;
               const url = `/live-chat-agent?ticket=${ticket.id}`;
 
               console.log("[LiveChatNotif] SENDING:", title, "|", body);
@@ -125,6 +133,9 @@ export function useLiveChatNotification({
                   payload: {
                     title,
                     body,
+                    roomName,
+                    senderName,
+                    messageText,
                     icon: "/icons/icon-192x192.png",
                     badge: "/icons/icon-192x192.png",
                     tag: `livechat-${ticket.id}`,
@@ -134,7 +145,6 @@ export function useLiveChatNotification({
                   },
                 });
               } else {
-                // Fallback: new Notification() kalau SW controller belum ready
                 console.log("[LiveChatNotif] No SW controller, fallback ke new Notification()");
                 try {
                   const notif = new Notification(title, {
