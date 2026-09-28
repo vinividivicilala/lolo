@@ -1698,7 +1698,8 @@ const NavbarButton = ({
   );
 };
 
-// ===== LEFT NAVBAR =====const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
+
+const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
   return (
     <div
       style={{
