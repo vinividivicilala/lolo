@@ -6,7 +6,9 @@ import gsap from "gsap";
 
 const BLUE = "#0D3CFC";
 const WHITE = "#FFFFFF";
+const BLACK = "#000000";
 const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
+const STRIPER_FONT = "'Striper', serif";
 
 // ===== SVG ICONS =====
 const BellIcon = ({ size = 18, color = "currentColor" }: { size?: number; color?: string }) => (
@@ -118,10 +120,17 @@ export default function LiveChatNotificationToggle({ user, db }: Props) {
     if (!containerRef.current || !buttonRef.current) return;
     const ctx = gsap.context(() => {
       gsap.fromTo(
-        buttonRef.current,
-        { opacity: 0, y: -20, scale: 0.9 },
-        { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: "back.out(1.7)", delay: 0.2 }
+        containerRef.current,
+        { opacity: 0, y: -30 },
+        { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" }
       );
+      if (buttonRef.current) {
+        gsap.fromTo(
+          buttonRef.current,
+          { opacity: 0, scale: 0.9 },
+          { opacity: 1, scale: 1, duration: 0.6, ease: "back.out(1.7)", delay: 0.3 }
+        );
+      }
       if (iconRef.current) {
         gsap.fromTo(
           iconRef.current,
@@ -219,26 +228,19 @@ export default function LiveChatNotificationToggle({ user, db }: Props) {
     }
   };
 
-  const handleEnter = () => {
-    if (loading) return;
-    if (buttonRef.current) gsap.to(buttonRef.current, { scale: 1.05, duration: 0.25, ease: "power2.out" });
-  };
-  const handleLeave = () => {
-    if (loading) return;
-    if (buttonRef.current) gsap.to(buttonRef.current, { scale: 1, duration: 0.25, ease: "power2.out" });
-  };
-
   if (!supported) {
     return (
       <div
         style={{
-          fontSize: "12px",
-          color: WHITE,
+          width: "100%",
+          backgroundColor: WHITE,
+          borderRadius: "12px",
+          padding: "16px 24px",
           fontFamily: FONT_FAMILY,
-          padding: "8px 12px",
-          backgroundColor: "rgba(255,255,255,0.15)",
-          borderRadius: "8px",
-          border: `1px solid ${WHITE}40`,
+          fontSize: "12px",
+          color: BLUE,
+          textAlign: "center",
+          border: `1.5px solid ${BLUE}30`,
         }}
       >
         Browser tidak mendukung notifikasi
@@ -250,79 +252,76 @@ export default function LiveChatNotificationToggle({ user, db }: Props) {
     <div
       ref={containerRef}
       style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
         width: "100%",
-        gap: "6px",
-        padding: "16px 20px",
-        backgroundColor: BLUE,
+        backgroundColor: WHITE,
         borderRadius: "12px",
+        padding: "18px 28px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: "20px",
         fontFamily: FONT_FAMILY,
+        flexWrap: "wrap",
       }}
     >
-      {/* ===== JUDUL ===== */}
-      <div
-        style={{
-          fontSize: "16px",
-          fontWeight: 800,
-          color: WHITE,
-          letterSpacing: "0.3px",
-          textAlign: "center",
-        }}
-      >
-        Notifikasi Live Chat
+      {/* ===== JUDUL + DESKRIPSI (kiri) ===== */}
+      <div style={{ display: "flex", flexDirection: "column", gap: "4px", minWidth: 0, flex: 1 }}>
+        <div
+          style={{
+            fontFamily: STRIPER_FONT,
+            fontSize: "32px",
+            fontWeight: 400,
+            color: BLUE,
+            letterSpacing: "-0.02em",
+            lineHeight: 1.1,
+          }}
+        >
+          Notifikasi Live Chat
+        </div>
+        <div
+          style={{
+            fontSize: "13px",
+            fontWeight: 500,
+            color: BLUE,
+            letterSpacing: "0.01em",
+            lineHeight: 1.4,
+          }}
+        >
+          Aktifkan notifikasi agar Anda tidak ketinggalan pesan dari customer atau agent.
+        </div>
       </div>
 
-      {/* ===== DESKRIPSI ===== */}
-      <div
-        style={{
-          fontSize: "12px",
-          fontWeight: 400,
-          color: "rgba(255,255,255,0.85)",
-          textAlign: "center",
-          marginBottom: "4px",
-          lineHeight: 1.4,
-          maxWidth: "420px",
-        }}
-      >
-        Aktifkan notifikasi agar Anda tidak ketinggalan pesan dari customer atau agent.
-      </div>
-
-      {/* ===== MAIN TOGGLE BUTTON (menyatu dengan BG utama) ===== */}
+      {/* ===== TOGGLE BUTTON (kanan) ===== */}
       <button
         ref={buttonRef}
         onClick={enabled ? handleDisable : handleEnable}
-        onMouseEnter={handleEnter}
-        onMouseLeave={handleLeave}
         disabled={loading}
         style={{
           display: "inline-flex",
           alignItems: "center",
           justifyContent: "center",
           gap: "10px",
-          padding: "10px 22px",
-          backgroundColor: enabled ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.15)",
-          color: WHITE,
-          border: `1.5px solid ${WHITE}`,
+          padding: "12px 26px",
+          backgroundColor: WHITE,
+          color: BLUE,
+          border: `2px solid ${BLUE}`,
           borderRadius: "10px",
           fontSize: "14px",
-          fontWeight: 700,
+          fontWeight: 800,
           cursor: loading ? "not-allowed" : "pointer",
           fontFamily: FONT_FAMILY,
           letterSpacing: "0.3px",
-          opacity: loading ? 0.7 : 1,
-          transition: "background-color 0.2s ease",
+          opacity: loading ? 0.6 : 1,
+          flexShrink: 0,
         }}
       >
         <div ref={iconRef} style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
           {loading ? (
-            <LoadingSpinner size={16} color={WHITE} />
+            <LoadingSpinner size={16} color={BLUE} />
           ) : enabled ? (
-            <BellIcon size={18} color={WHITE} />
+            <BellIcon size={18} color={BLUE} />
           ) : (
-            <BellOffIcon size={18} color={WHITE} />
+            <BellOffIcon size={18} color={BLUE} />
           )}
         </div>
         <span ref={textRef} style={{ whiteSpace: "nowrap" }}>
@@ -334,7 +333,7 @@ export default function LiveChatNotificationToggle({ user, db }: Props) {
         </span>
         {!loading && (
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <NorthEastArrow size={16} color={WHITE} />
+            <NorthEastArrow size={16} color={BLUE} />
           </div>
         )}
       </button>
