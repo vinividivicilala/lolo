@@ -501,7 +501,7 @@ const StabiloBadge = ({
 
 // ===== FOOTER LINKS =====
 const footerLinks = [
-  { title: "Get in Touch", links: ["Contact", "Instagram", "Live Chat"] },
+  { title: "Get in Touch", links: ["Contact Us", "Instagram", "Live Chat"] },
   {
     title: "Product",
     links: ["Shop", "Note", "Calendar", "Blog", "Donation", "Community", "Live Chat Agent", "Stories"],
@@ -1726,14 +1726,14 @@ const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
         iconType="resources"
         bigPanelWidth={850}
         bigPanelHeight={340}
-        buttonColor="#F2EA6B"
-        buttonHoverColor="#000000"
+        buttonColor="#0D3CFC"
+        buttonHoverColor="#0D3CFC"
         panelColor="#F04E23"
         iconButtonColor="#0D3CFC"
-        iconButtonHoverColor="#F2EA6B"
+        iconButtonHoverColor="#0D3CFC"
         panelBoxColor="rgba(255,255,255,0.15)"
         panelBoxBorder="rgba(255,255,255,0.3)"
-        labelTextColor="#000000"
+        labelTextColor="#ffffff"
         labelTextHoverColor="#ffffff"
         titleTextColor="#ffffff"
         descriptionTextColor="rgba(255,255,255,0.92)"
@@ -2967,12 +2967,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
   const [replyTo, setReplyTo] = useState<ChatMessage | null>(null);
   const [appealTickets, setAppealTickets] = useState<AppealTicket[]>([]);
   const [hasAppeal, setHasAppeal] = useState(false);
-  const [onlineAdmins, setOnlineAdmins] = useState<OnlineUser[]>([]);
-  const [selectedAdmin, setSelectedAdmin] = useState<OnlineUser | null>(null);
-  const [adminChatMessages, setAdminChatMessages] = useState<ChatMessage[]>([]);
-  const [adminChatText, setAdminChatText] = useState("");
-  const [showAdminChat, setShowAdminChat] = useState(false);
-  const [adminChatReplyTo, setAdminChatReplyTo] = useState<ChatMessage | null>(null);
   const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
   const [ticketPreviews, setTicketPreviews] = useState<{ [ticketId: string]: LastMessagePreview[] }>({});
   const [ticketMsgCounts, setTicketMsgCounts] = useState<{ [ticketId: string]: number }>({});
@@ -3200,7 +3194,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
     if (!db || !isMounted) return;
     const q = query(collection(db, "users"), where("online", "==", true));
     const unsub = onSnapshot(q, (snapshot: any) => {
-      const admins: OnlineUser[] = [];
       const users: OnlineUser[] = [];
       snapshot.forEach((docSnap: any) => {
         const data = docSnap.data();
@@ -3213,13 +3206,10 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
           lastSeen: data.lastSeen,
           isAgent: data.email === ADMIN_EMAIL,
         };
-        if (item.isAgent) {
-          admins.push(item);
-        } else {
+        if (!item.isAgent) {
           users.push(item);
         }
       });
-      setOnlineAdmins(admins);
       setOnlineUsers(users);
     });
     return () => unsub();
@@ -3368,29 +3358,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
       hasAutoSelectedRef.current = true;
     }
   }, [tickets, user, isAdmin, selectedTicket, isMounted]);
-
-  useEffect(() => {
-    if (!db || !user || !selectedAdmin || !isMounted) return;
-    const chatId = [user.uid, selectedAdmin.uid].sort().join("_");
-    const q = query(collection(db, "admin_chats", chatId, "messages"), orderBy("timestamp", "asc"));
-    const unsub = onSnapshot(q, async (snapshot: any) => {
-      const msgList: ChatMessage[] = [];
-      for (const docSnap of snapshot.docs) {
-        const data = docSnap.data();
-        let text = data.text || "";
-        if (data.isEncrypted) {
-          try {
-            text = await decryptMessage(text);
-          } catch {
-            text = "[Encrypted]";
-          }
-        }
-        msgList.push({ id: docSnap.id, ...data, text } as ChatMessage);
-      }
-      setAdminChatMessages(msgList);
-    });
-    return () => unsub();
-  }, [db, user, selectedAdmin, isMounted]);
 
   const generateTicketId = useCallback((createdAt: any): string => {
     if (!createdAt) return "#TICKET-0000";
@@ -3623,39 +3590,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
     }
   };
 
-  const sendAdminChatMessage = async () => {
-    if (!db || !selectedAdmin || !adminChatText.trim() || !user) return;
-    try {
-      const chatId = [user.uid, selectedAdmin.uid].sort().join("_");
-      const chatRef = doc(db, "admin_chats", chatId);
-      const chatSnap = await getDoc(chatRef);
-      if (!chatSnap.exists()) {
-        await setDoc(chatRef, { participants: [user.uid, selectedAdmin.uid], createdAt: serverTimestamp() });
-      }
-      const encryptedMessage = await encryptMessage(adminChatText.trim());
-      await addDoc(collection(db, "admin_chats", chatId, "messages"), {
-        senderId: user.uid,
-        senderName: user.displayName || user.email || "User",
-        text: encryptedMessage,
-        timestamp: serverTimestamp(),
-        read: false,
-        isEncrypted: true,
-        deliveryStatus: "sent",
-        replyTo: adminChatReplyTo
-          ? {
-              messageId: adminChatReplyTo.id,
-              senderName: adminChatReplyTo.senderName,
-              text: adminChatReplyTo.text.length > 50 ? adminChatReplyTo.text.substring(0, 50) + "..." : adminChatReplyTo.text,
-            }
-          : null,
-      });
-      setAdminChatText("");
-      setAdminChatReplyTo(null);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
   const takeTicket = async (ticketId: string) => {
     if (!db || !isAdmin || !user) return;
     try {
@@ -3788,9 +3722,12 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
   };
 
   const renderOnlinePanel = () => {
-    const list = isAdmin ? onlineUsers : onlineAdmins;
-    const title = isAdmin ? "Online Users" : "Online Admins";
-    const emptyText = isAdmin ? "No users online" : "No admins online";
+    // Hanya tampil untuk admin
+    if (!isAdmin) return null;
+
+    const list = onlineUsers;
+    const title = "Online Users";
+    const emptyText = "No users online";
     return (
       <div
         data-tour="online-panel"
@@ -4303,69 +4240,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
             </div>
           </div>
 
-          {onlineAdmins.length > 0 && (
-            <div style={{ marginBottom: "24px" }}>
-              <div
-                style={{
-                  fontSize: "13px",
-                  fontWeight: 700,
-                  color: BLUE,
-                  fontFamily: FONT_FAMILY,
-                  marginBottom: "12px",
-                  letterSpacing: "0.5px",
-                  textTransform: "uppercase",
-                }}
-              >
-                Chat with Admin ({onlineAdmins.length} Online)
-              </div>
-              <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                {onlineAdmins.map((a) => (
-                  <button
-                    key={a.uid}
-                    onClick={() => {
-                      setSelectedAdmin(a);
-                      setShowAdminChat(true);
-                    }}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "10px",
-                      padding: "10px 16px",
-                      backgroundColor: BLUE,
-                      border: `1.5px solid ${BLUE}`,
-                      borderRadius: "8px",
-                      cursor: "pointer",
-                      fontFamily: FONT_FAMILY,
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: "28px",
-                        height: "28px",
-                        borderRadius: "50%",
-                        overflow: "hidden",
-                        backgroundColor: WHITE,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        flexShrink: 0,
-                      }}
-                    >
-                      {a.photoURL ? (
-                        <img src={a.photoURL} alt={a.displayName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                      ) : (
-                        <span style={{ fontSize: "14px", fontWeight: 800, color: BLUE }}>
-                          {a.displayName.charAt(0).toUpperCase()}
-                        </span>
-                      )}
-                    </div>
-                    <span style={{ fontSize: "13px", fontWeight: 700, color: WHITE }}>{a.displayName}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
           <p style={{ fontSize: "15px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "16px" }}>
             Need help? Chat directly with our agent.
           </p>
@@ -4387,177 +4261,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
             Start Live Chat
           </button>
         </div>
-
-        {showAdminChat && selectedAdmin && (
-          <div
-            style={{
-              position: "fixed",
-              top: 0,
-              left: 0,
-              width: "100%",
-              height: "100%",
-              backgroundColor: "rgba(0,0,0,0.5)",
-              zIndex: 10001,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: "20px",
-            }}
-          >
-            <div
-              style={{
-                width: "100%",
-                maxWidth: "600px",
-                height: "600px",
-                backgroundColor: WHITE,
-                borderRadius: "16px",
-                overflow: "hidden",
-                display: "flex",
-                flexDirection: "column",
-                boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
-              }}
-            >
-              <div
-                style={{
-                  padding: "16px 20px",
-                  backgroundColor: BLUE,
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <span style={{ fontSize: "16px", fontWeight: 700, color: WHITE, fontFamily: FONT_FAMILY }}>
-                  Chat with {selectedAdmin.displayName}
-                </span>
-                <button
-                  onClick={() => {
-                    setShowAdminChat(false);
-                    setSelectedAdmin(null);
-                    setAdminChatMessages([]);
-                  }}
-                  style={{
-                    background: "transparent",
-                    border: "none",
-                    color: WHITE,
-                    fontSize: "20px",
-                    cursor: "pointer",
-                    fontFamily: FONT_FAMILY,
-                    padding: 0,
-                    lineHeight: 1,
-                  }}
-                >
-                  ×
-                </button>
-              </div>
-              <div
-                className="chat-messages-container"
-                style={{
-                  flex: 1,
-                  overflowY: "auto",
-                  padding: "20px",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "12px",
-                  backgroundColor: "#fafafa",
-                }}
-              >
-                {adminChatMessages.length === 0 ? (
-                  <div
-                    style={{
-                      textAlign: "center",
-                      color: "#999",
-                      fontSize: "14px",
-                      fontFamily: FONT_FAMILY,
-                      padding: "30px 0",
-                    }}
-                  >
-                    Mulai percakapan dengan admin
-                  </div>
-                ) : (
-                  adminChatMessages.map((msg, idx) => {
-                    const isMine = msg.senderId === user?.uid;
-                    return (
-                      <div key={msg.id || idx} style={{ alignSelf: isMine ? "flex-end" : "flex-start", maxWidth: "75%" }}>
-                        <div
-                          style={{
-                            padding: "10px 14px",
-                            borderRadius: "12px",
-                            backgroundColor: isMine ? BLUE : WHITE,
-                            color: isMine ? WHITE : BLACK,
-                            fontSize: "14px",
-                            fontFamily: FONT_FAMILY,
-                            border: isMine ? "none" : "1px solid rgba(0,0,0,0.08)",
-                            wordBreak: "break-word",
-                          }}
-                        >
-                          {!isMine && (
-                            <div style={{ fontSize: "11px", fontWeight: 700, color: BLUE, marginBottom: "3px" }}>
-                              {msg.senderName}
-                            </div>
-                          )}
-                          {msg.text}
-                          <div style={{ display: "flex", justifyContent: "flex-end", gap: "4px", marginTop: "4px" }}>
-                            <span style={{ fontSize: "9px", color: isMine ? "rgba(255,255,255,0.7)" : "#999" }}>
-                              {formatTime(msg.timestamp)}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-              <div
-                style={{
-                  padding: "12px 16px",
-                  borderTop: "1px solid rgba(0,0,0,0.08)",
-                  display: "flex",
-                  gap: "10px",
-                  backgroundColor: WHITE,
-                }}
-              >
-                <input
-                  type="text"
-                  value={adminChatText}
-                  onChange={(e) => setAdminChatText(e.target.value)}
-                  onKeyPress={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey && adminChatText.trim()) {
-                      e.preventDefault();
-                      sendAdminChatMessage();
-                    }
-                  }}
-                  placeholder="Tulis pesan..."
-                  style={{
-                    flex: 1,
-                    padding: "10px 14px",
-                    border: `1px solid ${BLUE}40`,
-                    borderRadius: "10px",
-                    fontSize: "14px",
-                    outline: "none",
-                    fontFamily: FONT_FAMILY,
-                  }}
-                />
-                <button
-                  onClick={sendAdminChatMessage}
-                  disabled={!adminChatText.trim()}
-                  style={{
-                    padding: "10px 20px",
-                    backgroundColor: adminChatText.trim() ? BLUE : "#ccc",
-                    color: WHITE,
-                    border: "none",
-                    borderRadius: "10px",
-                    cursor: adminChatText.trim() ? "pointer" : "not-allowed",
-                    fontFamily: FONT_FAMILY,
-                    fontSize: "13px",
-                    fontWeight: 700,
-                  }}
-                >
-                  Kirim
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </>
     );
   }
@@ -4764,24 +4467,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
           <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "10px", paddingTop: "10px" }}>
             {/* ===== PWA NOTIFIKASI LIVE CHAT: TOGGLE ===== */}
             {user && <LiveChatNotificationToggle user={user} db={db} />}
-            <span
-              style={{
-                fontSize: "13px",
-                fontWeight: 800,
-                color: onlineAdmins.length > 0 ? BLUE : "#999",
-                backgroundColor: onlineAdmins.length > 0 ? WHITE : "transparent",
-                border: onlineAdmins.length > 0 ? `1.5px solid ${BLUE}` : "none",
-                fontFamily: FONT_FAMILY,
-                letterSpacing: "0.5px",
-                textTransform: "uppercase",
-                padding: onlineAdmins.length > 0 ? "4px 10px" : "0",
-                borderRadius: "4px",
-              }}
-            >
-              {onlineAdmins.length > 0
-                ? `${onlineAdmins.length} Admin${onlineAdmins.length !== 1 ? "s" : ""} Online`
-                : "No Admins Online"}
-            </span>
           </div>
         </div>
 
@@ -6338,7 +6023,7 @@ export default function HomePage(): React.JSX.Element {
                       let linkHref = "#";
                       let isAttention = false;
                       let isStories = false;
-                      if (link === "Contact") linkHref = "/contact";
+                      if (link === "Contact Us") linkHref = "/contact";
                       else if (link === "Live Chat") linkHref = "/live-chat";
                       else if (link === "Live Chat Agent") linkHref = "/live-chat-agent";
                       else if (link === "Help Center") linkHref = "/pusat-bantuan";
