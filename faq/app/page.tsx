@@ -309,7 +309,7 @@ async function checkBanStatus(userId: string): Promise<any> {
 
 // ===== CONSTANTS =====
 const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
-const STRIPER_FONT = "'Striper', 'Poppins', sans-serif";
+const STRIPER_FONT = "'Striper', serif";
 const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 const AGENT_NAME = "Farid Ardiansyah";
 const TOUR_STORAGE_KEY = "menuru_livechat_tour_completed_v1";
@@ -407,7 +407,7 @@ const AgentIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: st
   </svg>
 );
 
-// ===== STRIPER ICON (meniru gaya Striper Fontshare) =====
+// ===== STRIPER ICON =====
 const StriperIcon = ({ size = 22, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg
     width={size}
@@ -969,7 +969,7 @@ const PWAInstallPrompt = () => {
   );
 };
 
-// ===== HERO MENURU TITLE (Font Striper) =====
+// ===== HERO MENURU TITLE (Font Striper ONLY) =====
 const HeroMenuruTitle = ({ onNavbarShiftChange }: { onNavbarShiftChange: (shifted: boolean) => void }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -1099,7 +1099,7 @@ const HeroMenuruTitle = ({ onNavbarShiftChange }: { onNavbarShiftChange: (shifte
   );
 };
 
-// ===== FOOTER MENURU TITLE (Font Striper) =====
+// ===== FOOTER MENURU TITLE =====
 const FooterMenuruTitle = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLSpanElement>(null);
@@ -1749,13 +1749,13 @@ const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
         iconComponent={<StriperIcon size={22} color="#ffffff" />}
         bigPanelWidth={850}
         bigPanelHeight={340}
-        buttonColor="#0D3CFC"
-        buttonHoverColor="#0D3CFC"
-        panelColor="#F04E23"
-        iconButtonColor="#0D3CFC"
-        iconButtonHoverColor="#0D3CFC"
-        panelBoxColor="rgba(255,255,255,0.15)"
-        panelBoxBorder="rgba(255,255,255,0.3)"
+        buttonColor="#000000"
+        buttonHoverColor="#000000"
+        panelColor="#000000"
+        iconButtonColor="#000000"
+        iconButtonHoverColor="#000000"
+        panelBoxColor="rgba(255,255,255,0.12)"
+        panelBoxBorder="rgba(255,255,255,0.25)"
         labelTextColor="#ffffff"
         labelTextHoverColor="#ffffff"
         titleTextColor="#ffffff"
@@ -4344,8 +4344,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
             >
               Start Chat
             </button>
-            <button
-              onClick={() => setShowStartChat(false)}
+            <button              onClick={() => setShowStartChat(false)}
               style={{
                 padding: "8px 20px",
                 backgroundColor: "transparent",
@@ -4463,6 +4462,13 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
         setCurrentStep={setTourStep}
       />
       <div style={{ marginTop: "80px", paddingTop: "30px" }}>
+        {/* ===== BANNER NOTIFIKASI (FULL WIDTH DI ATAS NAVBAR) ===== */}
+        {user && (
+          <div style={{ marginBottom: "16px", width: "100%" }}>
+            <LiveChatNotificationToggle user={user} db={db} />
+          </div>
+        )}
+
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "20px" }}>
           <h3
             ref={liveChatTitleRef}
@@ -4479,9 +4485,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
           >
             Live Chat Agent
           </h3>
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "10px", paddingTop: "10px" }}>
-            {user && <LiveChatNotificationToggle user={user} db={db} />}
-          </div>
         </div>
 
         {renderAnnouncementBroadcastSection()}
@@ -5022,7 +5025,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
                       <RollingNewMessage
                         key={rollingKey}
                         senderName={latestRollingMessage.senderName}
-                        message={latestRollingMessage.message}
+                        message={latestRollingMessage.text}
                         isFromAgent={latestRollingMessage.isFromAgent}
                       />
                     </div>
@@ -6189,7 +6192,7 @@ export default function HomePage(): React.JSX.Element {
         }
         @font-face {
           font-family: 'Striper';
-          src: local('Striper'), url('https://api.fontshare.com/v2/css?f[]=striper@400') format('woff2');
+          src: url('https://api.fontshare.com/v2/css?f[]=striper@400') format('woff2');
           font-display: swap;
           font-weight: 400;
           font-style: normal;
