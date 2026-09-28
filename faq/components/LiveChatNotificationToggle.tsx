@@ -7,8 +7,7 @@ import gsap from "gsap";
 const BLUE = "#0D3CFC";
 const WHITE = "#FFFFFF";
 const BLACK = "#000000";
-const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
-const STRIPER_FONT = "'Striper', serif";
+const STRIPER_FONT = "'Striper'";
 
 // ===== SVG ICONS =====
 const BellIcon = ({ size = 18, color = "currentColor" }: { size?: number; color?: string }) => (
