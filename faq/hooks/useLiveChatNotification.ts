@@ -1,6 +1,5 @@
 // hooks/useLiveChatNotification.ts
 import { useEffect, useRef } from "react";
-import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 
 interface Options {
   user: any;
@@ -10,28 +9,69 @@ interface Options {
   currentTicketId?: string | null;
 }
 
-// ===== HELPER: Simpan data notif banner ke Firestore =====
-async function saveBannerData(
-  db: any,
-  userId: string,
-  data: { senderName: string; ticketName: string; messageText: string }
-) {
-  if (!db || !userId) return;
-  try {
-    await setDoc(
-      doc(db, "users", userId),
-      {
-        notifBannerData: {
-          senderName: data.senderName,
-          ticketName: data.ticketName,
-          messageText: data.messageText,
-          updatedAt: new Date().toISOString(),
-        },
-      },
-      { merge: true }
-    );
-  } catch (e) {
-    console.warn("[LiveChatNotif] Save banner data error:", e);
+// ===== FIREBASE PROJECT ID (dari firebaseConfig) =====
+const FIREBASE_PROJECT_ID = "wawa44-58d1e";
+
+// ===== HELPER: Buat URL auto-create index untuk USER =====
+function getUserIndexUrl(): string {
+  // Index: livechat_tickets (userId ASC, lastMessageTime DESC)
+  const encoded = "ClVwcm9qZWN0cy93YXdhNDQtNThkMWUvZGF0YWJhc2VzLyhkZWZhdWx0KS9jb2xsZWN0aW9uR3JvdXBzL2xpdmVjaGF0X3RpY2tldHMvaW5kZXhlcy9fEAEaCgoGdXNlcklkEAEaEwoPbGFzdE1lc3NhZ2VUaW1lEAIaDAoIX19uYW1lX18QAg";
+  return `https://console.firebase.google.com/v1/r/project/${FIREBASE_PROJECT_ID}/firestore/indexes?create_composite=${encoded}`;
+}
+
+// ===== HELPER: Buat URL auto-create index untuk ADMIN =====
+function getAdminIndexUrl(): string {
+  // Index: livechat_tickets (status ASC, lastMessageTime DESC)
+  const encoded = "ClVwcm9qZWN0cy93YXdhNDQtNThkMWUvZGF0YWJhc2VzLyhkZWZhdWx0KS9jb2xsZWN0aW9uR3JvdXBzL2xpdmVjaGF0X3RpY2tldHMvaW5kZXhlcy9fEAEaCgoGc3RhdHVzEAEaEwoPbGFzdE1lc3NhZ2VUaW1lEAIaDAoIX19uYW1lX18QAg";
+  return `https://console.firebase.google.com/v1/r/project/${FIREBASE_PROJECT_ID}/firestore/indexes?create_composite=${encoded}`;
+}
+
+// ===== HELPER: Print link besar di Console =====
+function printIndexBanner(role: "USER" | "ADMIN") {
+  const url = role === "ADMIN" ? getAdminIndexUrl() : getUserIndexUrl();
+
+  const banner = `
+╔══════════════════════════════════════════════════════════════════╗
+║  ⚠️  COMPOSITE INDEX BELUM DIBUAT                                 ║
+║  Notifikasi Live Chat TIDAK akan berfungsi sampai index dibuat.   ║
+╠══════════════════════════════════════════════════════════════════╣
+║                                                                    ║
+║  👉 KLIK LINK INI untuk auto-create index (${role}):              ║
+║                                                                    ║
+║  ${url}
+║                                                                    ║
+║  ⏱️  Setelah klik, tunggu 1-3 menit sampai status "Enabled".      ║
+║  🔄 Hook akan otomatis retry setiap 10 detik.                     ║
+║                                                                    ║
+╚══════════════════════════════════════════════════════════════════╝
+  `;
+
+  console.log(`%c${banner}`, "color: #FF6B00; font-weight: bold; font-size: 11px;");
+}
+
+// ===== HELPER: Auto-open index URL (hanya 1x per session) =====
+function tryAutoOpenIndex(role: "USER" | "ADMIN") {
+  if (typeof window === "undefined") return;
+
+  const key = `menuru_index_opened_${role}`;
+  const alreadyOpened = sessionStorage.getItem(key);
+  if (alreadyOpened === "true") return;
+
+  const url = role === "ADMIN" ? getAdminIndexUrl() : getUserIndexUrl();
+
+  // Hanya auto-open kalau user setuju (pakai konfirmasi)
+  const shouldOpen = window.confirm(
+    `⚠️ Notifikasi Live Chat butuh Firebase Composite Index.\n\n` +
+    `Klik OK untuk membuka halaman auto-create index (${role}).\n` +
+    `Klik Cancel kalau mau copy link manual dari Console.`
+  );
+
+  if (shouldOpen) {
+    window.open(url, "_blank", "noopener,noreferrer");
+    sessionStorage.setItem(key, "true");
+    console.log(`[LiveChatNotif] ✅ Index URL dibuka di tab baru untuk ${role}`);
+  } else {
+    console.log(`[LiveChatNotif] ⏸️ User memilih manual. Link:\n${url}`);
   }
 }
 
@@ -44,6 +84,7 @@ export function useLiveChatNotification({
 }: Options) {
   const currentTicketIdRef = useRef<string | null>(currentTicketId);
   const lastNotifiedRef = useRef<{ [ticketId: string]: number }>({});
+  const retryCountRef = useRef(0);
   const isSetupRef = useRef(false);
 
   useEffect(() => {
@@ -53,9 +94,16 @@ export function useLiveChatNotification({
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (!user || !db || !enabled) return;
-    if (!("serviceWorker" in navigator) || !("Notification" in window)) return;
-    if (Notification.permission !== "granted") return;
+    if (!("serviceWorker" in navigator) || !("Notification" in window)) {
+      console.log("[LiveChatNotif] Browser tidak support");
+      return;
+    }
+    if (Notification.permission !== "granted") {
+      console.log("[LiveChatNotif] Permission belum granted");
+      return;
+    }
 
+    // Prevent double-setup
     if (isSetupRef.current) return;
     isSetupRef.current = true;
 
@@ -63,6 +111,7 @@ export function useLiveChatNotification({
 
     let unsubscribe: (() => void) | null = null;
     let isMounted = true;
+    let retryTimeout: NodeJS.Timeout | null = null;
 
     const setupListener = async () => {
       try {
@@ -72,6 +121,7 @@ export function useLiveChatNotification({
 
         let q;
         if (isAdmin) {
+          // ADMIN: pantau ticket waiting & active
           q = query(
             collection(db, "livechat_tickets"),
             where("status", "in", ["waiting", "active"]),
@@ -79,6 +129,7 @@ export function useLiveChatNotification({
             limit(30)
           );
         } else {
+          // USER: pantau ticket milik sendiri
           q = query(
             collection(db, "livechat_tickets"),
             where("userId", "==", user.uid),
@@ -87,12 +138,20 @@ export function useLiveChatNotification({
           );
         }
 
+        console.log("[LiveChatNotif] Query created, attaching listener...");
+
         unsubscribe = onSnapshot(
           q,
           (snapshot: any) => {
             if (!isMounted) return;
+            retryCountRef.current = 0; // reset retry count kalau sukses
 
-            snapshot.docChanges().forEach((change: any) => {
+            const changes = snapshot.docChanges();
+            if (changes.length > 0) {
+              console.log("[LiveChatNotif] Snapshot changes:", changes.length);
+            }
+
+            changes.forEach((change: any) => {
               if (change.type !== "modified" && change.type !== "added") return;
 
               const ticket = { id: change.doc.id, ...change.doc.data() } as any;
@@ -118,27 +177,22 @@ export function useLiveChatNotification({
 
               const now = Date.now();
               if (msgTime && now - msgTime > 60000) return;
+
               if (lastNotifiedRef.current[ticket.id] === msgTime) return;
               lastNotifiedRef.current[ticket.id] = msgTime;
 
               const senderName = ticket.lastMessageSender || "User";
-              const ticketName = ticket.topic || "Live Chat";
               const messagePreview = (ticket.lastMessage || "").substring(0, 80);
               const senderPhoto = isAdmin ? ticket.userPhoto || "" : "";
 
-              // ===== SIMPAN KE FIRESTORE (banner data) =====
-              saveBannerData(db, user.uid, {
-                senderName,
-                ticketName,
-                messageText: messagePreview || "Ada pesan baru untuk Anda",
-              });
-
               const title = isAdmin
-                ? `${ticket.userName} — ${ticketName}`
-                : senderName;
+                ? `💬 ${ticket.userName} — ${ticket.topic || "Pesan Baru"}`
+                : `💬 ${senderName}`;
 
               const body = messagePreview || "Ada pesan baru untuk Anda";
               const url = `/live-chat-agent?ticket=${ticket.id}`;
+
+              console.log("[LiveChatNotif] 🔔 SENDING:", title, "|", body);
 
               if (navigator.serviceWorker.controller) {
                 navigator.serviceWorker.controller.postMessage({
@@ -150,7 +204,6 @@ export function useLiveChatNotification({
                     badge: "/icons/icon-192x192.png",
                     senderPhoto,
                     senderName,
-                    ticketName,
                     tag: `livechat-${ticket.id}`,
                     url,
                     requireInteraction: true,
@@ -158,6 +211,8 @@ export function useLiveChatNotification({
                   },
                 });
               } else {
+                // Fallback: new Notification() kalau SW controller belum ready
+                console.log("[LiveChatNotif] No SW controller, fallback ke new Notification()");
                 try {
                   const notif = new Notification(title, {
                     body,
@@ -179,15 +234,34 @@ export function useLiveChatNotification({
           (error: any) => {
             console.error("[LiveChatNotif] Snapshot error:", error);
 
+            // ===== DETEKSI ERROR INDEX =====
             const isIndexError =
               error?.message?.includes("requires an index") ||
               error?.code === "failed-precondition";
 
             if (isIndexError) {
-              console.warn(
-                "[LiveChatNotif] ⚠️ Composite index belum dibuat. " +
-                  "Buka Firebase Console → Firestore → Indexes untuk membuat index untuk koleksi livechat_tickets."
+              // 1. Print banner besar di Console dengan link
+              printIndexBanner(isAdmin ? "ADMIN" : "USER");
+
+              // 2. Auto-open tab Firebase Console (hanya 1x per session)
+              tryAutoOpenIndex(isAdmin ? "ADMIN" : "USER");
+
+              // 3. Auto-retry setiap 10 detik sampai index siap
+              retryCountRef.current++;
+              const retryIn = 10000; // 10 detik
+
+              console.log(
+                `[LiveChatNotif] ⏳ Auto-retry #${retryCountRef.current} dalam ${retryIn / 1000}s...`
               );
+
+              if (retryTimeout) clearTimeout(retryTimeout);
+              retryTimeout = setTimeout(() => {
+                if (!isMounted) return;
+                console.log("[LiveChatNotif] 🔄 Retrying query...");
+                if (unsubscribe) unsubscribe();
+                isSetupRef.current = false; // reset supaya bisa re-setup
+                setupListener();
+              }, retryIn);
             }
           }
         );
@@ -202,6 +276,7 @@ export function useLiveChatNotification({
       isMounted = false;
       isSetupRef.current = false;
       if (unsubscribe) unsubscribe();
+      if (retryTimeout) clearTimeout(retryTimeout);
     };
   }, [user, db, isAdmin, enabled]);
 }
