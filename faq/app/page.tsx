@@ -5025,7 +5025,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
                       <RollingNewMessage
                         key={rollingKey}
                         senderName={latestRollingMessage.senderName}
-                        message={latestRollingMessage.text}
+                        message={latestRollingMessage.message}
                         isFromAgent={latestRollingMessage.isFromAgent}
                       />
                     </div>
@@ -5265,117 +5265,105 @@ export default function HomePage(): React.JSX.Element {
     return () => unsub();
   }, [db, user, isMounted]);
 
-  // ===== UPDATED PRELOADER ANIMATION WITH COUNTER + OVERLAY =====
+  // ===== PRELOADER: counter 01-100 (slow & smooth) + slide transition =====
   useEffect(() => {
     if (!isMounted || loading) return;
 
+    let killed = false;
+    const preloaderEl = preloaderRef.current;
+    const textEl = textRef.current;
+    const counterEl = counterRef.current;
+    const overlayEl = overlayRef.current;
+
+    if (!preloaderEl || !textEl || !counterEl || !overlayEl) return;
+
+    gsap.set(textEl, { y: 100, opacity: 0 });
+    gsap.set(counterEl, { opacity: 1, scale: 1, y: 0 });
+    gsap.set(overlayEl, { xPercent: 100 });
+    gsap.set(preloaderEl, { opacity: 1, scale: 1 });
+
+    const counterObj = { value: 1 };
+    counterEl.textContent = "01";
+
     const tl = gsap.timeline({
       onComplete: () => {
-        if (preloaderRef.current) {
-          gsap.to(preloaderRef.current, {
-            opacity: 0,
-            duration: 0.6,
-            ease: "power2.inOut",
-          });
-        }
-        // After preloader fades, show overlay from right
-        if (overlayRef.current) {
-          gsap.fromTo(
-            overlayRef.current,
-            { x: "100%" },
-            {
-              x: "0%",
-              duration: 1.0,
-              ease: "power3.inOut",
-              onComplete: () => {
-                setShowMain(true);
-                // Slide overlay out to the left after main is shown
-                gsap.to(overlayRef.current, {
-                  x: "-100%",
-                  duration: 0.8,
-                  ease: "power3.inOut",
-                  delay: 0.15,
-                  onComplete: () => {
-                    if (overlayRef.current) {
-                      overlayRef.current.style.display = "none";
-                    }
-                    setTimeout(() => ScrollTrigger.refresh(), 300);
-                  },
-                });
-              },
-            }
-          );
-        } else {
-          setShowMain(true);
-          setTimeout(() => ScrollTrigger.refresh(), 300);
-        }
+        if (killed) return;
       },
     });
 
-    // Text "Shop" entrance
-    gsap.set(textRef.current, { y: 100, opacity: 0 });
-    tl.to(textRef.current, { y: 0, opacity: 1, duration: 0.8, ease: "back.out(1.7)" })
-      .to(textRef.current, { duration: 0.6 })
-      .to(textRef.current, {
+    tl.to(textEl, { y: 0, opacity: 1, duration: 1.0, ease: "back.out(1.7)" })
+      .to(textEl, { duration: 0.8 })
+      .to(textEl, {
         opacity: 0,
         y: -20,
         scale: 0.9,
-        duration: 0.4,
+        duration: 0.5,
         ease: "power2.out",
         onComplete: () => {
-          if (textRef.current) textRef.current.textContent = "Note";
+          if (textEl) textEl.textContent = "Note";
         },
       })
-      .to(textRef.current, { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: "back.out(1.7)" })
-      .to(textRef.current, { duration: 0.8 });
+      .to(textEl, { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: "back.out(1.7)" })
+      .to(textEl, { duration: 1.2 });
 
-    // Counter animation 01 -> 100
-    const counterObj = { value: 1 };
     tl.to(
       counterObj,
       {
         value: 100,
-        duration: 4.0,
-        ease: "power1.inOut",
+        duration: 6.5,
+        ease: "power2.inOut",
         onUpdate: () => {
-          if (counterRef.current) {
+          if (counterEl) {
             const val = Math.round(counterObj.value);
-            counterRef.current.textContent = String(val).padStart(2, "0");
+            counterEl.textContent = String(val).padStart(2, "0");
           }
         },
       },
       0
     );
 
-    // Fade out text and counter together
-    tl.to(textRef.current, {
+    tl.to(textEl, {
       scale: 0.3,
       opacity: 0,
-      duration: 0.7,
+      duration: 0.8,
       ease: "power2.in",
     })
       .to(
-        counterRef.current,
+        counterEl,
         {
-          scale: 0.5,
+          scale: 0.6,
           opacity: 0,
-          duration: 0.7,
+          duration: 0.8,
           ease: "power2.in",
         },
-        "-=0.7"
+        "-=0.8"
       )
-      .to(
-        preloaderRef.current,
-        {
-          scale: 0.95,
-          opacity: 0.8,
-          duration: 0.3,
-          ease: "power2.inOut",
+      .to(preloaderEl, {
+        opacity: 0,
+        duration: 0.6,
+        ease: "power2.inOut",
+      })
+      .to(overlayEl, {
+        xPercent: 0,
+        duration: 1.1,
+        ease: "power3.inOut",
+        onStart: () => {
+          if (!killed) setShowMain(true);
         },
-        "-=0.3"
-      );
+      })
+      .to(overlayEl, {
+        xPercent: -100,
+        duration: 1.0,
+        ease: "power3.inOut",
+        delay: 0.15,
+        onComplete: () => {
+          if (overlayEl) overlayEl.style.display = "none";
+          setTimeout(() => ScrollTrigger.refresh(), 300);
+        },
+      });
 
     return () => {
+      killed = true;
       tl.kill();
     };
   }, [isMounted, loading]);
@@ -5472,71 +5460,88 @@ export default function HomePage(): React.JSX.Element {
   if (!showMain) {
     return (
       <>
-        {/* PRELOADER with counter on right side */}
+        {/* ===== PRELOADER (angka di atas kanan) ===== */}
         <div
           ref={preloaderRef}
           style={{
             position: "fixed",
-            top: 0,
-            left: 0,
+            inset: 0,
             width: "100%",
             height: "100%",
             backgroundColor: WHITE,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "0 60px",
             zIndex: 9999,
             fontFamily: FONT_FAMILY,
             overflow: "hidden",
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: "40px", overflow: "hidden" }}>
-            <span style={{ fontSize: "100px", fontWeight: 400, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em" }}>
-              Menuru
-            </span>
-            <span
-              ref={textRef}
-              style={{
-                fontSize: "50px",
-                fontWeight: 600,
-                color: BLACK,
-                fontFamily: FONT_FAMILY,
-                letterSpacing: "-0.02em",
-                display: "inline-block",
-                willChange: "transform, opacity",
-              }}
-            >
-              Shop
-            </span>
-          </div>
-
-          {/* Counter on the right side */}
+          {/* Angka counter di atas kanan */}
           <span
             ref={counterRef}
             style={{
+              position: "absolute",
+              top: "10px",
+              right: "40px",
               fontSize: "400px",
               fontWeight: 400,
               color: BLUE,
               fontFamily: FONT_FAMILY,
               letterSpacing: "-0.04em",
-              lineHeight: 1,
+              lineHeight: 0.9,
               display: "inline-block",
               willChange: "transform, opacity",
               userSelect: "none",
+              pointerEvents: "none",
             }}
           >
             01
           </span>
+
+          {/* Konten tengah: Menuru Shop/Note */}
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "40px", overflow: "hidden" }}>
+              <span
+                style={{
+                  fontSize: "100px",
+                  fontWeight: 400,
+                  color: BLUE,
+                  fontFamily: FONT_FAMILY,
+                  letterSpacing: "-0.03em",
+                }}
+              >
+                Menuru
+              </span>
+              <span
+                ref={textRef}
+                style={{
+                  fontSize: "50px",
+                  fontWeight: 600,
+                  color: BLACK,
+                  fontFamily: FONT_FAMILY,
+                  letterSpacing: "-0.02em",
+                  display: "inline-block",
+                  willChange: "transform, opacity",
+                }}
+              >
+                Shop
+              </span>
+            </div>
+          </div>
         </div>
 
-        {/* OVERLAY that slides in from right */}
+        {/* ===== OVERLAY TRANSISI SLIDE (bukan halaman baru) ===== */}
         <div
           ref={overlayRef}
           style={{
             position: "fixed",
-            top: 0,
-            left: 0,
+            inset: 0,
             width: "100%",
             height: "100%",
             backgroundColor: BLUE,
@@ -5545,6 +5550,7 @@ export default function HomePage(): React.JSX.Element {
             alignItems: "center",
             justifyContent: "center",
             transform: "translateX(100%)",
+            willChange: "transform",
           }}
         >
           <span
