@@ -5205,6 +5205,8 @@ export default function HomePage(): React.JSX.Element {
 
   const preloaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
+  const counterRef = useRef<HTMLSpanElement>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
   const noteJoinRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -5263,9 +5265,119 @@ export default function HomePage(): React.JSX.Element {
     return () => unsub();
   }, [db, user, isMounted]);
 
+  // ===== UPDATED PRELOADER ANIMATION WITH COUNTER + OVERLAY =====
   useEffect(() => {
     if (!isMounted || loading) return;
-    setTimeout(() => startPreloaderAnimation(), 500);
+
+    const tl = gsap.timeline({
+      onComplete: () => {
+        if (preloaderRef.current) {
+          gsap.to(preloaderRef.current, {
+            opacity: 0,
+            duration: 0.6,
+            ease: "power2.inOut",
+          });
+        }
+        // After preloader fades, show overlay from right
+        if (overlayRef.current) {
+          gsap.fromTo(
+            overlayRef.current,
+            { x: "100%" },
+            {
+              x: "0%",
+              duration: 1.0,
+              ease: "power3.inOut",
+              onComplete: () => {
+                setShowMain(true);
+                // Slide overlay out to the left after main is shown
+                gsap.to(overlayRef.current, {
+                  x: "-100%",
+                  duration: 0.8,
+                  ease: "power3.inOut",
+                  delay: 0.15,
+                  onComplete: () => {
+                    if (overlayRef.current) {
+                      overlayRef.current.style.display = "none";
+                    }
+                    setTimeout(() => ScrollTrigger.refresh(), 300);
+                  },
+                });
+              },
+            }
+          );
+        } else {
+          setShowMain(true);
+          setTimeout(() => ScrollTrigger.refresh(), 300);
+        }
+      },
+    });
+
+    // Text "Shop" entrance
+    gsap.set(textRef.current, { y: 100, opacity: 0 });
+    tl.to(textRef.current, { y: 0, opacity: 1, duration: 0.8, ease: "back.out(1.7)" })
+      .to(textRef.current, { duration: 0.6 })
+      .to(textRef.current, {
+        opacity: 0,
+        y: -20,
+        scale: 0.9,
+        duration: 0.4,
+        ease: "power2.out",
+        onComplete: () => {
+          if (textRef.current) textRef.current.textContent = "Note";
+        },
+      })
+      .to(textRef.current, { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: "back.out(1.7)" })
+      .to(textRef.current, { duration: 0.8 });
+
+    // Counter animation 01 -> 100
+    const counterObj = { value: 1 };
+    tl.to(
+      counterObj,
+      {
+        value: 100,
+        duration: 4.0,
+        ease: "power1.inOut",
+        onUpdate: () => {
+          if (counterRef.current) {
+            const val = Math.round(counterObj.value);
+            counterRef.current.textContent = String(val).padStart(2, "0");
+          }
+        },
+      },
+      0
+    );
+
+    // Fade out text and counter together
+    tl.to(textRef.current, {
+      scale: 0.3,
+      opacity: 0,
+      duration: 0.7,
+      ease: "power2.in",
+    })
+      .to(
+        counterRef.current,
+        {
+          scale: 0.5,
+          opacity: 0,
+          duration: 0.7,
+          ease: "power2.in",
+        },
+        "-=0.7"
+      )
+      .to(
+        preloaderRef.current,
+        {
+          scale: 0.95,
+          opacity: 0.8,
+          duration: 0.3,
+          ease: "power2.inOut",
+        },
+        "-=0.3"
+      );
+
+    return () => {
+      tl.kill();
+    };
   }, [isMounted, loading]);
 
   useEffect(() => {
@@ -5317,41 +5429,6 @@ export default function HomePage(): React.JSX.Element {
     }
   }, [activeNoteUser]);
 
-  const startPreloaderAnimation = () => {
-    const tl = gsap.timeline({
-      onComplete: () => {
-        if (preloaderRef.current) {
-          gsap.to(preloaderRef.current, {
-            opacity: 0,
-            duration: 0.6,
-            ease: "power2.inOut",
-            onComplete: () => {
-              setShowMain(true);
-              setTimeout(() => ScrollTrigger.refresh(), 300);
-            },
-          });
-        }
-      },
-    });
-    gsap.set(textRef.current, { y: 100, opacity: 0 });
-    tl.to(textRef.current, { y: 0, opacity: 1, duration: 0.8, ease: "back.out(1.7)" })
-      .to(textRef.current, { duration: 0.6 })
-      .to(textRef.current, {
-        opacity: 0,
-        y: -20,
-        scale: 0.9,
-        duration: 0.4,
-        ease: "power2.out",
-        onComplete: () => {
-          if (textRef.current) textRef.current.textContent = "Note";
-        },
-      })
-      .to(textRef.current, { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: "back.out(1.7)" })
-      .to(textRef.current, { duration: 0.8 })
-      .to(textRef.current, { scale: 0.3, opacity: 0, duration: 0.7, ease: "power2.in" })
-      .to(preloaderRef.current, { scale: 0.95, opacity: 0.8, duration: 0.3, ease: "power2.inOut" }, "-=0.3");
-  };
-
   if (!isMounted || loading) {
     return (
       <div
@@ -5394,42 +5471,96 @@ export default function HomePage(): React.JSX.Element {
 
   if (!showMain) {
     return (
-      <div
-        ref={preloaderRef}
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          backgroundColor: WHITE,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          zIndex: 9999,
-          fontFamily: FONT_FAMILY,
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "40px", overflow: "hidden" }}>
-          <span style={{ fontSize: "100px", fontWeight: 400, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em" }}>
-            Menuru
-          </span>
+      <>
+        {/* PRELOADER with counter on right side */}
+        <div
+          ref={preloaderRef}
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: WHITE,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "0 60px",
+            zIndex: 9999,
+            fontFamily: FONT_FAMILY,
+            overflow: "hidden",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "40px", overflow: "hidden" }}>
+            <span style={{ fontSize: "100px", fontWeight: 400, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em" }}>
+              Menuru
+            </span>
+            <span
+              ref={textRef}
+              style={{
+                fontSize: "50px",
+                fontWeight: 600,
+                color: BLACK,
+                fontFamily: FONT_FAMILY,
+                letterSpacing: "-0.02em",
+                display: "inline-block",
+                willChange: "transform, opacity",
+              }}
+            >
+              Shop
+            </span>
+          </div>
+
+          {/* Counter on the right side */}
           <span
-            ref={textRef}
+            ref={counterRef}
             style={{
-              fontSize: "50px",
-              fontWeight: 600,
-              color: BLACK,
+              fontSize: "400px",
+              fontWeight: 400,
+              color: BLUE,
               fontFamily: FONT_FAMILY,
-              letterSpacing: "-0.02em",
+              letterSpacing: "-0.04em",
+              lineHeight: 1,
               display: "inline-block",
               willChange: "transform, opacity",
+              userSelect: "none",
             }}
           >
-            Shop
+            01
           </span>
         </div>
-      </div>
+
+        {/* OVERLAY that slides in from right */}
+        <div
+          ref={overlayRef}
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: BLUE,
+            zIndex: 10000,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            transform: "translateX(100%)",
+          }}
+        >
+          <span
+            style={{
+              fontFamily: FONT_FAMILY,
+              fontSize: "80px",
+              fontWeight: 700,
+              color: WHITE,
+              letterSpacing: "-0.03em",
+              textTransform: "uppercase",
+            }}
+          >
+            Menuru
+          </span>
+        </div>
+      </>
     );
   }
 
