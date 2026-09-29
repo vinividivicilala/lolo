@@ -5207,6 +5207,7 @@ export default function HomePage(): React.JSX.Element {
   const textRef = useRef<HTMLSpanElement>(null);
   const counterRef = useRef<HTMLSpanElement>(null);
   const mainPageRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const noteJoinRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -5265,7 +5266,7 @@ export default function HomePage(): React.JSX.Element {
     return () => unsub();
   }, [db, user, isMounted]);
 
-  // ===== PRELOADER -> MAIN PAGE slide from RIGHT =====
+  // ===== PRELOADER -> MAIN PAGE slide from RIGHT (single render tree) =====
   useEffect(() => {
     if (!isMounted || loading) return;
 
@@ -5277,9 +5278,12 @@ export default function HomePage(): React.JSX.Element {
 
     if (!preloaderEl || !textEl || !counterEl || !mainEl) return;
 
-    // Set initial states
+    // Show main page (render tree) BEFORE animating so GSAP can move it
+    setShowMain(true);
+
+    // Initial states
     gsap.set(textEl, { y: 100, opacity: 0 });
-    gsap.set(counterEl, { opacity: 1, scale: 1, y: 0 });
+    gsap.set(counterEl, { opacity: 1, scale: 1, y: 0, xPercent: 0 });
     gsap.set(preloaderEl, { opacity: 1, scale: 1, xPercent: 0, display: "block" });
     gsap.set(mainEl, { xPercent: 100, opacity: 1, display: "flex" });
 
@@ -5305,7 +5309,7 @@ export default function HomePage(): React.JSX.Element {
       .to(textEl, { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: "back.out(1.7)" })
       .to(textEl, { duration: 1.2 });
 
-    // 3) Counter 01 -> 100, slow & smooth (6.5s) — parallel from the start
+    // 3) Counter 01 -> 100 (parallel, 6.5s, smooth)
     tl.to(
       counterObj,
       {
@@ -5322,7 +5326,7 @@ export default function HomePage(): React.JSX.Element {
       0
     );
 
-    // 4) Fade out text & counter
+    // 4) Fade out text + counter
     tl.to(textEl, {
       scale: 0.3,
       opacity: 0,
@@ -5339,7 +5343,7 @@ export default function HomePage(): React.JSX.Element {
         },
         "-=0.8"
       )
-      // 5) Preloader slide OUT to left, main page slide IN from right — parallel
+      // 5) Preloader slide OUT to left AND main page slide IN from right — parallel
       .to(
         preloaderEl,
         {
@@ -5359,7 +5363,9 @@ export default function HomePage(): React.JSX.Element {
           duration: 1.2,
           ease: "power3.inOut",
           onComplete: () => {
-            setShowMain(true);
+            if (killed) return;
+            // reset transform so subsequent GSAP (ScrollTrigger) uses clean state
+            gsap.set(mainEl, { clearProps: "transform,willChange" });
             setTimeout(() => ScrollTrigger.refresh(), 300);
           },
         },
@@ -5421,7 +5427,6 @@ export default function HomePage(): React.JSX.Element {
     }
   }, [activeNoteUser]);
 
-  // Initial loading (before Firebase auth ready) — static preloader
   if (!isMounted || loading) {
     return (
       <div
@@ -5485,424 +5490,509 @@ export default function HomePage(): React.JSX.Element {
         <meta name="twitter:image" content="/images/ai.jpg" />
       </Head>
 
-      {/* ===== PRELOADER (fixed, menutup layar) ===== */}
+      {/* ===== WRAPPER: menampung preloader + main page, overflow hidden agar tidak scroll horizontal ===== */}
       <div
-        ref={preloaderRef}
-        style={{
-          position: "fixed",
-          inset: 0,
-          width: "100%",
-          height: "100%",
-          backgroundColor: WHITE,
-          zIndex: 9999,
-          fontFamily: FONT_FAMILY,
-          overflow: "hidden",
-          willChange: "transform",
-        }}
-      >
-        {/* Angka counter di atas kanan */}
-        <span
-          ref={counterRef}
-          style={{
-            position: "absolute",
-            top: "10px",
-            right: "40px",
-            fontSize: "400px",
-            fontWeight: 400,
-            color: BLUE,
-            fontFamily: FONT_FAMILY,
-            letterSpacing: "-0.04em",
-            lineHeight: 0.9,
-            display: "inline-block",
-            willChange: "transform, opacity",
-            userSelect: "none",
-            pointerEvents: "none",
-          }}
-        >
-          01
-        </span>
-
-        {/* Center content: Menuru Shop/Note */}
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: "40px", overflow: "hidden" }}>
-            <span
-              style={{
-                fontSize: "100px",
-                fontWeight: 400,
-                color: BLUE,
-                fontFamily: FONT_FAMILY,
-                letterSpacing: "-0.03em",
-              }}
-            >
-              Menuru
-            </span>
-            <span
-              ref={textRef}
-              style={{
-                fontSize: "50px",
-                fontWeight: 600,
-                color: BLACK,
-                fontFamily: FONT_FAMILY,
-                letterSpacing: "-0.02em",
-                display: "inline-block",
-                willChange: "transform, opacity",
-              }}
-            >
-              Shop
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* ===== HALAMAN UTAMA (slide masuk dari kanan) ===== */}
-      <div
-        ref={mainPageRef}
+        ref={wrapperRef}
         style={{
           position: "relative",
+          width: "100%",
           minHeight: "100vh",
+          overflow: "hidden",
           backgroundColor: WHITE,
-          margin: 0,
-          padding: 0,
-          fontFamily: FONT_FAMILY,
-          overflow: "visible",
-          display: "flex",
-          flexDirection: "column",
-          transform: "translateX(100%)",
-          willChange: "transform",
         }}
       >
-        <LeftNavbar shifted={navbarShifted} />
-        <RightNavbar user={user} auth={auth} db={db} />
-        <CookieConsentPopup user={user} db={db} isMounted={isMounted} />
-
-        <HeroMenuruTitle onNavbarShiftChange={setNavbarShifted} />
-
+        {/* ===== PRELOADER (fixed, menutupi layar) ===== */}
         <div
+          ref={preloaderRef}
           style={{
-            padding: "0 40px",
-            maxWidth: "1600px",
-            margin: "0 auto",
+            position: "fixed",
+            top: 0,
+            left: 0,
             width: "100%",
-            position: "relative",
-            zIndex: 2,
-            marginTop: "-40px",
+            height: "100%",
+            backgroundColor: WHITE,
+            zIndex: 9999,
+            fontFamily: FONT_FAMILY,
+            overflow: "hidden",
+            willChange: "transform",
           }}
         >
-          <h2
+          {/* Angka counter di atas kanan */}
+          <span
+            ref={counterRef}
             style={{
-              fontFamily: FONT_FAMILY,
-              fontSize: "80px",
-              fontWeight: 700,
+              position: "absolute",
+              top: "10px",
+              right: "40px",
+              fontSize: "400px",
+              fontWeight: 400,
               color: BLUE,
-              letterSpacing: "-0.03em",
-              lineHeight: 1.1,
-              margin: 0,
-              marginBottom: "30px",
-              textAlign: "left",
-              WebkitFontSmoothing: "antialiased",
-              MozOsxFontSmoothing: "grayscale",
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "-0.04em",
+              lineHeight: 0.9,
+              display: "inline-block",
+              willChange: "transform, opacity",
+              userSelect: "none",
+              pointerEvents: "none",
             }}
           >
-            Features
-          </h2>
+            01
+          </span>
 
-          <div style={{ width: "100%", position: "relative", zIndex: 2, marginBottom: "40px" }}>
-            <div style={{ display: "flex", alignItems: "center", width: "100%", flexWrap: "wrap" }}>
-              <div style={{ display: "flex", alignItems: "baseline", gap: "140px" }}>
-                <span
-                  style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: "90px",
-                    fontWeight: 700,
-                    color: BLUE,
-                    letterSpacing: "-0.04em",
-                    lineHeight: 1,
-                  }}
-                >
-                  01
-                </span>
-                <span
-                  style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: "90px",
-                    fontWeight: 700,
-                    color: BLACK,
-                    letterSpacing: "-0.04em",
-                    lineHeight: 1,
-                  }}
-                >
-                  Notes
-                </span>
-              </div>
-              <div
+          {/* Center content: Menuru Shop/Note */}
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "40px", overflow: "hidden" }}>
+              <span
                 style={{
-                  marginLeft: "auto",
-                  marginRight: "360px",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "flex-start",
-                  gap: "8px",
-                  marginTop: "-45px",
+                  fontSize: "100px",
+                  fontWeight: 400,
+                  color: BLUE,
+                  fontFamily: FONT_FAMILY,
+                  letterSpacing: "-0.03em",
                 }}
               >
-                <span
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    padding: "6px 16px",
-                    backgroundColor: BLUE,
-                    color: WHITE,
-                    borderRadius: "4px",
-                    fontSize: "16px",
-                    fontWeight: 800,
-                    letterSpacing: "0.8px",
-                    textTransform: "uppercase",
-                    fontFamily: FONT_FAMILY,
-                    lineHeight: 1.3,
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  Trust
-                </span>
-                <p
-                  style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: "18px",
-                    fontWeight: 600,
-                    color: BLUE,
-                    letterSpacing: "-0.01em",
-                    lineHeight: 1.4,
-                    margin: 0,
-                    maxWidth: "420px",
-                    textAlign: "left",
-                  }}
-                >
-                  Notes for the next era of technology system
-                </p>
-              </div>
-            </div>
-            <div
-              style={{
-                position: "absolute",
-                right: "40px",
-                top: "0",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                width: "120px",
-                height: "120px",
-                backgroundColor: BLUE,
-                borderRadius: "20px",
-                flexShrink: 0,
-              }}
-            >
-              <svg width="64" height="64" viewBox="0 0 24 24" fill="none">
-                <path d="M7 17L17 7M17 7H8M17 7V16" stroke={WHITE} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
+                Menuru
+              </span>
+              <span
+                ref={textRef}
+                style={{
+                  fontSize: "50px",
+                  fontWeight: 600,
+                  color: BLACK,
+                  fontFamily: FONT_FAMILY,
+                  letterSpacing: "-0.02em",
+                  display: "inline-block",
+                  willChange: "transform, opacity",
+                }}
+              >
+                Shop
+              </span>
             </div>
           </div>
+        </div>
+
+        {/* ===== HALAMAN UTAMA (slide masuk dari kanan) ===== */}
+        <div
+          ref={mainPageRef}
+          style={{
+            position: "relative",
+            width: "100%",
+            minHeight: "100vh",
+            backgroundColor: WHITE,
+            margin: 0,
+            padding: 0,
+            fontFamily: FONT_FAMILY,
+            overflow: "visible",
+            display: "flex",
+            flexDirection: "column",
+            willChange: "transform",
+          }}
+        >
+          <LeftNavbar shifted={navbarShifted} />
+          <RightNavbar user={user} auth={auth} db={db} />
+          <CookieConsentPopup user={user} db={db} isMounted={isMounted} />
+
+          <HeroMenuruTitle onNavbarShiftChange={setNavbarShifted} />
 
           <div
-            style={{ position: "relative", width: "100%", height: "420px", marginBottom: "60px", zIndex: 1 }}
-            onMouseEnter={() => setNoteHovered(true)}
-            onMouseLeave={() => setNoteHovered(false)}
+            style={{
+              padding: "0 40px",
+              maxWidth: "1600px",
+              margin: "0 auto",
+              width: "100%",
+              position: "relative",
+              zIndex: 2,
+              marginTop: "-40px",
+            }}
           >
-            <div
+            <h2
               style={{
-                position: "absolute",
-                top: "0px",
-                left: "260px",
-                right: "360px",
-                height: "420px",
-                backgroundColor: BLUE,
-                borderRadius: "24px",
-                border: `2px solid ${BLUE}`,
-                overflow: "hidden",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
+                fontFamily: FONT_FAMILY,
+                fontSize: "80px",
+                fontWeight: 700,
+                color: BLUE,
+                letterSpacing: "-0.03em",
+                lineHeight: 1.1,
+                margin: 0,
+                marginBottom: "30px",
+                textAlign: "left",
+                WebkitFontSmoothing: "antialiased",
+                MozOsxFontSmoothing: "grayscale",
               }}
             >
-              <img
-                src="/images/plj.JPG"
-                alt="Note"
-                style={{
-                  maxWidth: "95%",
-                  maxHeight: "95%",
-                  width: "auto",
-                  height: "auto",
-                  objectFit: "contain",
-                  mixBlendMode: "screen",
-                  display: "block",
-                  opacity: noteHovered ? 0.35 : 1,
-                  transition: "opacity 0.4s ease",
-                  pointerEvents: "none",
-                  userSelect: "none",
-                }}
-              />
+              Features
+            </h2>
+
+            <div style={{ width: "100%", position: "relative", zIndex: 2, marginBottom: "40px" }}>
+              <div style={{ display: "flex", alignItems: "center", width: "100%", flexWrap: "wrap" }}>
+                <div style={{ display: "flex", alignItems: "baseline", gap: "140px" }}>
+                  <span
+                    style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: "90px",
+                      fontWeight: 700,
+                      color: BLUE,
+                      letterSpacing: "-0.04em",
+                      lineHeight: 1,
+                    }}
+                  >
+                    01
+                  </span>
+                  <span
+                    style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: "90px",
+                      fontWeight: 700,
+                      color: BLACK,
+                      letterSpacing: "-0.04em",
+                      lineHeight: 1,
+                    }}
+                  >
+                    Notes
+                  </span>
+                </div>
+                <div
+                  style={{
+                    marginLeft: "auto",
+                    marginRight: "360px",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "flex-start",
+                    gap: "8px",
+                    marginTop: "-45px",
+                  }}
+                >
+                  <span
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      padding: "6px 16px",
+                      backgroundColor: BLUE,
+                      color: WHITE,
+                      borderRadius: "4px",
+                      fontSize: "16px",
+                      fontWeight: 800,
+                      letterSpacing: "0.8px",
+                      textTransform: "uppercase",
+                      fontFamily: FONT_FAMILY,
+                      lineHeight: 1.3,
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    Trust
+                  </span>
+                  <p
+                    style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: "18px",
+                      fontWeight: 600,
+                      color: BLUE,
+                      letterSpacing: "-0.01em",
+                      lineHeight: 1.4,
+                      margin: 0,
+                      maxWidth: "420px",
+                      textAlign: "left",
+                    }}
+                  >
+                    Notes for the next era of technology system
+                  </p>
+                </div>
+              </div>
               <div
                 style={{
                   position: "absolute",
-                  top: 0,
-                  left: 0,
-                  width: "100%",
-                  height: "100%",
+                  right: "40px",
+                  top: "0",
                   display: "flex",
                   alignItems: "center",
+                  justifyContent: "center",
+                  width: "120px",
+                  height: "120px",
+                  backgroundColor: BLUE,
+                  borderRadius: "20px",
+                  flexShrink: 0,
+                }}
+              >
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none">
+                  <path d="M7 17L17 7M17 7H8M17 7V16" stroke={WHITE} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+            </div>
+
+            <div
+              style={{ position: "relative", width: "100%", height: "420px", marginBottom: "60px", zIndex: 1 }}
+              onMouseEnter={() => setNoteHovered(true)}
+              onMouseLeave={() => setNoteHovered(false)}
+            >
+              <div
+                style={{
+                  position: "absolute",
+                  top: "0px",
+                  left: "260px",
+                  right: "360px",
+                  height: "420px",
+                  backgroundColor: BLUE,
+                  borderRadius: "24px",
+                  border: `2px solid ${BLUE}`,
                   overflow: "hidden",
-                  pointerEvents: "none",
-                  opacity: noteHovered ? 1 : 0,
-                  transition: "opacity 0.4s ease",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <img
+                  src="/images/plj.JPG"
+                  alt="Note"
+                  style={{
+                    maxWidth: "95%",
+                    maxHeight: "95%",
+                    width: "auto",
+                    height: "auto",
+                    objectFit: "contain",
+                    mixBlendMode: "screen",
+                    display: "block",
+                    opacity: noteHovered ? 0.35 : 1,
+                    transition: "opacity 0.4s ease",
+                    pointerEvents: "none",
+                    userSelect: "none",
+                  }}
+                />
+                <div
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    overflow: "hidden",
+                    pointerEvents: "none",
+                    opacity: noteHovered ? 1 : 0,
+                    transition: "opacity 0.4s ease",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "inline-flex",
+                      whiteSpace: "nowrap",
+                      animation: noteHovered ? "comingsoon-marquee 8s linear infinite" : "none",
+                      fontFamily: FONT_FAMILY,
+                      fontSize: "140px",
+                      fontWeight: 800,
+                      color: WHITE,
+                      letterSpacing: "-0.04em",
+                      textTransform: "uppercase",
+                      lineHeight: 1,
+                    }}
+                  >
+                    <span style={{ paddingRight: "80px" }}>Comingsoon</span>
+                    <span style={{ paddingRight: "80px" }}>Comingsoon</span>
+                    <span style={{ paddingRight: "80px" }}>Comingsoon</span>
+                    <span style={{ paddingRight: "80px" }}>Comingsoon</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div
+              ref={noteJoinRef}
+              style={{
+                width: "100%",
+                marginTop: "0px",
+                marginBottom: "60px",
+                paddingLeft: "260px",
+                paddingRight: "360px",
+                fontFamily: FONT_FAMILY,
+                position: "relative",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "24px",
+                  marginBottom: "24px",
+                  flexWrap: "wrap",
+                }}
+              >
+                <h3
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "35px",
+                    fontWeight: 700,
+                    color: BLUE,
+                    letterSpacing: "-0.02em",
+                    lineHeight: 1.1,
+                    margin: 0,
+                  }}
+                >
+                  Bergabung bersama kami di fitur Note
+                </h3>
+                <button
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    padding: "8px 18px",
+                    backgroundColor: BLUE,
+                    color: WHITE,
+                    border: "none",
+                    borderRadius: "10px",
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "35px",
+                    fontWeight: 700,
+                    letterSpacing: "-0.02em",
+                    lineHeight: 1.1,
+                    cursor: "pointer",
+                    transition: "background-color 0.25s ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLButtonElement).style.backgroundColor = BLACK;
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLButtonElement).style.backgroundColor = BLUE;
+                  }}
+                >
+                  <span>Bergabung</span>
+                  <NorthEastArrow size={32} color={WHITE} />
+                </button>
+              </div>
+
+              <div
+                style={{
+                  width: "100%",
+                  backgroundColor: BLUE,
+                  borderRadius: "12px",
+                  padding: "16px 24px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "16px",
+                  flexWrap: "wrap",
+                  minHeight: "70px",
                 }}
               >
                 <div
                   style={{
-                    display: "inline-flex",
-                    whiteSpace: "nowrap",
-                    animation: noteHovered ? "comingsoon-marquee 8s linear infinite" : "none",
-                    fontFamily: FONT_FAMILY,
-                    fontSize: "140px",
-                    fontWeight: 800,
-                    color: WHITE,
-                    letterSpacing: "-0.04em",
-                    textTransform: "uppercase",
-                    lineHeight: 1,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "12px",
+                    flexWrap: "wrap",
                   }}
                 >
-                  <span style={{ paddingRight: "80px" }}>Comingsoon</span>
-                  <span style={{ paddingRight: "80px" }}>Comingsoon</span>
-                  <span style={{ paddingRight: "80px" }}>Comingsoon</span>
-                  <span style={{ paddingRight: "80px" }}>Comingsoon</span>
-                </div>
-              </div>
-            </div>
-          </div>
+                  {registeredUsers.length === 0 && (
+                    <span style={{ fontSize: "35px", fontWeight: 700, color: WHITE, letterSpacing: "-0.02em", lineHeight: 1.1 }}>
+                      Belum ada yang bergabung
+                    </span>
+                  )}
 
-          <div
-            ref={noteJoinRef}
-            style={{
-              width: "100%",
-              marginTop: "0px",
-              marginBottom: "60px",
-              paddingLeft: "260px",
-              paddingRight: "360px",
-              fontFamily: FONT_FAMILY,
-              position: "relative",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "24px",
-                marginBottom: "24px",
-                flexWrap: "wrap",
-              }}
-            >
-              <h3
-                style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: "35px",
-                  fontWeight: 700,
-                  color: BLUE,
-                  letterSpacing: "-0.02em",
-                  lineHeight: 1.1,
-                  margin: 0,
-                }}
-              >
-                Bergabung bersama kami di fitur Note
-              </h3>
-              <button
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  padding: "8px 18px",
-                  backgroundColor: BLUE,
-                  color: WHITE,
-                  border: "none",
-                  borderRadius: "10px",
-                  fontFamily: FONT_FAMILY,
-                  fontSize: "35px",
-                  fontWeight: 700,
-                  letterSpacing: "-0.02em",
-                  lineHeight: 1.1,
-                  cursor: "pointer",
-                  transition: "background-color 0.25s ease",
-                }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.backgroundColor = BLACK;
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.backgroundColor = BLUE;
-                }}
-              >
-                <span>Bergabung</span>
-                <NorthEastArrow size={32} color={WHITE} />
-              </button>
-            </div>
+                  {registeredUsers.map((n) => {
+                    const isCurrentUser = user && n.userId === user.uid;
+                    return (
+                      <div
+                        key={n.id}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "8px",
+                        }}
+                      >
+                        {isCurrentUser && (
+                          <>
+                            <span
+                              style={{
+                                fontSize: "35px",
+                                fontWeight: 600,
+                                color: WHITE,
+                                letterSpacing: "-0.02em",
+                                lineHeight: 1.1,
+                              }}
+                            >
+                              from
+                            </span>
+                            <span
+                              style={{
+                                fontSize: "35px",
+                                fontWeight: 700,
+                                color: WHITE,
+                                letterSpacing: "-0.02em",
+                                lineHeight: 1.1,
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              {n.userName || n.userEmail?.split("@")[0] || "User"}
+                            </span>
+                          </>
+                        )}
 
-            <div
-              style={{
-                width: "100%",
-                backgroundColor: BLUE,
-                borderRadius: "12px",
-                padding: "16px 24px",
-                display: "flex",
-                alignItems: "center",
-                gap: "16px",
-                flexWrap: "wrap",
-                minHeight: "70px",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "12px",
-                  flexWrap: "wrap",
-                }}
-              >
-                {registeredUsers.length === 0 && (
-                  <span style={{ fontSize: "35px", fontWeight: 700, color: WHITE, letterSpacing: "-0.02em", lineHeight: 1.1 }}>
-                    Belum ada yang bergabung
-                  </span>
-                )}
+                        <div
+                          className="note-user-fp"
+                          onClick={() => setActiveNoteUser(activeNoteUser === n.id ? null : n.id)}
+                          style={{
+                            width: "48px",
+                            height: "48px",
+                            borderRadius: "50%",
+                            overflow: "hidden",
+                            backgroundColor: WHITE,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            flexShrink: 0,
+                            cursor: "pointer",
+                            transition: "transform 0.2s ease",
+                            border: isCurrentUser ? `3px solid ${WHITE}` : "none",
+                          }}
+                          onMouseEnter={(e) => {
+                            (e.currentTarget as HTMLDivElement).style.transform = "scale(1.15)";
+                          }}
+                          onMouseLeave={(e) => {
+                            (e.currentTarget as HTMLDivElement).style.transform = "scale(1)";
+                          }}
+                        >
+                          {n.userPhoto ? (
+                            <img
+                              src={n.userPhoto}
+                              alt="User"
+                              style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                              referrerPolicy="no-referrer"
+                            />
+                          ) : (
+                            <span style={{ fontSize: "20px", fontWeight: 800, color: BLUE }}>
+                              {(n.userName || n.userEmail || "U").charAt(0).toUpperCase()}
+                            </span>
+                          )}
+                        </div>
 
-                {registeredUsers.map((n) => {
-                  const isCurrentUser = user && n.userId === user.uid;
-                  return (
-                    <div
-                      key={n.id}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                      }}
-                    >
-                      {isCurrentUser && (
-                        <>
+                        {isCurrentUser && (
                           <span
                             style={{
                               fontSize: "35px",
-                              fontWeight: 600,
+                              fontWeight: 700,
                               color: WHITE,
                               letterSpacing: "-0.02em",
                               lineHeight: 1.1,
+                              whiteSpace: "nowrap",
                             }}
                           >
-                            from
+                            {hasSubmittedNote ? "✓ Sudah bergabung" : "Belum bergabung"}
                           </span>
+                        )}
+
+                        {!isCurrentUser && activeNoteUser === n.id && (
                           <span
+                            className={`note-user-name-${n.id}`}
                             style={{
                               fontSize: "35px",
                               fontWeight: 700,
@@ -5914,349 +6004,280 @@ export default function HomePage(): React.JSX.Element {
                           >
                             {n.userName || n.userEmail?.split("@")[0] || "User"}
                           </span>
-                        </>
-                      )}
-
-                      <div
-                        className="note-user-fp"
-                        onClick={() => setActiveNoteUser(activeNoteUser === n.id ? null : n.id)}
-                        style={{
-                          width: "48px",
-                          height: "48px",
-                          borderRadius: "50%",
-                          overflow: "hidden",
-                          backgroundColor: WHITE,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          flexShrink: 0,
-                          cursor: "pointer",
-                          transition: "transform 0.2s ease",
-                          border: isCurrentUser ? `3px solid ${WHITE}` : "none",
-                        }}
-                        onMouseEnter={(e) => {
-                          (e.currentTarget as HTMLDivElement).style.transform = "scale(1.15)";
-                        }}
-                        onMouseLeave={(e) => {
-                          (e.currentTarget as HTMLDivElement).style.transform = "scale(1)";
-                        }}
-                      >
-                        {n.userPhoto ? (
-                          <img
-                            src={n.userPhoto}
-                            alt="User"
-                            style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-                            referrerPolicy="no-referrer"
-                          />
-                        ) : (
-                          <span style={{ fontSize: "20px", fontWeight: 800, color: BLUE }}>
-                            {(n.userName || n.userEmail || "U").charAt(0).toUpperCase()}
-                          </span>
                         )}
                       </div>
-
-                      {isCurrentUser && (
-                        <span
-                          style={{
-                            fontSize: "35px",
-                            fontWeight: 700,
-                            color: WHITE,
-                            letterSpacing: "-0.02em",
-                            lineHeight: 1.1,
-                            whiteSpace: "nowrap",
-                          }}
-                        >
-                          {hasSubmittedNote ? "✓ Sudah bergabung" : "Belum bergabung"}
-                        </span>
-                      )}
-
-                      {!isCurrentUser && activeNoteUser === n.id && (
-                        <span
-                          className={`note-user-name-${n.id}`}
-                          style={{
-                            fontSize: "35px",
-                            fontWeight: 700,
-                            color: WHITE,
-                            letterSpacing: "-0.02em",
-                            lineHeight: 1.1,
-                            whiteSpace: "nowrap",
-                          }}
-                        >
-                          {n.userName || n.userEmail?.split("@")[0] || "User"}
-                        </span>
-                      )}
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <div style={{ position: "relative", zIndex: 1, flex: "1 0 auto", backgroundColor: WHITE }}>
-          <div style={{ padding: "0 40px", maxWidth: "1600px", margin: "0 auto", width: "100%" }}>
-            <LiveChatAgent
-              user={user}
-              isAdmin={isAdmin}
-              db={db}
-              auth={auth}
-              onOpenAppealChat={(ticket: AppealTicket) => {
-                setAdminAppealTicket(ticket);
-                setShowAdminAppealSection(true);
-              }}
-              onOpenBannedAppealChat={(ticket: AppealTicket) => {
-                setBannedAppealTicket(ticket);
-                setShowBannedAppealSection(true);
-              }}
-            />
+          <div style={{ position: "relative", zIndex: 1, flex: "1 0 auto", backgroundColor: WHITE }}>
+            <div style={{ padding: "0 40px", maxWidth: "1600px", margin: "0 auto", width: "100%" }}>
+              <LiveChatAgent
+                user={user}
+                isAdmin={isAdmin}
+                db={db}
+                auth={auth}
+                onOpenAppealChat={(ticket: AppealTicket) => {
+                  setAdminAppealTicket(ticket);
+                  setShowAdminAppealSection(true);
+                }}
+                onOpenBannedAppealChat={(ticket: AppealTicket) => {
+                  setBannedAppealTicket(ticket);
+                  setShowBannedAppealSection(true);
+                }}
+              />
 
-            {isAdmin && showAdminAppealSection && adminAppealTicket && (
-              <div style={{ marginTop: "30px", height: "600px" }}>
-                <div
-                  style={{
-                    fontSize: "13px",
-                    fontWeight: 800,
-                    color: BLUE,
-                    fontFamily: FONT_FAMILY,
-                    letterSpacing: "0.5px",
-                    textTransform: "uppercase",
-                    marginBottom: "12px",
-                  }}
-                >
-                  Chat Ajukan Banding
-                </div>
-                <AppealChatRoom
-                  user={user}
-                  isAdmin={true}
-                  db={db}
-                  appealTicket={adminAppealTicket}
-                  onClose={() => {
-                    setShowAdminAppealSection(false);
-                    setAdminAppealTicket(null);
-                  }}
-                />
-              </div>
-            )}
-
-            {!isAdmin && showBannedAppealSection && bannedAppealTicket && (
-              <div style={{ marginTop: "30px", height: "600px" }}>
-                <div
-                  style={{
-                    fontSize: "13px",
-                    fontWeight: 800,
-                    color: BLUE,
-                    fontFamily: FONT_FAMILY,
-                    letterSpacing: "0.5px",
-                    textTransform: "uppercase",
-                    marginBottom: "12px",
-                  }}
-                >
-                  Chat Ajukan Banding
-                </div>
-                <AppealChatRoom
-                  user={user}
-                  isAdmin={false}
-                  db={db}
-                  appealTicket={bannedAppealTicket}
-                  onClose={() => {
-                    setShowBannedAppealSection(false);
-                    setBannedAppealTicket(null);
-                  }}
-                />
-              </div>
-            )}
-          </div>
-
-          <div
-            style={{
-              width: "100%",
-              padding: "60px 40px 40px 40px",
-              backgroundColor: WHITE,
-              borderTop: "1px solid rgba(0,0,0,0.05)",
-              marginTop: "20px",
-              position: "relative",
-              overflow: "hidden",
-            }}
-          >
-            <div
-              style={{
-                position: "absolute",
-                left: "40px",
-                top: "50%",
-                transform: "translateY(-50%)",
-                width: "200px",
-                height: "auto",
-                opacity: 0.8,
-              }}
-            >
-              <img src="/images/p0l.jpg" alt="" style={{ width: "100%", height: "auto", display: "block", objectFit: "cover" }} />
-            </div>
-            <div
-              style={{
-                position: "absolute",
-                right: "40px",
-                top: "50%",
-                transform: "translateY(-50%)",
-                width: "200px",
-                height: "auto",
-                opacity: 0.8,
-              }}
-            >
-              <img src="/images/xxz.jpg" alt="" style={{ width: "100%", height: "auto", display: "block", objectFit: "cover" }} />
-            </div>
-
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "flex-start",
-                maxWidth: "1400px",
-                margin: "0 auto",
-                gap: "40px",
-                flexWrap: "wrap",
-                position: "relative",
-                zIndex: 1,
-              }}
-            >
-              {footerLinks.map((section, idx) => (
-                <div key={idx} style={{ flex: "1", minWidth: "200px" }}>
-                  <h3
+              {isAdmin && showAdminAppealSection && adminAppealTicket && (
+                <div style={{ marginTop: "30px", height: "600px" }}>
+                  <div
                     style={{
+                      fontSize: "13px",
+                      fontWeight: 800,
+                      color: BLUE,
                       fontFamily: FONT_FAMILY,
-                      fontSize: "28px",
-                      fontWeight: 600,
-                      color: BLACK,
-                      margin: 0,
-                      marginBottom: "16px",
-                      letterSpacing: "-0.01em",
+                      letterSpacing: "0.5px",
+                      textTransform: "uppercase",
+                      marginBottom: "12px",
                     }}
                   >
-                    {section.title}
-                  </h3>
-                  <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                    {section.links.map((link, linkIdx) => {
-                      let linkHref = "#";
-                      let isAttention = false;
-                      let isStories = false;
-                      if (link === "Contact Us") linkHref = "/contact";
-                      else if (link === "Live Chat") linkHref = "/live-chat";
-                      else if (link === "Live Chat Agent") linkHref = "/live-chat-agent";
-                      else if (link === "Help Center") linkHref = "/pusat-bantuan";
-                      else if (link === "About Us") {
-                        linkHref = "/profile";
-                        isAttention = true;
-                      } else if (link === "Privacy Policy") {
-                        linkHref = "/privacy-policy";
-                        isAttention = true;
-                      } else if (link === "Terms & Conditions") {
-                        linkHref = "/terms-of-services";
-                        isAttention = true;
-                      } else if (link === "Terms of Use") {
-                        linkHref = "/terms-of-use";
-                        isAttention = true;
-                      } else if (link === "Cookies Policy") {
-                        linkHref = "/cookie-policy";
-                        isAttention = true;
-                      } else if (link === "Stories") {
-                        linkHref = "/stories";
-                        isStories = true;
-                      } else if (link === "Shop") linkHref = "/shop";
-                      else if (link === "Note") linkHref = "/note";
-                      else if (link === "Calendar") linkHref = "/calendar";
-                      else if (link === "Blog") linkHref = "/blog";
-                      else if (link === "Donation") linkHref = "/donation";
-                      else if (link === "Community") linkHref = "/community";
-                      else if (link === "Instagram") linkHref = "https://instagram.com/menuru";
-
-                      return (
-                        <div key={linkIdx} style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                          <Link href={linkHref} style={{ textDecoration: "none" }}>
-                            <span
-                              style={{
-                                fontFamily: FONT_FAMILY,
-                                fontSize: "20px",
-                                fontWeight: 400,
-                                color: BLUE,
-                                letterSpacing: "-0.01em",
-                                cursor: "pointer",
-                              }}
-                            >
-                              {link}
-                            </span>
-                          </Link>
-                          {isAttention && (
-                            <span
-                              style={{
-                                backgroundColor: WHITE,
-                                border: `1.5px solid ${BLUE}`,
-                                color: BLUE,
-                                padding: "2px 8px",
-                                borderRadius: "4px",
-                                fontSize: "10px",
-                                fontWeight: 800,
-                                fontFamily: FONT_FAMILY,
-                                letterSpacing: "0.5px",
-                                textTransform: "uppercase",
-                                display: "inline-block",
-                              }}
-                            >
-                              Updated
-                            </span>
-                          )}
-                          {isStories && (
-                            <span
-                              style={{
-                                backgroundColor: WHITE,
-                                border: `1.5px solid ${BLUE}`,
-                                color: BLUE,
-                                padding: "2px 8px",
-                                borderRadius: "4px",
-                                fontSize: "10px",
-                                fontWeight: 800,
-                                fontFamily: FONT_FAMILY,
-                                letterSpacing: "0.5px",
-                                textTransform: "uppercase",
-                                display: "inline-block",
-                              }}
-                            >
-                              New
-                            </span>
-                          )}
-                        </div>
-                      );
-                    })}
+                    Chat Ajukan Banding
                   </div>
+                  <AppealChatRoom
+                    user={user}
+                    isAdmin={true}
+                    db={db}
+                    appealTicket={adminAppealTicket}
+                    onClose={() => {
+                      setShowAdminAppealSection(false);
+                      setAdminAppealTicket(null);
+                    }}
+                  />
                 </div>
-              ))}
+              )}
+
+              {!isAdmin && showBannedAppealSection && bannedAppealTicket && (
+                <div style={{ marginTop: "30px", height: "600px" }}>
+                  <div
+                    style={{
+                      fontSize: "13px",
+                      fontWeight: 800,
+                      color: BLUE,
+                      fontFamily: FONT_FAMILY,
+                      letterSpacing: "0.5px",
+                      textTransform: "uppercase",
+                      marginBottom: "12px",
+                    }}
+                  >
+                    Chat Ajukan Banding
+                  </div>
+                  <AppealChatRoom
+                    user={user}
+                    isAdmin={false}
+                    db={db}
+                    appealTicket={bannedAppealTicket}
+                    onClose={() => {
+                      setShowBannedAppealSection(false);
+                      setBannedAppealTicket(null);
+                    }}
+                  />
+                </div>
+              )}
             </div>
 
             <div
               style={{
-                maxWidth: "1400px",
-                margin: "40px auto 0 auto",
-                paddingTop: "20px",
+                width: "100%",
+                padding: "60px 40px 40px 40px",
+                backgroundColor: WHITE,
                 borderTop: "1px solid rgba(0,0,0,0.05)",
+                marginTop: "20px",
                 position: "relative",
-                zIndex: 1,
+                overflow: "hidden",
               }}
             >
-              <p
+              <div
                 style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: "14px",
-                  fontWeight: 400,
-                  color: "#666",
-                  margin: 0,
-                  textAlign: "center",
-                  letterSpacing: "0.01em",
+                  position: "absolute",
+                  left: "40px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  width: "200px",
+                  height: "auto",
+                  opacity: 0.8,
                 }}
               >
-                Terms and conditions apply. By using this website, you agree to our Terms of Use and Privacy Policy.
-              </p>
-            </div>
-          </div>
+                <img src="/images/p0l.jpg" alt="" style={{ width: "100%", height: "auto", display: "block", objectFit: "cover" }} />
+              </div>
+              <div
+                style={{
+                  position: "absolute",
+                  right: "40px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  width: "200px",
+                  height: "auto",
+                  opacity: 0.8,
+                }}
+              >
+                <img src="/images/xxz.jpg" alt="" style={{ width: "100%", height: "auto", display: "block", objectFit: "cover" }} />
+              </div>
 
-          <FooterMenuruTitle />
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "flex-start",
+                  maxWidth: "1400px",
+                  margin: "0 auto",
+                  gap: "40px",
+                  flexWrap: "wrap",
+                  position: "relative",
+                  zIndex: 1,
+                }}
+              >
+                {footerLinks.map((section, idx) => (
+                  <div key={idx} style={{ flex: "1", minWidth: "200px" }}>
+                    <h3
+                      style={{
+                        fontFamily: FONT_FAMILY,
+                        fontSize: "28px",
+                        fontWeight: 600,
+                        color: BLACK,
+                        margin: 0,
+                        marginBottom: "16px",
+                        letterSpacing: "-0.01em",
+                      }}
+                    >
+                      {section.title}
+                    </h3>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                      {section.links.map((link, linkIdx) => {
+                        let linkHref = "#";
+                        let isAttention = false;
+                        let isStories = false;
+                        if (link === "Contact Us") linkHref = "/contact";
+                        else if (link === "Live Chat") linkHref = "/live-chat";
+                        else if (link === "Live Chat Agent") linkHref = "/live-chat-agent";
+                        else if (link === "Help Center") linkHref = "/pusat-bantuan";
+                        else if (link === "About Us") {
+                          linkHref = "/profile";
+                          isAttention = true;
+                        } else if (link === "Privacy Policy") {
+                          linkHref = "/privacy-policy";
+                          isAttention = true;
+                        } else if (link === "Terms & Conditions") {
+                          linkHref = "/terms-of-services";
+                          isAttention = true;
+                        } else if (link === "Terms of Use") {
+                          linkHref = "/terms-of-use";
+                          isAttention = true;
+                        } else if (link === "Cookies Policy") {
+                          linkHref = "/cookie-policy";
+                          isAttention = true;
+                        } else if (link === "Stories") {
+                          linkHref = "/stories";
+                          isStories = true;
+                        } else if (link === "Shop") linkHref = "/shop";
+                        else if (link === "Note") linkHref = "/note";
+                        else if (link === "Calendar") linkHref = "/calendar";
+                        else if (link === "Blog") linkHref = "/blog";
+                        else if (link === "Donation") linkHref = "/donation";
+                        else if (link === "Community") linkHref = "/community";
+                        else if (link === "Instagram") linkHref = "https://instagram.com/menuru";
+
+                        return (
+                          <div key={linkIdx} style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                            <Link href={linkHref} style={{ textDecoration: "none" }}>
+                              <span
+                                style={{
+                                  fontFamily: FONT_FAMILY,
+                                  fontSize: "20px",
+                                  fontWeight: 400,
+                                  color: BLUE,
+                                  letterSpacing: "-0.01em",
+                                  cursor: "pointer",
+                                }}
+                              >
+                                {link}
+                              </span>
+                            </Link>
+                            {isAttention && (
+                              <span
+                                style={{
+                                  backgroundColor: WHITE,
+                                  border: `1.5px solid ${BLUE}`,
+                                  color: BLUE,
+                                  padding: "2px 8px",
+                                  borderRadius: "4px",
+                                  fontSize: "10px",
+                                  fontWeight: 800,
+                                  fontFamily: FONT_FAMILY,
+                                  letterSpacing: "0.5px",
+                                  textTransform: "uppercase",
+                                  display: "inline-block",
+                                }}
+                              >
+                                Updated
+                              </span>
+                            )}
+                            {isStories && (
+                              <span
+                                style={{
+                                  backgroundColor: WHITE,
+                                  border: `1.5px solid ${BLUE}`,
+                                  color: BLUE,
+                                  padding: "2px 8px",
+                                  borderRadius: "4px",
+                                  fontSize: "10px",
+                                  fontWeight: 800,
+                                  fontFamily: FONT_FAMILY,
+                                  letterSpacing: "0.5px",
+                                  textTransform: "uppercase",
+                                  display: "inline-block",
+                                }}
+                              >
+                                New
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div
+                style={{
+                  maxWidth: "1400px",
+                  margin: "40px auto 0 auto",
+                  paddingTop: "20px",
+                  borderTop: "1px solid rgba(0,0,0,0.05)",
+                  position: "relative",
+                  zIndex: 1,
+                }}
+              >
+                <p
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "14px",
+                    fontWeight: 400,
+                    color: "#666",
+                    margin: 0,
+                    textAlign: "center",
+                    letterSpacing: "0.01em",
+                  }}
+                >
+                  Terms and conditions apply. By using this website, you agree to our Terms of Use and Privacy Policy.
+                </p>
+              </div>
+            </div>
+
+            <FooterMenuruTitle />
+          </div>
         </div>
       </div>
 
