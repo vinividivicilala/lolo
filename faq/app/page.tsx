@@ -5025,7 +5025,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
                       <RollingNewMessage
                         key={rollingKey}
                         senderName={latestRollingMessage.senderName}
-                        message={latestRollingMessage.message}
+                        message={latestRollingMessage.text}
                         isFromAgent={latestRollingMessage.isFromAgent}
                       />
                     </div>
@@ -5206,7 +5206,7 @@ export default function HomePage(): React.JSX.Element {
   const preloaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
   const counterRef = useRef<HTMLSpanElement>(null);
-  const overlayRef = useRef<HTMLDivElement>(null);
+  const mainPageRef = useRef<HTMLDivElement>(null);
   const noteJoinRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -5265,7 +5265,7 @@ export default function HomePage(): React.JSX.Element {
     return () => unsub();
   }, [db, user, isMounted]);
 
-  // ===== PRELOADER: counter 01-100 (slow & smooth) + slide transition =====
+  // ===== PRELOADER -> MAIN PAGE slide from RIGHT =====
   useEffect(() => {
     if (!isMounted || loading) return;
 
@@ -5273,26 +5273,25 @@ export default function HomePage(): React.JSX.Element {
     const preloaderEl = preloaderRef.current;
     const textEl = textRef.current;
     const counterEl = counterRef.current;
-    const overlayEl = overlayRef.current;
+    const mainEl = mainPageRef.current;
 
-    if (!preloaderEl || !textEl || !counterEl || !overlayEl) return;
+    if (!preloaderEl || !textEl || !counterEl || !mainEl) return;
 
+    // Set initial states
     gsap.set(textEl, { y: 100, opacity: 0 });
     gsap.set(counterEl, { opacity: 1, scale: 1, y: 0 });
-    gsap.set(overlayEl, { xPercent: 100 });
-    gsap.set(preloaderEl, { opacity: 1, scale: 1 });
+    gsap.set(preloaderEl, { opacity: 1, scale: 1, xPercent: 0, display: "block" });
+    gsap.set(mainEl, { xPercent: 100, opacity: 1, display: "flex" });
 
     const counterObj = { value: 1 };
     counterEl.textContent = "01";
 
-    const tl = gsap.timeline({
-      onComplete: () => {
-        if (killed) return;
-      },
-    });
+    const tl = gsap.timeline();
 
+    // 1) Text "Shop" entrance
     tl.to(textEl, { y: 0, opacity: 1, duration: 1.0, ease: "back.out(1.7)" })
       .to(textEl, { duration: 0.8 })
+      // 2) Switch to "Note"
       .to(textEl, {
         opacity: 0,
         y: -20,
@@ -5306,6 +5305,7 @@ export default function HomePage(): React.JSX.Element {
       .to(textEl, { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: "back.out(1.7)" })
       .to(textEl, { duration: 1.2 });
 
+    // 3) Counter 01 -> 100, slow & smooth (6.5s) — parallel from the start
     tl.to(
       counterObj,
       {
@@ -5322,6 +5322,7 @@ export default function HomePage(): React.JSX.Element {
       0
     );
 
+    // 4) Fade out text & counter
     tl.to(textEl, {
       scale: 0.3,
       opacity: 0,
@@ -5338,29 +5339,32 @@ export default function HomePage(): React.JSX.Element {
         },
         "-=0.8"
       )
-      .to(preloaderEl, {
-        opacity: 0,
-        duration: 0.6,
-        ease: "power2.inOut",
-      })
-      .to(overlayEl, {
-        xPercent: 0,
-        duration: 1.1,
-        ease: "power3.inOut",
-        onStart: () => {
-          if (!killed) setShowMain(true);
+      // 5) Preloader slide OUT to left, main page slide IN from right — parallel
+      .to(
+        preloaderEl,
+        {
+          xPercent: -100,
+          duration: 1.2,
+          ease: "power3.inOut",
+          onComplete: () => {
+            if (preloaderEl) preloaderEl.style.display = "none";
+          },
         },
-      })
-      .to(overlayEl, {
-        xPercent: -100,
-        duration: 1.0,
-        ease: "power3.inOut",
-        delay: 0.15,
-        onComplete: () => {
-          if (overlayEl) overlayEl.style.display = "none";
-          setTimeout(() => ScrollTrigger.refresh(), 300);
+        "-=0.2"
+      )
+      .to(
+        mainEl,
+        {
+          xPercent: 0,
+          duration: 1.2,
+          ease: "power3.inOut",
+          onComplete: () => {
+            setShowMain(true);
+            setTimeout(() => ScrollTrigger.refresh(), 300);
+          },
         },
-      });
+        "<"
+      );
 
     return () => {
       killed = true;
@@ -5417,6 +5421,7 @@ export default function HomePage(): React.JSX.Element {
     }
   }, [activeNoteUser]);
 
+  // Initial loading (before Firebase auth ready) — static preloader
   if (!isMounted || loading) {
     return (
       <div
@@ -5439,7 +5444,6 @@ export default function HomePage(): React.JSX.Element {
             Menuru
           </span>
           <span
-            ref={textRef}
             style={{
               fontSize: "50px",
               fontWeight: 600,
@@ -5447,126 +5451,12 @@ export default function HomePage(): React.JSX.Element {
               fontFamily: FONT_FAMILY,
               letterSpacing: "-0.02em",
               display: "inline-block",
-              willChange: "transform, opacity",
             }}
           >
             Shop
           </span>
         </div>
       </div>
-    );
-  }
-
-  if (!showMain) {
-    return (
-      <>
-        {/* ===== PRELOADER (angka di atas kanan) ===== */}
-        <div
-          ref={preloaderRef}
-          style={{
-            position: "fixed",
-            inset: 0,
-            width: "100%",
-            height: "100%",
-            backgroundColor: WHITE,
-            zIndex: 9999,
-            fontFamily: FONT_FAMILY,
-            overflow: "hidden",
-          }}
-        >
-          {/* Angka counter di atas kanan */}
-          <span
-            ref={counterRef}
-            style={{
-              position: "absolute",
-              top: "10px",
-              right: "40px",
-              fontSize: "400px",
-              fontWeight: 400,
-              color: BLUE,
-              fontFamily: FONT_FAMILY,
-              letterSpacing: "-0.04em",
-              lineHeight: 0.9,
-              display: "inline-block",
-              willChange: "transform, opacity",
-              userSelect: "none",
-              pointerEvents: "none",
-            }}
-          >
-            01
-          </span>
-
-          {/* Konten tengah: Menuru Shop/Note */}
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: "40px", overflow: "hidden" }}>
-              <span
-                style={{
-                  fontSize: "100px",
-                  fontWeight: 400,
-                  color: BLUE,
-                  fontFamily: FONT_FAMILY,
-                  letterSpacing: "-0.03em",
-                }}
-              >
-                Menuru
-              </span>
-              <span
-                ref={textRef}
-                style={{
-                  fontSize: "50px",
-                  fontWeight: 600,
-                  color: BLACK,
-                  fontFamily: FONT_FAMILY,
-                  letterSpacing: "-0.02em",
-                  display: "inline-block",
-                  willChange: "transform, opacity",
-                }}
-              >
-                Shop
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* ===== OVERLAY TRANSISI SLIDE (bukan halaman baru) ===== */}
-        <div
-          ref={overlayRef}
-          style={{
-            position: "fixed",
-            inset: 0,
-            width: "100%",
-            height: "100%",
-            backgroundColor: BLUE,
-            zIndex: 10000,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            transform: "translateX(100%)",
-            willChange: "transform",
-          }}
-        >
-          <span
-            style={{
-              fontFamily: FONT_FAMILY,
-              fontSize: "80px",
-              fontWeight: 700,
-              color: WHITE,
-              letterSpacing: "-0.03em",
-              textTransform: "uppercase",
-            }}
-          >
-            Menuru
-          </span>
-        </div>
-      </>
     );
   }
 
@@ -5595,23 +5485,104 @@ export default function HomePage(): React.JSX.Element {
         <meta name="twitter:image" content="/images/ai.jpg" />
       </Head>
 
-      <LeftNavbar shifted={navbarShifted} />
-      <RightNavbar user={user} auth={auth} db={db} />
-      <CookieConsentPopup user={user} db={db} isMounted={isMounted} />
-
+      {/* ===== PRELOADER (fixed, menutup layar) ===== */}
       <div
+        ref={preloaderRef}
         style={{
+          position: "fixed",
+          inset: 0,
+          width: "100%",
+          height: "100%",
+          backgroundColor: WHITE,
+          zIndex: 9999,
+          fontFamily: FONT_FAMILY,
+          overflow: "hidden",
+          willChange: "transform",
+        }}
+      >
+        {/* Angka counter di atas kanan */}
+        <span
+          ref={counterRef}
+          style={{
+            position: "absolute",
+            top: "10px",
+            right: "40px",
+            fontSize: "400px",
+            fontWeight: 400,
+            color: BLUE,
+            fontFamily: FONT_FAMILY,
+            letterSpacing: "-0.04em",
+            lineHeight: 0.9,
+            display: "inline-block",
+            willChange: "transform, opacity",
+            userSelect: "none",
+            pointerEvents: "none",
+          }}
+        >
+          01
+        </span>
+
+        {/* Center content: Menuru Shop/Note */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "40px", overflow: "hidden" }}>
+            <span
+              style={{
+                fontSize: "100px",
+                fontWeight: 400,
+                color: BLUE,
+                fontFamily: FONT_FAMILY,
+                letterSpacing: "-0.03em",
+              }}
+            >
+              Menuru
+            </span>
+            <span
+              ref={textRef}
+              style={{
+                fontSize: "50px",
+                fontWeight: 600,
+                color: BLACK,
+                fontFamily: FONT_FAMILY,
+                letterSpacing: "-0.02em",
+                display: "inline-block",
+                willChange: "transform, opacity",
+              }}
+            >
+              Shop
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* ===== HALAMAN UTAMA (slide masuk dari kanan) ===== */}
+      <div
+        ref={mainPageRef}
+        style={{
+          position: "relative",
           minHeight: "100vh",
           backgroundColor: WHITE,
           margin: 0,
           padding: 0,
-          position: "relative",
           fontFamily: FONT_FAMILY,
           overflow: "visible",
           display: "flex",
           flexDirection: "column",
+          transform: "translateX(100%)",
+          willChange: "transform",
         }}
       >
+        <LeftNavbar shifted={navbarShifted} />
+        <RightNavbar user={user} auth={auth} db={db} />
+        <CookieConsentPopup user={user} db={db} isMounted={isMounted} />
+
         <HeroMenuruTitle onNavbarShiftChange={setNavbarShifted} />
 
         <div
