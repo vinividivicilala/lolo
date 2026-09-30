@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import Head from "next/head";
 import Link from "next/link";
+import Script from "next/script";
 import { initializeApp, getApps } from "firebase/app";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
 import {
@@ -5364,7 +5365,6 @@ export default function HomePage(): React.JSX.Element {
           ease: "power3.inOut",
           onComplete: () => {
             if (killed) return;
-            // reset transform so subsequent GSAP (ScrollTrigger) uses clean state
             gsap.set(mainEl, { clearProps: "transform,willChange" });
             setTimeout(() => ScrollTrigger.refresh(), 300);
           },
@@ -5489,6 +5489,31 @@ export default function HomePage(): React.JSX.Element {
         <meta name="twitter:description" content="Menuru Brand from Love yourself" />
         <meta name="twitter:image" content="/images/ai.jpg" />
       </Head>
+
+      {/* ===== GOOGLE TAG MANAGER (script) ===== */}
+      <Script
+        id="gtm-script"
+        strategy="afterInteractive"
+        dangerouslySetInnerHTML={{
+          __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-MRD7N2G4');`,
+        }}
+      />
+      {/* ===== END GOOGLE TAG MANAGER (script) ===== */}
+
+      {/* ===== GOOGLE TAG MANAGER (noscript) ===== */}
+      <noscript>
+        <iframe
+          src="https://www.googletagmanager.com/ns.html?id=GTM-MRD7N2G4"
+          height="0"
+          width="0"
+          style={{ display: "none", visibility: "hidden" }}
+        />
+      </noscript>
+      {/* ===== END GOOGLE TAG MANAGER (noscript) ===== */}
 
       {/* ===== WRAPPER: menampung preloader + main page, overflow hidden agar tidak scroll horizontal ===== */}
       <div
