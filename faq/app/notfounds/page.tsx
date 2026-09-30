@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Head from "next/head";
+import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -12,6 +13,19 @@ if (typeof window !== "undefined") {
 const FONT_FAMILY = "'Plus Jakarta Sans'";
 const BLUE = "#0D3CFC";
 const WHITE = "#FFFFFF";
+const BLACK = "#000000";
+
+const footerLinks = [
+  { title: "Get in Touch", links: ["Contact Us", "Instagram", "Live Chat"] },
+  {
+    title: "Product",
+    links: ["Shop", "Note", "Calendar", "Blog", "Donation", "Community", "Live Chat Agent", "Stories"],
+  },
+  {
+    title: "Attention",
+    links: ["Privacy Policy", "Terms & Conditions", "About Us", "Terms of Use", "Cookies Policy", "Help Center"],
+  },
+];
 
 export default function NotFoundPage(): React.JSX.Element {
   const [isMounted, setIsMounted] = useState(false);
@@ -23,6 +37,9 @@ export default function NotFoundPage(): React.JSX.Element {
   const eyeRightRef = useRef<HTMLDivElement>(null);
   const pupilLeftRef = useRef<HTMLDivElement>(null);
   const pupilRightRef = useRef<HTMLDivElement>(null);
+  const mouthRef = useRef<HTMLDivElement>(null);
+  const teethTopRef = useRef<HTMLDivElement>(null);
+  const teethBottomRef = useRef<HTMLDivElement>(null);
   const mouseRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const rafRef = useRef<number>(0);
 
@@ -150,6 +167,63 @@ export default function NotFoundPage(): React.JSX.Element {
     };
   }, [isMounted]);
 
+  // ===== Animasi mulut buka-tutup + gigi bergerak otomatis =====
+  useEffect(() => {
+    if (!isMounted) return;
+    if (!mouthRef.current || !teethTopRef.current || !teethBottomRef.current) return;
+
+    const ctx = gsap.context(() => {
+      // Mulut buka-tutup seperti bernapas
+      const mouthTl = gsap.timeline({ repeat: -1, yoyo: true, defaults: { ease: "sine.inOut" } });
+
+      mouthTl
+        .to(mouthRef.current, {
+          height: "38%",
+          duration: 1.1,
+        })
+        .to(
+          mouthRef.current,
+          {
+            height: "14%",
+            duration: 1.1,
+          },
+          "+=0.4"
+        );
+
+      // Gigi atas turun sedikit saat mulut terbuka
+      gsap.to(teethTopRef.current, {
+        y: "20%",
+        duration: 1.1,
+        ease: "sine.inOut",
+        repeat: -1,
+        yoyo: true,
+        delay: 0.05,
+      });
+
+      // Gigi bawah naik sedikit saat mulut terbuka
+      gsap.to(teethBottomRef.current, {
+        y: "-20%",
+        duration: 1.1,
+        ease: "sine.inOut",
+        repeat: -1,
+        yoyo: true,
+        delay: 0.05,
+      });
+
+      // Lilu/bola kecil bergoyang (lidah minimalist) — opsional
+      gsap.to(".mouth-tongue", {
+        y: "-10%",
+        scaleY: 0.92,
+        duration: 0.9,
+        ease: "sine.inOut",
+        repeat: -1,
+        yoyo: true,
+      });
+    }, containerRef);
+
+    return () => ctx.revert();
+  }, [isMounted]);
+
   if (!isMounted) {
     return <div style={{ minHeight: "100vh", backgroundColor: WHITE, overflow: "hidden" }} />;
   }
@@ -166,242 +240,610 @@ export default function NotFoundPage(): React.JSX.Element {
         <meta name="theme-color" content={BLUE} />
       </Head>
 
+      {/* ===== WRAPPER utama dengan scroll normal untuk footer ===== */}
       <div
-        ref={containerRef}
         style={{
-          width: "100vw",
-          height: "100vh",
+          width: "100%",
+          minHeight: "100vh",
           backgroundColor: WHITE,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
           fontFamily: FONT_FAMILY,
-          overflow: "hidden",
-          position: "fixed",
-          top: 0,
-          left: 0,
+          display: "flex",
+          flexDirection: "column",
+          position: "relative",
+          overflowX: "hidden",
         }}
       >
-        {/* ===== Teks "Sorry" di kiri atas — 2 baris ===== */}
-        <p
-          style={{
-            position: "absolute",
-            top: "clamp(20px, 3vh, 40px)",
-            left: "clamp(20px, 3vw, 40px)",
-            fontFamily: FONT_FAMILY,
-            fontSize: "100px",
-            fontWeight: 700,
-            color: BLUE,
-            lineHeight: 1,
-            letterSpacing: "-0.04em",
-            margin: 0,
-            textAlign: "left",
-          }}
-        >
-          Sorry, we can&apos;t find
-          <br />
-          the page you&apos;re looking for.
-        </p>
-
-        {/* ===== Teks 404 di tengah ===== */}
+        {/* ===== SECTION 404 (fullscreen tanpa scroll) ===== */}
         <div
+          ref={containerRef}
           style={{
+            width: "100%",
+            height: "100vh",
+            backgroundColor: WHITE,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            gap: "1vw",
-            flexWrap: "nowrap",
-            userSelect: "none",
-            lineHeight: 0.85,
+            overflow: "hidden",
+            position: "relative",
+            flexShrink: 0,
           }}
         >
-          {/* Karakter "4" pertama */}
-          <span
-            ref={char4Ref}
+          {/* ===== Teks "Sorry" di kiri atas — 2 baris ===== */}
+          <p
             style={{
+              position: "absolute",
+              top: "clamp(20px, 3vh, 40px)",
+              left: "clamp(20px, 3vw, 40px)",
               fontFamily: FONT_FAMILY,
-              fontSize: "clamp(120px, 26vw, 400px)",
-              fontWeight: 400,
+              fontSize: "100px",
+              fontWeight: 700,
               color: BLUE,
-              lineHeight: 0.85,
-              letterSpacing: "-0.06em",
-              display: "inline-block",
-              willChange: "transform, opacity",
+              lineHeight: 1,
+              letterSpacing: "-0.04em",
+              margin: 0,
+              textAlign: "left",
             }}
           >
-            4
-          </span>
+            Sorry, we can&apos;t find
+            <br />
+            the page you&apos;re looking for.
+          </p>
 
-          {/* Karakter "0" diganti 2 mata + alis melengkung terpisah */}
+          {/* ===== Teks 404 di tengah ===== */}
           <div
-            ref={eyesRef}
             style={{
-              position: "relative",
-              width: "clamp(140px, 24vw, 360px)",
-              height: "clamp(140px, 24vw, 360px)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              willChange: "transform, opacity",
+              gap: "1vw",
+              flexWrap: "nowrap",
+              userSelect: "none",
+              lineHeight: 0.85,
             }}
           >
-            <div
+            {/* Karakter "4" pertama */}
+            <span
+              ref={char4Ref}
               style={{
-                position: "relative",
-                width: "100%",
-                height: "100%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "20%",
+                fontFamily: FONT_FAMILY,
+                fontSize: "clamp(120px, 26vw, 400px)",
+                fontWeight: 400,
+                color: BLUE,
+                lineHeight: 0.85,
+                letterSpacing: "-0.06em",
+                display: "inline-block",
+                willChange: "transform, opacity",
               }}
             >
-              {/* ===== Mata kiri + alis terpisah di atasnya ===== */}
+              4
+            </span>
+
+            {/* Karakter "0" diganti 2 mata + alis + mulut dengan gigi bergerak */}
+            <div
+              ref={eyesRef}
+              style={{
+                position: "relative",
+                width: "clamp(160px, 26vw, 380px)",
+                height: "clamp(200px, 34vw, 500px)",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                willChange: "transform, opacity",
+                gap: "6%",
+              }}
+            >
+              {/* ===== Baris mata ===== */}
               <div
                 style={{
                   position: "relative",
-                  width: "38%",
-                  aspectRatio: "1 / 1",
+                  width: "100%",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
+                  gap: "20%",
                 }}
               >
-                {/* Alis melengkung — terpisah di atas bola mata */}
-                <svg
-                  width="100%"
-                  height="40%"
-                  viewBox="0 0 100 40"
-                  style={{
-                    position: "absolute",
-                    top: "-32%",
-                    left: 0,
-                    overflow: "visible",
-                    pointerEvents: "none",
-                  }}
-                  preserveAspectRatio="none"
-                >
-                  <path
-                    d="M 6 36 Q 50 2 94 36"
-                    fill="none"
-                    stroke={BLUE}
-                    strokeWidth="6"
-                    strokeLinecap="round"
-                    vectorEffect="non-scaling-stroke"
-                  />
-                </svg>
-
-                {/* Bola mata */}
+                {/* Mata kiri + alis */}
                 <div
-                  ref={eyeLeftRef}
                   style={{
-                    width: "100%",
-                    aspectRatio: "1 / 1",
-                    borderRadius: "50%",
-                    border: "clamp(3px, 0.4vw, 6px) solid " + BLUE,
-                    backgroundColor: "transparent",
                     position: "relative",
+                    width: "38%",
+                    aspectRatio: "1 / 1",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    overflow: "hidden",
                   }}
                 >
-                  <div
-                    ref={pupilLeftRef}
+                  <svg
+                    width="100%"
+                    height="40%"
+                    viewBox="0 0 100 40"
                     style={{
-                      width: "44%",
-                      height: "44%",
-                      borderRadius: "50%",
-                      backgroundColor: BLUE,
-                      willChange: "transform",
+                      position: "absolute",
+                      top: "-32%",
+                      left: 0,
+                      overflow: "visible",
+                      pointerEvents: "none",
                     }}
-                  />
+                    preserveAspectRatio="none"
+                  >
+                    <path
+                      d="M 6 36 Q 50 2 94 36"
+                      fill="none"
+                      stroke={BLUE}
+                      strokeWidth="6"
+                      strokeLinecap="round"
+                      vectorEffect="non-scaling-stroke"
+                    />
+                  </svg>
+
+                  <div
+                    ref={eyeLeftRef}
+                    style={{
+                      width: "100%",
+                      aspectRatio: "1 / 1",
+                      borderRadius: "50%",
+                      border: "clamp(3px, 0.4vw, 6px) solid " + BLUE,
+                      backgroundColor: "transparent",
+                      position: "relative",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      overflow: "hidden",
+                    }}
+                  >
+                    <div
+                      ref={pupilLeftRef}
+                      style={{
+                        width: "44%",
+                        height: "44%",
+                        borderRadius: "50%",
+                        backgroundColor: BLUE,
+                        willChange: "transform",
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Mata kanan + alis */}
+                <div
+                  style={{
+                    position: "relative",
+                    width: "38%",
+                    aspectRatio: "1 / 1",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <svg
+                    width="100%"
+                    height="40%"
+                    viewBox="0 0 100 40"
+                    style={{
+                      position: "absolute",
+                      top: "-32%",
+                      left: 0,
+                      overflow: "visible",
+                      pointerEvents: "none",
+                    }}
+                    preserveAspectRatio="none"
+                  >
+                    <path
+                      d="M 6 36 Q 50 2 94 36"
+                      fill="none"
+                      stroke={BLUE}
+                      strokeWidth="6"
+                      strokeLinecap="round"
+                      vectorEffect="non-scaling-stroke"
+                    />
+                  </svg>
+
+                  <div
+                    ref={eyeRightRef}
+                    style={{
+                      width: "100%",
+                      aspectRatio: "1 / 1",
+                      borderRadius: "50%",
+                      border: "clamp(3px, 0.4vw, 6px) solid " + BLUE,
+                      backgroundColor: "transparent",
+                      position: "relative",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      overflow: "hidden",
+                    }}
+                  >
+                    <div
+                      ref={pupilRightRef}
+                      style={{
+                        width: "44%",
+                        height: "44%",
+                        borderRadius: "50%",
+                        backgroundColor: BLUE,
+                        willChange: "transform",
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
 
-              {/* ===== Mata kanan + alis terpisah di atasnya ===== */}
+              {/* ===== Mulut dengan gigi bergerak ===== */}
               <div
+                ref={mouthRef}
                 style={{
                   position: "relative",
-                  width: "38%",
-                  aspectRatio: "1 / 1",
+                  width: "70%",
+                  height: "24%",
+                  border: "clamp(3px, 0.4vw, 6px) solid " + BLUE,
+                  borderRadius: "999px",
+                  backgroundColor: "transparent",
+                  overflow: "hidden",
                   display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
+                  willChange: "height",
                 }}
               >
-                {/* Alis melengkung — terpisah di atas bola mata */}
-                <svg
-                  width="100%"
-                  height="40%"
-                  viewBox="0 0 100 40"
-                  style={{
-                    position: "absolute",
-                    top: "-32%",
-                    left: 0,
-                    overflow: "visible",
-                    pointerEvents: "none",
-                  }}
-                  preserveAspectRatio="none"
-                >
-                  <path
-                    d="M 6 36 Q 50 2 94 36"
-                    fill="none"
-                    stroke={BLUE}
-                    strokeWidth="6"
-                    strokeLinecap="round"
-                    vectorEffect="non-scaling-stroke"
-                  />
-                </svg>
-
-                {/* Bola mata */}
+                {/* Gigi atas */}
                 <div
-                  ref={eyeRightRef}
+                  ref={teethTopRef}
                   style={{
-                    width: "100%",
-                    aspectRatio: "1 / 1",
-                    borderRadius: "50%",
-                    border: "clamp(3px, 0.4vw, 6px) solid " + BLUE,
-                    backgroundColor: "transparent",
-                    position: "relative",
                     display: "flex",
-                    alignItems: "center",
                     justifyContent: "center",
-                    overflow: "hidden",
+                    gap: "6%",
+                    paddingTop: "2%",
+                    willChange: "transform",
                   }}
                 >
                   <div
-                    ref={pupilRightRef}
                     style={{
-                      width: "44%",
-                      height: "44%",
-                      borderRadius: "50%",
-                      backgroundColor: BLUE,
-                      willChange: "transform",
+                      width: "18%",
+                      height: "clamp(10px, 1.2vw, 18px)",
+                      border: "clamp(2px, 0.3vw, 4px) solid " + BLUE,
+                      borderTop: "none",
+                      borderBottomLeftRadius: "6px",
+                      borderBottomRightRadius: "6px",
+                    }}
+                  />
+                  <div
+                    style={{
+                      width: "18%",
+                      height: "clamp(10px, 1.2vw, 18px)",
+                      border: "clamp(2px, 0.3vw, 4px) solid " + BLUE,
+                      borderTop: "none",
+                      borderBottomLeftRadius: "6px",
+                      borderBottomRightRadius: "6px",
+                    }}
+                  />
+                  <div
+                    style={{
+                      width: "18%",
+                      height: "clamp(10px, 1.2vw, 18px)",
+                      border: "clamp(2px, 0.3vw, 4px) solid " + BLUE,
+                      borderTop: "none",
+                      borderBottomLeftRadius: "6px",
+                      borderBottomRightRadius: "6px",
+                    }}
+                  />
+                </div>
+
+                {/* Lidah minimalist (opsional) */}
+                <div
+                  className="mouth-tongue"
+                  style={{
+                    alignSelf: "center",
+                    width: "32%",
+                    height: "30%",
+                    borderRadius: "0 0 999px 999px",
+                    border: "clamp(2px, 0.3vw, 4px) solid " + BLUE,
+                    borderTop: "none",
+                    backgroundColor: "transparent",
+                    willChange: "transform",
+                  }}
+                />
+
+                {/* Gigi bawah */}
+                <div
+                  ref={teethBottomRef}
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    gap: "6%",
+                    paddingBottom: "2%",
+                    willChange: "transform",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: "18%",
+                      height: "clamp(10px, 1.2vw, 18px)",
+                      border: "clamp(2px, 0.3vw, 4px) solid " + BLUE,
+                      borderBottom: "none",
+                      borderTopLeftRadius: "6px",
+                      borderTopRightRadius: "6px",
+                    }}
+                  />
+                  <div
+                    style={{
+                      width: "18%",
+                      height: "clamp(10px, 1.2vw, 18px)",
+                      border: "clamp(2px, 0.3vw, 4px) solid " + BLUE,
+                      borderBottom: "none",
+                      borderTopLeftRadius: "6px",
+                      borderTopRightRadius: "6px",
+                    }}
+                  />
+                  <div
+                    style={{
+                      width: "18%",
+                      height: "clamp(10px, 1.2vw, 18px)",
+                      border: "clamp(2px, 0.3vw, 4px) solid " + BLUE,
+                      borderBottom: "none",
+                      borderTopLeftRadius: "6px",
+                      borderTopRightRadius: "6px",
                     }}
                   />
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Karakter "4" kedua */}
-          <span
-            ref={char4bRef}
+            {/* Karakter "4" kedua */}
+            <span
+              ref={char4bRef}
+              style={{
+                fontFamily: FONT_FAMILY,
+                fontSize: "clamp(120px, 26vw, 400px)",
+                fontWeight: 400,
+                color: BLUE,
+                lineHeight: 0.85,
+                letterSpacing: "-0.06em",
+                display: "inline-block",
+                willChange: "transform, opacity",
+              }}
+            >
+              4
+            </span>
+          </div>
+        </div>
+
+        {/* ===== FOOTER LENGKAP dari halaman utama ===== */}
+        <div
+          style={{
+            width: "100%",
+            padding: "60px 40px 40px 40px",
+            backgroundColor: WHITE,
+            borderTop: "1px solid rgba(0,0,0,0.05)",
+            position: "relative",
+            overflow: "hidden",
+            flexShrink: 0,
+          }}
+        >
+          <div
             style={{
-              fontFamily: FONT_FAMILY,
-              fontSize: "clamp(120px, 26vw, 400px)",
-              fontWeight: 400,
-              color: BLUE,
-              lineHeight: 0.85,
-              letterSpacing: "-0.06em",
-              display: "inline-block",
-              willChange: "transform, opacity",
+              position: "absolute",
+              left: "40px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              width: "200px",
+              height: "auto",
+              opacity: 0.8,
             }}
           >
-            4
+            <img src="/images/p0l.jpg" alt="" style={{ width: "100%", height: "auto", display: "block", objectFit: "cover" }} />
+          </div>
+          <div
+            style={{
+              position: "absolute",
+              right: "40px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              width: "200px",
+              height: "auto",
+              opacity: 0.8,
+            }}
+          >
+            <img src="/images/xxz.jpg" alt="" style={{ width: "100%", height: "auto", display: "block", objectFit: "cover" }} />
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+              maxWidth: "1400px",
+              margin: "0 auto",
+              gap: "40px",
+              flexWrap: "wrap",
+              position: "relative",
+              zIndex: 1,
+            }}
+          >
+            {footerLinks.map((section, idx) => (
+              <div key={idx} style={{ flex: "1", minWidth: "200px" }}>
+                <h3
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "28px",
+                    fontWeight: 600,
+                    color: BLACK,
+                    margin: 0,
+                    marginBottom: "16px",
+                    letterSpacing: "-0.01em",
+                  }}
+                >
+                  {section.title}
+                </h3>
+                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                  {section.links.map((link, linkIdx) => {
+                    let linkHref = "#";
+                    let isAttention = false;
+                    let isStories = false;
+                    if (link === "Contact Us") linkHref = "/contact";
+                    else if (link === "Live Chat") linkHref = "/live-chat";
+                    else if (link === "Live Chat Agent") linkHref = "/live-chat-agent";
+                    else if (link === "Help Center") linkHref = "/pusat-bantuan";
+                    else if (link === "About Us") {
+                      linkHref = "/profile";
+                      isAttention = true;
+                    } else if (link === "Privacy Policy") {
+                      linkHref = "/privacy-policy";
+                      isAttention = true;
+                    } else if (link === "Terms & Conditions") {
+                      linkHref = "/terms-of-services";
+                      isAttention = true;
+                    } else if (link === "Terms of Use") {
+                      linkHref = "/terms-of-use";
+                      isAttention = true;
+                    } else if (link === "Cookies Policy") {
+                      linkHref = "/cookie-policy";
+                      isAttention = true;
+                    } else if (link === "Stories") {
+                      linkHref = "/stories";
+                      isStories = true;
+                    } else if (link === "Shop") linkHref = "/shop";
+                    else if (link === "Note") linkHref = "/note";
+                    else if (link === "Calendar") linkHref = "/calendar";
+                    else if (link === "Blog") linkHref = "/blog";
+                    else if (link === "Donation") linkHref = "/donation";
+                    else if (link === "Community") linkHref = "/community";
+                    else if (link === "Instagram") linkHref = "https://instagram.com/menuru";
+
+                    return (
+                      <div key={linkIdx} style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                        <Link href={linkHref} style={{ textDecoration: "none" }}>
+                          <span
+                            style={{
+                              fontFamily: FONT_FAMILY,
+                              fontSize: "20px",
+                              fontWeight: 400,
+                              color: BLUE,
+                              letterSpacing: "-0.01em",
+                              cursor: "pointer",
+                            }}
+                          >
+                            {link}
+                          </span>
+                        </Link>
+                        {isAttention && (
+                          <span
+                            style={{
+                              backgroundColor: WHITE,
+                              border: `1.5px solid ${BLUE}`,
+                              color: BLUE,
+                              padding: "2px 8px",
+                              borderRadius: "4px",
+                              fontSize: "10px",
+                              fontWeight: 800,
+                              fontFamily: FONT_FAMILY,
+                              letterSpacing: "0.5px",
+                              textTransform: "uppercase",
+                              display: "inline-block",
+                            }}
+                          >
+                            Updated
+                          </span>
+                        )}
+                        {isStories && (
+                          <span
+                            style={{
+                              backgroundColor: WHITE,
+                              border: `1.5px solid ${BLUE}`,
+                              color: BLUE,
+                              padding: "2px 8px",
+                              borderRadius: "4px",
+                              fontSize: "10px",
+                              fontWeight: 800,
+                              fontFamily: FONT_FAMILY,
+                              letterSpacing: "0.5px",
+                              textTransform: "uppercase",
+                              display: "inline-block",
+                            }}
+                          >
+                            New
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div
+            style={{
+              maxWidth: "1400px",
+              margin: "40px auto 0 auto",
+              paddingTop: "20px",
+              borderTop: "1px solid rgba(0,0,0,0.05)",
+              position: "relative",
+              zIndex: 1,
+            }}
+          >
+            <p
+              style={{
+                fontFamily: FONT_FAMILY,
+                fontSize: "14px",
+                fontWeight: 400,
+                color: "#666",
+                margin: 0,
+                textAlign: "center",
+                letterSpacing: "0.01em",
+              }}
+            >
+              Terms and conditions apply. By using this website, you agree to our Terms of Use and Privacy Policy.
+            </p>
+          </div>
+        </div>
+
+        {/* ===== FOOTER MENURU besar + copyright ===== */}
+        <div
+          style={{
+            width: "100%",
+            padding: "0 40px 20px 40px",
+            backgroundColor: WHITE,
+            overflow: "visible",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "flex-start",
+            position: "relative",
+            flexShrink: 0,
+          }}
+        >
+          <span
+            style={{
+              fontFamily: FONT_FAMILY,
+              fontSize: "clamp(120px, 40vw, 600px)",
+              fontWeight: 400,
+              color: BLUE,
+              letterSpacing: "-0.05em",
+              lineHeight: "0.85",
+              display: "block",
+              textAlign: "left",
+              WebkitFontSmoothing: "antialiased",
+              whiteSpace: "nowrap",
+              margin: 0,
+              padding: 0,
+            }}
+          >
+            Menuru
           </span>
+          <div style={{ width: "100%", display: "flex", justifyContent: "flex-start", marginTop: "10px" }}>
+            <span
+              style={{
+                fontFamily: FONT_FAMILY,
+                fontSize: "16px",
+                fontWeight: 400,
+                color: BLUE,
+                letterSpacing: "0.01em",
+                opacity: 0.8,
+              }}
+            >
+              2024 - 2026 Menuru. All rights reserved.
+            </span>
+          </div>
         </div>
       </div>
 
@@ -412,8 +854,7 @@ export default function NotFoundPage(): React.JSX.Element {
           padding: 0;
           background-color: #ffffff;
           width: 100%;
-          height: 100%;
-          overflow: hidden !important;
+          min-height: 100%;
           -ms-overflow-style: none;
           scrollbar-width: none;
         }
@@ -425,9 +866,6 @@ export default function NotFoundPage(): React.JSX.Element {
         }
         * {
           box-sizing: border-box;
-        }
-        #__next {
-          overflow: hidden;
         }
       `}</style>
     </>
