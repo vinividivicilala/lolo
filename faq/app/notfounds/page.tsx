@@ -43,6 +43,8 @@ export default function NotFoundPage(): React.JSX.Element {
   const teethBottomRef = useRef<HTMLDivElement>(null);
   const menuruBigRef = useRef<HTMLSpanElement>(null);
   const pageNotFoundRef = useRef<HTMLDivElement>(null);
+  const sadEmojiRef = useRef<SVGSVGElement>(null);
+  const tearRef = useRef<SVGEllipseElement>(null);
   const smoothWrapperRef = useRef<HTMLDivElement>(null);
   const smoothContentRef = useRef<HTMLDivElement>(null);
   const mouseRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -263,7 +265,7 @@ export default function NotFoundPage(): React.JSX.Element {
     return () => ctx.revert();
   }, [isMounted]);
 
-  // ===== Animasi "Page not found" fade-in setelah 404 landing =====
+  // ===== Animasi "Page not found" + emoticon sedih =====
   useEffect(() => {
     if (!isMounted) return;
     if (!pageNotFoundRef.current) return;
@@ -280,6 +282,40 @@ export default function NotFoundPage(): React.JSX.Element {
           delay: 1.6,
         }
       );
+
+      // Emoticon goyang pelan
+      if (sadEmojiRef.current) {
+        gsap.to(sadEmojiRef.current, {
+          rotate: 4,
+          duration: 1.4,
+          ease: "sine.inOut",
+          repeat: -1,
+          yoyo: true,
+          transformOrigin: "50% 50%",
+        });
+      }
+
+      // Air mata jatuh dari mata kanan
+      if (tearRef.current) {
+        gsap.set(tearRef.current, { y: 0, opacity: 0 });
+        gsap.to(tearRef.current, {
+          y: 22,
+          opacity: 1,
+          duration: 1.6,
+          ease: "power1.in",
+          repeat: -1,
+          repeatDelay: 0.4,
+          yoyo: false,
+          onStart: () => {
+            gsap.set(tearRef.current, { opacity: 0 });
+          },
+          keyframes: [
+            { opacity: 1, y: 0, duration: 0.01 },
+            { opacity: 1, y: 22, duration: 1.4, ease: "power1.in" },
+            { opacity: 0, y: 26, duration: 0.2 },
+          ],
+        });
+      }
     }, containerRef);
 
     return () => ctx.revert();
@@ -686,7 +722,7 @@ export default function NotFoundPage(): React.JSX.Element {
                 </span>
               </div>
 
-              {/* ===== Teks "Page not found" + emoticon minimalist di sisi kanan bawah ===== */}
+              {/* ===== Teks "Page not found" + emoticon sedih di sisi kanan bawah ===== */}
               <div
                 ref={pageNotFoundRef}
                 style={{
@@ -695,7 +731,7 @@ export default function NotFoundPage(): React.JSX.Element {
                   marginRight: "clamp(20px, 4vw, 60px)",
                   display: "flex",
                   alignItems: "center",
-                  gap: "10px",
+                  gap: "20px",
                   opacity: 0,
                   willChange: "transform, opacity",
                 }}
@@ -703,42 +739,72 @@ export default function NotFoundPage(): React.JSX.Element {
                 <span
                   style={{
                     fontFamily: FONT_FAMILY,
-                    fontSize: "40px",
+                    fontSize: "100px",
                     fontWeight: 400,
                     color: BLACK,
-                    letterSpacing: "-0.02em",
+                    letterSpacing: "-0.04em",
                     lineHeight: 1,
+                    whiteSpace: "nowrap",
                   }}
                 >
                   Page not found
                 </span>
 
-                {/* Emoticon minimalist — lingkaran dengan 2 mata + mulut senyum */}
+                {/* Emoticon sedih minimalist */}
                 <svg
-                  width="42"
-                  height="42"
-                  viewBox="0 0 42 42"
+                  ref={sadEmojiRef}
+                  width="120"
+                  height="120"
+                  viewBox="0 0 120 120"
                   fill="none"
                   style={{ display: "block", flexShrink: 0 }}
                   aria-hidden="true"
                 >
+                  {/* Lingkaran kepala */}
                   <circle
-                    cx="21"
-                    cy="21"
-                    r="19"
+                    cx="60"
+                    cy="60"
+                    r="52"
                     stroke={BLACK}
-                    strokeWidth="2.5"
+                    strokeWidth="5"
                     fill="none"
                   />
-                  {/* Mata kiri */}
-                  <circle cx="15" cy="17" r="2" fill={BLACK} />
-                  {/* Mata kanan */}
-                  <circle cx="27" cy="17" r="2" fill={BLACK} />
-                  {/* Senyum */}
+
+                  {/* Alis kiri miring turun ke dalam (sedih) */}
                   <path
-                    d="M 13 25 Q 21 32 29 25"
+                    d="M 30 36 L 48 30"
                     stroke={BLACK}
-                    strokeWidth="2.5"
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                  />
+                  {/* Alis kanan miring turun ke dalam (sedih) */}
+                  <path
+                    d="M 90 36 L 72 30"
+                    stroke={BLACK}
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                  />
+
+                  {/* Mata kiri */}
+                  <circle cx="42" cy="52" r="5" fill={BLACK} />
+                  {/* Mata kanan */}
+                  <circle cx="78" cy="52" r="5" fill={BLACK} />
+
+                  {/* Air mata jatuh dari mata kanan */}
+                  <ellipse
+                    ref={tearRef}
+                    cx="82"
+                    cy="64"
+                    rx="3.5"
+                    ry="6"
+                    fill={BLACK}
+                  />
+
+                  {/* Mulut sedih melengkung ke bawah */}
+                  <path
+                    d="M 40 92 Q 60 78 80 92"
+                    stroke={BLACK}
+                    strokeWidth="5"
                     strokeLinecap="round"
                     fill="none"
                   />
