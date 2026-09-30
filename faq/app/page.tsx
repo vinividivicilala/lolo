@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import Head from "next/head";
 import Link from "next/link";
+import Script from "next/script";
 import { initializeApp, getApps } from "firebase/app";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
 import {
@@ -5266,7 +5267,6 @@ export default function HomePage(): React.JSX.Element {
     return () => unsub();
   }, [db, user, isMounted]);
 
-  // ===== PRELOADER -> MAIN PAGE slide from RIGHT (single render tree) =====
   useEffect(() => {
     if (!isMounted || loading) return;
 
@@ -5481,26 +5481,34 @@ export default function HomePage(): React.JSX.Element {
         <meta name="twitter:description" content="Menuru Brand from Love yourself" />
         <meta name="twitter:image" content="/images/ai.jpg" />
 
-        {/* ===== GOOGLE ADSENSE SNIPPET (pakai <script> biasa agar muncul di page source) ===== */}
-        <script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6198767676395468"
-          crossOrigin="anonymous"
-        ></script>
-        {/* ===== END GOOGLE ADSENSE SNIPPET ===== */}
+        {/* ===== GOOGLE ADSENSE META ===== */}
+        <meta name="google-adsense-account" content="ca-pub-6198767676395468" />
+        {/* ===== END GOOGLE ADSENSE META ===== */}
+      </Head>
 
-        {/* ===== GOOGLE TAG MANAGER (pakai <script> biasa) ===== */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+      {/* ===== GOOGLE TAG MANAGER (pakai next/script, beforeInteractive) ===== */}
+      <Script
+        id="gtm-script"
+        strategy="beforeInteractive"
+        dangerouslySetInnerHTML={{
+          __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
 })(window,document,'script','dataLayer','GTM-MRD7N2G4');`,
-          }}
-        />
-        {/* ===== END GOOGLE TAG MANAGER ===== */}
-      </Head>
+        }}
+      />
+      {/* ===== END GOOGLE TAG MANAGER ===== */}
+
+      {/* ===== GOOGLE ADSENSE (pakai next/script, beforeInteractive) ===== */}
+      <Script
+        id="adsbygoogle-init"
+        strategy="beforeInteractive"
+        async
+        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6198767676395468"
+        crossOrigin="anonymous"
+      />
+      {/* ===== END GOOGLE ADSENSE ===== */}
 
       {/* ===== GOOGLE TAG MANAGER (noscript) ===== */}
       <noscript>
@@ -5513,7 +5521,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       </noscript>
       {/* ===== END GOOGLE TAG MANAGER (noscript) ===== */}
 
-      {/* ===== WRAPPER: menampung preloader + main page ===== */}
+      {/* ===== WRAPPER ===== */}
       <div
         ref={wrapperRef}
         style={{
@@ -5524,7 +5532,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           backgroundColor: WHITE,
         }}
       >
-        {/* ===== PRELOADER (fixed, menutupi layar) ===== */}
+        {/* ===== PRELOADER ===== */}
         <div
           ref={preloaderRef}
           style={{
@@ -5603,7 +5611,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           </div>
         </div>
 
-        {/* ===== HALAMAN UTAMA (slide masuk dari kanan) ===== */}
+        {/* ===== HALAMAN UTAMA ===== */}
         <div
           ref={mainPageRef}
           style={{
