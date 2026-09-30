@@ -182,21 +182,20 @@ export default function NotFoundPage(): React.JSX.Element {
           left: 0,
         }}
       >
-        {/* ===== Teks "Sorry" di kiri atas ===== */}
+        {/* ===== Teks "Sorry" di kiri atas — 1 baris ke samping ===== */}
         <p
           style={{
             position: "absolute",
-            top: "clamp(24px, 4vh, 60px)",
-            left: "clamp(24px, 4vw, 60px)",
+            top: "clamp(20px, 3vh, 40px)",
+            left: "clamp(20px, 3vw, 40px)",
             fontFamily: FONT_FAMILY,
-            fontSize: "clamp(40px, 22vw, 300px)",
+            fontSize: "100px",
             fontWeight: 700,
             color: BLUE,
-            lineHeight: 0.9,
-            letterSpacing: "-0.05em",
+            lineHeight: 1,
+            letterSpacing: "-0.04em",
             margin: 0,
-            maxWidth: "45vw",
-            textAlign: "left",
+            whiteSpace: "nowrap",
           }}
         >
           Sorry, we can&apos;t find the page you&apos;re looking for.
