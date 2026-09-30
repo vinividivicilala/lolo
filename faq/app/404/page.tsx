@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from "react";
-import Head from "next/head";
 import Link from "next/link";
 import gsap from "gsap";
 
@@ -42,7 +41,7 @@ const Eye = ({
     const dy = mouseY - eyeCenterY;
     const dist = Math.sqrt(dx * dx + dy * dy);
 
-    const maxOffset = size * 0.22; // max pupil movement
+    const maxOffset = size * 0.22;
     const angle = Math.atan2(dy, dx);
     const clampedDist = Math.min(dist, maxOffset * 4);
     const moveX = (Math.cos(angle) * Math.min(clampedDist, maxOffset)) / 2;
@@ -89,7 +88,6 @@ const Eye = ({
           willChange: "transform",
         }}
       >
-        {/* Highlight */}
         <div
           style={{
             position: "absolute",
@@ -108,15 +106,15 @@ const Eye = ({
 };
 
 // ===== 404 PAGE =====
-export default function Custom404(): React.JSX.Element {
+export default function Page404(): React.JSX.Element {
   const [isMounted, setIsMounted] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
   const containerRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLDivElement>(null);
-  const char1Ref = useRef<HTMLSpanElement>(null); // "4"
-  const emoticonRef = useRef<HTMLDivElement>(null); // "0" replaced with face
-  const char3Ref = useRef<HTMLSpanElement>(null); // "4"
+  const char1Ref = useRef<HTMLSpanElement>(null);
+  const emoticonRef = useRef<HTMLDivElement>(null);
+  const char3Ref = useRef<HTMLSpanElement>(null);
   const eyeLeftRef = useRef<HTMLDivElement>(null);
   const eyeRightRef = useRef<HTMLDivElement>(null);
 
@@ -124,7 +122,6 @@ export default function Custom404(): React.JSX.Element {
     setIsMounted(true);
   }, []);
 
-  // Track mouse movement
   useEffect(() => {
     if (!isMounted) return;
     const handleMouseMove = (e: MouseEvent) => {
@@ -134,7 +131,6 @@ export default function Custom404(): React.JSX.Element {
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, [isMounted]);
 
-  // GSAP falling animation
   useEffect(() => {
     if (!isMounted) return;
     if (!char1Ref.current || !emoticonRef.current || !char3Ref.current) return;
@@ -142,14 +138,12 @@ export default function Custom404(): React.JSX.Element {
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({ delay: 0.2 });
 
-      // Initial: all characters far above, rotated
       gsap.set([char1Ref.current, emoticonRef.current, char3Ref.current], {
         yPercent: -800,
         opacity: 0,
         rotation: -180,
       });
 
-      // Drop character 1
       tl.to(char1Ref.current, {
         yPercent: 0,
         opacity: 1,
@@ -158,7 +152,6 @@ export default function Custom404(): React.JSX.Element {
         ease: "bounce.out",
       });
 
-      // Drop emoticon (0)
       tl.to(
         emoticonRef.current,
         {
@@ -171,7 +164,6 @@ export default function Custom404(): React.JSX.Element {
         "-=1.3"
       );
 
-      // Drop character 3
       tl.to(
         char3Ref.current,
         {
@@ -184,7 +176,6 @@ export default function Custom404(): React.JSX.Element {
         "-=1.3"
       );
 
-      // Ground shake after landing
       tl.to(
         containerRef.current,
         {
@@ -200,7 +191,6 @@ export default function Custom404(): React.JSX.Element {
         "-=0.2"
       );
 
-      // Title content fade-in (subtitle + button)
       if (titleRef.current) {
         const children = titleRef.current.querySelectorAll(".fade-in-item");
         gsap.set(children, { y: 30, opacity: 0 });
@@ -226,196 +216,166 @@ export default function Custom404(): React.JSX.Element {
   }
 
   return (
-    <>
-      <Head>
-        <title>404 — Page Not Found | Menuru</title>
-        <meta name="description" content="Halaman tidak ditemukan" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
-        <meta name="theme-color" content={BLUE} />
-        <link rel="icon" href="/images/ai.jpg" type="image/jpeg" />
-        <link rel="apple-touch-icon" href="/images/ai.jpg" />
-      </Head>
-
+    <div
+      ref={containerRef}
+      style={{
+        minHeight: "100vh",
+        width: "100%",
+        backgroundColor: WHITE,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        fontFamily: FONT_FAMILY,
+        padding: "40px 20px",
+        overflow: "hidden",
+        position: "relative",
+      }}
+    >
       <div
-        ref={containerRef}
+        ref={titleRef}
         style={{
-          minHeight: "100vh",
-          width: "100%",
-          backgroundColor: WHITE,
           display: "flex",
-          flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          fontFamily: FONT_FAMILY,
-          padding: "40px 20px",
-          overflow: "hidden",
-          position: "relative",
+          gap: "clamp(8px, 2vw, 24px)",
+          lineHeight: 0.85,
+          marginBottom: "60px",
+          userSelect: "none",
+          flexWrap: "nowrap",
         }}
       >
-        {/* ===== 4 0 4 ===== */}
-        <div
-          ref={titleRef}
+        <span
+          ref={char1Ref}
           style={{
+            fontFamily: FONT_FAMILY,
+            fontSize: "clamp(180px, 40vw, 700px)",
+            fontWeight: 700,
+            color: BLUE,
+            letterSpacing: "-0.06em",
+            display: "inline-block",
+            willChange: "transform, opacity",
+            lineHeight: 0.85,
+          }}
+        >
+          4
+        </span>
+
+        <div
+          ref={emoticonRef}
+          style={{
+            width: "clamp(180px, 40vw, 700px)",
+            height: "clamp(180px, 40vw, 700px)",
+            borderRadius: "50%",
+            border: `clamp(8px, 2vw, 26px) solid ${BLUE}`,
+            backgroundColor: WHITE,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            gap: "clamp(8px, 2vw, 24px)",
-            lineHeight: 0.85,
-            marginBottom: "60px",
-            userSelect: "none",
-            flexWrap: "nowrap",
+            gap: "clamp(10px, 4%, 40px)",
+            position: "relative",
+            boxSizing: "border-box",
+            willChange: "transform, opacity",
+            flexShrink: 0,
           }}
         >
-          {/* First "4" */}
-          <span
-            ref={char1Ref}
-            style={{
-              fontFamily: FONT_FAMILY,
-              fontSize: "clamp(180px, 40vw, 700px)",
-              fontWeight: 700,
-              color: BLUE,
-              letterSpacing: "-0.06em",
-              display: "inline-block",
-              willChange: "transform, opacity",
-              lineHeight: 0.85,
-            }}
-          >
-            4
-          </span>
-
-          {/* "0" replaced with emoticon face + 2 tracking eyes */}
-          <div
-            ref={emoticonRef}
-            style={{
-              width: "clamp(180px, 40vw, 700px)",
-              height: "clamp(180px, 40vw, 700px)",
-              borderRadius: "50%",
-              border: `clamp(8px, 2vw, 26px) solid ${BLUE}`,
-              backgroundColor: WHITE,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "clamp(10px, 4%, 40px)",
-              position: "relative",
-              boxSizing: "border-box",
-              willChange: "transform, opacity",
-              flexShrink: 0,
-            }}
-          >
-            {/* Left eye */}
-            <Eye
-              mouseX={mousePos.x}
-              mouseY={mousePos.y}
-              eyeRef={eyeLeftRef}
-              size={Math.round(700 * 0.16)}
-            />
-            {/* Right eye */}
-            <Eye
-              mouseX={mousePos.x}
-              mouseY={mousePos.y}
-              eyeRef={eyeRightRef}
-              size={Math.round(700 * 0.16)}
-            />
-          </div>
-
-          {/* Last "4" */}
-          <span
-            ref={char3Ref}
-            style={{
-              fontFamily: FONT_FAMILY,
-              fontSize: "clamp(180px, 40vw, 700px)",
-              fontWeight: 700,
-              color: BLUE,
-              letterSpacing: "-0.06em",
-              display: "inline-block",
-              willChange: "transform, opacity",
-              lineHeight: 0.85,
-            }}
-          >
-            4
-          </span>
+          <Eye
+            mouseX={mousePos.x}
+            mouseY={mousePos.y}
+            eyeRef={eyeLeftRef}
+            size={Math.round(700 * 0.16)}
+          />
+          <Eye
+            mouseX={mousePos.x}
+            mouseY={mousePos.y}
+            eyeRef={eyeRightRef}
+            size={Math.round(700 * 0.16)}
+          />
         </div>
 
-        {/* ===== Subtitle ===== */}
-        <h1
-          className="fade-in-item"
+        <span
+          ref={char3Ref}
           style={{
             fontFamily: FONT_FAMILY,
-            fontSize: "clamp(20px, 2.4vw, 36px)",
+            fontSize: "clamp(180px, 40vw, 700px)",
             fontWeight: 700,
             color: BLUE,
-            letterSpacing: "-0.02em",
-            margin: 0,
-            marginBottom: "16px",
-            textAlign: "center",
+            letterSpacing: "-0.06em",
+            display: "inline-block",
+            willChange: "transform, opacity",
+            lineHeight: 0.85,
           }}
         >
-          Halaman tidak ditemukan
-        </h1>
-
-        {/* ===== Description ===== */}
-        <p
-          className="fade-in-item"
-          style={{
-            fontFamily: FONT_FAMILY,
-            fontSize: "clamp(14px, 1.2vw, 18px)",
-            fontWeight: 400,
-            color: "#666",
-            lineHeight: 1.6,
-            maxWidth: "520px",
-            textAlign: "center",
-            margin: 0,
-            marginBottom: "40px",
-          }}
-        >
-          Sepertinya halaman yang Anda cari sudah dipindahkan, dihapus, atau tidak pernah ada.
-        </p>
-
-        {/* ===== Button: Back Home ===== */}
-        <div className="fade-in-item">
-          <Link href="/" style={{ textDecoration: "none" }}>
-            <button
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "10px",
-                padding: "14px 28px",
-                backgroundColor: BLUE,
-                color: WHITE,
-                border: "none",
-                borderRadius: "12px",
-                fontFamily: FONT_FAMILY,
-                fontSize: "15px",
-                fontWeight: 700,
-                letterSpacing: "0.02em",
-                cursor: "pointer",
-                transition: "transform 0.2s ease, background-color 0.25s ease",
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.transform = "translateY(-2px)";
-                (e.currentTarget as HTMLButtonElement).style.backgroundColor = BLACK;
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.transform = "translateY(0)";
-                (e.currentTarget as HTMLButtonElement).style.backgroundColor = BLUE;
-              }}
-            >
-              <span>Kembali ke Home</span>
-              <NorthEastArrow size={18} color={WHITE} />
-            </button>
-          </Link>
-        </div>
+          4
+        </span>
       </div>
 
-      <style jsx global>{`
-        html,
-        body {
-          margin: 0;
-          padding: 0;
-          background-color: #ffffff !important;
-          overflow-x: hidden;
-        }
-      `}</style>
-    </>
+      <h1
+        className="fade-in-item"
+        style={{
+          fontFamily: FONT_FAMILY,
+          fontSize: "clamp(20px, 2.4vw, 36px)",
+          fontWeight: 700,
+          color: BLUE,
+          letterSpacing: "-0.02em",
+          margin: 0,
+          marginBottom: "16px",
+          textAlign: "center",
+        }}
+      >
+        Halaman tidak ditemukan
+      </h1>
+
+      <p
+        className="fade-in-item"
+        style={{
+          fontFamily: FONT_FAMILY,
+          fontSize: "clamp(14px, 1.2vw, 18px)",
+          fontWeight: 400,
+          color: "#666",
+          lineHeight: 1.6,
+          maxWidth: "520px",
+          textAlign: "center",
+          margin: 0,
+          marginBottom: "40px",
+        }}
+      >
+        Sepertinya halaman yang Anda cari sudah dipindahkan, dihapus, atau tidak pernah ada.
+      </p>
+
+      <div className="fade-in-item">
+        <Link href="/" style={{ textDecoration: "none" }}>
+          <button
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "10px",
+              padding: "14px 28px",
+              backgroundColor: BLUE,
+              color: WHITE,
+              border: "none",
+              borderRadius: "12px",
+              fontFamily: FONT_FAMILY,
+              fontSize: "15px",
+              fontWeight: 700,
+              letterSpacing: "0.02em",
+              cursor: "pointer",
+              transition: "transform 0.2s ease, background-color 0.25s ease",
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.transform = "translateY(-2px)";
+              (e.currentTarget as HTMLButtonElement).style.backgroundColor = BLACK;
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.transform = "translateY(0)";
+              (e.currentTarget as HTMLButtonElement).style.backgroundColor = BLUE;
+            }}
+          >
+            <span>Kembali ke Home</span>
+            <NorthEastArrow size={18} color={WHITE} />
+          </button>
+        </Link>
+      </div>
+    </div>
   );
 }
