@@ -42,6 +42,7 @@ export default function NotFoundPage(): React.JSX.Element {
   const teethTopRef = useRef<HTMLDivElement>(null);
   const teethBottomRef = useRef<HTMLDivElement>(null);
   const menuruBigRef = useRef<HTMLSpanElement>(null);
+  const pageNotFoundRef = useRef<HTMLDivElement>(null);
   const smoothWrapperRef = useRef<HTMLDivElement>(null);
   const smoothContentRef = useRef<HTMLDivElement>(null);
   const mouseRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -149,8 +150,7 @@ export default function NotFoundPage(): React.JSX.Element {
       mouseRef.current = { x: e.clientX, y: e.clientY };
     };
 
-    // Nilai-nilai mulut (smooth via lerp)
-    let mouthOpenTarget = 24; // % height target
+    let mouthOpenTarget = 24;
     let mouthOpenCurrent = 24;
     let teethTopTarget = 0;
     let teethTopCurrent = 0;
@@ -164,7 +164,6 @@ export default function NotFoundPage(): React.JSX.Element {
       const pupilR = pupilRightRef.current;
       const mouth = mouthRef.current;
 
-      // ---- Pupil kiri ----
       if (eyeL && pupilL) {
         const rect = eyeL.getBoundingClientRect();
         const cx = rect.left + rect.width / 2;
@@ -179,7 +178,6 @@ export default function NotFoundPage(): React.JSX.Element {
         gsap.set(pupilL, { x: moveX, y: moveY });
       }
 
-      // ---- Pupil kanan ----
       if (eyeR && pupilR) {
         const rect = eyeR.getBoundingClientRect();
         const cx = rect.left + rect.width / 2;
@@ -194,7 +192,6 @@ export default function NotFoundPage(): React.JSX.Element {
         gsap.set(pupilR, { x: moveX, y: moveY });
       }
 
-      // ---- Mulut + gigi berdasarkan jarak cursor ke mulut ----
       if (mouth) {
         const rect = mouth.getBoundingClientRect();
         const cx = rect.left + rect.width / 2;
@@ -203,20 +200,15 @@ export default function NotFoundPage(): React.JSX.Element {
         const dy = mouseRef.current.y - cy;
         const dist = Math.hypot(dx, dy);
 
-        // Semakin dekat cursor, mulut makin terbuka
-        // Mapping: dist >= 600 → open 14%, dist <= 80 → open 42%
         const minDist = 80;
         const maxDist = 600;
         const clampedDist = Math.max(minDist, Math.min(maxDist, dist));
-        const t = 1 - (clampedDist - minDist) / (maxDist - minDist); // 1 = dekat, 0 = jauh
-        mouthOpenTarget = 14 + t * 28; // 14% .. 42%
-
-        // Gigi bergerak proporsional dengan bukaan mulut
-        teethTopTarget = t * 24; // 0% .. 24%
+        const t = 1 - (clampedDist - minDist) / (maxDist - minDist);
+        mouthOpenTarget = 14 + t * 28;
+        teethTopTarget = t * 24;
         teethBottomTarget = -t * 24;
       }
 
-      // Lerp smooth
       const lerpSpeed = 0.12;
       mouthOpenCurrent += (mouthOpenTarget - mouthOpenCurrent) * lerpSpeed;
       teethTopCurrent += (teethTopTarget - teethTopCurrent) * lerpSpeed;
@@ -252,11 +244,7 @@ export default function NotFoundPage(): React.JSX.Element {
     const ctx = gsap.context(() => {
       gsap.fromTo(
         menuruBigRef.current,
-        {
-          yPercent: 40,
-          opacity: 0,
-          scale: 0.85,
-        },
+        { yPercent: 40, opacity: 0, scale: 0.85 },
         {
           yPercent: 0,
           opacity: 1,
@@ -268,6 +256,28 @@ export default function NotFoundPage(): React.JSX.Element {
             end: "top 40%",
             scrub: 1,
           },
+        }
+      );
+    }, containerRef);
+
+    return () => ctx.revert();
+  }, [isMounted]);
+
+  // ===== Animasi "Page not found" fade-in setelah 404 landing =====
+  useEffect(() => {
+    if (!isMounted) return;
+    if (!pageNotFoundRef.current) return;
+
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        pageNotFoundRef.current,
+        { opacity: 0, x: 40 },
+        {
+          opacity: 1,
+          x: 0,
+          duration: 0.9,
+          ease: "power3.out",
+          delay: 1.6,
         }
       );
     }, containerRef);
@@ -291,7 +301,6 @@ export default function NotFoundPage(): React.JSX.Element {
         <meta name="theme-color" content={BLUE} />
       </Head>
 
-      {/* ===== ScrollSmoother wrapper ===== */}
       <div
         ref={smoothWrapperRef}
         style={{
@@ -349,322 +358,392 @@ export default function NotFoundPage(): React.JSX.Element {
               the page you&apos;re looking for.
             </p>
 
-            {/* ===== Teks 404 di tengah ===== */}
+            {/* ===== Blok 404 + label kanan ===== */}
             <div
               style={{
+                position: "relative",
                 display: "flex",
+                flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
-                gap: "1vw",
-                flexWrap: "nowrap",
-                userSelect: "none",
-                lineHeight: 0.85,
               }}
             >
-              {/* Karakter "4" pertama */}
-              <span
-                ref={char4Ref}
-                style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: "clamp(120px, 26vw, 400px)",
-                  fontWeight: 400,
-                  color: BLUE,
-                  lineHeight: 0.85,
-                  letterSpacing: "-0.06em",
-                  display: "inline-block",
-                  willChange: "transform, opacity",
-                }}
-              >
-                4
-              </span>
-
-              {/* Karakter "0": 2 mata + alis + mulut + gigi */}
+              {/* Teks 404 di tengah */}
               <div
-                ref={eyesRef}
                 style={{
-                  position: "relative",
-                  width: "clamp(160px, 26vw, 380px)",
-                  height: "clamp(200px, 34vw, 500px)",
                   display: "flex",
-                  flexDirection: "column",
                   alignItems: "center",
                   justifyContent: "center",
-                  willChange: "transform, opacity",
-                  gap: "6%",
+                  gap: "1vw",
+                  flexWrap: "nowrap",
+                  userSelect: "none",
+                  lineHeight: 0.85,
                 }}
               >
-                {/* Baris mata */}
-                <div
+                {/* Karakter "4" pertama */}
+                <span
+                  ref={char4Ref}
                   style={{
-                    position: "relative",
-                    width: "100%",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "20%",
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "clamp(120px, 26vw, 400px)",
+                    fontWeight: 400,
+                    color: BLUE,
+                    lineHeight: 0.85,
+                    letterSpacing: "-0.06em",
+                    display: "inline-block",
+                    willChange: "transform, opacity",
                   }}
                 >
-                  {/* Mata kiri + alis */}
-                  <div
-                    style={{
-                      position: "relative",
-                      width: "38%",
-                      aspectRatio: "1 / 1",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <svg
-                      width="100%"
-                      height="40%"
-                      viewBox="0 0 100 40"
-                      style={{
-                        position: "absolute",
-                        top: "-32%",
-                        left: 0,
-                        overflow: "visible",
-                        pointerEvents: "none",
-                      }}
-                      preserveAspectRatio="none"
-                    >
-                      <path
-                        d="M 6 36 Q 50 2 94 36"
-                        fill="none"
-                        stroke={BLUE}
-                        strokeWidth="6"
-                        strokeLinecap="round"
-                        vectorEffect="non-scaling-stroke"
-                      />
-                    </svg>
+                  4
+                </span>
 
-                    <div
-                      ref={eyeLeftRef}
-                      style={{
-                        width: "100%",
-                        aspectRatio: "1 / 1",
-                        borderRadius: "50%",
-                        border: "clamp(3px, 0.4vw, 6px) solid " + BLUE,
-                        backgroundColor: "transparent",
-                        position: "relative",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        overflow: "hidden",
-                      }}
-                    >
-                      <div
-                        ref={pupilLeftRef}
-                        style={{
-                          width: "44%",
-                          height: "44%",
-                          borderRadius: "50%",
-                          backgroundColor: BLUE,
-                          willChange: "transform",
-                        }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Mata kanan + alis */}
-                  <div
-                    style={{
-                      position: "relative",
-                      width: "38%",
-                      aspectRatio: "1 / 1",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <svg
-                      width="100%"
-                      height="40%"
-                      viewBox="0 0 100 40"
-                      style={{
-                        position: "absolute",
-                        top: "-32%",
-                        left: 0,
-                        overflow: "visible",
-                        pointerEvents: "none",
-                      }}
-                      preserveAspectRatio="none"
-                    >
-                      <path
-                        d="M 6 36 Q 50 2 94 36"
-                        fill="none"
-                        stroke={BLUE}
-                        strokeWidth="6"
-                        strokeLinecap="round"
-                        vectorEffect="non-scaling-stroke"
-                      />
-                    </svg>
-
-                    <div
-                      ref={eyeRightRef}
-                      style={{
-                        width: "100%",
-                        aspectRatio: "1 / 1",
-                        borderRadius: "50%",
-                        border: "clamp(3px, 0.4vw, 6px) solid " + BLUE,
-                        backgroundColor: "transparent",
-                        position: "relative",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        overflow: "hidden",
-                      }}
-                    >
-                      <div
-                        ref={pupilRightRef}
-                        style={{
-                          width: "44%",
-                          height: "44%",
-                          borderRadius: "50%",
-                          backgroundColor: BLUE,
-                          willChange: "transform",
-                        }}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Mulut dengan gigi bergerak sesuai mouse */}
+                {/* Karakter "0": 2 mata + alis + mulut + gigi */}
                 <div
-                  ref={mouthRef}
+                  ref={eyesRef}
                   style={{
                     position: "relative",
-                    width: "70%",
-                    height: "24%",
-                    border: "clamp(3px, 0.4vw, 6px) solid " + BLUE,
-                    borderRadius: "999px",
-                    backgroundColor: "transparent",
-                    overflow: "hidden",
+                    width: "clamp(160px, 26vw, 380px)",
+                    height: "clamp(200px, 34vw, 500px)",
                     display: "flex",
                     flexDirection: "column",
-                    justifyContent: "space-between",
-                    willChange: "height",
-                    transition: "none",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    willChange: "transform, opacity",
+                    gap: "6%",
                   }}
                 >
-                  {/* Gigi atas */}
+                  {/* Baris mata */}
                   <div
-                    ref={teethTopRef}
                     style={{
+                      position: "relative",
+                      width: "100%",
                       display: "flex",
+                      alignItems: "center",
                       justifyContent: "center",
-                      gap: "6%",
-                      paddingTop: "2%",
-                      willChange: "transform",
+                      gap: "20%",
                     }}
                   >
+                    {/* Mata kiri + alis */}
                     <div
                       style={{
-                        width: "18%",
-                        height: "clamp(10px, 1.2vw, 18px)",
-                        border: "clamp(2px, 0.3vw, 4px) solid " + BLUE,
-                        borderTop: "none",
-                        borderBottomLeftRadius: "6px",
-                        borderBottomRightRadius: "6px",
+                        position: "relative",
+                        width: "38%",
+                        aspectRatio: "1 / 1",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
                       }}
-                    />
+                    >
+                      <svg
+                        width="100%"
+                        height="40%"
+                        viewBox="0 0 100 40"
+                        style={{
+                          position: "absolute",
+                          top: "-32%",
+                          left: 0,
+                          overflow: "visible",
+                          pointerEvents: "none",
+                        }}
+                        preserveAspectRatio="none"
+                      >
+                        <path
+                          d="M 6 36 Q 50 2 94 36"
+                          fill="none"
+                          stroke={BLUE}
+                          strokeWidth="6"
+                          strokeLinecap="round"
+                          vectorEffect="non-scaling-stroke"
+                        />
+                      </svg>
+
+                      <div
+                        ref={eyeLeftRef}
+                        style={{
+                          width: "100%",
+                          aspectRatio: "1 / 1",
+                          borderRadius: "50%",
+                          border: "clamp(3px, 0.4vw, 6px) solid " + BLUE,
+                          backgroundColor: "transparent",
+                          position: "relative",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          overflow: "hidden",
+                        }}
+                      >
+                        <div
+                          ref={pupilLeftRef}
+                          style={{
+                            width: "44%",
+                            height: "44%",
+                            borderRadius: "50%",
+                            backgroundColor: BLUE,
+                            willChange: "transform",
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Mata kanan + alis */}
                     <div
                       style={{
-                        width: "18%",
-                        height: "clamp(10px, 1.2vw, 18px)",
-                        border: "clamp(2px, 0.3vw, 4px) solid " + BLUE,
-                        borderTop: "none",
-                        borderBottomLeftRadius: "6px",
-                        borderBottomRightRadius: "6px",
+                        position: "relative",
+                        width: "38%",
+                        aspectRatio: "1 / 1",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
                       }}
-                    />
-                    <div
-                      style={{
-                        width: "18%",
-                        height: "clamp(10px, 1.2vw, 18px)",
-                        border: "clamp(2px, 0.3vw, 4px) solid " + BLUE,
-                        borderTop: "none",
-                        borderBottomLeftRadius: "6px",
-                        borderBottomRightRadius: "6px",
-                      }}
-                    />
+                    >
+                      <svg
+                        width="100%"
+                        height="40%"
+                        viewBox="0 0 100 40"
+                        style={{
+                          position: "absolute",
+                          top: "-32%",
+                          left: 0,
+                          overflow: "visible",
+                          pointerEvents: "none",
+                        }}
+                        preserveAspectRatio="none"
+                      >
+                        <path
+                          d="M 6 36 Q 50 2 94 36"
+                          fill="none"
+                          stroke={BLUE}
+                          strokeWidth="6"
+                          strokeLinecap="round"
+                          vectorEffect="non-scaling-stroke"
+                        />
+                      </svg>
+
+                      <div
+                        ref={eyeRightRef}
+                        style={{
+                          width: "100%",
+                          aspectRatio: "1 / 1",
+                          borderRadius: "50%",
+                          border: "clamp(3px, 0.4vw, 6px) solid " + BLUE,
+                          backgroundColor: "transparent",
+                          position: "relative",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          overflow: "hidden",
+                        }}
+                      >
+                        <div
+                          ref={pupilRightRef}
+                          style={{
+                            width: "44%",
+                            height: "44%",
+                            borderRadius: "50%",
+                            backgroundColor: BLUE,
+                            willChange: "transform",
+                          }}
+                        />
+                      </div>
+                    </div>
                   </div>
 
-                  {/* Lidah minimalist */}
+                  {/* Mulut dengan gigi bergerak sesuai mouse */}
                   <div
-                    className="mouth-tongue"
+                    ref={mouthRef}
                     style={{
-                      alignSelf: "center",
-                      width: "32%",
-                      height: "30%",
-                      borderRadius: "0 0 999px 999px",
-                      border: "clamp(2px, 0.3vw, 4px) solid " + BLUE,
-                      borderTop: "none",
+                      position: "relative",
+                      width: "70%",
+                      height: "24%",
+                      border: "clamp(3px, 0.4vw, 6px) solid " + BLUE,
+                      borderRadius: "999px",
                       backgroundColor: "transparent",
-                    }}
-                  />
-
-                  {/* Gigi bawah */}
-                  <div
-                    ref={teethBottomRef}
-                    style={{
+                      overflow: "hidden",
                       display: "flex",
-                      justifyContent: "center",
-                      gap: "6%",
-                      paddingBottom: "2%",
-                      willChange: "transform",
+                      flexDirection: "column",
+                      justifyContent: "space-between",
+                      willChange: "height",
+                      transition: "none",
                     }}
                   >
+                    {/* Gigi atas */}
                     <div
+                      ref={teethTopRef}
                       style={{
-                        width: "18%",
-                        height: "clamp(10px, 1.2vw, 18px)",
+                        display: "flex",
+                        justifyContent: "center",
+                        gap: "6%",
+                        paddingTop: "2%",
+                        willChange: "transform",
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: "18%",
+                          height: "clamp(10px, 1.2vw, 18px)",
+                          border: "clamp(2px, 0.3vw, 4px) solid " + BLUE,
+                          borderTop: "none",
+                          borderBottomLeftRadius: "6px",
+                          borderBottomRightRadius: "6px",
+                        }}
+                      />
+                      <div
+                        style={{
+                          width: "18%",
+                          height: "clamp(10px, 1.2vw, 18px)",
+                          border: "clamp(2px, 0.3vw, 4px) solid " + BLUE,
+                          borderTop: "none",
+                          borderBottomLeftRadius: "6px",
+                          borderBottomRightRadius: "6px",
+                        }}
+                      />
+                      <div
+                        style={{
+                          width: "18%",
+                          height: "clamp(10px, 1.2vw, 18px)",
+                          border: "clamp(2px, 0.3vw, 4px) solid " + BLUE,
+                          borderTop: "none",
+                          borderBottomLeftRadius: "6px",
+                          borderBottomRightRadius: "6px",
+                        }}
+                      />
+                    </div>
+
+                    {/* Lidah minimalist */}
+                    <div
+                      className="mouth-tongue"
+                      style={{
+                        alignSelf: "center",
+                        width: "32%",
+                        height: "30%",
+                        borderRadius: "0 0 999px 999px",
                         border: "clamp(2px, 0.3vw, 4px) solid " + BLUE,
-                        borderBottom: "none",
-                        borderTopLeftRadius: "6px",
-                        borderTopRightRadius: "6px",
+                        borderTop: "none",
+                        backgroundColor: "transparent",
                       }}
                     />
+
+                    {/* Gigi bawah */}
                     <div
+                      ref={teethBottomRef}
                       style={{
-                        width: "18%",
-                        height: "clamp(10px, 1.2vw, 18px)",
-                        border: "clamp(2px, 0.3vw, 4px) solid " + BLUE,
-                        borderBottom: "none",
-                        borderTopLeftRadius: "6px",
-                        borderTopRightRadius: "6px",
+                        display: "flex",
+                        justifyContent: "center",
+                        gap: "6%",
+                        paddingBottom: "2%",
+                        willChange: "transform",
                       }}
-                    />
-                    <div
-                      style={{
-                        width: "18%",
-                        height: "clamp(10px, 1.2vw, 18px)",
-                        border: "clamp(2px, 0.3vw, 4px) solid " + BLUE,
-                        borderBottom: "none",
-                        borderTopLeftRadius: "6px",
-                        borderTopRightRadius: "6px",
-                      }}
-                    />
+                    >
+                      <div
+                        style={{
+                          width: "18%",
+                          height: "clamp(10px, 1.2vw, 18px)",
+                          border: "clamp(2px, 0.3vw, 4px) solid " + BLUE,
+                          borderBottom: "none",
+                          borderTopLeftRadius: "6px",
+                          borderTopRightRadius: "6px",
+                        }}
+                      />
+                      <div
+                        style={{
+                          width: "18%",
+                          height: "clamp(10px, 1.2vw, 18px)",
+                          border: "clamp(2px, 0.3vw, 4px) solid " + BLUE,
+                          borderBottom: "none",
+                          borderTopLeftRadius: "6px",
+                          borderTopRightRadius: "6px",
+                        }}
+                      />
+                      <div
+                        style={{
+                          width: "18%",
+                          height: "clamp(10px, 1.2vw, 18px)",
+                          border: "clamp(2px, 0.3vw, 4px) solid " + BLUE,
+                          borderBottom: "none",
+                          borderTopLeftRadius: "6px",
+                          borderTopRightRadius: "6px",
+                        }}
+                      />
+                    </div>
                   </div>
                 </div>
+
+                {/* Karakter "4" kedua */}
+                <span
+                  ref={char4bRef}
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "clamp(120px, 26vw, 400px)",
+                    fontWeight: 400,
+                    color: BLUE,
+                    lineHeight: 0.85,
+                    letterSpacing: "-0.06em",
+                    display: "inline-block",
+                    willChange: "transform, opacity",
+                  }}
+                >
+                  4
+                </span>
               </div>
 
-              {/* Karakter "4" kedua */}
-              <span
-                ref={char4bRef}
+              {/* ===== Teks "Page not found" + emoticon minimalist di sisi kanan bawah ===== */}
+              <div
+                ref={pageNotFoundRef}
                 style={{
-                  fontFamily: FONT_FAMILY,
-                  fontSize: "clamp(120px, 26vw, 400px)",
-                  fontWeight: 400,
-                  color: BLUE,
-                  lineHeight: 0.85,
-                  letterSpacing: "-0.06em",
-                  display: "inline-block",
+                  alignSelf: "flex-end",
+                  marginTop: "20px",
+                  marginRight: "clamp(20px, 4vw, 60px)",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                  opacity: 0,
                   willChange: "transform, opacity",
                 }}
               >
-                4
-              </span>
+                <span
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "40px",
+                    fontWeight: 400,
+                    color: BLACK,
+                    letterSpacing: "-0.02em",
+                    lineHeight: 1,
+                  }}
+                >
+                  Page not found
+                </span>
+
+                {/* Emoticon minimalist — lingkaran dengan 2 mata + mulut senyum */}
+                <svg
+                  width="42"
+                  height="42"
+                  viewBox="0 0 42 42"
+                  fill="none"
+                  style={{ display: "block", flexShrink: 0 }}
+                  aria-hidden="true"
+                >
+                  <circle
+                    cx="21"
+                    cy="21"
+                    r="19"
+                    stroke={BLACK}
+                    strokeWidth="2.5"
+                    fill="none"
+                  />
+                  {/* Mata kiri */}
+                  <circle cx="15" cy="17" r="2" fill={BLACK} />
+                  {/* Mata kanan */}
+                  <circle cx="27" cy="17" r="2" fill={BLACK} />
+                  {/* Senyum */}
+                  <path
+                    d="M 13 25 Q 21 32 29 25"
+                    stroke={BLACK}
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    fill="none"
+                  />
+                </svg>
+              </div>
             </div>
           </div>
 
@@ -857,7 +936,7 @@ export default function NotFoundPage(): React.JSX.Element {
             </div>
           </div>
 
-          {/* ===== FOOTER MENURU besar + copyright (tanpa garis lurus) ===== */}
+          {/* ===== FOOTER MENURU besar + copyright ===== */}
           <div
             style={{
               width: "100%",
