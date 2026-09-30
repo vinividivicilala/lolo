@@ -5279,10 +5279,8 @@ export default function HomePage(): React.JSX.Element {
 
     if (!preloaderEl || !textEl || !counterEl || !mainEl) return;
 
-    // Show main page (render tree) BEFORE animating so GSAP can move it
     setShowMain(true);
 
-    // Initial states
     gsap.set(textEl, { y: 100, opacity: 0 });
     gsap.set(counterEl, { opacity: 1, scale: 1, y: 0, xPercent: 0 });
     gsap.set(preloaderEl, { opacity: 1, scale: 1, xPercent: 0, display: "block" });
@@ -5293,10 +5291,8 @@ export default function HomePage(): React.JSX.Element {
 
     const tl = gsap.timeline();
 
-    // 1) Text "Shop" entrance
     tl.to(textEl, { y: 0, opacity: 1, duration: 1.0, ease: "back.out(1.7)" })
       .to(textEl, { duration: 0.8 })
-      // 2) Switch to "Note"
       .to(textEl, {
         opacity: 0,
         y: -20,
@@ -5310,7 +5306,6 @@ export default function HomePage(): React.JSX.Element {
       .to(textEl, { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: "back.out(1.7)" })
       .to(textEl, { duration: 1.2 });
 
-    // 3) Counter 01 -> 100 (parallel, 6.5s, smooth)
     tl.to(
       counterObj,
       {
@@ -5327,7 +5322,6 @@ export default function HomePage(): React.JSX.Element {
       0
     );
 
-    // 4) Fade out text + counter
     tl.to(textEl, {
       scale: 0.3,
       opacity: 0,
@@ -5344,7 +5338,6 @@ export default function HomePage(): React.JSX.Element {
         },
         "-=0.8"
       )
-      // 5) Preloader slide OUT to left AND main page slide IN from right — parallel
       .to(
         preloaderEl,
         {
@@ -5504,6 +5497,16 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       />
       {/* ===== END GOOGLE TAG MANAGER (script) ===== */}
 
+      {/* ===== GOOGLE ADSENSE ===== */}
+      <Script
+        id="adsbygoogle-init"
+        async
+        strategy="afterInteractive"
+        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6198767676395468"
+        crossOrigin="anonymous"
+      />
+      {/* ===== END GOOGLE ADSENSE ===== */}
+
       {/* ===== GOOGLE TAG MANAGER (noscript) ===== */}
       <noscript>
         <iframe
@@ -5515,7 +5518,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       </noscript>
       {/* ===== END GOOGLE TAG MANAGER (noscript) ===== */}
 
-      {/* ===== WRAPPER: menampung preloader + main page, overflow hidden agar tidak scroll horizontal ===== */}
+      {/* ===== WRAPPER: menampung preloader + main page ===== */}
       <div
         ref={wrapperRef}
         style={{
@@ -5542,7 +5545,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             willChange: "transform",
           }}
         >
-          {/* Angka counter di atas kanan */}
           <span
             ref={counterRef}
             style={{
@@ -5564,7 +5566,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             01
           </span>
 
-          {/* Center content: Menuru Shop/Note */}
           <div
             style={{
               position: "absolute",
