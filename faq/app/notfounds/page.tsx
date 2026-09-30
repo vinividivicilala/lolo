@@ -12,7 +12,6 @@ if (typeof window !== "undefined") {
 const FONT_FAMILY = "'Plus Jakarta Sans'";
 const BLUE = "#0D3CFC";
 const WHITE = "#FFFFFF";
-const BLACK = "#000000";
 
 export default function NotFoundPage(): React.JSX.Element {
   const [isMounted, setIsMounted] = useState(false);
@@ -174,7 +173,6 @@ export default function NotFoundPage(): React.JSX.Element {
           height: "100vh",
           backgroundColor: WHITE,
           display: "flex",
-          flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
           fontFamily: FONT_FAMILY,
@@ -182,10 +180,29 @@ export default function NotFoundPage(): React.JSX.Element {
           position: "fixed",
           top: 0,
           left: 0,
-          padding: "20px",
         }}
       >
-        {/* ===== Teks 404 ===== */}
+        {/* ===== Teks "Sorry" di kiri atas ===== */}
+        <p
+          style={{
+            position: "absolute",
+            top: "clamp(24px, 4vh, 60px)",
+            left: "clamp(24px, 4vw, 60px)",
+            fontFamily: FONT_FAMILY,
+            fontSize: "clamp(40px, 22vw, 300px)",
+            fontWeight: 700,
+            color: BLUE,
+            lineHeight: 0.9,
+            letterSpacing: "-0.05em",
+            margin: 0,
+            maxWidth: "45vw",
+            textAlign: "left",
+          }}
+        >
+          Sorry, we can&apos;t find the page you&apos;re looking for.
+        </p>
+
+        {/* ===== Teks 404 di tengah ===== */}
         <div
           style={{
             display: "flex",
@@ -214,7 +231,7 @@ export default function NotFoundPage(): React.JSX.Element {
             4
           </span>
 
-          {/* Karakter "0" diganti 2 mata + alis melengkung */}
+          {/* Karakter "0" diganti 2 mata + alis melengkung terpisah */}
           <div
             ref={eyesRef}
             style={{
@@ -235,10 +252,10 @@ export default function NotFoundPage(): React.JSX.Element {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                gap: "14%",
+                gap: "20%",
               }}
             >
-              {/* ===== Mata kiri + alis ===== */}
+              {/* ===== Mata kiri + alis terpisah di atasnya ===== */}
               <div
                 style={{
                   position: "relative",
@@ -249,25 +266,27 @@ export default function NotFoundPage(): React.JSX.Element {
                   justifyContent: "center",
                 }}
               >
-                {/* Alis melengkung di atas bola mata */}
+                {/* Alis melengkung — terpisah di atas bola mata */}
                 <svg
                   width="100%"
-                  height="50%"
-                  viewBox="0 0 100 50"
+                  height="40%"
+                  viewBox="0 0 100 40"
                   style={{
                     position: "absolute",
-                    top: "-14%",
+                    top: "-32%",
                     left: 0,
                     overflow: "visible",
                     pointerEvents: "none",
                   }}
+                  preserveAspectRatio="none"
                 >
                   <path
-                    d="M 8 42 Q 50 4 92 42"
+                    d="M 6 36 Q 50 2 94 36"
                     fill="none"
                     stroke={BLUE}
                     strokeWidth="6"
                     strokeLinecap="round"
+                    vectorEffect="non-scaling-stroke"
                   />
                 </svg>
 
@@ -300,7 +319,7 @@ export default function NotFoundPage(): React.JSX.Element {
                 </div>
               </div>
 
-              {/* ===== Mata kanan + alis ===== */}
+              {/* ===== Mata kanan + alis terpisah di atasnya ===== */}
               <div
                 style={{
                   position: "relative",
@@ -311,25 +330,27 @@ export default function NotFoundPage(): React.JSX.Element {
                   justifyContent: "center",
                 }}
               >
-                {/* Alis melengkung di atas bola mata */}
+                {/* Alis melengkung — terpisah di atas bola mata */}
                 <svg
                   width="100%"
-                  height="50%"
-                  viewBox="0 0 100 50"
+                  height="40%"
+                  viewBox="0 0 100 40"
                   style={{
                     position: "absolute",
-                    top: "-14%",
+                    top: "-32%",
                     left: 0,
                     overflow: "visible",
                     pointerEvents: "none",
                   }}
+                  preserveAspectRatio="none"
                 >
                   <path
-                    d="M 8 42 Q 50 4 92 42"
+                    d="M 6 36 Q 50 2 94 36"
                     fill="none"
                     stroke={BLUE}
                     strokeWidth="6"
                     strokeLinecap="round"
+                    vectorEffect="non-scaling-stroke"
                   />
                 </svg>
 
@@ -381,24 +402,6 @@ export default function NotFoundPage(): React.JSX.Element {
             4
           </span>
         </div>
-
-        {/* ===== Teks pengganti subtitle ===== */}
-        <p
-          style={{
-            fontFamily: FONT_FAMILY,
-            fontSize: "clamp(15px, 1.4vw, 20px)",
-            fontWeight: 400,
-            color: BLACK,
-            letterSpacing: "-0.01em",
-            margin: 0,
-            marginTop: "clamp(24px, 4vh, 48px)",
-            textAlign: "center",
-            maxWidth: "620px",
-            lineHeight: 1.5,
-          }}
-        >
-          Sorry, we can&apos;t find the page you&apos;re looking for.
-        </p>
       </div>
 
       <style jsx global>{`
