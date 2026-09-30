@@ -113,7 +113,7 @@ export default function NotFoundPage(): React.JSX.Element {
     return () => ctx.revert();
   }, [isMounted]);
 
-  // ===== Pupil mengikuti cursor mouse =====
+  // ===== Pupil + mulut + gigi mengikuti cursor mouse =====
   useEffect(() => {
     if (!isMounted) return;
 
@@ -126,7 +126,11 @@ export default function NotFoundPage(): React.JSX.Element {
       const eyeR = eyeRightRef.current;
       const pupilL = pupilLeftRef.current;
       const pupilR = pupilRightRef.current;
+      const mouth = mouthRef.current;
+      const teethTop = teethTopRef.current;
+      const teethBottom = teethBottomRef.current;
 
+      // ===== Pupil mengikuti cursor =====
       if (eyeL && pupilL) {
         const rect = eyeL.getBoundingClientRect();
         const cx = rect.left + rect.width / 2;
@@ -155,6 +159,49 @@ export default function NotFoundPage(): React.JSX.Element {
         gsap.set(pupilR, { x: moveX, y: moveY });
       }
 
+      // ===== Mulut & gigi mengikuti jarak cursor =====
+      if (mouth) {
+        const rect = mouth.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        const dx = mouseRef.current.x - cx;
+        const dy = mouseRef.current.y - cy;
+        const dist = Math.hypot(dx, dy);
+        const viewportDiag = Math.hypot(window.innerWidth, window.innerHeight);
+
+        // 0 = dekat (tertutup rapat), 1 = jauh (terbuka lebar)
+        const openness = Math.min(dist / (viewportDiag * 0.45), 1);
+
+        // height mulut: dari 8% (tertutup) → 42% (buka lebar)
+        const mouthHeight = 8 + openness * 34;
+
+        gsap.to(mouth, {
+          height: mouthHeight + "%",
+          duration: 0.35,
+          ease: "power2.out",
+          overwrite: true,
+        });
+
+        // Gigi atas turun saat mulut terbuka
+        if (teethTop) {
+          gsap.to(teethTop, {
+            y: openness * 14,
+            duration: 0.35,
+            ease: "power2.out",
+            overwrite: true,
+          });
+        }
+        // Gigi bawah naik saat mulut terbuka
+        if (teethBottom) {
+          gsap.to(teethBottom, {
+            y: -openness * 14,
+            duration: 0.35,
+            ease: "power2.out",
+            overwrite: true,
+          });
+        }
+      }
+
       rafRef.current = requestAnimationFrame(tick);
     };
 
@@ -165,63 +212,6 @@ export default function NotFoundPage(): React.JSX.Element {
       window.removeEventListener("mousemove", updateMouse);
       cancelAnimationFrame(rafRef.current);
     };
-  }, [isMounted]);
-
-  // ===== Animasi mulut buka-tutup + gigi bergerak otomatis =====
-  useEffect(() => {
-    if (!isMounted) return;
-    if (!mouthRef.current || !teethTopRef.current || !teethBottomRef.current) return;
-
-    const ctx = gsap.context(() => {
-      // Mulut buka-tutup seperti bernapas
-      const mouthTl = gsap.timeline({ repeat: -1, yoyo: true, defaults: { ease: "sine.inOut" } });
-
-      mouthTl
-        .to(mouthRef.current, {
-          height: "38%",
-          duration: 1.1,
-        })
-        .to(
-          mouthRef.current,
-          {
-            height: "14%",
-            duration: 1.1,
-          },
-          "+=0.4"
-        );
-
-      // Gigi atas turun sedikit saat mulut terbuka
-      gsap.to(teethTopRef.current, {
-        y: "20%",
-        duration: 1.1,
-        ease: "sine.inOut",
-        repeat: -1,
-        yoyo: true,
-        delay: 0.05,
-      });
-
-      // Gigi bawah naik sedikit saat mulut terbuka
-      gsap.to(teethBottomRef.current, {
-        y: "-20%",
-        duration: 1.1,
-        ease: "sine.inOut",
-        repeat: -1,
-        yoyo: true,
-        delay: 0.05,
-      });
-
-      // Lilu/bola kecil bergoyang (lidah minimalist) — opsional
-      gsap.to(".mouth-tongue", {
-        y: "-10%",
-        scaleY: 0.92,
-        duration: 0.9,
-        ease: "sine.inOut",
-        repeat: -1,
-        yoyo: true,
-      });
-    }, containerRef);
-
-    return () => ctx.revert();
   }, [isMounted]);
 
   if (!isMounted) {
@@ -240,7 +230,7 @@ export default function NotFoundPage(): React.JSX.Element {
         <meta name="theme-color" content={BLUE} />
       </Head>
 
-      {/* ===== WRAPPER utama dengan scroll normal untuk footer ===== */}
+      {/* ===== WRAPPER utama ===== */}
       <div
         style={{
           width: "100%",
@@ -253,7 +243,7 @@ export default function NotFoundPage(): React.JSX.Element {
           overflowX: "hidden",
         }}
       >
-        {/* ===== SECTION 404 (fullscreen tanpa scroll) ===== */}
+        {/* ===== SECTION 404 (fullscreen, tanpa sidebar & garis) ===== */}
         <div
           ref={containerRef}
           style={{
@@ -261,19 +251,18 @@ export default function NotFoundPage(): React.JSX.Element {
             height: "100vh",
             backgroundColor: WHITE,
             display: "flex",
+            flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
             overflow: "hidden",
             position: "relative",
             flexShrink: 0,
+            padding: "20px",
           }}
         >
-          {/* ===== Teks "Sorry" di kiri atas — 2 baris ===== */}
+          {/* ===== Teks "Sorry..." di tengah atas — 2 baris, 100px, biru ===== */}
           <p
             style={{
-              position: "absolute",
-              top: "clamp(20px, 3vh, 40px)",
-              left: "clamp(20px, 3vw, 40px)",
               fontFamily: FONT_FAMILY,
               fontSize: "100px",
               fontWeight: 700,
@@ -281,7 +270,8 @@ export default function NotFoundPage(): React.JSX.Element {
               lineHeight: 1,
               letterSpacing: "-0.04em",
               margin: 0,
-              textAlign: "left",
+              marginBottom: "clamp(20px, 4vh, 60px)",
+              textAlign: "center",
             }}
           >
             Sorry, we can&apos;t find
@@ -318,7 +308,7 @@ export default function NotFoundPage(): React.JSX.Element {
               4
             </span>
 
-            {/* Karakter "0" diganti 2 mata + alis + mulut dengan gigi bergerak */}
+            {/* Karakter "0" = 2 mata + alis + mulut dengan gigi bergerak */}
             <div
               ref={eyesRef}
               style={{
@@ -469,13 +459,13 @@ export default function NotFoundPage(): React.JSX.Element {
                 </div>
               </div>
 
-              {/* ===== Mulut dengan gigi bergerak ===== */}
+              {/* ===== Mulut dengan gigi (bergerak sesuai jarak cursor) ===== */}
               <div
                 ref={mouthRef}
                 style={{
                   position: "relative",
                   width: "70%",
-                  height: "24%",
+                  height: "10%",
                   border: "clamp(3px, 0.4vw, 6px) solid " + BLUE,
                   borderRadius: "999px",
                   backgroundColor: "transparent",
@@ -529,9 +519,8 @@ export default function NotFoundPage(): React.JSX.Element {
                   />
                 </div>
 
-                {/* Lidah minimalist (opsional) */}
+                {/* Lidah minimalist */}
                 <div
-                  className="mouth-tongue"
                   style={{
                     alignSelf: "center",
                     width: "32%",
@@ -540,7 +529,6 @@ export default function NotFoundPage(): React.JSX.Element {
                     border: "clamp(2px, 0.3vw, 4px) solid " + BLUE,
                     borderTop: "none",
                     backgroundColor: "transparent",
-                    willChange: "transform",
                   }}
                 />
 
@@ -608,13 +596,12 @@ export default function NotFoundPage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* ===== FOOTER LENGKAP dari halaman utama ===== */}
+        {/* ===== FOOTER LENGKAP (tanpa borderTop di atas) ===== */}
         <div
           style={{
             width: "100%",
             padding: "60px 40px 40px 40px",
             backgroundColor: WHITE,
-            borderTop: "1px solid rgba(0,0,0,0.05)",
             position: "relative",
             overflow: "hidden",
             flexShrink: 0,
@@ -776,8 +763,6 @@ export default function NotFoundPage(): React.JSX.Element {
             style={{
               maxWidth: "1400px",
               margin: "40px auto 0 auto",
-              paddingTop: "20px",
-              borderTop: "1px solid rgba(0,0,0,0.05)",
               position: "relative",
               zIndex: 1,
             }}
