@@ -182,7 +182,7 @@ export default function NotFoundPage(): React.JSX.Element {
           left: 0,
         }}
       >
-        {/* ===== Teks "Sorry" di kiri atas — 1 baris ke samping ===== */}
+        {/* ===== Teks "Sorry" di kiri atas — 2 baris ===== */}
         <p
           style={{
             position: "absolute",
@@ -195,10 +195,12 @@ export default function NotFoundPage(): React.JSX.Element {
             lineHeight: 1,
             letterSpacing: "-0.04em",
             margin: 0,
-            whiteSpace: "nowrap",
+            textAlign: "left",
           }}
         >
-          Sorry, we can&apos;t find the page you&apos;re looking for.
+          Sorry, we can&apos;t find
+          <br />
+          the page you&apos;re looking for.
         </p>
 
         {/* ===== Teks 404 di tengah ===== */}
