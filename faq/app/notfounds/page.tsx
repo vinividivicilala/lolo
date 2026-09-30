@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Head from "next/head";
-import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -19,7 +18,7 @@ export default function NotFoundPage(): React.JSX.Element {
   const [isMounted, setIsMounted] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const char4Ref = useRef<HTMLSpanElement>(null);
-  const char0Ref = useRef<HTMLDivElement>(null);
+  const eyesRef = useRef<HTMLDivElement>(null);
   const char4bRef = useRef<HTMLSpanElement>(null);
   const eyeLeftRef = useRef<HTMLDivElement>(null);
   const eyeRightRef = useRef<HTMLDivElement>(null);
@@ -32,13 +31,13 @@ export default function NotFoundPage(): React.JSX.Element {
     setIsMounted(true);
   }, []);
 
-  // ===== Falling animation untuk karakter 4, 0, 4 =====
+  // ===== Falling animation untuk karakter 4, (mata), 4 =====
   useEffect(() => {
     if (!isMounted) return;
-    if (!char4Ref.current || !char0Ref.current || !char4bRef.current) return;
+    if (!char4Ref.current || !eyesRef.current || !char4bRef.current) return;
 
     const ctx = gsap.context(() => {
-      const chars = [char4Ref.current, char0Ref.current, char4bRef.current];
+      const chars = [char4Ref.current, eyesRef.current, char4bRef.current];
 
       gsap.set(chars, {
         yPercent: -200,
@@ -203,7 +202,7 @@ export default function NotFoundPage(): React.JSX.Element {
             ref={char4Ref}
             style={{
               fontFamily: FONT_FAMILY,
-              fontSize: "clamp(200px, 40vw, 900px)",
+              fontSize: "clamp(120px, 26vw, 400px)",
               fontWeight: 400,
               color: BLUE,
               lineHeight: 0.85,
@@ -215,62 +214,72 @@ export default function NotFoundPage(): React.JSX.Element {
             4
           </span>
 
-          {/* Karakter "0" diganti emoticon garis minimalist */}
+          {/* Karakter "0" diganti 2 mata + alis melengkung */}
           <div
-            ref={char0Ref}
+            ref={eyesRef}
             style={{
               position: "relative",
-              width: "clamp(180px, 36vw, 810px)",
-              height: "clamp(180px, 36vw, 810px)",
+              width: "clamp(140px, 24vw, 360px)",
+              height: "clamp(140px, 24vw, 360px)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               willChange: "transform, opacity",
             }}
           >
-            {/* Lingkaran luar "0" — outline saja */}
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                borderRadius: "50%",
-                border: "clamp(4px, 0.6vw, 10px) solid " + BLUE,
-                backgroundColor: "transparent",
-              }}
-            />
-
-            {/* Wajah di dalam lingkaran */}
             <div
               style={{
                 position: "relative",
-                width: "76%",
-                height: "76%",
+                width: "100%",
+                height: "100%",
                 display: "flex",
-                flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
-                gap: "6%",
+                gap: "14%",
               }}
             >
-              {/* Dua mata */}
+              {/* ===== Mata kiri + alis ===== */}
               <div
                 style={{
+                  position: "relative",
+                  width: "38%",
+                  aspectRatio: "1 / 1",
                   display: "flex",
-                  gap: "14%",
                   alignItems: "center",
                   justifyContent: "center",
-                  width: "100%",
                 }}
               >
-                {/* Mata kiri */}
+                {/* Alis melengkung di atas bola mata */}
+                <svg
+                  width="100%"
+                  height="50%"
+                  viewBox="0 0 100 50"
+                  style={{
+                    position: "absolute",
+                    top: "-14%",
+                    left: 0,
+                    overflow: "visible",
+                    pointerEvents: "none",
+                  }}
+                >
+                  <path
+                    d="M 8 42 Q 50 4 92 42"
+                    fill="none"
+                    stroke={BLUE}
+                    strokeWidth="6"
+                    strokeLinecap="round"
+                  />
+                </svg>
+
+                {/* Bola mata */}
                 <div
                   ref={eyeLeftRef}
                   style={{
-                    width: "32%",
+                    width: "100%",
                     aspectRatio: "1 / 1",
                     borderRadius: "50%",
+                    border: "clamp(3px, 0.4vw, 6px) solid " + BLUE,
                     backgroundColor: "transparent",
-                    border: "clamp(3px, 0.5vw, 8px) solid " + BLUE,
                     position: "relative",
                     display: "flex",
                     alignItems: "center",
@@ -281,24 +290,58 @@ export default function NotFoundPage(): React.JSX.Element {
                   <div
                     ref={pupilLeftRef}
                     style={{
-                      width: "48%",
-                      height: "48%",
+                      width: "44%",
+                      height: "44%",
                       borderRadius: "50%",
                       backgroundColor: BLUE,
                       willChange: "transform",
                     }}
                   />
                 </div>
+              </div>
 
-                {/* Mata kanan */}
+              {/* ===== Mata kanan + alis ===== */}
+              <div
+                style={{
+                  position: "relative",
+                  width: "38%",
+                  aspectRatio: "1 / 1",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                {/* Alis melengkung di atas bola mata */}
+                <svg
+                  width="100%"
+                  height="50%"
+                  viewBox="0 0 100 50"
+                  style={{
+                    position: "absolute",
+                    top: "-14%",
+                    left: 0,
+                    overflow: "visible",
+                    pointerEvents: "none",
+                  }}
+                >
+                  <path
+                    d="M 8 42 Q 50 4 92 42"
+                    fill="none"
+                    stroke={BLUE}
+                    strokeWidth="6"
+                    strokeLinecap="round"
+                  />
+                </svg>
+
+                {/* Bola mata */}
                 <div
                   ref={eyeRightRef}
                   style={{
-                    width: "32%",
+                    width: "100%",
                     aspectRatio: "1 / 1",
                     borderRadius: "50%",
+                    border: "clamp(3px, 0.4vw, 6px) solid " + BLUE,
                     backgroundColor: "transparent",
-                    border: "clamp(3px, 0.5vw, 8px) solid " + BLUE,
                     position: "relative",
                     display: "flex",
                     alignItems: "center",
@@ -309,8 +352,8 @@ export default function NotFoundPage(): React.JSX.Element {
                   <div
                     ref={pupilRightRef}
                     style={{
-                      width: "48%",
-                      height: "48%",
+                      width: "44%",
+                      height: "44%",
                       borderRadius: "50%",
                       backgroundColor: BLUE,
                       willChange: "transform",
@@ -318,18 +361,6 @@ export default function NotFoundPage(): React.JSX.Element {
                   />
                 </div>
               </div>
-
-              {/* Mulut kecil (opsional) — garis sederhana */}
-              <div
-                style={{
-                  width: "26%",
-                  height: "clamp(3px, 0.5vw, 8px)",
-                  borderRadius: "999px",
-                  backgroundColor: BLUE,
-                  marginTop: "4%",
-                  opacity: 0.85,
-                }}
-              />
             </div>
           </div>
 
@@ -338,7 +369,7 @@ export default function NotFoundPage(): React.JSX.Element {
             ref={char4bRef}
             style={{
               fontFamily: FONT_FAMILY,
-              fontSize: "clamp(200px, 40vw, 900px)",
+              fontSize: "clamp(120px, 26vw, 400px)",
               fontWeight: 400,
               color: BLUE,
               lineHeight: 0.85,
@@ -351,65 +382,23 @@ export default function NotFoundPage(): React.JSX.Element {
           </span>
         </div>
 
-        {/* ===== Subtitle ===== */}
-        <h2
-          style={{
-            fontFamily: FONT_FAMILY,
-            fontSize: "clamp(18px, 2vw, 28px)",
-            fontWeight: 700,
-            color: BLACK,
-            letterSpacing: "-0.02em",
-            margin: 0,
-            marginTop: "clamp(20px, 3vh, 40px)",
-            textAlign: "center",
-          }}
-        >
-          Halaman tidak ditemukan
-        </h2>
+        {/* ===== Teks pengganti subtitle ===== */}
         <p
           style={{
             fontFamily: FONT_FAMILY,
-            fontSize: "clamp(13px, 1.1vw, 16px)",
+            fontSize: "clamp(15px, 1.4vw, 20px)",
             fontWeight: 400,
-            color: "#666",
+            color: BLACK,
+            letterSpacing: "-0.01em",
             margin: 0,
-            marginTop: "12px",
+            marginTop: "clamp(24px, 4vh, 48px)",
             textAlign: "center",
-            maxWidth: "520px",
+            maxWidth: "620px",
+            lineHeight: 1.5,
           }}
         >
-          Sepertinya halaman yang kamu cari sudah pindah atau tidak pernah ada.
+          Sorry, we can&apos;t find the page you&apos;re looking for.
         </p>
-
-        {/* ===== Tombol kembali ke home ===== */}
-        <Link href="/" style={{ textDecoration: "none", marginTop: "clamp(20px, 3vh, 36px)" }}>
-          <button
-            style={{
-              padding: "14px 32px",
-              backgroundColor: BLUE,
-              color: WHITE,
-              border: "none",
-              borderRadius: "12px",
-              fontFamily: FONT_FAMILY,
-              fontSize: "15px",
-              fontWeight: 700,
-              letterSpacing: "0.02em",
-              cursor: "pointer",
-              transition: "background-color 0.25s ease, transform 0.2s ease",
-              boxShadow: "0 12px 32px rgba(13,60,252,0.35)",
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.backgroundColor = BLACK;
-              (e.currentTarget as HTMLButtonElement).style.transform = "translateY(-2px)";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.backgroundColor = BLUE;
-              (e.currentTarget as HTMLButtonElement).style.transform = "translateY(0)";
-            }}
-          >
-            Kembali ke Home
-          </button>
-        </Link>
       </div>
 
       <style jsx global>{`
