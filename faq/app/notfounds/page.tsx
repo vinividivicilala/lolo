@@ -5,10 +5,10 @@ import Head from "next/head";
 import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import Lenis from "@studio-freight/lenis";
+import { ScrollSmoother } from "gsap/ScrollSmoother";
 
 if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger);
+  gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
 }
 
 const FONT_FAMILY = "'Plus Jakarta Sans'";
@@ -41,48 +41,37 @@ export default function NotFoundPage(): React.JSX.Element {
   const mouthRef = useRef<HTMLDivElement>(null);
   const teethTopRef = useRef<HTMLDivElement>(null);
   const teethBottomRef = useRef<HTMLDivElement>(null);
-  const tongueRef = useRef<HTMLDivElement>(null);
+  const menuruBigRef = useRef<HTMLSpanElement>(null);
+  const smoothWrapperRef = useRef<HTMLDivElement>(null);
+  const smoothContentRef = useRef<HTMLDivElement>(null);
   const mouseRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const rafRef = useRef<number>(0);
-  const lenisRef = useRef<any>(null);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  // ===== Lenis smooth scroll (Freight/Studio feel) =====
+  // ===== ScrollSmoother setup =====
   useEffect(() => {
     if (!isMounted) return;
-    if (typeof window === "undefined") return;
+    if (!smoothWrapperRef.current || !smoothContentRef.current) return;
 
-    // Lenis
-    const lenis = new Lenis({
-      duration: 1.6,
-      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      orientation: "vertical",
-      gestureOrientation: "vertical",
-      smoothWheel: true,
-      wheelMultiplier: 1,
-      touchMultiplier: 2,
-      infinite: false,
+    let smoother: any = null;
+    const ctx = gsap.context(() => {
+      smoother = ScrollSmoother.create({
+        wrapper: smoothWrapperRef.current as HTMLElement,
+        content: smoothContentRef.current as HTMLElement,
+        smooth: 1.2,
+        effects: true,
+        normalizeScroll: true,
+      });
+
+      setTimeout(() => ScrollTrigger.refresh(), 300);
     });
 
-    lenisRef.current = lenis;
-
-    // Sinkronisasi Lenis dengan GSAP ScrollTrigger
-    lenis.on("scroll", ScrollTrigger.update);
-
-    const raf = (time: number) => {
-      lenis.raf(time * 1000);
-    };
-
-    gsap.ticker.add(raf);
-    gsap.ticker.lagSmoothing(0);
-
     return () => {
-      gsap.ticker.remove(raf);
-      lenis.destroy();
-      lenisRef.current = null;
+      if (smoother) smoother.kill();
+      ctx.revert();
     };
   }, [isMounted]);
 
@@ -152,7 +141,7 @@ export default function NotFoundPage(): React.JSX.Element {
     return () => ctx.revert();
   }, [isMounted]);
 
-  // ===== Pupil + mulut + gigi reaktif ke gerakan mouse =====
+  // ===== Pupil + mulut + gigi mengikuti cursor =====
   useEffect(() => {
     if (!isMounted) return;
 
@@ -160,20 +149,24 @@ export default function NotFoundPage(): React.JSX.Element {
       mouseRef.current = { x: e.clientX, y: e.clientY };
     };
 
+    // Nilai-nilai mulut (smooth via lerp)
+    let mouthOpenTarget = 24; // % height target
+    let mouthOpenCurrent = 24;
+    let teethTopTarget = 0;
+    let teethTopCurrent = 0;
+    let teethBottomTarget = 0;
+    let teethBottomCurrent = 0;
+
     const tick = () => {
       const eyeL = eyeLeftRef.current;
       const eyeR = eyeRightRef.current;
       const pupilL = pupilLeftRef.current;
       const pupilR = pupilRightRef.current;
       const mouth = mouthRef.current;
-      const teethTop = teethTopRef.current;
-      const teethBottom = teethBottomRef.current;
-      const tongue = tongueRef.current;
 
-      // ===== Pupil mengikuti mouse =====
-      const applyPupil = (eye: HTMLDivElement | null, pupil: HTMLDivElement | null) => {
-        if (!eye || !pupil) return;
-        const rect = eye.getBoundingClientRect();
+      // ---- Pupil kiri ----
+      if (eyeL && pupilL) {
+        const rect = eyeL.getBoundingClientRect();
         const cx = rect.left + rect.width / 2;
         const cy = rect.top + rect.height / 2;
         const dx = mouseRef.current.x - cx;
@@ -183,74 +176,60 @@ export default function NotFoundPage(): React.JSX.Element {
         const angle = Math.atan2(dy, dx);
         const moveX = Math.cos(angle) * Math.min(dist, maxMove);
         const moveY = Math.sin(angle) * Math.min(dist, maxMove);
-        gsap.set(pupil, { x: moveX, y: moveY });
-      };
+        gsap.set(pupilL, { x: moveX, y: moveY });
+      }
 
-      applyPupil(eyeL, pupilL);
-      applyPupil(eyeR, pupilR);
+      // ---- Pupil kanan ----
+      if (eyeR && pupilR) {
+        const rect = eyeR.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        const dx = mouseRef.current.x - cx;
+        const dy = mouseRef.current.y - cy;
+        const maxMove = rect.width * 0.26;
+        const dist = Math.hypot(dx, dy);
+        const angle = Math.atan2(dy, dx);
+        const moveX = Math.cos(angle) * Math.min(dist, maxMove);
+        const moveY = Math.sin(angle) * Math.min(dist, maxMove);
+        gsap.set(pupilR, { x: moveX, y: moveY });
+      }
 
-      // ===== Mulut & gigi reaktif terhadap mouse =====
+      // ---- Mulut + gigi berdasarkan jarak cursor ke mulut ----
       if (mouth) {
         const rect = mouth.getBoundingClientRect();
         const cx = rect.left + rect.width / 2;
         const cy = rect.top + rect.height / 2;
         const dx = mouseRef.current.x - cx;
         const dy = mouseRef.current.y - cy;
-        // Rasio: -1..1 terhadap viewport
-        const nx = Math.max(-1, Math.min(1, dx / (window.innerWidth / 2)));
-        const ny = Math.max(-1, Math.min(1, dy / (window.innerHeight / 2)));
+        const dist = Math.hypot(dx, dy);
 
-        // Mulut terbuka jika cursor jauh dari mulut (jarak lebih besar = buka lebih lebar)
-        const distRatio = Math.min(1, Math.hypot(dx, dy) / 500);
-        const openAmount = 14 + distRatio * 22; // 14%..36%
+        // Semakin dekat cursor, mulut makin terbuka
+        // Mapping: dist >= 600 → open 14%, dist <= 80 → open 42%
+        const minDist = 80;
+        const maxDist = 600;
+        const clampedDist = Math.max(minDist, Math.min(maxDist, dist));
+        const t = 1 - (clampedDist - minDist) / (maxDist - minDist); // 1 = dekat, 0 = jauh
+        mouthOpenTarget = 14 + t * 28; // 14% .. 42%
 
-        gsap.to(mouth, {
-          height: `${openAmount}%`,
-          duration: 0.5,
-          ease: "power3.out",
-          overwrite: true,
-        });
+        // Gigi bergerak proporsional dengan bukaan mulut
+        teethTopTarget = t * 24; // 0% .. 24%
+        teethBottomTarget = -t * 24;
+      }
 
-        // Mulut miring halus mengikuti mouse
-        gsap.to(mouth, {
-          rotate: nx * 6,
-          duration: 0.6,
-          ease: "power3.out",
-          overwrite: "auto",
-        });
+      // Lerp smooth
+      const lerpSpeed = 0.12;
+      mouthOpenCurrent += (mouthOpenTarget - mouthOpenCurrent) * lerpSpeed;
+      teethTopCurrent += (teethTopTarget - teethTopCurrent) * lerpSpeed;
+      teethBottomCurrent += (teethBottomTarget - teethBottomCurrent) * lerpSpeed;
 
-        // Gigi atas turun ketika mulut terbuka
-        if (teethTop) {
-          gsap.to(teethTop, {
-            y: `${distRatio * 30}%`,
-            x: `${nx * 8}%`,
-            duration: 0.5,
-            ease: "power3.out",
-            overwrite: true,
-          });
-        }
-
-        // Gigi bawah naik ketika mulut terbuka
-        if (teethBottom) {
-          gsap.to(teethBottom, {
-            y: `${-distRatio * 30}%`,
-            x: `${nx * 8}%`,
-            duration: 0.5,
-            ease: "power3.out",
-            overwrite: true,
-          });
-        }
-
-        // Lidah bergoyang mengikuti ny
-        if (tongue) {
-          gsap.to(tongue, {
-            y: `${ny * 15}%`,
-            scaleY: 1 - Math.abs(ny) * 0.15,
-            duration: 0.5,
-            ease: "power3.out",
-            overwrite: true,
-          });
-        }
+      if (mouthRef.current) {
+        mouthRef.current.style.height = mouthOpenCurrent + "%";
+      }
+      if (teethTopRef.current) {
+        teethTopRef.current.style.transform = `translateY(${teethTopCurrent}%)`;
+      }
+      if (teethBottomRef.current) {
+        teethBottomRef.current.style.transform = `translateY(${teethBottomCurrent}%)`;
       }
 
       rafRef.current = requestAnimationFrame(tick);
@@ -263,6 +242,37 @@ export default function NotFoundPage(): React.JSX.Element {
       window.removeEventListener("mousemove", updateMouse);
       cancelAnimationFrame(rafRef.current);
     };
+  }, [isMounted]);
+
+  // ===== Animasi GSAP untuk teks "Menuru" besar saat scroll =====
+  useEffect(() => {
+    if (!isMounted) return;
+    if (!menuruBigRef.current) return;
+
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        menuruBigRef.current,
+        {
+          yPercent: 40,
+          opacity: 0,
+          scale: 0.85,
+        },
+        {
+          yPercent: 0,
+          opacity: 1,
+          scale: 1,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: menuruBigRef.current,
+            start: "top 95%",
+            end: "top 40%",
+            scrub: 1,
+          },
+        }
+      );
+    }, containerRef);
+
+    return () => ctx.revert();
   }, [isMounted]);
 
   if (!isMounted) {
@@ -281,597 +291,620 @@ export default function NotFoundPage(): React.JSX.Element {
         <meta name="theme-color" content={BLUE} />
       </Head>
 
-      {/* ===== WRAPPER utama ===== */}
+      {/* ===== ScrollSmoother wrapper ===== */}
       <div
+        ref={smoothWrapperRef}
         style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
           width: "100%",
-          minHeight: "100vh",
+          height: "100vh",
+          overflow: "hidden",
           backgroundColor: WHITE,
           fontFamily: FONT_FAMILY,
-          display: "flex",
-          flexDirection: "column",
-          position: "relative",
-          overflowX: "hidden",
         }}
       >
-        {/* ===== SECTION 404 (fullscreen) ===== */}
         <div
-          ref={containerRef}
+          ref={smoothContentRef}
           style={{
             width: "100%",
-            height: "100vh",
             backgroundColor: WHITE,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            overflow: "hidden",
-            position: "relative",
-            flexShrink: 0,
+            fontFamily: FONT_FAMILY,
           }}
         >
-          {/* ===== Teks "Sorry" di kiri atas — 2 baris ===== */}
-          <p
-            style={{
-              position: "absolute",
-              top: "clamp(20px, 3vh, 40px)",
-              left: "clamp(20px, 3vw, 40px)",
-              fontFamily: FONT_FAMILY,
-              fontSize: "100px",
-              fontWeight: 700,
-              color: BLUE,
-              lineHeight: 1,
-              letterSpacing: "-0.04em",
-              margin: 0,
-              textAlign: "left",
-            }}
-          >
-            Sorry, we can&apos;t find
-            <br />
-            the page you&apos;re looking for.
-          </p>
-
-          {/* ===== Teks 404 di tengah ===== */}
+          {/* ===== SECTION 404 (fullscreen) ===== */}
           <div
+            ref={containerRef}
             style={{
+              width: "100%",
+              height: "100vh",
+              backgroundColor: WHITE,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              gap: "1vw",
-              flexWrap: "nowrap",
-              userSelect: "none",
-              lineHeight: 0.85,
-            }}
-          >
-            {/* Karakter "4" pertama */}
-            <span
-              ref={char4Ref}
-              style={{
-                fontFamily: FONT_FAMILY,
-                fontSize: "clamp(120px, 26vw, 400px)",
-                fontWeight: 400,
-                color: BLUE,
-                lineHeight: 0.85,
-                letterSpacing: "-0.06em",
-                display: "inline-block",
-                willChange: "transform, opacity",
-              }}
-            >
-              4
-            </span>
-
-            {/* Karakter "0" diganti 2 mata + alis + mulut reaktif mouse */}
-            <div
-              ref={eyesRef}
-              style={{
-                position: "relative",
-                width: "clamp(160px, 26vw, 380px)",
-                height: "clamp(200px, 34vw, 500px)",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                willChange: "transform, opacity",
-                gap: "8%",
-              }}
-            >
-              {/* ===== Baris mata ===== */}
-              <div
-                style={{
-                  position: "relative",
-                  width: "100%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "20%",
-                }}
-              >
-                {/* Mata kiri + alis */}
-                <div
-                  style={{
-                    position: "relative",
-                    width: "38%",
-                    aspectRatio: "1 / 1",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <svg
-                    width="100%"
-                    height="40%"
-                    viewBox="0 0 100 40"
-                    style={{
-                      position: "absolute",
-                      top: "-32%",
-                      left: 0,
-                      overflow: "visible",
-                      pointerEvents: "none",
-                    }}
-                    preserveAspectRatio="none"
-                  >
-                    <path
-                      d="M 6 36 Q 50 2 94 36"
-                      fill="none"
-                      stroke={BLUE}
-                      strokeWidth="6"
-                      strokeLinecap="round"
-                      vectorEffect="non-scaling-stroke"
-                    />
-                  </svg>
-
-                  <div
-                    ref={eyeLeftRef}
-                    style={{
-                      width: "100%",
-                      aspectRatio: "1 / 1",
-                      borderRadius: "50%",
-                      border: "clamp(3px, 0.4vw, 6px) solid " + BLUE,
-                      backgroundColor: "transparent",
-                      position: "relative",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      overflow: "hidden",
-                    }}
-                  >
-                    <div
-                      ref={pupilLeftRef}
-                      style={{
-                        width: "44%",
-                        height: "44%",
-                        borderRadius: "50%",
-                        backgroundColor: BLUE,
-                        willChange: "transform",
-                      }}
-                    />
-                  </div>
-                </div>
-
-                {/* Mata kanan + alis */}
-                <div
-                  style={{
-                    position: "relative",
-                    width: "38%",
-                    aspectRatio: "1 / 1",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <svg
-                    width="100%"
-                    height="40%"
-                    viewBox="0 0 100 40"
-                    style={{
-                      position: "absolute",
-                      top: "-32%",
-                      left: 0,
-                      overflow: "visible",
-                      pointerEvents: "none",
-                    }}
-                    preserveAspectRatio="none"
-                  >
-                    <path
-                      d="M 6 36 Q 50 2 94 36"
-                      fill="none"
-                      stroke={BLUE}
-                      strokeWidth="6"
-                      strokeLinecap="round"
-                      vectorEffect="non-scaling-stroke"
-                    />
-                  </svg>
-
-                  <div
-                    ref={eyeRightRef}
-                    style={{
-                      width: "100%",
-                      aspectRatio: "1 / 1",
-                      borderRadius: "50%",
-                      border: "clamp(3px, 0.4vw, 6px) solid " + BLUE,
-                      backgroundColor: "transparent",
-                      position: "relative",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      overflow: "hidden",
-                    }}
-                  >
-                    <div
-                      ref={pupilRightRef}
-                      style={{
-                        width: "44%",
-                        height: "44%",
-                        borderRadius: "50%",
-                        backgroundColor: BLUE,
-                        willChange: "transform",
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* ===== Mulut dengan gigi reaktif mouse ===== */}
-              <div
-                ref={mouthRef}
-                style={{
-                  position: "relative",
-                  width: "70%",
-                  height: "24%",
-                  border: "clamp(3px, 0.4vw, 6px) solid " + BLUE,
-                  borderRadius: "999px",
-                  backgroundColor: "transparent",
-                  overflow: "hidden",
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "space-between",
-                  willChange: "height, transform",
-                }}
-              >
-                {/* Gigi atas */}
-                <div
-                  ref={teethTopRef}
-                  style={{
-                    display: "flex",
-                    justifyContent: "center",
-                    gap: "6%",
-                    paddingTop: "2%",
-                    willChange: "transform",
-                  }}
-                >
-                  <div
-                    style={{
-                      width: "18%",
-                      height: "clamp(10px, 1.2vw, 18px)",
-                      border: "clamp(2px, 0.3vw, 4px) solid " + BLUE,
-                      borderTop: "none",
-                      borderBottomLeftRadius: "6px",
-                      borderBottomRightRadius: "6px",
-                    }}
-                  />
-                  <div
-                    style={{
-                      width: "18%",
-                      height: "clamp(10px, 1.2vw, 18px)",
-                      border: "clamp(2px, 0.3vw, 4px) solid " + BLUE,
-                      borderTop: "none",
-                      borderBottomLeftRadius: "6px",
-                      borderBottomRightRadius: "6px",
-                    }}
-                  />
-                  <div
-                    style={{
-                      width: "18%",
-                      height: "clamp(10px, 1.2vw, 18px)",
-                      border: "clamp(2px, 0.3vw, 4px) solid " + BLUE,
-                      borderTop: "none",
-                      borderBottomLeftRadius: "6px",
-                      borderBottomRightRadius: "6px",
-                    }}
-                  />
-                </div>
-
-                {/* Lidah minimalist */}
-                <div
-                  ref={tongueRef}
-                  style={{
-                    alignSelf: "center",
-                    width: "32%",
-                    height: "30%",
-                    borderRadius: "0 0 999px 999px",
-                    border: "clamp(2px, 0.3vw, 4px) solid " + BLUE,
-                    borderTop: "none",
-                    backgroundColor: "transparent",
-                    willChange: "transform",
-                  }}
-                />
-
-                {/* Gigi bawah */}
-                <div
-                  ref={teethBottomRef}
-                  style={{
-                    display: "flex",
-                    justifyContent: "center",
-                    gap: "6%",
-                    paddingBottom: "2%",
-                    willChange: "transform",
-                  }}
-                >
-                  <div
-                    style={{
-                      width: "18%",
-                      height: "clamp(10px, 1.2vw, 18px)",
-                      border: "clamp(2px, 0.3vw, 4px) solid " + BLUE,
-                      borderBottom: "none",
-                      borderTopLeftRadius: "6px",
-                      borderTopRightRadius: "6px",
-                    }}
-                  />
-                  <div
-                    style={{
-                      width: "18%",
-                      height: "clamp(10px, 1.2vw, 18px)",
-                      border: "clamp(2px, 0.3vw, 4px) solid " + BLUE,
-                      borderBottom: "none",
-                      borderTopLeftRadius: "6px",
-                      borderTopRightRadius: "6px",
-                    }}
-                  />
-                  <div
-                    style={{
-                      width: "18%",
-                      height: "clamp(10px, 1.2vw, 18px)",
-                      border: "clamp(2px, 0.3vw, 4px) solid " + BLUE,
-                      borderBottom: "none",
-                      borderTopLeftRadius: "6px",
-                      borderTopRightRadius: "6px",
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Karakter "4" kedua */}
-            <span
-              ref={char4bRef}
-              style={{
-                fontFamily: FONT_FAMILY,
-                fontSize: "clamp(120px, 26vw, 400px)",
-                fontWeight: 400,
-                color: BLUE,
-                lineHeight: 0.85,
-                letterSpacing: "-0.06em",
-                display: "inline-block",
-                willChange: "transform, opacity",
-              }}
-            >
-              4
-            </span>
-          </div>
-        </div>
-
-        {/* ===== FOOTER LENGKAP ===== */}
-        <div
-          style={{
-            width: "100%",
-            padding: "60px 40px 40px 40px",
-            backgroundColor: WHITE,
-            borderTop: "1px solid rgba(0,0,0,0.05)",
-            position: "relative",
-            overflow: "hidden",
-            flexShrink: 0,
-          }}
-        >
-          {/* Hanya gambar kiri (kanan dihapus) */}
-          <div
-            style={{
-              position: "absolute",
-              left: "40px",
-              top: "50%",
-              transform: "translateY(-50%)",
-              width: "200px",
-              height: "auto",
-              opacity: 0.8,
-            }}
-          >
-            <img src="/images/p0l.jpg" alt="" style={{ width: "100%", height: "auto", display: "block", objectFit: "cover" }} />
-          </div>
-
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "flex-start",
-              maxWidth: "1400px",
-              margin: "0 auto",
-              gap: "40px",
-              flexWrap: "wrap",
+              overflow: "hidden",
               position: "relative",
-              zIndex: 1,
+              flexShrink: 0,
             }}
           >
-            {footerLinks.map((section, idx) => (
-              <div key={idx} style={{ flex: "1", minWidth: "200px" }}>
-                <h3
-                  style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: "28px",
-                    fontWeight: 600,
-                    color: BLACK,
-                    margin: 0,
-                    marginBottom: "16px",
-                    letterSpacing: "-0.01em",
-                  }}
-                >
-                  {section.title}
-                </h3>
-                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                  {section.links.map((link, linkIdx) => {
-                    let linkHref = "#";
-                    let isAttention = false;
-                    let isStories = false;
-                    if (link === "Contact Us") linkHref = "/contact";
-                    else if (link === "Live Chat") linkHref = "/live-chat";
-                    else if (link === "Live Chat Agent") linkHref = "/live-chat-agent";
-                    else if (link === "Help Center") linkHref = "/pusat-bantuan";
-                    else if (link === "About Us") {
-                      linkHref = "/profile";
-                      isAttention = true;
-                    } else if (link === "Privacy Policy") {
-                      linkHref = "/privacy-policy";
-                      isAttention = true;
-                    } else if (link === "Terms & Conditions") {
-                      linkHref = "/terms-of-services";
-                      isAttention = true;
-                    } else if (link === "Terms of Use") {
-                      linkHref = "/terms-of-use";
-                      isAttention = true;
-                    } else if (link === "Cookies Policy") {
-                      linkHref = "/cookie-policy";
-                      isAttention = true;
-                    } else if (link === "Stories") {
-                      linkHref = "/stories";
-                      isStories = true;
-                    } else if (link === "Shop") linkHref = "/shop";
-                    else if (link === "Note") linkHref = "/note";
-                    else if (link === "Calendar") linkHref = "/calendar";
-                    else if (link === "Blog") linkHref = "/blog";
-                    else if (link === "Donation") linkHref = "/donation";
-                    else if (link === "Community") linkHref = "/community";
-                    else if (link === "Instagram") linkHref = "https://instagram.com/menuru";
-
-                    return (
-                      <div key={linkIdx} style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                        <Link href={linkHref} style={{ textDecoration: "none" }}>
-                          <span
-                            style={{
-                              fontFamily: FONT_FAMILY,
-                              fontSize: "20px",
-                              fontWeight: 400,
-                              color: BLUE,
-                              letterSpacing: "-0.01em",
-                              cursor: "pointer",
-                            }}
-                          >
-                            {link}
-                          </span>
-                        </Link>
-                        {isAttention && (
-                          <span
-                            style={{
-                              backgroundColor: WHITE,
-                              border: `1.5px solid ${BLUE}`,
-                              color: BLUE,
-                              padding: "2px 8px",
-                              borderRadius: "4px",
-                              fontSize: "10px",
-                              fontWeight: 800,
-                              fontFamily: FONT_FAMILY,
-                              letterSpacing: "0.5px",
-                              textTransform: "uppercase",
-                              display: "inline-block",
-                            }}
-                          >
-                            Updated
-                          </span>
-                        )}
-                        {isStories && (
-                          <span
-                            style={{
-                              backgroundColor: WHITE,
-                              border: `1.5px solid ${BLUE}`,
-                              color: BLUE,
-                              padding: "2px 8px",
-                              borderRadius: "4px",
-                              fontSize: "10px",
-                              fontWeight: 800,
-                              fontFamily: FONT_FAMILY,
-                              letterSpacing: "0.5px",
-                              textTransform: "uppercase",
-                              display: "inline-block",
-                            }}
-                          >
-                            New
-                          </span>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div
-            style={{
-              maxWidth: "1400px",
-              margin: "40px auto 0 auto",
-              paddingTop: "20px",
-              borderTop: "1px solid rgba(0,0,0,0.05)",
-              position: "relative",
-              zIndex: 1,
-            }}
-          >
+            {/* Teks "Sorry" kiri atas — 2 baris */}
             <p
               style={{
+                position: "absolute",
+                top: "clamp(20px, 3vh, 40px)",
+                left: "clamp(20px, 3vw, 40px)",
                 fontFamily: FONT_FAMILY,
-                fontSize: "14px",
-                fontWeight: 400,
-                color: "#666",
+                fontSize: "100px",
+                fontWeight: 700,
+                color: BLUE,
+                lineHeight: 1,
+                letterSpacing: "-0.04em",
                 margin: 0,
-                textAlign: "center",
-                letterSpacing: "0.01em",
+                textAlign: "left",
               }}
             >
-              Terms and conditions apply. By using this website, you agree to our Terms of Use and Privacy Policy.
+              Sorry, we can&apos;t find
+              <br />
+              the page you&apos;re looking for.
             </p>
-          </div>
-        </div>
 
-        {/* ===== FOOTER MENURU besar (tanpa garis atas) ===== */}
-        <div
-          style={{
-            width: "100%",
-            padding: "0 40px 20px 40px",
-            backgroundColor: WHITE,
-            overflow: "visible",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "flex-start",
-            position: "relative",
-            flexShrink: 0,
-          }}
-        >
-          <span
+            {/* ===== Teks 404 di tengah ===== */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "1vw",
+                flexWrap: "nowrap",
+                userSelect: "none",
+                lineHeight: 0.85,
+              }}
+            >
+              {/* Karakter "4" pertama */}
+              <span
+                ref={char4Ref}
+                style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: "clamp(120px, 26vw, 400px)",
+                  fontWeight: 400,
+                  color: BLUE,
+                  lineHeight: 0.85,
+                  letterSpacing: "-0.06em",
+                  display: "inline-block",
+                  willChange: "transform, opacity",
+                }}
+              >
+                4
+              </span>
+
+              {/* Karakter "0": 2 mata + alis + mulut + gigi */}
+              <div
+                ref={eyesRef}
+                style={{
+                  position: "relative",
+                  width: "clamp(160px, 26vw, 380px)",
+                  height: "clamp(200px, 34vw, 500px)",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  willChange: "transform, opacity",
+                  gap: "6%",
+                }}
+              >
+                {/* Baris mata */}
+                <div
+                  style={{
+                    position: "relative",
+                    width: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "20%",
+                  }}
+                >
+                  {/* Mata kiri + alis */}
+                  <div
+                    style={{
+                      position: "relative",
+                      width: "38%",
+                      aspectRatio: "1 / 1",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <svg
+                      width="100%"
+                      height="40%"
+                      viewBox="0 0 100 40"
+                      style={{
+                        position: "absolute",
+                        top: "-32%",
+                        left: 0,
+                        overflow: "visible",
+                        pointerEvents: "none",
+                      }}
+                      preserveAspectRatio="none"
+                    >
+                      <path
+                        d="M 6 36 Q 50 2 94 36"
+                        fill="none"
+                        stroke={BLUE}
+                        strokeWidth="6"
+                        strokeLinecap="round"
+                        vectorEffect="non-scaling-stroke"
+                      />
+                    </svg>
+
+                    <div
+                      ref={eyeLeftRef}
+                      style={{
+                        width: "100%",
+                        aspectRatio: "1 / 1",
+                        borderRadius: "50%",
+                        border: "clamp(3px, 0.4vw, 6px) solid " + BLUE,
+                        backgroundColor: "transparent",
+                        position: "relative",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        overflow: "hidden",
+                      }}
+                    >
+                      <div
+                        ref={pupilLeftRef}
+                        style={{
+                          width: "44%",
+                          height: "44%",
+                          borderRadius: "50%",
+                          backgroundColor: BLUE,
+                          willChange: "transform",
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Mata kanan + alis */}
+                  <div
+                    style={{
+                      position: "relative",
+                      width: "38%",
+                      aspectRatio: "1 / 1",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <svg
+                      width="100%"
+                      height="40%"
+                      viewBox="0 0 100 40"
+                      style={{
+                        position: "absolute",
+                        top: "-32%",
+                        left: 0,
+                        overflow: "visible",
+                        pointerEvents: "none",
+                      }}
+                      preserveAspectRatio="none"
+                    >
+                      <path
+                        d="M 6 36 Q 50 2 94 36"
+                        fill="none"
+                        stroke={BLUE}
+                        strokeWidth="6"
+                        strokeLinecap="round"
+                        vectorEffect="non-scaling-stroke"
+                      />
+                    </svg>
+
+                    <div
+                      ref={eyeRightRef}
+                      style={{
+                        width: "100%",
+                        aspectRatio: "1 / 1",
+                        borderRadius: "50%",
+                        border: "clamp(3px, 0.4vw, 6px) solid " + BLUE,
+                        backgroundColor: "transparent",
+                        position: "relative",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        overflow: "hidden",
+                      }}
+                    >
+                      <div
+                        ref={pupilRightRef}
+                        style={{
+                          width: "44%",
+                          height: "44%",
+                          borderRadius: "50%",
+                          backgroundColor: BLUE,
+                          willChange: "transform",
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Mulut dengan gigi bergerak sesuai mouse */}
+                <div
+                  ref={mouthRef}
+                  style={{
+                    position: "relative",
+                    width: "70%",
+                    height: "24%",
+                    border: "clamp(3px, 0.4vw, 6px) solid " + BLUE,
+                    borderRadius: "999px",
+                    backgroundColor: "transparent",
+                    overflow: "hidden",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                    willChange: "height",
+                    transition: "none",
+                  }}
+                >
+                  {/* Gigi atas */}
+                  <div
+                    ref={teethTopRef}
+                    style={{
+                      display: "flex",
+                      justifyContent: "center",
+                      gap: "6%",
+                      paddingTop: "2%",
+                      willChange: "transform",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: "18%",
+                        height: "clamp(10px, 1.2vw, 18px)",
+                        border: "clamp(2px, 0.3vw, 4px) solid " + BLUE,
+                        borderTop: "none",
+                        borderBottomLeftRadius: "6px",
+                        borderBottomRightRadius: "6px",
+                      }}
+                    />
+                    <div
+                      style={{
+                        width: "18%",
+                        height: "clamp(10px, 1.2vw, 18px)",
+                        border: "clamp(2px, 0.3vw, 4px) solid " + BLUE,
+                        borderTop: "none",
+                        borderBottomLeftRadius: "6px",
+                        borderBottomRightRadius: "6px",
+                      }}
+                    />
+                    <div
+                      style={{
+                        width: "18%",
+                        height: "clamp(10px, 1.2vw, 18px)",
+                        border: "clamp(2px, 0.3vw, 4px) solid " + BLUE,
+                        borderTop: "none",
+                        borderBottomLeftRadius: "6px",
+                        borderBottomRightRadius: "6px",
+                      }}
+                    />
+                  </div>
+
+                  {/* Lidah minimalist */}
+                  <div
+                    className="mouth-tongue"
+                    style={{
+                      alignSelf: "center",
+                      width: "32%",
+                      height: "30%",
+                      borderRadius: "0 0 999px 999px",
+                      border: "clamp(2px, 0.3vw, 4px) solid " + BLUE,
+                      borderTop: "none",
+                      backgroundColor: "transparent",
+                    }}
+                  />
+
+                  {/* Gigi bawah */}
+                  <div
+                    ref={teethBottomRef}
+                    style={{
+                      display: "flex",
+                      justifyContent: "center",
+                      gap: "6%",
+                      paddingBottom: "2%",
+                      willChange: "transform",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: "18%",
+                        height: "clamp(10px, 1.2vw, 18px)",
+                        border: "clamp(2px, 0.3vw, 4px) solid " + BLUE,
+                        borderBottom: "none",
+                        borderTopLeftRadius: "6px",
+                        borderTopRightRadius: "6px",
+                      }}
+                    />
+                    <div
+                      style={{
+                        width: "18%",
+                        height: "clamp(10px, 1.2vw, 18px)",
+                        border: "clamp(2px, 0.3vw, 4px) solid " + BLUE,
+                        borderBottom: "none",
+                        borderTopLeftRadius: "6px",
+                        borderTopRightRadius: "6px",
+                      }}
+                    />
+                    <div
+                      style={{
+                        width: "18%",
+                        height: "clamp(10px, 1.2vw, 18px)",
+                        border: "clamp(2px, 0.3vw, 4px) solid " + BLUE,
+                        borderBottom: "none",
+                        borderTopLeftRadius: "6px",
+                        borderTopRightRadius: "6px",
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Karakter "4" kedua */}
+              <span
+                ref={char4bRef}
+                style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: "clamp(120px, 26vw, 400px)",
+                  fontWeight: 400,
+                  color: BLUE,
+                  lineHeight: 0.85,
+                  letterSpacing: "-0.06em",
+                  display: "inline-block",
+                  willChange: "transform, opacity",
+                }}
+              >
+                4
+              </span>
+            </div>
+          </div>
+
+          {/* ===== FOOTER LENGKAP ===== */}
+          <div
             style={{
-              fontFamily: FONT_FAMILY,
-              fontSize: "clamp(120px, 40vw, 600px)",
-              fontWeight: 400,
-              color: BLUE,
-              letterSpacing: "-0.05em",
-              lineHeight: "0.85",
-              display: "block",
-              textAlign: "left",
-              WebkitFontSmoothing: "antialiased",
-              whiteSpace: "nowrap",
-              margin: 0,
-              padding: 0,
+              width: "100%",
+              padding: "60px 40px 40px 40px",
+              backgroundColor: WHITE,
+              borderTop: "1px solid rgba(0,0,0,0.05)",
+              position: "relative",
+              overflow: "hidden",
+              flexShrink: 0,
             }}
           >
-            Menuru
-          </span>
-          <div style={{ width: "100%", display: "flex", justifyContent: "flex-start", marginTop: "10px" }}>
-            <span
+            <div
               style={{
-                fontFamily: FONT_FAMILY,
-                fontSize: "16px",
-                fontWeight: 400,
-                color: BLUE,
-                letterSpacing: "0.01em",
+                position: "absolute",
+                left: "40px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                width: "200px",
+                height: "auto",
                 opacity: 0.8,
               }}
             >
-              2024 - 2026 Menuru. All rights reserved.
+              <img src="/images/p0l.jpg" alt="" style={{ width: "100%", height: "auto", display: "block", objectFit: "cover" }} />
+            </div>
+            <div
+              style={{
+                position: "absolute",
+                right: "40px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                width: "200px",
+                height: "auto",
+                opacity: 0.8,
+              }}
+            >
+              <img src="/images/xxz.jpg" alt="" style={{ width: "100%", height: "auto", display: "block", objectFit: "cover" }} />
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "flex-start",
+                maxWidth: "1400px",
+                margin: "0 auto",
+                gap: "40px",
+                flexWrap: "wrap",
+                position: "relative",
+                zIndex: 1,
+              }}
+            >
+              {footerLinks.map((section, idx) => (
+                <div key={idx} style={{ flex: "1", minWidth: "200px" }}>
+                  <h3
+                    style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: "28px",
+                      fontWeight: 600,
+                      color: BLACK,
+                      margin: 0,
+                      marginBottom: "16px",
+                      letterSpacing: "-0.01em",
+                    }}
+                  >
+                    {section.title}
+                  </h3>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                    {section.links.map((link, linkIdx) => {
+                      let linkHref = "#";
+                      let isAttention = false;
+                      let isStories = false;
+                      if (link === "Contact Us") linkHref = "/contact";
+                      else if (link === "Live Chat") linkHref = "/live-chat";
+                      else if (link === "Live Chat Agent") linkHref = "/live-chat-agent";
+                      else if (link === "Help Center") linkHref = "/pusat-bantuan";
+                      else if (link === "About Us") {
+                        linkHref = "/profile";
+                        isAttention = true;
+                      } else if (link === "Privacy Policy") {
+                        linkHref = "/privacy-policy";
+                        isAttention = true;
+                      } else if (link === "Terms & Conditions") {
+                        linkHref = "/terms-of-services";
+                        isAttention = true;
+                      } else if (link === "Terms of Use") {
+                        linkHref = "/terms-of-use";
+                        isAttention = true;
+                      } else if (link === "Cookies Policy") {
+                        linkHref = "/cookie-policy";
+                        isAttention = true;
+                      } else if (link === "Stories") {
+                        linkHref = "/stories";
+                        isStories = true;
+                      } else if (link === "Shop") linkHref = "/shop";
+                      else if (link === "Note") linkHref = "/note";
+                      else if (link === "Calendar") linkHref = "/calendar";
+                      else if (link === "Blog") linkHref = "/blog";
+                      else if (link === "Donation") linkHref = "/donation";
+                      else if (link === "Community") linkHref = "/community";
+                      else if (link === "Instagram") linkHref = "https://instagram.com/menuru";
+
+                      return (
+                        <div key={linkIdx} style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                          <Link href={linkHref} style={{ textDecoration: "none" }}>
+                            <span
+                              style={{
+                                fontFamily: FONT_FAMILY,
+                                fontSize: "20px",
+                                fontWeight: 400,
+                                color: BLUE,
+                                letterSpacing: "-0.01em",
+                                cursor: "pointer",
+                              }}
+                            >
+                              {link}
+                            </span>
+                          </Link>
+                          {isAttention && (
+                            <span
+                              style={{
+                                backgroundColor: WHITE,
+                                border: `1.5px solid ${BLUE}`,
+                                color: BLUE,
+                                padding: "2px 8px",
+                                borderRadius: "4px",
+                                fontSize: "10px",
+                                fontWeight: 800,
+                                fontFamily: FONT_FAMILY,
+                                letterSpacing: "0.5px",
+                                textTransform: "uppercase",
+                                display: "inline-block",
+                              }}
+                            >
+                              Updated
+                            </span>
+                          )}
+                          {isStories && (
+                            <span
+                              style={{
+                                backgroundColor: WHITE,
+                                border: `1.5px solid ${BLUE}`,
+                                color: BLUE,
+                                padding: "2px 8px",
+                                borderRadius: "4px",
+                                fontSize: "10px",
+                                fontWeight: 800,
+                                fontFamily: FONT_FAMILY,
+                                letterSpacing: "0.5px",
+                                textTransform: "uppercase",
+                                display: "inline-block",
+                              }}
+                            >
+                              New
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div
+              style={{
+                maxWidth: "1400px",
+                margin: "40px auto 0 auto",
+                paddingTop: "20px",
+                position: "relative",
+                zIndex: 1,
+              }}
+            >
+              <p
+                style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: "14px",
+                  fontWeight: 400,
+                  color: "#666",
+                  margin: 0,
+                  textAlign: "center",
+                  letterSpacing: "0.01em",
+                }}
+              >
+                Terms and conditions apply. By using this website, you agree to our Terms of Use and Privacy Policy.
+              </p>
+            </div>
+          </div>
+
+          {/* ===== FOOTER MENURU besar + copyright (tanpa garis lurus) ===== */}
+          <div
+            style={{
+              width: "100%",
+              padding: "0 40px 20px 40px",
+              backgroundColor: WHITE,
+              overflow: "hidden",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "flex-start",
+              position: "relative",
+              flexShrink: 0,
+            }}
+          >
+            <span
+              ref={menuruBigRef}
+              style={{
+                fontFamily: FONT_FAMILY,
+                fontSize: "clamp(120px, 40vw, 600px)",
+                fontWeight: 400,
+                color: BLUE,
+                letterSpacing: "-0.05em",
+                lineHeight: "0.85",
+                display: "block",
+                textAlign: "left",
+                WebkitFontSmoothing: "antialiased",
+                whiteSpace: "nowrap",
+                margin: 0,
+                padding: 0,
+                willChange: "transform, opacity",
+              }}
+            >
+              Menuru
             </span>
+            <div style={{ width: "100%", display: "flex", justifyContent: "flex-start", marginTop: "10px" }}>
+              <span
+                style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: "16px",
+                  fontWeight: 400,
+                  color: BLUE,
+                  letterSpacing: "0.01em",
+                  opacity: 0.8,
+                }}
+              >
+                2024 - 2026 Menuru. All rights reserved.
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -884,21 +917,18 @@ export default function NotFoundPage(): React.JSX.Element {
           background-color: #ffffff;
           width: 100%;
           min-height: 100%;
+          overflow: hidden !important;
+          -ms-overflow-style: none;
+          scrollbar-width: none;
         }
-        * {
-          box-sizing: border-box;
-        }
-        /* Sembunyikan scrollbar visual tapi scroll tetap bisa */
         html::-webkit-scrollbar,
         body::-webkit-scrollbar {
           display: none !important;
           width: 0 !important;
           height: 0 !important;
         }
-        html,
-        body {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
+        * {
+          box-sizing: border-box;
         }
       `}</style>
     </>
