@@ -5,6 +5,7 @@ import Head from "next/head";
 import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Lenis from "@studio-freight/lenis";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -40,12 +41,50 @@ export default function NotFoundPage(): React.JSX.Element {
   const mouthRef = useRef<HTMLDivElement>(null);
   const teethTopRef = useRef<HTMLDivElement>(null);
   const teethBottomRef = useRef<HTMLDivElement>(null);
+  const tongueRef = useRef<HTMLDivElement>(null);
   const mouseRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const rafRef = useRef<number>(0);
+  const lenisRef = useRef<any>(null);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  // ===== Lenis smooth scroll (Freight/Studio feel) =====
+  useEffect(() => {
+    if (!isMounted) return;
+    if (typeof window === "undefined") return;
+
+    // Lenis
+    const lenis = new Lenis({
+      duration: 1.6,
+      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      orientation: "vertical",
+      gestureOrientation: "vertical",
+      smoothWheel: true,
+      wheelMultiplier: 1,
+      touchMultiplier: 2,
+      infinite: false,
+    });
+
+    lenisRef.current = lenis;
+
+    // Sinkronisasi Lenis dengan GSAP ScrollTrigger
+    lenis.on("scroll", ScrollTrigger.update);
+
+    const raf = (time: number) => {
+      lenis.raf(time * 1000);
+    };
+
+    gsap.ticker.add(raf);
+    gsap.ticker.lagSmoothing(0);
+
+    return () => {
+      gsap.ticker.remove(raf);
+      lenis.destroy();
+      lenisRef.current = null;
+    };
+  }, [isMounted]);
 
   // ===== Falling animation untuk karakter 4, (mata), 4 =====
   useEffect(() => {
@@ -113,7 +152,7 @@ export default function NotFoundPage(): React.JSX.Element {
     return () => ctx.revert();
   }, [isMounted]);
 
-  // ===== Pupil + mulut + gigi mengikuti cursor mouse =====
+  // ===== Pupil + mulut + gigi reaktif ke gerakan mouse =====
   useEffect(() => {
     if (!isMounted) return;
 
@@ -129,10 +168,12 @@ export default function NotFoundPage(): React.JSX.Element {
       const mouth = mouthRef.current;
       const teethTop = teethTopRef.current;
       const teethBottom = teethBottomRef.current;
+      const tongue = tongueRef.current;
 
-      // ===== Pupil mengikuti cursor =====
-      if (eyeL && pupilL) {
-        const rect = eyeL.getBoundingClientRect();
+      // ===== Pupil mengikuti mouse =====
+      const applyPupil = (eye: HTMLDivElement | null, pupil: HTMLDivElement | null) => {
+        if (!eye || !pupil) return;
+        const rect = eye.getBoundingClientRect();
         const cx = rect.left + rect.width / 2;
         const cy = rect.top + rect.height / 2;
         const dx = mouseRef.current.x - cx;
@@ -142,61 +183,71 @@ export default function NotFoundPage(): React.JSX.Element {
         const angle = Math.atan2(dy, dx);
         const moveX = Math.cos(angle) * Math.min(dist, maxMove);
         const moveY = Math.sin(angle) * Math.min(dist, maxMove);
-        gsap.set(pupilL, { x: moveX, y: moveY });
-      }
+        gsap.set(pupil, { x: moveX, y: moveY });
+      };
 
-      if (eyeR && pupilR) {
-        const rect = eyeR.getBoundingClientRect();
-        const cx = rect.left + rect.width / 2;
-        const cy = rect.top + rect.height / 2;
-        const dx = mouseRef.current.x - cx;
-        const dy = mouseRef.current.y - cy;
-        const maxMove = rect.width * 0.26;
-        const dist = Math.hypot(dx, dy);
-        const angle = Math.atan2(dy, dx);
-        const moveX = Math.cos(angle) * Math.min(dist, maxMove);
-        const moveY = Math.sin(angle) * Math.min(dist, maxMove);
-        gsap.set(pupilR, { x: moveX, y: moveY });
-      }
+      applyPupil(eyeL, pupilL);
+      applyPupil(eyeR, pupilR);
 
-      // ===== Mulut & gigi mengikuti jarak cursor =====
+      // ===== Mulut & gigi reaktif terhadap mouse =====
       if (mouth) {
         const rect = mouth.getBoundingClientRect();
         const cx = rect.left + rect.width / 2;
         const cy = rect.top + rect.height / 2;
         const dx = mouseRef.current.x - cx;
         const dy = mouseRef.current.y - cy;
-        const dist = Math.hypot(dx, dy);
-        const viewportDiag = Math.hypot(window.innerWidth, window.innerHeight);
+        // Rasio: -1..1 terhadap viewport
+        const nx = Math.max(-1, Math.min(1, dx / (window.innerWidth / 2)));
+        const ny = Math.max(-1, Math.min(1, dy / (window.innerHeight / 2)));
 
-        // 0 = dekat (tertutup rapat), 1 = jauh (terbuka lebar)
-        const openness = Math.min(dist / (viewportDiag * 0.45), 1);
-
-        // height mulut: dari 8% (tertutup) → 42% (buka lebar)
-        const mouthHeight = 8 + openness * 34;
+        // Mulut terbuka jika cursor jauh dari mulut (jarak lebih besar = buka lebih lebar)
+        const distRatio = Math.min(1, Math.hypot(dx, dy) / 500);
+        const openAmount = 14 + distRatio * 22; // 14%..36%
 
         gsap.to(mouth, {
-          height: mouthHeight + "%",
-          duration: 0.35,
-          ease: "power2.out",
+          height: `${openAmount}%`,
+          duration: 0.5,
+          ease: "power3.out",
           overwrite: true,
         });
 
-        // Gigi atas turun saat mulut terbuka
+        // Mulut miring halus mengikuti mouse
+        gsap.to(mouth, {
+          rotate: nx * 6,
+          duration: 0.6,
+          ease: "power3.out",
+          overwrite: "auto",
+        });
+
+        // Gigi atas turun ketika mulut terbuka
         if (teethTop) {
           gsap.to(teethTop, {
-            y: openness * 14,
-            duration: 0.35,
-            ease: "power2.out",
+            y: `${distRatio * 30}%`,
+            x: `${nx * 8}%`,
+            duration: 0.5,
+            ease: "power3.out",
             overwrite: true,
           });
         }
-        // Gigi bawah naik saat mulut terbuka
+
+        // Gigi bawah naik ketika mulut terbuka
         if (teethBottom) {
           gsap.to(teethBottom, {
-            y: -openness * 14,
-            duration: 0.35,
-            ease: "power2.out",
+            y: `${-distRatio * 30}%`,
+            x: `${nx * 8}%`,
+            duration: 0.5,
+            ease: "power3.out",
+            overwrite: true,
+          });
+        }
+
+        // Lidah bergoyang mengikuti ny
+        if (tongue) {
+          gsap.to(tongue, {
+            y: `${ny * 15}%`,
+            scaleY: 1 - Math.abs(ny) * 0.15,
+            duration: 0.5,
+            ease: "power3.out",
             overwrite: true,
           });
         }
@@ -243,7 +294,7 @@ export default function NotFoundPage(): React.JSX.Element {
           overflowX: "hidden",
         }}
       >
-        {/* ===== SECTION 404 (fullscreen, tanpa sidebar & garis) ===== */}
+        {/* ===== SECTION 404 (fullscreen) ===== */}
         <div
           ref={containerRef}
           style={{
@@ -251,18 +302,19 @@ export default function NotFoundPage(): React.JSX.Element {
             height: "100vh",
             backgroundColor: WHITE,
             display: "flex",
-            flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
             overflow: "hidden",
             position: "relative",
             flexShrink: 0,
-            padding: "20px",
           }}
         >
-          {/* ===== Teks "Sorry..." di tengah atas — 2 baris, 100px, biru ===== */}
+          {/* ===== Teks "Sorry" di kiri atas — 2 baris ===== */}
           <p
             style={{
+              position: "absolute",
+              top: "clamp(20px, 3vh, 40px)",
+              left: "clamp(20px, 3vw, 40px)",
               fontFamily: FONT_FAMILY,
               fontSize: "100px",
               fontWeight: 700,
@@ -270,8 +322,7 @@ export default function NotFoundPage(): React.JSX.Element {
               lineHeight: 1,
               letterSpacing: "-0.04em",
               margin: 0,
-              marginBottom: "clamp(20px, 4vh, 60px)",
-              textAlign: "center",
+              textAlign: "left",
             }}
           >
             Sorry, we can&apos;t find
@@ -308,7 +359,7 @@ export default function NotFoundPage(): React.JSX.Element {
               4
             </span>
 
-            {/* Karakter "0" = 2 mata + alis + mulut dengan gigi bergerak */}
+            {/* Karakter "0" diganti 2 mata + alis + mulut reaktif mouse */}
             <div
               ref={eyesRef}
               style={{
@@ -320,7 +371,7 @@ export default function NotFoundPage(): React.JSX.Element {
                 alignItems: "center",
                 justifyContent: "center",
                 willChange: "transform, opacity",
-                gap: "6%",
+                gap: "8%",
               }}
             >
               {/* ===== Baris mata ===== */}
@@ -459,13 +510,13 @@ export default function NotFoundPage(): React.JSX.Element {
                 </div>
               </div>
 
-              {/* ===== Mulut dengan gigi (bergerak sesuai jarak cursor) ===== */}
+              {/* ===== Mulut dengan gigi reaktif mouse ===== */}
               <div
                 ref={mouthRef}
                 style={{
                   position: "relative",
                   width: "70%",
-                  height: "10%",
+                  height: "24%",
                   border: "clamp(3px, 0.4vw, 6px) solid " + BLUE,
                   borderRadius: "999px",
                   backgroundColor: "transparent",
@@ -473,7 +524,7 @@ export default function NotFoundPage(): React.JSX.Element {
                   display: "flex",
                   flexDirection: "column",
                   justifyContent: "space-between",
-                  willChange: "height",
+                  willChange: "height, transform",
                 }}
               >
                 {/* Gigi atas */}
@@ -521,6 +572,7 @@ export default function NotFoundPage(): React.JSX.Element {
 
                 {/* Lidah minimalist */}
                 <div
+                  ref={tongueRef}
                   style={{
                     alignSelf: "center",
                     width: "32%",
@@ -529,6 +581,7 @@ export default function NotFoundPage(): React.JSX.Element {
                     border: "clamp(2px, 0.3vw, 4px) solid " + BLUE,
                     borderTop: "none",
                     backgroundColor: "transparent",
+                    willChange: "transform",
                   }}
                 />
 
@@ -596,17 +649,19 @@ export default function NotFoundPage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* ===== FOOTER LENGKAP (tanpa borderTop di atas) ===== */}
+        {/* ===== FOOTER LENGKAP ===== */}
         <div
           style={{
             width: "100%",
             padding: "60px 40px 40px 40px",
             backgroundColor: WHITE,
+            borderTop: "1px solid rgba(0,0,0,0.05)",
             position: "relative",
             overflow: "hidden",
             flexShrink: 0,
           }}
         >
+          {/* Hanya gambar kiri (kanan dihapus) */}
           <div
             style={{
               position: "absolute",
@@ -619,19 +674,6 @@ export default function NotFoundPage(): React.JSX.Element {
             }}
           >
             <img src="/images/p0l.jpg" alt="" style={{ width: "100%", height: "auto", display: "block", objectFit: "cover" }} />
-          </div>
-          <div
-            style={{
-              position: "absolute",
-              right: "40px",
-              top: "50%",
-              transform: "translateY(-50%)",
-              width: "200px",
-              height: "auto",
-              opacity: 0.8,
-            }}
-          >
-            <img src="/images/xxz.jpg" alt="" style={{ width: "100%", height: "auto", display: "block", objectFit: "cover" }} />
           </div>
 
           <div
@@ -763,6 +805,8 @@ export default function NotFoundPage(): React.JSX.Element {
             style={{
               maxWidth: "1400px",
               margin: "40px auto 0 auto",
+              paddingTop: "20px",
+              borderTop: "1px solid rgba(0,0,0,0.05)",
               position: "relative",
               zIndex: 1,
             }}
@@ -783,7 +827,7 @@ export default function NotFoundPage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* ===== FOOTER MENURU besar + copyright ===== */}
+        {/* ===== FOOTER MENURU besar (tanpa garis atas) ===== */}
         <div
           style={{
             width: "100%",
@@ -840,17 +884,21 @@ export default function NotFoundPage(): React.JSX.Element {
           background-color: #ffffff;
           width: 100%;
           min-height: 100%;
-          -ms-overflow-style: none;
-          scrollbar-width: none;
         }
+        * {
+          box-sizing: border-box;
+        }
+        /* Sembunyikan scrollbar visual tapi scroll tetap bisa */
         html::-webkit-scrollbar,
         body::-webkit-scrollbar {
           display: none !important;
           width: 0 !important;
           height: 0 !important;
         }
-        * {
-          box-sizing: border-box;
+        html,
+        body {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
         }
       `}</style>
     </>
