@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import Head from "next/head";
 import Link from "next/link";
-import Script from "next/script";
 import { initializeApp, getApps } from "firebase/app";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
 import {
@@ -5481,31 +5480,27 @@ export default function HomePage(): React.JSX.Element {
         <meta name="twitter:title" content="Menuru Official | Home" />
         <meta name="twitter:description" content="Menuru Brand from Love yourself" />
         <meta name="twitter:image" content="/images/ai.jpg" />
-      </Head>
 
-      {/* ===== GOOGLE TAG MANAGER (script) ===== */}
-      <Script
-        id="gtm-script"
-        strategy="afterInteractive"
-        dangerouslySetInnerHTML={{
-          __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+        {/* ===== GOOGLE ADSENSE SNIPPET (pakai <script> biasa agar muncul di page source) ===== */}
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6198767676395468"
+          crossOrigin="anonymous"
+        ></script>
+        {/* ===== END GOOGLE ADSENSE SNIPPET ===== */}
+
+        {/* ===== GOOGLE TAG MANAGER (pakai <script> biasa) ===== */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
 })(window,document,'script','dataLayer','GTM-MRD7N2G4');`,
-        }}
-      />
-      {/* ===== END GOOGLE TAG MANAGER (script) ===== */}
-
-      {/* ===== GOOGLE ADSENSE ===== */}
-      <Script
-        id="adsbygoogle-init"
-        async
-        strategy="afterInteractive"
-        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6198767676395468"
-        crossOrigin="anonymous"
-      />
-      {/* ===== END GOOGLE ADSENSE ===== */}
+          }}
+        />
+        {/* ===== END GOOGLE TAG MANAGER ===== */}
+      </Head>
 
       {/* ===== GOOGLE TAG MANAGER (noscript) ===== */}
       <noscript>
