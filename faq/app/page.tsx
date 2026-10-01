@@ -5650,6 +5650,97 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           <RightNavbar user={user} auth={auth} db={db} />
           <CookieConsentPopup user={user} db={db} isMounted={isMounted} />
 
+          {/* ===== BRAND IDENTITIES & CAMPAIGNS (kiri) + DESKRIPSI 2 BARIS (kanan) ===== */}
+          <div
+            style={{
+              width: "100%",
+              padding: "0 40px",
+              maxWidth: "1600px",
+              margin: "0 auto",
+              marginTop: "140px",
+              position: "relative",
+              zIndex: 2,
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "flex-start",
+                gap: "60px",
+                flexWrap: "wrap",
+              }}
+            >
+              {/* Sisi Kiri — 2 baris, 90px */}
+              <div style={{ flexShrink: 0 }}>
+                <div
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "90px",
+                    fontWeight: 700,
+                    color: BLUE,
+                    letterSpacing: "-0.04em",
+                    lineHeight: 1.05,
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  Brand Identities
+                </div>
+                <div
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "90px",
+                    fontWeight: 700,
+                    color: BLUE,
+                    letterSpacing: "-0.04em",
+                    lineHeight: 1.05,
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  &amp; Campaigns
+                </div>
+              </div>
+
+              {/* Sisi Kanan — deskripsi 2 baris, 40px */}
+              <div
+                style={{
+                  flex: "1 1 0",
+                  minWidth: "300px",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-end",
+                  textAlign: "right",
+                  paddingTop: "20px",
+                }}
+              >
+                <div
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "40px",
+                    fontWeight: 600,
+                    color: BLACK,
+                    letterSpacing: "-0.02em",
+                    lineHeight: 1.25,
+                  }}
+                >
+                  Menuru Studio is a non-profit brand born from the founder&apos;s vision to assist the public at no cost
+                </div>
+                <div
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "40px",
+                    fontWeight: 600,
+                    color: BLACK,
+                    letterSpacing: "-0.02em",
+                    lineHeight: 1.25,
+                  }}
+                >
+                  Since our brand was established, we have helped people find exceptional solutions for their activities and created memorable features
+                </div>
+              </div>
+            </div>
+          </div>
+
           <HeroMenuruTitle onNavbarShiftChange={setNavbarShifted} />
 
           <div
@@ -5680,197 +5771,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             >
               Features
             </h2>
-
-            {/* ===== BRAND IDENTITIES & CAMPAIGNS (KIRI) + DESKRIPSI (KANAN) ===== */}
-            <div
-              style={{
-                width: "100%",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "flex-start",
-                gap: "60px",
-                marginBottom: "40px",
-                flexWrap: "wrap",
-              }}
-            >
-              {/* Sisi Kiri */}
-              <div style={{ flex: "1 1 400px", minWidth: "300px" }}>
-                <div
-                  style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: "90px",
-                    fontWeight: 700,
-                    color: BLUE,
-                    letterSpacing: "-0.04em",
-                    lineHeight: 1.05,
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  Brand Identities
-                </div>
-                <div
-                  style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: "90px",
-                    fontWeight: 700,
-                    color: BLUE,
-                    letterSpacing: "-0.04em",
-                    lineHeight: 1.05,
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  &amp; Campaigns
-                </div>
-              </div>
-
-              {/* Sisi Kanan */}
-              <div style={{ flex: "1 1 400px", minWidth: "300px", textAlign: "right" }}>
-                <div
-                  style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: "90px",
-                    fontWeight: 700,
-                    color: BLACK,
-                    letterSpacing: "-0.04em",
-                    lineHeight: 1.05,
-                  }}
-                >
-                  Menuru Studio is a
-                </div>
-                <div
-                  style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: "90px",
-                    fontWeight: 700,
-                    color: BLACK,
-                    letterSpacing: "-0.04em",
-                    lineHeight: 1.05,
-                  }}
-                >
-                  non-profit brand born
-                </div>
-                <div
-                  style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: "90px",
-                    fontWeight: 700,
-                    color: BLACK,
-                    letterSpacing: "-0.04em",
-                    lineHeight: 1.05,
-                  }}
-                >
-                  from the founder&apos;s
-                </div>
-                <div
-                  style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: "90px",
-                    fontWeight: 700,
-                    color: BLACK,
-                    letterSpacing: "-0.04em",
-                    lineHeight: 1.05,
-                  }}
-                >
-                  vision to assist the
-                </div>
-                <div
-                  style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: "90px",
-                    fontWeight: 700,
-                    color: BLACK,
-                    letterSpacing: "-0.04em",
-                    lineHeight: 1.05,
-                  }}
-                >
-                  public at no cost and
-                </div>
-                <div
-                  style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: "90px",
-                    fontWeight: 700,
-                    color: BLACK,
-                    letterSpacing: "-0.04em",
-                    lineHeight: 1.05,
-                  }}
-                >
-                  Since our brand was
-                </div>
-                <div
-                  style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: "90px",
-                    fontWeight: 700,
-                    color: BLACK,
-                    letterSpacing: "-0.04em",
-                    lineHeight: 1.05,
-                  }}
-                >
-                  established, we have
-                </div>
-                <div
-                  style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: "90px",
-                    fontWeight: 700,
-                    color: BLACK,
-                    letterSpacing: "-0.04em",
-                    lineHeight: 1.05,
-                  }}
-                >
-                  helped people find
-                </div>
-                <div
-                  style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: "90px",
-                    fontWeight: 700,
-                    color: BLACK,
-                    letterSpacing: "-0.04em",
-                    lineHeight: 1.05,
-                  }}
-                >
-                  exceptional solutions
-                </div>
-                <div
-                  style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: "90px",
-                    fontWeight: 700,
-                    color: BLACK,
-                    letterSpacing: "-0.04em",
-                    lineHeight: 1.05,
-                  }}
-                >
-                  for their activities and
-                </div>
-                <div
-                  style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: "90px",
-                    fontWeight: 700,
-                    color: BLACK,
-                    letterSpacing: "-0.04em",
-                    lineHeight: 1.05,
-                  }}
-                >
-                  created memorable
-                </div>
-                <div
-                  style={{
-                    fontFamily: FONT_FAMILY,
-                    fontSize: "90px",
-                    fontWeight: 700,
-                    color: BLACK,
-                    letterSpacing: "-0.04em",
-                    lineHeight: 1.05,
-                  }}
-                >
-                  features
-                </div>
-              </div>
-            </div>
 
             <div style={{ width: "100%", position: "relative", zIndex: 2, marginBottom: "40px" }}>
               <div style={{ display: "flex", alignItems: "center", width: "100%", flexWrap: "wrap" }}>
