@@ -1441,9 +1441,6 @@ const NavbarButton = ({
   descriptionTextColor = "rgba(255,255,255,0.9)",
   iconComponent = null,
   isResources = false,
-  // ===== TAMBAHAN: teks di bawah tombol & teks kanan =====
-  belowButtonText = null,
-  rightSideText = null,
 }: any) => {
   const [open, setOpen] = useState(false);
   const linesTopRef = useRef<SVGLineElement>(null);
@@ -1558,35 +1555,6 @@ const NavbarButton = ({
           )}
         </div>
       </div>
-
-      {/* ===== TAMBAHAN: teks di bawah tombol (2 baris) ===== */}
-      {belowButtonText && (
-        <div
-          style={{
-            marginTop: "8px",
-            display: "flex",
-            flexDirection: "column",
-            gap: "2px",
-            fontFamily: FONT_FAMILY,
-          }}
-        >
-          {belowButtonText.map((line: string, i: number) => (
-            <span
-              key={i}
-              style={{
-                fontSize: "13px",
-                fontWeight: 600,
-                color: BLUE,
-                letterSpacing: "-0.01em",
-                lineHeight: 1.3,
-                whiteSpace: "nowrap",
-              }}
-            >
-              {line}
-            </span>
-          ))}
-        </div>
-      )}
 
       {open && (
         <div
@@ -1722,35 +1690,6 @@ const NavbarButton = ({
                 <p style={{ fontSize: "12px", lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY }}>
                   {panelRightDescription}
                 </p>
-
-                {/* ===== TAMBAHAN: teks about Menuru Studio (per baris) ===== */}
-                {rightSideText && (
-                  <div
-                    style={{
-                      marginTop: "6px",
-                      paddingTop: "8px",
-                      borderTop: `1px solid ${panelBoxBorder}`,
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: "4px",
-                    }}
-                  >
-                    {rightSideText.map((line: string, i: number) => (
-                      <span
-                        key={i}
-                        style={{
-                          fontSize: "11px",
-                          lineHeight: 1.5,
-                          color: descriptionTextColor,
-                          fontFamily: FONT_FAMILY,
-                          fontWeight: 400,
-                        }}
-                      >
-                        {line}
-                      </span>
-                    ))}
-                  </div>
-                )}
               </div>
             )}
           </div>
@@ -1770,7 +1709,7 @@ const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
         left: shifted ? "340px" : "60px",
         zIndex: 9000,
         display: "flex",
-        alignItems: "flex-start",
+        alignItems: "center",
         gap: "8px",
         fontFamily: FONT_FAMILY,
         transition: "left 0.6s cubic-bezier(0.65, 0, 0.35, 1)",
@@ -1787,13 +1726,6 @@ const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
         iconType="trust"
         bigPanelWidth={850}
         bigPanelHeight={260}
-        // ===== TAMBAHAN: teks di bawah tombol Teams =====
-        belowButtonText={["Brand Identities", "& Campaigns"]}
-        // ===== TAMBAHAN: teks tentang Menuru Studio di sisi kanan =====
-        rightSideText={[
-          "Menuru Studio is a non-profit brand born from the founder's vision to assist the public at no cost",
-          "Since our brand was established, we have helped people find exceptional solutions for their activities and created memorable features",
-        ]}
       />
       <NavbarButton
         label="Individual"
@@ -5748,6 +5680,197 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             >
               Features
             </h2>
+
+            {/* ===== BRAND IDENTITIES & CAMPAIGNS (KIRI) + DESKRIPSI (KANAN) ===== */}
+            <div
+              style={{
+                width: "100%",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "flex-start",
+                gap: "60px",
+                marginBottom: "40px",
+                flexWrap: "wrap",
+              }}
+            >
+              {/* Sisi Kiri */}
+              <div style={{ flex: "1 1 400px", minWidth: "300px" }}>
+                <div
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "90px",
+                    fontWeight: 700,
+                    color: BLUE,
+                    letterSpacing: "-0.04em",
+                    lineHeight: 1.05,
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  Brand Identities
+                </div>
+                <div
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "90px",
+                    fontWeight: 700,
+                    color: BLUE,
+                    letterSpacing: "-0.04em",
+                    lineHeight: 1.05,
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  &amp; Campaigns
+                </div>
+              </div>
+
+              {/* Sisi Kanan */}
+              <div style={{ flex: "1 1 400px", minWidth: "300px", textAlign: "right" }}>
+                <div
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "90px",
+                    fontWeight: 700,
+                    color: BLACK,
+                    letterSpacing: "-0.04em",
+                    lineHeight: 1.05,
+                  }}
+                >
+                  Menuru Studio is a
+                </div>
+                <div
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "90px",
+                    fontWeight: 700,
+                    color: BLACK,
+                    letterSpacing: "-0.04em",
+                    lineHeight: 1.05,
+                  }}
+                >
+                  non-profit brand born
+                </div>
+                <div
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "90px",
+                    fontWeight: 700,
+                    color: BLACK,
+                    letterSpacing: "-0.04em",
+                    lineHeight: 1.05,
+                  }}
+                >
+                  from the founder&apos;s
+                </div>
+                <div
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "90px",
+                    fontWeight: 700,
+                    color: BLACK,
+                    letterSpacing: "-0.04em",
+                    lineHeight: 1.05,
+                  }}
+                >
+                  vision to assist the
+                </div>
+                <div
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "90px",
+                    fontWeight: 700,
+                    color: BLACK,
+                    letterSpacing: "-0.04em",
+                    lineHeight: 1.05,
+                  }}
+                >
+                  public at no cost and
+                </div>
+                <div
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "90px",
+                    fontWeight: 700,
+                    color: BLACK,
+                    letterSpacing: "-0.04em",
+                    lineHeight: 1.05,
+                  }}
+                >
+                  Since our brand was
+                </div>
+                <div
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "90px",
+                    fontWeight: 700,
+                    color: BLACK,
+                    letterSpacing: "-0.04em",
+                    lineHeight: 1.05,
+                  }}
+                >
+                  established, we have
+                </div>
+                <div
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "90px",
+                    fontWeight: 700,
+                    color: BLACK,
+                    letterSpacing: "-0.04em",
+                    lineHeight: 1.05,
+                  }}
+                >
+                  helped people find
+                </div>
+                <div
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "90px",
+                    fontWeight: 700,
+                    color: BLACK,
+                    letterSpacing: "-0.04em",
+                    lineHeight: 1.05,
+                  }}
+                >
+                  exceptional solutions
+                </div>
+                <div
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "90px",
+                    fontWeight: 700,
+                    color: BLACK,
+                    letterSpacing: "-0.04em",
+                    lineHeight: 1.05,
+                  }}
+                >
+                  for their activities and
+                </div>
+                <div
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "90px",
+                    fontWeight: 700,
+                    color: BLACK,
+                    letterSpacing: "-0.04em",
+                    lineHeight: 1.05,
+                  }}
+                >
+                  created memorable
+                </div>
+                <div
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "90px",
+                    fontWeight: 700,
+                    color: BLACK,
+                    letterSpacing: "-0.04em",
+                    lineHeight: 1.05,
+                  }}
+                >
+                  features
+                </div>
+              </div>
+            </div>
 
             <div style={{ width: "100%", position: "relative", zIndex: 2, marginBottom: "40px" }}>
               <div style={{ display: "flex", alignItems: "center", width: "100%", flexWrap: "wrap" }}>
