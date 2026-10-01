@@ -1441,6 +1441,9 @@ const NavbarButton = ({
   descriptionTextColor = "rgba(255,255,255,0.9)",
   iconComponent = null,
   isResources = false,
+  // ===== TAMBAHAN: teks di bawah tombol & teks kanan =====
+  belowButtonText = null,
+  rightSideText = null,
 }: any) => {
   const [open, setOpen] = useState(false);
   const linesTopRef = useRef<SVGLineElement>(null);
@@ -1555,6 +1558,35 @@ const NavbarButton = ({
           )}
         </div>
       </div>
+
+      {/* ===== TAMBAHAN: teks di bawah tombol (2 baris) ===== */}
+      {belowButtonText && (
+        <div
+          style={{
+            marginTop: "8px",
+            display: "flex",
+            flexDirection: "column",
+            gap: "2px",
+            fontFamily: FONT_FAMILY,
+          }}
+        >
+          {belowButtonText.map((line: string, i: number) => (
+            <span
+              key={i}
+              style={{
+                fontSize: "13px",
+                fontWeight: 600,
+                color: BLUE,
+                letterSpacing: "-0.01em",
+                lineHeight: 1.3,
+                whiteSpace: "nowrap",
+              }}
+            >
+              {line}
+            </span>
+          ))}
+        </div>
+      )}
 
       {open && (
         <div
@@ -1690,6 +1722,35 @@ const NavbarButton = ({
                 <p style={{ fontSize: "12px", lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY }}>
                   {panelRightDescription}
                 </p>
+
+                {/* ===== TAMBAHAN: teks about Menuru Studio (per baris) ===== */}
+                {rightSideText && (
+                  <div
+                    style={{
+                      marginTop: "6px",
+                      paddingTop: "8px",
+                      borderTop: `1px solid ${panelBoxBorder}`,
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "4px",
+                    }}
+                  >
+                    {rightSideText.map((line: string, i: number) => (
+                      <span
+                        key={i}
+                        style={{
+                          fontSize: "11px",
+                          lineHeight: 1.5,
+                          color: descriptionTextColor,
+                          fontFamily: FONT_FAMILY,
+                          fontWeight: 400,
+                        }}
+                      >
+                        {line}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -1709,7 +1770,7 @@ const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
         left: shifted ? "340px" : "60px",
         zIndex: 9000,
         display: "flex",
-        alignItems: "center",
+        alignItems: "flex-start",
         gap: "8px",
         fontFamily: FONT_FAMILY,
         transition: "left 0.6s cubic-bezier(0.65, 0, 0.35, 1)",
@@ -1726,6 +1787,13 @@ const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
         iconType="trust"
         bigPanelWidth={850}
         bigPanelHeight={260}
+        // ===== TAMBAHAN: teks di bawah tombol Teams =====
+        belowButtonText={["Brand Identities", "& Campaigns"]}
+        // ===== TAMBAHAN: teks tentang Menuru Studio di sisi kanan =====
+        rightSideText={[
+          "Menuru Studio is a non-profit brand born from the founder's vision to assist the public at no cost",
+          "Since our brand was established, we have helped people find exceptional solutions for their activities and created memorable features",
+        ]}
       />
       <NavbarButton
         label="Individual"
