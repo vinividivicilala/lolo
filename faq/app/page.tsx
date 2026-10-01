@@ -6219,20 +6219,20 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                           linkHref = "/terms-of-services";
                           isAttention = true;
                         } else if (link === "Terms of Use") {
-                          linkHref = "/terms-of-use";
+                          linkHref = "/notfounds";
                           isAttention = true;
                         } else if (link === "Cookies Policy") {
-                          linkHref = "/cookie-policy";
+                          linkHref = "/notfounds";
                           isAttention = true;
                         } else if (link === "Stories") {
-                          linkHref = "/stories";
+                          linkHref = "/notfounds";
                           isStories = true;
-                        } else if (link === "Shop") linkHref = "/shop";
-                        else if (link === "Note") linkHref = "/note";
-                        else if (link === "Calendar") linkHref = "/calendar";
-                        else if (link === "Blog") linkHref = "/blog";
-                        else if (link === "Donation") linkHref = "/donation";
-                        else if (link === "Community") linkHref = "/community";
+                        } else if (link === "Shop") linkHref = "/notfounds";
+                        else if (link === "Note") linkHref = "/notfounds";
+                        else if (link === "Calendar") linkHref = "/notfounds";
+                        else if (link === "Blog") linkHref = "/notfounds";
+                        else if (link === "Donation") linkHref = "/notfounds";
+                        else if (link === "Community") linkHref = "/notfounds";
                         else if (link === "Instagram") linkHref = "https://instagram.com/menuru";
 
                         return (
