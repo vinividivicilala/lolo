@@ -317,6 +317,7 @@ const COOKIE_CONSENT_STORAGE_KEY = "menuru_cookie_consent_v1";
 const BLUE = "#0D3CFC";
 const WHITE = "#FFFFFF";
 const BLACK = "#000000";
+const LIME = "#E3FB96";
 
 const STATUS_STYLES: any = {
   waiting: { label: "Waiting", bg: WHITE, text: BLUE, border: BLUE },
@@ -1821,29 +1822,83 @@ const RightNavbar = ({ user, auth, db }: { user: any; auth: any; db: any }) => {
           display: "flex",
           alignItems: "center",
           gap: "10px",
-          padding: "10px 18px 10px 16px",
-          backgroundColor: "rgba(0, 0, 0, 0.75)",
-          backdropFilter: "blur(20px)",
-          borderRadius: "10px",
-          border: "1px solid rgba(255,255,255,0.15)",
-          boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
           fontFamily: FONT_FAMILY,
         }}
       >
-        <PeopleIcon size={20} color="#ffffff" />
+        {/* ===== TOMBOL "SAY HEY" ===== */}
+        <Link
+          href="/say-hey"
+          style={{
+            textDecoration: "none",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "10px",
+            padding: "10px 18px",
+            backgroundColor: LIME,
+            borderRadius: "10px",
+            border: `1px solid ${LIME}`,
+            boxShadow: "0 8px 24px rgba(227,251,150,0.45)",
+            cursor: "pointer",
+            transition: "transform 0.2s ease",
+          }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLAnchorElement).style.transform = "scale(1.05)";
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLAnchorElement).style.transform = "scale(1)";
+          }}
+        >
+          <span
+            style={{
+              color: BLACK,
+              fontSize: "14px",
+              fontWeight: 700,
+              letterSpacing: "0.02em",
+              fontFamily: FONT_FAMILY,
+              whiteSpace: "nowrap",
+            }}
+          >
+            Say Hey
+          </span>
+          <NorthEastArrow size={18} color={BLACK} />
+        </Link>
+
+        {/* ===== TOMBOL "SIGN IN" ===== */}
         <Link
           href="/signin"
           style={{
             textDecoration: "none",
-            color: "#ffffff",
-            fontSize: "14px",
-            fontWeight: 600,
-            letterSpacing: "0.02em",
-            fontFamily: FONT_FAMILY,
-            whiteSpace: "nowrap",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "10px",
+            padding: "10px 18px 10px 16px",
+            backgroundColor: BLUE,
+            borderRadius: "10px",
+            border: `1px solid ${BLUE}`,
+            boxShadow: "0 8px 24px rgba(13,60,252,0.35)",
+            cursor: "pointer",
+            transition: "transform 0.2s ease",
+          }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLAnchorElement).style.transform = "scale(1.05)";
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLAnchorElement).style.transform = "scale(1)";
           }}
         >
-          Log In
+          <PeopleIcon size={20} color="#ffffff" />
+          <span
+            style={{
+              color: "#ffffff",
+              fontSize: "14px",
+              fontWeight: 700,
+              letterSpacing: "0.02em",
+              fontFamily: FONT_FAMILY,
+              whiteSpace: "nowrap",
+            }}
+          >
+            Sign In
+          </span>
         </Link>
       </div>
     );
@@ -4659,8 +4714,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
 
               {isAdmin && appealTickets.length > 0 && (
                 <div style={{ marginTop: "20px" }}>
-                  <div
-                    style={{
+                  <div                    style={{
                       padding: "10px 16px",
                       display: "flex",
                       alignItems: "center",
@@ -5671,8 +5725,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 flexWrap: "wrap",
               }}
             >
-              {/* Sisi Kiri — 2 baris, 90px */}
-              <div style={{ flexShrink: 0 }}>
+              {/* Sisi Kiri — 2 baris, 90px, rata kiri */}
+              <div style={{ flexShrink: 0, textAlign: "left" }}>
                 <div
                   style={{
                     fontFamily: FONT_FAMILY,
@@ -5701,7 +5755,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 </div>
               </div>
 
-                           {/* Sisi Kanan — deskripsi 2 baris, 25px, rata kiri */}
+              {/* Sisi Kanan — deskripsi 2 baris, 25px, rata kiri */}
               <div
                 style={{
                   flex: "1 1 0",
@@ -5742,7 +5796,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 </div>
               </div>
             </div>
-
           </div>
 
           <HeroMenuruTitle onNavbarShiftChange={setNavbarShifted} />
