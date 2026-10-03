@@ -1063,14 +1063,14 @@ const HeroMenuruTitle = ({ onNavbarShiftChange }: { onNavbarShiftChange: (shifte
       ref={containerRef}
       style={{
         width: "100%",
-        height: "1100px",
+        height: "950px",
         backgroundColor: "#ffffff",
         overflow: "visible",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         position: "relative",
-        paddingTop: "110px",
+        paddingTop: "0px",
       }}
     >
       <h1
@@ -5701,7 +5701,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 </div>
               </div>
 
-              {/* Sisi Kanan — deskripsi 2 baris, 40px */}
+              {/* Sisi Kanan — deskripsi 2 baris, 25px, rata kanan */}
               <div
                 style={{
                   flex: "1 1 0",
@@ -5716,11 +5716,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 <div
                   style={{
                     fontFamily: FONT_FAMILY,
-                    fontSize: "40px",
+                    fontSize: "25px",
                     fontWeight: 600,
                     color: BLACK,
-                    letterSpacing: "-0.02em",
-                    lineHeight: 1.25,
+                    letterSpacing: "-0.01em",
+                    lineHeight: 1.35,
+                    maxWidth: "700px",
                   }}
                 >
                   Menuru Studio is a non-profit brand born from the founder&apos;s vision to assist the public at no cost
@@ -5728,11 +5729,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 <div
                   style={{
                     fontFamily: FONT_FAMILY,
-                    fontSize: "40px",
+                    fontSize: "25px",
                     fontWeight: 600,
                     color: BLACK,
-                    letterSpacing: "-0.02em",
-                    lineHeight: 1.25,
+                    letterSpacing: "-0.01em",
+                    lineHeight: 1.35,
+                    maxWidth: "700px",
+                    marginTop: "4px",
                   }}
                 >
                   Since our brand was established, we have helped people find exceptional solutions for their activities and created memorable features
