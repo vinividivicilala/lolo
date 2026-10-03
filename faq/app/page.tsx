@@ -5701,15 +5701,15 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 </div>
               </div>
 
-              {/* Sisi Kanan — deskripsi 2 baris, 25px, rata kanan */}
+                           {/* Sisi Kanan — deskripsi 2 baris, 25px, rata kiri */}
               <div
                 style={{
                   flex: "1 1 0",
                   minWidth: "300px",
                   display: "flex",
                   flexDirection: "column",
-                  alignItems: "flex-end",
-                  textAlign: "right",
+                  alignItems: "flex-start",
+                  textAlign: "left",
                   paddingTop: "20px",
                 }}
               >
@@ -5742,6 +5742,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 </div>
               </div>
             </div>
+
           </div>
 
           <HeroMenuruTitle onNavbarShiftChange={setNavbarShifted} />
