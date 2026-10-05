@@ -489,48 +489,19 @@ const SayHeyIcon = ({ size = 22, color = "#000000" }: { size?: number; color?: s
   </svg>
 );
 
-// ===== PULSE RADAR DOT (pemancar luas) =====
-const PulseRadarDot = ({ size = 10, color = BLUE }: { size?: number; color?: string }) => (
+// ===== BLINKING DOT (untuk status) =====
+const BlinkingDot = ({ size = 10, color = BLUE }: { size?: number; color?: string }) => (
   <span
     style={{
-      position: "relative",
-      display: "inline-flex",
-      alignItems: "center",
-      justifyContent: "center",
+      display: "inline-block",
       width: `${size}px`,
       height: `${size}px`,
+      borderRadius: "50%",
+      backgroundColor: color,
       flexShrink: 0,
+      animation: "blinking-dot 1s ease-in-out infinite",
     }}
-  >
-    <span
-      style={{
-        position: "absolute",
-        inset: 0,
-        borderRadius: "50%",
-        backgroundColor: color,
-        animation: "pulse-radar 1.5s ease-out infinite",
-      }}
-    />
-    <span
-      style={{
-        position: "absolute",
-        inset: 0,
-        borderRadius: "50%",
-        backgroundColor: color,
-        animation: "pulse-radar 1.5s ease-out infinite",
-        animationDelay: "0.75s",
-      }}
-    />
-    <span
-      style={{
-        position: "relative",
-        width: `${size * 0.5}px`,
-        height: `${size * 0.5}px`,
-        borderRadius: "50%",
-        backgroundColor: color,
-      }}
-    />
-  </span>
+  />
 );
 
 // ===== STABILO BADGE =====
@@ -710,12 +681,11 @@ interface SayHeyTicket {
   lastMessage?: string;
   lastMessageTime?: any;
   lastMessageSender?: string;
-  unreadCount: number;
   typing: boolean;
   typingUserId?: string | null;
   typingUserName?: string | null;
-  userUnreadCount?: number;
-  ownerUnreadCount?: number;
+  userUnreadCount: number;
+  ownerUnreadCount: number;
 }
 
 interface SayHeyMessage {
@@ -727,15 +697,6 @@ interface SayHeyMessage {
   read: boolean;
   isEncrypted?: boolean;
   deliveryStatus?: "sending" | "sent" | "delivered" | "read" | "failed";
-}
-
-interface OwnerUser {
-  uid: string;
-  displayName: string;
-  email: string;
-  photoURL?: string;
-  online: boolean;
-  lastSeen?: any;
 }
 
 // ===== PWA: SERVICE WORKER REGISTER =====
@@ -2010,7 +1971,6 @@ const RightNavbar = ({
       >
         <SayHeyButton />
 
-        {/* ===== TOMBOL "SIGN IN" ===== */}
         <Link
           href="/signin"
           style={{
@@ -2183,7 +2143,7 @@ const RightNavbar = ({
   );
 };
 
-// ===== SAY HEY SECTION =====
+// ===== SAY HEY SECTION (works for BOTH user & owner) =====
 const SayHeySection = ({
   user,
   db,
@@ -2195,17 +2155,18 @@ const SayHeySection = ({
   isAdmin: boolean;
   onUnreadCountChange?: (count: number) => void;
 }) => {
-  const [owners, setOwners] = useState<OwnerUser[]>([]);
-  const [selectedOwner, setSelectedOwner] = useState<OwnerUser | null>(null);
+  const [contacts, setContacts] = useState<any[]>([]);
+  const [selectedContact, setSelectedContact] = useState<any | null>(null);
   const [ticket, setTicket] = useState<SayHeyTicket | null>(null);
   const [messages, setMessages] = useState<SayHeyMessage[]>([]);
   const [messageText, setMessageText] = useState("");
   const [encryptionReady, setEncryptionReady] = useState(false);
-  const [loadingTicket, setLoadingTicket] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const isOwner = isAdmin; // admin = owner
 
   // Init encryption
   useEffect(() => {
@@ -2214,52 +2175,81 @@ const SayHeySection = ({
       .catch(() => setEncryptionReady(true));
   }, []);
 
-  // Load online owners
+  // Load contacts (owner list for user, user list for owner)
   useEffect(() => {
-    if (!db) return;
-    const q = query(
-      collection(db, "users"),
-      where("online", "==", true),
-      where("email", "==", OWNER_EMAIL)
-    );
+    if (!db || !user) return;
+    let q;
+    if (isOwner) {
+      // Owner: get all online users except self
+      q = query(collection(db, "users"), where("online", "==", true));
+    } else {
+      // User: get the owner (online)
+      q = query(
+        collection(db, "users"),
+        where("online", "==", true),
+        where("email", "==", OWNER_EMAIL)
+      );
+    }
     const unsub = onSnapshot(q, (snapshot: any) => {
-      const list: OwnerUser[] = [];
+      const list: any[] = [];
       snapshot.forEach((docSnap: any) => {
         const data = docSnap.data();
+        // Owner: skip self and other admins
+        if (isOwner) {
+          if (docSnap.id === user.uid) return;
+          if (data.email === ADMIN_EMAIL) return;
+        }
         list.push({
           uid: docSnap.id,
-          displayName: data.displayName || data.name || data.email || OWNER_NAME,
+          displayName: data.displayName || data.name || data.email || "User",
           email: data.email || "",
           photoURL: data.photoURL || "",
           online: data.online || false,
           lastSeen: data.lastSeen,
         });
       });
-      setOwners(list);
+      setContacts(list);
     });
     return () => unsub();
-  }, [db]);
+  }, [db, user, isOwner]);
 
-  // Load user's sayhey tickets
+  // Load all tickets that involve the current user (either as user or owner)
   useEffect(() => {
     if (!db || !user) return;
-    const q = query(
-      collection(db, "sayhey_tickets"),
-      where("userId", "==", user.uid),
-      orderBy("createdAt", "desc")
-    );
+    let q;
+    if (isOwner) {
+      q = query(
+        collection(db, "sayhey_tickets"),
+        where("ownerId", "==", user.uid),
+        orderBy("createdAt", "desc")
+      );
+    } else {
+      q = query(
+        collection(db, "sayhey_tickets"),
+        where("userId", "==", user.uid),
+        orderBy("createdAt", "desc")
+      );
+    }
     const unsub = onSnapshot(q, (snapshot: any) => {
-      if (!snapshot.empty) {
-        const first = snapshot.docs[0];
-        setTicket({ id: first.id, ...first.data() } as SayHeyTicket);
-      } else {
-        setTicket(null);
+      const ticketMap: { [uid: string]: SayHeyTicket } = {};
+      snapshot.forEach((docSnap: any) => {
+        const data = docSnap.data();
+        const otherId = isOwner ? data.userId : data.ownerId;
+        ticketMap[otherId] = { id: docSnap.id, ...data } as SayHeyTicket;
+      });
+      // Attach to contacts for unread display
+      setContacts((prev) =>
+        prev.map((c) => ({ ...c, ticket: ticketMap[c.uid] || null }))
+      );
+      // If currently selected, update ticket
+      if (selectedContact && ticketMap[selectedContact.uid]) {
+        setTicket(ticketMap[selectedContact.uid]);
       }
     });
     return () => unsub();
-  }, [db, user]);
+  }, [db, user, isOwner, selectedContact]);
 
-  // Load messages
+  // Load messages for selected ticket
   useEffect(() => {
     if (!db || !ticket) return;
     const q = query(
@@ -2290,37 +2280,67 @@ const SayHeySection = ({
     return () => unsub();
   }, [db, ticket]);
 
-  // Compute unread count and notify parent
+  // Compute total unread count (across all tickets) for badge
   useEffect(() => {
-    if (!ticket || !user) {
-      if (onUnreadCountChange) onUnreadCountChange(0);
-      return;
-    }
-    const unread = messages.filter((m) => m.senderId !== user.uid && !m.read).length;
-    if (onUnreadCountChange) onUnreadCountChange(unread);
-  }, [messages, ticket, user, onUnreadCountChange]);
+    if (!db || !user) return;
+    // Listen to all tickets involving me, count unread
+    const q = isOwner
+      ? query(collection(db, "sayhey_tickets"), where("ownerId", "==", user.uid))
+      : query(collection(db, "sayhey_tickets"), where("userId", "==", user.uid));
+    const unsub = onSnapshot(q, async (snapshot: any) => {
+      let total = 0;
+      for (const docSnap of snapshot.docs) {
+        const tid = docSnap.id;
+        const msgQ = query(
+          collection(db, "sayhey_tickets", tid, "messages"),
+          where("read", "==", false)
+        );
+        // We can't easily count without fetching; use the ticket's unread counter field
+        const data = docSnap.data();
+        const unread = isOwner
+          ? data.ownerUnreadCount || 0
+          : data.userUnreadCount || 0;
+        total += unread;
+      }
+      if (onUnreadCountChange) onUnreadCountChange(total);
+    });
+    return () => unsub();
+  }, [db, user, isOwner, onUnreadCountChange]);
 
-  // Mark messages as read
+  // Mark messages as read for the selected ticket
   useEffect(() => {
     if (!db || !ticket || !user) return;
     const unread = messages.filter((m) => m.senderId !== user.uid && !m.read);
+    if (unread.length === 0) return;
     unread.forEach(async (msg) => {
       const msgRef = doc(db, "sayhey_tickets", ticket.id, "messages", msg.id);
       await updateDoc(msgRef, { read: true, deliveryStatus: "read" });
     });
-  }, [messages, ticket, db, user]);
+    // Reset unread counter for this side
+    const ticketRef = doc(db, "sayhey_tickets", ticket.id);
+    if (isOwner) {
+      updateDoc(ticketRef, { ownerUnreadCount: 0 }).catch(() => {});
+    } else {
+      updateDoc(ticketRef, { userUnreadCount: 0 }).catch(() => {});
+    }
+  }, [messages, ticket, db, user, isOwner]);
 
-  // Create or get ticket
-  const startChatWithOwner = async (owner: OwnerUser) => {
+  // Start or open chat with a contact
+  const openChatWith = async (contact: any) => {
     if (!db || !user) return;
-    setLoadingTicket(true);
-    setSelectedOwner(owner);
+    setSelectedContact(contact);
     try {
-      const existingQ = query(
-        collection(db, "sayhey_tickets"),
-        where("userId", "==", user.uid),
-        where("ownerId", "==", owner.uid)
-      );
+      const existingQ = isOwner
+        ? query(
+            collection(db, "sayhey_tickets"),
+            where("userId", "==", contact.uid),
+            where("ownerId", "==", user.uid)
+          )
+        : query(
+            collection(db, "sayhey_tickets"),
+            where("userId", "==", user.uid),
+            where("ownerId", "==", contact.uid)
+          );
       const existingSnap = await new Promise<any>((resolve) => {
         const unsub = onSnapshot(existingQ, (snap: any) => {
           unsub();
@@ -2330,26 +2350,33 @@ const SayHeySection = ({
       if (!existingSnap.empty) {
         const docSnap = existingSnap.docs[0];
         setTicket({ id: docSnap.id, ...docSnap.data() } as SayHeyTicket);
-        setLoadingTicket(false);
         return;
       }
       const ticketRef = await addDoc(collection(db, "sayhey_tickets"), {
-        userId: user.uid,
-        userName: user.displayName || user.email || "User",
-        userEmail: user.email || "",
-        userPhoto: user.photoURL || "",
-        ownerId: owner.uid,
-        ownerName: owner.displayName || OWNER_NAME,
-        ownerEmail: owner.email || OWNER_EMAIL,
-        ownerPhoto: owner.photoURL || "",
+        userId: isOwner ? contact.uid : user.uid,
+        userName: isOwner
+          ? contact.displayName || contact.email || "User"
+          : user.displayName || user.email || "User",
+        userEmail: isOwner ? contact.email || "" : user.email || "",
+        userPhoto: isOwner ? contact.photoURL || "" : user.photoURL || "",
+        ownerId: isOwner ? user.uid : contact.uid,
+        ownerName: isOwner
+          ? user.displayName || OWNER_NAME
+          : contact.displayName || OWNER_NAME,
+        ownerEmail: isOwner ? user.email || OWNER_EMAIL : contact.email || OWNER_EMAIL,
+        ownerPhoto: isOwner ? user.photoURL || "" : contact.photoURL || "",
         status: "active",
         createdAt: serverTimestamp(),
-        unreadCount: 0,
+        lastMessage: "",
+        lastMessageTime: serverTimestamp(),
+        lastMessageSender: "",
         typing: false,
         typingUserId: null,
         typingUserName: null,
+        userUnreadCount: 0,
+        ownerUnreadCount: 0,
       });
-      const initialMessage = `Hey! 👋`;
+      const initialMessage = isOwner ? `Hey! 👋` : `Hey! 👋`;
       const encryptedMessage = await encryptMessage(initialMessage);
       await addDoc(collection(db, "sayhey_tickets", ticketRef.id, "messages"), {
         senderId: user.uid,
@@ -2369,12 +2396,10 @@ const SayHeySection = ({
       setTicket({ id: newTicketSnap.id, ...newTicketSnap.data() } as SayHeyTicket);
     } catch (error) {
       console.error(error);
-    } finally {
-      setLoadingTicket(false);
     }
   };
 
-  // Typing handler
+  // Typing
   const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setMessageText(value);
@@ -2412,11 +2437,24 @@ const SayHeySection = ({
         isEncrypted: true,
         deliveryStatus: "sent",
       });
-      await updateDoc(ticketRef, {
+
+      // Update ticket lastMessage and unread count for the OTHER side
+      const updatePayload: any = {
         lastMessage: messageText.trim(),
         lastMessageTime: serverTimestamp(),
         lastMessageSender: senderName,
-      });
+      };
+      if (isOwner) {
+        // Owner sent → increment userUnreadCount
+        const currentUserUnread = ticket.userUnreadCount || 0;
+        updatePayload.userUnreadCount = currentUserUnread + 1;
+      } else {
+        // User sent → increment ownerUnreadCount
+        const currentOwnerUnread = ticket.ownerUnreadCount || 0;
+        updatePayload.ownerUnreadCount = currentOwnerUnread + 1;
+      }
+      await updateDoc(ticketRef, updatePayload);
+
       setMessageText("");
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     } catch (error) {
@@ -2512,7 +2550,7 @@ const SayHeySection = ({
             fontFamily: FONT_FAMILY,
           }}
         >
-          Please sign in to your account to start a real-time conversation with the owner. Your chat is private and encrypted end-to-end.
+          Please sign in to your account to start a real-time conversation. Your chat is private and encrypted end-to-end.
         </p>
         <Link
           href="/signin"
@@ -2539,6 +2577,10 @@ const SayHeySection = ({
     );
   }
 
+  const selectedContactTicket = selectedContact
+    ? contacts.find((c) => c.uid === selectedContact.uid)?.ticket
+    : null;
+
   // ===== AFTER LOGIN =====
   return (
     <div
@@ -2553,7 +2595,6 @@ const SayHeySection = ({
         minHeight: "600px",
       }}
     >
-      {/* Title */}
       <div style={{ marginBottom: "30px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "12px" }}>
           <SayHeyIcon size={40} color={WHITE} />
@@ -2581,11 +2622,14 @@ const SayHeySection = ({
             fontFamily: FONT_FAMILY,
           }}
         >
-          {ticket ? "You are now connected in a real-time chat with the owner." : "Select an owner below to start a real-time conversation."}
+          {ticket
+            ? "You are now connected in a real-time chat."
+            : isOwner
+            ? "Select an online user below to start a real-time conversation."
+            : "Select the owner below to start a real-time conversation."}
         </p>
       </div>
 
-      {/* Two columns: Owner list + Chat */}
       <div
         style={{
           display: "flex",
@@ -2594,7 +2638,7 @@ const SayHeySection = ({
           flexWrap: "wrap",
         }}
       >
-        {/* ===== LEFT: OWNER LIST (bg #4ADE80) ===== */}
+        {/* ===== LEFT: CONTACT LIST (bg #4ADE80, header #E3FB96) ===== */}
         <div
           style={{
             width: "300px",
@@ -2609,7 +2653,6 @@ const SayHeySection = ({
             boxShadow: "0 8px 24px rgba(74,222,128,0.35)",
           }}
         >
-          {/* Header panel owner #E3FB96 */}
           <div
             style={{
               padding: "16px 20px",
@@ -2626,7 +2669,7 @@ const SayHeySection = ({
               justifyContent: "space-between",
             }}
           >
-            <span>Owners Online</span>
+            <span>{isOwner ? "Users Online" : "Owners Online"}</span>
             <span
               style={{
                 fontSize: "11px",
@@ -2638,11 +2681,11 @@ const SayHeySection = ({
                 letterSpacing: "0.5px",
               }}
             >
-              {owners.length}
+              {contacts.length}
             </span>
           </div>
           <div style={{ overflowY: "auto", flex: 1, minHeight: 0 }}>
-            {owners.length === 0 ? (
+            {contacts.length === 0 ? (
               <div
                 style={{
                   padding: "40px 20px",
@@ -2654,86 +2697,114 @@ const SayHeySection = ({
                   opacity: 0.85,
                 }}
               >
-                Owner is currently offline.
+                {isOwner ? "No users online." : "Owner is currently offline."}
                 <br />
                 Please check back later.
               </div>
             ) : (
-              owners.map((o) => (
-                <div
-                  key={o.uid}
-                  onClick={() => startChatWithOwner(o)}
-                  style={{
-                    padding: "14px 20px",
-                    borderBottom: `1px solid rgba(0,0,0,0.08)`,
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "12px",
-                    backgroundColor:
-                      selectedOwner?.uid === o.uid ? "rgba(0,0,0,0.12)" : "transparent",
-                    transition: "background-color 0.2s ease",
-                  }}
-                >
-                  {/* FP tanpa border & tanpa dot */}
+              contacts.map((c) => {
+                const cTicket = c.ticket;
+                const unread = cTicket
+                  ? isOwner
+                    ? cTicket.ownerUnreadCount || 0
+                    : cTicket.userUnreadCount || 0
+                  : 0;
+                return (
                   <div
+                    key={c.uid}
+                    onClick={() => openChatWith(c)}
                     style={{
-                      width: "44px",
-                      height: "44px",
-                      borderRadius: "12px",
-                      overflow: "hidden",
-                      backgroundColor: WHITE,
+                      padding: "14px 20px",
+                      borderBottom: `1px solid rgba(0,0,0,0.08)`,
+                      cursor: "pointer",
                       display: "flex",
                       alignItems: "center",
-                      justifyContent: "center",
-                      flexShrink: 0,
+                      gap: "12px",
+                      backgroundColor:
+                        selectedContact?.uid === c.uid ? "rgba(0,0,0,0.12)" : "transparent",
+                      transition: "background-color 0.2s ease",
                     }}
                   >
-                    {o.photoURL ? (
-                      <img
-                        src={o.photoURL}
-                        alt={o.displayName}
-                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                      />
-                    ) : (
-                      <span style={{ fontSize: "18px", fontWeight: 800, color: BLUE }}>
-                        {o.displayName.charAt(0).toUpperCase()}
+                    <div
+                      style={{
+                        width: "44px",
+                        height: "44px",
+                        borderRadius: "12px",
+                        overflow: "hidden",
+                        backgroundColor: WHITE,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexShrink: 0,
+                      }}
+                    >
+                      {c.photoURL ? (
+                        <img
+                          src={c.photoURL}
+                          alt={c.displayName}
+                          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                        />
+                      ) : (
+                        <span style={{ fontSize: "18px", fontWeight: 800, color: BLUE }}>
+                          {c.displayName.charAt(0).toUpperCase()}
+                        </span>
+                      )}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div
+                        style={{
+                          fontSize: "14px",
+                          fontWeight: 700,
+                          color: BLACK,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                          marginBottom: "2px",
+                          fontFamily: FONT_FAMILY,
+                        }}
+                      >
+                        {c.displayName}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: "11px",
+                          color: BLACK,
+                          fontFamily: FONT_FAMILY,
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "6px",
+                          fontWeight: 600,
+                          opacity: 0.85,
+                        }}
+                      >
+                        <BlinkingDot size={8} color={BLUE} />
+                        {c.online ? "Online" : "Offline"}
+                      </div>
+                    </div>
+                    {unread > 0 && (
+                      <span
+                        style={{
+                          minWidth: "20px",
+                          height: "20px",
+                          padding: "0 6px",
+                          borderRadius: "10px",
+                          backgroundColor: BLUE,
+                          color: WHITE,
+                          fontSize: "11px",
+                          fontWeight: 800,
+                          fontFamily: FONT_FAMILY,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          flexShrink: 0,
+                        }}
+                      >
+                        {unread > 99 ? "99+" : unread}
                       </span>
                     )}
                   </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div
-                      style={{
-                        fontSize: "14px",
-                        fontWeight: 700,
-                        color: BLACK,
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                        marginBottom: "2px",
-                        fontFamily: FONT_FAMILY,
-                      }}
-                    >
-                      {o.displayName}
-                    </div>
-                    <div
-                      style={{
-                        fontSize: "11px",
-                        color: BLACK,
-                        fontFamily: FONT_FAMILY,
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "6px",
-                        fontWeight: 600,
-                        opacity: 0.85,
-                      }}
-                    >
-                      <PulseRadarDot size={10} color={BLUE} />
-                      {o.online ? "Online" : "Offline"}
-                    </div>
-                  </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         </div>
@@ -2752,7 +2823,7 @@ const SayHeySection = ({
             color: BLACK,
           }}
         >
-          {!ticket ? (
+          {!ticket || !selectedContact ? (
             <div
               style={{
                 flex: 1,
@@ -2769,11 +2840,15 @@ const SayHeySection = ({
               }}
             >
               <SayHeyIcon size={48} color="#ccc" />
-              <span>Select an owner on the left to start chatting</span>
+              <span>
+                {isOwner
+                  ? "Select an online user on the left to start chatting"
+                  : "Select the owner on the left to start chatting"}
+              </span>
             </div>
           ) : (
             <>
-              {/* Chat header #E3FB96 */}
+              {/* Header #E3FB96 */}
               <div
                 style={{
                   padding: "16px 20px",
@@ -2788,7 +2863,6 @@ const SayHeySection = ({
                 }}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: 0 }}>
-                  {/* FP tanpa border & tanpa dot */}
                   <div
                     style={{
                       width: "40px",
@@ -2802,15 +2876,15 @@ const SayHeySection = ({
                       flexShrink: 0,
                     }}
                   >
-                    {ticket.ownerPhoto ? (
+                    {selectedContact.photoURL ? (
                       <img
-                        src={ticket.ownerPhoto}
-                        alt={ticket.ownerName}
+                        src={selectedContact.photoURL}
+                        alt={selectedContact.displayName}
                         style={{ width: "100%", height: "100%", objectFit: "cover" }}
                       />
                     ) : (
                       <span style={{ fontSize: "16px", fontWeight: 800, color: BLUE }}>
-                        {(ticket.ownerName || "O").charAt(0).toUpperCase()}
+                        {(selectedContact.displayName || "U").charAt(0).toUpperCase()}
                       </span>
                     )}
                   </div>
@@ -2826,7 +2900,7 @@ const SayHeySection = ({
                         whiteSpace: "nowrap",
                       }}
                     >
-                      {ticket.ownerName}
+                      {selectedContact.displayName}
                     </div>
                     <div
                       style={{
@@ -2840,10 +2914,8 @@ const SayHeySection = ({
                         opacity: 0.85,
                       }}
                     >
-                      <PulseRadarDot size={10} color={BLUE} />
-                      {owners.find((o) => o.uid === ticket.ownerId)?.online
-                        ? "Online"
-                        : "Offline"}
+                      <BlinkingDot size={8} color={BLUE} />
+                      {selectedContact.online ? "Online" : "Offline"}
                     </div>
                   </div>
                 </div>
@@ -5497,7 +5569,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
         setCurrentStep={setTourStep}
       />
       <div style={{ marginTop: "80px", paddingTop: "30px" }}>
-        {/* ===== BANNER NOTIFIKASI (FULL WIDTH DI ATAS NAVBAR) ===== */}
         {user && (
           <div style={{ marginBottom: "16px", width: "100%" }}>
             <LiveChatNotificationToggle user={user} db={db} />
@@ -6530,7 +6601,6 @@ export default function HomePage(): React.JSX.Element {
         <meta name="twitter:image" content="/images/ai.jpg" />
       </Head>
 
-      {/* ===== GOOGLE TAG MANAGER (script) ===== */}
       <Script
         id="gtm-script"
         strategy="afterInteractive"
@@ -6542,9 +6612,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-MRD7N2G4');`,
         }}
       />
-      {/* ===== END GOOGLE TAG MANAGER (script) ===== */}
 
-      {/* ===== GOOGLE ADSENSE ===== */}
       <Script
         id="adsbygoogle-init"
         async
@@ -6552,9 +6620,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6198767676395468"
         crossOrigin="anonymous"
       />
-      {/* ===== END GOOGLE ADSENSE ===== */}
 
-      {/* ===== GOOGLE TAG (gtag.js) — GA4 ===== */}
       <Script
         id="gtag-js"
         async
@@ -6573,9 +6639,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           `,
         }}
       />
-      {/* ===== END GOOGLE TAG (gtag.js) ===== */}
 
-      {/* ===== GOOGLE TAG MANAGER (noscript) ===== */}
       <noscript>
         <iframe
           src="https://www.googletagmanager.com/ns.html?id=GTM-MRD7N2G4"
@@ -6584,9 +6648,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           style={{ display: "none", visibility: "hidden" }}
         />
       </noscript>
-      {/* ===== END GOOGLE TAG MANAGER (noscript) ===== */}
 
-      {/* ===== WRAPPER: menampung preloader + main page ===== */}
       <div
         ref={wrapperRef}
         style={{
@@ -6597,7 +6659,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           backgroundColor: WHITE,
         }}
       >
-        {/* ===== PRELOADER (fixed, menutupi layar) ===== */}
         <div
           ref={preloaderRef}
           style={{
@@ -6676,7 +6737,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           </div>
         </div>
 
-        {/* ===== HALAMAN UTAMA (slide masuk dari kanan) ===== */}
         <div
           ref={mainPageRef}
           style={{
@@ -6704,7 +6764,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           />
           <CookieConsentPopup user={user} db={db} isMounted={isMounted} />
 
-          {/* ===== BRAND IDENTITIES & CAMPAIGNS (kiri) + DESKRIPSI 2 BARIS (kanan) ===== */}
           <div
             style={{
               width: "100%",
@@ -6725,7 +6784,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 flexWrap: "wrap",
               }}
             >
-              {/* Sisi Kiri — 2 baris, 90px, rata kiri */}
               <div style={{ flexShrink: 0, textAlign: "left" }}>
                 <div
                   style={{
@@ -6755,7 +6813,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 </div>
               </div>
 
-              {/* Sisi Kanan — deskripsi 2 baris, 25px, rata kiri */}
               <div
                 style={{
                   flex: "1 1 0",
@@ -6800,7 +6857,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
           <HeroMenuruTitle onNavbarShiftChange={setNavbarShifted} />
 
-          {/* ===== SAY HEY SECTION (muncul saat tombol Say Hey diklik) ===== */}
           {sayHeyOpen && (
             <div
               id="sayhey-section"
@@ -7585,14 +7641,14 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             transform: translateX(-50%);
           }
         }
-        @keyframes pulse-radar {
-          0% {
+        @keyframes blinking-dot {
+          0%, 100% {
+            opacity: 1;
             transform: scale(1);
-            opacity: 0.7;
           }
-          100% {
-            transform: scale(3);
-            opacity: 0;
+          50% {
+            opacity: 0.3;
+            transform: scale(0.75);
           }
         }
         @keyframes badge-pop {
