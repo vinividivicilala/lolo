@@ -312,6 +312,8 @@ async function checkBanStatus(userId: string): Promise<any> {
 const FONT_FAMILY = "'Plus Jakarta Sans'";
 const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 const AGENT_NAME = "Farid Ardiansyah";
+const OWNER_NAME = "Farid Ardiansyah";
+const OWNER_EMAIL = "faridardiansyah061@gmail.com";
 const TOUR_STORAGE_KEY = "menuru_livechat_tour_completed_v1";
 const COOKIE_CONSENT_STORAGE_KEY = "menuru_cookie_consent_v1";
 const BLUE = "#0D3CFC";
@@ -476,6 +478,16 @@ const ShieldBanIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?
   </svg>
 );
 
+// ===== SAY HEY ICON =====
+const SayHeyIcon = ({ size = 22, color = "#000000" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M21 11.5C21 16.1944 16.9706 20 12 20C10.8452 20 9.74371 19.7964 8.73507 19.4276L4 21L5.45177 16.7441C4.53668 15.3762 4 13.7581 4 12C4 7.30558 8.02944 3.5 12 3.5C16.9706 3.5 21 7.30558 21 11.5Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <circle cx="9" cy="11.5" r="1" fill={color} />
+    <circle cx="12" cy="11.5" r="1" fill={color} />
+    <circle cx="15" cy="11.5" r="1" fill={color} />
+  </svg>
+);
+
 // ===== STABILO BADGE =====
 const StabiloBadge = ({
   label,
@@ -635,6 +647,48 @@ interface NoteEntry {
   userPhoto?: string;
   text?: string;
   createdAt: any;
+}
+
+// ===== SAY HEY INTERFACES =====
+interface SayHeyTicket {
+  id: string;
+  userId: string;
+  userName: string;
+  userEmail: string;
+  userPhoto?: string;
+  ownerId: string;
+  ownerName: string;
+  ownerEmail: string;
+  ownerPhoto?: string;
+  status: "waiting" | "active" | "closed";
+  createdAt: any;
+  lastMessage?: string;
+  lastMessageTime?: any;
+  lastMessageSender?: string;
+  unreadCount: number;
+  typing: boolean;
+  typingUserId?: string | null;
+  typingUserName?: string | null;
+}
+
+interface SayHeyMessage {
+  id: string;
+  senderId: string;
+  senderName: string;
+  text: string;
+  timestamp: any;
+  read: boolean;
+  isEncrypted?: boolean;
+  deliveryStatus?: "sending" | "sent" | "delivered" | "read" | "failed";
+}
+
+interface OwnerUser {
+  uid: string;
+  displayName: string;
+  email: string;
+  photoURL?: string;
+  online: boolean;
+  lastSeen?: any;
 }
 
 // ===== PWA: SERVICE WORKER REGISTER =====
@@ -1768,7 +1822,19 @@ const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
 };
 
 // ===== RIGHT NAVBAR =====
-const RightNavbar = ({ user, auth, db }: { user: any; auth: any; db: any }) => {
+const RightNavbar = ({
+  user,
+  auth,
+  db,
+  onSayHeyToggle,
+  sayHeyOpen,
+}: {
+  user: any;
+  auth: any;
+  db: any;
+  onSayHeyToggle: () => void;
+  sayHeyOpen: boolean;
+}) => {
   const rollingRef = useRef<HTMLDivElement>(null);
   const [rollingIndex, setRollingIndex] = useState(0);
   const displayName = user?.displayName || user?.email?.split("@")[0] || "User";
@@ -1826,31 +1892,31 @@ const RightNavbar = ({ user, auth, db }: { user: any; auth: any; db: any }) => {
         }}
       >
         {/* ===== TOMBOL "SAY HEY" ===== */}
-        <Link
-          href="/say-hey"
+        <button
+          onClick={onSayHeyToggle}
           style={{
-            textDecoration: "none",
             display: "inline-flex",
             alignItems: "center",
             gap: "10px",
             padding: "10px 18px",
-            backgroundColor: LIME,
+            backgroundColor: sayHeyOpen ? BLACK : LIME,
             borderRadius: "10px",
-            border: `1px solid ${LIME}`,
-            boxShadow: "0 8px 24px rgba(227,251,150,0.45)",
+            border: `1px solid ${sayHeyOpen ? BLACK : LIME}`,
+            boxShadow: sayHeyOpen ? "0 8px 24px rgba(0,0,0,0.35)" : "0 8px 24px rgba(227,251,150,0.45)",
             cursor: "pointer",
-            transition: "transform 0.2s ease",
+            transition: "all 0.2s ease",
           }}
           onMouseEnter={(e) => {
-            (e.currentTarget as HTMLAnchorElement).style.transform = "scale(1.05)";
+            (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.05)";
           }}
           onMouseLeave={(e) => {
-            (e.currentTarget as HTMLAnchorElement).style.transform = "scale(1)";
+            (e.currentTarget as HTMLButtonElement).style.transform = "scale(1)";
           }}
         >
+          <SayHeyIcon size={18} color={sayHeyOpen ? WHITE : BLACK} />
           <span
             style={{
-              color: BLACK,
+              color: sayHeyOpen ? WHITE : BLACK,
               fontSize: "14px",
               fontWeight: 700,
               letterSpacing: "0.02em",
@@ -1860,8 +1926,8 @@ const RightNavbar = ({ user, auth, db }: { user: any; auth: any; db: any }) => {
           >
             Say Hey
           </span>
-          <NorthEastArrow size={18} color={BLACK} />
-        </Link>
+          <NorthEastArrow size={16} color={sayHeyOpen ? WHITE : BLACK} />
+        </button>
 
         {/* ===== TOMBOL "SIGN IN" ===== */}
         <Link
@@ -1917,6 +1983,44 @@ const RightNavbar = ({ user, auth, db }: { user: any; auth: any; db: any }) => {
         gap: "10px",
       }}
     >
+      {/* ===== TOMBOL "SAY HEY" ===== */}
+      <button
+        onClick={onSayHeyToggle}
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: "10px",
+          padding: "10px 18px",
+          backgroundColor: sayHeyOpen ? BLACK : LIME,
+          borderRadius: "10px",
+          border: `1px solid ${sayHeyOpen ? BLACK : LIME}`,
+          boxShadow: sayHeyOpen ? "0 8px 24px rgba(0,0,0,0.35)" : "0 8px 24px rgba(227,251,150,0.45)",
+          cursor: "pointer",
+          transition: "all 0.2s ease",
+        }}
+        onMouseEnter={(e) => {
+          (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.05)";
+        }}
+        onMouseLeave={(e) => {
+          (e.currentTarget as HTMLButtonElement).style.transform = "scale(1)";
+        }}
+      >
+        <SayHeyIcon size={18} color={sayHeyOpen ? WHITE : BLACK} />
+        <span
+          style={{
+            color: sayHeyOpen ? WHITE : BLACK,
+            fontSize: "14px",
+            fontWeight: 700,
+            letterSpacing: "0.02em",
+            fontFamily: FONT_FAMILY,
+            whiteSpace: "nowrap",
+          }}
+        >
+          Say Hey
+        </span>
+        <NorthEastArrow size={16} color={sayHeyOpen ? WHITE : BLACK} />
+      </button>
+
       <div
         style={{
           position: "relative",
@@ -2027,6 +2131,815 @@ const RightNavbar = ({ user, auth, db }: { user: any; auth: any; db: any }) => {
               </span>
               <LogoutIcon size={50} color={BLUE} />
             </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ===== SAY HEY SECTION =====
+const SayHeySection = ({
+  user,
+  db,
+  isAdmin,
+}: {
+  user: any;
+  db: any;
+  isAdmin: boolean;
+}) => {
+  const [owners, setOwners] = useState<OwnerUser[]>([]);
+  const [selectedOwner, setSelectedOwner] = useState<OwnerUser | null>(null);
+  const [ticket, setTicket] = useState<SayHeyTicket | null>(null);
+  const [messages, setMessages] = useState<SayHeyMessage[]>([]);
+  const [messageText, setMessageText] = useState("");
+  const [encryptionReady, setEncryptionReady] = useState(false);
+  const [loadingTicket, setLoadingTicket] = useState(false);
+
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Init encryption
+  useEffect(() => {
+    getCryptoKey()
+      .then(() => setEncryptionReady(true))
+      .catch(() => setEncryptionReady(true));
+  }, []);
+
+  // Load online owners
+  useEffect(() => {
+    if (!db) return;
+    const q = query(
+      collection(db, "users"),
+      where("online", "==", true),
+      where("email", "==", OWNER_EMAIL)
+    );
+    const unsub = onSnapshot(q, (snapshot: any) => {
+      const list: OwnerUser[] = [];
+      snapshot.forEach((docSnap: any) => {
+        const data = docSnap.data();
+        list.push({
+          uid: docSnap.id,
+          displayName: data.displayName || data.name || data.email || OWNER_NAME,
+          email: data.email || "",
+          photoURL: data.photoURL || "",
+          online: data.online || false,
+          lastSeen: data.lastSeen,
+        });
+      });
+      setOwners(list);
+    });
+    return () => unsub();
+  }, [db]);
+
+  // Load user's sayhey tickets
+  useEffect(() => {
+    if (!db || !user) return;
+    const q = query(
+      collection(db, "sayhey_tickets"),
+      where("userId", "==", user.uid),
+      orderBy("createdAt", "desc")
+    );
+    const unsub = onSnapshot(q, (snapshot: any) => {
+      if (!snapshot.empty) {
+        const first = snapshot.docs[0];
+        setTicket({ id: first.id, ...first.data() } as SayHeyTicket);
+      } else {
+        setTicket(null);
+      }
+    });
+    return () => unsub();
+  }, [db, user]);
+
+  // Load messages
+  useEffect(() => {
+    if (!db || !ticket) return;
+    const q = query(
+      collection(db, "sayhey_tickets", ticket.id, "messages"),
+      orderBy("timestamp", "asc")
+    );
+    const unsub = onSnapshot(q, async (snapshot: any) => {
+      const list: SayHeyMessage[] = [];
+      for (const docSnap of snapshot.docs) {
+        const data = docSnap.data();
+        let text = data.text || "";
+        if (data.isEncrypted) {
+          try {
+            text = await decryptMessage(text);
+          } catch {
+            text = "[Encrypted]";
+          }
+        }
+        list.push({ id: docSnap.id, ...data, text } as SayHeyMessage);
+      }
+      setMessages(list);
+      requestAnimationFrame(() => {
+        if (chatContainerRef.current) {
+          chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+        }
+      });
+    });
+    return () => unsub();
+  }, [db, ticket]);
+
+  // Mark messages as read
+  useEffect(() => {
+    if (!db || !ticket || !user) return;
+    const unread = messages.filter((m) => m.senderId !== user.uid && !m.read);
+    unread.forEach(async (msg) => {
+      const msgRef = doc(db, "sayhey_tickets", ticket.id, "messages", msg.id);
+      await updateDoc(msgRef, { read: true, deliveryStatus: "read" });
+    });
+  }, [messages, ticket, db, user]);
+
+  // Create or get ticket
+  const startChatWithOwner = async (owner: OwnerUser) => {
+    if (!db || !user) return;
+    setLoadingTicket(true);
+    setSelectedOwner(owner);
+    try {
+      const existingQ = query(
+        collection(db, "sayhey_tickets"),
+        where("userId", "==", user.uid),
+        where("ownerId", "==", owner.uid)
+      );
+      const existingSnap = await new Promise<any>((resolve) => {
+        const unsub = onSnapshot(existingQ, (snap: any) => {
+          unsub();
+          resolve(snap);
+        });
+      });
+      if (!existingSnap.empty) {
+        const docSnap = existingSnap.docs[0];
+        setTicket({ id: docSnap.id, ...docSnap.data() } as SayHeyTicket);
+        setLoadingTicket(false);
+        return;
+      }
+      const ticketRef = await addDoc(collection(db, "sayhey_tickets"), {
+        userId: user.uid,
+        userName: user.displayName || user.email || "User",
+        userEmail: user.email || "",
+        userPhoto: user.photoURL || "",
+        ownerId: owner.uid,
+        ownerName: owner.displayName || OWNER_NAME,
+        ownerEmail: owner.email || OWNER_EMAIL,
+        ownerPhoto: owner.photoURL || "",
+        status: "active",
+        createdAt: serverTimestamp(),
+        unreadCount: 0,
+        typing: false,
+        typingUserId: null,
+        typingUserName: null,
+      });
+      const initialMessage = `Hey! 👋`;
+      const encryptedMessage = await encryptMessage(initialMessage);
+      await addDoc(collection(db, "sayhey_tickets", ticketRef.id, "messages"), {
+        senderId: user.uid,
+        senderName: user.displayName || user.email || "User",
+        text: encryptedMessage,
+        timestamp: serverTimestamp(),
+        read: false,
+        isEncrypted: true,
+        deliveryStatus: "sent",
+      });
+      await updateDoc(ticketRef, {
+        lastMessage: initialMessage,
+        lastMessageTime: serverTimestamp(),
+        lastMessageSender: user.displayName || user.email || "User",
+      });
+      const newTicketSnap = await getDoc(ticketRef);
+      setTicket({ id: newTicketSnap.id, ...newTicketSnap.data() } as SayHeyTicket);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoadingTicket(false);
+    }
+  };
+
+  // Typing handler
+  const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setMessageText(value);
+    if (!ticket || !user || !db) return;
+    const ticketRef = doc(db, "sayhey_tickets", ticket.id);
+    if (value.length > 0) {
+      await updateDoc(ticketRef, {
+        typing: true,
+        typingUserId: user.uid,
+        typingUserName: user.displayName || user.email || "User",
+      });
+    } else {
+      await updateDoc(ticketRef, { typing: false, typingUserId: null, typingUserName: null });
+    }
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    typingTimeoutRef.current = setTimeout(async () => {
+      await updateDoc(ticketRef, { typing: false, typingUserId: null, typingUserName: null });
+    }, 2000);
+  };
+
+  // Send message
+  const sendMessage = async () => {
+    if (!db || !ticket || !messageText.trim() || !user || !encryptionReady) return;
+    try {
+      const ticketRef = doc(db, "sayhey_tickets", ticket.id);
+      await updateDoc(ticketRef, { typing: false, typingUserId: null, typingUserName: null });
+      const senderName = user.displayName || user.email || "User";
+      const encryptedMessage = await encryptMessage(messageText.trim());
+      await addDoc(collection(db, "sayhey_tickets", ticket.id, "messages"), {
+        senderId: user.uid,
+        senderName,
+        text: encryptedMessage,
+        timestamp: serverTimestamp(),
+        read: false,
+        isEncrypted: true,
+        deliveryStatus: "sent",
+      });
+      await updateDoc(ticketRef, {
+        lastMessage: messageText.trim(),
+        lastMessageTime: serverTimestamp(),
+        lastMessageSender: senderName,
+      });
+      setMessageText("");
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const renderDeliveryStatus = (msg: SayHeyMessage, isMine: boolean) => {
+    if (!isMine) return null;
+    let label = "Sent";
+    let icon = <CheckIcon size={11} color="#ffffff" />;
+    if (msg.read) {
+      label = "Read";
+      icon = <DoubleCheckIcon size={11} color="#ffffff" />;
+    } else if (msg.deliveryStatus === "delivered") {
+      label = "Delivered";
+      icon = <DoubleCheckIcon size={11} color="#ffffff" />;
+    } else if (msg.deliveryStatus === "sending") {
+      label = "Sending";
+      icon = <ClockIcon size={11} color="#ffffff" />;
+    } else if (msg.deliveryStatus === "failed") {
+      label = "Failed";
+      icon = <ErrorIcon size={11} color="#ffffff" />;
+    }
+    return (
+      <span
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: "3px",
+          fontSize: "10px",
+          color: "#ffffff",
+          fontFamily: FONT_FAMILY,
+          fontWeight: 500,
+        }}
+      >
+        {label}
+        {icon}
+      </span>
+    );
+  };
+
+  const formatTime = (timestamp: any) => {
+    if (!timestamp) return "";
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    return date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+  };
+
+  // ===== BEFORE LOGIN =====
+  if (!user) {
+    return (
+      <div
+        style={{
+          width: "100%",
+          backgroundColor: BLUE,
+          borderRadius: "20px",
+          padding: "60px 40px",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "20px",
+          fontFamily: FONT_FAMILY,
+          color: WHITE,
+          marginBottom: "40px",
+          minHeight: "300px",
+        }}
+      >
+        <SayHeyIcon size={64} color={WHITE} />
+        <h3
+          style={{
+            fontSize: "48px",
+            fontWeight: 700,
+            color: WHITE,
+            margin: 0,
+            letterSpacing: "-0.02em",
+            textAlign: "center",
+            fontFamily: FONT_FAMILY,
+          }}
+        >
+          Say Hey
+        </h3>
+        <p
+          style={{
+            fontSize: "18px",
+            fontWeight: 500,
+            color: WHITE,
+            margin: 0,
+            textAlign: "center",
+            maxWidth: "600px",
+            lineHeight: 1.5,
+            opacity: 0.95,
+            fontFamily: FONT_FAMILY,
+          }}
+        >
+          Please sign in to your account to start a real-time conversation with the owner. Your chat is private and encrypted end-to-end.
+        </p>
+        <Link
+          href="/signin"
+          style={{
+            textDecoration: "none",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "10px",
+            padding: "14px 28px",
+            backgroundColor: WHITE,
+            color: BLUE,
+            borderRadius: "12px",
+            fontSize: "16px",
+            fontWeight: 800,
+            fontFamily: FONT_FAMILY,
+            letterSpacing: "0.02em",
+            marginTop: "10px",
+          }}
+        >
+          Sign In to Continue
+          <NorthEastArrow size={20} color={BLUE} />
+        </Link>
+      </div>
+    );
+  }
+
+  // ===== AFTER LOGIN =====
+  return (
+    <div
+      style={{
+        width: "100%",
+        backgroundColor: BLUE,
+        borderRadius: "20px",
+        padding: "40px",
+        fontFamily: FONT_FAMILY,
+        color: WHITE,
+        marginBottom: "40px",
+        minHeight: "600px",
+      }}
+    >
+      {/* Title */}
+      <div style={{ marginBottom: "30px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "12px" }}>
+          <SayHeyIcon size={40} color={WHITE} />
+          <h3
+            style={{
+              fontSize: "48px",
+              fontWeight: 700,
+              color: WHITE,
+              margin: 0,
+              letterSpacing: "-0.02em",
+              fontFamily: FONT_FAMILY,
+            }}
+          >
+            Say Hey
+          </h3>
+        </div>
+        <p
+          style={{
+            fontSize: "16px",
+            fontWeight: 500,
+            color: WHITE,
+            margin: 0,
+            lineHeight: 1.5,
+            opacity: 0.95,
+            fontFamily: FONT_FAMILY,
+          }}
+        >
+          {ticket ? "You are now connected in a real-time chat with the owner." : "Select an owner below to start a real-time conversation."}
+        </p>
+      </div>
+
+      {/* Two columns: Owner list + Chat */}
+      <div
+        style={{
+          display: "flex",
+          gap: "20px",
+          minHeight: "500px",
+          flexWrap: "wrap",
+        }}
+      >
+        {/* ===== LEFT: OWNER LIST ===== */}
+        <div
+          style={{
+            width: "300px",
+            flexShrink: 0,
+            backgroundColor: "rgba(255,255,255,0.1)",
+            borderRadius: "16px",
+            border: "1px solid rgba(255,255,255,0.2)",
+            overflow: "hidden",
+            display: "flex",
+            flexDirection: "column",
+            height: "500px",
+          }}
+        >
+          <div
+            style={{
+              padding: "16px 20px",
+              borderBottom: "1px solid rgba(255,255,255,0.15)",
+              fontSize: "14px",
+              fontWeight: 700,
+              letterSpacing: "0.5px",
+              textTransform: "uppercase",
+              color: WHITE,
+              fontFamily: FONT_FAMILY,
+            }}
+          >
+            Owners Online ({owners.length})
+          </div>
+          <div style={{ overflowY: "auto", flex: 1, minHeight: 0 }}>
+            {owners.length === 0 ? (
+              <div
+                style={{
+                  padding: "40px 20px",
+                  textAlign: "center",
+                  fontSize: "13px",
+                  color: "rgba(255,255,255,0.7)",
+                  fontFamily: FONT_FAMILY,
+                  lineHeight: 1.5,
+                }}
+              >
+                Owner is currently offline.
+                <br />
+                Please check back later.
+              </div>
+            ) : (
+              owners.map((o) => (
+                <div
+                  key={o.uid}
+                  onClick={() => startChatWithOwner(o)}
+                  style={{
+                    padding: "14px 20px",
+                    borderBottom: "1px solid rgba(255,255,255,0.08)",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "12px",
+                    backgroundColor:
+                      selectedOwner?.uid === o.uid ? "rgba(255,255,255,0.15)" : "transparent",
+                    transition: "background-color 0.2s ease",
+                  }}
+                >
+                  <div style={{ position: "relative", flexShrink: 0 }}>
+                    <div
+                      style={{
+                        width: "44px",
+                        height: "44px",
+                        borderRadius: "50%",
+                        overflow: "hidden",
+                        backgroundColor: WHITE,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {o.photoURL ? (
+                        <img
+                          src={o.photoURL}
+                          alt={o.displayName}
+                          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                        />
+                      ) : (
+                        <span style={{ fontSize: "18px", fontWeight: 800, color: BLUE }}>
+                          {o.displayName.charAt(0).toUpperCase()}
+                        </span>
+                      )}
+                    </div>
+                    {o.online && (
+                      <span
+                        style={{
+                          position: "absolute",
+                          bottom: 0,
+                          right: 0,
+                          width: "12px",
+                          height: "12px",
+                          borderRadius: "50%",
+                          backgroundColor: "#4ADE80",
+                          border: `2px solid ${BLUE}`,
+                        }}
+                      />
+                    )}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div
+                      style={{
+                        fontSize: "14px",
+                        fontWeight: 700,
+                        color: WHITE,
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                        marginBottom: "2px",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
+                      {o.displayName}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: "11px",
+                        color: "rgba(255,255,255,0.75)",
+                        fontFamily: FONT_FAMILY,
+                      }}
+                    >
+                      {o.online ? "Online" : "Offline"}
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* ===== RIGHT: CHAT ===== */}
+        <div
+          style={{
+            flex: 1,
+            minWidth: "300px",
+            backgroundColor: WHITE,
+            borderRadius: "16px",
+            overflow: "hidden",
+            display: "flex",
+            flexDirection: "column",
+            height: "500px",
+            color: BLACK,
+          }}
+        >
+          {!ticket ? (
+            <div
+              style={{
+                flex: 1,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexDirection: "column",
+                gap: "12px",
+                color: "#999",
+                fontSize: "15px",
+                fontFamily: FONT_FAMILY,
+                padding: "20px",
+                textAlign: "center",
+              }}
+            >
+              <SayHeyIcon size={48} color="#ccc" />
+              <span>Select an owner on the left to start chatting</span>
+            </div>
+          ) : (
+            <>
+              {/* Chat header */}
+              <div
+                style={{
+                  padding: "16px 20px",
+                  backgroundColor: BLUE,
+                  color: WHITE,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: "12px",
+                  flexShrink: 0,
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: 0 }}>
+                  <div
+                    style={{
+                      width: "40px",
+                      height: "40px",
+                      borderRadius: "50%",
+                      overflow: "hidden",
+                      backgroundColor: WHITE,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexShrink: 0,
+                    }}
+                  >
+                    {ticket.ownerPhoto ? (
+                      <img
+                        src={ticket.ownerPhoto}
+                        alt={ticket.ownerName}
+                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                      />
+                    ) : (
+                      <span style={{ fontSize: "16px", fontWeight: 800, color: BLUE }}>
+                        {(ticket.ownerName || "O").charAt(0).toUpperCase()}
+                      </span>
+                    )}
+                  </div>
+                  <div style={{ minWidth: 0 }}>
+                    <div
+                      style={{
+                        fontSize: "15px",
+                        fontWeight: 700,
+                        color: WHITE,
+                        fontFamily: FONT_FAMILY,
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {ticket.ownerName}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: "11px",
+                        color: "rgba(255,255,255,0.85)",
+                        fontFamily: FONT_FAMILY,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                      }}
+                    >
+                      <span
+                        style={{
+                          width: "8px",
+                          height: "8px",
+                          borderRadius: "50%",
+                          backgroundColor: owners.find((o) => o.uid === ticket.ownerId)?.online
+                            ? "#4ADE80"
+                            : "#999",
+                        }}
+                      />
+                      {owners.find((o) => o.uid === ticket.ownerId)?.online ? "Online" : "Offline"}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Messages */}
+              <div
+                ref={chatContainerRef}
+                className="chat-messages-container"
+                style={{
+                  flex: 1,
+                  overflowY: "auto",
+                  padding: "20px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "12px",
+                  minHeight: 0,
+                  backgroundColor: "#fafafa",
+                }}
+              >
+                {messages.length === 0 ? (
+                  <div
+                    style={{
+                      textAlign: "center",
+                      color: "#999",
+                      fontSize: "14px",
+                      padding: "30px 0",
+                      fontFamily: FONT_FAMILY,
+                    }}
+                  >
+                    No messages yet. Say hey! 👋
+                  </div>
+                ) : (
+                  messages.map((msg, idx) => {
+                    const isMine = msg.senderId === user?.uid;
+                    return (
+                      <div
+                        key={msg.id || idx}
+                        style={{ alignSelf: isMine ? "flex-end" : "flex-start", maxWidth: "75%" }}
+                      >
+                        <div
+                          style={{
+                            padding: "10px 14px",
+                            borderRadius: "12px",
+                            backgroundColor: isMine ? BLUE : "#ffffff",
+                            color: isMine ? WHITE : BLACK,
+                            fontSize: "14px",
+                            fontFamily: FONT_FAMILY,
+                            wordBreak: "break-word",
+                            border: isMine ? "none" : "1px solid rgba(0,0,0,0.06)",
+                            boxShadow: isMine ? "none" : "0 2px 6px rgba(0,0,0,0.04)",
+                          }}
+                        >
+                          {!isMine && (
+                            <div
+                              style={{
+                                fontSize: "11px",
+                                fontWeight: 700,
+                                color: BLUE,
+                                marginBottom: "4px",
+                              }}
+                            >
+                              {msg.senderName}
+                            </div>
+                          )}
+                          <div>{msg.text}</div>
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "flex-end",
+                              alignItems: "center",
+                              gap: "6px",
+                              marginTop: "4px",
+                            }}
+                          >
+                            {renderDeliveryStatus(msg, isMine)}
+                            <span
+                              style={{
+                                fontSize: "10px",
+                                color: isMine ? "rgba(255,255,255,0.85)" : "#999",
+                              }}
+                            >
+                              {formatTime(msg.timestamp)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+                {ticket.typing && ticket.typingUserId !== user?.uid && (
+                  <div
+                    style={{
+                      alignSelf: "flex-start",
+                      fontSize: "13px",
+                      color: "#666",
+                      fontStyle: "italic",
+                      fontFamily: FONT_FAMILY,
+                      padding: "4px 10px",
+                    }}
+                  >
+                    {ticket.typingUserName} is typing...
+                  </div>
+                )}
+                <div ref={messagesEndRef} />
+              </div>
+
+              {/* Input */}
+              <div
+                style={{
+                  padding: "14px 20px",
+                  borderTop: "1px solid rgba(0,0,0,0.06)",
+                  display: "flex",
+                  gap: "10px",
+                  backgroundColor: WHITE,
+                  flexShrink: 0,
+                }}
+              >
+                <input
+                  type="text"
+                  value={messageText}
+                  onChange={handleTyping}
+                  onKeyPress={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey && messageText.trim()) {
+                      e.preventDefault();
+                      sendMessage();
+                    }
+                  }}
+                  placeholder="Type your message..."
+                  style={{
+                    flex: 1,
+                    padding: "12px 16px",
+                    border: "1px solid rgba(0,0,0,0.1)",
+                    borderRadius: "10px",
+                    fontSize: "14px",
+                    outline: "none",
+                    fontFamily: FONT_FAMILY,
+                    backgroundColor: WHITE,
+                    color: BLACK,
+                  }}
+                />
+                <button
+                  onClick={sendMessage}
+                  disabled={!messageText.trim()}
+                  style={{
+                    padding: "12px 24px",
+                    backgroundColor: messageText.trim() ? BLUE : "#ccc",
+                    color: WHITE,
+                    border: "none",
+                    borderRadius: "10px",
+                    cursor: messageText.trim() ? "pointer" : "not-allowed",
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "13px",
+                    fontWeight: 800,
+                    letterSpacing: "0.5px",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Send
+                </button>
+              </div>
+            </>
           )}
         </div>
       </div>
@@ -4714,7 +5627,8 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
 
               {isAdmin && appealTickets.length > 0 && (
                 <div style={{ marginTop: "20px" }}>
-                  <div                    style={{
+                  <div
+                    style={{
                       padding: "10px 16px",
                       display: "flex",
                       alignItems: "center",
@@ -4863,8 +5777,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
                           {selectedTicket.typingUserName} is typing...
                         </span>
                       )}
-                      <span
-                        style={{
+                      <span                        style={{
                           fontSize: "10px",
                           color: "rgba(255,255,255,0.75)",
                           fontWeight: 700,
@@ -5248,6 +6161,7 @@ export default function HomePage(): React.JSX.Element {
   const [isMounted, setIsMounted] = useState(false);
   const [navbarShifted, setNavbarShifted] = useState(false);
   const [noteHovered, setNoteHovered] = useState(false);
+  const [sayHeyOpen, setSayHeyOpen] = useState(false);
 
   const [registeredUsers, setRegisteredUsers] = useState<NoteEntry[]>([]);
   const [hasSubmittedNote, setHasSubmittedNote] = useState(false);
@@ -5473,6 +6387,17 @@ export default function HomePage(): React.JSX.Element {
       );
     }
   }, [activeNoteUser]);
+
+  // Scroll to Say Hey section when opened
+  useEffect(() => {
+    if (!sayHeyOpen) return;
+    const el = document.getElementById("sayhey-section");
+    if (el) {
+      setTimeout(() => {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 150);
+    }
+  }, [sayHeyOpen]);
 
   if (!isMounted || loading) {
     return (
@@ -5701,7 +6626,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           }}
         >
           <LeftNavbar shifted={navbarShifted} />
-          <RightNavbar user={user} auth={auth} db={db} />
+          <RightNavbar
+            user={user}
+            auth={auth}
+            db={db}
+            onSayHeyToggle={() => setSayHeyOpen((prev) => !prev)}
+            sayHeyOpen={sayHeyOpen}
+          />
           <CookieConsentPopup user={user} db={db} isMounted={isMounted} />
 
           {/* ===== BRAND IDENTITIES & CAMPAIGNS (kiri) + DESKRIPSI 2 BARIS (kanan) ===== */}
@@ -5799,6 +6730,24 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           </div>
 
           <HeroMenuruTitle onNavbarShiftChange={setNavbarShifted} />
+
+          {/* ===== SAY HEY SECTION (muncul saat tombol Say Hey diklik) ===== */}
+          {sayHeyOpen && (
+            <div
+              id="sayhey-section"
+              style={{
+                width: "100%",
+                padding: "0 40px",
+                maxWidth: "1600px",
+                margin: "0 auto",
+                marginBottom: "40px",
+                position: "relative",
+                zIndex: 2,
+              }}
+            >
+              <SayHeySection user={user} db={db} isAdmin={isAdmin} />
+            </div>
+          )}
 
           <div
             style={{
