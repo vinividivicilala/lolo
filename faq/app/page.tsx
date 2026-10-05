@@ -489,19 +489,48 @@ const SayHeyIcon = ({ size = 22, color = "#000000" }: { size?: number; color?: s
   </svg>
 );
 
-// ===== BLINKING DOT =====
-const BlinkingDot = ({ size = 10, color = BLUE }: { size?: number; color?: string }) => (
+// ===== PULSE RADAR DOT (pemancar luas) =====
+const PulseRadarDot = ({ size = 10, color = BLUE }: { size?: number; color?: string }) => (
   <span
     style={{
-      display: "inline-block",
+      position: "relative",
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
       width: `${size}px`,
       height: `${size}px`,
-      borderRadius: "50%",
-      backgroundColor: color,
       flexShrink: 0,
-      animation: "blinking-dot 1s ease-in-out infinite",
     }}
-  />
+  >
+    <span
+      style={{
+        position: "absolute",
+        inset: 0,
+        borderRadius: "50%",
+        backgroundColor: color,
+        animation: "pulse-radar 1.5s ease-out infinite",
+      }}
+    />
+    <span
+      style={{
+        position: "absolute",
+        inset: 0,
+        borderRadius: "50%",
+        backgroundColor: color,
+        animation: "pulse-radar 1.5s ease-out infinite",
+        animationDelay: "0.75s",
+      }}
+    />
+    <span
+      style={{
+        position: "relative",
+        width: `${size * 0.5}px`,
+        height: `${size * 0.5}px`,
+        borderRadius: "50%",
+        backgroundColor: color,
+      }}
+    />
+  </span>
 );
 
 // ===== STABILO BADGE =====
@@ -685,6 +714,8 @@ interface SayHeyTicket {
   typing: boolean;
   typingUserId?: string | null;
   typingUserName?: string | null;
+  userUnreadCount?: number;
+  ownerUnreadCount?: number;
 }
 
 interface SayHeyMessage {
@@ -1844,12 +1875,14 @@ const RightNavbar = ({
   db,
   onSayHeyToggle,
   sayHeyOpen,
+  sayHeyUnreadCount,
 }: {
   user: any;
   auth: any;
   db: any;
   onSayHeyToggle: () => void;
   sayHeyOpen: boolean;
+  sayHeyUnreadCount: number;
 }) => {
   const rollingRef = useRef<HTMLDivElement>(null);
   const [rollingIndex, setRollingIndex] = useState(0);
@@ -1893,6 +1926,74 @@ const RightNavbar = ({
     }
   };
 
+  const SayHeyButton = () => (
+    <button
+      onClick={onSayHeyToggle}
+      style={{
+        position: "relative",
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "10px",
+        padding: "10px 18px",
+        backgroundColor: sayHeyOpen ? BLACK : LIME,
+        borderRadius: "10px",
+        border: `1px solid ${sayHeyOpen ? BLACK : LIME}`,
+        boxShadow: sayHeyOpen ? "0 8px 24px rgba(0,0,0,0.35)" : "0 8px 24px rgba(227,251,150,0.45)",
+        cursor: "pointer",
+        transition: "all 0.2s ease",
+      }}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.05)";
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLButtonElement).style.transform = "scale(1)";
+      }}
+    >
+      <SayHeyIcon size={18} color={sayHeyOpen ? WHITE : BLACK} />
+      <span
+        style={{
+          color: sayHeyOpen ? WHITE : BLACK,
+          fontSize: "14px",
+          fontWeight: 700,
+          letterSpacing: "0.02em",
+          fontFamily: FONT_FAMILY,
+          whiteSpace: "nowrap",
+        }}
+      >
+        Say Hey
+      </span>
+      <NorthEastArrow size={16} color={sayHeyOpen ? WHITE : BLACK} />
+
+      {/* Counter notifikasi */}
+      {sayHeyUnreadCount > 0 && !sayHeyOpen && (
+        <span
+          style={{
+            position: "absolute",
+            top: "-6px",
+            right: "-6px",
+            minWidth: "20px",
+            height: "20px",
+            padding: "0 6px",
+            borderRadius: "10px",
+            backgroundColor: BLUE,
+            color: WHITE,
+            fontSize: "11px",
+            fontWeight: 800,
+            fontFamily: FONT_FAMILY,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            border: `2px solid ${WHITE}`,
+            boxShadow: "0 2px 8px rgba(13,60,252,0.5)",
+            animation: "badge-pop 0.4s ease-out",
+          }}
+        >
+          {sayHeyUnreadCount > 99 ? "99+" : sayHeyUnreadCount}
+        </span>
+      )}
+    </button>
+  );
+
   if (!user) {
     return (
       <div
@@ -1907,43 +2008,7 @@ const RightNavbar = ({
           fontFamily: FONT_FAMILY,
         }}
       >
-        {/* ===== TOMBOL "SAY HEY" ===== */}
-        <button
-          onClick={onSayHeyToggle}
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "10px",
-            padding: "10px 18px",
-            backgroundColor: sayHeyOpen ? BLACK : LIME,
-            borderRadius: "10px",
-            border: `1px solid ${sayHeyOpen ? BLACK : LIME}`,
-            boxShadow: sayHeyOpen ? "0 8px 24px rgba(0,0,0,0.35)" : "0 8px 24px rgba(227,251,150,0.45)",
-            cursor: "pointer",
-            transition: "all 0.2s ease",
-          }}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.05)";
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.transform = "scale(1)";
-          }}
-        >
-          <SayHeyIcon size={18} color={sayHeyOpen ? WHITE : BLACK} />
-          <span
-            style={{
-              color: sayHeyOpen ? WHITE : BLACK,
-              fontSize: "14px",
-              fontWeight: 700,
-              letterSpacing: "0.02em",
-              fontFamily: FONT_FAMILY,
-              whiteSpace: "nowrap",
-            }}
-          >
-            Say Hey
-          </span>
-          <NorthEastArrow size={16} color={sayHeyOpen ? WHITE : BLACK} />
-        </button>
+        <SayHeyButton />
 
         {/* ===== TOMBOL "SIGN IN" ===== */}
         <Link
@@ -1999,43 +2064,7 @@ const RightNavbar = ({
         gap: "10px",
       }}
     >
-      {/* ===== TOMBOL "SAY HEY" ===== */}
-      <button
-        onClick={onSayHeyToggle}
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: "10px",
-          padding: "10px 18px",
-          backgroundColor: sayHeyOpen ? BLACK : LIME,
-          borderRadius: "10px",
-          border: `1px solid ${sayHeyOpen ? BLACK : LIME}`,
-          boxShadow: sayHeyOpen ? "0 8px 24px rgba(0,0,0,0.35)" : "0 8px 24px rgba(227,251,150,0.45)",
-          cursor: "pointer",
-          transition: "all 0.2s ease",
-        }}
-        onMouseEnter={(e) => {
-          (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.05)";
-        }}
-        onMouseLeave={(e) => {
-          (e.currentTarget as HTMLButtonElement).style.transform = "scale(1)";
-        }}
-      >
-        <SayHeyIcon size={18} color={sayHeyOpen ? WHITE : BLACK} />
-        <span
-          style={{
-            color: sayHeyOpen ? WHITE : BLACK,
-            fontSize: "14px",
-            fontWeight: 700,
-            letterSpacing: "0.02em",
-            fontFamily: FONT_FAMILY,
-            whiteSpace: "nowrap",
-          }}
-        >
-          Say Hey
-        </span>
-        <NorthEastArrow size={16} color={sayHeyOpen ? WHITE : BLACK} />
-      </button>
+      <SayHeyButton />
 
       <div
         style={{
@@ -2159,10 +2188,12 @@ const SayHeySection = ({
   user,
   db,
   isAdmin,
+  onUnreadCountChange,
 }: {
   user: any;
   db: any;
   isAdmin: boolean;
+  onUnreadCountChange?: (count: number) => void;
 }) => {
   const [owners, setOwners] = useState<OwnerUser[]>([]);
   const [selectedOwner, setSelectedOwner] = useState<OwnerUser | null>(null);
@@ -2258,6 +2289,16 @@ const SayHeySection = ({
     });
     return () => unsub();
   }, [db, ticket]);
+
+  // Compute unread count and notify parent
+  useEffect(() => {
+    if (!ticket || !user) {
+      if (onUnreadCountChange) onUnreadCountChange(0);
+      return;
+    }
+    const unread = messages.filter((m) => m.senderId !== user.uid && !m.read).length;
+    if (onUnreadCountChange) onUnreadCountChange(unread);
+  }, [messages, ticket, user, onUnreadCountChange]);
 
   // Mark messages as read
   useEffect(() => {
@@ -2634,44 +2675,29 @@ const SayHeySection = ({
                     transition: "background-color 0.2s ease",
                   }}
                 >
-                  <div style={{ position: "relative", flexShrink: 0 }}>
-                    <div
-                      style={{
-                        width: "44px",
-                        height: "44px",
-                        borderRadius: "50%",
-                        overflow: "hidden",
-                        backgroundColor: WHITE,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        border: `2px solid ${BLACK}`,
-                      }}
-                    >
-                      {o.photoURL ? (
-                        <img
-                          src={o.photoURL}
-                          alt={o.displayName}
-                          style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                        />
-                      ) : (
-                        <span style={{ fontSize: "18px", fontWeight: 800, color: BLUE }}>
-                          {o.displayName.charAt(0).toUpperCase()}
-                        </span>
-                      )}
-                    </div>
-                    {o.online && (
-                      <span
-                        style={{
-                          position: "absolute",
-                          bottom: 2,
-                          right: 2,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
-                      >
-                        <BlinkingDot size={12} color={BLUE} />
+                  {/* FP tanpa border & tanpa dot */}
+                  <div
+                    style={{
+                      width: "44px",
+                      height: "44px",
+                      borderRadius: "12px",
+                      overflow: "hidden",
+                      backgroundColor: WHITE,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexShrink: 0,
+                    }}
+                  >
+                    {o.photoURL ? (
+                      <img
+                        src={o.photoURL}
+                        alt={o.displayName}
+                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                      />
+                    ) : (
+                      <span style={{ fontSize: "18px", fontWeight: 800, color: BLUE }}>
+                        {o.displayName.charAt(0).toUpperCase()}
                       </span>
                     )}
                   </div>
@@ -2702,7 +2728,7 @@ const SayHeySection = ({
                         opacity: 0.85,
                       }}
                     >
-                      <BlinkingDot size={8} color={BLUE} />
+                      <PulseRadarDot size={10} color={BLUE} />
                       {o.online ? "Online" : "Offline"}
                     </div>
                   </div>
@@ -2762,18 +2788,18 @@ const SayHeySection = ({
                 }}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: 0 }}>
+                  {/* FP tanpa border & tanpa dot */}
                   <div
                     style={{
                       width: "40px",
                       height: "40px",
-                      borderRadius: "50%",
+                      borderRadius: "10px",
                       overflow: "hidden",
                       backgroundColor: WHITE,
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
                       flexShrink: 0,
-                      border: `2px solid ${BLACK}`,
                     }}
                   >
                     {ticket.ownerPhoto ? (
@@ -2814,7 +2840,7 @@ const SayHeySection = ({
                         opacity: 0.85,
                       }}
                     >
-                      <BlinkingDot size={8} color={BLUE} />
+                      <PulseRadarDot size={10} color={BLUE} />
                       {owners.find((o) => o.uid === ticket.ownerId)?.online
                         ? "Online"
                         : "Offline"}
@@ -6034,7 +6060,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
                       <RollingNewMessage
                         key={rollingKey}
                         senderName={latestRollingMessage.senderName}
-                        message={latestRollingMessage.text}
+                        message={latestRollingMessage.message || latestRollingMessage.text}
                         isFromAgent={latestRollingMessage.isFromAgent}
                       />
                     </div>
@@ -6203,6 +6229,7 @@ export default function HomePage(): React.JSX.Element {
   const [navbarShifted, setNavbarShifted] = useState(false);
   const [noteHovered, setNoteHovered] = useState(false);
   const [sayHeyOpen, setSayHeyOpen] = useState(false);
+  const [sayHeyUnreadCount, setSayHeyUnreadCount] = useState(0);
 
   const [registeredUsers, setRegisteredUsers] = useState<NoteEntry[]>([]);
   const [hasSubmittedNote, setHasSubmittedNote] = useState(false);
@@ -6673,6 +6700,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             db={db}
             onSayHeyToggle={() => setSayHeyOpen((prev) => !prev)}
             sayHeyOpen={sayHeyOpen}
+            sayHeyUnreadCount={sayHeyUnreadCount}
           />
           <CookieConsentPopup user={user} db={db} isMounted={isMounted} />
 
@@ -6786,7 +6814,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 zIndex: 2,
               }}
             >
-              <SayHeySection user={user} db={db} isAdmin={isAdmin} />
+              <SayHeySection
+                user={user}
+                db={db}
+                isAdmin={isAdmin}
+                onUnreadCountChange={setSayHeyUnreadCount}
+              />
             </div>
           )}
 
@@ -7552,14 +7585,28 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             transform: translateX(-50%);
           }
         }
-        @keyframes blinking-dot {
-          0%, 100% {
-            opacity: 1;
+        @keyframes pulse-radar {
+          0% {
             transform: scale(1);
+            opacity: 0.7;
+          }
+          100% {
+            transform: scale(3);
+            opacity: 0;
+          }
+        }
+        @keyframes badge-pop {
+          0% {
+            transform: scale(0);
+            opacity: 0;
           }
           50% {
-            opacity: 0.3;
-            transform: scale(0.75);
+            transform: scale(1.2);
+            opacity: 1;
+          }
+          100% {
+            transform: scale(1);
+            opacity: 1;
           }
         }
       `}</style>
