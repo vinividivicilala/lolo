@@ -320,6 +320,7 @@ const BLUE = "#0D3CFC";
 const WHITE = "#FFFFFF";
 const BLACK = "#000000";
 const LIME = "#E3FB96";
+const GREEN = "#4ADE80";
 
 const STATUS_STYLES: any = {
   waiting: { label: "Waiting", bg: WHITE, text: BLUE, border: BLUE },
@@ -486,6 +487,21 @@ const SayHeyIcon = ({ size = 22, color = "#000000" }: { size?: number; color?: s
     <circle cx="12" cy="11.5" r="1" fill={color} />
     <circle cx="15" cy="11.5" r="1" fill={color} />
   </svg>
+);
+
+// ===== BLINKING DOT =====
+const BlinkingDot = ({ size = 10, color = BLUE }: { size?: number; color?: string }) => (
+  <span
+    style={{
+      display: "inline-block",
+      width: `${size}px`,
+      height: `${size}px`,
+      borderRadius: "50%",
+      backgroundColor: color,
+      flexShrink: 0,
+      animation: "blinking-dot 1s ease-in-out infinite",
+    }}
+  />
 );
 
 // ===== STABILO BADGE =====
@@ -2537,33 +2553,52 @@ const SayHeySection = ({
           flexWrap: "wrap",
         }}
       >
-        {/* ===== LEFT: OWNER LIST ===== */}
+        {/* ===== LEFT: OWNER LIST (bg #4ADE80) ===== */}
         <div
           style={{
             width: "300px",
             flexShrink: 0,
-            backgroundColor: "rgba(255,255,255,0.1)",
+            backgroundColor: GREEN,
             borderRadius: "16px",
-            border: "1px solid rgba(255,255,255,0.2)",
+            border: `1px solid ${GREEN}`,
             overflow: "hidden",
             display: "flex",
             flexDirection: "column",
             height: "500px",
+            boxShadow: "0 8px 24px rgba(74,222,128,0.35)",
           }}
         >
+          {/* Header panel owner #E3FB96 */}
           <div
             style={{
               padding: "16px 20px",
-              borderBottom: "1px solid rgba(255,255,255,0.15)",
+              backgroundColor: LIME,
+              borderBottom: `1px solid ${LIME}`,
               fontSize: "14px",
-              fontWeight: 700,
+              fontWeight: 800,
               letterSpacing: "0.5px",
               textTransform: "uppercase",
-              color: WHITE,
+              color: BLACK,
               fontFamily: FONT_FAMILY,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
             }}
           >
-            Owners Online ({owners.length})
+            <span>Owners Online</span>
+            <span
+              style={{
+                fontSize: "11px",
+                color: BLACK,
+                padding: "2px 8px",
+                borderRadius: "4px",
+                backgroundColor: WHITE,
+                fontWeight: 800,
+                letterSpacing: "0.5px",
+              }}
+            >
+              {owners.length}
+            </span>
           </div>
           <div style={{ overflowY: "auto", flex: 1, minHeight: 0 }}>
             {owners.length === 0 ? (
@@ -2572,9 +2607,10 @@ const SayHeySection = ({
                   padding: "40px 20px",
                   textAlign: "center",
                   fontSize: "13px",
-                  color: "rgba(255,255,255,0.7)",
+                  color: BLACK,
                   fontFamily: FONT_FAMILY,
                   lineHeight: 1.5,
+                  opacity: 0.85,
                 }}
               >
                 Owner is currently offline.
@@ -2588,13 +2624,13 @@ const SayHeySection = ({
                   onClick={() => startChatWithOwner(o)}
                   style={{
                     padding: "14px 20px",
-                    borderBottom: "1px solid rgba(255,255,255,0.08)",
+                    borderBottom: `1px solid rgba(0,0,0,0.08)`,
                     cursor: "pointer",
                     display: "flex",
                     alignItems: "center",
                     gap: "12px",
                     backgroundColor:
-                      selectedOwner?.uid === o.uid ? "rgba(255,255,255,0.15)" : "transparent",
+                      selectedOwner?.uid === o.uid ? "rgba(0,0,0,0.12)" : "transparent",
                     transition: "background-color 0.2s ease",
                   }}
                 >
@@ -2609,6 +2645,7 @@ const SayHeySection = ({
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
+                        border: `2px solid ${BLACK}`,
                       }}
                     >
                       {o.photoURL ? (
@@ -2627,15 +2664,15 @@ const SayHeySection = ({
                       <span
                         style={{
                           position: "absolute",
-                          bottom: 0,
-                          right: 0,
-                          width: "12px",
-                          height: "12px",
-                          borderRadius: "50%",
-                          backgroundColor: "#4ADE80",
-                          border: `2px solid ${BLUE}`,
+                          bottom: 2,
+                          right: 2,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
                         }}
-                      />
+                      >
+                        <BlinkingDot size={12} color={BLUE} />
+                      </span>
                     )}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
@@ -2643,7 +2680,7 @@ const SayHeySection = ({
                       style={{
                         fontSize: "14px",
                         fontWeight: 700,
-                        color: WHITE,
+                        color: BLACK,
                         overflow: "hidden",
                         textOverflow: "ellipsis",
                         whiteSpace: "nowrap",
@@ -2656,10 +2693,16 @@ const SayHeySection = ({
                     <div
                       style={{
                         fontSize: "11px",
-                        color: "rgba(255,255,255,0.75)",
+                        color: BLACK,
                         fontFamily: FONT_FAMILY,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        fontWeight: 600,
+                        opacity: 0.85,
                       }}
                     >
+                      <BlinkingDot size={8} color={BLUE} />
                       {o.online ? "Online" : "Offline"}
                     </div>
                   </div>
@@ -2704,17 +2747,18 @@ const SayHeySection = ({
             </div>
           ) : (
             <>
-              {/* Chat header */}
+              {/* Chat header #E3FB96 */}
               <div
                 style={{
                   padding: "16px 20px",
-                  backgroundColor: BLUE,
-                  color: WHITE,
+                  backgroundColor: LIME,
+                  color: BLACK,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
                   gap: "12px",
                   flexShrink: 0,
+                  borderBottom: `1px solid ${LIME}`,
                 }}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: 0 }}>
@@ -2729,6 +2773,7 @@ const SayHeySection = ({
                       alignItems: "center",
                       justifyContent: "center",
                       flexShrink: 0,
+                      border: `2px solid ${BLACK}`,
                     }}
                   >
                     {ticket.ownerPhoto ? (
@@ -2747,8 +2792,8 @@ const SayHeySection = ({
                     <div
                       style={{
                         fontSize: "15px",
-                        fontWeight: 700,
-                        color: WHITE,
+                        fontWeight: 800,
+                        color: BLACK,
                         fontFamily: FONT_FAMILY,
                         overflow: "hidden",
                         textOverflow: "ellipsis",
@@ -2760,24 +2805,19 @@ const SayHeySection = ({
                     <div
                       style={{
                         fontSize: "11px",
-                        color: "rgba(255,255,255,0.85)",
+                        color: BLACK,
                         fontFamily: FONT_FAMILY,
                         display: "flex",
                         alignItems: "center",
                         gap: "6px",
+                        fontWeight: 600,
+                        opacity: 0.85,
                       }}
                     >
-                      <span
-                        style={{
-                          width: "8px",
-                          height: "8px",
-                          borderRadius: "50%",
-                          backgroundColor: owners.find((o) => o.uid === ticket.ownerId)?.online
-                            ? "#4ADE80"
-                            : "#999",
-                        }}
-                      />
-                      {owners.find((o) => o.uid === ticket.ownerId)?.online ? "Online" : "Offline"}
+                      <BlinkingDot size={8} color={BLUE} />
+                      {owners.find((o) => o.uid === ticket.ownerId)?.online
+                        ? "Online"
+                        : "Offline"}
                     </div>
                   </div>
                 </div>
@@ -5777,7 +5817,8 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
                           {selectedTicket.typingUserName} is typing...
                         </span>
                       )}
-                      <span                        style={{
+                      <span
+                        style={{
                           fontSize: "10px",
                           color: "rgba(255,255,255,0.75)",
                           fontWeight: 700,
@@ -7509,6 +7550,16 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           }
           100% {
             transform: translateX(-50%);
+          }
+        }
+        @keyframes blinking-dot {
+          0%, 100% {
+            opacity: 1;
+            transform: scale(1);
+          }
+          50% {
+            opacity: 0.3;
+            transform: scale(0.75);
           }
         }
       `}</style>
