@@ -89,15 +89,15 @@ export const metadata: Metadata = {
     title: 'Menuru Studio | Official Website',
     description:
       'Platform digital kreatif untuk Note, Live Chat Agent, Shop, Calendar, dan Community.',
-    images: ['/images/ai.jpg'],
+    images: ['/images/dxzb.jpg'],
     creator: '@menuru',
   },
 
   // ===== ICONS =====
   icons: {
-    icon: '/images/ai.jpg',
-    apple: '/images/ai.jpg',
-    shortcut: '/images/ai.jpg',
+    icon: '/images/dxzb.jpg',
+    apple: '/images/dxzb.jpg',
+    shortcut: '/images/dxzb.jpg',
   },
 
   // ===== APP INFO =====
@@ -183,9 +183,9 @@ export default function RootLayout({
         <meta name="theme-color" content="#8be9fd" />
 
         {/* ===== Favicon ===== */}
-        <link rel="icon" href="/images/ai.jpg" type="image/jpeg" />
-        <link rel="apple-touch-icon" href="/images/ai.jpg" />
-        <link rel="shortcut icon" href="/images/ai.jpg" />
+        <link rel="icon" href="/images/dxzb.jpg" type="image/jpeg" />
+        <link rel="apple-touch-icon" href="/images/dxzb.jpg" />
+        <link rel="shortcut icon" href="/images/dxzb.jpg" />
 
         {/* ===== JSON-LD: WebSite (untuk Sitelinks Search Box) ===== */}
         <script
@@ -223,11 +223,11 @@ export default function RootLayout({
               url: 'https://menuru-studio.netlify.app',
               logo: {
                 '@type': 'ImageObject',
-                url: 'https://menuru-studio.netlify.app/images/ai.jpg',
+                url: 'https://menuru-studio.netlify.app/images/dxzb.jpg',
                 width: 512,
                 height: 512,
               },
-              image: 'https://menuru-studio.netlify.app/images/ai.jpg',
+              image: 'https://menuru-studio.netlify.app/images/dxzb.jpg',
               description:
                 'Menuru Studio — Platform digital kreatif untuk Note, Live Chat Agent, Shop, Calendar, dan Community.',
               sameAs: [
@@ -402,7 +402,7 @@ export default function RootLayout({
               },
               primaryImageOfPage: {
                 '@type': 'ImageObject',
-                url: 'https://menuru-studio.netlify.app/images/ai.jpg',
+                url: 'https://menuru-studio.netlify.app/images/dxzb.jpg',
               },
               datePublished: '2024-01-01',
               dateModified: new Date().toISOString().split('T')[0],
