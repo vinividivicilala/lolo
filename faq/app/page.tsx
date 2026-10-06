@@ -1032,10 +1032,55 @@ const PWAInstallPrompt = () => {
   );
 };
 
-// ===== HERO MENURU TITLE (static, no GSAP) =====
+// ===== HERO MENURU TITLE (dengan SplitText GSAP) =====
 const HeroMenuruTitle = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isMounted) return;
+    if (!titleRef.current) return;
+
+    const title = titleRef.current;
+    const ctx = gsap.context(() => {
+      const split = new SplitText(title, { type: "chars", charsClass: "hero-menuru-char" });
+
+      gsap.set(split.chars, {
+        opacity: 0,
+        y: 220,
+        rotationX: -90,
+        scale: 0.4,
+        transformOrigin: "50% 100%",
+        force3D: true,
+      });
+
+      gsap.to(split.chars, {
+        opacity: 1,
+        y: 0,
+        rotationX: 0,
+        scale: 1,
+        duration: 1.4,
+        stagger: 0.09,
+        ease: "back.out(1.8)",
+        delay: 0.2,
+      });
+
+      return () => {
+        if (split) split.revert();
+      };
+    }, containerRef);
+
+    return () => ctx.revert();
+  }, [isMounted]);
+
   return (
     <div
+      ref={containerRef}
       style={{
         width: "100%",
         paddingTop: "180px",
@@ -1048,6 +1093,7 @@ const HeroMenuruTitle = () => {
       }}
     >
       <h1
+        ref={titleRef}
         style={{
           fontFamily: FONT_FAMILY,
           fontSize: "600px",
@@ -1059,6 +1105,7 @@ const HeroMenuruTitle = () => {
           textAlign: "center",
           userSelect: "none",
           whiteSpace: "nowrap",
+          display: "inline-block",
           WebkitFontSmoothing: "antialiased",
           MozOsxFontSmoothing: "grayscale",
         }}
@@ -1670,7 +1717,7 @@ const NavbarButton = ({
 };
 
 
-// ===== LEFT NAVBAR: Logo Menuru (biru) + foto dxzb.jpg + tombol Teams/Individual/Resources =====
+// ===== LEFT NAVBAR: Logo Menuru + foto dxzb.jpg di samping tombol Teams =====
 const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
   return (
     <div
@@ -1687,25 +1734,25 @@ const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
         willChange: "left",
       }}
     >
-      {/* ===== LOGO MENURU + FOTO dxzb.jpg ===== */}
+      {/* ===== LOGO MENURU + FOTO dxzb.jpg (sejajar, tidak crop) ===== */}
       <Link
         href="/"
         style={{
           textDecoration: "none",
           display: "flex",
           alignItems: "center",
-          gap: "10px",
-          marginRight: "12px",
+          gap: "12px",
+          marginRight: "16px",
         }}
       >
         <img
           src="/images/dxzb.jpg"
           alt="Menuru"
           style={{
-            width: "36px",
-            height: "36px",
-            borderRadius: "8px",
-            objectFit: "cover",
+            height: "60px",
+            width: "auto",
+            maxWidth: "none",
+            objectFit: "contain",
             display: "block",
             flexShrink: 0,
           }}
@@ -1713,9 +1760,9 @@ const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
         <span
           style={{
             color: BLUE,
-            fontSize: "22px",
-            fontWeight: 800,
-            letterSpacing: "-0.02em",
+            fontSize: "60px",
+            fontWeight: 700,
+            letterSpacing: "-0.03em",
             fontFamily: FONT_FAMILY,
             lineHeight: 1,
             whiteSpace: "nowrap",
@@ -2772,7 +2819,8 @@ const SayHeySection = ({
                 }}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: 0 }}>
-                  <div                    style={{
+                  <div
+                    style={{
                       width: "40px",
                       height: "40px",
                       borderRadius: "10px",
@@ -6669,7 +6717,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           />
           <CookieConsentPopup user={user} db={db} isMounted={isMounted} />
 
-          {/* ===== HERO "MENURU" BESAR (static, no GSAP, di bawah navbar) ===== */}
+          {/* ===== HERO "MENURU" BESAR (SplitText GSAP, di bawah navbar) ===== */}
           <HeroMenuruTitle />
 
           {/* ===== BRAND IDENTITIES & CAMPAIGNS (di bawah Menuru besar) ===== */}
