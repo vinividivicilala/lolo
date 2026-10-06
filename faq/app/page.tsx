@@ -1032,128 +1032,35 @@ const PWAInstallPrompt = () => {
   );
 };
 
-// ===== HERO MENURU TITLE (Font Plus Jakarta Sans) =====
-const HeroMenuruTitle = ({ onNavbarShiftChange }: { onNavbarShiftChange: (shifted: boolean) => void }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const titleRef = useRef<HTMLHeadingElement>(null);
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!isMounted) return;
-    if (!containerRef.current || !titleRef.current) return;
-
-    const container = containerRef.current;
-    const title = titleRef.current;
-    const NAV_TOP = 10;
-    const NAV_LEFT = 40;
-    const NAV_FONT_SIZE = 70;
-    const NAV_HEIGHT = 60;
-
-    const ctx = gsap.context(() => {
-      const split = new SplitText(title, { type: "chars", charsClass: "hero-menuru-char" });
-
-      gsap.set(split.chars, {
-        opacity: 0,
-        y: 220,
-        rotationX: -90,
-        scale: 0.4,
-        transformOrigin: "50% 100%",
-        force3D: true,
-      });
-
-      gsap.to(split.chars, {
-        opacity: 1,
-        y: 0,
-        rotationX: 0,
-        scale: 1,
-        duration: 1.4,
-        stagger: 0.09,
-        ease: "back.out(1.8)",
-        delay: 0.2,
-      });
-
-      const scrollTl = gsap.timeline({
-        scrollTrigger: {
-          trigger: container,
-          start: "top top",
-          end: "+=900",
-          scrub: 0.8,
-          pin: false,
-          onUpdate: (self) => {
-            onNavbarShiftChange(self.progress > 0.35);
-          },
-          onLeave: () => onNavbarShiftChange(true),
-          onEnterBack: () => onNavbarShiftChange(false),
-        },
-      });
-
-      scrollTl.to(
-        title,
-        {
-          position: "fixed",
-          top: `${NAV_TOP}px`,
-          left: `${NAV_LEFT}px`,
-          fontSize: `${NAV_FONT_SIZE}px`,
-          fontWeight: 400,
-          letterSpacing: "-0.03em",
-          lineHeight: 1,
-          height: `${NAV_HEIGHT}px`,
-          display: "flex",
-          alignItems: "center",
-          transform: "translateX(0px) translateY(0px)",
-          duration: 1,
-          ease: "power2.inOut",
-        },
-        0
-      );
-
-      scrollTl.to(container, { height: "80px", duration: 1, ease: "power2.inOut" }, 0);
-
-      return () => {
-        if (split) split.revert();
-      };
-    }, containerRef);
-
-    return () => ctx.revert();
-  }, [isMounted, onNavbarShiftChange]);
-
+// ===== HERO MENURU TITLE (static, no GSAP) =====
+const HeroMenuruTitle = () => {
   return (
     <div
-      ref={containerRef}
       style={{
         width: "100%",
-        height: "950px",
-        backgroundColor: "#ffffff",
-        overflow: "visible",
+        paddingTop: "180px",
+        paddingBottom: "20px",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         position: "relative",
-        paddingTop: "0px",
+        backgroundColor: WHITE,
       }}
     >
       <h1
-        ref={titleRef}
         style={{
           fontFamily: FONT_FAMILY,
           fontSize: "600px",
           fontWeight: 400,
-          color: "#0D3CFC",
+          color: BLUE,
           letterSpacing: "-0.05em",
           lineHeight: 0.85,
           margin: 0,
           textAlign: "center",
           userSelect: "none",
           whiteSpace: "nowrap",
-          display: "inline-block",
           WebkitFontSmoothing: "antialiased",
           MozOsxFontSmoothing: "grayscale",
-          willChange: "transform, font-size, top, left",
-          zIndex: 8999,
         }}
       >
         Menuru
@@ -1763,6 +1670,7 @@ const NavbarButton = ({
 };
 
 
+// ===== LEFT NAVBAR: Logo Menuru (biru) + foto dxzb.jpg + tombol Teams/Individual/Resources =====
 const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
   return (
     <div
@@ -1779,6 +1687,44 @@ const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
         willChange: "left",
       }}
     >
+      {/* ===== LOGO MENURU + FOTO dxzb.jpg ===== */}
+      <Link
+        href="/"
+        style={{
+          textDecoration: "none",
+          display: "flex",
+          alignItems: "center",
+          gap: "10px",
+          marginRight: "12px",
+        }}
+      >
+        <img
+          src="/images/dxzb.jpg"
+          alt="Menuru"
+          style={{
+            width: "36px",
+            height: "36px",
+            borderRadius: "8px",
+            objectFit: "cover",
+            display: "block",
+            flexShrink: 0,
+          }}
+        />
+        <span
+          style={{
+            color: BLUE,
+            fontSize: "22px",
+            fontWeight: 800,
+            letterSpacing: "-0.02em",
+            fontFamily: FONT_FAMILY,
+            lineHeight: 1,
+            whiteSpace: "nowrap",
+          }}
+        >
+          Menuru
+        </span>
+      </Link>
+
       <NavbarButton
         label="Teams"
         panelTitle="Trust"
@@ -2173,7 +2119,6 @@ const SayHeySection = ({
       .catch(() => setEncryptionReady(true));
   }, []);
 
-  // Load contacts
   useEffect(() => {
     if (!db || !user) return;
     let q;
@@ -2208,7 +2153,6 @@ const SayHeySection = ({
     return () => unsub();
   }, [db, user, isOwner]);
 
-  // Load tickets involving current user
   useEffect(() => {
     if (!db || !user) return;
     let q;
@@ -2242,7 +2186,6 @@ const SayHeySection = ({
     return () => unsub();
   }, [db, user, isOwner, selectedContact]);
 
-  // Load messages
   useEffect(() => {
     if (!db || !ticket) return;
     const q = query(
@@ -2273,7 +2216,6 @@ const SayHeySection = ({
     return () => unsub();
   }, [db, ticket]);
 
-  // Compute total unread count for badge
   useEffect(() => {
     if (!db || !user) return;
     const q = isOwner
@@ -2291,7 +2233,6 @@ const SayHeySection = ({
     return () => unsub();
   }, [db, user, isOwner, onUnreadCountChange]);
 
-  // Mark read
   useEffect(() => {
     if (!db || !ticket || !user) return;
     const unread = messages.filter((m) => m.senderId !== user.uid && !m.read);
@@ -2831,8 +2772,7 @@ const SayHeySection = ({
                 }}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: 0 }}>
-                  <div
-                    style={{
+                  <div                    style={{
                       width: "40px",
                       height: "40px",
                       borderRadius: "10px",
@@ -6718,47 +6658,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             willChange: "transform",
           }}
         >
-          {/* ===== NAVBAR BARU: Logo Menuru + gambar dxzb.jpg di kiri, nyatu dengan bg utama ===== */}
-          <div
-            style={{
-              position: "fixed",
-              top: "20px",
-              left: "60px",
-              zIndex: 9000,
-              display: "flex",
-              alignItems: "center",
-              gap: "12px",
-              fontFamily: FONT_FAMILY,
-              transition: "left 0.6s cubic-bezier(0.65, 0, 0.35, 1)",
-              willChange: "left",
-            }}
-          >
-            <img
-              src="/images/dxzb.jpg"
-              alt="Menuru"
-              style={{
-                width: "44px",
-                height: "44px",
-                borderRadius: "10px",
-                objectFit: "cover",
-                display: "block",
-                flexShrink: 0,
-              }}
-            />
-            <span
-              style={{
-                fontSize: "28px",
-                fontWeight: 700,
-                color: BLACK,
-                letterSpacing: "-0.02em",
-                fontFamily: FONT_FAMILY,
-                lineHeight: 1,
-              }}
-            >
-              Menuru
-            </span>
-          </div>
-
           <LeftNavbar shifted={navbarShifted} />
           <RightNavbar
             user={user}
@@ -6770,38 +6669,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           />
           <CookieConsentPopup user={user} db={db} isMounted={isMounted} />
 
-          {/* ===== HERO "MENURU" BESAR (di bawah navbar) ===== */}
-          <div
-            style={{
-              width: "100%",
-              paddingTop: "180px",
-              paddingBottom: "20px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              position: "relative",
-              backgroundColor: WHITE,
-            }}
-          >
-            <h1
-              style={{
-                fontFamily: FONT_FAMILY,
-                fontSize: "240px",
-                fontWeight: 700,
-                color: BLUE,
-                letterSpacing: "-0.05em",
-                lineHeight: 0.9,
-                margin: 0,
-                textAlign: "center",
-                userSelect: "none",
-                whiteSpace: "nowrap",
-                WebkitFontSmoothing: "antialiased",
-                MozOsxFontSmoothing: "grayscale",
-              }}
-            >
-              Menuru
-            </h1>
-          </div>
+          {/* ===== HERO "MENURU" BESAR (static, no GSAP, di bawah navbar) ===== */}
+          <HeroMenuruTitle />
 
           {/* ===== BRAND IDENTITIES & CAMPAIGNS (di bawah Menuru besar) ===== */}
           <div
@@ -6824,7 +6693,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 flexWrap: "wrap",
               }}
             >
-              {/* Sisi Kiri — 2 baris, 90px, rata kiri */}
               <div style={{ flexShrink: 0, textAlign: "left" }}>
                 <div
                   style={{
@@ -6854,7 +6722,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 </div>
               </div>
 
-              {/* Sisi Kanan — deskripsi 2 baris, 25px, rata kiri */}
               <div
                 style={{
                   flex: "1 1 0",
