@@ -489,7 +489,7 @@ const SayHeyIcon = ({ size = 22, color = "#000000" }: { size?: number; color?: s
   </svg>
 );
 
-// ===== BLINKING DOT (untuk status) =====
+// ===== BLINKING DOT =====
 const BlinkingDot = ({ size = 10, color = BLUE }: { size?: number; color?: string }) => (
   <span
     style={{
@@ -1925,7 +1925,6 @@ const RightNavbar = ({
       </span>
       <NorthEastArrow size={16} color={sayHeyOpen ? WHITE : BLACK} />
 
-      {/* Counter notifikasi */}
       {sayHeyUnreadCount > 0 && !sayHeyOpen && (
         <span
           style={{
@@ -2143,7 +2142,7 @@ const RightNavbar = ({
   );
 };
 
-// ===== SAY HEY SECTION (works for BOTH user & owner) =====
+// ===== SAY HEY SECTION =====
 const SayHeySection = ({
   user,
   db,
@@ -2166,24 +2165,21 @@ const SayHeySection = ({
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const isOwner = isAdmin; // admin = owner
+  const isOwner = isAdmin;
 
-  // Init encryption
   useEffect(() => {
     getCryptoKey()
       .then(() => setEncryptionReady(true))
       .catch(() => setEncryptionReady(true));
   }, []);
 
-  // Load contacts (owner list for user, user list for owner)
+  // Load contacts
   useEffect(() => {
     if (!db || !user) return;
     let q;
     if (isOwner) {
-      // Owner: get all online users except self
       q = query(collection(db, "users"), where("online", "==", true));
     } else {
-      // User: get the owner (online)
       q = query(
         collection(db, "users"),
         where("online", "==", true),
@@ -2194,7 +2190,6 @@ const SayHeySection = ({
       const list: any[] = [];
       snapshot.forEach((docSnap: any) => {
         const data = docSnap.data();
-        // Owner: skip self and other admins
         if (isOwner) {
           if (docSnap.id === user.uid) return;
           if (data.email === ADMIN_EMAIL) return;
@@ -2213,7 +2208,7 @@ const SayHeySection = ({
     return () => unsub();
   }, [db, user, isOwner]);
 
-  // Load all tickets that involve the current user (either as user or owner)
+  // Load tickets involving current user
   useEffect(() => {
     if (!db || !user) return;
     let q;
@@ -2237,11 +2232,9 @@ const SayHeySection = ({
         const otherId = isOwner ? data.userId : data.ownerId;
         ticketMap[otherId] = { id: docSnap.id, ...data } as SayHeyTicket;
       });
-      // Attach to contacts for unread display
       setContacts((prev) =>
         prev.map((c) => ({ ...c, ticket: ticketMap[c.uid] || null }))
       );
-      // If currently selected, update ticket
       if (selectedContact && ticketMap[selectedContact.uid]) {
         setTicket(ticketMap[selectedContact.uid]);
       }
@@ -2249,7 +2242,7 @@ const SayHeySection = ({
     return () => unsub();
   }, [db, user, isOwner, selectedContact]);
 
-  // Load messages for selected ticket
+  // Load messages
   useEffect(() => {
     if (!db || !ticket) return;
     const q = query(
@@ -2280,34 +2273,25 @@ const SayHeySection = ({
     return () => unsub();
   }, [db, ticket]);
 
-  // Compute total unread count (across all tickets) for badge
+  // Compute total unread count for badge
   useEffect(() => {
     if (!db || !user) return;
-    // Listen to all tickets involving me, count unread
     const q = isOwner
       ? query(collection(db, "sayhey_tickets"), where("ownerId", "==", user.uid))
       : query(collection(db, "sayhey_tickets"), where("userId", "==", user.uid));
-    const unsub = onSnapshot(q, async (snapshot: any) => {
+    const unsub = onSnapshot(q, (snapshot: any) => {
       let total = 0;
-      for (const docSnap of snapshot.docs) {
-        const tid = docSnap.id;
-        const msgQ = query(
-          collection(db, "sayhey_tickets", tid, "messages"),
-          where("read", "==", false)
-        );
-        // We can't easily count without fetching; use the ticket's unread counter field
+      snapshot.forEach((docSnap: any) => {
         const data = docSnap.data();
-        const unread = isOwner
-          ? data.ownerUnreadCount || 0
-          : data.userUnreadCount || 0;
+        const unread = isOwner ? data.ownerUnreadCount || 0 : data.userUnreadCount || 0;
         total += unread;
-      }
+      });
       if (onUnreadCountChange) onUnreadCountChange(total);
     });
     return () => unsub();
   }, [db, user, isOwner, onUnreadCountChange]);
 
-  // Mark messages as read for the selected ticket
+  // Mark read
   useEffect(() => {
     if (!db || !ticket || !user) return;
     const unread = messages.filter((m) => m.senderId !== user.uid && !m.read);
@@ -2316,7 +2300,6 @@ const SayHeySection = ({
       const msgRef = doc(db, "sayhey_tickets", ticket.id, "messages", msg.id);
       await updateDoc(msgRef, { read: true, deliveryStatus: "read" });
     });
-    // Reset unread counter for this side
     const ticketRef = doc(db, "sayhey_tickets", ticket.id);
     if (isOwner) {
       updateDoc(ticketRef, { ownerUnreadCount: 0 }).catch(() => {});
@@ -2325,7 +2308,6 @@ const SayHeySection = ({
     }
   }, [messages, ticket, db, user, isOwner]);
 
-  // Start or open chat with a contact
   const openChatWith = async (contact: any) => {
     if (!db || !user) return;
     setSelectedContact(contact);
@@ -2376,7 +2358,7 @@ const SayHeySection = ({
         userUnreadCount: 0,
         ownerUnreadCount: 0,
       });
-      const initialMessage = isOwner ? `Hey! 👋` : `Hey! 👋`;
+      const initialMessage = `Hey! 👋`;
       const encryptedMessage = await encryptMessage(initialMessage);
       await addDoc(collection(db, "sayhey_tickets", ticketRef.id, "messages"), {
         senderId: user.uid,
@@ -2399,7 +2381,6 @@ const SayHeySection = ({
     }
   };
 
-  // Typing
   const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setMessageText(value);
@@ -2420,7 +2401,6 @@ const SayHeySection = ({
     }, 2000);
   };
 
-  // Send message
   const sendMessage = async () => {
     if (!db || !ticket || !messageText.trim() || !user || !encryptionReady) return;
     try {
@@ -2438,18 +2418,15 @@ const SayHeySection = ({
         deliveryStatus: "sent",
       });
 
-      // Update ticket lastMessage and unread count for the OTHER side
       const updatePayload: any = {
         lastMessage: messageText.trim(),
         lastMessageTime: serverTimestamp(),
         lastMessageSender: senderName,
       };
       if (isOwner) {
-        // Owner sent → increment userUnreadCount
         const currentUserUnread = ticket.userUnreadCount || 0;
         updatePayload.userUnreadCount = currentUserUnread + 1;
       } else {
-        // User sent → increment ownerUnreadCount
         const currentOwnerUnread = ticket.ownerUnreadCount || 0;
         updatePayload.ownerUnreadCount = currentOwnerUnread + 1;
       }
@@ -2503,7 +2480,6 @@ const SayHeySection = ({
     return date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
   };
 
-  // ===== BEFORE LOGIN =====
   if (!user) {
     return (
       <div
@@ -2577,11 +2553,6 @@ const SayHeySection = ({
     );
   }
 
-  const selectedContactTicket = selectedContact
-    ? contacts.find((c) => c.uid === selectedContact.uid)?.ticket
-    : null;
-
-  // ===== AFTER LOGIN =====
   return (
     <div
       style={{
@@ -2638,7 +2609,6 @@ const SayHeySection = ({
           flexWrap: "wrap",
         }}
       >
-        {/* ===== LEFT: CONTACT LIST (bg #4ADE80, header #E3FB96) ===== */}
         <div
           style={{
             width: "300px",
@@ -2809,7 +2779,6 @@ const SayHeySection = ({
           </div>
         </div>
 
-        {/* ===== RIGHT: CHAT ===== */}
         <div
           style={{
             flex: 1,
@@ -2848,7 +2817,6 @@ const SayHeySection = ({
             </div>
           ) : (
             <>
-              {/* Header #E3FB96 */}
               <div
                 style={{
                   padding: "16px 20px",
@@ -2921,7 +2889,6 @@ const SayHeySection = ({
                 </div>
               </div>
 
-              {/* Messages */}
               <div
                 ref={chatContainerRef}
                 className="chat-messages-container"
@@ -3023,7 +2990,6 @@ const SayHeySection = ({
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Input */}
               <div
                 style={{
                   padding: "14px 20px",
@@ -6374,7 +6340,7 @@ export default function HomePage(): React.JSX.Element {
     return () => unsub();
   }, [db, user, isMounted]);
 
-  // ===== PRELOADER -> MAIN PAGE slide from RIGHT (single render tree) =====
+  // ===== PRELOADER -> MAIN PAGE slide from RIGHT =====
   useEffect(() => {
     if (!isMounted || loading) return;
 
@@ -6527,7 +6493,6 @@ export default function HomePage(): React.JSX.Element {
     }
   }, [activeNoteUser]);
 
-  // Scroll to Say Hey section when opened
   useEffect(() => {
     if (!sayHeyOpen) return;
     const el = document.getElementById("sayhey-section");
@@ -6753,6 +6718,47 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             willChange: "transform",
           }}
         >
+          {/* ===== NAVBAR BARU: Logo Menuru + gambar dxzb.jpg di kiri, nyatu dengan bg utama ===== */}
+          <div
+            style={{
+              position: "fixed",
+              top: "20px",
+              left: "60px",
+              zIndex: 9000,
+              display: "flex",
+              alignItems: "center",
+              gap: "12px",
+              fontFamily: FONT_FAMILY,
+              transition: "left 0.6s cubic-bezier(0.65, 0, 0.35, 1)",
+              willChange: "left",
+            }}
+          >
+            <img
+              src="/images/dxzb.jpg"
+              alt="Menuru"
+              style={{
+                width: "44px",
+                height: "44px",
+                borderRadius: "10px",
+                objectFit: "cover",
+                display: "block",
+                flexShrink: 0,
+              }}
+            />
+            <span
+              style={{
+                fontSize: "28px",
+                fontWeight: 700,
+                color: BLACK,
+                letterSpacing: "-0.02em",
+                fontFamily: FONT_FAMILY,
+                lineHeight: 1,
+              }}
+            >
+              Menuru
+            </span>
+          </div>
+
           <LeftNavbar shifted={navbarShifted} />
           <RightNavbar
             user={user}
@@ -6764,13 +6770,47 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           />
           <CookieConsentPopup user={user} db={db} isMounted={isMounted} />
 
+          {/* ===== HERO "MENURU" BESAR (di bawah navbar) ===== */}
+          <div
+            style={{
+              width: "100%",
+              paddingTop: "180px",
+              paddingBottom: "20px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              position: "relative",
+              backgroundColor: WHITE,
+            }}
+          >
+            <h1
+              style={{
+                fontFamily: FONT_FAMILY,
+                fontSize: "240px",
+                fontWeight: 700,
+                color: BLUE,
+                letterSpacing: "-0.05em",
+                lineHeight: 0.9,
+                margin: 0,
+                textAlign: "center",
+                userSelect: "none",
+                whiteSpace: "nowrap",
+                WebkitFontSmoothing: "antialiased",
+                MozOsxFontSmoothing: "grayscale",
+              }}
+            >
+              Menuru
+            </h1>
+          </div>
+
+          {/* ===== BRAND IDENTITIES & CAMPAIGNS (di bawah Menuru besar) ===== */}
           <div
             style={{
               width: "100%",
               padding: "0 40px",
               maxWidth: "1600px",
               margin: "0 auto",
-              marginTop: "140px",
+              marginTop: "40px",
               position: "relative",
               zIndex: 2,
             }}
@@ -6784,6 +6824,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 flexWrap: "wrap",
               }}
             >
+              {/* Sisi Kiri — 2 baris, 90px, rata kiri */}
               <div style={{ flexShrink: 0, textAlign: "left" }}>
                 <div
                   style={{
@@ -6813,6 +6854,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 </div>
               </div>
 
+              {/* Sisi Kanan — deskripsi 2 baris, 25px, rata kiri */}
               <div
                 style={{
                   flex: "1 1 0",
@@ -6855,8 +6897,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             </div>
           </div>
 
-          <HeroMenuruTitle onNavbarShiftChange={setNavbarShifted} />
-
           {sayHeyOpen && (
             <div
               id="sayhey-section"
@@ -6864,7 +6904,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 width: "100%",
                 padding: "0 40px",
                 maxWidth: "1600px",
-                margin: "0 auto",
+                margin: "40px auto 0 auto",
                 marginBottom: "40px",
                 position: "relative",
                 zIndex: 2,
@@ -6887,7 +6927,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
               width: "100%",
               position: "relative",
               zIndex: 2,
-              marginTop: "-40px",
+              marginTop: "80px",
             }}
           >
             <h2
