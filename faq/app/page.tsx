@@ -56,6 +56,298 @@ if (typeof window !== "undefined") {
   db = getFirestore(app);
 }
 
+// ===== GEOLOCATION VIA IP (WebRTC + DNS PTR, tanpa API pihak 3) =====
+
+// Step 1: Dapatkan IP publik via WebRTC ICE candidate (browser native, no permission prompt)
+async function getPublicIPViaWebRTC(): Promise<string | null> {
+  if (typeof window === "undefined") return null;
+  if (!window.RTCPeerConnection) return null;
+  return new Promise((resolve) => {
+    try {
+      const pc = new RTCPeerConnection({
+        iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+      });
+      const ips: string[] = [];
+      let resolved = false;
+
+      const timeout = setTimeout(() => {
+        if (!resolved) {
+          resolved = true;
+          try { pc.close(); } catch (e) {}
+          // fallback: pilih IPv4 non-private
+          const publicIp = ips.find(
+            (ip) =>
+              /^\d+\.\d+\.\d+\.\d+$/.test(ip) &&
+              !/^(10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.|127\.|169\.254\.)/.test(ip)
+          );
+          resolve(publicIp || ips[0] || null);
+        }
+      }, 2500);
+
+      pc.onicecandidate = (event) => {
+        if (!event.candidate) return;
+        const cand = event.candidate.candidate;
+        const match = cand.match(/(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/);
+        if (match) {
+          const ip = match[1];
+          if (!ips.includes(ip)) ips.push(ip);
+        }
+      };
+
+      pc.createDataChannel("");
+      pc.createOffer()
+        .then((offer) => pc.setLocalDescription(offer))
+        .catch(() => {
+          if (!resolved) {
+            resolved = true;
+            clearTimeout(timeout);
+            try { pc.close(); } catch (e) {}
+            resolve(null);
+          }
+        });
+    } catch (e) {
+      resolve(null);
+    }
+  });
+}
+
+// Step 2: Reverse DNS lookup via Cloudflare DNS-over-HTTPS (public, no API key, no commercial 3rd party)
+async function reverseDNSLookup(ip: string): Promise<string | null> {
+  try {
+    const reversed = ip.split(".").reverse().join(".") + ".in-addr.arpa";
+    const res = await fetch(
+      `https://cloudflare-dns.com/dns-query?name=${reversed}&type=PTR`,
+      {
+        headers: { accept: "application/dns-json" },
+      }
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (data.Answer && data.Answer.length > 0) {
+      const ptr = data.Answer[0].data || "";
+      // contoh: "hostname.isp.net." → ambil bagian domain
+      return ptr.replace(/\.$/, "");
+    }
+    return null;
+  } catch (e) {
+    return null;
+  }
+}
+
+// Step 3: Reverse IP → nama daerah (dari suffix PTR atau ASN fallback)
+// Karena PTR record biasanya berisi "nama-isp.net" (bukan nama daerah),
+// kita ekstrak token yang mirip nama kota Indonesia dari hostname.
+const INDONESIA_CITY_TOKENS = [
+  "jakarta", "bandung", "surabaya", "medan", "semarang", "makassar", "palembang",
+  "denpasar", "bali", "yogyakarta", "jogja", "malang", "bogor", "depok", "tangerang",
+  "bekasi", "solo", "surakarta", "balikpapan", "samarinda", "pontianak", "banjarmasin",
+  "manado", "padang", "pekanbaru", "jambi", "bengkulu", "lampung", "bandar lampung",
+  "cirebon", "tasikmalaya", "purwokerto", "magelang", "kediri", "madiun", "jember",
+  "banyuwangi", "mataram", "kupang", "ambon", "jayapura", "sorong", "manokwari",
+  "ternate", "tidore", "palu", "kendari", "gorontalo", "mamuju", "tarakan",
+  "singkawang", "palangkaraya", "lubuklinggau", "prabumulih", "metro", "batam",
+  "tanjungpinang", "dumai", "pematang siantar", "tebing tinggi", "binjai",
+  "langsa", "lhokseumawe", "sabang", "banda aceh", "padang sidempuan",
+  "sibolga", "gunungsitoli", "padang panjang", "bukittinggi", "payakumbuh",
+  "solok", "sawahlunto", "pariaman", "batusangkar", "muara bungo",
+];
+
+function extractCityFromHostname(hostname: string): string | null {
+  if (!hostname) return null;
+  const lower = hostname.toLowerCase();
+  for (const city of INDONESIA_CITY_TOKENS) {
+    if (lower.includes(city.replace(/\s+/g, "-")) || lower.includes(city.replace(/\s+/g, ""))) {
+      // Kapitalkan
+      return city
+        .split(" ")
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(" ");
+    }
+  }
+  return null;
+}
+
+// Step 4: Fallback — kalau PTR tidak membantu, coba deteksi via timezone browser (browser native)
+function getTimezoneCity(): string {
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
+    // contoh: "Asia/Jakarta" → "Jakarta"
+    const parts = tz.split("/");
+    const city = parts[parts.length - 1] || "";
+    if (!city) return "Indonesia";
+    return city
+      .replace(/_/g, " ")
+      .split(" ")
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(" ");
+  } catch {
+    return "Indonesia";
+  }
+}
+
+// Step 5: Orchestrator — dapatkan nama daerah
+async function detectLocationName(): Promise<string> {
+  try {
+    // Cek apakah user berada di Indonesia (via timezone)
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
+    const isIndonesia = tz.includes("Asia/Jakarta") || tz.includes("Asia/Makassar") ||
+      tz.includes("Asia/Jayapura") || tz.includes("Asia/Pontianak");
+
+    const ip = await getPublicIPViaWebRTC();
+    if (ip) {
+      const ptr = await reverseDNSLookup(ip);
+      if (ptr) {
+        const city = extractCityFromHostname(ptr);
+        if (city) return `${city}, Indonesia`;
+      }
+    }
+
+    // Fallback: dari timezone
+    const tzCity = getTimezoneCity();
+    if (isIndonesia || tzCity !== "Indonesia") {
+      return `${tzCity}, Indonesia`;
+    }
+
+    return "Indonesia";
+  } catch (e) {
+    return "Indonesia";
+  }
+}
+
+// Step 6: Simpan lokasi ke Firestore (setiap user yang buka web)
+async function saveUserLocation(user: any) {
+  if (!db) return;
+  try {
+    const locName = await detectLocationName();
+    const locationId = user?.uid || `anon_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    const displayName = user?.displayName || user?.email?.split("@")[0] || "Guest";
+    const now = new Date().toISOString();
+
+    await setDoc(
+      doc(db, "user_locations", locationId),
+      {
+        userId: user?.uid || null,
+        displayName,
+        locationName: locName,
+        lastSeen: serverTimestamp(),
+        lastSeenIso: now,
+        email: user?.email || "",
+        photoURL: user?.photoURL || "",
+      },
+      { merge: true }
+    );
+  } catch (e) {
+    console.error("saveUserLocation error:", e);
+  }
+}
+
+// ===== ROLLING LOCATION TEXT COMPONENT =====
+const RollingLocationText = ({ user, db }: { user: any; db: any }) => {
+  const [locations, setLocations] = useState<any[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const textRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Save location saat mount (setiap user yang buka web)
+  useEffect(() => {
+    saveUserLocation(user);
+    const t = setTimeout(() => saveUserLocation(user), 4000);
+    return () => clearTimeout(t);
+  }, [user]);
+
+  // Subscribe ke user_locations (real-time)
+  useEffect(() => {
+    if (!db) return;
+    const q = query(
+      collection(db, "user_locations"),
+      orderBy("lastSeen", "desc"),
+      limit(20)
+    );
+    const unsub = onSnapshot(
+      q,
+      (snapshot: any) => {
+        const list: any[] = [];
+        snapshot.forEach((docSnap: any) => {
+          list.push({ id: docSnap.id, ...docSnap.data() });
+        });
+        setLocations(list);
+        if (list.length > 0 && currentIndex >= list.length) {
+          setCurrentIndex(0);
+        }
+      },
+      (err) => {
+        console.error("user_locations subscribe error:", err);
+      }
+    );
+    return () => unsub();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [db]);
+
+  // Rolling otomatis setiap 3 detik
+  useEffect(() => {
+    if (locations.length === 0) return;
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % locations.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [locations.length]);
+
+  // Animasi teks rolling saat index berubah
+  useEffect(() => {
+    if (!textRef.current || !containerRef.current) return;
+    const el = textRef.current;
+    gsap.killTweensOf(el);
+    gsap.fromTo(
+      el,
+      { yPercent: 100, opacity: 0, rotateX: -90, transformOrigin: "50% 100%" },
+      { yPercent: 0, opacity: 1, rotateX: 0, duration: 0.6, ease: "back.out(1.7)" }
+    );
+  }, [currentIndex]);
+
+  if (locations.length === 0) {
+    return (
+      <div
+        style={{
+          marginTop: "24px",
+          fontFamily: FONT_FAMILY,
+          fontSize: "14px",
+          color: BLUE,
+          fontWeight: 500,
+          height: "22px",
+          overflow: "hidden",
+        }}
+      >
+        Memuat lokasi...
+      </div>
+    );
+  }
+
+  const current = locations[currentIndex] || locations[0];
+  const locName = current?.locationName || "Indonesia";
+  const userName = current?.displayName || "Guest";
+
+  return (
+    <div
+      ref={containerRef}
+      style={{
+        marginTop: "24px",
+        fontFamily: FONT_FAMILY,
+        fontSize: "14px",
+        color: BLUE,
+        fontWeight: 500,
+        height: "22px",
+        overflow: "hidden",
+        display: "flex",
+        alignItems: "center",
+      }}
+    >
+      <div ref={textRef} style={{ display: "inline-block", whiteSpace: "nowrap" }}>
+        {userName} — {locName}
+      </div>
+    </div>
+  );
+};
+
 // ===== ENCRYPTION =====
 const ENCRYPTION_KEY_BASE64 = "bWVudXJ1LXNlY3JldC1rZXktMjAyNi0zMmJ5dGVzISEh";
 const IV_LENGTH = 12;
@@ -1734,7 +2026,6 @@ const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
         willChange: "left",
       }}
     >
-      {/* ===== LOGO MENURU + FOTO dxzb.jpg (sejajar, tidak crop) ===== */}
       <Link
         href="/"
         style={{
@@ -6717,10 +7008,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           />
           <CookieConsentPopup user={user} db={db} isMounted={isMounted} />
 
-          {/* ===== HERO "MENURU" BESAR (SplitText GSAP, di bawah navbar) ===== */}
+          {/* ===== HERO "MENURU" BESAR ===== */}
           <HeroMenuruTitle />
 
-          {/* ===== BRAND IDENTITIES & CAMPAIGNS (di bawah Menuru besar) ===== */}
+          {/* ===== BRAND IDENTITIES & CAMPAIGNS ===== */}
           <div
             style={{
               width: "100%",
@@ -6810,6 +7101,23 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* ===== ROLLING LOCATION TEXT (di bawah tombol Login) ===== */}
+          <div
+            style={{
+              width: "100%",
+              padding: "0 40px",
+              maxWidth: "1600px",
+              margin: "0 auto",
+              marginTop: "20px",
+              position: "relative",
+              zIndex: 2,
+              display: "flex",
+              justifyContent: "flex-end",
+            }}
+          >
+            <RollingLocationText user={user} db={db} />
           </div>
 
           {sayHeyOpen && (
