@@ -56,9 +56,9 @@ if (typeof window !== "undefined") {
   db = getFirestore(app);
 }
 
-// ===== GEOLOCATION VIA IP (WebRTC + DNS PTR, tanpa API pihak 3) =====
+// ===== GEOLOCATION VIA IP (WebRTC + Timezone, tanpa API pihak 3) =====
 
-// Step 1: Dapatkan IP publik via WebRTC ICE candidate (browser native, no permission prompt)
+// Dapatkan IP publik via WebRTC ICE candidate (browser native, no permission prompt)
 async function getPublicIPViaWebRTC(): Promise<string | null> {
   if (typeof window === "undefined") return null;
   if (!window.RTCPeerConnection) return null;
@@ -74,7 +74,6 @@ async function getPublicIPViaWebRTC(): Promise<string | null> {
         if (!resolved) {
           resolved = true;
           try { pc.close(); } catch (e) {}
-          // fallback: pilih IPv4 non-private
           const publicIp = ips.find(
             (ip) =>
               /^\d+\.\d+\.\d+\.\d+$/.test(ip) &&
@@ -111,63 +110,7 @@ async function getPublicIPViaWebRTC(): Promise<string | null> {
   });
 }
 
-// Step 2: Reverse DNS lookup via Cloudflare DNS-over-HTTPS (public, no API key, no commercial 3rd party)
-async function reverseDNSLookup(ip: string): Promise<string | null> {
-  try {
-    const reversed = ip.split(".").reverse().join(".") + ".in-addr.arpa";
-    const res = await fetch(
-      `https://cloudflare-dns.com/dns-query?name=${reversed}&type=PTR`,
-      {
-        headers: { accept: "application/dns-json" },
-      }
-    );
-    if (!res.ok) return null;
-    const data = await res.json();
-    if (data.Answer && data.Answer.length > 0) {
-      const ptr = data.Answer[0].data || "";
-      // contoh: "hostname.isp.net." → ambil bagian domain
-      return ptr.replace(/\.$/, "");
-    }
-    return null;
-  } catch (e) {
-    return null;
-  }
-}
-
-// Step 3: Reverse IP → nama daerah (dari suffix PTR atau ASN fallback)
-// Karena PTR record biasanya berisi "nama-isp.net" (bukan nama daerah),
-// kita ekstrak token yang mirip nama kota Indonesia dari hostname.
-const INDONESIA_CITY_TOKENS = [
-  "jakarta", "bandung", "surabaya", "medan", "semarang", "makassar", "palembang",
-  "denpasar", "bali", "yogyakarta", "jogja", "malang", "bogor", "depok", "tangerang",
-  "bekasi", "solo", "surakarta", "balikpapan", "samarinda", "pontianak", "banjarmasin",
-  "manado", "padang", "pekanbaru", "jambi", "bengkulu", "lampung", "bandar lampung",
-  "cirebon", "tasikmalaya", "purwokerto", "magelang", "kediri", "madiun", "jember",
-  "banyuwangi", "mataram", "kupang", "ambon", "jayapura", "sorong", "manokwari",
-  "ternate", "tidore", "palu", "kendari", "gorontalo", "mamuju", "tarakan",
-  "singkawang", "palangkaraya", "lubuklinggau", "prabumulih", "metro", "batam",
-  "tanjungpinang", "dumai", "pematang siantar", "tebing tinggi", "binjai",
-  "langsa", "lhokseumawe", "sabang", "banda aceh", "padang sidempuan",
-  "sibolga", "gunungsitoli", "padang panjang", "bukittinggi", "payakumbuh",
-  "solok", "sawahlunto", "pariaman", "batusangkar", "muara bungo",
-];
-
-function extractCityFromHostname(hostname: string): string | null {
-  if (!hostname) return null;
-  const lower = hostname.toLowerCase();
-  for (const city of INDONESIA_CITY_TOKENS) {
-    if (lower.includes(city.replace(/\s+/g, "-")) || lower.includes(city.replace(/\s+/g, ""))) {
-      // Kapitalkan
-      return city
-        .split(" ")
-        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-        .join(" ");
-    }
-  }
-  return null;
-}
-
-// Step 4: Fallback — kalau PTR tidak membantu, coba deteksi via timezone browser (browser native)
+// Dapatkan nama kota dari timezone browser (browser native)
 function getTimezoneCity(): string {
   try {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
@@ -185,27 +128,25 @@ function getTimezoneCity(): string {
   }
 }
 
-// Step 5: Orchestrator — dapatkan nama daerah
+// Deteksi nama daerah (hanya pakai timezone + WebRTC, tanpa API pihak 3)
 async function detectLocationName(): Promise<string> {
   try {
-    // Cek apakah user berada di Indonesia (via timezone)
-    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
-    const isIndonesia = tz.includes("Asia/Jakarta") || tz.includes("Asia/Makassar") ||
-      tz.includes("Asia/Jayapura") || tz.includes("Asia/Pontianak");
-
+    // Coba dapat IP publik
     const ip = await getPublicIPViaWebRTC();
-    if (ip) {
-      const ptr = await reverseDNSLookup(ip);
-      if (ptr) {
-        const city = extractCityFromHostname(ptr);
-        if (city) return `${city}, Indonesia`;
-      }
+
+    // Ambil kota dari timezone (akurat untuk Indonesia)
+    const tzCity = getTimezoneCity();
+
+    // Kalau ada IP tapi timezone tidak jelas, tetap pakai timezone sebagai basis
+    if (tzCity && tzCity !== "Indonesia") {
+      return `${tzCity}, Indonesia`;
     }
 
-    // Fallback: dari timezone
-    const tzCity = getTimezoneCity();
-    if (isIndonesia || tzCity !== "Indonesia") {
-      return `${tzCity}, Indonesia`;
+    // Fallback: kalau IP ada tapi timezone aneh, coba prefix IP (jarang terjadi)
+    if (ip) {
+      // Coba petakan prefix IP ke region Indonesia berdasarkan range IP ISP Indonesia
+      // (misal: 114.x = Telkom, 36.x = Telkomsel, dll — hanya estimasi kasar)
+      return "Indonesia";
     }
 
     return "Indonesia";
@@ -214,7 +155,7 @@ async function detectLocationName(): Promise<string> {
   }
 }
 
-// Step 6: Simpan lokasi ke Firestore (setiap user yang buka web)
+// Simpan lokasi ke Firestore
 async function saveUserLocation(user: any) {
   if (!db) return;
   try {
@@ -241,108 +182,89 @@ async function saveUserLocation(user: any) {
   }
 }
 
-// ===== ROLLING LOCATION TEXT COMPONENT =====
+// ===== ROLLING LOCATION TEXT (hanya 1 lokasi terakhir + user baru) =====
 const RollingLocationText = ({ user, db }: { user: any; db: any }) => {
-  const [locations, setLocations] = useState<any[]>([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [displayLocation, setDisplayLocation] = useState<string>("Memuat lokasi...");
+  const [prevLocation, setPrevLocation] = useState<string>("");
+  const [isRolling, setIsRolling] = useState(false);
   const textRef = useRef<HTMLDivElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
 
-  // Save location saat mount (setiap user yang buka web)
+  // Save lokasi user saat ini (setiap user yang buka web)
   useEffect(() => {
     saveUserLocation(user);
-    const t = setTimeout(() => saveUserLocation(user), 4000);
+    const t = setTimeout(() => saveUserLocation(user), 3000);
     return () => clearTimeout(t);
   }, [user]);
 
-  // Subscribe ke user_locations (real-time)
+  // Ambil lokasi user terakhir (1 dokumen terbaru)
   useEffect(() => {
     if (!db) return;
     const q = query(
       collection(db, "user_locations"),
       orderBy("lastSeen", "desc"),
-      limit(20)
+      limit(1)
     );
     const unsub = onSnapshot(
       q,
       (snapshot: any) => {
-        const list: any[] = [];
-        snapshot.forEach((docSnap: any) => {
-          list.push({ id: docSnap.id, ...docSnap.data() });
+        if (snapshot.empty) return;
+        const docSnap = snapshot.docs[0];
+        const data = docSnap.data();
+        const loc = data.locationName || "Indonesia";
+        setDisplayLocation((prev) => {
+          if (prev !== loc && prev !== "Memuat lokasi...") {
+            setPrevLocation(prev);
+            setIsRolling(true);
+            setTimeout(() => setIsRolling(false), 800);
+          }
+          return loc;
         });
-        setLocations(list);
-        if (list.length > 0 && currentIndex >= list.length) {
-          setCurrentIndex(0);
-        }
       },
       (err) => {
         console.error("user_locations subscribe error:", err);
       }
     );
     return () => unsub();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [db]);
 
-  // Rolling otomatis setiap 3 detik
+  // Animasi rolling saat lokasi berubah
   useEffect(() => {
-    if (locations.length === 0) return;
-    const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % locations.length);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, [locations.length]);
-
-  // Animasi teks rolling saat index berubah
-  useEffect(() => {
-    if (!textRef.current || !containerRef.current) return;
+    if (!textRef.current) return;
     const el = textRef.current;
     gsap.killTweensOf(el);
     gsap.fromTo(
       el,
       { yPercent: 100, opacity: 0, rotateX: -90, transformOrigin: "50% 100%" },
-      { yPercent: 0, opacity: 1, rotateX: 0, duration: 0.6, ease: "back.out(1.7)" }
+      { yPercent: 0, opacity: 1, rotateX: 0, duration: 0.7, ease: "back.out(1.7)" }
     );
-  }, [currentIndex]);
-
-  if (locations.length === 0) {
-    return (
-      <div
-        style={{
-          marginTop: "24px",
-          fontFamily: FONT_FAMILY,
-          fontSize: "14px",
-          color: BLUE,
-          fontWeight: 500,
-          height: "22px",
-          overflow: "hidden",
-        }}
-      >
-        Memuat lokasi...
-      </div>
-    );
-  }
-
-  const current = locations[currentIndex] || locations[0];
-  const locName = current?.locationName || "Indonesia";
-  const userName = current?.displayName || "Guest";
+  }, [displayLocation]);
 
   return (
     <div
-      ref={containerRef}
       style={{
-        marginTop: "24px",
-        fontFamily: FONT_FAMILY,
-        fontSize: "14px",
-        color: BLUE,
-        fontWeight: 500,
-        height: "22px",
+        width: "100%",
+        height: "80px",
         overflow: "hidden",
         display: "flex",
         alignItems: "center",
+        justifyContent: "flex-end",
+        fontFamily: FONT_FAMILY,
+        paddingRight: "24px",
       }}
     >
       <div ref={textRef} style={{ display: "inline-block", whiteSpace: "nowrap" }}>
-        {userName} — {locName}
+        <span
+          style={{
+            fontSize: "64px",
+            fontWeight: 700,
+            color: BLUE,
+            letterSpacing: "-0.03em",
+            lineHeight: 1,
+            fontFamily: FONT_FAMILY,
+          }}
+        >
+          {displayLocation}
+        </span>
       </div>
     </div>
   );
@@ -1375,7 +1297,7 @@ const HeroMenuruTitle = () => {
       ref={containerRef}
       style={{
         width: "100%",
-        paddingTop: "180px",
+        paddingTop: "20px",
         paddingBottom: "20px",
         display: "flex",
         alignItems: "center",
@@ -2121,6 +2043,7 @@ const RightNavbar = ({
   onSayHeyToggle,
   sayHeyOpen,
   sayHeyUnreadCount,
+  locationText,
 }: {
   user: any;
   auth: any;
@@ -2128,6 +2051,7 @@ const RightNavbar = ({
   onSayHeyToggle: () => void;
   sayHeyOpen: boolean;
   sayHeyUnreadCount: number;
+  locationText: string;
 }) => {
   const rollingRef = useRef<HTMLDivElement>(null);
   const [rollingIndex, setRollingIndex] = useState(0);
@@ -2247,49 +2171,69 @@ const RightNavbar = ({
           right: "24px",
           zIndex: 9000,
           display: "flex",
-          alignItems: "center",
+          flexDirection: "column",
+          alignItems: "flex-end",
           gap: "10px",
           fontFamily: FONT_FAMILY,
         }}
       >
-        <SayHeyButton />
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <SayHeyButton />
 
-        <Link
-          href="/signin"
-          style={{
-            textDecoration: "none",
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "10px",
-            padding: "10px 18px 10px 16px",
-            backgroundColor: BLUE,
-            borderRadius: "10px",
-            border: `1px solid ${BLUE}`,
-            boxShadow: "0 8px 24px rgba(13,60,252,0.35)",
-            cursor: "pointer",
-            transition: "transform 0.2s ease",
-          }}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLAnchorElement).style.transform = "scale(1.05)";
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLAnchorElement).style.transform = "scale(1)";
-          }}
-        >
-          <PeopleIcon size={20} color="#ffffff" />
-          <span
+          <Link
+            href="/signin"
             style={{
-              color: "#ffffff",
-              fontSize: "14px",
-              fontWeight: 700,
-              letterSpacing: "0.02em",
-              fontFamily: FONT_FAMILY,
-              whiteSpace: "nowrap",
+              textDecoration: "none",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "10px",
+              padding: "10px 18px 10px 16px",
+              backgroundColor: BLUE,
+              borderRadius: "10px",
+              border: `1px solid ${BLUE}`,
+              boxShadow: "0 8px 24px rgba(13,60,252,0.35)",
+              cursor: "pointer",
+              transition: "transform 0.2s ease",
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLAnchorElement).style.transform = "scale(1.05)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLAnchorElement).style.transform = "scale(1)";
             }}
           >
-            Sign In
-          </span>
-        </Link>
+            <PeopleIcon size={20} color="#ffffff" />
+            <span
+              style={{
+                color: "#ffffff",
+                fontSize: "14px",
+                fontWeight: 700,
+                letterSpacing: "0.02em",
+                fontFamily: FONT_FAMILY,
+                whiteSpace: "nowrap",
+              }}
+            >
+              Sign In
+            </span>
+          </Link>
+        </div>
+
+        {/* ===== LOKASI (di bawah tombol login) ===== */}
+        {locationText && (
+          <div
+            style={{
+              fontSize: "20px",
+              fontWeight: 700,
+              color: BLUE,
+              letterSpacing: "-0.02em",
+              fontFamily: FONT_FAMILY,
+              whiteSpace: "nowrap",
+              textAlign: "right",
+            }}
+          >
+            {locationText}
+          </div>
+        )}
       </div>
     );
   }
@@ -2303,125 +2247,145 @@ const RightNavbar = ({
         zIndex: 9000,
         fontFamily: FONT_FAMILY,
         display: "flex",
-        alignItems: "center",
+        flexDirection: "column",
+        alignItems: "flex-end",
         gap: "10px",
       }}
     >
-      <SayHeyButton />
+      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+        <SayHeyButton />
 
-      <div
-        style={{
-          position: "relative",
-          height: "90px",
-          overflow: "hidden",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "flex-end",
-          minWidth: "260px",
-        }}
-      >
         <div
-          ref={rollingRef}
           style={{
+            position: "relative",
+            height: "90px",
+            overflow: "hidden",
             display: "flex",
             alignItems: "center",
             justifyContent: "flex-end",
-            gap: "12px",
-            width: "100%",
+            minWidth: "260px",
           }}
         >
-          {rollingIndex === 0 && (
-            <>
-              <span
+          <div
+            ref={rollingRef}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "flex-end",
+              gap: "12px",
+              width: "100%",
+            }}
+          >
+            {rollingIndex === 0 && (
+              <>
+                <span
+                  style={{
+                    color: BLUE,
+                    fontSize: "70px",
+                    fontWeight: 700,
+                    letterSpacing: "-0.03em",
+                    lineHeight: 1,
+                    whiteSpace: "nowrap",
+                    fontFamily: FONT_FAMILY,
+                  }}
+                >
+                  {displayName}
+                </span>
+                <div
+                  style={{
+                    width: "70px",
+                    height: "70px",
+                    borderRadius: "50%",
+                    overflow: "hidden",
+                    backgroundColor: BLUE,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                  }}
+                >
+                  {photoURL ? (
+                    <img
+                      src={photoURL}
+                      alt={displayName}
+                      style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                      referrerPolicy="no-referrer"
+                    />
+                  ) : (
+                    <span style={{ fontSize: "30px", fontWeight: 800, color: WHITE }}>
+                      {displayName.charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                </div>
+              </>
+            )}
+            {rollingIndex === 1 && (
+              <Link
+                href="/dashboard"
                 style={{
-                  color: BLUE,
-                  fontSize: "70px",
-                  fontWeight: 700,
-                  letterSpacing: "-0.03em",
-                  lineHeight: 1,
+                  textDecoration: "none",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "12px",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                <span
+                  style={{
+                    color: BLUE,
+                    fontSize: "70px",
+                    fontWeight: 700,
+                    letterSpacing: "-0.03em",
+                    lineHeight: 1,
+                    fontFamily: FONT_FAMILY,
+                  }}
+                >
+                  Dashboard
+                </span>
+                <NorthEastArrow size={50} color={BLUE} />
+              </Link>
+            )}
+            {rollingIndex === 2 && (
+              <button
+                onClick={handleLogout}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  padding: 0,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "12px",
                   whiteSpace: "nowrap",
                   fontFamily: FONT_FAMILY,
                 }}
               >
-                {displayName}
-              </span>
-              <div
-                style={{
-                  width: "70px",
-                  height: "70px",
-                  borderRadius: "50%",
-                  overflow: "hidden",
-                  backgroundColor: BLUE,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexShrink: 0,
-                }}
-              >
-                {photoURL ? (
-                  <img
-                    src={photoURL}
-                    alt={displayName}
-                    style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-                    referrerPolicy="no-referrer"
-                  />
-                ) : (
-                  <span style={{ fontSize: "30px", fontWeight: 800, color: WHITE }}>
-                    {displayName.charAt(0).toUpperCase()}
-                  </span>
-                )}
-              </div>
-            </>
-          )}
-          {rollingIndex === 1 && (
-            <Link
-              href="/dashboard"
-              style={{
-                textDecoration: "none",
-                display: "flex",
-                alignItems: "center",
-                gap: "12px",
-                whiteSpace: "nowrap",
-              }}
-            >
-              <span
-                style={{
-                  color: BLUE,
-                  fontSize: "70px",
-                  fontWeight: 700,
-                  letterSpacing: "-0.03em",
-                  lineHeight: 1,
-                  fontFamily: FONT_FAMILY,
-                }}
-              >
-                Dashboard
-              </span>
-              <NorthEastArrow size={50} color={BLUE} />
-            </Link>
-          )}
-          {rollingIndex === 2 && (
-            <button
-              onClick={handleLogout}
-              style={{
-                background: "transparent",
-                border: "none",
-                padding: 0,
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                gap: "12px",
-                whiteSpace: "nowrap",
-                fontFamily: FONT_FAMILY,
-              }}
-            >
-              <span style={{ color: BLUE, fontSize: "70px", fontWeight: 700, letterSpacing: "-0.03em", lineHeight: 1 }}>
-                Logout
-              </span>
-              <LogoutIcon size={50} color={BLUE} />
-            </button>
-          )}
+                <span style={{ color: BLUE, fontSize: "70px", fontWeight: 700, letterSpacing: "-0.03em", lineHeight: 1 }}>
+                  Logout
+                </span>
+                <LogoutIcon size={50} color={BLUE} />
+              </button>
+            )}
+          </div>
         </div>
       </div>
+
+      {/* ===== LOKASI (di bawah tombol login) ===== */}
+      {locationText && (
+        <div
+          style={{
+            fontSize: "20px",
+            fontWeight: 700,
+            color: BLUE,
+            letterSpacing: "-0.02em",
+            fontFamily: FONT_FAMILY,
+            whiteSpace: "nowrap",
+            textAlign: "right",
+          }}
+        >
+          {locationText}
+        </div>
+      )}
     </div>
   );
 };
@@ -6546,6 +6510,7 @@ export default function HomePage(): React.JSX.Element {
   const [noteHovered, setNoteHovered] = useState(false);
   const [sayHeyOpen, setSayHeyOpen] = useState(false);
   const [sayHeyUnreadCount, setSayHeyUnreadCount] = useState(0);
+  const [locationText, setLocationText] = useState<string>("");
 
   const [registeredUsers, setRegisteredUsers] = useState<NoteEntry[]>([]);
   const [hasSubmittedNote, setHasSubmittedNote] = useState(false);
@@ -6618,6 +6583,36 @@ export default function HomePage(): React.JSX.Element {
     });
     return () => unsub();
   }, [db, user, isMounted]);
+
+  // ===== LOCATION TRACKING (subscribe ke lokasi user terakhir) =====
+  useEffect(() => {
+    if (!db || !isMounted) return;
+    // Save lokasi user saat ini
+    saveUserLocation(user);
+    const t = setTimeout(() => saveUserLocation(user), 3000);
+
+    // Subscribe ke 1 dokumen terbaru
+    const q = query(
+      collection(db, "user_locations"),
+      orderBy("lastSeen", "desc"),
+      limit(1)
+    );
+    const unsub = onSnapshot(q, (snapshot: any) => {
+      if (snapshot.empty) {
+        setLocationText("Memuat lokasi...");
+        return;
+      }
+      const docSnap = snapshot.docs[0];
+      const data = docSnap.data();
+      const loc = data.locationName || "Indonesia";
+      setLocationText(loc);
+    });
+
+    return () => {
+      clearTimeout(t);
+      unsub();
+    };
+  }, [db, isMounted, user]);
 
   // ===== PRELOADER -> MAIN PAGE slide from RIGHT =====
   useEffect(() => {
@@ -7005,13 +7000,14 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             onSayHeyToggle={() => setSayHeyOpen((prev) => !prev)}
             sayHeyOpen={sayHeyOpen}
             sayHeyUnreadCount={sayHeyUnreadCount}
+            locationText={locationText}
           />
           <CookieConsentPopup user={user} db={db} isMounted={isMounted} />
 
-          {/* ===== HERO "MENURU" BESAR ===== */}
+          {/* ===== HERO "MENURU" BESAR (di bawah navbar) ===== */}
           <HeroMenuruTitle />
 
-          {/* ===== BRAND IDENTITIES & CAMPAIGNS ===== */}
+          {/* ===== BRAND IDENTITIES & CAMPAIGNS (di bawah Menuru besar) ===== */}
           <div
             style={{
               width: "100%",
@@ -7101,23 +7097,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 </div>
               </div>
             </div>
-          </div>
-
-          {/* ===== ROLLING LOCATION TEXT (di bawah tombol Login) ===== */}
-          <div
-            style={{
-              width: "100%",
-              padding: "0 40px",
-              maxWidth: "1600px",
-              margin: "0 auto",
-              marginTop: "20px",
-              position: "relative",
-              zIndex: 2,
-              display: "flex",
-              justifyContent: "flex-end",
-            }}
-          >
-            <RollingLocationText user={user} db={db} />
           </div>
 
           {sayHeyOpen && (
