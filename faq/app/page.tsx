@@ -114,7 +114,6 @@ async function getPublicIPViaWebRTC(): Promise<string | null> {
 function getTimezoneCity(): string {
   try {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
-    // contoh: "Asia/Jakarta" → "Jakarta"
     const parts = tz.split("/");
     const city = parts[parts.length - 1] || "";
     if (!city) return "Indonesia";
@@ -131,21 +130,14 @@ function getTimezoneCity(): string {
 // Deteksi nama daerah (hanya pakai timezone + WebRTC, tanpa API pihak 3)
 async function detectLocationName(): Promise<string> {
   try {
-    // Coba dapat IP publik
     const ip = await getPublicIPViaWebRTC();
-
-    // Ambil kota dari timezone (akurat untuk Indonesia)
     const tzCity = getTimezoneCity();
 
-    // Kalau ada IP tapi timezone tidak jelas, tetap pakai timezone sebagai basis
     if (tzCity && tzCity !== "Indonesia") {
       return `${tzCity}, Indonesia`;
     }
 
-    // Fallback: kalau IP ada tapi timezone aneh, coba prefix IP (jarang terjadi)
     if (ip) {
-      // Coba petakan prefix IP ke region Indonesia berdasarkan range IP ISP Indonesia
-      // (misal: 114.x = Telkom, 36.x = Telkomsel, dll — hanya estimasi kasar)
       return "Indonesia";
     }
 
@@ -181,94 +173,6 @@ async function saveUserLocation(user: any) {
     console.error("saveUserLocation error:", e);
   }
 }
-
-// ===== ROLLING LOCATION TEXT (hanya 1 lokasi terakhir + user baru) =====
-const RollingLocationText = ({ user, db }: { user: any; db: any }) => {
-  const [displayLocation, setDisplayLocation] = useState<string>("Memuat lokasi...");
-  const [prevLocation, setPrevLocation] = useState<string>("");
-  const [isRolling, setIsRolling] = useState(false);
-  const textRef = useRef<HTMLDivElement>(null);
-
-  // Save lokasi user saat ini (setiap user yang buka web)
-  useEffect(() => {
-    saveUserLocation(user);
-    const t = setTimeout(() => saveUserLocation(user), 3000);
-    return () => clearTimeout(t);
-  }, [user]);
-
-  // Ambil lokasi user terakhir (1 dokumen terbaru)
-  useEffect(() => {
-    if (!db) return;
-    const q = query(
-      collection(db, "user_locations"),
-      orderBy("lastSeen", "desc"),
-      limit(1)
-    );
-    const unsub = onSnapshot(
-      q,
-      (snapshot: any) => {
-        if (snapshot.empty) return;
-        const docSnap = snapshot.docs[0];
-        const data = docSnap.data();
-        const loc = data.locationName || "Indonesia";
-        setDisplayLocation((prev) => {
-          if (prev !== loc && prev !== "Memuat lokasi...") {
-            setPrevLocation(prev);
-            setIsRolling(true);
-            setTimeout(() => setIsRolling(false), 800);
-          }
-          return loc;
-        });
-      },
-      (err) => {
-        console.error("user_locations subscribe error:", err);
-      }
-    );
-    return () => unsub();
-  }, [db]);
-
-  // Animasi rolling saat lokasi berubah
-  useEffect(() => {
-    if (!textRef.current) return;
-    const el = textRef.current;
-    gsap.killTweensOf(el);
-    gsap.fromTo(
-      el,
-      { yPercent: 100, opacity: 0, rotateX: -90, transformOrigin: "50% 100%" },
-      { yPercent: 0, opacity: 1, rotateX: 0, duration: 0.7, ease: "back.out(1.7)" }
-    );
-  }, [displayLocation]);
-
-  return (
-    <div
-      style={{
-        width: "100%",
-        height: "80px",
-        overflow: "hidden",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "flex-end",
-        fontFamily: FONT_FAMILY,
-        paddingRight: "24px",
-      }}
-    >
-      <div ref={textRef} style={{ display: "inline-block", whiteSpace: "nowrap" }}>
-        <span
-          style={{
-            fontSize: "64px",
-            fontWeight: 700,
-            color: BLUE,
-            letterSpacing: "-0.03em",
-            lineHeight: 1,
-            fontFamily: FONT_FAMILY,
-          }}
-        >
-          {displayLocation}
-        </span>
-      </div>
-    </div>
-  );
-};
 
 // ===== ENCRYPTION =====
 const ENCRYPTION_KEY_BASE64 = "bWVudXJ1LXNlY3JldC1rZXktMjAyNi0zMmJ5dGVzISEh";
@@ -1931,7 +1835,7 @@ const NavbarButton = ({
 };
 
 
-// ===== LEFT NAVBAR: Logo Menuru + foto dxzb.jpg di samping tombol Teams =====
+// ===== LEFT NAVBAR: Logo Menuru + GIF Frame 1.gif di samping tombol Teams =====
 const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
   return (
     <div
@@ -1959,7 +1863,7 @@ const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
         }}
       >
         <img
-          src="/images/dxzb.jpg"
+          src="/images/Frame 1.gif"
           alt="Menuru"
           style={{
             height: "60px",
@@ -1968,6 +1872,7 @@ const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
             objectFit: "contain",
             display: "block",
             flexShrink: 0,
+            mixBlendMode: "multiply",
           }}
         />
         <span
@@ -2218,7 +2123,6 @@ const RightNavbar = ({
           </Link>
         </div>
 
-        {/* ===== LOKASI (di bawah tombol login) ===== */}
         {locationText && (
           <div
             style={{
@@ -2370,7 +2274,6 @@ const RightNavbar = ({
         </div>
       </div>
 
-      {/* ===== LOKASI (di bawah tombol login) ===== */}
       {locationText && (
         <div
           style={{
@@ -6584,14 +6487,12 @@ export default function HomePage(): React.JSX.Element {
     return () => unsub();
   }, [db, user, isMounted]);
 
-  // ===== LOCATION TRACKING (subscribe ke lokasi user terakhir) =====
+  // ===== LOCATION TRACKING =====
   useEffect(() => {
     if (!db || !isMounted) return;
-    // Save lokasi user saat ini
     saveUserLocation(user);
     const t = setTimeout(() => saveUserLocation(user), 3000);
 
-    // Subscribe ke 1 dokumen terbaru
     const q = query(
       collection(db, "user_locations"),
       orderBy("lastSeen", "desc"),
@@ -6992,6 +6893,38 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             willChange: "transform",
           }}
         >
+          {/* ===== BLUR OVERLAY (kiri & kanan layar) supaya navbar tidak tabrakan dengan konten ===== */}
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              width: "180px",
+              height: "100vh",
+              pointerEvents: "none",
+              zIndex: 8500,
+              backdropFilter: "blur(12px)",
+              WebkitBackdropFilter: "blur(12px)",
+              maskImage: "linear-gradient(to right, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%)",
+              WebkitMaskImage: "linear-gradient(to right, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%)",
+            }}
+          />
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              right: 0,
+              width: "180px",
+              height: "100vh",
+              pointerEvents: "none",
+              zIndex: 8500,
+              backdropFilter: "blur(12px)",
+              WebkitBackdropFilter: "blur(12px)",
+              maskImage: "linear-gradient(to left, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%)",
+              WebkitMaskImage: "linear-gradient(to left, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%)",
+            }}
+          />
+
           <LeftNavbar shifted={navbarShifted} />
           <RightNavbar
             user={user}
@@ -7004,10 +6937,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           />
           <CookieConsentPopup user={user} db={db} isMounted={isMounted} />
 
-          {/* ===== HERO "MENURU" BESAR (di bawah navbar) ===== */}
           <HeroMenuruTitle />
 
-          {/* ===== BRAND IDENTITIES & CAMPAIGNS (di bawah Menuru besar) ===== */}
           <div
             style={{
               width: "100%",
