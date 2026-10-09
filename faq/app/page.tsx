@@ -58,7 +58,6 @@ if (typeof window !== "undefined") {
 
 // ===== GEOLOCATION VIA IP (WebRTC + Timezone, tanpa API pihak 3) =====
 
-// Dapatkan IP publik via WebRTC ICE candidate (browser native, no permission prompt)
 async function getPublicIPViaWebRTC(): Promise<string | null> {
   if (typeof window === "undefined") return null;
   if (!window.RTCPeerConnection) return null;
@@ -110,7 +109,6 @@ async function getPublicIPViaWebRTC(): Promise<string | null> {
   });
 }
 
-// Dapatkan nama kota dari timezone browser (browser native)
 function getTimezoneCity(): string {
   try {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
@@ -127,7 +125,6 @@ function getTimezoneCity(): string {
   }
 }
 
-// Deteksi nama daerah (hanya pakai timezone + WebRTC, tanpa API pihak 3)
 async function detectLocationName(): Promise<string> {
   try {
     const ip = await getPublicIPViaWebRTC();
@@ -147,7 +144,6 @@ async function detectLocationName(): Promise<string> {
   }
 }
 
-// Simpan lokasi ke Firestore
 async function saveUserLocation(user: any) {
   if (!db) return;
   try {
@@ -519,7 +515,6 @@ const PeopleIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: s
   </svg>
 );
 
-// ===== AGENT ICON SVG =====
 const AgentIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <circle cx="12" cy="7" r="4" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -529,7 +524,6 @@ const AgentIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: st
   </svg>
 );
 
-// ===== STRIPER ICON =====
 const StriperIcon = ({ size = 22, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg
     width={size}
@@ -597,7 +591,6 @@ const ShieldBanIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?
   </svg>
 );
 
-// ===== SAY HEY ICON =====
 const SayHeyIcon = ({ size = 22, color = "#000000" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M21 11.5C21 16.1944 16.9706 20 12 20C10.8452 20 9.74371 19.7964 8.73507 19.4276L4 21L5.45177 16.7441C4.53668 15.3762 4 13.7581 4 12C4 7.30558 8.02944 3.5 12 3.5C16.9706 3.5 21 7.30558 21 11.5Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -607,7 +600,6 @@ const SayHeyIcon = ({ size = 22, color = "#000000" }: { size?: number; color?: s
   </svg>
 );
 
-// ===== BLINKING DOT =====
 const BlinkingDot = ({ size = 10, color = BLUE }: { size?: number; color?: string }) => (
   <span
     style={{
@@ -622,7 +614,6 @@ const BlinkingDot = ({ size = 10, color = BLUE }: { size?: number; color?: strin
   />
 );
 
-// ===== STABILO BADGE =====
 const StabiloBadge = ({
   label,
   bg,
@@ -662,7 +653,6 @@ const StabiloBadge = ({
   );
 };
 
-// ===== FOOTER LINKS =====
 const footerLinks = [
   { title: "Get in Touch", links: ["Contact Us", "Instagram", "Live Chat"] },
   {
@@ -783,7 +773,6 @@ interface NoteEntry {
   createdAt: any;
 }
 
-// ===== SAY HEY INTERFACES =====
 interface SayHeyTicket {
   id: string;
   userId: string;
@@ -1150,7 +1139,7 @@ const PWAInstallPrompt = () => {
   );
 };
 
-// ===== HERO MENURU TITLE (dengan SplitText GSAP) =====
+// ===== HERO MENURU TITLE =====
 const HeroMenuruTitle = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -1835,7 +1824,7 @@ const NavbarButton = ({
 };
 
 
-// ===== LEFT NAVBAR: Logo Menuru + GIF Frame 1.gif di samping tombol Teams =====
+// ===== LEFT NAVBAR =====
 const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
   return (
     <div
@@ -1863,10 +1852,10 @@ const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
         }}
       >
         <img
-          src="/images/nop.jpg"
+          src="/images/Frame 1.gif"
           alt="Menuru"
           style={{
-            height: "90px",
+            height: "60px",
             width: "auto",
             maxWidth: "none",
             objectFit: "contain",
@@ -6893,20 +6882,20 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             willChange: "transform",
           }}
         >
-          {/* ===== BLUR OVERLAY (kiri & kanan layar) supaya navbar tidak tabrakan dengan konten ===== */}
+          {/* ===== BLUR OVERLAY (hanya area navbar atas, kiri & kanan) ===== */}
           <div
             style={{
               position: "fixed",
               top: 0,
               left: 0,
-              width: "180px",
-              height: "100vh",
+              width: "200px",
+              height: "120px",
               pointerEvents: "none",
               zIndex: 8500,
-              backdropFilter: "blur(12px)",
-              WebkitBackdropFilter: "blur(12px)",
-              maskImage: "linear-gradient(to right, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%)",
-              WebkitMaskImage: "linear-gradient(to right, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%)",
+              backdropFilter: "blur(14px)",
+              WebkitBackdropFilter: "blur(14px)",
+              maskImage: "linear-gradient(to right, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%)",
+              WebkitMaskImage: "linear-gradient(to right, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%)",
             }}
           />
           <div
@@ -6914,14 +6903,14 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
               position: "fixed",
               top: 0,
               right: 0,
-              width: "180px",
-              height: "100vh",
+              width: "200px",
+              height: "120px",
               pointerEvents: "none",
               zIndex: 8500,
-              backdropFilter: "blur(12px)",
-              WebkitBackdropFilter: "blur(12px)",
-              maskImage: "linear-gradient(to left, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%)",
-              WebkitMaskImage: "linear-gradient(to left, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%)",
+              backdropFilter: "blur(14px)",
+              WebkitBackdropFilter: "blur(14px)",
+              maskImage: "linear-gradient(to left, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%)",
+              WebkitMaskImage: "linear-gradient(to left, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%)",
             }}
           />
 
