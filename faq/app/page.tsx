@@ -1863,10 +1863,10 @@ const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
         }}
       >
         <img
-          src="/images/Frame 1.gif"
+          src="/video/Frame 1.gif"
           alt="Menuru"
           style={{
-            height: "60px",
+            height: "90px",
             width: "auto",
             maxWidth: "none",
             objectFit: "contain",
