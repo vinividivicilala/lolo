@@ -13,7 +13,6 @@ export async function POST(req: NextRequest) {
     }
 
     const user = await authLookup(idToken);
-
     if (!user) {
       return NextResponse.json({ error: "Token tidak valid" }, { status: 401 });
     }
