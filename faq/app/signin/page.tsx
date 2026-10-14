@@ -61,13 +61,6 @@ const HelpDeskIcon = ({ size = 24, color = BLUE }: { size?: number; color?: stri
   </svg>
 );
 
-const PeopleIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="12" cy="8" r="4" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M4 21V19C4 16.7909 5.79086 15 8 15H16C18.2091 15 20 16.7909 20 19V21" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-
 const SayHeyIcon = ({ size = 22, color = "#000000" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M21 11.5C21 16.1944 16.9706 20 12 20C10.8452 20 9.74371 19.7964 8.73507 19.4276L4 21L5.45177 16.7441C4.53668 15.3762 4 13.7581 4 12C4 7.30558 8.02944 3.5 12 3.5C16.9706 3.5 21 7.30558 21 11.5Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -1427,7 +1420,7 @@ const Preloader = ({ onComplete }: { onComplete: () => void }) => {
   );
 };
 
-// ===== PIN INPUT (6 KOLOM TERPISAH) =====
+// ===== PIN INPUT (6 KOLOM BESAR, ANGKA TERLIHAT) =====
 const PinInput = ({
   value,
   onChange,
@@ -1503,14 +1496,14 @@ const PinInput = ({
   const renderBoxes = (val: string, isConfirm: boolean) => {
     const refs = isConfirm ? confirmRefs : inputRefs;
     return (
-      <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+      <div style={{ display: "flex", gap: "16px", justifyContent: "center", flexWrap: "wrap" }}>
         {Array.from({ length: 6 }).map((_, i) => (
           <input
             key={i}
             ref={(el) => {
               refs.current[i] = el;
             }}
-            type="password"
+            type="text"
             inputMode="numeric"
             maxLength={1}
             value={val[i] || ""}
@@ -1518,23 +1511,24 @@ const PinInput = ({
             onKeyDown={(e) => handleKeyDown(i, e, isConfirm)}
             onFocus={(e) => e.target.select()}
             style={{
-              width: "56px",
-              height: "68px",
-              fontSize: "28px",
-              fontWeight: 700,
+              width: "100px",
+              height: "130px",
+              fontSize: "72px",
+              fontWeight: 800,
               textAlign: "center",
               backgroundColor: BLUE,
               color: WHITE,
               border: "none",
-              borderRadius: "12px",
+              borderRadius: "20px",
               outline: "none",
               fontFamily: FONT_FAMILY,
               caretColor: WHITE,
               transition: "all 0.2s ease",
+              padding: 0,
             }}
             onFocusCapture={(e) => {
               e.currentTarget.style.transform = "scale(1.08)";
-              e.currentTarget.style.boxShadow = `0 0 0 3px ${LIME}`;
+              e.currentTarget.style.boxShadow = `0 0 0 4px ${LIME}`;
             }}
             onBlurCapture={(e) => {
               e.currentTarget.style.transform = "scale(1)";
@@ -1551,51 +1545,57 @@ const PinInput = ({
       style={{
         display: "flex",
         flexDirection: "column",
-        gap: "20px",
+        gap: "30px",
         alignItems: "center",
         width: "100%",
       }}
     >
-      <div>
-        <label
+      <div style={{ width: "100%", textAlign: "center" }}>
+        <div
           style={{
-            fontSize: "14px",
-            color: "#666",
-            display: "block",
-            marginBottom: "10px",
+            display: "inline-block",
+            backgroundColor: BLUE,
+            color: WHITE,
+            padding: "14px 32px",
+            borderRadius: "12px",
+            fontSize: "20px",
+            fontWeight: 700,
             fontFamily: FONT_FAMILY,
-            textAlign: "center",
-            fontWeight: 600,
+            letterSpacing: "0.02em",
+            marginBottom: "24px",
           }}
         >
           {isNew ? "Buat PIN 6 Digit" : "Masukkan PIN 6 Digit"}
-        </label>
-        {renderBoxes(value, false)}
+        </div>
+        <div>{renderBoxes(value, false)}</div>
       </div>
 
       {isNew && confirmValue !== undefined && onConfirmChange && (
-        <div>
-          <label
+        <div style={{ width: "100%", textAlign: "center" }}>
+          <div
             style={{
-              fontSize: "14px",
-              color: "#666",
-              display: "block",
-              marginBottom: "10px",
+              display: "inline-block",
+              backgroundColor: BLUE,
+              color: WHITE,
+              padding: "14px 32px",
+              borderRadius: "12px",
+              fontSize: "20px",
+              fontWeight: 700,
               fontFamily: FONT_FAMILY,
-              textAlign: "center",
-              fontWeight: 600,
+              letterSpacing: "0.02em",
+              marginBottom: "24px",
             }}
           >
             Konfirmasi PIN
-          </label>
-          {renderBoxes(confirmValue, true)}
+          </div>
+          <div>{renderBoxes(confirmValue, true)}</div>
         </div>
       )}
     </div>
   );
 };
 
-// ===== TERMS AGREEMENT BOX (SEPERTI MAKALAH) =====
+// ===== TERMS AGREEMENT BOX (BG BIRU FULL, TEKS PUTIH, ROMAWI) =====
 const TermsAgreementBox = ({
   agreed,
   onToggle,
@@ -1619,20 +1619,20 @@ const TermsAgreementBox = ({
       ref={boxRef}
       style={{
         width: "100%",
-        backgroundColor: "#f8f9ff",
-        border: `2px solid ${BLUE}30`,
+        backgroundColor: BLUE,
         borderRadius: "16px",
-        padding: "28px 32px",
+        padding: "32px 36px",
         marginBottom: "24px",
         fontFamily: FONT_FAMILY,
+        color: WHITE,
       }}
     >
       <h3
         style={{
-          fontSize: "20px",
+          fontSize: "24px",
           fontWeight: 700,
-          color: BLUE,
-          margin: "0 0 16px 0",
+          color: WHITE,
+          margin: "0 0 20px 0",
           letterSpacing: "-0.01em",
           fontFamily: FONT_FAMILY,
         }}
@@ -1644,36 +1644,66 @@ const TermsAgreementBox = ({
         style={{
           fontSize: "15px",
           lineHeight: 1.8,
-          color: "#333",
+          color: WHITE,
           fontFamily: FONT_FAMILY,
           marginBottom: "20px",
         }}
       >
-        <p style={{ margin: "0 0 12px 0", textIndent: "2em" }}>
+        <p style={{ margin: "0 0 14px 0", textIndent: "2em" }}>
           Dengan melakukan sign in ke akun Menuru, Anda menyatakan telah membaca, memahami, dan
-          menyetujui seluruh Syarat &amp; Ketentuan yang berlaku. Persetujuan ini mencakup penggunaan
-          layanan secara wajar, menjaga kerahasiaan akun, serta tidak menyalahgunakan fitur yang
-          tersedia untuk aktivitas yang melanggar hukum.
+          menyetujui seluruh Syarat &amp; Ketentuan yang berlaku. Persetujuan ini mencakup
+          penggunaan layanan secara wajar, menjaga kerahasiaan akun, serta tidak menyalahgunakan
+          fitur yang tersedia untuk aktivitas yang melanggar hukum.
         </p>
-        <p style={{ margin: "0 0 12px 0", textIndent: "2em" }}>
-          Menuru berkomitmen melindungi data pribadi Anda sesuai dengan Kebijakan Privasi yang
-          berlaku. Kami menggunakan enkripsi end-to-end untuk menjaga kerahasiaan percakapan dan
-          tidak akan membagikan data Anda kepada pihak ketiga tanpa izin.
-        </p>
-        <p style={{ margin: 0, textIndent: "2em" }}>
-          Apabila Anda tidak menyetujui ketentuan ini, mohon untuk tidak melanjutkan proses sign in.
-          Dengan mencentang kotak di bawah, Anda secara sadar dan sukarela menyetujui seluruh
+
+        <div style={{ marginBottom: "14px" }}>
+          <div style={{ display: "flex", gap: "12px", marginBottom: "8px" }}>
+            <span style={{ fontWeight: 700, flexShrink: 0, minWidth: "40px" }}>I.</span>
+            <span>
+              <strong>Penggunaan Layanan.</strong> Anda setuju untuk menggunakan layanan Menuru
+              hanya untuk tujuan yang sah dan sesuai dengan ketentuan yang berlaku. Segala bentuk
+              penyalahgunaan akan dikenakan sanksi sesuai kebijakan yang berlaku.
+            </span>
+          </div>
+        </div>
+
+        <div style={{ marginBottom: "14px" }}>
+          <div style={{ display: "flex", gap: "12px", marginBottom: "8px" }}>
+            <span style={{ fontWeight: 700, flexShrink: 0, minWidth: "40px" }}>II.</span>
+            <span>
+              <strong>Privasi &amp; Keamanan Data.</strong> Menuru berkomitmen melindungi data
+              pribadi Anda sesuai dengan Kebijakan Privasi yang berlaku. Kami menggunakan enkripsi
+              end-to-end untuk menjaga kerahasiaan percakapan dan tidak akan membagikan data Anda
+              kepada pihak ketiga tanpa izin.
+            </span>
+          </div>
+        </div>
+
+        <div style={{ marginBottom: "14px" }}>
+          <div style={{ display: "flex", gap: "12px", marginBottom: "8px" }}>
+            <span style={{ fontWeight: 700, flexShrink: 0, minWidth: "40px" }}>III.</span>
+            <span>
+              <strong>Tanggung Jawab Pengguna.</strong> Anda bertanggung jawab penuh atas
+              kerahasiaan akun dan PIN Anda. Segala aktivitas yang terjadi melalui akun Anda
+              menjadi tanggung jawab Anda sepenuhnya.
+            </span>
+          </div>
+        </div>
+
+        <p style={{ margin: "0", textIndent: "2em" }}>
+          Apabila Anda tidak menyetujui ketentuan ini, mohon untuk tidak melanjutkan proses sign
+          in. Dengan mencentang kotak di bawah, Anda secara sadar dan sukarela menyetujui seluruh
           ketentuan yang tercantum pada{" "}
           <Link
             href="/terms-of-services"
-            style={{ color: BLUE, textDecoration: "underline", fontWeight: 600 }}
+            style={{ color: WHITE, textDecoration: "underline", fontWeight: 600 }}
           >
             Syarat &amp; Ketentuan
           </Link>{" "}
           dan{" "}
           <Link
             href="/privacy-policy"
-            style={{ color: BLUE, textDecoration: "underline", fontWeight: 600 }}
+            style={{ color: WHITE, textDecoration: "underline", fontWeight: 600 }}
           >
             Kebijakan Privasi
           </Link>
@@ -1689,7 +1719,7 @@ const TermsAgreementBox = ({
           cursor: "pointer",
           fontSize: "15px",
           fontWeight: 600,
-          color: BLUE,
+          color: WHITE,
           fontFamily: FONT_FAMILY,
           lineHeight: 1.5,
         }}
@@ -1703,7 +1733,7 @@ const TermsAgreementBox = ({
             height: "22px",
             marginTop: "2px",
             cursor: "pointer",
-            accentColor: BLUE,
+            accentColor: WHITE,
             flexShrink: 0,
           }}
         />
@@ -1979,29 +2009,31 @@ export default function SignInPage() {
           transition={{ duration: 0.6 }}
           style={{
             flex: isMobile ? "1" : "0 0 55%",
-            maxWidth: isMobile ? "100%" : "600px",
+            maxWidth: isMobile ? "100%" : "900px",
           }}
         >
           {!showPinScreen && !user ? (
             <>
+              {/* JUDUL SIGN IN 450px + PANAH BESAR */}
               <div
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: "20px",
-                  marginBottom: "10px",
+                  gap: "24px",
+                  marginBottom: "20px",
+                  flexWrap: "wrap",
                 }}
               >
                 <h1
                   style={{
-                    fontSize: isMobile ? "80px" : "200px",
+                    fontSize: isMobile ? "100px" : "450px",
                     fontWeight: 700,
                     color: BLUE,
-                    letterSpacing: "-0.05em",
-                    lineHeight: 1,
+                    letterSpacing: "-0.06em",
+                    lineHeight: 0.85,
                     margin: 0,
-                    wordBreak: "break-word",
                     fontFamily: FONT_FAMILY,
+                    whiteSpace: "nowrap",
                   }}
                 >
                   Sign In
@@ -2011,14 +2043,14 @@ export default function SignInPage() {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    width: isMobile ? "60px" : "120px",
-                    height: isMobile ? "60px" : "120px",
+                    width: isMobile ? "100px" : "220px",
+                    height: isMobile ? "100px" : "220px",
                     backgroundColor: BLUE,
-                    borderRadius: "20px",
+                    borderRadius: "32px",
                     flexShrink: 0,
                   }}
                 >
-                  <NorthEastArrow size={isMobile ? 40 : 80} color={WHITE} />
+                  <NorthEastArrow size={isMobile ? 60 : 140} color={WHITE} />
                 </div>
               </div>
 
@@ -2268,7 +2300,7 @@ export default function SignInPage() {
                   </div>
                 </div>
 
-                {/* KOLOM PERSETUJUAN LAYANAN (SEPERTI MAKALAH) */}
+                {/* KOLOM PERSETUJUAN LAYANAN (BG BIRU FULL, TEKS PUTIH, ROMAWI) */}
                 <TermsAgreementBox
                   agreed={agreeTerms}
                   onToggle={() => setAgreeTerms(!agreeTerms)}
@@ -2339,53 +2371,46 @@ export default function SignInPage() {
                 width: "100%",
               }}
             >
+              {/* JUDUL PIN 250px */}
               <div
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: "16px",
-                  marginBottom: "20px",
+                  gap: "24px",
+                  marginBottom: "30px",
+                  flexWrap: "wrap",
+                  justifyContent: "center",
                 }}
               >
                 <h2
                   style={{
-                    fontSize: isMobile ? "32px" : "48px",
+                    fontSize: isMobile ? "80px" : "250px",
                     fontWeight: 700,
                     color: BLUE,
                     margin: 0,
                     fontFamily: FONT_FAMILY,
-                    letterSpacing: "-0.02em",
+                    letterSpacing: "-0.05em",
+                    lineHeight: 0.85,
+                    whiteSpace: "nowrap",
                   }}
                 >
-                  {isNewPin ? "Buat PIN" : "Masukkan PIN"}
+                  {isNewPin ? "PIN" : "PIN"}
                 </h2>
                 <div
                   style={{
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    width: "60px",
-                    height: "60px",
+                    width: isMobile ? "80px" : "180px",
+                    height: isMobile ? "80px" : "180px",
                     backgroundColor: BLUE,
-                    borderRadius: "16px",
+                    borderRadius: "28px",
+                    flexShrink: 0,
                   }}
                 >
-                  <NorthEastArrow size={40} color={WHITE} />
+                  <NorthEastArrow size={isMobile ? 50 : 110} color={WHITE} />
                 </div>
               </div>
-              <p
-                style={{
-                  fontSize: "16px",
-                  color: "#666",
-                  marginBottom: "32px",
-                  fontFamily: FONT_FAMILY,
-                  textAlign: "center",
-                }}
-              >
-                {isNewPin
-                  ? "Buat PIN 6 digit untuk keamanan tambahan akun Anda"
-                  : "Masukkan PIN 6 digit akun Anda"}
-              </p>
 
               <PinInput
                 value={pin}
@@ -2415,9 +2440,9 @@ export default function SignInPage() {
                 </motion.div>
               )}
 
-              <div style={{ display: "flex", gap: "16px", marginTop: "32px" }}>
+              <div style={{ display: "flex", gap: "16px", marginTop: "40px" }}>
                 <motion.button
-                  whileHover={{ scale: 1.05 }}
+                  whileHover={{ scale: 1.05, backgroundColor: BLACK }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => {
                     setPin("");
@@ -2425,36 +2450,41 @@ export default function SignInPage() {
                     setPinError("");
                   }}
                   style={{
-                    padding: "12px 28px",
-                    backgroundColor: "transparent",
-                    color: "#666",
-                    border: "2px solid #ddd",
-                    borderRadius: "10px",
-                    fontSize: "16px",
-                    cursor: "pointer",
-                    fontFamily: FONT_FAMILY,
-                    fontWeight: 600,
-                  }}
-                >
-                  Reset
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.05, backgroundColor: BLACK }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handlePinSubmit}
-                  style={{
-                    padding: "12px 28px",
+                    padding: "14px 32px",
                     backgroundColor: BLUE,
-                    color: "#fff",
+                    color: WHITE,
                     border: "none",
-                    borderRadius: "10px",
+                    borderRadius: "12px",
                     fontSize: "16px",
                     cursor: "pointer",
                     fontFamily: FONT_FAMILY,
                     fontWeight: 700,
                     display: "flex",
                     alignItems: "center",
-                    gap: "8px",
+                    gap: "10px",
+                    transition: "background-color 0.25s ease",
+                  }}
+                >
+                  Reset
+                  <NorthEastArrow size={22} color={WHITE} />
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.05, backgroundColor: BLACK }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handlePinSubmit}
+                  style={{
+                    padding: "14px 32px",
+                    backgroundColor: BLUE,
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "12px",
+                    fontSize: "16px",
+                    cursor: "pointer",
+                    fontFamily: FONT_FAMILY,
+                    fontWeight: 700,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
                     transition: "background-color 0.25s ease",
                   }}
                 >
