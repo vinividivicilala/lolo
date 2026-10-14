@@ -30,10 +30,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 1. Sign up via Firebase Auth REST
     const authData = await authSignUp(email, password, name);
 
-    // 2. Simpan ke Firestore (create-only, tidak overwrite)
     const now = new Date().toISOString();
     await firestoreCreate(
       "users",
@@ -69,9 +67,8 @@ export async function POST(req: NextRequest) {
     const errorMap: Record<string, string> = {
       EMAIL_EXISTS: "Email sudah digunakan",
       INVALID_EMAIL: "Email tidak valid",
-      WEAK_PASSWORD: "Password terlalu lemah (min. 6 karakter)",
+      WEAK_PASSWORD: "Password minimal 6 karakter",
       OPERATION_NOT_ALLOWED: "Registrasi email/password tidak diaktifkan",
-      "Network error": "Koneksi ke Firebase gagal",
     };
 
     const code = error.message?.split(":")[0]?.trim();
