@@ -1,8 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminAuth, adminDb } from "@/lib/firebaseAdmin";
+import { getAdminAuth, getAdminDb, getFieldValue } from "@/lib/firebaseAdmin";
+
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
   try {
+    const adminAuth = getAdminAuth();
+    const adminDb = getAdminDb();
+    const FieldValue = getFieldValue();
+
     const { idToken, uid } = await req.json();
 
     if (idToken) {
@@ -18,8 +25,8 @@ export async function POST(req: NextRequest) {
             userRecord.email?.split("@")[0] ||
             "Pengguna",
           photoURL: userRecord.photoURL || null,
-          lastLogin: adminDb.FieldValue.serverTimestamp(),
-          updatedAt: adminDb.FieldValue.serverTimestamp(),
+          lastLogin: FieldValue.serverTimestamp(),
+          updatedAt: FieldValue.serverTimestamp(),
         },
         { merge: true }
       );
