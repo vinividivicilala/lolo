@@ -17,17 +17,11 @@ import gsap from "gsap";
 
 const FONT_FAMILY = "'Poppins', 'Poppins Fallback', sans-serif";
 
-// Ikon (sama seperti signup - copy dari atas)
+// ===== ICONS (sama seperti signup) =====
 const ShoppingBag = ({ size = 20 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <path d="M6 6H18L19 18H5L6 6Z" stroke="#0D3CFC" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     <path d="M9 10V6C9 4.34315 10.3431 3 12 3C13.6569 3 15 4.34315 15 6V10" stroke="#0D3CFC" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-
-const SouthEastArrow = ({ size = 24 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <path d="M7 17L17 7M17 17V7H7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
@@ -151,26 +145,32 @@ export default function SignInPage() {
     }
   };
 
+  // ===== AUTH STATE LISTENER — Sinkron dengan REST API =====
   useEffect(() => {
     if (!showMain || !auth) return;
+
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
-        const idToken = await currentUser.getIdToken();
-        const result = await apiRequest<{ user: any }>("/auth/signin", {
-          method: "POST",
-          body: JSON.stringify({ idToken }),
-        });
+        try {
+          const idToken = await currentUser.getIdToken();
+          const result = await apiRequest<{ user: any }>("/auth/signin", {
+            method: "POST",
+            body: JSON.stringify({ idToken }),
+          });
 
-        if (result.success && result.data) {
-          setTempUser(currentUser);
-          if (result.data.user.hasPin) {
-            setShowPinScreen(true);
-            setIsNewPin(false);
-          } else {
-            setShowPinScreen(true);
-            setIsNewPin(true);
+          if (result.success && result.data) {
+            setTempUser(currentUser);
+            if (result.data.user.hasPin) {
+              setShowPinScreen(true);
+              setIsNewPin(false);
+            } else {
+              setShowPinScreen(true);
+              setIsNewPin(true);
+            }
+            setUser(null);
           }
-          setUser(null);
+        } catch (error) {
+          console.error("Auth state error:", error);
         }
       } else {
         setUser(null);
@@ -181,8 +181,13 @@ export default function SignInPage() {
     return () => unsubscribe();
   }, [showMain]);
 
+  // ===== HANDLE PIN SUBMIT =====
   const handlePinSubmit = async () => {
-    if (!auth?.currentUser) return;
+    if (!auth?.currentUser) {
+      setPinError("Sesi tidak ditemukan. Silakan login ulang.");
+      return;
+    }
+
     const idToken = await auth.currentUser.getIdToken();
 
     if (isNewPin) {
@@ -196,7 +201,7 @@ export default function SignInPage() {
       });
 
       if (!result.success) { setPinError(result.error || "Gagal menyimpan PIN"); return; }
-      setUser(tempUser);
+      setUser(auth.currentUser);
       setShowPinScreen(false);
       router.push("/");
     } else {
@@ -209,7 +214,7 @@ export default function SignInPage() {
       });
 
       if (!result.success) { setPinError(result.error || "PIN salah"); return; }
-      setUser(tempUser);
+      setUser(auth.currentUser);
       setShowPinScreen(false);
       router.push("/");
     }
