@@ -1,16 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAdminAuth, getAdminDb, getFieldValue } from "@/lib/firebaseAdmin";
+import { authSignUp, firestoreSet } from "@/lib/firebaseRest";
 
-// ⚠️ WAJIB: paksa route jadi dynamic (tidak di-prerender saat build)
-export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   try {
-    const adminAuth = getAdminAuth();
-    const adminDb = getAdminDb();
-    const FieldValue = getFieldValue();
-
     const { email, password, name } = await req.json();
 
     if (!email || !password || !name) {
@@ -35,63 +30,50 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Cek email sudah ada
-    try {
-      await adminAuth.getUserByEmail(email);
-      return NextResponse.json(
-        { error: "Email sudah digunakan" },
-        { status: 400 }
-      );
-    } catch (err: any) {
-      if (err.code !== "auth/user-not-found") throw err;
-    }
+    const authData = await authSignUp(email, password, name);
 
-    // Buat user
-    const userRecord = await adminAuth.createUser({
-      email,
-      password,
-      displayName: name,
-      emailVerified: false,
-    });
-
-    // Simpan ke Firestore
-    await adminDb.collection("users").doc(userRecord.uid).set({
-      uid: userRecord.uid,
-      email: userRecord.email,
-      displayName: name,
-      name: name,
-      pin: null,
-      provider: "email",
-      createdAt: FieldValue.serverTimestamp(),
-      updatedAt: FieldValue.serverTimestamp(),
-      lastLogin: FieldValue.serverTimestamp(),
-    });
-
-    const customToken = await adminAuth.createCustomToken(userRecord.uid);
+    const now = new Date().toISOString();
+    await firestoreSet(
+      "users",
+      authData.localId,
+      {
+        uid: authData.localId,
+        email: email,
+        displayName: name,
+        name: name,
+        pin: null,
+        provider: "email",
+        createdAt: now,
+        updatedAt: now,
+        lastLogin: now,
+      },
+      authData.idToken
+    );
 
     return NextResponse.json(
       {
         success: true,
         message: "Akun berhasil dibuat",
-        uid: userRecord.uid,
-        email: userRecord.email,
+        uid: authData.localId,
+        email: email,
         displayName: name,
-        customToken,
+        idToken: authData.idToken,
       },
       { status: 201 }
     );
   } catch (error: any) {
-    console.error("Signup error:", error);
+    console.error("Signup error:", error.message);
 
     const errorMap: Record<string, string> = {
-      "auth/email-already-exists": "Email sudah digunakan",
-      "auth/invalid-email": "Email tidak valid",
-      "auth/weak-password": "Password terlalu lemah",
-      "auth/operation-not-allowed": "Registrasi tidak diizinkan",
+      EMAIL_EXISTS: "Email sudah digunakan",
+      INVALID_EMAIL: "Email tidak valid",
+      WEAK_PASSWORD: "Password terlalu lemah (min. 6 karakter)",
+      OPERATION_NOT_ALLOWED: "Registrasi email/password tidak diaktifkan",
     };
 
+    const code = error.message?.split(":")[0]?.trim();
     return NextResponse.json(
-      { error: errorMap[error.code] || error.message || "Gagal membuat akun" },
+      { error: errorMap[code] || error.message || "Gagal membuat akun" },
       { status: 400 }
     );
   }
