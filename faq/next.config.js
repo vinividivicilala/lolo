@@ -4,8 +4,8 @@ const path = require("path");
 const nextConfig = {
   reactStrictMode: true,
 
-  // ⚠️ JANGAN pakai output: "standalone" untuk Netlify
-  // ⚠️ JANGAN pakai outputFileTracingRoot
+  // ⚠️⚠️⚠️ WAJIB — INI KUNCI UNTUK FIREBASE-ADMIN ⚠️⚠️⚠️
+  serverExternalPackages: ["firebase-admin"],
 
   experimental: {
     serverActions: {
@@ -75,6 +75,12 @@ const nextConfig = {
       config.plugins.push(
         new webpack.IgnorePlugin({ resourceRegExp: /^firebase-admin$/ })
       );
+    }
+
+    // ⚠️ TAMBAHAN: pastikan firebase-admin tidak di-bundle di server
+    if (isServer) {
+      config.externals = config.externals || [];
+      config.externals.push("firebase-admin");
     }
 
     return config;
