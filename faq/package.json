@@ -68,6 +68,7 @@
         "crypto-js": "^4.2.0",
      "smooth-scrollbar": "^8.8.4",
     "firebase-admin": "^14.5.0",
+     "server-only": "^0.0.1",
         "matter-js": "^0.20.0"
      
     
