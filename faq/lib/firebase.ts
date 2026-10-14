@@ -13,14 +13,21 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
+// ⚠️ Hanya inisialisasi di client-side (browser)
+// Di server-side (SSR/build), auth & db akan undefined
 let app: FirebaseApp | undefined;
 let auth: Auth | undefined;
 let db: Firestore | undefined;
 
 if (typeof window !== "undefined") {
-  app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-  auth = getAuth(app);
-  db = getFirestore(app);
+  try {
+    app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+    auth = getAuth(app);
+    db = getFirestore(app);
+    console.log("✅ Firebase Client initialized");
+  } catch (error) {
+    console.error("❌ Firebase Client initialization error:", error);
+  }
 }
 
 export { app, auth, db };
