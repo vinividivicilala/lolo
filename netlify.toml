@@ -1,7 +1,7 @@
 [build]
   base = "faq"
   command = "npm run build"
-  publish = ".next"
+  publish = "faq/.next"
 
 [build.environment]
   NODE_VERSION = "22"
@@ -9,6 +9,35 @@
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+
+# ⚠️⚠️⚠️ KUNCI: INCLUDE firebase-admin ke dalam function bundle
+# Path relatif terhadap BASE DIRECTORY ("faq")
+[functions]
+  included_files = [
+    "faq/node_modules/firebase-admin/**",
+    "faq/node_modules/firebase-admin/**/*",
+    "faq/node_modules/@google-cloud/**",
+    "faq/node_modules/google-gax/**",
+    "faq/node_modules/google-auth-library/**",
+    "faq/node_modules/gcp-metadata/**",
+    "faq/node_modules/gtoken/**",
+    "faq/node_modules/jwa/**",
+    "faq/node_modules/jws/**",
+    "faq/node_modules/jose/**",
+    "faq/node_modules/proto3-json-serializer/**",
+    "faq/node_modules/protobufjs/**",
+    "faq/node_modules/stream-events/**",
+    "faq/node_modules/retry-request/**",
+    "faq/node_modules/teeny-request/**",
+    "faq/node_modules/node-fetch/**",
+    "faq/node_modules/functional-red-black-tree/**",
+    "faq/node_modules/duplexify/**",
+    "faq/node_modules/http-proxy-agent/**",
+    "faq/node_modules/https-proxy-agent/**",
+    "faq/node_modules/agent-base/**",
+    "faq/node_modules/debug/**",
+    "faq/node_modules/ms/**",
+  ]
 
 [[headers]]
   for = "/sw.js"
