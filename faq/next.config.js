@@ -29,10 +29,7 @@ const nextConfig = {
         headers: [
           { key: "Cache-Control", value: "public, max-age=0, must-revalidate" },
           { key: "Service-Worker-Allowed", value: "/" },
-          {
-            key: "Content-Type",
-            value: "application/javascript; charset=utf-8",
-          },
+          { key: "Content-Type", value: "application/javascript; charset=utf-8" },
         ],
       },
       {
@@ -40,10 +37,7 @@ const nextConfig = {
         headers: [
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "X-Frame-Options", value: "SAMEORIGIN" },
-          {
-            key: "Referrer-Policy",
-            value: "strict-origin-when-cross-origin",
-          },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
         ],
       },
     ];
