@@ -4,10 +4,9 @@ const path = require("path");
 const nextConfig = {
   reactStrictMode: true,
 
-  // ⚠️⚠️⚠️ WAJIB — INI KUNCI UNTUK FIREBASE-ADMIN ⚠️⚠️⚠️
-  serverExternalPackages: ["firebase-admin"],
-
   experimental: {
+    // ✅ Sintaks yang BENAR untuk Next.js 14.2.5
+    serverComponentsExternalPackages: ["firebase-admin"],
     serverActions: {
       bodySizeLimit: "2mb",
       allowedOrigins: ["*"],
@@ -75,12 +74,6 @@ const nextConfig = {
       config.plugins.push(
         new webpack.IgnorePlugin({ resourceRegExp: /^firebase-admin$/ })
       );
-    }
-
-    // ⚠️ TAMBAHAN: pastikan firebase-admin tidak di-bundle di server
-    if (isServer) {
-      config.externals = config.externals || [];
-      config.externals.push("firebase-admin");
     }
 
     return config;
