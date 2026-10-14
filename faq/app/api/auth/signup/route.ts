@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { authSignUp, firestoreSet } from "@/lib/firebaseRest";
+import { authSignUp, firestoreCreate } from "@/lib/firebaseRest";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -30,10 +30,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // 1. Sign up via Firebase Auth REST
     const authData = await authSignUp(email, password, name);
 
+    // 2. Simpan ke Firestore (create-only, tidak overwrite)
     const now = new Date().toISOString();
-    await firestoreSet(
+    await firestoreCreate(
       "users",
       authData.localId,
       {
@@ -69,6 +71,7 @@ export async function POST(req: NextRequest) {
       INVALID_EMAIL: "Email tidak valid",
       WEAK_PASSWORD: "Password terlalu lemah (min. 6 karakter)",
       OPERATION_NOT_ALLOWED: "Registrasi email/password tidak diaktifkan",
+      "Network error": "Koneksi ke Firebase gagal",
     };
 
     const code = error.message?.split(":")[0]?.trim();
