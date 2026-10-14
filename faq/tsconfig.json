@@ -1,41 +1,23 @@
 {
   "compilerOptions": {
-    /* ===== Dasar ===== */
-    "target": "es2017",
+    "target": "es5",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
     "strict": false,
-
-    /* ===== React & JSX ===== */
-    "jsx": "preserve",  // ← HAPUS tanda petik ganda di akhir
+    "noEmit": true,
+    "esModuleInterop": true,
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-
-    /* ===== Output Build ===== */
-    "noEmit": true,
+    "jsx": "preserve",
     "incremental": true,
-
-    /* ===== Typings ===== */
-    "types": ["react", "react-dom", "node"],
-
-    /* ===== Base URL ===== */
-    "baseUrl": ".",
+    "plugins": [{ "name": "next" }],
     "paths": {
       "@/*": ["./*"]
     }
   },
-
-  "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    "**/*.js",
-    "**/*.jsx"
-  ],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
   "exclude": ["node_modules"]
 }
