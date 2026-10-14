@@ -1,4 +1,4 @@
-{
+.{
   "name": "faq",
   "version": "1.0.0",
   "private": true,
@@ -67,6 +67,7 @@
     "jspdf-autotable": "^5.0.7",
         "crypto-js": "^4.2.0",
      "smooth-scrollbar": "^8.8.4",
+    "firebase-admin": "^14.5.0",
         "matter-js": "^0.20.0"
      
     
