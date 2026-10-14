@@ -1,8 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminAuth, adminDb } from "@/lib/firebaseAdmin";
+import { getAdminAuth, getAdminDb, getFieldValue } from "@/lib/firebaseAdmin";
+
+// ⚠️ WAJIB: paksa route jadi dynamic (tidak di-prerender saat build)
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
   try {
+    const adminAuth = getAdminAuth();
+    const adminDb = getAdminDb();
+    const FieldValue = getFieldValue();
+
     const { email, password, name } = await req.json();
 
     if (!email || !password || !name) {
@@ -27,6 +35,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Cek email sudah ada
     try {
       await adminAuth.getUserByEmail(email);
       return NextResponse.json(
@@ -37,6 +46,7 @@ export async function POST(req: NextRequest) {
       if (err.code !== "auth/user-not-found") throw err;
     }
 
+    // Buat user
     const userRecord = await adminAuth.createUser({
       email,
       password,
@@ -44,6 +54,7 @@ export async function POST(req: NextRequest) {
       emailVerified: false,
     });
 
+    // Simpan ke Firestore
     await adminDb.collection("users").doc(userRecord.uid).set({
       uid: userRecord.uid,
       email: userRecord.email,
@@ -51,9 +62,9 @@ export async function POST(req: NextRequest) {
       name: name,
       pin: null,
       provider: "email",
-      createdAt: adminDb.FieldValue.serverTimestamp(),
-      updatedAt: adminDb.FieldValue.serverTimestamp(),
-      lastLogin: adminDb.FieldValue.serverTimestamp(),
+      createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
+      lastLogin: FieldValue.serverTimestamp(),
     });
 
     const customToken = await adminAuth.createCustomToken(userRecord.uid);
