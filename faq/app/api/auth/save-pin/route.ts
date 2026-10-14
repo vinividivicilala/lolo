@@ -1,15 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAdminAuth, getAdminDb, getFieldValue } from "@/lib/firebaseAdmin";
+import { authLookup, firestoreSet } from "@/lib/firebaseRest";
 
-export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   try {
-    const adminAuth = getAdminAuth();
-    const adminDb = getAdminDb();
-    const FieldValue = getFieldValue();
-
     const { idToken, pin } = await req.json();
 
     if (!idToken || !pin) {
@@ -26,15 +22,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const decodedToken = await adminAuth.verifyIdToken(idToken);
-    const uid = decodedToken.uid;
+    const user = await authLookup(idToken);
+    if (!user) {
+      return NextResponse.json({ error: "Token tidak valid" }, { status: 401 });
+    }
 
-    await adminDb.collection("users").doc(uid).set(
-      {
-        pin: pin,
-        updatedAt: FieldValue.serverTimestamp(),
-      },
-      { merge: true }
+    await firestoreSet(
+      "users",
+      user.localId,
+      { pin: pin, updatedAt: new Date().toISOString() },
+      idToken
     );
 
     return NextResponse.json({
@@ -42,7 +39,7 @@ export async function POST(req: NextRequest) {
       message: "PIN berhasil disimpan",
     });
   } catch (error: any) {
-    console.error("Save PIN error:", error);
+    console.error("Save PIN error:", error.message);
     return NextResponse.json(
       { error: error.message || "Gagal menyimpan PIN" },
       { status: 401 }
