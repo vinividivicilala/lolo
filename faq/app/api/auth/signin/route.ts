@@ -1,73 +1,68 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAdminAuth, getAdminDb, getFieldValue } from "@/lib/firebaseAdmin";
+import { authLookup, firestoreGet, firestoreSet } from "@/lib/firebaseRest";
 
-export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   try {
-    const adminAuth = getAdminAuth();
-    const adminDb = getAdminDb();
-    const FieldValue = getFieldValue();
+    const { idToken } = await req.json();
 
-    const { idToken, uid } = await req.json();
+    if (!idToken) {
+      return NextResponse.json({ error: "Token diperlukan" }, { status: 401 });
+    }
 
-    if (idToken) {
-      const decodedToken = await adminAuth.verifyIdToken(idToken);
-      const userRecord = await adminAuth.getUser(decodedToken.uid);
+    const user = await authLookup(idToken);
 
-      await adminDb.collection("users").doc(userRecord.uid).set(
-        {
-          uid: userRecord.uid,
-          email: userRecord.email || "",
-          displayName:
-            userRecord.displayName ||
-            userRecord.email?.split("@")[0] ||
-            "Pengguna",
-          photoURL: userRecord.photoURL || null,
-          lastLogin: FieldValue.serverTimestamp(),
-          updatedAt: FieldValue.serverTimestamp(),
-        },
-        { merge: true }
+    if (!user) {
+      return NextResponse.json({ error: "Token tidak valid" }, { status: 401 });
+    }
+
+    const uid = user.localId;
+    const existingUser = await firestoreGet("users", uid, idToken);
+    const now = new Date().toISOString();
+
+    if (existingUser) {
+      await firestoreSet(
+        "users",
+        uid,
+        { lastLogin: now, updatedAt: now },
+        idToken
       );
-
-      const userDoc = await adminDb.collection("users").doc(userRecord.uid).get();
-      const userData = userDoc.data();
-
-      return NextResponse.json({
-        success: true,
-        user: {
-          uid: userRecord.uid,
-          email: userRecord.email,
-          displayName: userRecord.displayName,
-          photoURL: userRecord.photoURL,
-          hasPin: !!userData?.pin,
+    } else {
+      await firestoreSet(
+        "users",
+        uid,
+        {
+          uid: uid,
+          email: user.email || "",
+          displayName:
+            user.displayName || user.email?.split("@")[0] || "Pengguna",
+          photoURL: user.photoUrl || null,
+          pin: null,
+          provider: "oauth",
+          createdAt: now,
+          updatedAt: now,
+          lastLogin: now,
         },
-      });
+        idToken
+      );
     }
 
-    if (uid) {
-      const userRecord = await adminAuth.getUser(uid);
-      const userDoc = await adminDb.collection("users").doc(uid).get();
-      const userData = userDoc.data();
+    const userData = existingUser || { pin: null };
 
-      return NextResponse.json({
-        success: true,
-        user: {
-          uid: userRecord.uid,
-          email: userRecord.email,
-          displayName: userRecord.displayName,
-          hasPin: !!userData?.pin,
-        },
-      });
-    }
-
-    return NextResponse.json(
-      { error: "idToken atau uid diperlukan" },
-      { status: 400 }
-    );
+    return NextResponse.json({
+      success: true,
+      user: {
+        uid: uid,
+        email: user.email,
+        displayName: user.displayName,
+        photoURL: user.photoUrl,
+        hasPin: !!userData.pin,
+      },
+    });
   } catch (error: any) {
-    console.error("Signin error:", error);
+    console.error("Signin error:", error.message);
     return NextResponse.json(
       { error: error.message || "Verifikasi gagal" },
       { status: 401 }
