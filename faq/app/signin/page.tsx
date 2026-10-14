@@ -15,7 +15,7 @@ import { auth } from "@/lib/firebase";
 import { apiRequest } from "@/lib/apiClient";
 import gsap from "gsap";
 
-// ===== FONT (SAMA SEPERTI HALAMAN UTAMA) =====
+// ===== FONT =====
 const FONT_FAMILY = "'Plus Jakarta Sans'";
 
 // ===== WARNA =====
@@ -35,20 +35,6 @@ const NorthEastArrow = ({ size = 24, color = "currentColor" }: { size?: number; 
 const NorthWestArrow = ({ size = 24, color = "currentColor" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <path d="M17 17L7 7M7 17V7H17" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-
-const ShoppingBag = ({ size = 20, color = BLUE }: { size?: number; color?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <path d="M6 6H18L19 18H5L6 6Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M9 10V6C9 4.34315 10.3431 3 12 3C13.6569 3 15 4.34315 15 6V10" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-
-const ShieldCheck = ({ size = 24, color = BLUE }: { size?: number; color?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <path d="M12 2L3 6V12C3 16.97 6.84 21.67 12 22C17.16 21.67 21 16.97 21 12V6L12 2Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M9 12L11 14L15 10" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
@@ -138,30 +124,14 @@ const BrandIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: st
   </svg>
 );
 
-// ===== NAVBAR BUTTON (SAMA SEPERTI HALAMAN UTAMA) =====
+// ===== NAVBAR BUTTON =====
 const NavbarButton = ({
-  label,
-  panelTitle,
-  panelDescription,
-  panelImage,
-  panelRightTitle,
-  panelRightDescription,
-  iconType,
-  bigPanelWidth = 850,
-  bigPanelHeight = 260,
-  buttonColor = "#0D3CFC",
-  buttonHoverColor = "#000000",
-  panelColor = "#0D3CFC",
-  iconButtonColor = "#000000",
-  iconButtonHoverColor = "#0D3CFC",
-  panelBoxColor = "rgba(255,255,255,0.12)",
-  panelBoxBorder = "rgba(255,255,255,0.25)",
-  labelTextColor = "#ffffff",
-  labelTextHoverColor = "#ffffff",
-  titleTextColor = "#ffffff",
-  descriptionTextColor = "rgba(255,255,255,0.9)",
-  iconComponent = null,
-  isResources = false,
+  label, panelTitle, panelDescription, panelImage, panelRightTitle, panelRightDescription,
+  iconType, bigPanelWidth = 850, bigPanelHeight = 260, buttonColor = "#0D3CFC", buttonHoverColor = "#000000",
+  panelColor = "#0D3CFC", iconButtonColor = "#000000", iconButtonHoverColor = "#0D3CFC",
+  panelBoxColor = "rgba(255,255,255,0.12)", panelBoxBorder = "rgba(255,255,255,0.25)",
+  labelTextColor = "#ffffff", labelTextHoverColor = "#ffffff", titleTextColor = "#ffffff",
+  descriptionTextColor = "rgba(255,255,255,0.9)", iconComponent = null, isResources = false,
 }: any) => {
   const [open, setOpen] = useState(false);
   const linesTopRef = useRef<SVGLineElement>(null);
@@ -170,25 +140,15 @@ const NavbarButton = ({
   const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleEnter = () => {
-    if (closeTimeoutRef.current) {
-      clearTimeout(closeTimeoutRef.current);
-      closeTimeoutRef.current = null;
-    }
+    if (closeTimeoutRef.current) { clearTimeout(closeTimeoutRef.current); closeTimeoutRef.current = null; }
     setOpen(true);
   };
-
   const handleLeave = () => {
     if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
-    closeTimeoutRef.current = setTimeout(() => {
-      setOpen(false);
-    }, 250);
+    closeTimeoutRef.current = setTimeout(() => setOpen(false), 250);
   };
 
-  useEffect(() => {
-    return () => {
-      if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
-    };
-  }, []);
+  useEffect(() => () => { if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current); }, []);
 
   useEffect(() => {
     if (!linesTopRef.current || !linesBottomRef.current) return;
@@ -204,19 +164,9 @@ const NavbarButton = ({
   useEffect(() => {
     if (!panelRef.current) return;
     if (open) {
-      gsap.fromTo(
-        panelRef.current,
-        { opacity: 0, y: -20, scale: 0.96 },
-        { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: "power3.out" }
-      );
+      gsap.fromTo(panelRef.current, { opacity: 0, y: -20, scale: 0.96 }, { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: "power3.out" });
     } else {
-      gsap.to(panelRef.current, {
-        opacity: 0,
-        y: -20,
-        scale: 0.96,
-        duration: 0.25,
-        ease: "power2.in",
-      });
+      gsap.to(panelRef.current, { opacity: 0, y: -20, scale: 0.96, duration: 0.25, ease: "power2.in" });
     }
   }, [open]);
 
@@ -224,46 +174,17 @@ const NavbarButton = ({
 
   return (
     <div style={{ position: "relative" }} onMouseEnter={handleEnter} onMouseLeave={handleLeave}>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "10px",
-          padding: "10px 16px",
-          backgroundColor: open ? buttonHoverColor : buttonColor,
-          backdropFilter: "blur(20px)",
-          borderRadius: "10px",
-          border: "1px solid rgba(255,255,255,0.18)",
-          boxShadow: open ? "0 8px 24px rgba(0,0,0,0.35)" : `0 8px 24px ${buttonColor}55`,
-          transition: "background-color 0.25s ease",
-          cursor: "pointer",
-          position: "relative",
-          zIndex: 2,
-        }}
-      >
-        <span
-          style={{
-            color: open ? labelTextHoverColor : labelTextColor,
-            fontSize: "14px",
-            fontWeight: 600,
-            letterSpacing: "0.02em",
-            fontFamily: FONT_FAMILY,
-            whiteSpace: "nowrap",
-          }}
-        >
+      <div style={{
+        display: "flex", alignItems: "center", gap: "10px", padding: "10px 16px",
+        backgroundColor: open ? buttonHoverColor : buttonColor, backdropFilter: "blur(20px)",
+        borderRadius: "10px", border: "1px solid rgba(255,255,255,0.18)",
+        boxShadow: open ? "0 8px 24px rgba(0,0,0,0.35)" : `0 8px 24px ${buttonColor}55`,
+        transition: "background-color 0.25s ease", cursor: "pointer", position: "relative", zIndex: 2,
+      }}>
+        <span style={{ color: open ? labelTextHoverColor : labelTextColor, fontSize: "14px", fontWeight: 600, letterSpacing: "0.02em", fontFamily: FONT_FAMILY, whiteSpace: "nowrap" }}>
           {label}
         </span>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: "22px",
-            height: "22px",
-            backgroundColor: open ? iconButtonHoverColor : iconButtonColor,
-            borderRadius: "6px",
-          }}
-        >
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "22px", height: "22px", backgroundColor: open ? iconButtonHoverColor : iconButtonColor, borderRadius: "6px" }}>
           {iconComponent ? (
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
               <StriperIcon size={14} color={strokeColor} />
@@ -278,39 +199,21 @@ const NavbarButton = ({
       </div>
 
       {open && (
-        <div
-          ref={panelRef}
-          onMouseEnter={handleEnter}
-          onMouseLeave={handleLeave}
-          style={{
-            position: "absolute",
-            top: "calc(100% + 10px)",
-            left: "0px",
-            width: `${bigPanelWidth}px`,
-            minHeight: `${bigPanelHeight}px`,
-            backgroundColor: panelColor,
-            backdropFilter: "blur(24px)",
-            borderRadius: "10px",
-            border: "1px solid rgba(255,255,255,0.2)",
-            boxShadow: `0 8px 32px ${panelColor}55`,
-            zIndex: 1,
-            fontFamily: FONT_FAMILY,
-            color: titleTextColor,
-            padding: "22px 26px",
-            display: "flex",
-            gap: "20px",
-            alignItems: "flex-start",
-          }}
-        >
+        <div ref={panelRef} onMouseEnter={handleEnter} onMouseLeave={handleLeave} style={{
+          position: "absolute", top: "calc(100% + 10px)", left: "0px",
+          width: `${bigPanelWidth}px`, minHeight: `${bigPanelHeight}px`,
+          backgroundColor: panelColor, backdropFilter: "blur(24px)", borderRadius: "10px",
+          border: "1px solid rgba(255,255,255,0.2)", boxShadow: `0 8px 32px ${panelColor}55`,
+          zIndex: 1, fontFamily: FONT_FAMILY, color: titleTextColor, padding: "22px 26px",
+          display: "flex", gap: "20px", alignItems: "flex-start",
+        }}>
           <div style={{ flex: "1 1 0", minWidth: 0, display: "flex", flexDirection: "column", gap: "12px" }}>
             {isResources ? (
               <>
                 <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                     <DocsIcon size={22} color={titleTextColor} />
-                    <span style={{ fontSize: "16px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>
-                      Docs
-                    </span>
+                    <span style={{ fontSize: "16px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>Docs</span>
                   </div>
                   <p style={{ fontSize: "12px", lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY, maxWidth: "340px" }}>
                     Dokumentasi lengkap panduan produk, API, dan tutorial Menuru.
@@ -319,9 +222,7 @@ const NavbarButton = ({
                 <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                     <BrandIcon size={22} color={titleTextColor} />
-                    <span style={{ fontSize: "16px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>
-                      Brand
-                    </span>
+                    <span style={{ fontSize: "16px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>Brand</span>
                   </div>
                   <p style={{ fontSize: "12px", lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY, maxWidth: "340px" }}>
                     Aset visual, logo, dan panduan identitas brand Menuru.
@@ -331,18 +232,8 @@ const NavbarButton = ({
             ) : (
               <>
                 <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                  {iconComponent ? (
-                    iconComponent
-                  ) : iconType === "trust" ? (
-                    <TrustIcon size={26} color={titleTextColor} />
-                  ) : iconType === "career" ? (
-                    <CareerIcon size={26} color={titleTextColor} />
-                  ) : (
-                    <ResourcesIcon size={26} color={titleTextColor} />
-                  )}
-                  <span style={{ fontSize: "20px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>
-                    {panelTitle}
-                  </span>
+                  {iconComponent ? iconComponent : iconType === "trust" ? <TrustIcon size={26} color={titleTextColor} /> : iconType === "career" ? <CareerIcon size={26} color={titleTextColor} /> : <ResourcesIcon size={26} color={titleTextColor} />}
+                  <span style={{ fontSize: "20px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>{panelTitle}</span>
                 </div>
                 <p style={{ fontSize: "13px", lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY, maxWidth: "340px" }}>
                   {panelDescription}
@@ -353,64 +244,22 @@ const NavbarButton = ({
           <div style={{ flex: "0 0 380px", display: "flex", flexDirection: "column", gap: "12px" }}>
             {isResources ? (
               <>
-                <div
-                  style={{
-                    backgroundColor: panelBoxColor,
-                    border: `1px solid ${panelBoxBorder}`,
-                    borderRadius: "12px",
-                    padding: "12px",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "8px",
-                  }}
-                >
+                <div style={{ backgroundColor: panelBoxColor, border: `1px solid ${panelBoxBorder}`, borderRadius: "12px", padding: "12px", display: "flex", flexDirection: "column", gap: "8px" }}>
                   <img src={panelImage} alt="Docs" style={{ width: "100%", height: "120px", objectFit: "contain", display: "block", borderRadius: "8px" }} />
-                  <span style={{ fontSize: "14px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>
-                    Docs Guide
-                  </span>
-                  <p style={{ fontSize: "12px", lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY }}>
-                    Panduan lengkap dan referensi teknis.
-                  </p>
+                  <span style={{ fontSize: "14px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>Docs Guide</span>
+                  <p style={{ fontSize: "12px", lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY }}>Panduan lengkap dan referensi teknis.</p>
                 </div>
-                <div
-                  style={{
-                    backgroundColor: panelBoxColor,
-                    border: `1px solid ${panelBoxBorder}`,
-                    borderRadius: "12px",
-                    padding: "12px",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "8px",
-                  }}
-                >
+                <div style={{ backgroundColor: panelBoxColor, border: `1px solid ${panelBoxBorder}`, borderRadius: "12px", padding: "12px", display: "flex", flexDirection: "column", gap: "8px" }}>
                   <img src={panelImage} alt="Brand" style={{ width: "100%", height: "120px", objectFit: "contain", display: "block", borderRadius: "8px" }} />
-                  <span style={{ fontSize: "14px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>
-                    Brand Assets
-                  </span>
-                  <p style={{ fontSize: "12px", lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY }}>
-                    Logo, palet warna, dan identitas visual.
-                  </p>
+                  <span style={{ fontSize: "14px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>Brand Assets</span>
+                  <p style={{ fontSize: "12px", lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY }}>Logo, palet warna, dan identitas visual.</p>
                 </div>
               </>
             ) : (
-              <div
-                style={{
-                  backgroundColor: panelBoxColor,
-                  border: `1px solid ${panelBoxBorder}`,
-                  borderRadius: "12px",
-                  padding: "14px",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "10px",
-                }}
-              >
+              <div style={{ backgroundColor: panelBoxColor, border: `1px solid ${panelBoxBorder}`, borderRadius: "12px", padding: "14px", display: "flex", flexDirection: "column", gap: "10px" }}>
                 <img src={panelImage} alt={panelTitle} style={{ width: "100%", height: "170px", objectFit: "contain", display: "block", borderRadius: "10px" }} />
-                <span style={{ fontSize: "15px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>
-                  {panelRightTitle}
-                </span>
-                <p style={{ fontSize: "12px", lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY }}>
-                  {panelRightDescription}
-                </p>
+                <span style={{ fontSize: "15px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>{panelRightTitle}</span>
+                <p style={{ fontSize: "12px", lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY }}>{panelRightDescription}</p>
               </div>
             )}
           </div>
@@ -421,127 +270,29 @@ const NavbarButton = ({
 };
 
 // ===== LEFT NAVBAR =====
-const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
-  return (
-    <div
-      style={{
-        position: "fixed",
-        top: "20px",
-        left: shifted ? "340px" : "60px",
-        zIndex: 9000,
-        display: "flex",
-        alignItems: "center",
-        gap: "8px",
-        fontFamily: FONT_FAMILY,
-        transition: "left 0.6s cubic-bezier(0.65, 0, 0.35, 1)",
-        willChange: "left",
-      }}
-    >
-      <Link
-        href="/"
-        style={{
-          textDecoration: "none",
-          display: "flex",
-          alignItems: "center",
-          gap: "12px",
-          marginRight: "16px",
-        }}
-      >
-        <img
-          src="/images/nop.jpg"
-          alt="Menuru"
-          style={{
-            height: "60px",
-            width: "auto",
-            maxWidth: "none",
-            objectFit: "contain",
-            display: "block",
-            flexShrink: 0,
-            mixBlendMode: "multiply",
-          }}
-        />
-        <span
-          style={{
-            color: BLUE,
-            fontSize: "60px",
-            fontWeight: 700,
-            letterSpacing: "-0.03em",
-            fontFamily: FONT_FAMILY,
-            lineHeight: 1,
-            whiteSpace: "nowrap",
-          }}
-        >
-          Menuru
-        </span>
-      </Link>
+const LeftNavbar = ({ shifted }: { shifted: boolean }) => (
+  <div style={{
+    position: "fixed", top: "20px", left: shifted ? "340px" : "60px", zIndex: 9000,
+    display: "flex", alignItems: "center", gap: "8px", fontFamily: FONT_FAMILY,
+    transition: "left 0.6s cubic-bezier(0.65, 0, 0.35, 1)", willChange: "left",
+  }}>
+    <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "12px", marginRight: "16px" }}>
+      <img src="/images/nop.jpg" alt="Menuru" style={{ height: "60px", width: "auto", maxWidth: "none", objectFit: "contain", display: "block", flexShrink: 0, mixBlendMode: "multiply" }} />
+      <span style={{ color: BLUE, fontSize: "60px", fontWeight: 700, letterSpacing: "-0.03em", fontFamily: FONT_FAMILY, lineHeight: 1, whiteSpace: "nowrap" }}>Menuru</span>
+    </Link>
 
-      <NavbarButton
-        label="Teams"
-        panelTitle="Trust"
-        panelDescription="Keamanan dan privasi Anda adalah prioritas kami dengan enkripsi end-to-end."
-        panelImage="/images/p0l.jpg"
-        panelRightTitle="Why Trust Us"
-        panelRightDescription="Sistem kami dipantau 24/7 untuk melindungi data Anda."
-        iconType="trust"
-        bigPanelWidth={850}
-        bigPanelHeight={260}
-      />
-      <NavbarButton
-        label="Individual"
-        panelTitle="Careers"
-        panelDescription="Bergabunglah dengan tim kami dan bangun karier yang bermakna di lingkungan yang suportif."
-        panelImage="/images/xxz.jpg"
-        panelRightTitle="Life at Menuru"
-        panelRightDescription="Budaya kerja kolaboratif, fleksibel, dan penuh peluang untuk tumbuh bersama."
-        iconType="career"
-        bigPanelWidth={850}
-        bigPanelHeight={260}
-      />
-      <NavbarButton
-        label="Resources"
-        panelTitle="Docs & Brand"
-        panelDescription="Akses dokumentasi lengkap dan aset brand Menuru dalam satu tempat."
-        panelImage="/images/p0l.jpg"
-        panelRightTitle="Docs & Brand"
-        panelRightDescription="Panduan, aset visual, dan referensi resmi brand Menuru."
-        iconType="resources"
-        iconComponent={<StriperIcon size={22} color="#ffffff" />}
-        bigPanelWidth={850}
-        bigPanelHeight={340}
-        buttonColor="#0D3CFC"
-        buttonHoverColor="#0D3CFC"
-        panelColor="#000000"
-        iconButtonColor="#000000"
-        iconButtonHoverColor="#000000"
-        panelBoxColor="rgba(255,255,255,0.12)"
-        panelBoxBorder="rgba(255,255,255,0.25)"
-        labelTextColor="#ffffff"
-        labelTextHoverColor="#ffffff"
-        titleTextColor="#ffffff"
-        descriptionTextColor="rgba(255,255,255,0.92)"
-        isResources={true}
-      />
-    </div>
-  );
-};
+    <NavbarButton label="Teams" panelTitle="Trust" panelDescription="Keamanan dan privasi Anda adalah prioritas kami dengan enkripsi end-to-end." panelImage="/images/p0l.jpg" panelRightTitle="Why Trust Us" panelRightDescription="Sistem kami dipantau 24/7 untuk melindungi data Anda." iconType="trust" bigPanelWidth={850} bigPanelHeight={260} />
+    <NavbarButton label="Individual" panelTitle="Careers" panelDescription="Bergabunglah dengan tim kami dan bangun karier yang bermakna di lingkungan yang suportif." panelImage="/images/xxz.jpg" panelRightTitle="Life at Menuru" panelRightDescription="Budaya kerja kolaboratif, fleksibel, dan penuh peluang untuk tumbuh bersama." iconType="career" bigPanelWidth={850} bigPanelHeight={260} />
+    <NavbarButton label="Resources" panelTitle="Docs & Brand" panelDescription="Akses dokumentasi lengkap dan aset brand Menuru dalam satu tempat." panelImage="/images/p0l.jpg" panelRightTitle="Docs & Brand" panelRightDescription="Panduan, aset visual, dan referensi resmi brand Menuru." iconType="resources" iconComponent={<StriperIcon size={22} color="#ffffff" />} bigPanelWidth={850} bigPanelHeight={340} buttonColor="#0D3CFC" buttonHoverColor="#0D3CFC" panelColor="#000000" iconButtonColor="#000000" iconButtonHoverColor="#000000" panelBoxColor="rgba(255,255,255,0.12)" panelBoxBorder="rgba(255,255,255,0.25)" labelTextColor="#ffffff" labelTextHoverColor="#ffffff" titleTextColor="#ffffff" descriptionTextColor="rgba(255,255,255,0.92)" isResources={true} />
+  </div>
+);
 
 // ===== RIGHT NAVBAR =====
 const RightNavbar = ({
-  user,
-  auth,
-  db,
-  onSayHeyToggle,
-  sayHeyOpen,
-  sayHeyUnreadCount,
-  locationText,
+  user, auth, db, onSayHeyToggle, sayHeyOpen, sayHeyUnreadCount, locationText,
 }: {
-  user: any;
-  auth: any;
-  db: any;
-  onSayHeyToggle: () => void;
-  sayHeyOpen: boolean;
-  sayHeyUnreadCount: number;
-  locationText: string;
+  user: any; auth: any; db: any;
+  onSayHeyToggle: () => void; sayHeyOpen: boolean; sayHeyUnreadCount: number; locationText: string;
 }) => {
   const rollingRef = useRef<HTMLDivElement>(null);
   const [rollingIndex, setRollingIndex] = useState(0);
@@ -550,9 +301,7 @@ const RightNavbar = ({
 
   useEffect(() => {
     if (!user) return;
-    const interval = setInterval(() => {
-      setRollingIndex((prev) => (prev + 1) % 3);
-    }, 3000);
+    const interval = setInterval(() => setRollingIndex((prev) => (prev + 1) % 3), 3000);
     return () => clearInterval(interval);
   }, [user]);
 
@@ -560,14 +309,11 @@ const RightNavbar = ({
     if (!user || !rollingRef.current) return;
     const el = rollingRef.current;
     gsap.killTweensOf(el);
-    gsap.fromTo(
-      el,
+    gsap.fromTo(el,
       { yPercent: 100, opacity: 0, rotateX: -90, transformOrigin: "50% 100%" },
       { yPercent: 0, opacity: 1, rotateX: 0, duration: 0.6, ease: "back.out(1.7)" }
     );
-    return () => {
-      gsap.killTweensOf(el);
-    };
+    return () => { gsap.killTweensOf(el); };
   }, [rollingIndex, user]);
 
   const handleLogout = async () => {
@@ -575,78 +321,35 @@ const RightNavbar = ({
     try {
       if (db && user) {
         const { updateDoc, doc, serverTimestamp } = await import("firebase/firestore");
-        await updateDoc(doc(db, "users", user.uid), {
-          online: false,
-          lastSeen: serverTimestamp(),
-        });
+        await updateDoc(doc(db, "users", user.uid), { online: false, lastSeen: serverTimestamp() });
       }
       const { signOut } = await import("firebase/auth");
       await signOut(auth);
-    } catch (error) {
-      console.error("Logout error:", error);
-    }
+    } catch (error) { console.error("Logout error:", error); }
   };
 
   const SayHeyButton = () => (
-    <button
-      onClick={onSayHeyToggle}
-      style={{
-        position: "relative",
-        display: "inline-flex",
-        alignItems: "center",
-        gap: "10px",
-        padding: "10px 18px",
-        backgroundColor: sayHeyOpen ? BLACK : LIME,
-        borderRadius: "10px",
-        border: `1px solid ${sayHeyOpen ? BLACK : LIME}`,
-        boxShadow: sayHeyOpen ? "0 8px 24px rgba(0,0,0,0.35)" : "0 8px 24px rgba(227,251,150,0.45)",
-        cursor: "pointer",
-        transition: "all 0.2s ease",
-      }}
-      onMouseEnter={(e) => {
-        (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.05)";
-      }}
-      onMouseLeave={(e) => {
-        (e.currentTarget as HTMLButtonElement).style.transform = "scale(1)";
-      }}
+    <button onClick={onSayHeyToggle} style={{
+      position: "relative", display: "inline-flex", alignItems: "center", gap: "10px",
+      padding: "10px 18px", backgroundColor: sayHeyOpen ? BLACK : LIME, borderRadius: "10px",
+      border: `1px solid ${sayHeyOpen ? BLACK : LIME}`,
+      boxShadow: sayHeyOpen ? "0 8px 24px rgba(0,0,0,0.35)" : "0 8px 24px rgba(227,251,150,0.45)",
+      cursor: "pointer", transition: "all 0.2s ease",
+    }}
+      onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.05)"; }}
+      onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = "scale(1)"; }}
     >
       <SayHeyIcon size={18} color={sayHeyOpen ? WHITE : BLACK} />
-      <span
-        style={{
-          color: sayHeyOpen ? WHITE : BLACK,
-          fontSize: "14px",
-          fontWeight: 700,
-          letterSpacing: "0.02em",
-          fontFamily: FONT_FAMILY,
-          whiteSpace: "nowrap",
-        }}
-      >
-        Say Hey
-      </span>
+      <span style={{ color: sayHeyOpen ? WHITE : BLACK, fontSize: "14px", fontWeight: 700, letterSpacing: "0.02em", fontFamily: FONT_FAMILY, whiteSpace: "nowrap" }}>Say Hey</span>
       <NorthEastArrow size={16} color={sayHeyOpen ? WHITE : BLACK} />
-
       {sayHeyUnreadCount > 0 && !sayHeyOpen && (
-        <span
-          style={{
-            position: "absolute",
-            top: "-6px",
-            right: "-6px",
-            minWidth: "20px",
-            height: "20px",
-            padding: "0 6px",
-            borderRadius: "10px",
-            backgroundColor: BLUE,
-            color: WHITE,
-            fontSize: "11px",
-            fontWeight: 800,
-            fontFamily: FONT_FAMILY,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            border: `2px solid ${WHITE}`,
-            boxShadow: "0 2px 8px rgba(13,60,252,0.5)",
-          }}
-        >
+        <span style={{
+          position: "absolute", top: "-6px", right: "-6px", minWidth: "20px", height: "20px",
+          padding: "0 6px", borderRadius: "10px", backgroundColor: BLUE, color: WHITE,
+          fontSize: "11px", fontWeight: 800, fontFamily: FONT_FAMILY,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          border: `2px solid ${WHITE}`, boxShadow: "0 2px 8px rgba(13,60,252,0.5)",
+        }}>
           {sayHeyUnreadCount > 99 ? "99+" : sayHeyUnreadCount}
         </span>
       )}
@@ -655,204 +358,62 @@ const RightNavbar = ({
 
   if (!user) {
     return (
-      <div
-        style={{
-          position: "fixed",
-          top: "20px",
-          right: "24px",
-          zIndex: 9000,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "flex-end",
-          gap: "10px",
-          fontFamily: FONT_FAMILY,
-        }}
-      >
+      <div style={{
+        position: "fixed", top: "20px", right: "24px", zIndex: 9000,
+        display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "10px", fontFamily: FONT_FAMILY,
+      }}>
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <SayHeyButton />
-
-          <Link
-            href="/signin"
-            style={{
-              textDecoration: "none",
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "10px",
-              padding: "10px 18px 10px 16px",
-              backgroundColor: BLUE,
-              borderRadius: "10px",
-              border: `1px solid ${BLUE}`,
-              boxShadow: "0 8px 24px rgba(13,60,252,0.35)",
-              cursor: "pointer",
-              transition: "transform 0.2s ease",
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLAnchorElement).style.transform = "scale(1.05)";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLAnchorElement).style.transform = "scale(1)";
-            }}
+          <Link href="/signin" style={{
+            textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "10px",
+            padding: "10px 18px 10px 16px", backgroundColor: BLUE, borderRadius: "10px",
+            border: `1px solid ${BLUE}`, boxShadow: "0 8px 24px rgba(13,60,252,0.35)",
+            cursor: "pointer", transition: "transform 0.2s ease",
+          }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.transform = "scale(1.05)"; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.transform = "scale(1)"; }}
           >
             <PeopleIcon size={20} color="#ffffff" />
-            <span
-              style={{
-                color: "#ffffff",
-                fontSize: "14px",
-                fontWeight: 700,
-                letterSpacing: "0.02em",
-                fontFamily: FONT_FAMILY,
-                whiteSpace: "nowrap",
-              }}
-            >
-              Sign In
-            </span>
+            <span style={{ color: "#ffffff", fontSize: "14px", fontWeight: 700, letterSpacing: "0.02em", fontFamily: FONT_FAMILY, whiteSpace: "nowrap" }}>Sign In</span>
           </Link>
         </div>
-
         {locationText && (
-          <div
-            style={{
-              fontSize: "20px",
-              fontWeight: 700,
-              color: BLUE,
-              letterSpacing: "-0.02em",
-              fontFamily: FONT_FAMILY,
-              whiteSpace: "nowrap",
-              textAlign: "right",
-            }}
-          >
-            {locationText}
-          </div>
+          <div style={{ fontSize: "20px", fontWeight: 700, color: BLUE, letterSpacing: "-0.02em", fontFamily: FONT_FAMILY, whiteSpace: "nowrap", textAlign: "right" }}>{locationText}</div>
         )}
       </div>
     );
   }
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        top: "20px",
-        right: "24px",
-        zIndex: 9000,
-        fontFamily: FONT_FAMILY,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "flex-end",
-        gap: "10px",
-      }}
-    >
+    <div style={{
+      position: "fixed", top: "20px", right: "24px", zIndex: 9000, fontFamily: FONT_FAMILY,
+      display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "10px",
+    }}>
       <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
         <SayHeyButton />
-
-        <div
-          style={{
-            position: "relative",
-            height: "90px",
-            overflow: "hidden",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "flex-end",
-            minWidth: "260px",
-          }}
-        >
-          <div
-            ref={rollingRef}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "flex-end",
-              gap: "12px",
-              width: "100%",
-            }}
-          >
+        <div style={{ position: "relative", height: "90px", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "flex-end", minWidth: "260px" }}>
+          <div ref={rollingRef} style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "12px", width: "100%" }}>
             {rollingIndex === 0 && (
               <>
-                <span
-                  style={{
-                    color: BLUE,
-                    fontSize: "70px",
-                    fontWeight: 700,
-                    letterSpacing: "-0.03em",
-                    lineHeight: 1,
-                    whiteSpace: "nowrap",
-                    fontFamily: FONT_FAMILY,
-                  }}
-                >
-                  {displayName}
-                </span>
-                <div
-                  style={{
-                    width: "70px",
-                    height: "70px",
-                    borderRadius: "50%",
-                    overflow: "hidden",
-                    backgroundColor: BLUE,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    flexShrink: 0,
-                  }}
-                >
+                <span style={{ color: BLUE, fontSize: "70px", fontWeight: 700, letterSpacing: "-0.03em", lineHeight: 1, whiteSpace: "nowrap", fontFamily: FONT_FAMILY }}>{displayName}</span>
+                <div style={{ width: "70px", height: "70px", borderRadius: "50%", overflow: "hidden", backgroundColor: BLUE, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                   {photoURL ? (
-                    <img
-                      src={photoURL}
-                      alt={displayName}
-                      style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-                      referrerPolicy="no-referrer"
-                    />
+                    <img src={photoURL} alt={displayName} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} referrerPolicy="no-referrer" />
                   ) : (
-                    <span style={{ fontSize: "30px", fontWeight: 800, color: WHITE }}>
-                      {displayName.charAt(0).toUpperCase()}
-                    </span>
+                    <span style={{ fontSize: "30px", fontWeight: 800, color: WHITE }}>{displayName.charAt(0).toUpperCase()}</span>
                   )}
                 </div>
               </>
             )}
             {rollingIndex === 1 && (
-              <Link
-                href="/dashboard"
-                style={{
-                  textDecoration: "none",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "12px",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                <span
-                  style={{
-                    color: BLUE,
-                    fontSize: "70px",
-                    fontWeight: 700,
-                    letterSpacing: "-0.03em",
-                    lineHeight: 1,
-                    fontFamily: FONT_FAMILY,
-                  }}
-                >
-                  Dashboard
-                </span>
+              <Link href="/dashboard" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "12px", whiteSpace: "nowrap" }}>
+                <span style={{ color: BLUE, fontSize: "70px", fontWeight: 700, letterSpacing: "-0.03em", lineHeight: 1, fontFamily: FONT_FAMILY }}>Dashboard</span>
                 <NorthEastArrow size={50} color={BLUE} />
               </Link>
             )}
             {rollingIndex === 2 && (
-              <button
-                onClick={handleLogout}
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  padding: 0,
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "12px",
-                  whiteSpace: "nowrap",
-                  fontFamily: FONT_FAMILY,
-                }}
-              >
-                <span style={{ color: BLUE, fontSize: "70px", fontWeight: 700, letterSpacing: "-0.03em", lineHeight: 1 }}>
-                  Logout
-                </span>
+              <button onClick={handleLogout} style={{ background: "transparent", border: "none", padding: 0, cursor: "pointer", display: "flex", alignItems: "center", gap: "12px", whiteSpace: "nowrap", fontFamily: FONT_FAMILY }}>
+                <span style={{ color: BLUE, fontSize: "70px", fontWeight: 700, letterSpacing: "-0.03em", lineHeight: 1 }}>Logout</span>
                 <svg width="50" height="50" viewBox="0 0 24 24" fill="none">
                   <path d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9" stroke={BLUE} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                   <path d="M16 17L21 12L16 7" stroke={BLUE} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -863,23 +424,151 @@ const RightNavbar = ({
           </div>
         </div>
       </div>
-
       {locationText && (
-        <div
-          style={{
-            fontSize: "20px",
-            fontWeight: 700,
-            color: BLUE,
-            letterSpacing: "-0.02em",
-            fontFamily: FONT_FAMILY,
-            whiteSpace: "nowrap",
-            textAlign: "right",
-          }}
-        >
-          {locationText}
-        </div>
+        <div style={{ fontSize: "20px", fontWeight: 700, color: BLUE, letterSpacing: "-0.02em", fontFamily: FONT_FAMILY, whiteSpace: "nowrap", textAlign: "right" }}>{locationText}</div>
       )}
     </div>
+  );
+};
+
+// ===== SAY HEY SECTION (SEDERHANA UNTUK SIGN IN PAGE) =====
+const SayHeySection = ({ user, onClose }: { user: any; onClose: () => void }) => {
+  const [messageText, setMessageText] = useState("");
+  const [messages, setMessages] = useState<{ id: string; sender: string; text: string; time: string }[]>([]);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages]);
+
+  const handleSend = () => {
+    if (!messageText.trim()) return;
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+    setMessages((prev) => [...prev, { id: Date.now().toString(), sender: user?.displayName || user?.email || "You", text: messageText.trim(), time: timeStr }]);
+    setMessageText("");
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 30 }}
+      transition={{ duration: 0.5 }}
+      style={{
+        width: "100%", backgroundColor: BLUE, borderRadius: "20px", padding: "40px",
+        fontFamily: FONT_FAMILY, color: WHITE, marginBottom: "40px", minHeight: "400px",
+        position: "relative",
+      }}
+    >
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "24px", flexWrap: "wrap", gap: "16px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+          <SayHeyIcon size={40} color={WHITE} />
+          <div>
+            <h3 style={{ fontSize: "48px", fontWeight: 700, color: WHITE, margin: 0, letterSpacing: "-0.02em", fontFamily: FONT_FAMILY, lineHeight: 1.1 }}>
+              Say Hey
+            </h3>
+            <p style={{ fontSize: "16px", fontWeight: 500, color: WHITE, margin: 0, lineHeight: 1.5, opacity: 0.95, fontFamily: FONT_FAMILY }}>
+              Real-time chat with our team. Your chat is private and encrypted.
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={onClose}
+          style={{
+            padding: "10px 20px", backgroundColor: WHITE, color: BLUE,
+            border: `2px solid ${WHITE}`, borderRadius: "10px", fontSize: "14px",
+            fontWeight: 800, cursor: "pointer", fontFamily: FONT_FAMILY,
+            letterSpacing: "0.5px", textTransform: "uppercase",
+            display: "flex", alignItems: "center", gap: "8px",
+          }}
+        >
+          Close
+          <NorthEastArrow size={20} color={BLUE} />
+        </button>
+      </div>
+
+      {!user ? (
+        <div style={{ backgroundColor: "rgba(255,255,255,0.1)", borderRadius: "16px", padding: "40px", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: "16px" }}>
+          <SayHeyIcon size={64} color={WHITE} />
+          <p style={{ fontSize: "18px", fontWeight: 500, color: WHITE, margin: 0, maxWidth: "600px", lineHeight: 1.5, fontFamily: FONT_FAMILY }}>
+            Please sign in to your account to start a real-time conversation.
+          </p>
+          <Link href="/signin" style={{
+            textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "10px",
+            padding: "14px 28px", backgroundColor: WHITE, color: BLUE, borderRadius: "12px",
+            fontSize: "16px", fontWeight: 800, fontFamily: FONT_FAMILY, letterSpacing: "0.02em",
+          }}>
+            Sign In to Continue
+            <NorthEastArrow size={20} color={BLUE} />
+          </Link>
+        </div>
+      ) : (
+        <div style={{ backgroundColor: WHITE, borderRadius: "16px", overflow: "hidden", display: "flex", flexDirection: "column", height: "400px" }}>
+          <div style={{ flex: 1, overflowY: "auto", padding: "20px", display: "flex", flexDirection: "column", gap: "12px", backgroundColor: "#fafafa" }}>
+            {messages.length === 0 ? (
+              <div style={{ textAlign: "center", color: "#999", fontSize: "14px", padding: "30px 0", fontFamily: FONT_FAMILY }}>
+                No messages yet. Say hey! 👋
+              </div>
+            ) : (
+              messages.map((msg) => {
+                const isMine = msg.sender === (user?.displayName || user?.email || "You");
+                return (
+                  <div key={msg.id} style={{ alignSelf: isMine ? "flex-end" : "flex-start", maxWidth: "75%" }}>
+                    <div style={{
+                      padding: "10px 14px", borderRadius: "12px",
+                      backgroundColor: isMine ? BLUE : "#ffffff",
+                      color: isMine ? WHITE : BLACK, fontSize: "14px",
+                      fontFamily: FONT_FAMILY, wordBreak: "break-word",
+                      border: isMine ? "none" : "1px solid rgba(0,0,0,0.06)",
+                      boxShadow: isMine ? "none" : "0 2px 6px rgba(0,0,0,0.04)",
+                    }}>
+                      {!isMine && <div style={{ fontSize: "11px", fontWeight: 700, color: BLUE, marginBottom: "4px" }}>{msg.sender}</div>}
+                      <div>{msg.text}</div>
+                      <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "4px" }}>
+                        <span style={{ fontSize: "10px", color: isMine ? "rgba(255,255,255,0.85)" : "#999" }}>{msg.time}</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+          <div style={{ padding: "14px 20px", borderTop: "1px solid rgba(0,0,0,0.06)", display: "flex", gap: "10px", backgroundColor: WHITE, flexShrink: 0 }}>
+            <input
+              type="text"
+              value={messageText}
+              onChange={(e) => setMessageText(e.target.value)}
+              onKeyPress={(e) => { if (e.key === "Enter" && !e.shiftKey && messageText.trim()) { e.preventDefault(); handleSend(); } }}
+              placeholder="Type your message..."
+              style={{
+                flex: 1, padding: "12px 16px", border: `2px solid ${BLUE}`,
+                borderRadius: "10px", fontSize: "14px", outline: "none",
+                fontFamily: FONT_FAMILY, backgroundColor: BLUE, color: WHITE,
+              }}
+            />
+            <button
+              onClick={handleSend}
+              disabled={!messageText.trim()}
+              style={{
+                padding: "12px 24px", backgroundColor: messageText.trim() ? BLUE : "#ccc",
+                color: WHITE, border: "none", borderRadius: "10px",
+                cursor: messageText.trim() ? "pointer" : "not-allowed",
+                fontFamily: FONT_FAMILY, fontSize: "13px", fontWeight: 800,
+                letterSpacing: "0.5px", textTransform: "uppercase",
+                display: "flex", alignItems: "center", gap: "8px",
+              }}
+            >
+              Send
+              {messageText.trim() && <NorthEastArrow size={18} color={WHITE} />}
+            </button>
+          </div>
+        </div>
+      )}
+    </motion.div>
   );
 };
 
@@ -898,85 +587,23 @@ const FooterMenuruTitle = () => {
 
     const spans = title.querySelectorAll("span");
     const ctx = gsap.context(() => {
-      gsap.set(spans, {
-        yPercent: 120,
-        opacity: 0,
-        rotationX: -90,
-        transformOrigin: "50% 100%",
-        force3D: true,
-      });
-
+      gsap.set(spans, { yPercent: 120, opacity: 0, rotationX: -90, transformOrigin: "50% 100%", force3D: true });
       gsap.to(spans, {
-        yPercent: 0,
-        opacity: 1,
-        rotationX: 0,
-        duration: 1,
-        stagger: 0.08,
-        ease: "back.out(1.7)",
-        scrollTrigger: {
-          trigger: containerRef.current,
-          start: "top 90%",
-          end: "top 40%",
-          scrub: 1,
-          toggleActions: "play none none reverse",
-          invalidateOnRefresh: true,
-        },
+        yPercent: 0, opacity: 1, rotationX: 0, duration: 1, stagger: 0.08, ease: "back.out(1.7)",
+        scrollTrigger: { trigger: containerRef.current, start: "top 90%", end: "top 40%", scrub: 1, toggleActions: "play none none reverse", invalidateOnRefresh: true },
       });
     }, containerRef);
 
-    return () => {
-      ctx.revert();
-    };
+    return () => { ctx.revert(); };
   }, []);
 
   return (
-    <div
-      ref={containerRef}
-      style={{
-        width: "100%",
-        padding: "0 40px 20px 40px",
-        backgroundColor: "#ffffff",
-        overflow: "visible",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "flex-start",
-        position: "relative",
-      }}
-    >
-      <span
-        ref={titleRef}
-        style={{
-          fontFamily: FONT_FAMILY,
-          fontSize: "600px",
-          fontWeight: 400,
-          color: BLUE,
-          letterSpacing: "-0.05em",
-          lineHeight: "0.85",
-          display: "block",
-          textAlign: "left",
-          WebkitFontSmoothing: "antialiased",
-          MozOsxFontSmoothing: "grayscale",
-          willChange: "transform, opacity",
-          whiteSpace: "nowrap",
-          margin: 0,
-          padding: 0,
-          overflow: "visible",
-          position: "relative",
-        }}
-      >
+    <div ref={containerRef} style={{ width: "100%", padding: "0 40px 20px 40px", backgroundColor: "#ffffff", overflow: "visible", display: "flex", flexDirection: "column", justifyContent: "flex-start", position: "relative" }}>
+      <span ref={titleRef} style={{ fontFamily: FONT_FAMILY, fontSize: "600px", fontWeight: 400, color: BLUE, letterSpacing: "-0.05em", lineHeight: "0.85", display: "block", textAlign: "left", WebkitFontSmoothing: "antialiased", MozOsxFontSmoothing: "grayscale", willChange: "transform, opacity", whiteSpace: "nowrap", margin: 0, padding: 0, overflow: "visible", position: "relative" }}>
         Menuru
       </span>
       <div style={{ width: "100%", display: "flex", justifyContent: "flex-start", marginTop: "10px" }}>
-        <span
-          style={{
-            fontFamily: FONT_FAMILY,
-            fontSize: "16px",
-            fontWeight: 400,
-            color: BLUE,
-            letterSpacing: "0.01em",
-            opacity: 0.8,
-          }}
-        >
+        <span style={{ fontFamily: FONT_FAMILY, fontSize: "16px", fontWeight: 400, color: BLUE, letterSpacing: "0.01em", opacity: 0.8 }}>
           2024 - 2026 Menuru. All rights reserved.
         </span>
       </div>
@@ -987,14 +614,8 @@ const FooterMenuruTitle = () => {
 // ===== FOOTER LINKS =====
 const footerLinks = [
   { title: "Get in Touch", links: ["Contact Us", "Instagram", "Live Chat"] },
-  {
-    title: "Product",
-    links: ["Shop", "Note", "Calendar", "Blog", "Donation", "Community", "Live Chat Agent", "Stories"],
-  },
-  {
-    title: "Attention",
-    links: ["Privacy Policy", "Terms & Conditions", "About Us", "Terms of Use", "Cookies Policy", "Help Center"],
-  },
+  { title: "Product", links: ["Shop", "Note", "Calendar", "Blog", "Donation", "Community", "Live Chat Agent", "Stories"] },
+  { title: "Attention", links: ["Privacy Policy", "Terms & Conditions", "About Us", "Terms of Use", "Cookies Policy", "Help Center"] },
 ];
 
 // ===== PRELOADER =====
@@ -1013,10 +634,7 @@ const Preloader = ({ onComplete }: { onComplete: () => void }) => {
     gsap.set(textRef.current, { y: 100, opacity: 0 });
     tl.to(textRef.current, { y: 0, opacity: 1, duration: 0.8, ease: "back.out(1.7)" })
       .to(textRef.current, { duration: 0.6 })
-      .to(textRef.current, {
-        opacity: 0, y: -20, scale: 0.9, duration: 0.4,
-        onComplete: () => { if (textRef.current) textRef.current.textContent = "Note"; },
-      })
+      .to(textRef.current, { opacity: 0, y: -20, scale: 0.9, duration: 0.4, onComplete: () => { if (textRef.current) textRef.current.textContent = "Note"; } })
       .to(textRef.current, { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: "back.out(1.7)" })
       .to(textRef.current, { duration: 0.8 })
       .to(textRef.current, { scale: 0.3, opacity: 0, duration: 0.7 })
@@ -1033,6 +651,132 @@ const Preloader = ({ onComplete }: { onComplete: () => void }) => {
         <span style={{ fontSize: "100px", fontWeight: 400, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em" }}>Menuru</span>
         <span ref={textRef} style={{ fontSize: "50px", fontWeight: 600, color: BLACK, fontFamily: FONT_FAMILY, display: "inline-block" }}>Shop</span>
       </div>
+    </div>
+  );
+};
+
+// ===== PIN INPUT (6 KOLOM TERPISAH) =====
+const PinInput = ({
+  value, onChange, onComplete, isNew, confirmValue, onConfirmChange,
+}: {
+  value: string; onChange: (v: string) => void; onComplete?: () => void;
+  isNew?: boolean; confirmValue?: string; onConfirmChange?: (v: string) => void;
+}) => {
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const confirmRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  const handleChange = (index: number, val: string, isConfirm: boolean = false) => {
+    const numericVal = val.replace(/\D/g, "");
+    if (!numericVal) return;
+
+    const current = isConfirm ? (confirmValue || "") : value;
+    const newVal = current.split("");
+    newVal[index] = numericVal[numericVal.length - 1];
+    const result = newVal.join("").slice(0, 6);
+
+    if (isConfirm) {
+      onConfirmChange?.(result);
+    } else {
+      onChange(result);
+      if (result.length === 6 && onComplete) {
+        setTimeout(() => onComplete(), 200);
+      }
+    }
+
+    // Auto focus next
+    if (index < 5 && numericVal) {
+      const refs = isConfirm ? confirmRefs : inputRefs;
+      setTimeout(() => refs.current[index + 1]?.focus(), 10);
+    }
+  };
+
+  const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>, isConfirm: boolean = false) => {
+    const refs = isConfirm ? confirmRefs : inputRefs;
+    if (e.key === "Backspace") {
+      e.preventDefault();
+      const current = isConfirm ? (confirmValue || "") : value;
+      const newVal = current.split("");
+      if (newVal[index]) {
+        newVal[index] = "";
+        const result = newVal.join("");
+        if (isConfirm) onConfirmChange?.(result);
+        else onChange(result);
+      } else if (index > 0) {
+        refs.current[index - 1]?.focus();
+        const prevVal = current.split("");
+        prevVal[index - 1] = "";
+        const result = prevVal.join("");
+        if (isConfirm) onConfirmChange?.(result);
+        else onChange(result);
+      }
+    } else if (e.key === "ArrowLeft" && index > 0) {
+      refs.current[index - 1]?.focus();
+    } else if (e.key === "ArrowRight" && index < 5) {
+      refs.current[index + 1]?.focus();
+    }
+  };
+
+  const renderBoxes = (val: string, isConfirm: boolean) => {
+    const refs = isConfirm ? confirmRefs : inputRefs;
+    return (
+      <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+        {Array.from({ length: 6 }).map((_, i) => (
+          <input
+            key={i}
+            ref={(el) => { refs.current[i] = el; }}
+            type="password"
+            inputMode="numeric"
+            maxLength={1}
+            value={val[i] || ""}
+            onChange={(e) => handleChange(i, e.target.value, isConfirm)}
+            onKeyDown={(e) => handleKeyDown(i, e, isConfirm)}
+            onFocus={(e) => e.target.select()}
+            style={{
+              width: "56px",
+              height: "68px",
+              fontSize: "28px",
+              fontWeight: 700,
+              textAlign: "center",
+              backgroundColor: BLUE,
+              color: WHITE,
+              border: "none",
+              borderRadius: "12px",
+              outline: "none",
+              fontFamily: FONT_FAMILY,
+              caretColor: WHITE,
+              transition: "all 0.2s ease",
+            }}
+            onFocusCapture={(e) => {
+              e.currentTarget.style.transform = "scale(1.08)";
+              e.currentTarget.style.boxShadow = `0 0 0 3px ${LIME}`;
+            }}
+            onBlurCapture={(e) => {
+              e.currentTarget.style.transform = "scale(1)";
+              e.currentTarget.style.boxShadow = "none";
+            }}
+          />
+        ))}
+      </div>
+    );
+  };
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "20px", alignItems: "center", width: "100%" }}>
+      <div>
+        <label style={{ fontSize: "14px", color: "#666", display: "block", marginBottom: "10px", fontFamily: FONT_FAMILY, textAlign: "center", fontWeight: 600 }}>
+          {isNew ? "Buat PIN 6 Digit" : "Masukkan PIN 6 Digit"}
+        </label>
+        {renderBoxes(value, false)}
+      </div>
+
+      {isNew && confirmValue !== undefined && onConfirmChange && (
+        <div>
+          <label style={{ fontSize: "14px", color: "#666", display: "block", marginBottom: "10px", fontFamily: FONT_FAMILY, textAlign: "center", fontWeight: 600 }}>
+            Konfirmasi PIN
+          </label>
+          {renderBoxes(confirmValue, true)}
+        </div>
+      )}
     </div>
   );
 };
@@ -1075,34 +819,22 @@ export default function SignInPage() {
   // ===== AUTH STATE LISTENER =====
   useEffect(() => {
     if (!showMain || !auth) return;
-
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         try {
           const idToken = await currentUser.getIdToken();
           const result = await apiRequest<{ user: any }>("/auth/signin", {
-            method: "POST",
-            body: JSON.stringify({ idToken }),
+            method: "POST", body: JSON.stringify({ idToken }),
           });
-
           if (result.success && result.data) {
             setTempUser(currentUser);
-            if (result.data.user.hasPin) {
-              setShowPinScreen(true);
-              setIsNewPin(false);
-            } else {
-              setShowPinScreen(true);
-              setIsNewPin(true);
-            }
+            if (result.data.user.hasPin) { setShowPinScreen(true); setIsNewPin(false); }
+            else { setShowPinScreen(true); setIsNewPin(true); }
             setUser(null);
           }
-        } catch (error) {
-          console.error("Auth state error:", error);
-        }
+        } catch (error) { console.error("Auth state error:", error); }
       } else {
-        setUser(null);
-        setShowPinScreen(false);
-        setTempUser(null);
+        setUser(null); setShowPinScreen(false); setTempUser(null);
       }
     });
     return () => unsubscribe();
@@ -1110,82 +842,50 @@ export default function SignInPage() {
 
   // ===== HANDLE PIN SUBMIT =====
   const handlePinSubmit = async () => {
-    if (!auth?.currentUser) {
-      setPinError("Sesi tidak ditemukan. Silakan login ulang.");
-      return;
-    }
-
+    if (!auth?.currentUser) { setPinError("Sesi tidak ditemukan. Silakan login ulang."); return; }
     const idToken = await auth.currentUser.getIdToken();
 
     if (isNewPin) {
       if (pin.length !== 6) { setPinError("PIN harus 6 digit"); return; }
       if (pin !== pinConfirm) { setPinError("PIN tidak cocok"); return; }
       setPinError("");
-
-      const result = await apiRequest("/auth/save-pin", {
-        method: "POST",
-        body: JSON.stringify({ idToken, pin }),
-      });
-
+      const result = await apiRequest("/auth/save-pin", { method: "POST", body: JSON.stringify({ idToken, pin }) });
       if (!result.success) { setPinError(result.error || "Gagal menyimpan PIN"); return; }
-      setUser(auth.currentUser);
-      setShowPinScreen(false);
-      router.push("/");
+      setUser(auth.currentUser); setShowPinScreen(false); router.push("/");
     } else {
       if (pin.length !== 6) { setPinError("PIN harus 6 digit"); return; }
       setPinError("");
-
-      const result = await apiRequest("/auth/verify-pin", {
-        method: "POST",
-        body: JSON.stringify({ idToken, pin }),
-      });
-
+      const result = await apiRequest("/auth/verify-pin", { method: "POST", body: JSON.stringify({ idToken, pin }) });
       if (!result.success) { setPinError(result.error || "PIN salah"); return; }
-      setUser(auth.currentUser);
-      setShowPinScreen(false);
-      router.push("/");
+      setUser(auth.currentUser); setShowPinScreen(false); router.push("/");
     }
   };
 
   const handleGoogleLogin = async () => {
     if (!auth) return;
-    if (!agreeTerms) {
-      setError("Anda harus menyetujui Syarat & Ketentuan serta Kebijakan Privasi terlebih dahulu.");
-      return;
-    }
+    if (!agreeTerms) { setError("Anda harus menyetujui Syarat & Ketentuan serta Kebijakan Privasi terlebih dahulu."); return; }
     setLoading(true); setError("");
-    try {
-      await signInWithPopup(auth, new GoogleAuthProvider());
-    } catch (err: any) {
-      setError(err.message || "Login Google gagal");
-    } finally { setLoading(false); }
+    try { await signInWithPopup(auth, new GoogleAuthProvider()); }
+    catch (err: any) { setError(err.message || "Login Google gagal"); }
+    finally { setLoading(false); }
   };
 
   const handleGitHubLogin = async () => {
     if (!auth) return;
-    if (!agreeTerms) {
-      setError("Anda harus menyetujui Syarat & Ketentuan serta Kebijakan Privasi terlebih dahulu.");
-      return;
-    }
+    if (!agreeTerms) { setError("Anda harus menyetujui Syarat & Ketentuan serta Kebijakan Privasi terlebih dahulu."); return; }
     setLoading(true); setError("");
-    try {
-      await signInWithPopup(auth, new GithubAuthProvider());
-    } catch (err: any) {
-      setError(err.message || "Login GitHub gagal");
-    } finally { setLoading(false); }
+    try { await signInWithPopup(auth, new GithubAuthProvider()); }
+    catch (err: any) { setError(err.message || "Login GitHub gagal"); }
+    finally { setLoading(false); }
   };
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!auth) return;
-    if (!agreeTerms) {
-      setError("Anda harus menyetujui Syarat & Ketentuan serta Kebijakan Privasi terlebih dahulu.");
-      return;
-    }
+    if (!agreeTerms) { setError("Anda harus menyetujui Syarat & Ketentuan serta Kebijakan Privasi terlebih dahulu."); return; }
     setLoading(true); setError("");
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-    } catch (err: any) {
+    try { await signInWithEmailAndPassword(auth, email, password); }
+    catch (err: any) {
       const map: Record<string, string> = {
         "auth/invalid-email": "Email tidak valid",
         "auth/user-not-found": "Akun tidak ditemukan",
@@ -1207,12 +907,9 @@ export default function SignInPage() {
       {/* NAVBAR */}
       <LeftNavbar shifted={navbarShifted} />
       <RightNavbar
-        user={user}
-        auth={auth}
-        db={null}
+        user={user} auth={auth} db={null}
         onSayHeyToggle={() => setSayHeyOpen((prev) => !prev)}
-        sayHeyOpen={sayHeyOpen}
-        sayHeyUnreadCount={sayHeyUnreadCount}
+        sayHeyOpen={sayHeyOpen} sayHeyUnreadCount={sayHeyUnreadCount}
         locationText={locationText}
       />
 
@@ -1231,7 +928,6 @@ export default function SignInPage() {
         >
           {!showPinScreen && !user ? (
             <>
-              {/* JUDUL DENGAN PANAH BESAR */}
               <div style={{ display: "flex", alignItems: "center", gap: "20px", marginBottom: "10px" }}>
                 <h1 style={{
                   fontSize: isMobile ? "80px" : "200px", fontWeight: 700, color: BLUE,
@@ -1256,51 +952,55 @@ export default function SignInPage() {
                 </motion.div>
               )}
 
-              {/* TOMBOL SOSIAL */}
+              {/* TOMBOL SOSIAL - BIRU FULL, HOVER HIJAU */}
               <div style={{ display: "flex", flexDirection: "column", gap: "16px", marginBottom: "32px" }}>
                 <motion.button
-                  whileHover={{ scale: 1.02, backgroundColor: "#f0f4ff" }}
+                  whileHover={{ scale: 1.02, backgroundColor: GREEN }}
                   whileTap={{ scale: 0.98 }}
                   onClick={handleGoogleLogin}
                   disabled={loading}
                   style={{
-                    display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", padding: "14px 20px",
-                    border: `2px solid ${BLUE}`, borderRadius: "12px", background: "#fff",
-                    cursor: loading ? "not-allowed" : "pointer", width: "100%", fontSize: "16px", color: BLUE,
-                    fontFamily: FONT_FAMILY, fontWeight: 600, transition: "background-color 0.25s ease",
+                    display: "flex", alignItems: "center", justifyContent: "space-between",
+                    gap: "12px", padding: "14px 20px", border: "none",
+                    borderRadius: "12px", background: BLUE,
+                    cursor: loading ? "not-allowed" : "pointer", width: "100%",
+                    fontSize: "16px", color: WHITE, fontFamily: FONT_FAMILY, fontWeight: 600,
+                    transition: "background-color 0.25s ease",
                   }}
                 >
                   <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                     <svg width="24" height="24" viewBox="0 0 24 24">
-                      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                      <path fill="#ffffff" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                      <path fill="#ffffff" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                      <path fill="#ffffff" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                      <path fill="#ffffff" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                     </svg>
                     <span>Continue with Google</span>
                   </div>
-                  <NorthEastArrow size={28} color={BLUE} />
+                  <NorthEastArrow size={28} color={WHITE} />
                 </motion.button>
 
                 <motion.button
-                  whileHover={{ scale: 1.02, backgroundColor: "#f0f4ff" }}
+                  whileHover={{ scale: 1.02, backgroundColor: GREEN }}
                   whileTap={{ scale: 0.98 }}
                   onClick={handleGitHubLogin}
                   disabled={loading}
                   style={{
-                    display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", padding: "14px 20px",
-                    border: `2px solid ${BLUE}`, borderRadius: "12px", background: "#fff",
-                    cursor: loading ? "not-allowed" : "pointer", width: "100%", fontSize: "16px", color: BLUE,
-                    fontFamily: FONT_FAMILY, fontWeight: 600, transition: "background-color 0.25s ease",
+                    display: "flex", alignItems: "center", justifyContent: "space-between",
+                    gap: "12px", padding: "14px 20px", border: "none",
+                    borderRadius: "12px", background: BLUE,
+                    cursor: loading ? "not-allowed" : "pointer", width: "100%",
+                    fontSize: "16px", color: WHITE, fontFamily: FONT_FAMILY, fontWeight: 600,
+                    transition: "background-color 0.25s ease",
                   }}
                 >
                   <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                     <svg width="24" height="24" viewBox="0 0 24 24">
-                      <path fill="#333" d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
+                      <path fill="#ffffff" d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
                     </svg>
                     <span>Continue with GitHub</span>
                   </div>
-                  <NorthEastArrow size={28} color={BLUE} />
+                  <NorthEastArrow size={28} color={WHITE} />
                 </motion.button>
               </div>
 
@@ -1310,7 +1010,7 @@ export default function SignInPage() {
                 <div style={{ flex: 1, height: "1px", backgroundColor: "#e8e8e8" }} />
               </div>
 
-              {/* FORM EMAIL - INPUT BIRU TEKS PUTIH */}
+              {/* FORM EMAIL - INPUT BIRU FULL TEKS PUTIH TANPA BORDER */}
               <form onSubmit={handleEmailLogin} style={{ width: "100%" }}>
                 <input
                   type="email"
@@ -1321,7 +1021,7 @@ export default function SignInPage() {
                   style={{
                     width: "100%",
                     padding: "16px 20px",
-                    border: `2px solid ${BLUE}`,
+                    border: "none",
                     borderRadius: "12px",
                     fontSize: "16px",
                     marginBottom: "16px",
@@ -1342,7 +1042,7 @@ export default function SignInPage() {
                     style={{
                       width: "100%",
                       padding: "16px 50px 16px 20px",
-                      border: `2px solid ${BLUE}`,
+                      border: "none",
                       borderRadius: "12px",
                       fontSize: "16px",
                       outline: "none",
@@ -1355,14 +1055,9 @@ export default function SignInPage() {
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     style={{
-                      position: "absolute",
-                      right: "14px",
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      background: "none",
-                      border: "none",
-                      cursor: "pointer",
-                      color: WHITE,
+                      position: "absolute", right: "14px", top: "50%",
+                      transform: "translateY(-50%)", background: "none",
+                      border: "none", cursor: "pointer", color: WHITE,
                     }}
                   >
                     <EyeIcon open={showPassword} color={WHITE} />
@@ -1413,16 +1108,9 @@ export default function SignInPage() {
                 <button
                   onClick={() => router.push("/forgot-password")}
                   style={{
-                    background: "none",
-                    border: "none",
-                    color: BLUE,
-                    fontSize: "15px",
-                    cursor: "pointer",
-                    textDecoration: "underline",
-                    fontFamily: FONT_FAMILY,
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "6px",
+                    background: "none", border: "none", color: BLUE, fontSize: "15px",
+                    cursor: "pointer", textDecoration: "underline", fontFamily: FONT_FAMILY,
+                    display: "inline-flex", alignItems: "center", gap: "6px",
                   }}
                 >
                   <NorthWestArrow size={20} color={BLUE} />
@@ -1433,17 +1121,9 @@ export default function SignInPage() {
                   <button
                     onClick={() => router.push("/signup")}
                     style={{
-                      background: "none",
-                      border: "none",
-                      color: BLUE,
-                      fontSize: "15px",
-                      fontWeight: 500,
-                      cursor: "pointer",
-                      textDecoration: "underline",
-                      fontFamily: FONT_FAMILY,
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: "6px",
+                      background: "none", border: "none", color: BLUE, fontSize: "15px",
+                      fontWeight: 500, cursor: "pointer", textDecoration: "underline",
+                      fontFamily: FONT_FAMILY, display: "inline-flex", alignItems: "center", gap: "6px",
                     }}
                   >
                     Sign up
@@ -1463,55 +1143,77 @@ export default function SignInPage() {
           ) : (
             <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
               style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
-              <h2 style={{ fontSize: "36px", fontWeight: 600, color: BLUE, marginBottom: "8px", fontFamily: FONT_FAMILY }}>
-                {isNewPin ? "Buat PIN 6 Digit" : "Masukkan PIN"}
-              </h2>
-              <p style={{ fontSize: "18px", color: "#666", marginBottom: "32px", fontFamily: FONT_FAMILY }}>
-                {isNewPin ? "Buat PIN untuk keamanan tambahan" : "Masukkan PIN 6 digit Anda"}
+              <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "20px" }}>
+                <h2 style={{ fontSize: isMobile ? "32px" : "48px", fontWeight: 700, color: BLUE, margin: 0, fontFamily: FONT_FAMILY, letterSpacing: "-0.02em" }}>
+                  {isNewPin ? "Buat PIN" : "Masukkan PIN"}
+                </h2>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "60px", height: "60px", backgroundColor: BLUE, borderRadius: "16px" }}>
+                  <NorthEastArrow size={40} color={WHITE} />
+                </div>
+              </div>
+              <p style={{ fontSize: "16px", color: "#666", marginBottom: "32px", fontFamily: FONT_FAMILY, textAlign: "center" }}>
+                {isNewPin ? "Buat PIN 6 digit untuk keamanan tambahan akun Anda" : "Masukkan PIN 6 digit akun Anda"}
               </p>
 
-              {isNewPin ? (
-                <div style={{ display: "flex", gap: "24px", width: "100%", maxWidth: "400px", marginBottom: "16px" }}>
-                  <div style={{ flex: 1 }}>
-                    <label style={{ fontSize: "14px", color: "#666", display: "block", marginBottom: "4px", fontFamily: FONT_FAMILY }}>PIN</label>
-                    <input type="password" maxLength={6} value={pin}
-                      onChange={(e) => { const v = e.target.value.replace(/\D/g, ""); if (v.length <= 6) setPin(v); }}
-                      style={{ width: "100%", padding: "20px", fontSize: "32px", textAlign: "center", border: `2px solid ${BLUE}`, borderRadius: "12px", letterSpacing: "8px", outline: "none", backgroundColor: BLUE, color: WHITE, fontFamily: FONT_FAMILY }} />
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <label style={{ fontSize: "14px", color: "#666", display: "block", marginBottom: "4px", fontFamily: FONT_FAMILY }}>Konfirmasi</label>
-                    <input type="password" maxLength={6} value={pinConfirm}
-                      onChange={(e) => { const v = e.target.value.replace(/\D/g, ""); if (v.length <= 6) setPinConfirm(v); }}
-                      style={{ width: "100%", padding: "20px", fontSize: "32px", textAlign: "center", border: `2px solid ${BLUE}`, borderRadius: "12px", letterSpacing: "8px", outline: "none", backgroundColor: BLUE, color: WHITE, fontFamily: FONT_FAMILY }} />
-                  </div>
-                </div>
-              ) : (
-                <div style={{ width: "100%", maxWidth: "200px", marginBottom: "16px" }}>
-                  <input type="password" maxLength={6} value={pin}
-                    onChange={(e) => { const v = e.target.value.replace(/\D/g, ""); if (v.length <= 6) setPin(v); }}
-                    style={{ width: "100%", padding: "20px", fontSize: "32px", textAlign: "center", border: `2px solid ${BLUE}`, borderRadius: "12px", letterSpacing: "8px", outline: "none", backgroundColor: BLUE, color: WHITE, fontFamily: FONT_FAMILY }} />
-                </div>
+              <PinInput
+                value={pin}
+                onChange={setPin}
+                isNew={isNewPin}
+                confirmValue={isNewPin ? pinConfirm : undefined}
+                onConfirmChange={isNewPin ? setPinConfirm : undefined}
+                onComplete={() => { if (!isNewPin && pin.length === 6) handlePinSubmit(); }}
+              />
+
+              {pinError && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  style={{ color: BLUE, fontSize: "16px", marginTop: "20px", fontFamily: FONT_FAMILY, fontWeight: 600, textAlign: "center" }}
+                >
+                  {pinError}
+                </motion.div>
               )}
 
-              {pinError && <div style={{ color: BLUE, fontSize: "16px", marginBottom: "16px", fontFamily: FONT_FAMILY }}>{pinError}</div>}
-
-              <div style={{ display: "flex", gap: "16px", marginTop: "8px" }}>
-                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+              <div style={{ display: "flex", gap: "16px", marginTop: "32px" }}>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={() => { setPin(""); setPinConfirm(""); setPinError(""); }}
-                  style={{ padding: "12px 28px", backgroundColor: "transparent", color: "#666", border: "2px solid #ddd", borderRadius: "8px", fontSize: "16px", cursor: "pointer", fontFamily: FONT_FAMILY }}>
+                  style={{
+                    padding: "12px 28px", backgroundColor: "transparent", color: "#666",
+                    border: "2px solid #ddd", borderRadius: "10px", fontSize: "16px",
+                    cursor: "pointer", fontFamily: FONT_FAMILY, fontWeight: 600,
+                  }}
+                >
                   Reset
                 </motion.button>
-                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+                <motion.button
+                  whileHover={{ scale: 1.05, backgroundColor: BLACK }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={handlePinSubmit}
-                  style={{ padding: "12px 28px", backgroundColor: BLUE, color: "#fff", border: "none", borderRadius: "8px", fontSize: "16px", cursor: "pointer", fontFamily: FONT_FAMILY, display: "flex", alignItems: "center", gap: "8px" }}>
+                  style={{
+                    padding: "12px 28px", backgroundColor: BLUE, color: "#fff",
+                    border: "none", borderRadius: "10px", fontSize: "16px",
+                    cursor: "pointer", fontFamily: FONT_FAMILY, fontWeight: 700,
+                    display: "flex", alignItems: "center", gap: "8px",
+                    transition: "background-color 0.25s ease",
+                  }}
+                >
                   {isNewPin ? "Simpan PIN" : "Verifikasi"}
-                  <NorthEastArrow size={20} color={WHITE} />
+                  <NorthEastArrow size={22} color={WHITE} />
                 </motion.button>
               </div>
             </motion.div>
           )}
         </motion.div>
       </div>
+
+      {/* SAY HEY SECTION */}
+      {sayHeyOpen && (
+        <div style={{ width: "100%", padding: "0 40px", maxWidth: "1400px", margin: "0 auto 40px auto", position: "relative", zIndex: 2 }}>
+          <SayHeySection user={user} onClose={() => setSayHeyOpen(false)} />
+        </div>
+      )}
 
       {/* FOOTER */}
       <div style={{ width: "100%", padding: "60px 40px 40px 40px", backgroundColor: WHITE, borderTop: "1px solid rgba(0,0,0,0.05)", marginTop: "20px", position: "relative", overflow: "hidden" }}>
@@ -1542,9 +1244,8 @@ export default function SignInPage() {
 
                   return (
                     <Link key={linkIdx} href={linkHref} style={{ textDecoration: "none" }}>
-                      <span style={{ fontFamily: FONT_FAMILY, fontSize: "20px", fontWeight: 400, color: BLUE, letterSpacing: "-0.01em", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                      <span style={{ fontFamily: FONT_FAMILY, fontSize: "20px", fontWeight: 400, color: BLUE, letterSpacing: "-0.01em", cursor: "pointer" }}>
                         {link}
-                        <NorthEastArrow size={20} color={BLUE} />
                       </span>
                     </Link>
                   );
@@ -1570,29 +1271,19 @@ export default function SignInPage() {
           scrollbar-width: none !important;
           height: 100% !important;
         }
-        html::-webkit-scrollbar {
-          display: none !important;
-          width: 0 !important;
-          height: 0 !important;
-        }
+        html::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
         body {
           overflow: auto !important;
           -ms-overflow-style: none !important;
           scrollbar-width: none !important;
-          margin: 0;
-          padding: 0;
+          margin: 0; padding: 0;
           background-color: #ffffff !important;
           min-height: 100% !important;
           height: auto !important;
         }
-        body::-webkit-scrollbar {
-          display: none !important;
-          width: 0 !important;
-          height: 0 !important;
-        }
-        * {
-          background-color: transparent;
-        }
+        body::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
+        * { background-color: transparent; }
+        input::placeholder { color: rgba(255,255,255,0.75) !important; }
       `}</style>
     </div>
   );
