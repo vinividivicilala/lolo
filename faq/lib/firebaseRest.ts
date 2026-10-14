@@ -1,27 +1,20 @@
 // ============================================
 // Firebase REST API Helper
 // 100% compatible dengan Netlify Functions
-// Tidak butuh firebase-admin, cuma fetch()
 // ============================================
 
 const FIREBASE_API_KEY = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
 const PROJECT_ID = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
 
-// ===== VALIDASI ENV VARS =====
 function validateEnv() {
   if (!FIREBASE_API_KEY) {
-    throw new Error(
-      "NEXT_PUBLIC_FIREBASE_API_KEY tidak di-set. Cek env vars di Netlify."
-    );
+    throw new Error("NEXT_PUBLIC_FIREBASE_API_KEY tidak di-set");
   }
   if (!PROJECT_ID) {
-    throw new Error(
-      "NEXT_PUBLIC_FIREBASE_PROJECT_ID tidak di-set. Cek env vars di Netlify."
-    );
+    throw new Error("NEXT_PUBLIC_FIREBASE_PROJECT_ID tidak di-set");
   }
 }
 
-// ===== HELPER: FETCH DENGAN TIMEOUT =====
 async function fetchWithTimeout(
   url: string,
   options: RequestInit = {},
@@ -31,22 +24,17 @@ async function fetchWithTimeout(
   const id = setTimeout(() => controller.abort(), timeout);
 
   try {
-    const res = await fetch(url, {
-      ...options,
-      signal: controller.signal,
-    });
+    const res = await fetch(url, { ...options, signal: controller.signal });
     clearTimeout(id);
     return res;
   } catch (error: any) {
     clearTimeout(id);
-    if (error.name === "AbortError") {
-      throw new Error("Request timeout — server tidak merespons");
-    }
+    if (error.name === "AbortError") throw new Error("Request timeout");
     throw new Error(`Network error: ${error.message}`);
   }
 }
 
-// ===== AUTH REST API =====
+// ===== AUTH =====
 
 export async function authSignUp(
   email: string,
@@ -70,11 +58,7 @@ export async function authSignUp(
   );
 
   const data = await res.json();
-
-  if (!res.ok) {
-    const errCode = data.error?.message || "SIGNUP_FAILED";
-    throw new Error(errCode);
-  }
+  if (!res.ok) throw new Error(data.error?.message || "SIGNUP_FAILED");
 
   return data as {
     idToken: string;
@@ -82,34 +66,7 @@ export async function authSignUp(
     refreshToken: string;
     expiresIn: string;
     localId: string;
-    displayName?: string;
   };
-}
-
-export async function authSignIn(email: string, password: string) {
-  validateEnv();
-
-  const res = await fetchWithTimeout(
-    `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${FIREBASE_API_KEY}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email,
-        password,
-        returnSecureToken: true,
-      }),
-    }
-  );
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    const errCode = data.error?.message || "SIGNIN_FAILED";
-    throw new Error(errCode);
-  }
-
-  return data;
 }
 
 export async function authLookup(idToken: string) {
@@ -125,16 +82,12 @@ export async function authLookup(idToken: string) {
   );
 
   const data = await res.json();
-
-  if (!res.ok) {
-    const errCode = data.error?.message || "LOOKUP_FAILED";
-    throw new Error(errCode);
-  }
+  if (!res.ok) throw new Error(data.error?.message || "LOOKUP_FAILED");
 
   return data.users?.[0];
 }
 
-// ===== FIRESTORE REST API =====
+// ===== FIRESTORE =====
 
 export async function firestoreGet(
   collection: string,
@@ -147,22 +100,17 @@ export async function firestoreGet(
     `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/${collection}/${docId}`,
     {
       method: "GET",
-      headers: {
-        Authorization: `Bearer ${idToken}`,
-      },
+      headers: { Authorization: `Bearer ${idToken}` },
     }
   );
 
   if (res.status === 404) return null;
-
   if (!res.ok) {
     let errMsg = `Firestore get gagal (${res.status})`;
     try {
       const error = await res.json();
       errMsg = error.error?.message || errMsg;
-    } catch {
-      // ignore
-    }
+    } catch {}
     throw new Error(errMsg);
   }
 
@@ -179,10 +127,6 @@ export async function firestoreSet(
   validateEnv();
 
   const firestoreFields = firestoreEncodeFields(fields);
-
-  // ⚠️ PENTING: pakai PATCH dengan updateMask
-  // supaya hanya field yang dikirim yang di-update
-  // field lain tetap aman
   const updateMask = Object.keys(fields)
     .map((key) => `updateMask.fieldPaths=${encodeURIComponent(key)}`)
     .join("&");
@@ -204,19 +148,13 @@ export async function firestoreSet(
     try {
       const error = await res.json();
       errMsg = error.error?.message || errMsg;
-    } catch {
-      // ignore
-    }
+    } catch {}
     throw new Error(errMsg);
   }
 
   return await res.json();
 }
 
-/**
- * Create document baru (create-only, tidak overwrite)
- * Untuk signup user baru
- */
 export async function firestoreCreate(
   collection: string,
   docId: string,
@@ -244,20 +182,16 @@ export async function firestoreCreate(
     try {
       const error = await res.json();
       errMsg = error.error?.message || errMsg;
-    } catch {
-      // ignore
-    }
+    } catch {}
     throw new Error(errMsg);
   }
 
   return await res.json();
 }
 
-// ===== HELPER: ENCODE/DECODE FIRESTORE =====
+// ===== HELPER =====
 
-function firestoreEncodeFields(
-  fields: Record<string, any>
-): Record<string, any> {
+function firestoreEncodeFields(fields: Record<string, any>) {
   const result: Record<string, any> = {};
 
   for (const [key, value] of Object.entries(fields)) {
@@ -277,9 +211,7 @@ function firestoreEncodeFields(
       result[key] = { timestampValue: value.toISOString() };
     } else if (Array.isArray(value)) {
       result[key] = {
-        arrayValue: {
-          values: value.map((v) => firestoreEncodeFields({ v }).v),
-        },
+        arrayValue: { values: value.map((v) => firestoreEncodeFields({ v }).v) },
       };
     } else if (typeof value === "object") {
       result[key] = {
@@ -293,13 +225,10 @@ function firestoreEncodeFields(
 
 function firestoreParseDocument(doc: any): Record<string, any> | null {
   if (!doc || !doc.fields) return null;
-
   const result: Record<string, any> = {};
-
-  for (const [key, value] of Object.entries(doc.fields as Record<string, any>)) {
+  for (const [key, value] of Object.entries(doc.fields)) {
     result[key] = firestoreDecodeValue(value);
   }
-
   return result;
 }
 
