@@ -1,8 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminAuth, adminDb } from "@/lib/firebaseAdmin";
+import { getAdminAuth, getAdminDb, getFieldValue } from "@/lib/firebaseAdmin";
+
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
   try {
+    const adminAuth = getAdminAuth();
+    const adminDb = getAdminDb();
+    const FieldValue = getFieldValue();
+
     const { idToken, pin } = await req.json();
 
     if (!idToken || !pin) {
@@ -37,7 +44,7 @@ export async function POST(req: NextRequest) {
     }
 
     await adminDb.collection("users").doc(uid).update({
-      lastLogin: adminDb.FieldValue.serverTimestamp(),
+      lastLogin: FieldValue.serverTimestamp(),
     });
 
     return NextResponse.json({
