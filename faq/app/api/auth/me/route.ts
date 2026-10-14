@@ -1,8 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminAuth, adminDb } from "@/lib/firebaseAdmin";
+import { getAdminAuth, getAdminDb } from "@/lib/firebaseAdmin";
+
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
   try {
+    const adminAuth = getAdminAuth();
+    const adminDb = getAdminDb();
+
     const { idToken } = await req.json();
 
     if (!idToken) {
