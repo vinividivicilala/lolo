@@ -4,6 +4,12 @@ const path = require("path");
 const nextConfig = {
   reactStrictMode: true,
 
+  // ⚠️ WAJIB UNTUK NETLIFY: bikin serverless functions
+  output: "standalone",
+
+  // ⚠️ WAJIB: karena project di subfolder faq/
+  outputFileTracingRoot: path.join(__dirname, "../"),
+
   experimental: {
     serverActions: {
       bodySizeLimit: "2mb",
