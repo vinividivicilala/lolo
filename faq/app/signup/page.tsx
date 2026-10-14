@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { signInWithCustomToken } from "firebase/auth";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { apiRequest } from "@/lib/apiClient";
 import gsap from "gsap";
@@ -42,13 +42,13 @@ const EyeIcon = ({ open }: { open: boolean }) => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
     {open ? (
       <>
-        <path d="M1 12C1 12 5 4 12 4C19 4 23 12 23 12C23 12 19 20 12 20C5 20 1 12 1 12Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M1 12C1 12 5 4 12 4C19 4 23 12 23 12C23 12 19 20 12 20C5 20 1 12 1 12Z" stroke="currentColor" strokeWidth="1.5" />
         <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.5" />
       </>
     ) : (
       <>
-        <path d="M1 12C1 12 5 4 12 4C19 4 23 12 23 12C23 12 19 20 12 20C5 20 1 12 1 12Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M3 3L21 21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M1 12C1 12 5 4 12 4C19 4 23 12 23 12C23 12 19 20 12 20C5 20 1 12 1 12Z" stroke="currentColor" strokeWidth="1.5" />
+        <path d="M3 3L21 21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
       </>
     )}
   </svg>
@@ -59,7 +59,6 @@ const HelpDeskIcon = ({ size = 24 }: { size?: number }) => (
     <path d="M3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12V15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
     <path d="M5 15C5 13.8954 5.89543 13 7 13H8C9.10457 13 10 13.8954 10 15V17C10 18.1046 9.10457 19 8 19H7C5.89543 19 5 18.1046 5 17V15Z" stroke="currentColor" strokeWidth="1.5" />
     <path d="M19 15C19 13.8954 18.1046 13 17 13H16C14.8954 13 14 13.8954 14 15V17C14 18.1046 14.8954 19 16 19H17C18.1046 19 19 18.1046 19 17V15Z" stroke="currentColor" strokeWidth="1.5" />
-    <path d="M8 13V11C8 8.79086 9.79086 7 12 7C14.2091 7 16 8.79086 16 11V13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
   </svg>
 );
 
@@ -72,25 +71,21 @@ const Preloader = ({ onComplete }: { onComplete: () => void }) => {
     const tl = gsap.timeline({
       onComplete: () => {
         if (preloaderRef.current) {
-          gsap.to(preloaderRef.current, {
-            opacity: 0, duration: 0.6, ease: "power2.inOut", onComplete,
-          });
+          gsap.to(preloaderRef.current, { opacity: 0, duration: 0.6, onComplete });
         }
       },
     });
-
     gsap.set(textRef.current, { y: 100, opacity: 0 });
-
     tl.to(textRef.current, { y: 0, opacity: 1, duration: 0.8, ease: "back.out(1.7)" })
       .to(textRef.current, { duration: 0.6 })
       .to(textRef.current, {
-        opacity: 0, y: -20, scale: 0.9, duration: 0.4, ease: "power2.out",
+        opacity: 0, y: -20, scale: 0.9, duration: 0.4,
         onComplete: () => { if (textRef.current) textRef.current.textContent = "Note"; },
       })
       .to(textRef.current, { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: "back.out(1.7)" })
       .to(textRef.current, { duration: 0.8 })
-      .to(textRef.current, { scale: 0.3, opacity: 0, duration: 0.7, ease: "power2.in" })
-      .to(preloaderRef.current, { scale: 0.95, opacity: 0.8, duration: 0.3, ease: "power2.inOut" }, "-=0.3");
+      .to(textRef.current, { scale: 0.3, opacity: 0, duration: 0.7 })
+      .to(preloaderRef.current, { scale: 0.95, opacity: 0.8, duration: 0.3 }, "-=0.3");
   }, [onComplete]);
 
   return (
@@ -99,12 +94,9 @@ const Preloader = ({ onComplete }: { onComplete: () => void }) => {
       backgroundColor: "#ffffff", display: "flex", alignItems: "center",
       justifyContent: "center", zIndex: 9999, fontFamily: FONT_FAMILY,
     }}>
-      <div style={{ display: "flex", alignItems: "center", gap: "40px", overflow: "hidden" }}>
-        <span style={{ fontSize: "100px", fontWeight: 700, color: "#0D3CFC", letterSpacing: "-0.03em" }}>Menuru</span>
-        <span ref={textRef} style={{
-          fontSize: "50px", fontWeight: 600, color: "#000000", letterSpacing: "-0.02em",
-          display: "inline-block", willChange: "transform, opacity",
-        }}>Shop</span>
+      <div style={{ display: "flex", alignItems: "center", gap: "40px" }}>
+        <span style={{ fontSize: "100px", fontWeight: 700, color: "#0D3CFC" }}>Menuru</span>
+        <span ref={textRef} style={{ fontSize: "50px", fontWeight: 600, color: "#000000", display: "inline-block" }}>Shop</span>
       </div>
     </div>
   );
@@ -145,7 +137,7 @@ export default function SignUpPage() {
     if (!isMenuOpen) {
       setIsMenuOpen(true);
       if (menuOverlayRef.current) {
-        gsap.fromTo(menuOverlayRef.current, { y: "-100%", opacity: 0 }, { y: "0%", opacity: 1, duration: 0.6, ease: "power2.out" });
+        gsap.fromTo(menuOverlayRef.current, { y: "-100%", opacity: 0 }, { y: "0%", opacity: 1, duration: 0.6 });
       }
       if (plusIconRef.current) gsap.to(plusIconRef.current, { rotation: 45, duration: 0.4 });
     } else {
@@ -165,50 +157,81 @@ export default function SignUpPage() {
     }
   };
 
+  // ===== HANDLE SIGN UP — REST API + Client SDK Login =====
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!agreed) { setError("Anda harus menyetujui Pernyataan Persetujuan"); return; }
     setIsLoading(true);
     setError("");
 
-    const result = await apiRequest<{ uid: string; customToken: string }>("/auth/signup", {
-      method: "POST",
-      body: JSON.stringify({ email: formData.email, password: formData.password, name: formData.name }),
-    });
-
-    if (!result.success) {
-      setError(result.error || "Gagal membuat akun");
-      setIsLoading(false);
-      return;
-    }
-
     try {
-      if (auth && result.data?.customToken) {
-        await signInWithCustomToken(auth, result.data.customToken);
+      // 1. Signup via REST API
+      const result = await apiRequest<{ uid: string; idToken: string }>(
+        "/auth/signup",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            email: formData.email,
+            password: formData.password,
+            name: formData.name,
+          }),
+        }
+      );
+
+      if (!result.success) {
+        setError(result.error || "Gagal membuat akun");
+        setIsLoading(false);
+        return;
       }
+
+      // 2. Login ke Firebase Client untuk set session
+      if (auth) {
+        try {
+          await signInWithEmailAndPassword(auth, formData.email, formData.password);
+          console.log("✅ Auto-login berhasil, uid:", auth.currentUser?.uid);
+        } catch (loginErr: any) {
+          console.warn("Auto-login gagal, user perlu login manual:", loginErr.message);
+        }
+      }
+
+      // 3. Tampilkan PIN screen
       setShowPinScreen(true);
-    } catch {
-      setError("Akun dibuat, tapi gagal login otomatis.");
+    } catch (error: any) {
+      console.error("Signup error:", error);
+      setError(error.message || "Gagal membuat akun");
     } finally {
       setIsLoading(false);
     }
   };
 
+  // ===== HANDLE PIN SUBMIT =====
   const handlePinSubmit = async () => {
     if (pin.length !== 6) { setPinError("PIN harus 6 digit"); return; }
     if (pin !== pinConfirm) { setPinError("PIN tidak cocok"); return; }
     setPinError("");
 
-    if (!auth?.currentUser) { setPinError("Sesi tidak ditemukan"); return; }
-    const idToken = await auth.currentUser.getIdToken();
+    if (!auth?.currentUser) {
+      setPinError("Sesi tidak ditemukan. Silakan login ulang.");
+      return;
+    }
 
-    const result = await apiRequest("/auth/save-pin", {
-      method: "POST",
-      body: JSON.stringify({ idToken, pin }),
-    });
+    try {
+      const idToken = await auth.currentUser.getIdToken();
 
-    if (!result.success) { setPinError(result.error || "Gagal menyimpan PIN"); return; }
-    router.push("/");
+      const result = await apiRequest("/auth/save-pin", {
+        method: "POST",
+        body: JSON.stringify({ idToken, pin }),
+      });
+
+      if (!result.success) {
+        setPinError(result.error || "Gagal menyimpan PIN");
+        return;
+      }
+
+      router.push("/");
+    } catch (error: any) {
+      setPinError(error.message || "Gagal menyimpan PIN");
+    }
   };
 
   if (!isMounted || !showMain) return <Preloader onComplete={handlePreloaderComplete} />;
@@ -253,21 +276,12 @@ export default function SignUpPage() {
               <ShieldCheck size={28} />
               <span style={{ fontSize: "30px", fontWeight: 500, color: "#0D3CFC", lineHeight: 1 }}>Anti-Bot</span>
             </div>
-            <Link href="/contact" style={{
-              display: "inline-flex", alignItems: "center", gap: "8px",
-              border: "2px solid #0D3CFC", borderRadius: "8px", padding: "8px 16px",
-            }}>
-              <span style={{ fontSize: "16px", fontWeight: 500, color: "#0D3CFC" }}>Get in touch</span>
-              <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", backgroundColor: "#0D3CFC", borderRadius: "4px", padding: "4px", color: "#ffffff" }}>
-                <SouthEastArrow size={24} />
-              </div>
-            </Link>
             <Link href="/pusat-bantuan" style={{
               display: "inline-flex", alignItems: "center", gap: "8px",
               border: "2px solid #000000", borderRadius: "8px", padding: "8px 16px",
             }}>
               <span style={{ fontSize: "16px", fontWeight: 500, color: "#000000" }}>Pusat Bantuan</span>
-              <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", backgroundColor: "#000000", borderRadius: "4px", padding: "4px", color: "#ffffff" }}>
+              <div style={{ background: "#000000", borderRadius: "4px", padding: "4px", color: "#fff" }}>
                 <NorthWestArrow size={24} />
               </div>
             </Link>
@@ -275,7 +289,7 @@ export default function SignUpPage() {
               display: "inline-flex", alignItems: "center", gap: "8px",
               border: "2px solid #000000", borderRadius: "8px", padding: "8px 16px", cursor: "pointer",
             }}>
-              <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", backgroundColor: "#000000", borderRadius: "4px", padding: "4px", color: "#ffffff" }}>
+              <div style={{ background: "#000000", borderRadius: "4px", padding: "4px", color: "#fff" }}>
                 <span ref={plusIconRef} style={{ fontSize: "24px", lineHeight: 1, display: "inline-block" }}>
                   {isMenuOpen ? "✕" : "+"}
                 </span>
@@ -288,14 +302,13 @@ export default function SignUpPage() {
         </div>
       </div>
 
-      {/* MENU OVERLAY */}
       <div ref={menuOverlayRef} style={{
         position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
         backgroundColor: "#0D3CFC", zIndex: 100,
-        display: isMenuOpen ? "flex" : "none", flexDirection: "column",
+        display: isMenuOpen ? "flex" : "none",
         transform: "translateY(-100%)", opacity: 0, padding: "40px",
       }}>
-        <h1 style={{ fontSize: "48px", fontWeight: 700, color: "#ffffff", position: "absolute", top: "40px", left: "40px", margin: 0 }}>
+        <h1 style={{ fontSize: "48px", fontWeight: 700, color: "#ffffff", margin: 0, position: "absolute", top: "40px", left: "40px" }}>
           Menuru
         </h1>
       </div>
@@ -305,8 +318,7 @@ export default function SignUpPage() {
         marginTop: "180px", padding: "0 40px 80px", width: "100%", maxWidth: "1400px",
         marginLeft: "auto", marginRight: "auto",
         display: "flex", flexDirection: isMobile ? "column" : "row",
-        gap: isMobile ? "40px" : "80px",
-        justifyContent: "center", minHeight: "calc(100vh - 260px)",
+        gap: isMobile ? "40px" : "80px", justifyContent: "center", minHeight: "calc(100vh - 260px)",
       }}>
         <motion.div
           initial={{ opacity: 0, x: -30 }}
