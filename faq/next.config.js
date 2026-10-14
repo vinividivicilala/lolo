@@ -4,11 +4,8 @@ const path = require("path");
 const nextConfig = {
   reactStrictMode: true,
 
-  // ⚠️ WAJIB UNTUK NETLIFY: bikin serverless functions
-  output: "standalone",
-
-  // ⚠️ WAJIB: karena project di subfolder faq/
-  outputFileTracingRoot: path.join(__dirname, "../"),
+  // ⚠️ JANGAN pakai output: "standalone" untuk Netlify
+  // ⚠️ JANGAN pakai outputFileTracingRoot
 
   experimental: {
     serverActions: {
