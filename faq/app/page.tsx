@@ -57,7 +57,6 @@ if (typeof window !== "undefined") {
 }
 
 // ===== GEOLOCATION VIA IP (WebRTC + Timezone, tanpa API pihak 3) =====
-
 async function getPublicIPViaWebRTC(): Promise<string | null> {
   if (typeof window === "undefined") return null;
   if (!window.RTCPeerConnection) return null;
@@ -334,6 +333,20 @@ function containsBannedContent(text: string): { isBanned: boolean; reason: strin
     if (pattern.test(lowerText)) return { isBanned: true, reason: "Transfer/Payment Request" };
   }
   return { isBanned: false, reason: "" };
+}
+
+// ===== DETEKSI KENDALA (untuk tag Admin otomatis) =====
+const KENDALA_KEYWORDS = [
+  "kendala", "masalah", "error", "bug", "tidak bisa", "gagal", "rusak",
+  "bermasalah", "terkendala", "help", "tolong", "bantuan", "issue",
+  "crash", "not working", "tidak berfungsi", "stuck", "macet", "lemot",
+  "lambat", "susah", "sulit", "bingung", "tidak jelas", "tidak paham",
+  "butuh bantuan", "mohon bantuan", "problem", "trouble", "fail", "failed",
+];
+
+function containsKendala(text: string): boolean {
+  const lowerText = text.toLowerCase();
+  return KENDALA_KEYWORDS.some((keyword) => lowerText.includes(keyword));
 }
 
 // ===== BAN USER PERMANENT =====
@@ -619,6 +632,22 @@ const SayHeyIcon = ({ size = 22, color = "#000000" }: { size?: number; color?: s
   </svg>
 );
 
+const InviteIcon = ({ size = 20, color = "currentColor" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <path d="M16 21V19C16 16.7909 14.2091 15 12 15H5C2.79086 15 1 16.7909 1 19V21" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <circle cx="8.5" cy="7" r="4" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M20 8V14" stroke={color} strokeWidth="2" strokeLinecap="round" />
+    <path d="M23 11H17" stroke={color} strokeWidth="2" strokeLinecap="round" />
+  </svg>
+);
+
+const AdminTagIcon = ({ size = 14, color = "#ffffff" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <path d="M12 2L4 5V11C4 16 8 20 12 22C16 20 20 16 20 11V5L12 2Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M9 12L11 14L15 10" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
 const BlinkingDot = ({ size = 10, color = BLUE }: { size?: number; color?: string }) => (
   <span
     style={{
@@ -790,6 +819,8 @@ interface NoteEntry {
   userPhoto?: string;
   text?: string;
   category?: string;
+  hasKendala?: boolean;
+  adminTagged?: boolean;
   createdAt: any;
 }
 
@@ -1842,7 +1873,6 @@ const NavbarButton = ({
     </div>
   );
 };
-
 
 // ===== LEFT NAVBAR =====
 const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
@@ -6425,6 +6455,7 @@ export default function HomePage(): React.JSX.Element {
   const [locationText, setLocationText] = useState<string>("");
   const [showNotesSection, setShowNotesSection] = useState(false);
   const [notes, setNotes] = useState<NoteEntry[]>([]);
+  const [inviteCopied, setInviteCopied] = useState(false);
 
   const [registeredUsers, setRegisteredUsers] = useState<NoteEntry[]>([]);
   const [hasSubmittedNote, setHasSubmittedNote] = useState(false);
@@ -6503,19 +6534,23 @@ export default function HomePage(): React.JSX.Element {
   // ===== NOTES FROM FIREBASE =====
   useEffect(() => {
     if (!db || !isMounted) return;
-    const q = query(collection(db, "notes"), orderBy("createdAt", "desc"), limit(50));
+    const q = query(collection(db, "notes"), orderBy("createdAt", "desc"), limit(100));
     const unsub = onSnapshot(q, (snapshot: any) => {
       const list: NoteEntry[] = [];
       snapshot.forEach((docSnap: any) => {
         const data = docSnap.data();
+        const text = data.text || "";
+        const hasKendala = containsKendala(text);
         list.push({
           id: docSnap.id,
           userId: data.userId || docSnap.id,
           userName: data.userName || data.userEmail?.split("@")[0] || "User",
           userEmail: data.userEmail || "",
           userPhoto: data.userPhoto || "",
-          text: data.text || "",
+          text: text,
           category: data.category || "",
+          hasKendala: hasKendala,
+          adminTagged: data.adminTagged || hasKendala,
           createdAt: data.createdAt || null,
         } as NoteEntry);
       });
@@ -6725,6 +6760,34 @@ export default function HomePage(): React.JSX.Element {
       { opacity: 1, y: 0, duration: 1, ease: "power3.out" }
     );
   }, [showNotesSection]);
+
+  // ===== HANDLE INVITE =====
+  const handleInvite = async () => {
+    try {
+      const inviteUrl = `${window.location.origin}${window.location.pathname}#notes-invite`;
+      if (navigator.share) {
+        await navigator.share({
+          title: "Menuru Notes",
+          text: "Bergabung bersama kami di fitur Note Menuru!",
+          url: inviteUrl,
+        });
+      } else {
+        await navigator.clipboard.writeText(inviteUrl);
+        setInviteCopied(true);
+        setTimeout(() => setInviteCopied(false), 2000);
+      }
+    } catch (error) {
+      console.error("Invite error:", error);
+      try {
+        const inviteUrl = `${window.location.origin}${window.location.pathname}#notes-invite`;
+        await navigator.clipboard.writeText(inviteUrl);
+        setInviteCopied(true);
+        setTimeout(() => setInviteCopied(false), 2000);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  };
 
   if (!isMounted || loading) {
     return (
@@ -7512,6 +7575,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             {showNotesSection && (
               <div
                 ref={notesSectionRef}
+                id="notes-invite"
                 style={{
                   width: "100%",
                   marginTop: "60px",
@@ -7554,31 +7618,172 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                   Temukan catatan-catatan menarik dari komunitas Menuru. Semua catatan dikategorikan untuk memudahkan Anda menjelajahi topik yang Anda minati.
                 </p>
 
-                {/* Kategori */}
+                {/* Tombol Invite / Undang */}
+                <div style={{ marginBottom: "40px", display: "flex", alignItems: "center", gap: "16px", flexWrap: "wrap" }}>
+                  <button
+                    onClick={handleInvite}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "10px",
+                      padding: "12px 24px",
+                      backgroundColor: BLUE,
+                      color: WHITE,
+                      border: "none",
+                      borderRadius: "10px",
+                      fontFamily: FONT_FAMILY,
+                      fontSize: "18px",
+                      fontWeight: 700,
+                      letterSpacing: "-0.01em",
+                      cursor: "pointer",
+                      transition: "background-color 0.25s ease",
+                    }}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLButtonElement).style.backgroundColor = BLACK;
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLButtonElement).style.backgroundColor = BLUE;
+                    }}
+                  >
+                    <InviteIcon size={22} color={WHITE} />
+                    <span>{inviteCopied ? "Link Tersalin!" : "Undang Orang Lain"}</span>
+                  </button>
+                  <span
+                    style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: "15px",
+                      fontWeight: 500,
+                      color: BLUE,
+                      letterSpacing: "-0.01em",
+                    }}
+                  >
+                    Bagikan link ke teman Anda untuk bergabung di Notes Menuru
+                  </span>
+                </div>
+
+                {/* Kategori - Sejajar ke Bawah */}
                 <div
                   style={{
                     display: "flex",
-                    flexWrap: "wrap",
-                    gap: "16px",
-                    marginBottom: "40px",
+                    flexDirection: "column",
+                    gap: "14px",
+                    marginBottom: "50px",
                   }}
                 >
-                  {NOTES_CATEGORIES.map((cat) => (
-                    <span
-                      key={cat}
-                      style={{
-                        fontFamily: FONT_FAMILY,
-                        fontSize: "18px",
-                        fontWeight: 700,
-                        color: BLACK,
-                        letterSpacing: "-0.01em",
-                        lineHeight: 1.3,
-                        cursor: "default",
-                      }}
-                    >
-                      {cat}
-                    </span>
-                  ))}
+                  {NOTES_CATEGORIES.map((cat) => {
+                    const categoryNotes = notes.filter((n) => n.category === cat);
+                    return (
+                      <div
+                        key={cat}
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "10px",
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontFamily: FONT_FAMILY,
+                            fontSize: "32px",
+                            fontWeight: 700,
+                            color: BLUE,
+                            letterSpacing: "-0.02em",
+                            lineHeight: 1.2,
+                            cursor: "default",
+                          }}
+                        >
+                          {cat}
+                        </span>
+                        {categoryNotes.length > 0 ? (
+                          <div
+                            style={{
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: "8px",
+                              paddingLeft: "20px",
+                            }}
+                          >
+                            {categoryNotes.map((note) => (
+                              <div
+                                key={note.id}
+                                style={{
+                                  display: "flex",
+                                  flexDirection: "column",
+                                  gap: "4px",
+                                }}
+                              >
+                                <div
+                                  style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "10px",
+                                    flexWrap: "wrap",
+                                  }}
+                                >
+                                  <span
+                                    style={{
+                                      fontFamily: FONT_FAMILY,
+                                      fontSize: "16px",
+                                      fontWeight: 700,
+                                      color: BLUE,
+                                    }}
+                                  >
+                                    {note.userName}
+                                  </span>
+                                  {note.adminTagged && (
+                                    <span
+                                      style={{
+                                        display: "inline-flex",
+                                        alignItems: "center",
+                                        gap: "4px",
+                                        padding: "3px 10px",
+                                        backgroundColor: BLUE,
+                                        color: WHITE,
+                                        borderRadius: "4px",
+                                        fontSize: "10px",
+                                        fontWeight: 800,
+                                        letterSpacing: "0.5px",
+                                        textTransform: "uppercase",
+                                        fontFamily: FONT_FAMILY,
+                                      }}
+                                    >
+                                      <AdminTagIcon size={12} color={WHITE} />
+                                      Admin
+                                    </span>
+                                  )}
+                                </div>
+                                <span
+                                  style={{
+                                    fontFamily: FONT_FAMILY,
+                                    fontSize: "15px",
+                                    fontWeight: 400,
+                                    color: BLACK,
+                                    lineHeight: 1.5,
+                                    paddingLeft: "10px",
+                                  }}
+                                >
+                                  {note.text}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <span
+                            style={{
+                              fontFamily: FONT_FAMILY,
+                              fontSize: "14px",
+                              fontWeight: 400,
+                              color: "#999",
+                              paddingLeft: "20px",
+                              fontStyle: "italic",
+                            }}
+                          >
+                            Belum ada catatan di kategori ini
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
 
                 {/* Aktivitas Terbaru */}
@@ -7656,6 +7861,27 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                                 }}
                               >
                                 {note.category}
+                              </span>
+                            )}
+                            {note.adminTagged && (
+                              <span
+                                style={{
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  gap: "4px",
+                                  padding: "3px 10px",
+                                  backgroundColor: WHITE,
+                                  color: BLUE,
+                                  borderRadius: "4px",
+                                  fontSize: "10px",
+                                  fontWeight: 800,
+                                  letterSpacing: "0.5px",
+                                  textTransform: "uppercase",
+                                  fontFamily: FONT_FAMILY,
+                                }}
+                              >
+                                <AdminTagIcon size={12} color={BLUE} />
+                                Admin
                               </span>
                             )}
                           </div>
