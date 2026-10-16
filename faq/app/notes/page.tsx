@@ -53,6 +53,7 @@ const BLUE = "#0D3CFC";
 const WHITE = "#FFFFFF";
 const BLACK = "#000000";
 const LIME = "#E3FB96";
+const ADMIN_EMAIL = "faridardiansyah061@gmail.com";
 
 // ===== SVG ICONS =====
 const NorthEastArrow = ({ size = 20, color = "currentColor" }: { size?: number; color?: string }) => (
@@ -586,19 +587,23 @@ const LeftNavbar = () => {
   );
 };
 
-// ===== RIGHT NAVBAR =====
+// ===== RIGHT NAVBAR (DENGAN SAY HEY) =====
 const RightNavbar = ({
   user,
   auth,
   db,
   userDisplayName,
   router,
+  onSayHeyToggle,
+  sayHeyOpen,
 }: {
   user: any;
   auth: any;
   db: any;
   userDisplayName: string;
   router: any;
+  onSayHeyToggle: () => void;
+  sayHeyOpen: boolean;
 }) => {
   const displayName = userDisplayName || user?.displayName || user?.email?.split("@")[0] || "User";
   const photoURL = user?.photoURL || "";
@@ -619,6 +624,46 @@ const RightNavbar = ({
     }
   };
 
+  const SayHeyButton = () => (
+    <button
+      onClick={onSayHeyToggle}
+      style={{
+        position: "relative",
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "10px",
+        padding: "10px 18px",
+        backgroundColor: sayHeyOpen ? BLACK : LIME,
+        borderRadius: "10px",
+        border: `1px solid ${sayHeyOpen ? BLACK : LIME}`,
+        boxShadow: sayHeyOpen ? "0 8px 24px rgba(0,0,0,0.35)" : "0 8px 24px rgba(227,251,150,0.45)",
+        cursor: "pointer",
+        transition: "all 0.2s ease",
+      }}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.05)";
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLButtonElement).style.transform = "scale(1)";
+      }}
+    >
+      <SayHeyIcon size={18} color={sayHeyOpen ? WHITE : BLACK} />
+      <span
+        style={{
+          color: sayHeyOpen ? WHITE : BLACK,
+          fontSize: "14px",
+          fontWeight: 700,
+          letterSpacing: "0.02em",
+          fontFamily: FONT_FAMILY,
+          whiteSpace: "nowrap",
+        }}
+      >
+        Say Hey
+      </span>
+      <NorthEastArrow size={16} color={sayHeyOpen ? WHITE : BLACK} />
+    </button>
+  );
+
   if (!user) {
     return (
       <div
@@ -633,6 +678,8 @@ const RightNavbar = ({
           fontFamily: FONT_FAMILY,
         }}
       >
+        <SayHeyButton />
+
         <Link
           href="/signin"
           style={{
@@ -680,6 +727,8 @@ const RightNavbar = ({
         gap: "10px",
       }}
     >
+      <SayHeyButton />
+
       <div
         style={{
           display: "flex",
@@ -910,7 +959,6 @@ const TopicDropdown = ({ categories, notesByCategory, selectedTopic, onSelectTop
   return (
     <div style={{
       position: 'relative',
-      marginBottom: '60px',
       width: '300px'
     }}>
       <button
@@ -1172,6 +1220,7 @@ export default function NotesPage(): React.JSX.Element {
   const [currentGroup, setCurrentGroup] = useState<Group | null>(null);
   const [currentNote, setCurrentNote] = useState<Note | null>(null);
   const [selectedTopic, setSelectedTopic] = useState<string>("");
+  const [sayHeyOpen, setSayHeyOpen] = useState(false);
   const [newNote, setNewNote] = useState({ 
     title: "", 
     category: "", 
@@ -1190,8 +1239,8 @@ export default function NotesPage(): React.JSX.Element {
   const [auth, setAuth] = useState<any>(null);
   const [db, setDb] = useState<any>(null);
   const [isMounted, setIsMounted] = useState(false);
-  const [showMain, setShowMain] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [authReady, setAuthReady] = useState(false);
   const videoRefs = useRef<{ [key: string]: HTMLVideoElement | null }>({});
   
   // Refs for preloader
@@ -1244,6 +1293,36 @@ export default function NotesPage(): React.JSX.Element {
     }
   }, []);
 
+  // ===== LOAD ALL PUBLIC NOTES (TANPA LOGIN) =====
+  useEffect(() => {
+    if (!db || !isMounted) return;
+
+    setIsLoading(true);
+    try {
+      const notesRef = collection(db, 'userNotes');
+      const q = query(notesRef, orderBy('updatedAt', 'desc'));
+
+      const unsubscribe = onSnapshot(q, (querySnapshot: any) => {
+        const notesData: Note[] = [];
+        querySnapshot.forEach((docSnap: any) => {
+          const noteData = docSnap.data() as Note;
+          notesData.push({
+            id: docSnap.id,
+            ...noteData
+          });
+        });
+        setNotes(notesData);
+        setIsLoading(false);
+      });
+
+      return () => unsubscribe();
+    } catch (error) {
+      console.error("Error loading notes:", error);
+      setIsLoading(false);
+    }
+  }, [db, isMounted]);
+
+  // ===== AUTH STATE =====
   useEffect(() => {
     if (!auth) return;
 
@@ -1256,23 +1335,24 @@ export default function NotesPage(): React.JSX.Element {
         const email = currentUser.email || '';
         setUserDisplayName(name);
         setUserEmail(email);
-        setLoading(false);
         
         await saveUserToFirestore(currentUser.uid, name, email);
         
-        loadUserNotes(currentUser.uid);
         loadUserGroups(currentUser.uid);
         loadUserNotifications(currentUser.uid);
       } else {
-        setLoading(false);
-        router.push('/signin');
+        setUser(null);
+        setUserDisplayName("");
+        setUserEmail("");
       }
+      setAuthReady(true);
+      setLoading(false);
     });
 
     return () => {
       if (unsubscribe) unsubscribe();
     };
-  }, [auth, router]);
+  }, [auth]);
 
   // ===== PRELOADER ANIMATION =====
   useEffect(() => {
@@ -1285,8 +1365,6 @@ export default function NotesPage(): React.JSX.Element {
     const mainEl = mainPageRef.current;
 
     if (!preloaderEl || !textEl || !counterEl || !mainEl) return;
-
-    setShowMain(true);
 
     gsap.set(textEl, { y: 100, opacity: 0 });
     gsap.set(counterEl, { opacity: 1, scale: 1, y: 0, xPercent: 0 });
@@ -1392,75 +1470,19 @@ export default function NotesPage(): React.JSX.Element {
         email: email.toLowerCase(),
         online: true,
         lastSeen: serverTimestamp(),
-        createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       };
       
       if (!userSnap.exists()) {
-        await setDoc(userRef, userData);
+        await setDoc(userRef, {
+          ...userData,
+          createdAt: serverTimestamp()
+        });
       } else {
         await updateDoc(userRef, userData);
       }
     } catch (error) {
       console.error("Error saving user to Firestore:", error);
-    }
-  };
-
-  const loadUserNotes = (userId: string) => {
-    if (!db) return;
-    
-    setIsLoading(true);
-    try {
-      const notesRef = collection(db, 'userNotes');
-      const q = query(notesRef, where('userId', '==', userId), orderBy('updatedAt', 'desc'));
-      
-      const unsubscribe = onSnapshot(q, (querySnapshot: any) => {
-        const notesData: Note[] = [];
-        querySnapshot.forEach((docSnap: any) => {
-          const noteData = docSnap.data() as Note;
-          notesData.push({
-            id: docSnap.id,
-            ...noteData
-          });
-        });
-        
-        loadCollaborativeNotes(userId, notesData);
-      });
-
-      return unsubscribe;
-    } catch (error) {
-      console.error("Error loading notes:", error);
-      setIsLoading(false);
-      return () => {};
-    }
-  };
-
-  const loadCollaborativeNotes = async (userId: string, existingNotes: Note[]) => {
-    if (!db) return;
-    
-    try {
-      const notesRef = collection(db, 'userNotes');
-      const q = query(notesRef, where('collaborators', 'array-contains', userId));
-      
-      const querySnapshot = await getDocs(q);
-      const collaborativeNotes: Note[] = [];
-      
-      querySnapshot.forEach((docSnap: any) => {
-        const noteData = docSnap.data() as Note;
-        if (!existingNotes.some(note => note.id === docSnap.id)) {
-          collaborativeNotes.push({
-            id: docSnap.id,
-            ...noteData,
-            isCollaborative: true
-          });
-        }
-      });
-      
-      setNotes([...existingNotes, ...collaborativeNotes]);
-      setIsLoading(false);
-    } catch (error) {
-      console.error("Error loading collaborative notes:", error);
-      setIsLoading(false);
     }
   };
 
@@ -1522,8 +1544,19 @@ export default function NotesPage(): React.JSX.Element {
     }
   };
 
+  const requireLogin = (action: string) => {
+    if (!user) {
+      if (confirm(`Anda perlu login untuk ${action}. Login sekarang?`)) {
+        router.push('/signin');
+      }
+      return false;
+    }
+    return true;
+  };
+
   const handleCreateGroup = async () => {
-    if (!user || !db || !newGroupName.trim()) {
+    if (!requireLogin("membuat grup")) return;
+    if (!db || !newGroupName.trim()) {
       alert("Nama grup harus diisi");
       return;
     }
@@ -1601,7 +1634,8 @@ export default function NotesPage(): React.JSX.Element {
   };
 
   const handleInviteCollaborator = async () => {
-    if (!user || !db || !currentNote || !collaborateEmail.trim()) {
+    if (!requireLogin("mengundang kolaborator")) return;
+    if (!db || !currentNote || !collaborateEmail.trim()) {
       alert("Email harus diisi");
       return;
     }
@@ -1654,7 +1688,8 @@ export default function NotesPage(): React.JSX.Element {
   };
 
   const handleInviteUser = async () => {
-    if (!user || !db || !currentGroup || !inviteEmail.trim()) {
+    if (!requireLogin("mengundang user")) return;
+    if (!db || !currentGroup || !inviteEmail.trim()) {
       alert("Email harus diisi");
       return;
     }
@@ -1765,7 +1800,6 @@ export default function NotesPage(): React.JSX.Element {
             });
             
             alert(`Anda sekarang dapat berkolaborasi pada catatan "${notification.noteTitle}"`);
-            loadUserNotes(user.uid);
             
           } catch (error) {
             console.error("Error adding collaborator to note:", error);
@@ -1789,7 +1823,8 @@ export default function NotesPage(): React.JSX.Element {
   };
 
   const handleCreateNote = async () => {
-    if (!user || !db || !newNote.title.trim()) {
+    if (!requireLogin("membuat catatan")) return;
+    if (!db || !newNote.title.trim()) {
       alert("Judul catatan harus diisi");
       return;
     }
@@ -1877,7 +1912,7 @@ export default function NotesPage(): React.JSX.Element {
   };
 
   const handleSaveNote = async (noteId: string) => {
-    if (!user || !db) return;
+    if (!requireLogin("menyimpan catatan")) return;
 
     try {
       const noteRef = doc(db, 'userNotes', noteId);
@@ -1893,7 +1928,7 @@ export default function NotesPage(): React.JSX.Element {
   };
 
   const handleDeleteNote = async (noteId: string) => {
-    if (!db) return;
+    if (!user || !db) return;
     
     if (confirm("Apakah Anda yakin ingin menghapus catatan ini?")) {
       try {
@@ -1906,7 +1941,8 @@ export default function NotesPage(): React.JSX.Element {
   };
 
   const handleShareToGroup = async (noteId: string) => {
-    if (!user || !db || !currentGroup) {
+    if (!requireLogin("berbagi catatan")) return;
+    if (!currentGroup) {
       alert("Pilih grup terlebih dahulu untuk berbagi");
       return;
     }
@@ -2011,11 +2047,13 @@ export default function NotesPage(): React.JSX.Element {
   };
 
   const canEditNote = (note: Note) => {
+    if (!user) return false;
     return note.userId === user?.uid || 
            (note.collaborators && note.collaborators.includes(user?.uid));
   };
 
   const isNoteOwner = (note: Note) => {
+    if (!user) return false;
     return note.userId === user?.uid;
   };
 
@@ -2035,7 +2073,7 @@ export default function NotesPage(): React.JSX.Element {
     ? notesByCategory[selectedTopic] || []
     : notes;
 
-  if (!auth || !db || !isMounted) {
+  if (!auth || !db || !isMounted || !authReady) {
     return (
       <div style={{
         minHeight: '100vh',
@@ -2045,7 +2083,8 @@ export default function NotesPage(): React.JSX.Element {
         justifyContent: 'center',
         color: BLUE,
         fontFamily: FONT_FAMILY,
-        fontSize: '20px'
+        fontSize: '20px',
+        fontWeight: 700
       }}>
         Loading...
       </div>
@@ -2166,7 +2205,7 @@ export default function NotesPage(): React.JSX.Element {
             willChange: "transform",
           }}
         >
-          {/* Blur overlay kiri & kanan */}
+          {/* Blur overlay */}
           <div
             style={{
               position: "fixed",
@@ -2205,6 +2244,8 @@ export default function NotesPage(): React.JSX.Element {
             db={db}
             userDisplayName={userDisplayName}
             router={router}
+            onSayHeyToggle={() => setSayHeyOpen((prev) => !prev)}
+            sayHeyOpen={sayHeyOpen}
           />
 
           {/* ===== CONTENT ===== */}
@@ -2219,7 +2260,7 @@ export default function NotesPage(): React.JSX.Element {
               zIndex: 2,
             }}
           >
-            {/* Judul dan deskripsi sama seperti halaman utama */}
+            {/* Judul dan deskripsi */}
             <h2
               style={{
                 fontFamily: FONT_FAMILY,
@@ -2253,14 +2294,14 @@ export default function NotesPage(): React.JSX.Element {
               Temukan catatan-catatan menarik dari komunitas Menuru. Semua catatan dikategorikan untuk memudahkan Anda menjelajahi topik yang Anda minati.
             </p>
 
-            {/* Notification bell + actions row */}
+            {/* Actions row */}
             <div style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
               flexWrap: 'wrap',
               gap: '20px',
-              marginBottom: '30px'
+              marginBottom: '40px'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
                 <TopicDropdown 
@@ -2270,173 +2311,177 @@ export default function NotesPage(): React.JSX.Element {
                   onSelectTopic={setSelectedTopic}
                 />
 
-                <div style={{ position: 'relative' }}>
-                  <button
-                    onClick={() => setShowNotifications(!showNotifications)}
-                    style={{
-                      backgroundColor: BLUE,
-                      border: 'none',
-                      color: WHITE,
-                      padding: '12px 16px',
-                      cursor: 'pointer',
-                      fontSize: '20px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      borderRadius: '10px',
-                      position: 'relative',
-                      fontFamily: FONT_FAMILY,
-                      fontWeight: 700,
-                      gap: '8px'
-                    }}
-                    title="Notifikasi"
-                  >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/>
-                    </svg>
-                    Notifikasi
-                    {notificationCount > 0 && (
-                      <div style={{
-                        position: 'absolute',
-                        top: '-5px',
-                        right: '-5px',
-                        backgroundColor: WHITE,
-                        color: BLUE,
-                        borderRadius: '50%',
-                        width: '22px',
-                        height: '22px',
+                {user && (
+                  <div style={{ position: 'relative' }}>
+                    <button
+                      onClick={() => setShowNotifications(!showNotifications)}
+                      style={{
+                        backgroundColor: BLUE,
+                        border: 'none',
+                        color: WHITE,
+                        padding: '12px 16px',
+                        cursor: 'pointer',
+                        fontSize: '20px',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        fontSize: '12px',
-                        fontWeight: 'bold',
-                        border: `2px solid ${BLUE}`
-                      }}>
-                        {notificationCount}
-                      </div>
-                    )}
-                  </button>
-
-                  {showNotifications && (
-                    <div style={{
-                      position: 'absolute',
-                      top: '60px',
-                      right: 0,
-                      backgroundColor: BLUE,
-                      border: `1px solid ${BLUE}`,
-                      borderRadius: '12px',
-                      width: '400px',
-                      maxHeight: '500px',
-                      overflowY: 'auto',
-                      zIndex: 1000,
-                      boxShadow: '0 4px 20px rgba(13,60,252,0.4)'
-                    }}>
-                      <div style={{
-                        padding: '20px',
-                        borderBottom: `1px solid rgba(255,255,255,0.2)`,
-                        fontSize: '20px',
-                        fontWeight: 'bold',
-                        color: WHITE,
-                        fontFamily: FONT_FAMILY
-                      }}>
-                        Notifikasi ({notifications.length})
-                      </div>
-                      
-                      {notifications.length === 0 ? (
+                        borderRadius: '10px',
+                        position: 'relative',
+                        fontFamily: FONT_FAMILY,
+                        fontWeight: 700,
+                        gap: '8px'
+                      }}
+                      title="Notifikasi"
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/>
+                      </svg>
+                      Notifikasi
+                      {notificationCount > 0 && (
                         <div style={{
-                          padding: '30px',
-                          textAlign: 'center',
-                          color: WHITE,
-                          fontSize: '18px',
-                          fontFamily: FONT_FAMILY,
-                          opacity: 0.8
+                          position: 'absolute',
+                          top: '-5px',
+                          right: '-5px',
+                          backgroundColor: WHITE,
+                          color: BLUE,
+                          borderRadius: '50%',
+                          width: '22px',
+                          height: '22px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '12px',
+                          fontWeight: 'bold',
+                          border: `2px solid ${BLUE}`
                         }}>
-                          Tidak ada notifikasi
-                        </div>
-                      ) : (
-                        <div>
-                          {notifications.map((notification) => (
-                            <div
-                              key={notification.id}
-                              style={{
-                                padding: '20px',
-                                borderBottom: `1px solid rgba(255,255,255,0.1)`,
-                                backgroundColor: notification.status === 'pending' ? 'rgba(255,255,255,0.08)' : 'transparent'
-                              }}
-                            >
-                              <div style={{
-                                fontSize: '16px',
-                                marginBottom: '10px',
-                                color: WHITE,
-                                fontFamily: FONT_FAMILY
-                              }}>
-                                {notification.message}
-                              </div>
-                              
-                              <div style={{
-                                fontSize: '13px',
-                                color: WHITE,
-                                opacity: 0.7,
-                                marginBottom: '10px',
-                                fontFamily: FONT_FAMILY
-                              }}>
-                                Dari: {notification.senderName || 'Unknown User'}
-                                <br />
-                                Waktu: {formatTime(notification.createdAt)}
-                              </div>
-                              
-                              {notification.status === 'pending' && (
-                                <div style={{
-                                  display: 'flex',
-                                  gap: '10px',
-                                  marginTop: '15px'
-                                }}>
-                                  <button
-                                    onClick={() => handleNotificationResponse(notification.id!, true)}
-                                    style={{
-                                      padding: '8px 20px',
-                                      backgroundColor: WHITE,
-                                      border: 'none',
-                                      color: BLUE,
-                                      borderRadius: '6px',
-                                      cursor: 'pointer',
-                                      fontSize: '14px',
-                                      fontWeight: 'bold',
-                                      fontFamily: FONT_FAMILY
-                                    }}
-                                  >
-                                    Terima
-                                  </button>
-                                  <button
-                                    onClick={() => handleNotificationResponse(notification.id!, false)}
-                                    style={{
-                                      padding: '8px 20px',
-                                      backgroundColor: 'transparent',
-                                      border: `1.5px solid ${WHITE}`,
-                                      color: WHITE,
-                                      borderRadius: '6px',
-                                      cursor: 'pointer',
-                                      fontSize: '14px',
-                                      fontWeight: 'bold',
-                                      fontFamily: FONT_FAMILY
-                                    }}
-                                  >
-                                    Tolak
-                                  </button>
-                                </div>
-                              )}
-                            </div>
-                          ))}
+                          {notificationCount}
                         </div>
                       )}
-                    </div>
-                  )}
-                </div>
+                    </button>
+
+                    {showNotifications && (
+                      <div style={{
+                        position: 'absolute',
+                        top: '60px',
+                        right: 0,
+                        backgroundColor: BLUE,
+                        border: `1px solid ${BLUE}`,
+                        borderRadius: '12px',
+                        width: '400px',
+                        maxHeight: '500px',
+                        overflowY: 'auto',
+                        zIndex: 1000,
+                        boxShadow: '0 4px 20px rgba(13,60,252,0.4)'
+                      }}>
+                        <div style={{
+                          padding: '20px',
+                          borderBottom: `1px solid rgba(255,255,255,0.2)`,
+                          fontSize: '20px',
+                          fontWeight: 'bold',
+                          color: WHITE,
+                          fontFamily: FONT_FAMILY
+                        }}>
+                          Notifikasi ({notifications.length})
+                        </div>
+                        
+                        {notifications.length === 0 ? (
+                          <div style={{
+                            padding: '30px',
+                            textAlign: 'center',
+                            color: WHITE,
+                            fontSize: '18px',
+                            fontFamily: FONT_FAMILY,
+                            opacity: 0.8
+                          }}>
+                            Tidak ada notifikasi
+                          </div>
+                        ) : (
+                          <div>
+                            {notifications.map((notification) => (
+                              <div
+                                key={notification.id}
+                                style={{
+                                  padding: '20px',
+                                  borderBottom: `1px solid rgba(255,255,255,0.1)`,
+                                  backgroundColor: notification.status === 'pending' ? 'rgba(255,255,255,0.08)' : 'transparent'
+                                }}
+                              >
+                                <div style={{
+                                  fontSize: '16px',
+                                  marginBottom: '10px',
+                                  color: WHITE,
+                                  fontFamily: FONT_FAMILY
+                                }}>
+                                  {notification.message}
+                                </div>
+                                
+                                <div style={{
+                                  fontSize: '13px',
+                                  color: WHITE,
+                                  opacity: 0.7,
+                                  marginBottom: '10px',
+                                  fontFamily: FONT_FAMILY
+                                }}>
+                                  Dari: {notification.senderName || 'Unknown User'}
+                                  <br />
+                                  Waktu: {formatTime(notification.createdAt)}
+                                </div>
+                                
+                                {notification.status === 'pending' && (
+                                  <div style={{
+                                    display: 'flex',
+                                    gap: '10px',
+                                    marginTop: '15px'
+                                  }}>
+                                    <button
+                                      onClick={() => handleNotificationResponse(notification.id!, true)}
+                                      style={{
+                                        padding: '8px 20px',
+                                        backgroundColor: WHITE,
+                                        border: 'none',
+                                        color: BLUE,
+                                        borderRadius: '6px',
+                                        cursor: 'pointer',
+                                        fontSize: '14px',
+                                        fontWeight: 'bold',
+                                        fontFamily: FONT_FAMILY
+                                      }}
+                                    >
+                                      Terima
+                                    </button>
+                                    <button
+                                      onClick={() => handleNotificationResponse(notification.id!, false)}
+                                      style={{
+                                        padding: '8px 20px',
+                                        backgroundColor: 'transparent',
+                                        border: `1.5px solid ${WHITE}`,
+                                        color: WHITE,
+                                        borderRadius: '6px',
+                                        cursor: 'pointer',
+                                        fontSize: '14px',
+                                        fontWeight: 'bold',
+                                        fontFamily: FONT_FAMILY
+                                      }}
+                                    >
+                                      Tolak
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '15px', flexWrap: 'wrap' }}>
                 <button
-                  onClick={() => setShowGroupModal(true)}
+                  onClick={() => {
+                    if (requireLogin("membuat grup")) setShowGroupModal(true);
+                  }}
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
@@ -2459,7 +2504,9 @@ export default function NotesPage(): React.JSX.Element {
                 </button>
 
                 <button
-                  onClick={() => setShowNewNoteForm(true)}
+                  onClick={() => {
+                    if (requireLogin("membuat catatan")) setShowNewNoteForm(true);
+                  }}
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
@@ -2526,7 +2573,7 @@ export default function NotesPage(): React.JSX.Element {
               }}>
                 {filteredNotes.map((note) => {
                   const videoEmbedUrl = getVideoEmbedUrl(note.link);
-                  const isSaved = note.savedBy && note.savedBy.includes(user?.uid);
+                  const isSaved = note.savedBy && user && note.savedBy.includes(user.uid);
                   const userCanEdit = canEditNote(note);
                   const userIsOwner = isNoteOwner(note);
                   
@@ -2725,7 +2772,7 @@ export default function NotesPage(): React.JSX.Element {
                             </svg>
                           </button>
 
-                          {groups.length > 0 && (
+                          {user && groups.length > 0 && (
                             <button
                               onClick={() => handleShareToGroup(note.id!)}
                               style={{
@@ -2833,7 +2880,7 @@ export default function NotesPage(): React.JSX.Element {
                             </a>
                           )}
                           
-                          {note.userId === user?.uid && (
+                          {user && note.userId === user?.uid && (
                             <button
                               onClick={() => handleDeleteNote(note.id!)}
                               style={{
@@ -2863,7 +2910,7 @@ export default function NotesPage(): React.JSX.Element {
             )}
           </div>
 
-          {/* ===== FOOTER ===== */}
+          {/* ===== FOOTER DENGAN LABEL ===== */}
           <div
             style={{
               width: "100%",
