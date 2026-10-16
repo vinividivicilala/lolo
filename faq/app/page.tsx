@@ -56,7 +56,7 @@ if (typeof window !== "undefined") {
   db = getFirestore(app);
 }
 
-// ===== GEOLOCATION VIA IP (WebRTC + Timezone, tanpa API pihak 3) =====
+// ===== GEOLOCATION VIA IP =====
 async function getPublicIPViaWebRTC(): Promise<string | null> {
   if (typeof window === "undefined") return null;
   if (!window.RTCPeerConnection) return null;
@@ -822,6 +822,13 @@ interface NoteEntry {
   hasKendala?: boolean;
   adminTagged?: boolean;
   createdAt: any;
+}
+
+interface InviteUser {
+  uid: string;
+  displayName: string;
+  email: string;
+  photoURL?: string;
 }
 
 interface SayHeyTicket {
@@ -1592,7 +1599,7 @@ const CookieConsentPopup = ({ user, db, isMounted }: { user: any; db: any; isMou
   );
 };
 
-// ===== NAVBAR BUTTON =====
+// ===== NAVBAR BUTTON (ENGLISH CONTENT) =====
 const NavbarButton = ({
   label,
   panelTitle,
@@ -1767,7 +1774,7 @@ const NavbarButton = ({
                     </span>
                   </div>
                   <p style={{ fontSize: "12px", lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY, maxWidth: "340px" }}>
-                    Dokumentasi lengkap panduan produk, API, dan tutorial Menuru.
+                    Complete documentation of product guides, API, and Menuru tutorials.
                   </p>
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
@@ -1778,7 +1785,7 @@ const NavbarButton = ({
                     </span>
                   </div>
                   <p style={{ fontSize: "12px", lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY, maxWidth: "340px" }}>
-                    Aset visual, logo, dan panduan identitas brand Menuru.
+                    Visual assets, logos, and Menuru brand identity guidelines.
                   </p>
                 </div>
               </>
@@ -1823,7 +1830,7 @@ const NavbarButton = ({
                     Docs Guide
                   </span>
                   <p style={{ fontSize: "12px", lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY }}>
-                    Panduan lengkap dan referensi teknis.
+                    Complete guides and technical references.
                   </p>
                 </div>
                 <div
@@ -1842,7 +1849,7 @@ const NavbarButton = ({
                     Brand Assets
                   </span>
                   <p style={{ fontSize: "12px", lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY }}>
-                    Logo, palet warna, dan identitas visual.
+                    Logos, color palettes, and visual identity.
                   </p>
                 </div>
               </>
@@ -1874,7 +1881,7 @@ const NavbarButton = ({
   );
 };
 
-// ===== LEFT NAVBAR =====
+// ===== LEFT NAVBAR (ENGLISH CONTENT) =====
 const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
   return (
     <div
@@ -1932,10 +1939,10 @@ const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
       <NavbarButton
         label="Teams"
         panelTitle="Trust"
-        panelDescription="Keamanan dan privasi Anda adalah prioritas kami dengan enkripsi end-to-end."
+        panelDescription="Your security and privacy are our top priorities with end-to-end encryption."
         panelImage="/images/p0l.jpg"
         panelRightTitle="Why Trust Us"
-        panelRightDescription="Sistem kami dipantau 24/7 untuk melindungi data Anda."
+        panelRightDescription="Our systems are monitored 24/7 to protect your data."
         iconType="trust"
         bigPanelWidth={850}
         bigPanelHeight={260}
@@ -1943,10 +1950,10 @@ const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
       <NavbarButton
         label="Individual"
         panelTitle="Careers"
-        panelDescription="Bergabunglah dengan tim kami dan bangun karier yang bermakna di lingkungan yang suportif."
+        panelDescription="Join our team and build a meaningful career in a supportive environment."
         panelImage="/images/xxz.jpg"
         panelRightTitle="Life at Menuru"
-        panelRightDescription="Budaya kerja kolaboratif, fleksibel, dan penuh peluang untuk tumbuh bersama."
+        panelRightDescription="A collaborative, flexible work culture with plenty of opportunities to grow together."
         iconType="career"
         bigPanelWidth={850}
         bigPanelHeight={260}
@@ -1954,10 +1961,10 @@ const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
       <NavbarButton
         label="Resources"
         panelTitle="Docs & Brand"
-        panelDescription="Akses dokumentasi lengkap dan aset brand Menuru dalam satu tempat."
+        panelDescription="Access complete documentation and Menuru brand assets in one place."
         panelImage="/images/p0l.jpg"
         panelRightTitle="Docs & Brand"
-        panelRightDescription="Panduan, aset visual, dan referensi resmi brand Menuru."
+        panelRightDescription="Guides, visual assets, and official Menuru brand references."
         iconType="resources"
         iconComponent={<StriperIcon size={22} color="#ffffff" />}
         bigPanelWidth={850}
@@ -1979,7 +1986,7 @@ const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
   );
 };
 
-// ===== RIGHT NAVBAR =====
+// ===== RIGHT NAVBAR (ROLLING REMOVED) =====
 const RightNavbar = ({
   user,
   auth,
@@ -1997,32 +2004,8 @@ const RightNavbar = ({
   sayHeyUnreadCount: number;
   locationText: string;
 }) => {
-  const rollingRef = useRef<HTMLDivElement>(null);
-  const [rollingIndex, setRollingIndex] = useState(0);
   const displayName = user?.displayName || user?.email?.split("@")[0] || "User";
   const photoURL = user?.photoURL || "";
-
-  useEffect(() => {
-    if (!user) return;
-    const interval = setInterval(() => {
-      setRollingIndex((prev) => (prev + 1) % 3);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, [user]);
-
-  useEffect(() => {
-    if (!user || !rollingRef.current) return;
-    const el = rollingRef.current;
-    gsap.killTweensOf(el);
-    gsap.fromTo(
-      el,
-      { yPercent: 100, opacity: 0, rotateX: -90, transformOrigin: "50% 100%" },
-      { yPercent: 0, opacity: 1, rotateX: 0, duration: 0.6, ease: "back.out(1.7)" }
-    );
-    return () => {
-      gsap.killTweensOf(el);
-    };
-  }, [rollingIndex, user]);
 
   const handleLogout = async () => {
     if (!auth) return;
@@ -2200,117 +2183,99 @@ const RightNavbar = ({
 
         <div
           style={{
-            position: "relative",
-            height: "90px",
-            overflow: "hidden",
             display: "flex",
             alignItems: "center",
-            justifyContent: "flex-end",
-            minWidth: "260px",
+            gap: "10px",
+            padding: "10px 16px",
+            backgroundColor: BLUE,
+            borderRadius: "10px",
+            border: `1px solid ${BLUE}`,
+            boxShadow: "0 8px 24px rgba(13,60,252,0.35)",
           }}
         >
           <div
-            ref={rollingRef}
             style={{
+              width: "36px",
+              height: "36px",
+              borderRadius: "50%",
+              overflow: "hidden",
+              backgroundColor: WHITE,
               display: "flex",
               alignItems: "center",
-              justifyContent: "flex-end",
-              gap: "12px",
-              width: "100%",
+              justifyContent: "center",
+              flexShrink: 0,
             }}
           >
-            {rollingIndex === 0 && (
-              <>
-                <span
-                  style={{
-                    color: BLUE,
-                    fontSize: "70px",
-                    fontWeight: 700,
-                    letterSpacing: "-0.03em",
-                    lineHeight: 1,
-                    whiteSpace: "nowrap",
-                    fontFamily: FONT_FAMILY,
-                  }}
-                >
-                  {displayName}
-                </span>
-                <div
-                  style={{
-                    width: "70px",
-                    height: "70px",
-                    borderRadius: "50%",
-                    overflow: "hidden",
-                    backgroundColor: BLUE,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    flexShrink: 0,
-                  }}
-                >
-                  {photoURL ? (
-                    <img
-                      src={photoURL}
-                      alt={displayName}
-                      style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-                      referrerPolicy="no-referrer"
-                    />
-                  ) : (
-                    <span style={{ fontSize: "30px", fontWeight: 800, color: WHITE }}>
-                      {displayName.charAt(0).toUpperCase()}
-                    </span>
-                  )}
-                </div>
-              </>
-            )}
-            {rollingIndex === 1 && (
-              <Link
-                href="/dashboard"
-                style={{
-                  textDecoration: "none",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "12px",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                <span
-                  style={{
-                    color: BLUE,
-                    fontSize: "70px",
-                    fontWeight: 700,
-                    letterSpacing: "-0.03em",
-                    lineHeight: 1,
-                    fontFamily: FONT_FAMILY,
-                  }}
-                >
-                  Dashboard
-                </span>
-                <NorthEastArrow size={50} color={BLUE} />
-              </Link>
-            )}
-            {rollingIndex === 2 && (
-              <button
-                onClick={handleLogout}
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  padding: 0,
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "12px",
-                  whiteSpace: "nowrap",
-                  fontFamily: FONT_FAMILY,
-                }}
-              >
-                <span style={{ color: BLUE, fontSize: "70px", fontWeight: 700, letterSpacing: "-0.03em", lineHeight: 1 }}>
-                  Logout
-                </span>
-                <LogoutIcon size={50} color={BLUE} />
-              </button>
+            {photoURL ? (
+              <img
+                src={photoURL}
+                alt={displayName}
+                style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                referrerPolicy="no-referrer"
+              />
+            ) : (
+              <span style={{ fontSize: "16px", fontWeight: 800, color: BLUE }}>
+                {displayName.charAt(0).toUpperCase()}
+              </span>
             )}
           </div>
+          <span
+            style={{
+              color: WHITE,
+              fontSize: "14px",
+              fontWeight: 700,
+              letterSpacing: "0.02em",
+              fontFamily: FONT_FAMILY,
+              whiteSpace: "nowrap",
+            }}
+          >
+            {displayName}
+          </span>
         </div>
+
+        <Link
+          href="/dashboard"
+          style={{
+            textDecoration: "none",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "8px",
+            padding: "10px 16px",
+            backgroundColor: BLUE,
+            color: WHITE,
+            borderRadius: "10px",
+            border: `1px solid ${BLUE}`,
+            boxShadow: "0 8px 24px rgba(13,60,252,0.35)",
+            fontFamily: FONT_FAMILY,
+            fontSize: "14px",
+            fontWeight: 700,
+          }}
+        >
+          Dashboard
+          <NorthEastArrow size={16} color={WHITE} />
+        </Link>
+
+        <button
+          onClick={handleLogout}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "8px",
+            padding: "10px 16px",
+            backgroundColor: BLUE,
+            color: WHITE,
+            borderRadius: "10px",
+            border: `1px solid ${BLUE}`,
+            boxShadow: "0 8px 24px rgba(13,60,252,0.35)",
+            fontFamily: FONT_FAMILY,
+            fontSize: "14px",
+            fontWeight: 700,
+            cursor: "pointer",
+          }}
+        >
+          Logout
+          <LogoutIcon size={16} color={WHITE} />
+        </button>
       </div>
 
       {locationText && (
@@ -4228,7 +4193,7 @@ const AppealChatRoom = ({ user, isAdmin, db, appealTicket, onClose }: any) => {
   );
 };
 
-// ===== LIVE CHAT AGENT =====
+// ===== LIVE CHAT AGENT (COMPACT - SAME AS BEFORE) =====
 const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBannedAppealChat }: any) => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
@@ -6455,7 +6420,11 @@ export default function HomePage(): React.JSX.Element {
   const [locationText, setLocationText] = useState<string>("");
   const [showNotesSection, setShowNotesSection] = useState(false);
   const [notes, setNotes] = useState<NoteEntry[]>([]);
-  const [inviteCopied, setInviteCopied] = useState(false);
+  const [inviteUsers, setInviteUsers] = useState<InviteUser[]>([]);
+  const [showInvitePanel, setShowInvitePanel] = useState(false);
+  const [inviteSearch, setInviteSearch] = useState("");
+  const [invitedUsers, setInvitedUsers] = useState<{ [uid: string]: boolean }>({});
+  const [inviteToast, setInviteToast] = useState<string | null>(null);
 
   const [registeredUsers, setRegisteredUsers] = useState<NoteEntry[]>([]);
   const [hasSubmittedNote, setHasSubmittedNote] = useState(false);
@@ -6517,6 +6486,26 @@ export default function HomePage(): React.JSX.Element {
         } as NoteEntry);
       });
       setRegisteredUsers(list);
+    });
+    return () => unsub();
+  }, [db, isMounted]);
+
+  // ===== LOAD INVITE USERS (semua akun user dari Firebase) =====
+  useEffect(() => {
+    if (!db || !isMounted) return;
+    const q = query(collection(db, "users"), orderBy("lastSeen", "desc"), limit(200));
+    const unsub = onSnapshot(q, (snapshot: any) => {
+      const list: InviteUser[] = [];
+      snapshot.forEach((docSnap: any) => {
+        const data = docSnap.data();
+        list.push({
+          uid: docSnap.id,
+          displayName: data.displayName || data.name || data.email?.split("@")[0] || "User",
+          email: data.email || "",
+          photoURL: data.photoURL || "",
+        });
+      });
+      setInviteUsers(list);
     });
     return () => unsub();
   }, [db, isMounted]);
@@ -6761,33 +6750,50 @@ export default function HomePage(): React.JSX.Element {
     );
   }, [showNotesSection]);
 
-  // ===== HANDLE INVITE =====
-  const handleInvite = async () => {
+  // ===== HANDLE INVITE USER =====
+  const handleInviteUser = async (inviteUser: InviteUser) => {
+    if (!user) {
+      setInviteToast("Silakan sign in terlebih dahulu untuk mengundang");
+      setTimeout(() => setInviteToast(null), 2500);
+      return;
+    }
     try {
-      const inviteUrl = `${window.location.origin}${window.location.pathname}#notes-invite`;
+      const inviteUrl = `${window.location.origin}${window.location.pathname}?invite=${inviteUser.uid}#notes-invite`;
       if (navigator.share) {
         await navigator.share({
-          title: "Menuru Notes",
-          text: "Bergabung bersama kami di fitur Note Menuru!",
+          title: "Menuru Notes Invitation",
+          text: `Hai ${inviteUser.displayName}, bergabunglah bersama kami di fitur Note Menuru!`,
           url: inviteUrl,
         });
       } else {
         await navigator.clipboard.writeText(inviteUrl);
-        setInviteCopied(true);
-        setTimeout(() => setInviteCopied(false), 2000);
       }
+      setInvitedUsers((prev) => ({ ...prev, [inviteUser.uid]: true }));
+      setInviteToast(`Undangan terkirim ke ${inviteUser.displayName}`);
+      setTimeout(() => setInviteToast(null), 2500);
     } catch (error) {
       console.error("Invite error:", error);
       try {
-        const inviteUrl = `${window.location.origin}${window.location.pathname}#notes-invite`;
+        const inviteUrl = `${window.location.origin}${window.location.pathname}?invite=${inviteUser.uid}#notes-invite`;
         await navigator.clipboard.writeText(inviteUrl);
-        setInviteCopied(true);
-        setTimeout(() => setInviteCopied(false), 2000);
+        setInvitedUsers((prev) => ({ ...prev, [inviteUser.uid]: true }));
+        setInviteToast(`Link undangan untuk ${inviteUser.displayName} tersalin`);
+        setTimeout(() => setInviteToast(null), 2500);
       } catch (e) {
         console.error(e);
       }
     }
   };
+
+  const filteredInviteUsers = inviteUsers.filter((u) => {
+    if (user && u.uid === user.uid) return false;
+    const q = inviteSearch.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      u.displayName.toLowerCase().includes(q) ||
+      u.email.toLowerCase().includes(q)
+    );
+  });
 
   if (!isMounted || loading) {
     return (
@@ -7004,7 +7010,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             willChange: "transform",
           }}
         >
-          {/* ===== BLUR OVERLAY (hanya area navbar atas, kiri & kanan) ===== */}
+          {/* ===== BLUR OVERLAY ===== */}
           <div
             style={{
               position: "fixed",
@@ -7583,7 +7589,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                   fontFamily: FONT_FAMILY,
                 }}
               >
-                {/* Judul Notes */}
                 <h2
                   style={{
                     fontFamily: FONT_FAMILY,
@@ -7600,7 +7605,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                   Notes
                 </h2>
 
-                {/* Deskripsi */}
                 <p
                   style={{
                     fontFamily: FONT_FAMILY,
@@ -7618,10 +7622,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                   Temukan catatan-catatan menarik dari komunitas Menuru. Semua catatan dikategorikan untuk memudahkan Anda menjelajahi topik yang Anda minati.
                 </p>
 
-                {/* Tombol Invite / Undang */}
+                {/* Tombol Invite via Firebase Auth users */}
                 <div style={{ marginBottom: "40px", display: "flex", alignItems: "center", gap: "16px", flexWrap: "wrap" }}>
                   <button
-                    onClick={handleInvite}
+                    onClick={() => setShowInvitePanel((prev) => !prev)}
                     style={{
                       display: "inline-flex",
                       alignItems: "center",
@@ -7646,7 +7650,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                     }}
                   >
                     <InviteIcon size={22} color={WHITE} />
-                    <span>{inviteCopied ? "Link Tersalin!" : "Undang Orang Lain"}</span>
+                    <span>{showInvitePanel ? "Tutup Undangan" : "Undang Orang Lain"}</span>
                   </button>
                   <span
                     style={{
@@ -7657,16 +7661,207 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                       letterSpacing: "-0.01em",
                     }}
                   >
-                    Bagikan link ke teman Anda untuk bergabung di Notes Menuru
+                    Pilih user dari Firebase untuk diundang ke Notes Menuru
                   </span>
                 </div>
+
+                {/* Invite Panel */}
+                {showInvitePanel && (
+                  <div
+                    style={{
+                      marginBottom: "40px",
+                      backgroundColor: BLUE,
+                      borderRadius: "16px",
+                      padding: "24px",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "16px",
+                      maxWidth: "700px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        flexWrap: "wrap",
+                        gap: "12px",
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontFamily: FONT_FAMILY,
+                          fontSize: "20px",
+                          fontWeight: 700,
+                          color: WHITE,
+                          letterSpacing: "-0.01em",
+                        }}
+                      >
+                        Daftar User ({filteredInviteUsers.length})
+                      </span>
+                      <input
+                        type="text"
+                        value={inviteSearch}
+                        onChange={(e) => setInviteSearch(e.target.value)}
+                        placeholder="Cari user..."
+                        style={{
+                          padding: "8px 14px",
+                          borderRadius: "8px",
+                          border: `1.5px solid ${WHITE}`,
+                          backgroundColor: WHITE,
+                          color: BLUE,
+                          fontFamily: FONT_FAMILY,
+                          fontSize: "13px",
+                          fontWeight: 600,
+                          outline: "none",
+                          minWidth: "200px",
+                        }}
+                      />
+                    </div>
+
+                    <div
+                      style={{
+                        maxHeight: "300px",
+                        overflowY: "auto",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "8px",
+                      }}
+                    >
+                      {filteredInviteUsers.length === 0 && (
+                        <div
+                          style={{
+                            padding: "20px",
+                            textAlign: "center",
+                            fontFamily: FONT_FAMILY,
+                            fontSize: "14px",
+                            color: WHITE,
+                            opacity: 0.8,
+                          }}
+                        >
+                          Tidak ada user ditemukan
+                        </div>
+                      )}
+                      {filteredInviteUsers.map((iu) => {
+                        const isInvited = invitedUsers[iu.uid];
+                        return (
+                          <div
+                            key={iu.uid}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "12px",
+                              padding: "10px 14px",
+                              backgroundColor: WHITE,
+                              borderRadius: "10px",
+                            }}
+                          >
+                            <div
+                              style={{
+                                width: "40px",
+                                height: "40px",
+                                borderRadius: "50%",
+                                overflow: "hidden",
+                                backgroundColor: BLUE,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                flexShrink: 0,
+                              }}
+                            >
+                              {iu.photoURL ? (
+                                <img
+                                  src={iu.photoURL}
+                                  alt={iu.displayName}
+                                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                                  referrerPolicy="no-referrer"
+                                />
+                              ) : (
+                                <span style={{ fontSize: "16px", fontWeight: 800, color: WHITE }}>
+                                  {iu.displayName.charAt(0).toUpperCase()}
+                                </span>
+                              )}
+                            </div>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div
+                                style={{
+                                  fontFamily: FONT_FAMILY,
+                                  fontSize: "14px",
+                                  fontWeight: 700,
+                                  color: BLUE,
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {iu.displayName}
+                              </div>
+                              <div
+                                style={{
+                                  fontFamily: FONT_FAMILY,
+                                  fontSize: "11px",
+                                  fontWeight: 500,
+                                  color: BLUE,
+                                  opacity: 0.75,
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {iu.email}
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => handleInviteUser(iu)}
+                              style={{
+                                padding: "8px 16px",
+                                backgroundColor: isInvited ? BLACK : BLUE,
+                                color: WHITE,
+                                border: "none",
+                                borderRadius: "8px",
+                                fontFamily: FONT_FAMILY,
+                                fontSize: "12px",
+                                fontWeight: 800,
+                                letterSpacing: "0.5px",
+                                cursor: "pointer",
+                                textTransform: "uppercase",
+                                flexShrink: 0,
+                              }}
+                            >
+                              {isInvited ? "Invited" : "Invite"}
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Toast */}
+                {inviteToast && (
+                  <div
+                    style={{
+                      marginBottom: "20px",
+                      padding: "12px 20px",
+                      backgroundColor: BLUE,
+                      color: WHITE,
+                      borderRadius: "10px",
+                      fontFamily: FONT_FAMILY,
+                      fontSize: "14px",
+                      fontWeight: 600,
+                      display: "inline-block",
+                    }}
+                  >
+                    {inviteToast}
+                  </div>
+                )}
 
                 {/* Kategori - Sejajar ke Bawah */}
                 <div
                   style={{
                     display: "flex",
                     flexDirection: "column",
-                    gap: "14px",
+                    gap: "24px",
                     marginBottom: "50px",
                   }}
                 >
@@ -7772,13 +7967,14 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                             style={{
                               fontFamily: FONT_FAMILY,
                               fontSize: "14px",
-                              fontWeight: 400,
+                              fontWeight: 500,
                               color: "#999",
                               paddingLeft: "20px",
                               fontStyle: "italic",
+                              animation: "loading-blink 1.2s ease-in-out infinite",
                             }}
                           >
-                            Belum ada catatan di kategori ini
+                            Memuat catatan...
                           </span>
                         )}
                       </div>
@@ -7810,9 +8006,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                         color: "#999",
                         fontFamily: FONT_FAMILY,
                         fontSize: "16px",
+                        fontStyle: "italic",
+                        animation: "loading-blink 1.2s ease-in-out infinite",
                       }}
                     >
-                      Belum ada catatan yang masuk.
+                      Memuat catatan...
                     </div>
                   ) : (
                     <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
@@ -8281,6 +8479,14 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           }
           100% {
             transform: scale(1);
+            opacity: 1;
+          }
+        }
+        @keyframes loading-blink {
+          0%, 100% {
+            opacity: 0.35;
+          }
+          50% {
             opacity: 1;
           }
         }
