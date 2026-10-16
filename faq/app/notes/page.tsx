@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import Head from "next/head";
 import { 
   getAuth, 
   onAuthStateChanged,
@@ -26,6 +28,13 @@ import {
   getDoc
 } from "firebase/firestore";
 import { initializeApp, getApps } from "firebase/app";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { SplitText } from "gsap/SplitText";
+
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger, SplitText);
+}
 
 const firebaseConfig = {
   apiKey: "AIzaSyD_htQZ1TClnXKZGRJ4izbMQ02y6V3aNAQ",
@@ -38,7 +47,91 @@ const firebaseConfig = {
   measurementId: "G-8LMP7F4BE9"
 };
 
-// Instagram Verified Badge Component - Otomatis untuk semua akun Gmail
+// ===== CONSTANTS =====
+const FONT_FAMILY = "'Plus Jakarta Sans'";
+const BLUE = "#0D3CFC";
+const WHITE = "#FFFFFF";
+const BLACK = "#000000";
+const LIME = "#E3FB96";
+
+// ===== SVG ICONS =====
+const NorthEastArrow = ({ size = 20, color = "currentColor" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <path d="M7 17L17 7M17 7H8M17 7V16" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const LogoutIcon = ({ size = 20, color = "currentColor" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <path d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M16 17L21 12L16 7" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M21 12H9" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const PeopleIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="12" cy="8" r="4" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M4 21V19C4 16.7909 5.79086 15 8 15H16C18.2091 15 20 16.7909 20 19V21" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const StriperIcon = ({ size = 22, color = "#ffffff" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M3 6H21" stroke={color} strokeWidth="3.5" strokeLinecap="round" />
+    <path d="M3 12H21" stroke={color} strokeWidth="3.5" strokeLinecap="round" />
+    <path d="M3 18H21" stroke={color} strokeWidth="3.5" strokeLinecap="round" />
+  </svg>
+);
+
+const TrustIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 2L4 5V11C4 16 8 20 12 22C16 20 20 16 20 11V5L12 2Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M9 12L11 14L15 10" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const CareerIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="2" y="7" width="20" height="14" rx="2" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M8 7V5C8 3.89543 8.89543 3 10 3H14C15.1046 3 16 3.89543 16 5V7" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M2 13H22" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const ResourcesIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M4 4H10C11.1046 4 12 4.89543 12 6V20C12 18.8954 11.1046 18 10 18H4V4Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M20 4H14C12.8954 4 12 4.89543 12 6V20C12 18.8954 12.8954 18 14 18H20V4Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const DocsIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M14 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M14 2V8H20" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M8 13H16" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M8 17H16" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const BrandIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M20.59 13.41L11 3.83C10.6 3.43 10.06 3.2 9.5 3.2H4C2.9 3.2 2 4.1 2 5.2V10.7C2 11.26 2.22 11.8 2.63 12.2L12.21 21.79C13 22.57 14.27 22.57 15.06 21.79L20.59 16.26C21.37 15.47 21.37 14.2 20.59 13.41Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <circle cx="7" cy="7" r="1.5" fill={color} />
+  </svg>
+);
+
+const SayHeyIcon = ({ size = 22, color = "#000000" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M21 11.5C21 16.1944 16.9706 20 12 20C10.8452 20 9.74371 19.7964 8.73507 19.4276L4 21L5.45177 16.7441C4.53668 15.3762 4 13.7581 4 12C4 7.30558 8.02944 3.5 12 3.5C16.9706 3.5 21 7.30558 21 11.5Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <circle cx="9" cy="11.5" r="1" fill={color} />
+    <circle cx="12" cy="11.5" r="1" fill={color} />
+    <circle cx="15" cy="11.5" r="1" fill={color} />
+  </svg>
+);
+
+// Instagram Verified Badge Component
 const InstagramVerifiedBadge = ({ size = 16 }) => {
   const [showTooltip, setShowTooltip] = useState(false);
   
@@ -65,22 +158,7 @@ const InstagramVerifiedBadge = ({ size = 16 }) => {
       >
         <path
           fill="#0095F6"
-          d="
-            M12 2.2
-            C13.6 3.8 16.2 3.8 17.8 2.2
-            C18.6 3.8 20.2 5.4 21.8 6.2
-            C20.2 7.8 20.2 10.4 21.8 12
-            C20.2 13.6 20.2 16.2 21.8 17.8
-            C20.2 18.6 18.6 20.2 17.8 21.8
-            C16.2 20.2 13.6 20.2 12 21.8
-            C10.4 20.2 7.8 20.2 6.2 21.8
-            C5.4 20.2 3.8 18.6 2.2 17.8
-            C3.8 16.2 3.8 13.6 2.2 12
-            C3.8 10.4 3.8 7.8 2.2 6.2
-            C3.8 5.4 5.4 3.8 6.2 2.2
-            C7.8 3.8 10.4 3.8 12 2.2
-            Z
-          "
+          d="M12 2.2C13.6 3.8 16.2 3.8 17.8 2.2C18.6 3.8 20.2 5.4 21.8 6.2C20.2 7.8 20.2 10.4 21.8 12C20.2 13.6 20.2 16.2 21.8 17.8C20.2 18.6 18.6 20.2 17.8 21.8C16.2 20.2 13.6 20.2 12 21.8C10.4 20.2 7.8 20.2 6.2 21.8C5.4 20.2 3.8 18.6 2.2 17.8C3.8 16.2 3.8 13.6 2.2 12C3.8 10.4 3.8 7.8 2.2 6.2C3.8 5.4 5.4 3.8 6.2 2.2C7.8 3.8 10.4 3.8 12 2.2Z"
         />
         <path
           d="M9.2 12.3l2 2 4.6-4.6"
@@ -123,15 +201,709 @@ const InstagramVerifiedBadge = ({ size = 16 }) => {
   );
 };
 
-// Topic Dropdown Component
-const TopicDropdown = ({ categories, notesByCategory, selectedTopic, onSelectTopic }) => {
+// ===== NAVBAR BUTTON =====
+const NavbarButton = ({
+  label,
+  panelTitle,
+  panelDescription,
+  panelImage,
+  panelRightTitle,
+  panelRightDescription,
+  iconType,
+  bigPanelWidth = 850,
+  bigPanelHeight = 260,
+  buttonColor = "#0D3CFC",
+  buttonHoverColor = "#000000",
+  panelColor = "#0D3CFC",
+  iconButtonColor = "#000000",
+  iconButtonHoverColor = "#0D3CFC",
+  panelBoxColor = "rgba(255,255,255,0.12)",
+  panelBoxBorder = "rgba(255,255,255,0.25)",
+  labelTextColor = "#ffffff",
+  labelTextHoverColor = "#ffffff",
+  titleTextColor = "#ffffff",
+  descriptionTextColor = "rgba(255,255,255,0.9)",
+  iconComponent = null,
+  isResources = false,
+}: any) => {
+  const [open, setOpen] = useState(false);
+  const linesTopRef = useRef<SVGLineElement>(null);
+  const linesBottomRef = useRef<SVGLineElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleEnter = () => {
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
+      closeTimeoutRef.current = null;
+    }
+    setOpen(true);
+  };
+
+  const handleLeave = () => {
+    if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+    closeTimeoutRef.current = setTimeout(() => {
+      setOpen(false);
+    }, 250);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!linesTopRef.current || !linesBottomRef.current) return;
+    if (open) {
+      gsap.to(linesTopRef.current, { y: 2, duration: 0.35, ease: "power2.out" });
+      gsap.to(linesBottomRef.current, { y: -2, duration: 0.35, ease: "power2.out" });
+    } else {
+      gsap.to(linesTopRef.current, { y: 0, duration: 0.35, ease: "power2.out" });
+      gsap.to(linesBottomRef.current, { y: 0, duration: 0.35, ease: "power2.out" });
+    }
+  }, [open]);
+
+  useEffect(() => {
+    if (!panelRef.current) return;
+    if (open) {
+      gsap.fromTo(
+        panelRef.current,
+        { opacity: 0, y: -20, scale: 0.96 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: "power3.out" }
+      );
+    } else {
+      gsap.to(panelRef.current, {
+        opacity: 0,
+        y: -20,
+        scale: 0.96,
+        duration: 0.25,
+        ease: "power2.in",
+      });
+    }
+  }, [open]);
+
+  const strokeColor = open ? labelTextHoverColor : labelTextColor;
+
+  return (
+    <div style={{ position: "relative" }} onMouseEnter={handleEnter} onMouseLeave={handleLeave}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "10px",
+          padding: "10px 16px",
+          backgroundColor: open ? buttonHoverColor : buttonColor,
+          backdropFilter: "blur(20px)",
+          borderRadius: "10px",
+          border: "1px solid rgba(255,255,255,0.18)",
+          boxShadow: open ? "0 8px 24px rgba(0,0,0,0.35)" : `0 8px 24px ${buttonColor}55`,
+          transition: "background-color 0.25s ease",
+          cursor: "pointer",
+          position: "relative",
+          zIndex: 2,
+        }}
+      >
+        <span
+          style={{
+            color: open ? labelTextHoverColor : labelTextColor,
+            fontSize: "14px",
+            fontWeight: 600,
+            letterSpacing: "0.02em",
+            fontFamily: FONT_FAMILY,
+            whiteSpace: "nowrap",
+          }}
+        >
+          {label}
+        </span>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "22px",
+            height: "22px",
+            backgroundColor: open ? iconButtonHoverColor : iconButtonColor,
+            borderRadius: "6px",
+          }}
+        >
+          {iconComponent ? (
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <StriperIcon size={14} color={strokeColor} />
+            </div>
+          ) : (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{ display: "block" }}>
+              <line ref={linesTopRef} x1="4" y1="7" x2="20" y2="7" stroke={strokeColor} strokeWidth="2.5" strokeLinecap="round" />
+              <line ref={linesBottomRef} x1="4" y1="17" x2="20" y2="17" stroke={strokeColor} strokeWidth="2.5" strokeLinecap="round" />
+            </svg>
+          )}
+        </div>
+      </div>
+
+      {open && (
+        <div
+          ref={panelRef}
+          onMouseEnter={handleEnter}
+          onMouseLeave={handleLeave}
+          style={{
+            position: "absolute",
+            top: "calc(100% + 10px)",
+            left: "0px",
+            width: `${bigPanelWidth}px`,
+            minHeight: `${bigPanelHeight}px`,
+            backgroundColor: panelColor,
+            backdropFilter: "blur(24px)",
+            borderRadius: "10px",
+            border: "1px solid rgba(255,255,255,0.2)",
+            boxShadow: `0 8px 32px ${panelColor}55`,
+            zIndex: 1,
+            fontFamily: FONT_FAMILY,
+            color: titleTextColor,
+            padding: "22px 26px",
+            display: "flex",
+            gap: "20px",
+            alignItems: "flex-start",
+          }}
+        >
+          <div style={{ flex: "1 1 0", minWidth: 0, display: "flex", flexDirection: "column", gap: "12px" }}>
+            {isResources ? (
+              <>
+                <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                    <DocsIcon size={22} color={titleTextColor} />
+                    <span style={{ fontSize: "16px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>
+                      Docs
+                    </span>
+                  </div>
+                  <p style={{ fontSize: "12px", lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY, maxWidth: "340px" }}>
+                    Complete documentation of product guides, API, and Menuru tutorials.
+                  </p>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                    <BrandIcon size={22} color={titleTextColor} />
+                    <span style={{ fontSize: "16px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>
+                      Brand
+                    </span>
+                  </div>
+                  <p style={{ fontSize: "12px", lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY, maxWidth: "340px" }}>
+                    Visual assets, logos, and Menuru brand identity guidelines.
+                  </p>
+                </div>
+              </>
+            ) : (
+              <>
+                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                  {iconComponent ? (
+                    iconComponent
+                  ) : iconType === "trust" ? (
+                    <TrustIcon size={26} color={titleTextColor} />
+                  ) : iconType === "career" ? (
+                    <CareerIcon size={26} color={titleTextColor} />
+                  ) : (
+                    <ResourcesIcon size={26} color={titleTextColor} />
+                  )}
+                  <span style={{ fontSize: "20px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>
+                    {panelTitle}
+                  </span>
+                </div>
+                <p style={{ fontSize: "13px", lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY, maxWidth: "340px" }}>
+                  {panelDescription}
+                </p>
+              </>
+            )}
+          </div>
+          <div style={{ flex: "0 0 380px", display: "flex", flexDirection: "column", gap: "12px" }}>
+            {isResources ? (
+              <>
+                <div
+                  style={{
+                    backgroundColor: panelBoxColor,
+                    border: `1px solid ${panelBoxBorder}`,
+                    borderRadius: "12px",
+                    padding: "12px",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "8px",
+                  }}
+                >
+                  <img src={panelImage} alt="Docs" style={{ width: "100%", height: "120px", objectFit: "contain", display: "block", borderRadius: "8px" }} />
+                  <span style={{ fontSize: "14px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>
+                    Docs Guide
+                  </span>
+                  <p style={{ fontSize: "12px", lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY }}>
+                    Complete guides and technical references.
+                  </p>
+                </div>
+                <div
+                  style={{
+                    backgroundColor: panelBoxColor,
+                    border: `1px solid ${panelBoxBorder}`,
+                    borderRadius: "12px",
+                    padding: "12px",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "8px",
+                  }}
+                >
+                  <img src={panelImage} alt="Brand" style={{ width: "100%", height: "120px", objectFit: "contain", display: "block", borderRadius: "8px" }} />
+                  <span style={{ fontSize: "14px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>
+                    Brand Assets
+                  </span>
+                  <p style={{ fontSize: "12px", lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY }}>
+                    Logos, color palettes, and visual identity.
+                  </p>
+                </div>
+              </>
+            ) : (
+              <div
+                style={{
+                  backgroundColor: panelBoxColor,
+                  border: `1px solid ${panelBoxBorder}`,
+                  borderRadius: "12px",
+                  padding: "14px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "10px",
+                }}
+              >
+                <img src={panelImage} alt={panelTitle} style={{ width: "100%", height: "170px", objectFit: "contain", display: "block", borderRadius: "10px" }} />
+                <span style={{ fontSize: "15px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>
+                  {panelRightTitle}
+                </span>
+                <p style={{ fontSize: "12px", lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY }}>
+                  {panelRightDescription}
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ===== LEFT NAVBAR =====
+const LeftNavbar = () => {
+  return (
+    <div
+      style={{
+        position: "fixed",
+        top: "20px",
+        left: "60px",
+        zIndex: 9000,
+        display: "flex",
+        alignItems: "center",
+        gap: "8px",
+        fontFamily: FONT_FAMILY,
+      }}
+    >
+      <Link
+        href="/"
+        style={{
+          textDecoration: "none",
+          display: "flex",
+          alignItems: "center",
+          gap: "12px",
+          marginRight: "16px",
+        }}
+      >
+        <img
+          src="/images/nop.jpg"
+          alt="Menuru"
+          style={{
+            height: "60px",
+            width: "auto",
+            maxWidth: "none",
+            objectFit: "contain",
+            display: "block",
+            flexShrink: 0,
+            mixBlendMode: "multiply",
+          }}
+        />
+        <span
+          style={{
+            color: BLUE,
+            fontSize: "60px",
+            fontWeight: 700,
+            letterSpacing: "-0.03em",
+            fontFamily: FONT_FAMILY,
+            lineHeight: 1,
+            whiteSpace: "nowrap",
+          }}
+        >
+          Menuru
+        </span>
+      </Link>
+
+      <NavbarButton
+        label="Teams"
+        panelTitle="Trust"
+        panelDescription="Your security and privacy are our top priorities with end-to-end encryption."
+        panelImage="/images/p0l.jpg"
+        panelRightTitle="Why Trust Us"
+        panelRightDescription="Our systems are monitored 24/7 to protect your data."
+        iconType="trust"
+        bigPanelWidth={850}
+        bigPanelHeight={260}
+      />
+      <NavbarButton
+        label="Individual"
+        panelTitle="Careers"
+        panelDescription="Join our team and build a meaningful career in a supportive environment."
+        panelImage="/images/xxz.jpg"
+        panelRightTitle="Life at Menuru"
+        panelRightDescription="A collaborative, flexible work culture with plenty of opportunities to grow together."
+        iconType="career"
+        bigPanelWidth={850}
+        bigPanelHeight={260}
+      />
+      <NavbarButton
+        label="Resources"
+        panelTitle="Docs & Brand"
+        panelDescription="Access complete documentation and Menuru brand assets in one place."
+        panelImage="/images/p0l.jpg"
+        panelRightTitle="Docs & Brand"
+        panelRightDescription="Guides, visual assets, and official Menuru brand references."
+        iconType="resources"
+        iconComponent={<StriperIcon size={22} color="#ffffff" />}
+        bigPanelWidth={850}
+        bigPanelHeight={340}
+        buttonColor="#0D3CFC"
+        buttonHoverColor="#0D3CFC"
+        panelColor="#000000"
+        iconButtonColor="#000000"
+        iconButtonHoverColor="#000000"
+        panelBoxColor="rgba(255,255,255,0.12)"
+        panelBoxBorder="rgba(255,255,255,0.25)"
+        labelTextColor="#ffffff"
+        labelTextHoverColor="#ffffff"
+        titleTextColor="#ffffff"
+        descriptionTextColor="rgba(255,255,255,0.92)"
+        isResources={true}
+      />
+    </div>
+  );
+};
+
+// ===== RIGHT NAVBAR =====
+const RightNavbar = ({
+  user,
+  auth,
+  db,
+  userDisplayName,
+  router,
+}: {
+  user: any;
+  auth: any;
+  db: any;
+  userDisplayName: string;
+  router: any;
+}) => {
+  const displayName = userDisplayName || user?.displayName || user?.email?.split("@")[0] || "User";
+  const photoURL = user?.photoURL || "";
+
+  const handleLogout = async () => {
+    if (!auth) return;
+    try {
+      if (db && user) {
+        await updateDoc(doc(db, "users", user.uid), {
+          online: false,
+          lastSeen: serverTimestamp(),
+        });
+      }
+      await signOut(auth);
+      router.push("/");
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
+
+  if (!user) {
+    return (
+      <div
+        style={{
+          position: "fixed",
+          top: "20px",
+          right: "24px",
+          zIndex: 9000,
+          display: "flex",
+          alignItems: "center",
+          gap: "10px",
+          fontFamily: FONT_FAMILY,
+        }}
+      >
+        <Link
+          href="/signin"
+          style={{
+            textDecoration: "none",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "10px",
+            padding: "10px 18px 10px 16px",
+            backgroundColor: BLUE,
+            borderRadius: "10px",
+            border: `1px solid ${BLUE}`,
+            boxShadow: "0 8px 24px rgba(13,60,252,0.35)",
+            cursor: "pointer",
+            transition: "transform 0.2s ease",
+          }}
+        >
+          <PeopleIcon size={20} color="#ffffff" />
+          <span
+            style={{
+              color: "#ffffff",
+              fontSize: "14px",
+              fontWeight: 700,
+              letterSpacing: "0.02em",
+              fontFamily: FONT_FAMILY,
+              whiteSpace: "nowrap",
+            }}
+          >
+            Sign In
+          </span>
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      style={{
+        position: "fixed",
+        top: "20px",
+        right: "24px",
+        zIndex: 9000,
+        fontFamily: FONT_FAMILY,
+        display: "flex",
+        alignItems: "center",
+        gap: "10px",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "10px",
+          padding: "10px 16px",
+          backgroundColor: BLUE,
+          borderRadius: "10px",
+          border: `1px solid ${BLUE}`,
+          boxShadow: "0 8px 24px rgba(13,60,252,0.35)",
+        }}
+      >
+        <div
+          style={{
+            width: "36px",
+            height: "36px",
+            borderRadius: "50%",
+            overflow: "hidden",
+            backgroundColor: WHITE,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+          }}
+        >
+          {photoURL ? (
+            <img
+              src={photoURL}
+              alt={displayName}
+              style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+              referrerPolicy="no-referrer"
+            />
+          ) : (
+            <span style={{ fontSize: "16px", fontWeight: 800, color: BLUE }}>
+              {displayName.charAt(0).toUpperCase()}
+            </span>
+          )}
+        </div>
+        <span
+          style={{
+            color: WHITE,
+            fontSize: "14px",
+            fontWeight: 700,
+            letterSpacing: "0.02em",
+            fontFamily: FONT_FAMILY,
+            whiteSpace: "nowrap",
+          }}
+        >
+          {displayName}
+        </span>
+      </div>
+
+      <button
+        onClick={handleLogout}
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: "8px",
+          padding: "10px 16px",
+          backgroundColor: BLUE,
+          color: WHITE,
+          borderRadius: "10px",
+          border: `1px solid ${BLUE}`,
+          boxShadow: "0 8px 24px rgba(13,60,252,0.35)",
+          fontFamily: FONT_FAMILY,
+          fontSize: "14px",
+          fontWeight: 700,
+          cursor: "pointer",
+        }}
+      >
+        Logout
+        <LogoutIcon size={16} color={WHITE} />
+      </button>
+    </div>
+  );
+};
+
+// ===== FOOTER MENURU TITLE =====
+const FooterMenuruTitle = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!titleRef.current || !containerRef.current) return;
+
+    const title = titleRef.current;
+    let split: any = null;
+    let ctx: any = null;
+
+    const setup = () => {
+      split = new SplitText(title, { type: "chars", charsClass: "footer-menuru-char" });
+
+      ctx = gsap.context(() => {
+        gsap.set(split.chars, {
+          yPercent: 120,
+          opacity: 0,
+          rotationX: -90,
+          transformOrigin: "50% 100%",
+          force3D: true,
+        });
+
+        gsap.to(split.chars, {
+          yPercent: 0,
+          opacity: 1,
+          rotationX: 0,
+          duration: 1,
+          stagger: 0.08,
+          ease: "back.out(1.7)",
+          scrollTrigger: {
+            trigger: containerRef.current,
+            start: "top 90%",
+            end: "top 40%",
+            scrub: 1,
+            toggleActions: "play none none reverse",
+            invalidateOnRefresh: true,
+          },
+        });
+      }, containerRef);
+    };
+
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => {
+        setTimeout(setup, 50);
+      });
+    } else {
+      setTimeout(setup, 200);
+    }
+
+    return () => {
+      if (ctx) ctx.revert();
+      if (split && split.revert) split.revert();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const onLoad = () => ScrollTrigger.refresh();
+    window.addEventListener("load", onLoad);
+    const t1 = setTimeout(() => ScrollTrigger.refresh(), 600);
+    const t2 = setTimeout(() => ScrollTrigger.refresh(), 1500);
+    return () => {
+      window.removeEventListener("load", onLoad);
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
+  }, []);
+
+  return (
+    <div
+      ref={containerRef}
+      style={{
+        width: "100%",
+        padding: "0 40px 20px 40px",
+        backgroundColor: "#ffffff",
+        overflow: "visible",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "flex-start",
+        position: "relative",
+      }}
+    >
+      <span
+        ref={titleRef}
+        style={{
+          fontFamily: FONT_FAMILY,
+          fontSize: "600px",
+          fontWeight: 400,
+          color: BLUE,
+          letterSpacing: "-0.05em",
+          lineHeight: "0.85",
+          display: "block",
+          textAlign: "left",
+          WebkitFontSmoothing: "antialiased",
+          MozOsxFontSmoothing: "grayscale",
+          willChange: "transform, opacity",
+          whiteSpace: "nowrap",
+          margin: 0,
+          padding: 0,
+          overflow: "visible",
+          position: "relative",
+        }}
+      >
+        Menuru
+      </span>
+      <div style={{ width: "100%", display: "flex", justifyContent: "flex-start", marginTop: "10px" }}>
+        <span
+          style={{
+            fontFamily: FONT_FAMILY,
+            fontSize: "16px",
+            fontWeight: 400,
+            color: BLUE,
+            letterSpacing: "0.01em",
+            opacity: 0.8,
+          }}
+        >
+          2024 - 2026 Menuru. All rights reserved.
+        </span>
+      </div>
+    </div>
+  );
+};
+
+const footerLinks = [
+  { title: "Get in Touch", links: ["Contact Us", "Instagram", "Live Chat"] },
+  {
+    title: "Product",
+    links: ["Shop", "Note", "Calendar", "Blog", "Donation", "Community", "Live Chat Agent", "Stories"],
+  },
+  {
+    title: "Attention",
+    links: ["Privacy Policy", "Terms & Conditions", "About Us", "Terms of Use", "Cookies Policy", "Help Center"],
+  },
+];
+
+// ===== TOPIC DROPDOWN =====
+const TopicDropdown = ({ categories, notesByCategory, selectedTopic, onSelectTopic }: any) => {
   const [isOpen, setIsOpen] = useState(false);
   
-  const getNoteCount = (category) => {
+  const getNoteCount = (category: string) => {
     return notesByCategory[category]?.length || 0;
   };
   
-  const activeCategories = categories.filter(cat => getNoteCount(cat) > 0);
+  const activeCategories = categories.filter((cat: string) => getNoteCount(cat) > 0);
   
   if (activeCategories.length === 0) return null;
   
@@ -146,12 +918,12 @@ const TopicDropdown = ({ categories, notesByCategory, selectedTopic, onSelectTop
         style={{
           width: '100%',
           padding: '16px 20px',
-          backgroundColor: '#111',
-          border: '1px solid #333',
+          backgroundColor: BLUE,
+          border: `1px solid ${BLUE}`,
           borderRadius: '8px',
           color: 'white',
           fontSize: '18px',
-          fontFamily: 'Helvetica, Arial, sans-serif',
+          fontFamily: FONT_FAMILY,
           cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',
@@ -183,8 +955,8 @@ const TopicDropdown = ({ categories, notesByCategory, selectedTopic, onSelectTop
           left: 0,
           right: 0,
           marginTop: '4px',
-          backgroundColor: '#111',
-          border: '1px solid #333',
+          backgroundColor: BLUE,
+          border: `1px solid ${BLUE}`,
           borderRadius: '8px',
           overflow: 'hidden',
           zIndex: 1000
@@ -199,32 +971,31 @@ const TopicDropdown = ({ categories, notesByCategory, selectedTopic, onSelectTop
               padding: '16px 20px',
               backgroundColor: 'transparent',
               border: 'none',
-              borderBottom: '1px solid #222',
-              color: !selectedTopic ? 'white' : '#999',
+              borderBottom: `1px solid rgba(255,255,255,0.1)`,
+              color: !selectedTopic ? 'white' : 'rgba(255,255,255,0.6)',
               fontSize: '16px',
-              fontFamily: 'Helvetica, Arial, sans-serif',
+              fontFamily: FONT_FAMILY,
               cursor: 'pointer',
               textAlign: 'left',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between'
             }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1a1a1a'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
           >
             <span>Semua Topik</span>
             <span style={{
-              backgroundColor: '#222',
+              backgroundColor: WHITE,
               padding: '4px 10px',
               borderRadius: '20px',
               fontSize: '14px',
-              color: '#999'
+              color: BLUE,
+              fontWeight: 700
             }}>
               {Object.keys(notesByCategory).reduce((acc, cat) => acc + notesByCategory[cat].length, 0)}
             </span>
           </button>
           
-          {activeCategories.map((category) => (
+          {activeCategories.map((category: string) => (
             <button
               key={category}
               onClick={() => {
@@ -236,26 +1007,25 @@ const TopicDropdown = ({ categories, notesByCategory, selectedTopic, onSelectTop
                 padding: '16px 20px',
                 backgroundColor: 'transparent',
                 border: 'none',
-                borderBottom: '1px solid #222',
-                color: selectedTopic === category ? 'white' : '#999',
+                borderBottom: `1px solid rgba(255,255,255,0.1)`,
+                color: selectedTopic === category ? 'white' : 'rgba(255,255,255,0.6)',
                 fontSize: '16px',
-                fontFamily: 'Helvetica, Arial, sans-serif',
+                fontFamily: FONT_FAMILY,
                 cursor: 'pointer',
                 textAlign: 'left',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between'
               }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1a1a1a'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
               <span>{category}</span>
               <span style={{
-                backgroundColor: '#222',
+                backgroundColor: WHITE,
                 padding: '4px 10px',
                 borderRadius: '20px',
                 fontSize: '14px',
-                color: '#999'
+                color: BLUE,
+                fontWeight: 700
               }}>
                 {getNoteCount(category)}
               </span>
@@ -267,19 +1037,20 @@ const TopicDropdown = ({ categories, notesByCategory, selectedTopic, onSelectTop
   );
 };
 
-// Collaborate Badge - Tanpa warna kuning
+// ===== COLLABORATE BADGE =====
 const CollaborateBadge = () => (
   <div style={{
     display: 'inline-flex',
     alignItems: 'center',
     gap: '6px',
     padding: '4px 10px',
-    backgroundColor: '#222',
+    backgroundColor: BLUE,
     borderRadius: '20px',
     fontSize: '12px',
-    color: '#ccc',
+    color: WHITE,
     letterSpacing: '0.3px',
-    marginLeft: '10px'
+    marginLeft: '10px',
+    fontWeight: 700
   }}>
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <path d="M12 2a10 10 0 0 1 10 10c0 5.52-4.48 10-10 10S2 17.52 2 12 6.48 2 12 2z"/>
@@ -289,8 +1060,8 @@ const CollaborateBadge = () => (
   </div>
 );
 
-// Collaborator List - Tanpa border
-const CollaboratorList = ({ collaborators = [], collaboratorNames = {} }) => {
+// ===== COLLABORATOR LIST =====
+const CollaboratorList = ({ collaborators = [], collaboratorNames = {} }: any) => {
   if (!collaborators || collaborators.length === 0) return null;
   
   return (
@@ -302,8 +1073,9 @@ const CollaboratorList = ({ collaborators = [], collaboratorNames = {} }) => {
     }}>
       <span style={{
         fontSize: '16px',
-        color: '#aaa',
-        fontWeight: '300'
+        color: BLUE,
+        fontWeight: '600',
+        fontFamily: FONT_FAMILY,
       }}>
         Kolaborator:
       </span>
@@ -313,7 +1085,7 @@ const CollaboratorList = ({ collaborators = [], collaboratorNames = {} }) => {
         gap: '15px',
         flexWrap: 'wrap'
       }}>
-        {Object.entries(collaboratorNames || {}).map(([id, name]) => (
+        {Object.entries(collaboratorNames || {}).map(([id, name]: any) => (
           <div
             key={id}
             style={{
@@ -321,7 +1093,9 @@ const CollaboratorList = ({ collaborators = [], collaboratorNames = {} }) => {
               alignItems: 'center',
               gap: '4px',
               fontSize: '16px',
-              color: 'white'
+              color: BLUE,
+              fontFamily: FONT_FAMILY,
+              fontWeight: 600
             }}
           >
             <span>{name}</span>
@@ -333,6 +1107,7 @@ const CollaboratorList = ({ collaborators = [], collaboratorNames = {} }) => {
   );
 };
 
+// ===== INTERFACES =====
 interface Note {
   id?: string;
   title: string;
@@ -414,7 +1189,16 @@ export default function NotesPage(): React.JSX.Element {
   const [collaborateEmail, setCollaborateEmail] = useState("");
   const [auth, setAuth] = useState<any>(null);
   const [db, setDb] = useState<any>(null);
+  const [isMounted, setIsMounted] = useState(false);
+  const [showMain, setShowMain] = useState(false);
+  const [loading, setLoading] = useState(true);
   const videoRefs = useRef<{ [key: string]: HTMLVideoElement | null }>({});
+  
+  // Refs for preloader
+  const preloaderRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLSpanElement>(null);
+  const counterRef = useRef<HTMLSpanElement>(null);
+  const mainPageRef = useRef<HTMLDivElement>(null);
 
   const categories = [
     "Makanan",
@@ -433,6 +1217,10 @@ export default function NotesPage(): React.JSX.Element {
     "Teknologi",
     "Hobi"
   ];
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -468,6 +1256,7 @@ export default function NotesPage(): React.JSX.Element {
         const email = currentUser.email || '';
         setUserDisplayName(name);
         setUserEmail(email);
+        setLoading(false);
         
         await saveUserToFirestore(currentUser.uid, name, email);
         
@@ -475,7 +1264,8 @@ export default function NotesPage(): React.JSX.Element {
         loadUserGroups(currentUser.uid);
         loadUserNotifications(currentUser.uid);
       } else {
-        router.push('/');
+        setLoading(false);
+        router.push('/signin');
       }
     });
 
@@ -483,6 +1273,110 @@ export default function NotesPage(): React.JSX.Element {
       if (unsubscribe) unsubscribe();
     };
   }, [auth, router]);
+
+  // ===== PRELOADER ANIMATION =====
+  useEffect(() => {
+    if (!isMounted || loading) return;
+
+    let killed = false;
+    const preloaderEl = preloaderRef.current;
+    const textEl = textRef.current;
+    const counterEl = counterRef.current;
+    const mainEl = mainPageRef.current;
+
+    if (!preloaderEl || !textEl || !counterEl || !mainEl) return;
+
+    setShowMain(true);
+
+    gsap.set(textEl, { y: 100, opacity: 0 });
+    gsap.set(counterEl, { opacity: 1, scale: 1, y: 0, xPercent: 0 });
+    gsap.set(preloaderEl, { opacity: 1, scale: 1, xPercent: 0, display: "block" });
+    gsap.set(mainEl, { xPercent: 100, opacity: 1, display: "flex" });
+
+    const counterObj = { value: 1 };
+    counterEl.textContent = "01";
+
+    const tl = gsap.timeline();
+
+    tl.to(textEl, { y: 0, opacity: 1, duration: 1.0, ease: "back.out(1.7)" })
+      .to(textEl, { duration: 0.8 })
+      .to(textEl, {
+        opacity: 0,
+        y: -20,
+        scale: 0.9,
+        duration: 0.5,
+        ease: "power2.out",
+        onComplete: () => {
+          if (textEl) textEl.textContent = "Note";
+        },
+      })
+      .to(textEl, { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: "back.out(1.7)" })
+      .to(textEl, { duration: 1.2 });
+
+    tl.to(
+      counterObj,
+      {
+        value: 100,
+        duration: 6.5,
+        ease: "power2.inOut",
+        onUpdate: () => {
+          if (counterEl) {
+            const val = Math.round(counterObj.value);
+            counterEl.textContent = String(val).padStart(2, "0");
+          }
+        },
+      },
+      0
+    );
+
+    tl.to(textEl, {
+      scale: 0.3,
+      opacity: 0,
+      duration: 0.8,
+      ease: "power2.in",
+    })
+      .to(
+        counterEl,
+        {
+          scale: 0.6,
+          opacity: 0,
+          duration: 0.8,
+          ease: "power2.in",
+        },
+        "-=0.8"
+      )
+      .to(
+        preloaderEl,
+        {
+          xPercent: -100,
+          duration: 1.2,
+          ease: "power3.inOut",
+          onComplete: () => {
+            if (preloaderEl) preloaderEl.style.display = "none";
+          },
+        },
+        "-=0.2"
+      )
+      .to(
+        mainEl,
+        {
+          xPercent: 0,
+          duration: 1.2,
+          ease: "power3.inOut",
+          onComplete: () => {
+            if (killed) return;
+            gsap.set(mainEl, { clearProps: "transform,willChange" });
+            setTimeout(() => ScrollTrigger.refresh(), 300);
+          },
+        },
+        "<"
+      );
+
+    return () => {
+      killed = true;
+      tl.kill();
+    };
+  }, [isMounted, loading]);
 
   const saveUserToFirestore = async (userId: string, name: string, email: string) => {
     if (!db) return;
@@ -494,17 +1388,18 @@ export default function NotesPage(): React.JSX.Element {
       const userData = {
         id: userId,
         name: name,
+        displayName: name,
         email: email.toLowerCase(),
+        online: true,
+        lastSeen: serverTimestamp(),
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       };
       
       if (!userSnap.exists()) {
         await setDoc(userRef, userData);
-        console.log("User document created in Firestore");
       } else {
         await updateDoc(userRef, userData);
-        console.log("User document updated in Firestore");
       }
     } catch (error) {
       console.error("Error saving user to Firestore:", error);
@@ -512,22 +1407,19 @@ export default function NotesPage(): React.JSX.Element {
   };
 
   const loadUserNotes = (userId: string) => {
-    if (!db) {
-      console.log('Database not ready yet');
-      return;
-    }
+    if (!db) return;
     
     setIsLoading(true);
     try {
       const notesRef = collection(db, 'userNotes');
       const q = query(notesRef, where('userId', '==', userId), orderBy('updatedAt', 'desc'));
       
-      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const unsubscribe = onSnapshot(q, (querySnapshot: any) => {
         const notesData: Note[] = [];
-        querySnapshot.forEach((doc) => {
-          const noteData = doc.data() as Note;
+        querySnapshot.forEach((docSnap: any) => {
+          const noteData = docSnap.data() as Note;
           notesData.push({
-            id: doc.id,
+            id: docSnap.id,
             ...noteData
           });
         });
@@ -553,11 +1445,11 @@ export default function NotesPage(): React.JSX.Element {
       const querySnapshot = await getDocs(q);
       const collaborativeNotes: Note[] = [];
       
-      querySnapshot.forEach((doc) => {
-        const noteData = doc.data() as Note;
-        if (!existingNotes.some(note => note.id === doc.id)) {
+      querySnapshot.forEach((docSnap: any) => {
+        const noteData = docSnap.data() as Note;
+        if (!existingNotes.some(note => note.id === docSnap.id)) {
           collaborativeNotes.push({
-            id: doc.id,
+            id: docSnap.id,
             ...noteData,
             isCollaborative: true
           });
@@ -579,12 +1471,12 @@ export default function NotesPage(): React.JSX.Element {
       const groupsRef = collection(db, 'groups');
       const q = query(groupsRef, where('members', 'array-contains', userId));
       
-      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const unsubscribe = onSnapshot(q, (querySnapshot: any) => {
         const groupsData: Group[] = [];
-        querySnapshot.forEach((doc) => {
-          const groupData = doc.data() as Group;
+        querySnapshot.forEach((docSnap: any) => {
+          const groupData = docSnap.data() as Group;
           groupsData.push({
-            id: doc.id,
+            id: docSnap.id,
             ...groupData
           });
         });
@@ -612,11 +1504,10 @@ export default function NotesPage(): React.JSX.Element {
         orderBy('createdAt', 'desc')
       );
       
-      const unsubscribe = onSnapshot(q, async (querySnapshot) => {
+      const unsubscribe = onSnapshot(q, async (querySnapshot: any) => {
         const notificationsData: Notification[] = [];
         for (const docSnap of querySnapshot.docs) {
           const notificationData = docSnap.data() as Notification;
-          
           notificationsData.push({
             id: docSnap.id,
             ...notificationData
@@ -671,10 +1562,10 @@ export default function NotesPage(): React.JSX.Element {
       const querySnapshot = await getDocs(q);
       
       if (!querySnapshot.empty) {
-        const doc = querySnapshot.docs[0];
+        const docSnap = querySnapshot.docs[0];
         return {
-          id: doc.id,
-          ...doc.data()
+          id: docSnap.id,
+          ...docSnap.data()
         };
       }
       
@@ -694,6 +1585,7 @@ export default function NotesPage(): React.JSX.Element {
         id: userId,
         email: email.toLowerCase(),
         name: name || email.split('@')[0],
+        displayName: name || email.split('@')[0],
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       };
@@ -701,7 +1593,6 @@ export default function NotesPage(): React.JSX.Element {
       const userRef = doc(db, 'users', userId);
       await setDoc(userRef, userData);
       
-      console.log("Created new user record:", userId);
       return userId;
     } catch (error) {
       console.error("Error creating user record:", error);
@@ -1045,17 +1936,6 @@ export default function NotesPage(): React.JSX.Element {
     }
   };
 
-  const handleLogout = async () => {
-    if (auth) {
-      try {
-        await signOut(auth);
-        router.push('/');
-      } catch (error) {
-        console.error("Error logging out:", error);
-      }
-    }
-  };
-
   const getVideoEmbedUrl = (link: string) => {
     if (!link) return null;
     
@@ -1142,7 +2022,6 @@ export default function NotesPage(): React.JSX.Element {
   const pendingNotifications = notifications.filter(n => n.status === 'pending');
   const notificationCount = pendingNotifications.length;
 
-  // Group notes by category
   const notesByCategory = notes.reduce((acc, note) => {
     const category = note.category || "Lainnya";
     if (!acc[category]) {
@@ -1152,21 +2031,20 @@ export default function NotesPage(): React.JSX.Element {
     return acc;
   }, {} as { [key: string]: Note[] });
 
-  // Filter notes based on selected topic
   const filteredNotes = selectedTopic 
     ? notesByCategory[selectedTopic] || []
     : notes;
 
-  if (!auth || !db) {
+  if (!auth || !db || !isMounted) {
     return (
       <div style={{
         minHeight: '100vh',
-        backgroundColor: 'black',
+        backgroundColor: WHITE,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        color: 'white',
-        fontFamily: 'Helvetica, Arial, sans-serif',
+        color: BLUE,
+        fontFamily: FONT_FAMILY,
         fontSize: '20px'
       }}>
         Loading...
@@ -1175,850 +2053,921 @@ export default function NotesPage(): React.JSX.Element {
   }
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      backgroundColor: 'black',
-      margin: 0,
-      padding: 0,
-      width: '100%',
-      fontFamily: 'Helvetica, Arial, sans-serif',
-      color: 'white',
-      position: 'relative'
-    }}>
-      {/* Header */}
-      <div style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        padding: '20px 40px',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        backgroundColor: 'black',
-        zIndex: 100,
-      }}>
-        <div style={{
-          fontSize: '42px',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          fontWeight: 'bold',
-          color: 'white',
-          letterSpacing: '1px',
-          cursor: 'pointer'
-        }} onClick={() => router.push('/')}>
-          Menuru
-        </div>
+    <>
+      <Head>
+        <title>Menuru Notes | My Notes</title>
+        <meta name="description" content="Notes for the next era of technology system" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+        <meta name="theme-color" content={BLUE} />
+      </Head>
 
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '30px'
-        }}>
-          <div style={{
-            fontSize: '32px',
-            fontFamily: 'Helvetica, Arial, sans-serif',
-            color: 'white',
-            fontWeight: 'bold',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px'
-          }}>
-            {userDisplayName}
-            <InstagramVerifiedBadge />
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M7 17l9.2-9.2M17 17V7H7"/>
-            </svg>
-          </div>
-          
-          <div style={{ position: 'relative' }}>
-            <button
-              onClick={() => setShowNotifications(!showNotifications)}
-              style={{
-                backgroundColor: 'transparent',
-                border: 'none',
-                color: 'white',
-                padding: '10px',
-                cursor: 'pointer',
-                fontSize: '24px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                position: 'relative'
-              }}
-              title="Notifikasi"
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/>
-              </svg>
-              {notificationCount > 0 && (
-                <div style={{
-                  position: 'absolute',
-                  top: '5px',
-                  right: '5px',
-                  backgroundColor: 'red',
-                  color: 'white',
-                  borderRadius: '50%',
-                  width: '20px',
-                  height: '20px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '12px',
-                  fontWeight: 'bold'
-                }}>
-                  {notificationCount}
-                </div>
-              )}
-            </button>
-
-            {showNotifications && (
-              <div style={{
-                position: 'absolute',
-                top: '50px',
-                right: 0,
-                backgroundColor: '#111',
-                border: '1px solid #333',
-                borderRadius: '8px',
-                width: '400px',
-                maxHeight: '500px',
-                overflowY: 'auto',
-                zIndex: 1000,
-                boxShadow: '0 4px 20px rgba(0,0,0,0.5)'
-              }}>
-                <div style={{
-                  padding: '20px',
-                  borderBottom: '1px solid #333',
-                  fontSize: '20px',
-                  fontWeight: 'bold'
-                }}>
-                  Notifikasi ({notifications.length})
-                </div>
-                
-                {notifications.length === 0 ? (
-                  <div style={{
-                    padding: '30px',
-                    textAlign: 'center',
-                    color: '#888',
-                    fontSize: '18px'
-                  }}>
-                    Tidak ada notifikasi
-                  </div>
-                ) : (
-                  <div>
-                    {notifications.map((notification) => (
-                      <div
-                        key={notification.id}
-                        style={{
-                          padding: '20px',
-                          borderBottom: '1px solid #222',
-                          backgroundColor: notification.status === 'pending' ? 'rgba(255,255,255,0.05)' : 'transparent'
-                        }}
-                      >
-                        <div style={{
-                          fontSize: '18px',
-                          marginBottom: '10px',
-                          color: notification.status === 'pending' ? 'white' : '#aaa'
-                        }}>
-                          {notification.message}
-                        </div>
-                        
-                        <div style={{
-                          fontSize: '14px',
-                          color: '#666',
-                          marginBottom: '10px'
-                        }}>
-                          Dari: {notification.senderName || 'Unknown User'}
-                          {notification.type === 'group_invite' && (
-                            <>
-                              <br />
-                              Grup: {notification.groupName || 'Unknown Group'}
-                            </>
-                          )}
-                          {notification.type === 'collaborate_invite' && (
-                            <>
-                              <br />
-                              Catatan: {notification.noteTitle || 'Unknown Note'}
-                            </>
-                          )}
-                          <br />
-                          Waktu: {formatTime(notification.createdAt)}
-                        </div>
-                        
-                        {notification.status === 'pending' && (
-                          <div style={{
-                            display: 'flex',
-                            gap: '10px',
-                            marginTop: '15px'
-                          }}>
-                            <button
-                              onClick={() => handleNotificationResponse(notification.id!, true)}
-                              style={{
-                                padding: '8px 20px',
-                                backgroundColor: 'green',
-                                border: 'none',
-                                color: 'white',
-                                borderRadius: '6px',
-                                cursor: 'pointer',
-                                fontSize: '16px',
-                                fontWeight: 'bold'
-                              }}
-                            >
-                              Terima
-                            </button>
-                            <button
-                              onClick={() => handleNotificationResponse(notification.id!, false)}
-                              style={{
-                                padding: '8px 20px',
-                                backgroundColor: 'red',
-                                border: 'none',
-                                color: 'white',
-                                borderRadius: '6px',
-                                cursor: 'pointer',
-                                fontSize: '16px',
-                                fontWeight: 'bold'
-                              }}
-                            >
-                              Tolak
-                            </button>
-                          </div>
-                        )}
-                        
-                        {notification.status === 'accepted' && (
-                          <div style={{
-                            color: 'green',
-                            fontSize: '16px',
-                            fontWeight: 'bold',
-                            marginTop: '10px'
-                          }}>
-                            ✓ Diterima
-                          </div>
-                        )}
-                        
-                        {notification.status === 'rejected' && (
-                          <div style={{
-                            color: 'red',
-                            fontSize: '16px',
-                            fontWeight: 'bold',
-                            marginTop: '10px'
-                          }}>
-                            ✗ Ditolak
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-          
-          {groups.length > 0 && (
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '15px'
-            }}>
-              <select
-                value={currentGroup?.id || ''}
-                onChange={(e) => {
-                  const group = groups.find(g => g.id === e.target.value);
-                  setCurrentGroup(group || null);
-                }}
-                style={{
-                  padding: '10px 15px',
-                  backgroundColor: 'transparent',
-                  border: 'none',
-                  color: 'white',
-                  fontSize: '18px',
-                  outline: 'none',
-                  cursor: 'pointer',
-                  minWidth: '150px'
-                }}
-              >
-                {groups.map((group) => (
-                  <option key={group.id} value={group.id} style={{ backgroundColor: 'black' }}>
-                    {group.name}
-                  </option>
-                ))}
-              </select>
-              
-              {currentGroup && (
-                <button
-                  onClick={() => router.push('/groups')}
-                  style={{
-                    backgroundColor: 'transparent',
-                    border: 'none',
-                    color: 'white',
-                    padding: '10px',
-                    cursor: 'pointer',
-                    fontSize: '20px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '5px'
-                  }}
-                  title="Buka Halaman Grup"
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
-                  </svg>
-                  Grup
-                </button>
-              )}
-              
-              <button
-                onClick={() => setShowInviteModal(true)}
-                style={{
-                  backgroundColor: 'transparent',
-                  border: 'none',
-                  color: 'white',
-                  padding: '10px',
-                  cursor: 'pointer',
-                  fontSize: '20px'
-                }}
-                title="Undang ke Grup"
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
-                  <circle cx="8.5" cy="7" r="4"/>
-                  <line x1="20" y1="8" x2="20" y2="14"/>
-                  <line x1="23" y1="11" x2="17" y2="11"/>
-                </svg>
-              </button>
-            </div>
-          )}
-          
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '5px'
-          }}>
-            <span style={{
-              fontSize: '20px',
-              color: 'white'
-            }}>
-              Buat Grup Baru
-            </span>
-            <button
-              onClick={() => setShowGroupModal(true)}
-              style={{
-                backgroundColor: 'transparent',
-                border: 'none',
-                color: 'white',
-                padding: '10px',
-                cursor: 'pointer',
-                fontSize: '24px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-              title="Buat Grup Baru"
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M12 5v14M5 12h14"/>
-              </svg>
-            </button>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M7 17L17 7M7 7H17V17"/>
-            </svg>
-          </div>
-          
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '5px'
-          }}>
-            <span style={{
-              fontSize: '20px',
-              color: 'white'
-            }}>
-              Buat Catatan Baru
-            </span>
-            <button
-              onClick={() => setShowNewNoteForm(true)}
-              style={{
-                backgroundColor: 'transparent',
-                border: 'none',
-                color: 'white',
-                padding: '12px',
-                cursor: 'pointer',
-                fontSize: '28px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: '50px',
-                height: '50px'
-              }}
-              title="Buat Catatan Baru"
-            >
-              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M12 5v14M5 12h14"/>
-              </svg>
-            </button>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M7 17L17 7M7 7H17V17"/>
-            </svg>
-          </div>
-
-          <button
-            onClick={handleLogout}
+      <div
+        style={{
+          position: "relative",
+          width: "100%",
+          minHeight: "100vh",
+          overflow: "hidden",
+          backgroundColor: WHITE,
+        }}
+      >
+        {/* ===== PRELOADER ===== */}
+        <div
+          ref={preloaderRef}
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: WHITE,
+            zIndex: 9999,
+            fontFamily: FONT_FAMILY,
+            overflow: "hidden",
+            willChange: "transform",
+          }}
+        >
+          <span
+            ref={counterRef}
             style={{
-              backgroundColor: 'transparent',
-              border: 'none',
-              color: 'white',
-              padding: '10px',
-              cursor: 'pointer',
-              fontSize: '24px',
+              position: "absolute",
+              top: "10px",
+              right: "40px",
+              fontSize: "400px",
+              fontWeight: 400,
+              color: BLUE,
+              fontFamily: FONT_FAMILY,
+              letterSpacing: "-0.04em",
+              lineHeight: 0.9,
+              display: "inline-block",
+              willChange: "transform, opacity",
+              userSelect: "none",
+              pointerEvents: "none",
+            }}
+          >
+            01
+          </span>
+
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "40px", overflow: "hidden" }}>
+              <span
+                style={{
+                  fontSize: "100px",
+                  fontWeight: 400,
+                  color: BLUE,
+                  fontFamily: FONT_FAMILY,
+                  letterSpacing: "-0.03em",
+                }}
+              >
+                Menuru
+              </span>
+              <span
+                ref={textRef}
+                style={{
+                  fontSize: "50px",
+                  fontWeight: 600,
+                  color: BLACK,
+                  fontFamily: FONT_FAMILY,
+                  letterSpacing: "-0.02em",
+                  display: "inline-block",
+                  willChange: "transform, opacity",
+                }}
+              >
+                Note
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* ===== MAIN PAGE ===== */}
+        <div
+          ref={mainPageRef}
+          style={{
+            position: "relative",
+            width: "100%",
+            minHeight: "100vh",
+            backgroundColor: WHITE,
+            margin: 0,
+            padding: 0,
+            fontFamily: FONT_FAMILY,
+            overflow: "visible",
+            display: "flex",
+            flexDirection: "column",
+            willChange: "transform",
+          }}
+        >
+          {/* Blur overlay kiri & kanan */}
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              width: "200px",
+              height: "120px",
+              pointerEvents: "none",
+              zIndex: 8500,
+              backdropFilter: "blur(14px)",
+              WebkitBackdropFilter: "blur(14px)",
+              maskImage: "linear-gradient(to right, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%)",
+              WebkitMaskImage: "linear-gradient(to right, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%)",
+            }}
+          />
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              right: 0,
+              width: "200px",
+              height: "120px",
+              pointerEvents: "none",
+              zIndex: 8500,
+              backdropFilter: "blur(14px)",
+              WebkitBackdropFilter: "blur(14px)",
+              maskImage: "linear-gradient(to left, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%)",
+              WebkitMaskImage: "linear-gradient(to left, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%)",
+            }}
+          />
+
+          <LeftNavbar />
+          <RightNavbar
+            user={user}
+            auth={auth}
+            db={db}
+            userDisplayName={userDisplayName}
+            router={router}
+          />
+
+          {/* ===== CONTENT ===== */}
+          <div
+            style={{
+              width: "100%",
+              padding: "0 40px",
+              maxWidth: "1600px",
+              margin: "0 auto",
+              marginTop: "180px",
+              position: "relative",
+              zIndex: 2,
+            }}
+          >
+            {/* Judul dan deskripsi sama seperti halaman utama */}
+            <h2
+              style={{
+                fontFamily: FONT_FAMILY,
+                fontSize: "150px",
+                fontWeight: 700,
+                color: BLUE,
+                letterSpacing: "-0.04em",
+                lineHeight: 1,
+                margin: 0,
+                marginBottom: "20px",
+                textAlign: "left",
+              }}
+            >
+              Notes
+            </h2>
+
+            <p
+              style={{
+                fontFamily: FONT_FAMILY,
+                fontSize: "20px",
+                fontWeight: 500,
+                color: BLACK,
+                letterSpacing: "-0.01em",
+                lineHeight: 1.6,
+                margin: 0,
+                marginBottom: "40px",
+                maxWidth: "800px",
+                textAlign: "left",
+              }}
+            >
+              Temukan catatan-catatan menarik dari komunitas Menuru. Semua catatan dikategorikan untuk memudahkan Anda menjelajahi topik yang Anda minati.
+            </p>
+
+            {/* Notification bell + actions row */}
+            <div style={{
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center'
-            }}
-            title="Logout"
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
-              <polyline points="16 17 21 12 16 7"/>
-              <line x1="21" y1="12" x2="9" y2="12"/>
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div style={{
-        width: '100%',
-        maxWidth: '900px',
-        margin: '0 auto',
-        padding: '160px 20px 100px',
-        boxSizing: 'border-box'
-      }}>
-        {/* Topic Dropdown */}
-        <TopicDropdown 
-          categories={categories}
-          notesByCategory={notesByCategory}
-          selectedTopic={selectedTopic}
-          onSelectTopic={setSelectedTopic}
-        />
-
-        {isLoading ? (
-          <div style={{
-            display: 'flex',
-            justifyContent: 'center',
-            padding: '100px',
-            fontSize: '26px',
-            fontFamily: 'Helvetica, Arial, sans-serif',
-            color: 'white'
-          }}>
-            Memuat catatan...
-          </div>
-        ) : filteredNotes.length === 0 ? (
-          <div style={{
-            textAlign: 'center',
-            padding: '120px 20px',
-            fontFamily: 'Helvetica, Arial, sans-serif'
-          }}>
-            <div style={{
-              fontSize: '32px',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              color: 'white',
-              marginBottom: '20px'
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '20px',
+              marginBottom: '30px'
             }}>
-              {selectedTopic ? `Belum ada catatan di topik ${selectedTopic}` : 'Belum ada catatan'}
-            </div>
-            <div style={{
-              fontSize: '24px',
-              fontFamily: 'Helvetica, Arial, sans-serif',
-              color: 'white'
-            }}>
-              {selectedTopic ? 'Buat catatan pertama di topik ini' : 'Buat catatan pertama Anda'}
-            </div>
-          </div>
-        ) : (
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '80px',
-            fontFamily: 'Helvetica, Arial, sans-serif'
-          }}>
-            {filteredNotes.map((note) => {
-              const videoEmbedUrl = getVideoEmbedUrl(note.link);
-              const isSaved = note.savedBy && note.savedBy.includes(user?.uid);
-              const userCanEdit = canEditNote(note);
-              const userIsOwner = isNoteOwner(note);
-              
-              return (
-                <div
-                  key={note.id}
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '25px',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    position: 'relative'
-                  }}
-                >
-                  {note.category && (
-                    <div style={{
-                      fontSize: '28px',
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                      color: 'white',
-                      marginBottom: '15px',
-                      fontWeight: '600'
-                    }}>
-                      {note.category}
-                    </div>
-                  )}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
+                <TopicDropdown 
+                  categories={categories}
+                  notesByCategory={notesByCategory}
+                  selectedTopic={selectedTopic}
+                  onSelectTopic={setSelectedTopic}
+                />
 
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    flexWrap: 'wrap',
-                    gap: '10px'
-                  }}>
-                    <div style={{
-                      fontSize: '48px',
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                      lineHeight: '1.3',
-                      color: 'white',
-                      fontWeight: 'bold'
-                    }}>
-                      {note.title}
-                    </div>
-                    {note.isCollaborative && <CollaborateBadge />}
-                  </div>
+                <div style={{ position: 'relative' }}>
+                  <button
+                    onClick={() => setShowNotifications(!showNotifications)}
+                    style={{
+                      backgroundColor: BLUE,
+                      border: 'none',
+                      color: WHITE,
+                      padding: '12px 16px',
+                      cursor: 'pointer',
+                      fontSize: '20px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      borderRadius: '10px',
+                      position: 'relative',
+                      fontFamily: FONT_FAMILY,
+                      fontWeight: 700,
+                      gap: '8px'
+                    }}
+                    title="Notifikasi"
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/>
+                    </svg>
+                    Notifikasi
+                    {notificationCount > 0 && (
+                      <div style={{
+                        position: 'absolute',
+                        top: '-5px',
+                        right: '-5px',
+                        backgroundColor: WHITE,
+                        color: BLUE,
+                        borderRadius: '50%',
+                        width: '22px',
+                        height: '22px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '12px',
+                        fontWeight: 'bold',
+                        border: `2px solid ${BLUE}`
+                      }}>
+                        {notificationCount}
+                      </div>
+                    )}
+                  </button>
 
-                  {note.description && (
+                  {showNotifications && (
                     <div style={{
-                      fontSize: '28px',
-                      fontFamily: 'Helvetica, Arial, sans-serif',
-                      lineHeight: '1.6',
-                      color: 'white',
-                      marginTop: '25px',
-                      whiteSpace: 'pre-wrap'
+                      position: 'absolute',
+                      top: '60px',
+                      right: 0,
+                      backgroundColor: BLUE,
+                      border: `1px solid ${BLUE}`,
+                      borderRadius: '12px',
+                      width: '400px',
+                      maxHeight: '500px',
+                      overflowY: 'auto',
+                      zIndex: 1000,
+                      boxShadow: '0 4px 20px rgba(13,60,252,0.4)'
                     }}>
-                      {note.description}
-                    </div>
-                  )}
-
-                  {note.thumbnail && !videoEmbedUrl && (
-                    <div style={{
-                      margin: '20px 0'
-                    }}>
-                      <img 
-                        src={note.thumbnail} 
-                        alt="Thumbnail"
-                        style={{
-                          width: '100%',
-                          maxWidth: '600px',
-                          height: 'auto',
-                          borderRadius: '8px'
-                        }}
-                      />
-                    </div>
-                  )}
-
-                  {videoEmbedUrl && (
-                    <div style={{
-                      margin: '30px 0',
-                      position: 'relative'
-                    }}>
-                      {videoEmbedUrl.includes('youtube.com/embed') || videoEmbedUrl.includes('vimeo.com') ? (
+                      <div style={{
+                        padding: '20px',
+                        borderBottom: `1px solid rgba(255,255,255,0.2)`,
+                        fontSize: '20px',
+                        fontWeight: 'bold',
+                        color: WHITE,
+                        fontFamily: FONT_FAMILY
+                      }}>
+                        Notifikasi ({notifications.length})
+                      </div>
+                      
+                      {notifications.length === 0 ? (
                         <div style={{
-                          position: 'relative',
-                          paddingBottom: '56.25%',
-                          height: 0,
-                          overflow: 'hidden',
-                          backgroundColor: '#000'
+                          padding: '30px',
+                          textAlign: 'center',
+                          color: WHITE,
+                          fontSize: '18px',
+                          fontFamily: FONT_FAMILY,
+                          opacity: 0.8
                         }}>
-                          <iframe
-                            src={videoEmbedUrl}
-                            style={{
-                              position: 'absolute',
-                              top: 0,
-                              left: 0,
-                              width: '100%',
-                              height: '100%',
-                              border: 'none'
-                            }}
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowFullScreen
-                          />
+                          Tidak ada notifikasi
                         </div>
                       ) : (
+                        <div>
+                          {notifications.map((notification) => (
+                            <div
+                              key={notification.id}
+                              style={{
+                                padding: '20px',
+                                borderBottom: `1px solid rgba(255,255,255,0.1)`,
+                                backgroundColor: notification.status === 'pending' ? 'rgba(255,255,255,0.08)' : 'transparent'
+                              }}
+                            >
+                              <div style={{
+                                fontSize: '16px',
+                                marginBottom: '10px',
+                                color: WHITE,
+                                fontFamily: FONT_FAMILY
+                              }}>
+                                {notification.message}
+                              </div>
+                              
+                              <div style={{
+                                fontSize: '13px',
+                                color: WHITE,
+                                opacity: 0.7,
+                                marginBottom: '10px',
+                                fontFamily: FONT_FAMILY
+                              }}>
+                                Dari: {notification.senderName || 'Unknown User'}
+                                <br />
+                                Waktu: {formatTime(notification.createdAt)}
+                              </div>
+                              
+                              {notification.status === 'pending' && (
+                                <div style={{
+                                  display: 'flex',
+                                  gap: '10px',
+                                  marginTop: '15px'
+                                }}>
+                                  <button
+                                    onClick={() => handleNotificationResponse(notification.id!, true)}
+                                    style={{
+                                      padding: '8px 20px',
+                                      backgroundColor: WHITE,
+                                      border: 'none',
+                                      color: BLUE,
+                                      borderRadius: '6px',
+                                      cursor: 'pointer',
+                                      fontSize: '14px',
+                                      fontWeight: 'bold',
+                                      fontFamily: FONT_FAMILY
+                                    }}
+                                  >
+                                    Terima
+                                  </button>
+                                  <button
+                                    onClick={() => handleNotificationResponse(notification.id!, false)}
+                                    style={{
+                                      padding: '8px 20px',
+                                      backgroundColor: 'transparent',
+                                      border: `1.5px solid ${WHITE}`,
+                                      color: WHITE,
+                                      borderRadius: '6px',
+                                      cursor: 'pointer',
+                                      fontSize: '14px',
+                                      fontWeight: 'bold',
+                                      fontFamily: FONT_FAMILY
+                                    }}
+                                  >
+                                    Tolak
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '15px', flexWrap: 'wrap' }}>
+                <button
+                  onClick={() => setShowGroupModal(true)}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '12px 20px',
+                    backgroundColor: BLUE,
+                    color: WHITE,
+                    border: 'none',
+                    borderRadius: '10px',
+                    fontFamily: FONT_FAMILY,
+                    fontSize: '15px',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                  }}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M12 5v14M5 12h14"/>
+                  </svg>
+                  Buat Grup
+                </button>
+
+                <button
+                  onClick={() => setShowNewNoteForm(true)}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '12px 20px',
+                    backgroundColor: BLUE,
+                    color: WHITE,
+                    border: 'none',
+                    borderRadius: '10px',
+                    fontFamily: FONT_FAMILY,
+                    fontSize: '15px',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                  }}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M12 5v14M5 12h14"/>
+                  </svg>
+                  Buat Catatan
+                </button>
+              </div>
+            </div>
+
+            {isLoading ? (
+              <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                padding: '100px',
+                fontSize: '26px',
+                fontFamily: FONT_FAMILY,
+                color: BLUE,
+                fontWeight: 700
+              }}>
+                Memuat catatan...
+              </div>
+            ) : filteredNotes.length === 0 ? (
+              <div style={{
+                textAlign: 'center',
+                padding: '120px 20px',
+                fontFamily: FONT_FAMILY
+              }}>
+                <div style={{
+                  fontSize: '32px',
+                  color: BLUE,
+                  marginBottom: '20px',
+                  fontWeight: 700
+                }}>
+                  {selectedTopic ? `Belum ada catatan di topik ${selectedTopic}` : 'Belum ada catatan'}
+                </div>
+                <div style={{
+                  fontSize: '20px',
+                  color: BLUE,
+                  fontWeight: 500
+                }}>
+                  {selectedTopic ? 'Buat catatan pertama di topik ini' : 'Buat catatan pertama Anda'}
+                </div>
+              </div>
+            ) : (
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '80px',
+                fontFamily: FONT_FAMILY
+              }}>
+                {filteredNotes.map((note) => {
+                  const videoEmbedUrl = getVideoEmbedUrl(note.link);
+                  const isSaved = note.savedBy && note.savedBy.includes(user?.uid);
+                  const userCanEdit = canEditNote(note);
+                  const userIsOwner = isNoteOwner(note);
+                  
+                  return (
+                    <div
+                      key={note.id}
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '25px',
+                        fontFamily: FONT_FAMILY,
+                        position: 'relative'
+                      }}
+                    >
+                      {note.category && (
                         <div style={{
-                          position: 'relative',
-                          backgroundColor: '#000'
+                          fontSize: '28px',
+                          color: BLUE,
+                          marginBottom: '15px',
+                          fontWeight: '700',
+                          fontFamily: FONT_FAMILY
                         }}>
-                          <video
-                            ref={(el) => {
-                              if (note.id) videoRefs.current[note.id] = el;
-                            }}
-                            src={videoEmbedUrl}
+                          {note.category}
+                        </div>
+                      )}
+
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        flexWrap: 'wrap',
+                        gap: '10px'
+                      }}>
+                        <div style={{
+                          fontSize: '48px',
+                          fontFamily: FONT_FAMILY,
+                          lineHeight: '1.3',
+                          color: BLUE,
+                          fontWeight: '700'
+                        }}>
+                          {note.title}
+                        </div>
+                        {note.isCollaborative && <CollaborateBadge />}
+                      </div>
+
+                      {note.description && (
+                        <div style={{
+                          fontSize: '28px',
+                          fontFamily: FONT_FAMILY,
+                          lineHeight: '1.6',
+                          color: BLACK,
+                          marginTop: '25px',
+                          whiteSpace: 'pre-wrap'
+                        }}>
+                          {note.description}
+                        </div>
+                      )}
+
+                      {note.thumbnail && !videoEmbedUrl && (
+                        <div style={{ margin: '20px 0' }}>
+                          <img 
+                            src={note.thumbnail} 
+                            alt="Thumbnail"
                             style={{
                               width: '100%',
                               maxWidth: '600px',
                               height: 'auto',
-                              aspectRatio: '16/9',
-                              backgroundColor: '#000',
-                              cursor: 'pointer'
+                              borderRadius: '8px'
                             }}
-                            onClick={() => togglePlayPause(note.id!)}
-                            controls
                           />
-                          {!note.thumbnail && (
-                            <button
-                              onClick={() => togglePlayPause(note.id!)}
-                              style={{
-                                position: 'absolute',
-                                top: '50%',
-                                left: '50%',
-                                transform: 'translate(-50%, -50%)',
-                                backgroundColor: 'rgba(0, 0, 0, 0.7)',
-                                border: 'none',
-                                borderRadius: '50%',
-                                width: '80px',
-                                height: '80px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                cursor: 'pointer'
-                              }}
-                            >
-                              <svg width="40" height="40" viewBox="0 0 24 24" fill="white">
-                                <path d="M8 5v14l11-7z"/>
-                              </svg>
-                            </button>
+                        </div>
+                      )}
+
+                      {videoEmbedUrl && (
+                        <div style={{
+                          margin: '30px 0',
+                          position: 'relative'
+                        }}>
+                          {videoEmbedUrl.includes('youtube.com/embed') || videoEmbedUrl.includes('vimeo.com') ? (
+                            <div style={{
+                              position: 'relative',
+                              paddingBottom: '56.25%',
+                              height: 0,
+                              overflow: 'hidden',
+                              backgroundColor: '#000',
+                              borderRadius: '8px'
+                            }}>
+                              <iframe
+                                src={videoEmbedUrl}
+                                style={{
+                                  position: 'absolute',
+                                  top: 0,
+                                  left: 0,
+                                  width: '100%',
+                                  height: '100%',
+                                  border: 'none'
+                                }}
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowFullScreen
+                              />
+                            </div>
+                          ) : (
+                            <div style={{
+                              position: 'relative',
+                              backgroundColor: '#000',
+                              borderRadius: '8px',
+                              overflow: 'hidden'
+                            }}>
+                              <video
+                                ref={(el) => {
+                                  if (note.id) videoRefs.current[note.id] = el;
+                                }}
+                                src={videoEmbedUrl}
+                                style={{
+                                  width: '100%',
+                                  maxWidth: '600px',
+                                  height: 'auto',
+                                  aspectRatio: '16/9',
+                                  backgroundColor: '#000',
+                                  cursor: 'pointer'
+                                }}
+                                onClick={() => togglePlayPause(note.id!)}
+                                controls
+                              />
+                            </div>
                           )}
                         </div>
                       )}
-                    </div>
-                  )}
 
-                  {/* Collaborator List */}
-                  <CollaboratorList 
-                    collaborators={note.collaborators}
-                    collaboratorNames={note.collaboratorNames}
-                  />
+                      <CollaboratorList 
+                        collaborators={note.collaborators}
+                        collaboratorNames={note.collaboratorNames}
+                      />
 
-                  <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginTop: '30px',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
-                  }}>
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '20px'
-                    }}>
-                      <span style={{
-                        fontSize: '22px',
-                        fontFamily: 'Helvetica, Arial, sans-serif',
-                        color: 'white'
-                      }}>
-                        {formatDate(note.updatedAt)}
-                      </span>
-                      <span style={{
-                        fontSize: '18px',
-                        color: '#aaa',
+                      <div style={{
                         display: 'flex',
+                        justifyContent: 'space-between',
                         alignItems: 'center',
-                        gap: '4px'
+                        marginTop: '30px',
+                        fontFamily: FONT_FAMILY,
+                        flexWrap: 'wrap',
+                        gap: '15px'
                       }}>
-                        oleh {note.userName}
-                        <InstagramVerifiedBadge />
-                      </span>
-                    </div>
-                    
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '20px',
-                      fontFamily: 'Helvetica, Arial, sans-serif'
-                    }}>
-                      <button
-                        onClick={() => handleSaveNote(note.id!)}
-                        style={{
-                          backgroundColor: 'transparent',
-                          border: 'none',
-                          color: isSaved ? '#888' : 'white',
-                          fontSize: '24px',
-                          cursor: 'pointer',
-                          padding: '5px',
+                        <div style={{
                           display: 'flex',
                           alignItems: 'center',
-                          justifyContent: 'center'
-                        }}
-                        title={isSaved ? "Disimpan" : "Simpan Catatan"}
-                      >
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill={isSaved ? "#888" : "none"} stroke="currentColor" strokeWidth="2">
-                          <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/>
-                        </svg>
-                      </button>
+                          gap: '20px',
+                          flexWrap: 'wrap'
+                        }}>
+                          <span style={{
+                            fontSize: '18px',
+                            color: BLUE,
+                            fontWeight: 600,
+                            fontFamily: FONT_FAMILY
+                          }}>
+                            {formatDate(note.updatedAt)}
+                          </span>
+                          <span style={{
+                            fontSize: '16px',
+                            color: BLUE,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            fontFamily: FONT_FAMILY,
+                            fontWeight: 600
+                          }}>
+                            oleh {note.userName}
+                            <InstagramVerifiedBadge />
+                          </span>
+                        </div>
+                        
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '16px',
+                          fontFamily: FONT_FAMILY,
+                          flexWrap: 'wrap'
+                        }}>
+                          <button
+                            onClick={() => handleSaveNote(note.id!)}
+                            style={{
+                              backgroundColor: 'transparent',
+                              border: 'none',
+                              color: BLUE,
+                              fontSize: '22px',
+                              cursor: 'pointer',
+                              padding: '5px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              opacity: isSaved ? 0.5 : 1
+                            }}
+                            title={isSaved ? "Disimpan" : "Simpan Catatan"}
+                          >
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill={isSaved ? BLUE : "none"} stroke={BLUE} strokeWidth="2">
+                              <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/>
+                            </svg>
+                          </button>
 
-                      {groups.length > 0 && (
-                        <button
-                          onClick={() => handleShareToGroup(note.id!)}
-                          style={{
-                            backgroundColor: 'transparent',
-                            border: 'none',
-                            color: 'white',
-                            fontSize: '24px',
-                            cursor: 'pointer',
-                            padding: '5px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                          }}
-                          title="Bagikan ke Grup"
-                        >
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <circle cx="18" cy="5" r="3"/>
-                            <circle cx="6" cy="12" r="3"/>
-                            <circle cx="18" cy="19" r="3"/>
-                            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
-                            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
-                          </svg>
-                        </button>
-                      )}
+                          {groups.length > 0 && (
+                            <button
+                              onClick={() => handleShareToGroup(note.id!)}
+                              style={{
+                                backgroundColor: 'transparent',
+                                border: 'none',
+                                color: BLUE,
+                                fontSize: '22px',
+                                cursor: 'pointer',
+                                padding: '5px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                              }}
+                              title="Bagikan ke Grup"
+                            >
+                              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={BLUE} strokeWidth="2">
+                                <circle cx="18" cy="5" r="3"/>
+                                <circle cx="6" cy="12" r="3"/>
+                                <circle cx="18" cy="19" r="3"/>
+                                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+                                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                              </svg>
+                            </button>
+                          )}
 
-                      {userIsOwner && (
-                        <button
-                          onClick={() => {
-                            setCurrentNote(note);
-                            setShowCollaborateModal(true);
-                          }}
-                          style={{
-                            backgroundColor: 'transparent',
-                            border: 'none',
-                            color: '#888',
-                            fontSize: '24px',
-                            cursor: 'pointer',
-                            padding: '5px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                          }}
-                          title="Undang Kolaborator"
-                        >
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
-                            <circle cx="8.5" cy="7" r="4"/>
-                            <line x1="20" y1="8" x2="20" y2="14"/>
-                            <line x1="23" y1="11" x2="17" y2="11"/>
-                          </svg>
-                        </button>
-                      )}
+                          {userIsOwner && (
+                            <button
+                              onClick={() => {
+                                setCurrentNote(note);
+                                setShowCollaborateModal(true);
+                              }}
+                              style={{
+                                backgroundColor: 'transparent',
+                                border: 'none',
+                                color: BLUE,
+                                fontSize: '22px',
+                                cursor: 'pointer',
+                                padding: '5px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                              }}
+                              title="Undang Kolaborator"
+                            >
+                              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={BLUE} strokeWidth="2">
+                                <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+                                <circle cx="8.5" cy="7" r="4"/>
+                                <line x1="20" y1="8" x2="20" y2="14"/>
+                                <line x1="23" y1="11" x2="17" y2="11"/>
+                              </svg>
+                            </button>
+                          )}
 
-                      {userCanEdit && (
-                        <button
-                          onClick={() => {
-                            setCurrentNote(note);
-                            setEditNote({
-                              title: note.title,
-                              category: note.category,
-                              link: note.link || '',
-                              description: note.description || ''
-                            });
-                            setShowEditNoteModal(true);
-                          }}
-                          style={{
-                            backgroundColor: 'transparent',
-                            border: 'none',
-                            color: 'white',
-                            fontSize: '24px',
-                            cursor: 'pointer',
-                            padding: '5px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                          }}
-                          title="Edit Catatan"
-                        >
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
-                          </svg>
-                        </button>
-                      )}
+                          {userCanEdit && (
+                            <button
+                              onClick={() => {
+                                setCurrentNote(note);
+                                setEditNote({
+                                  title: note.title,
+                                  category: note.category,
+                                  link: note.link || '',
+                                  description: note.description || ''
+                                });
+                                setShowEditNoteModal(true);
+                              }}
+                              style={{
+                                backgroundColor: 'transparent',
+                                border: 'none',
+                                color: BLUE,
+                                fontSize: '22px',
+                                cursor: 'pointer',
+                                padding: '5px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                              }}
+                              title="Edit Catatan"
+                            >
+                              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={BLUE} strokeWidth="2">
+                                <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
+                              </svg>
+                            </button>
+                          )}
 
-                      {note.link && (
-                        <a
-                          href={note.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={{
-                            color: 'white',
-                            textDecoration: 'none',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            fontSize: '20px',
-                            fontFamily: 'Helvetica, Arial, sans-serif'
-                          }}
-                        >
-                          Buka Link
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M7 17l9.2-9.2M17 17V7H7"/>
-                          </svg>
-                        </a>
-                      )}
-                      
-                      {note.userId === user?.uid && (
-                        <button
-                          onClick={() => handleDeleteNote(note.id!)}
-                          style={{
-                            backgroundColor: 'transparent',
-                            border: 'none',
-                            color: 'white',
-                            fontSize: '32px',
-                            cursor: 'pointer',
-                            padding: '0',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            width: '40px',
-                            height: '40px'
-                          }}
-                          title="Hapus Catatan"
-                        >
-                          ×
-                        </button>
-                      )}
+                          {note.link && (
+                            <a
+                              href={note.link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{
+                                color: BLUE,
+                                textDecoration: 'none',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                fontSize: '16px',
+                                fontFamily: FONT_FAMILY,
+                                fontWeight: 700
+                              }}
+                            >
+                              Buka Link
+                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={BLUE} strokeWidth="2">
+                                <path d="M7 17l9.2-9.2M17 17V7H7"/>
+                              </svg>
+                            </a>
+                          )}
+                          
+                          {note.userId === user?.uid && (
+                            <button
+                              onClick={() => handleDeleteNote(note.id!)}
+                              style={{
+                                backgroundColor: 'transparent',
+                                border: 'none',
+                                color: BLUE,
+                                fontSize: '32px',
+                                cursor: 'pointer',
+                                padding: '0',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                width: '32px',
+                                height: '32px'
+                              }}
+                              title="Hapus Catatan"
+                            >
+                              ×
+                            </button>
+                          )}
+                        </div>
+                      </div>
                     </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* ===== FOOTER ===== */}
+          <div
+            style={{
+              width: "100%",
+              padding: "60px 40px 40px 40px",
+              backgroundColor: WHITE,
+              borderTop: "1px solid rgba(0,0,0,0.05)",
+              marginTop: "100px",
+              position: "relative",
+              overflow: "hidden",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "flex-start",
+                maxWidth: "1400px",
+                margin: "0 auto",
+                gap: "40px",
+                flexWrap: "wrap",
+                position: "relative",
+                zIndex: 1,
+              }}
+            >
+              {footerLinks.map((section, idx) => (
+                <div key={idx} style={{ flex: "1", minWidth: "200px" }}>
+                  <h3
+                    style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: "28px",
+                      fontWeight: 600,
+                      color: BLACK,
+                      margin: 0,
+                      marginBottom: "16px",
+                      letterSpacing: "-0.01em",
+                    }}
+                  >
+                    {section.title}
+                  </h3>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                    {section.links.map((link, linkIdx) => {
+                      let linkHref = "#";
+                      if (link === "Contact Us") linkHref = "/contact";
+                      else if (link === "Live Chat") linkHref = "/live-chat";
+                      else if (link === "Live Chat Agent") linkHref = "/live-chat-agent";
+                      else if (link === "Help Center") linkHref = "/pusat-bantuan";
+                      else if (link === "About Us") linkHref = "/profile";
+                      else if (link === "Privacy Policy") linkHref = "/privacy-policy";
+                      else if (link === "Terms & Conditions") linkHref = "/terms-of-services";
+                      else if (link === "Instagram") linkHref = "https://instagram.com/menuru";
+
+                      return (
+                        <Link key={linkIdx} href={linkHref} style={{ textDecoration: "none" }}>
+                          <span
+                            style={{
+                              fontFamily: FONT_FAMILY,
+                              fontSize: "20px",
+                              fontWeight: 400,
+                              color: BLUE,
+                              letterSpacing: "-0.01em",
+                              cursor: "pointer",
+                            }}
+                          >
+                            {link}
+                          </span>
+                        </Link>
+                      );
+                    })}
                   </div>
                 </div>
-              );
-            })}
+              ))}
+            </div>
+
+            <div
+              style={{
+                maxWidth: "1400px",
+                margin: "40px auto 0 auto",
+                paddingTop: "20px",
+                borderTop: "1px solid rgba(0,0,0,0.05)",
+                position: "relative",
+                zIndex: 1,
+              }}
+            >
+              <p
+                style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: "14px",
+                  fontWeight: 400,
+                  color: "#666",
+                  margin: 0,
+                  textAlign: "center",
+                  letterSpacing: "0.01em",
+                }}
+              >
+                Terms and conditions apply. By using this website, you agree to our Terms of Use and Privacy Policy.
+              </p>
+            </div>
           </div>
-        )}
+
+          <FooterMenuruTitle />
+        </div>
       </div>
 
-      {/* Teks Halaman Utama dengan South West Arrow di Pojok Kiri Bawah */}
-      <div style={{
-        position: 'fixed',
-        bottom: '40px',
-        left: '40px',
-        zIndex: 99
-      }}>
-        <a
-          href="/"
-          style={{
-            color: 'white',
-            textDecoration: 'none',
-            fontSize: '24px',
-            fontFamily: 'Helvetica, Arial, sans-serif',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-            fontWeight: 'bold'
-          }}
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M17 7L7 17M17 17V7H7"/>
-          </svg>
-          Halaman Utama
-        </a>
-      </div>
+      {/* ===== MODALS ===== */}
 
       {/* Modal buat catatan baru */}
       {showNewNoteForm && (
@@ -2028,31 +2977,29 @@ export default function NotesPage(): React.JSX.Element {
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.95)',
+          backgroundColor: 'rgba(13,60,252,0.95)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          zIndex: 1000,
+          zIndex: 10000,
           padding: '30px',
-          fontFamily: 'Helvetica, Arial, sans-serif'
+          fontFamily: FONT_FAMILY
         }}>
           <div style={{
-            backgroundColor: 'black',
+            backgroundColor: WHITE,
             width: '100%',
             maxWidth: '700px',
             padding: '60px',
-            fontFamily: 'Helvetica, Arial, sans-serif',
+            borderRadius: '16px',
+            fontFamily: FONT_FAMILY,
           }}>
-            <div style={{
-              marginBottom: '50px',
-              fontFamily: 'Helvetica, Arial, sans-serif'
-            }}>
+            <div style={{ marginBottom: '50px' }}>
               <div style={{
                 fontSize: '36px',
-                fontFamily: 'Helvetica, Arial, sans-serif',
                 marginBottom: '20px',
-                color: 'white',
-                fontWeight: 'bold'
+                color: BLUE,
+                fontWeight: '700',
+                fontFamily: FONT_FAMILY
               }}>
                 Buat Catatan Baru
               </div>
@@ -2062,7 +3009,6 @@ export default function NotesPage(): React.JSX.Element {
               display: 'flex',
               flexDirection: 'column',
               gap: '30px',
-              fontFamily: 'Helvetica, Arial, sans-serif'
             }}>
               <div>
                 <input
@@ -2075,11 +3021,12 @@ export default function NotesPage(): React.JSX.Element {
                     padding: '20px',
                     backgroundColor: 'transparent',
                     border: 'none',
-                    color: 'white',
-                    fontSize: '32px',
+                    borderBottom: `2px solid ${BLUE}`,
+                    color: BLUE,
+                    fontSize: '28px',
                     outline: 'none',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    lineHeight: '1.3'
+                    fontFamily: FONT_FAMILY,
+                    fontWeight: 700
                   }}
                 />
               </div>
@@ -2090,30 +3037,21 @@ export default function NotesPage(): React.JSX.Element {
                   onChange={(e) => setNewNote({...newNote, category: e.target.value})}
                   style={{
                     width: '100%',
-                    padding: '20px',
-                    backgroundColor: 'transparent',
+                    padding: '16px 20px',
+                    backgroundColor: BLUE,
                     border: 'none',
-                    color: 'white',
-                    fontSize: '24px',
+                    color: WHITE,
+                    fontSize: '18px',
                     outline: 'none',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    fontFamily: FONT_FAMILY,
                     cursor: 'pointer',
-                    appearance: 'none',
-                    backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
-                    backgroundRepeat: 'no-repeat',
-                    backgroundPosition: 'right 20px center',
-                    backgroundSize: '24px'
+                    borderRadius: '10px',
+                    fontWeight: 600
                   }}
                 >
-                  <option value="" style={{ backgroundColor: 'black', color: 'white', fontSize: '20px' }}>
-                    Pilih Kategori
-                  </option>
+                  <option value="">Pilih Kategori</option>
                   {categories.map((category) => (
-                    <option 
-                      key={category} 
-                      value={category}
-                      style={{ backgroundColor: 'black', color: 'white', fontSize: '20px' }}
-                    >
+                    <option key={category} value={category}>
                       {category}
                     </option>
                   ))}
@@ -2128,13 +3066,15 @@ export default function NotesPage(): React.JSX.Element {
                   placeholder="Link Video/Gambar (YouTube, Vimeo, dll.)"
                   style={{
                     width: '100%',
-                    padding: '20px',
+                    padding: '16px 20px',
                     backgroundColor: 'transparent',
-                    border: 'none',
-                    color: 'white',
-                    fontSize: '24px',
+                    border: `1.5px solid ${BLUE}`,
+                    borderRadius: '10px',
+                    color: BLUE,
+                    fontSize: '16px',
                     outline: 'none',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
+                    fontFamily: FONT_FAMILY,
+                    fontWeight: 600
                   }}
                 />
               </div>
@@ -2147,15 +3087,17 @@ export default function NotesPage(): React.JSX.Element {
                   rows={8}
                   style={{
                     width: '100%',
-                    padding: '20px',
+                    padding: '16px 20px',
                     backgroundColor: 'transparent',
-                    border: 'none',
-                    color: 'white',
-                    fontSize: '24px',
+                    border: `1.5px solid ${BLUE}`,
+                    borderRadius: '10px',
+                    color: BLUE,
+                    fontSize: '16px',
                     outline: 'none',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    fontFamily: FONT_FAMILY,
                     resize: 'none',
-                    lineHeight: '1.6'
+                    lineHeight: '1.6',
+                    fontWeight: 500
                   }}
                 />
               </div>
@@ -2163,20 +3105,21 @@ export default function NotesPage(): React.JSX.Element {
               <div style={{
                 display: 'flex',
                 justifyContent: 'flex-end',
-                gap: '25px',
-                marginTop: '50px',
-                fontFamily: 'Helvetica, Arial, sans-serif'
+                gap: '20px',
+                marginTop: '30px',
               }}>
                 <button
                   onClick={() => setShowNewNoteForm(false)}
                   style={{
-                    padding: '15px 30px',
+                    padding: '14px 28px',
                     backgroundColor: 'transparent',
-                    border: 'none',
-                    color: 'white',
-                    fontSize: '22px',
+                    border: `1.5px solid ${BLUE}`,
+                    borderRadius: '10px',
+                    color: BLUE,
+                    fontSize: '16px',
                     cursor: 'pointer',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
+                    fontFamily: FONT_FAMILY,
+                    fontWeight: 700
                   }}
                 >
                   Batal
@@ -2184,22 +3127,22 @@ export default function NotesPage(): React.JSX.Element {
                 <button
                   onClick={handleCreateNote}
                   style={{
-                    padding: '15px 30px',
-                    backgroundColor: 'transparent',
+                    padding: '14px 28px',
+                    backgroundColor: BLUE,
                     border: 'none',
-                    color: 'white',
-                    fontSize: '22px',
+                    borderRadius: '10px',
+                    color: WHITE,
+                    fontSize: '16px',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '12px',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
+                    gap: '10px',
+                    fontFamily: FONT_FAMILY,
+                    fontWeight: 700
                   }}
                 >
                   Simpan Catatan
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M7 17l9.2-9.2M17 17V7H7"/>
-                  </svg>
+                  <NorthEastArrow size={18} color={WHITE} />
                 </button>
               </div>
             </div>
@@ -2215,31 +3158,29 @@ export default function NotesPage(): React.JSX.Element {
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.95)',
+          backgroundColor: 'rgba(13,60,252,0.95)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          zIndex: 1000,
+          zIndex: 10000,
           padding: '30px',
-          fontFamily: 'Helvetica, Arial, sans-serif'
+          fontFamily: FONT_FAMILY
         }}>
           <div style={{
-            backgroundColor: 'black',
+            backgroundColor: WHITE,
             width: '100%',
             maxWidth: '700px',
             padding: '60px',
-            fontFamily: 'Helvetica, Arial, sans-serif',
+            borderRadius: '16px',
+            fontFamily: FONT_FAMILY,
           }}>
-            <div style={{
-              marginBottom: '50px',
-              fontFamily: 'Helvetica, Arial, sans-serif'
-            }}>
+            <div style={{ marginBottom: '50px' }}>
               <div style={{
                 fontSize: '36px',
-                fontFamily: 'Helvetica, Arial, sans-serif',
                 marginBottom: '20px',
-                color: 'white',
-                fontWeight: 'bold'
+                color: BLUE,
+                fontWeight: '700',
+                fontFamily: FONT_FAMILY
               }}>
                 Edit Catatan
               </div>
@@ -2249,7 +3190,6 @@ export default function NotesPage(): React.JSX.Element {
               display: 'flex',
               flexDirection: 'column',
               gap: '30px',
-              fontFamily: 'Helvetica, Arial, sans-serif'
             }}>
               <div>
                 <input
@@ -2262,11 +3202,12 @@ export default function NotesPage(): React.JSX.Element {
                     padding: '20px',
                     backgroundColor: 'transparent',
                     border: 'none',
-                    color: 'white',
-                    fontSize: '32px',
+                    borderBottom: `2px solid ${BLUE}`,
+                    color: BLUE,
+                    fontSize: '28px',
                     outline: 'none',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    lineHeight: '1.3'
+                    fontFamily: FONT_FAMILY,
+                    fontWeight: 700
                   }}
                 />
               </div>
@@ -2277,30 +3218,21 @@ export default function NotesPage(): React.JSX.Element {
                   onChange={(e) => setEditNote({...editNote, category: e.target.value})}
                   style={{
                     width: '100%',
-                    padding: '20px',
-                    backgroundColor: 'transparent',
+                    padding: '16px 20px',
+                    backgroundColor: BLUE,
                     border: 'none',
-                    color: 'white',
-                    fontSize: '24px',
+                    color: WHITE,
+                    fontSize: '18px',
                     outline: 'none',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    fontFamily: FONT_FAMILY,
                     cursor: 'pointer',
-                    appearance: 'none',
-                    backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
-                    backgroundRepeat: 'no-repeat',
-                    backgroundPosition: 'right 20px center',
-                    backgroundSize: '24px'
+                    borderRadius: '10px',
+                    fontWeight: 600
                   }}
                 >
-                  <option value="" style={{ backgroundColor: 'black', color: 'white', fontSize: '20px' }}>
-                    Pilih Kategori
-                  </option>
+                  <option value="">Pilih Kategori</option>
                   {categories.map((category) => (
-                    <option 
-                      key={category} 
-                      value={category}
-                      style={{ backgroundColor: 'black', color: 'white', fontSize: '20px' }}
-                    >
+                    <option key={category} value={category}>
                       {category}
                     </option>
                   ))}
@@ -2315,13 +3247,15 @@ export default function NotesPage(): React.JSX.Element {
                   placeholder="Link Video/Gambar"
                   style={{
                     width: '100%',
-                    padding: '20px',
+                    padding: '16px 20px',
                     backgroundColor: 'transparent',
-                    border: 'none',
-                    color: 'white',
-                    fontSize: '24px',
+                    border: `1.5px solid ${BLUE}`,
+                    borderRadius: '10px',
+                    color: BLUE,
+                    fontSize: '16px',
                     outline: 'none',
-                    fontFamily: 'Helvetica, Arial, sans-serif'
+                    fontFamily: FONT_FAMILY,
+                    fontWeight: 600
                   }}
                 />
               </div>
@@ -2334,15 +3268,17 @@ export default function NotesPage(): React.JSX.Element {
                   rows={8}
                   style={{
                     width: '100%',
-                    padding: '20px',
+                    padding: '16px 20px',
                     backgroundColor: 'transparent',
-                    border: 'none',
-                    color: 'white',
-                    fontSize: '24px',
+                    border: `1.5px solid ${BLUE}`,
+                    borderRadius: '10px',
+                    color: BLUE,
+                    fontSize: '16px',
                     outline: 'none',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    fontFamily: FONT_FAMILY,
                     resize: 'none',
-                    lineHeight: '1.6'
+                    lineHeight: '1.6',
+                    fontWeight: 500
                   }}
                 />
               </div>
@@ -2350,9 +3286,8 @@ export default function NotesPage(): React.JSX.Element {
               <div style={{
                 display: 'flex',
                 justifyContent: 'flex-end',
-                gap: '25px',
-                marginTop: '50px',
-                fontFamily: 'Helvetica, Arial, sans-serif'
+                gap: '20px',
+                marginTop: '30px',
               }}>
                 <button
                   onClick={() => {
@@ -2360,12 +3295,15 @@ export default function NotesPage(): React.JSX.Element {
                     setCurrentNote(null);
                   }}
                   style={{
-                    padding: '15px 30px',
+                    padding: '14px 28px',
                     backgroundColor: 'transparent',
-                    border: 'none',
-                    color: 'white',
-                    fontSize: '22px',
-                    cursor: 'pointer'
+                    border: `1.5px solid ${BLUE}`,
+                    borderRadius: '10px',
+                    color: BLUE,
+                    fontSize: '16px',
+                    cursor: 'pointer',
+                    fontFamily: FONT_FAMILY,
+                    fontWeight: 700
                   }}
                 >
                   Batal
@@ -2373,22 +3311,22 @@ export default function NotesPage(): React.JSX.Element {
                 <button
                   onClick={handleEditNote}
                   style={{
-                    padding: '15px 30px',
-                    backgroundColor: 'transparent',
+                    padding: '14px 28px',
+                    backgroundColor: BLUE,
                     border: 'none',
-                    color: 'white',
-                    fontSize: '22px',
+                    borderRadius: '10px',
+                    color: WHITE,
+                    fontSize: '16px',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '12px'
+                    gap: '10px',
+                    fontFamily: FONT_FAMILY,
+                    fontWeight: 700
                   }}
                 >
                   Update Catatan
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M20 14.66V20a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2h5.34"/>
-                    <polygon points="18 2 22 6 12 16 8 16 8 12 18 2"/>
-                  </svg>
+                  <NorthEastArrow size={18} color={WHITE} />
                 </button>
               </div>
             </div>
@@ -2404,37 +3342,37 @@ export default function NotesPage(): React.JSX.Element {
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.95)',
+          backgroundColor: 'rgba(13,60,252,0.95)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          zIndex: 1001,
+          zIndex: 10000,
           padding: '30px',
-          fontFamily: 'Helvetica, Arial, sans-serif'
+          fontFamily: FONT_FAMILY
         }}>
           <div style={{
-            backgroundColor: 'black',
+            backgroundColor: WHITE,
             width: '100%',
             maxWidth: '500px',
             padding: '50px',
-            fontFamily: 'Helvetica, Arial, sans-serif',
+            borderRadius: '16px',
+            fontFamily: FONT_FAMILY,
           }}>
-            <div style={{
-              marginBottom: '40px',
-              fontFamily: 'Helvetica, Arial, sans-serif'
-            }}>
+            <div style={{ marginBottom: '40px' }}>
               <div style={{
                 fontSize: '32px',
-                fontFamily: 'Helvetica, Arial, sans-serif',
                 marginBottom: '20px',
-                color: 'white',
-                fontWeight: 'bold'
+                color: BLUE,
+                fontWeight: '700',
+                fontFamily: FONT_FAMILY
               }}>
                 Buat Grup Baru
               </div>
               <div style={{
-                fontSize: '20px',
-                color: 'white'
+                fontSize: '18px',
+                color: BLUE,
+                fontFamily: FONT_FAMILY,
+                opacity: 0.8
               }}>
                 Buat grup untuk berbagi catatan dengan teman-teman
               </div>
@@ -2452,12 +3390,15 @@ export default function NotesPage(): React.JSX.Element {
                 placeholder="Nama Grup"
                 style={{
                   width: '100%',
-                  padding: '20px',
+                  padding: '16px 20px',
                   backgroundColor: 'transparent',
-                  border: 'none',
-                  color: 'white',
-                  fontSize: '24px',
-                  outline: 'none'
+                  border: `1.5px solid ${BLUE}`,
+                  borderRadius: '10px',
+                  color: BLUE,
+                  fontSize: '18px',
+                  outline: 'none',
+                  fontFamily: FONT_FAMILY,
+                  fontWeight: 600
                 }}
               />
 
@@ -2473,12 +3414,15 @@ export default function NotesPage(): React.JSX.Element {
                     setNewGroupName("");
                   }}
                   style={{
-                    padding: '15px 30px',
+                    padding: '14px 28px',
                     backgroundColor: 'transparent',
-                    border: 'none',
-                    color: 'white',
-                    fontSize: '20px',
-                    cursor: 'pointer'
+                    border: `1.5px solid ${BLUE}`,
+                    borderRadius: '10px',
+                    color: BLUE,
+                    fontSize: '16px',
+                    cursor: 'pointer',
+                    fontFamily: FONT_FAMILY,
+                    fontWeight: 700
                   }}
                 >
                   Batal
@@ -2486,21 +3430,22 @@ export default function NotesPage(): React.JSX.Element {
                 <button
                   onClick={handleCreateGroup}
                   style={{
-                    padding: '15px 30px',
-                    backgroundColor: 'transparent',
+                    padding: '14px 28px',
+                    backgroundColor: BLUE,
                     border: 'none',
-                    color: 'white',
-                    fontSize: '20px',
+                    borderRadius: '10px',
+                    color: WHITE,
+                    fontSize: '16px',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '10px'
+                    gap: '10px',
+                    fontFamily: FONT_FAMILY,
+                    fontWeight: 700
                   }}
                 >
                   Buat Grup
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M12 5v14M5 12h14"/>
-                  </svg>
+                  <NorthEastArrow size={18} color={WHITE} />
                 </button>
               </div>
             </div>
@@ -2516,37 +3461,37 @@ export default function NotesPage(): React.JSX.Element {
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.95)',
+          backgroundColor: 'rgba(13,60,252,0.95)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          zIndex: 1001,
+          zIndex: 10000,
           padding: '30px',
-          fontFamily: 'Helvetica, Arial, sans-serif'
+          fontFamily: FONT_FAMILY
         }}>
           <div style={{
-            backgroundColor: 'black',
+            backgroundColor: WHITE,
             width: '100%',
             maxWidth: '500px',
             padding: '50px',
-            fontFamily: 'Helvetica, Arial, sans-serif',
+            borderRadius: '16px',
+            fontFamily: FONT_FAMILY,
           }}>
-            <div style={{
-              marginBottom: '40px',
-              fontFamily: 'Helvetica, Arial, sans-serif'
-            }}>
+            <div style={{ marginBottom: '40px' }}>
               <div style={{
                 fontSize: '32px',
-                fontFamily: 'Helvetica, Arial, sans-serif',
                 marginBottom: '20px',
-                color: 'white',
-                fontWeight: 'bold'
+                color: BLUE,
+                fontWeight: '700',
+                fontFamily: FONT_FAMILY
               }}>
                 Invite ke Grup
               </div>
               <div style={{
-                fontSize: '20px',
-                color: 'white'
+                fontSize: '18px',
+                color: BLUE,
+                fontFamily: FONT_FAMILY,
+                opacity: 0.8
               }}>
                 Undang user lain ke grup: <strong>{currentGroup?.name}</strong>
               </div>
@@ -2564,12 +3509,15 @@ export default function NotesPage(): React.JSX.Element {
                 placeholder="Email user yang ingin diundang"
                 style={{
                   width: '100%',
-                  padding: '20px',
+                  padding: '16px 20px',
                   backgroundColor: 'transparent',
-                  border: 'none',
-                  color: 'white',
-                  fontSize: '20px',
-                  outline: 'none'
+                  border: `1.5px solid ${BLUE}`,
+                  borderRadius: '10px',
+                  color: BLUE,
+                  fontSize: '16px',
+                  outline: 'none',
+                  fontFamily: FONT_FAMILY,
+                  fontWeight: 600
                 }}
               />
 
@@ -2585,12 +3533,15 @@ export default function NotesPage(): React.JSX.Element {
                     setInviteEmail("");
                   }}
                   style={{
-                    padding: '15px 30px',
+                    padding: '14px 28px',
                     backgroundColor: 'transparent',
-                    border: 'none',
-                    color: 'white',
-                    fontSize: '20px',
-                    cursor: 'pointer'
+                    border: `1.5px solid ${BLUE}`,
+                    borderRadius: '10px',
+                    color: BLUE,
+                    fontSize: '16px',
+                    cursor: 'pointer',
+                    fontFamily: FONT_FAMILY,
+                    fontWeight: 700
                   }}
                 >
                   Batal
@@ -2598,21 +3549,22 @@ export default function NotesPage(): React.JSX.Element {
                 <button
                   onClick={handleInviteUser}
                   style={{
-                    padding: '15px 30px',
-                    backgroundColor: 'transparent',
+                    padding: '14px 28px',
+                    backgroundColor: BLUE,
                     border: 'none',
-                    color: 'white',
-                    fontSize: '20px',
+                    borderRadius: '10px',
+                    color: WHITE,
+                    fontSize: '16px',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '10px'
+                    gap: '10px',
+                    fontFamily: FONT_FAMILY,
+                    fontWeight: 700
                   }}
                 >
                   Kirim Undangan
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
-                  </svg>
+                  <NorthEastArrow size={18} color={WHITE} />
                 </button>
               </div>
             </div>
@@ -2628,37 +3580,37 @@ export default function NotesPage(): React.JSX.Element {
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.95)',
+          backgroundColor: 'rgba(13,60,252,0.95)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          zIndex: 1001,
+          zIndex: 10000,
           padding: '30px',
-          fontFamily: 'Helvetica, Arial, sans-serif'
+          fontFamily: FONT_FAMILY
         }}>
           <div style={{
-            backgroundColor: 'black',
+            backgroundColor: WHITE,
             width: '100%',
             maxWidth: '500px',
             padding: '50px',
-            fontFamily: 'Helvetica, Arial, sans-serif',
+            borderRadius: '16px',
+            fontFamily: FONT_FAMILY,
           }}>
-            <div style={{
-              marginBottom: '40px',
-              fontFamily: 'Helvetica, Arial, sans-serif'
-            }}>
+            <div style={{ marginBottom: '40px' }}>
               <div style={{
                 fontSize: '32px',
-                fontFamily: 'Helvetica, Arial, sans-serif',
                 marginBottom: '20px',
-                color: 'white',
-                fontWeight: 'bold'
+                color: BLUE,
+                fontWeight: '700',
+                fontFamily: FONT_FAMILY
               }}>
                 Undang Kolaborator
               </div>
               <div style={{
-                fontSize: '20px',
-                color: 'white'
+                fontSize: '18px',
+                color: BLUE,
+                fontFamily: FONT_FAMILY,
+                opacity: 0.8
               }}>
                 Undang user lain untuk berkolaborasi pada catatan:<br />
                 <strong>"{currentNote.title}"</strong>
@@ -2668,13 +3620,15 @@ export default function NotesPage(): React.JSX.Element {
                 <div style={{
                   marginTop: '20px',
                   padding: '15px',
-                  backgroundColor: '#111',
+                  backgroundColor: 'rgba(13,60,252,0.08)',
                   borderRadius: '8px'
                 }}>
                   <div style={{
-                    fontSize: '16px',
-                    color: '#aaa',
-                    marginBottom: '10px'
+                    fontSize: '14px',
+                    color: BLUE,
+                    marginBottom: '10px',
+                    fontFamily: FONT_FAMILY,
+                    fontWeight: 600
                   }}>
                     Kolaborator saat ini:
                   </div>
@@ -2683,13 +3637,15 @@ export default function NotesPage(): React.JSX.Element {
                     flexDirection: 'column',
                     gap: '8px'
                   }}>
-                    {Object.entries(currentNote.collaboratorNames || {}).map(([id, name]) => (
+                    {Object.entries(currentNote.collaboratorNames || {}).map(([id, name]: any) => (
                       <div key={id} style={{
                         display: 'flex',
                         alignItems: 'center',
                         gap: '4px',
-                        fontSize: '16px',
-                        color: 'white'
+                        fontSize: '14px',
+                        color: BLUE,
+                        fontFamily: FONT_FAMILY,
+                        fontWeight: 600
                       }}>
                         <span>{name}</span>
                         <InstagramVerifiedBadge size={14} />
@@ -2712,12 +3668,15 @@ export default function NotesPage(): React.JSX.Element {
                 placeholder="Email user yang ingin diundang"
                 style={{
                   width: '100%',
-                  padding: '20px',
+                  padding: '16px 20px',
                   backgroundColor: 'transparent',
-                  border: 'none',
-                  color: 'white',
-                  fontSize: '20px',
-                  outline: 'none'
+                  border: `1.5px solid ${BLUE}`,
+                  borderRadius: '10px',
+                  color: BLUE,
+                  fontSize: '16px',
+                  outline: 'none',
+                  fontFamily: FONT_FAMILY,
+                  fontWeight: 600
                 }}
               />
 
@@ -2734,12 +3693,15 @@ export default function NotesPage(): React.JSX.Element {
                     setCurrentNote(null);
                   }}
                   style={{
-                    padding: '15px 30px',
+                    padding: '14px 28px',
                     backgroundColor: 'transparent',
-                    border: 'none',
-                    color: 'white',
-                    fontSize: '20px',
-                    cursor: 'pointer'
+                    border: `1.5px solid ${BLUE}`,
+                    borderRadius: '10px',
+                    color: BLUE,
+                    fontSize: '16px',
+                    cursor: 'pointer',
+                    fontFamily: FONT_FAMILY,
+                    fontWeight: 700
                   }}
                 >
                   Batal
@@ -2747,28 +3709,66 @@ export default function NotesPage(): React.JSX.Element {
                 <button
                   onClick={handleInviteCollaborator}
                   style={{
-                    padding: '15px 30px',
-                    backgroundColor: 'transparent',
+                    padding: '14px 28px',
+                    backgroundColor: BLUE,
                     border: 'none',
-                    color: 'white',
-                    fontSize: '20px',
+                    borderRadius: '10px',
+                    color: WHITE,
+                    fontSize: '16px',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '10px'
+                    gap: '10px',
+                    fontFamily: FONT_FAMILY,
+                    fontWeight: 700
                   }}
                 >
                   Kirim Undangan Kolaborasi
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M12 2a10 10 0 0 1 10 10c0 5.52-4.48 10-10 10S2 17.52 2 12 6.48 2 12 2z"/>
-                    <path d="M8 12h8M12 8v8"/>
-                  </svg>
+                  <NorthEastArrow size={18} color={WHITE} />
                 </button>
               </div>
             </div>
           </div>
         </div>
       )}
-    </div>
+
+      <style jsx global>{`
+        html {
+          overflow: auto !important;
+          -ms-overflow-style: none !important;
+          scrollbar-width: none !important;
+          height: 100% !important;
+        }
+        html::-webkit-scrollbar {
+          display: none !important;
+          width: 0 !important;
+          height: 0 !important;
+        }
+        body {
+          overflow: auto !important;
+          -ms-overflow-style: none !important;
+          scrollbar-width: none !important;
+          margin: 0;
+          padding: 0;
+          background-color: #ffffff !important;
+          min-height: 100% !important;
+          height: auto !important;
+        }
+        body::-webkit-scrollbar {
+          display: none !important;
+          width: 0 !important;
+          height: 0 !important;
+        }
+        * {
+          background-color: transparent;
+        }
+        .footer-menuru-char {
+          display: inline-block;
+          will-change: transform, opacity;
+          color: #0D3CFC !important;
+          transform-origin: 50% 100%;
+        }
+      `}</style>
+    </>
   );
 }
