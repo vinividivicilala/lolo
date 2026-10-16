@@ -436,6 +436,25 @@ const BLACK = "#000000";
 const LIME = "#E3FB96";
 const GREEN = "#4ADE80";
 
+// ===== NOTES CATEGORIES =====
+const NOTES_CATEGORIES = [
+  "Makanan",
+  "Minuman",
+  "Coding",
+  "Teknologi",
+  "Pendidikan",
+  "Kesehatan",
+  "Olahraga",
+  "Seni",
+  "Musik",
+  "Bisnis",
+  "Keuangan",
+  "Traveling",
+  "Otomotif",
+  "Game",
+  "Fashion",
+];
+
 const STATUS_STYLES: any = {
   waiting: { label: "Waiting", bg: WHITE, text: BLUE, border: BLUE },
   active: { label: "Active", bg: WHITE, text: BLUE, border: BLUE },
@@ -451,20 +470,6 @@ const TOPIC_STYLES: any = {
   "Partnership": { bg: WHITE, text: BLUE, border: BLUE },
   "Other": { bg: WHITE, text: BLUE, border: BLUE },
 };
-
-// ===== NOTES CATEGORIES =====
-const NOTES_CATEGORIES = [
-  { id: "makanan", label: "Makanan" },
-  { id: "minuman", label: "Minuman" },
-  { id: "coding", label: "Coding" },
-  { id: "teknologi", label: "Teknologi" },
-  { id: "kesehatan", label: "Kesehatan" },
-  { id: "pendidikan", label: "Pendidikan" },
-  { id: "bisnis", label: "Bisnis" },
-  { id: "hiburan", label: "Hiburan" },
-  { id: "olahraga", label: "Olahraga" },
-  { id: "lainnya", label: "Lainnya" },
-];
 
 // ===== SVG ICONS =====
 const NorthEastArrow = ({ size = 20, color = "currentColor" }: { size?: number; color?: string }) => (
@@ -784,49 +789,7 @@ interface NoteEntry {
   userEmail: string;
   userPhoto?: string;
   text?: string;
-  createdAt: any;
-}
-
-interface NoteItem {
-  id: string;
-  userId: string;
-  userName: string;
-  userEmail: string;
-  userPhoto?: string;
-  title: string;
-  content: string;
-  category: string;
-  createdAt: any;
-  updatedAt?: any;
-  likes?: number;
-  views?: number;
-}
-
-interface PersonalNoteInvite {
-  id: string;
-  noteId: string;
-  ownerId: string;
-  ownerName: string;
-  ownerEmail: string;
-  invitedUserId: string;
-  invitedUserName: string;
-  invitedUserEmail: string;
-  status: "pending" | "accepted" | "declined";
-  createdAt: any;
-}
-
-interface NoteReport {
-  id: string;
-  noteId: string;
-  noteTitle: string;
-  noteOwnerId: string;
-  noteOwnerName: string;
-  reporterId: string;
-  reporterName: string;
-  reporterEmail: string;
-  reason: string;
-  description: string;
-  status: "pending" | "reviewed" | "resolved";
+  category?: string;
   createdAt: any;
 }
 
@@ -2004,8 +1967,32 @@ const RightNavbar = ({
   sayHeyUnreadCount: number;
   locationText: string;
 }) => {
+  const rollingRef = useRef<HTMLDivElement>(null);
+  const [rollingIndex, setRollingIndex] = useState(0);
   const displayName = user?.displayName || user?.email?.split("@")[0] || "User";
   const photoURL = user?.photoURL || "";
+
+  useEffect(() => {
+    if (!user) return;
+    const interval = setInterval(() => {
+      setRollingIndex((prev) => (prev + 1) % 3);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [user]);
+
+  useEffect(() => {
+    if (!user || !rollingRef.current) return;
+    const el = rollingRef.current;
+    gsap.killTweensOf(el);
+    gsap.fromTo(
+      el,
+      { yPercent: 100, opacity: 0, rotateX: -90, transformOrigin: "50% 100%" },
+      { yPercent: 0, opacity: 1, rotateX: 0, duration: 0.6, ease: "back.out(1.7)" }
+    );
+    return () => {
+      gsap.killTweensOf(el);
+    };
+  }, [rollingIndex, user]);
 
   const handleLogout = async () => {
     if (!auth) return;
@@ -2183,74 +2170,118 @@ const RightNavbar = ({
 
         <div
           style={{
+            position: "relative",
+            height: "90px",
+            overflow: "hidden",
             display: "flex",
             alignItems: "center",
             justifyContent: "flex-end",
-            gap: "12px",
+            minWidth: "260px",
           }}
         >
-          <span
-            style={{
-              color: BLUE,
-              fontSize: "70px",
-              fontWeight: 700,
-              letterSpacing: "-0.03em",
-              lineHeight: 1,
-              whiteSpace: "nowrap",
-              fontFamily: FONT_FAMILY,
-            }}
-          >
-            {displayName}
-          </span>
           <div
+            ref={rollingRef}
             style={{
-              width: "70px",
-              height: "70px",
-              borderRadius: "50%",
-              overflow: "hidden",
-              backgroundColor: BLUE,
               display: "flex",
               alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
+              justifyContent: "flex-end",
+              gap: "12px",
+              width: "100%",
             }}
           >
-            {photoURL ? (
-              <img
-                src={photoURL}
-                alt={displayName}
-                style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-                referrerPolicy="no-referrer"
-              />
-            ) : (
-              <span style={{ fontSize: "30px", fontWeight: 800, color: WHITE }}>
-                {displayName.charAt(0).toUpperCase()}
-              </span>
+            {rollingIndex === 0 && (
+              <>
+                <span
+                  style={{
+                    color: BLUE,
+                    fontSize: "70px",
+                    fontWeight: 700,
+                    letterSpacing: "-0.03em",
+                    lineHeight: 1,
+                    whiteSpace: "nowrap",
+                    fontFamily: FONT_FAMILY,
+                  }}
+                >
+                  {displayName}
+                </span>
+                <div
+                  style={{
+                    width: "70px",
+                    height: "70px",
+                    borderRadius: "50%",
+                    overflow: "hidden",
+                    backgroundColor: BLUE,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                  }}
+                >
+                  {photoURL ? (
+                    <img
+                      src={photoURL}
+                      alt={displayName}
+                      style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                      referrerPolicy="no-referrer"
+                    />
+                  ) : (
+                    <span style={{ fontSize: "30px", fontWeight: 800, color: WHITE }}>
+                      {displayName.charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                </div>
+              </>
+            )}
+            {rollingIndex === 1 && (
+              <Link
+                href="/dashboard"
+                style={{
+                  textDecoration: "none",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "12px",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                <span
+                  style={{
+                    color: BLUE,
+                    fontSize: "70px",
+                    fontWeight: 700,
+                    letterSpacing: "-0.03em",
+                    lineHeight: 1,
+                    fontFamily: FONT_FAMILY,
+                  }}
+                >
+                  Dashboard
+                </span>
+                <NorthEastArrow size={50} color={BLUE} />
+              </Link>
+            )}
+            {rollingIndex === 2 && (
+              <button
+                onClick={handleLogout}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  padding: 0,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "12px",
+                  whiteSpace: "nowrap",
+                  fontFamily: FONT_FAMILY,
+                }}
+              >
+                <span style={{ color: BLUE, fontSize: "70px", fontWeight: 700, letterSpacing: "-0.03em", lineHeight: 1 }}>
+                  Logout
+                </span>
+                <LogoutIcon size={50} color={BLUE} />
+              </button>
             )}
           </div>
         </div>
       </div>
-
-      <button
-        onClick={handleLogout}
-        style={{
-          background: "transparent",
-          border: `1.5px solid ${BLUE}`,
-          color: BLUE,
-          padding: "6px 16px",
-          borderRadius: "8px",
-          fontSize: "13px",
-          fontWeight: 700,
-          cursor: "pointer",
-          fontFamily: FONT_FAMILY,
-          display: "flex",
-          alignItems: "center",
-          gap: "6px",
-        }}
-      >
-        <LogoutIcon size={14} color={BLUE} />
-        Logout
-      </button>
 
       {locationText && (
         <div
@@ -2482,7 +2513,7 @@ const SayHeySection = ({
         userUnreadCount: 0,
         ownerUnreadCount: 0,
       });
-      const initialMessage = `Hey!`;
+      const initialMessage = `Hey! 👋`;
       const encryptedMessage = await encryptMessage(initialMessage);
       await addDoc(collection(db, "sayhey_tickets", ticketRef.id, "messages"), {
         senderId: user.uid,
@@ -3037,7 +3068,7 @@ const SayHeySection = ({
                       fontFamily: FONT_FAMILY,
                     }}
                   >
-                    No messages yet. Say hey!
+                    No messages yet. Say hey! 👋
                   </div>
                 ) : (
                   messages.map((msg, idx) => {
@@ -6380,1041 +6411,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
   );
 };
 
-// ===== NOTES SECTION COMPONENT =====
-const NotesSection = ({ user, db, isMounted }: { user: any; db: any; isMounted: boolean }) => {
-  const [notes, setNotes] = useState<NoteItem[]>([]);
-  const [latestNotes, setLatestNotes] = useState<NoteItem[]>([]);
-  const [loadingNotes, setLoadingNotes] = useState(true);
-  const [showCreateForm, setShowCreateForm] = useState(false);
-  const [newNoteTitle, setNewNoteTitle] = useState("");
-  const [newNoteContent, setNewNoteContent] = useState("");
-  const [newNoteCategory, setNewNoteCategory] = useState("makanan");
-  const [submitting, setSubmitting] = useState(false);
-
-  // Invite user ke note pribadi
-  const [showInviteForm, setShowInviteForm] = useState(false);
-  const [inviteEmail, setInviteEmail] = useState("");
-  const [inviteStatus, setInviteStatus] = useState<string | null>(null);
-  const [myInvites, setMyInvites] = useState<PersonalNoteInvite[]>([]);
-
-  // Report note ke admin
-  const [showReportForm, setShowReportForm] = useState(false);
-  const [reportNoteId, setReportNoteId] = useState<string | null>(null);
-  const [reportNoteTitle, setReportNoteTitle] = useState("");
-  const [reportReason, setReportReason] = useState("");
-  const [reportDescription, setReportDescription] = useState("");
-  const [reportStatus, setReportStatus] = useState<string | null>(null);
-
-  const titleRef = useRef<HTMLHeadingElement>(null);
-
-  // GSAP animation for Notes title
-  useEffect(() => {
-    if (!isMounted || !titleRef.current) return;
-    const ctx = gsap.context(() => {
-      const split = new SplitText(titleRef.current, { type: "chars", charsClass: "notes-title-char" });
-      gsap.set(split.chars, {
-        opacity: 0,
-        y: 80,
-        rotationX: -90,
-        transformOrigin: "50% 100%",
-        force3D: true,
-      });
-      gsap.to(split.chars, {
-        opacity: 1,
-        y: 0,
-        rotationX: 0,
-        duration: 1,
-        stagger: 0.06,
-        ease: "back.out(1.7)",
-        scrollTrigger: {
-          trigger: titleRef.current,
-          start: "top 85%",
-          toggleActions: "play none none none",
-        },
-      });
-      return () => split.revert();
-    }, titleRef);
-    return () => ctx.revert();
-  }, [isMounted]);
-
-  // Load notes from Firebase (semua kategori sekaligus, dikelompokkan)
-  useEffect(() => {
-    if (!db || !isMounted) return;
-    setLoadingNotes(true);
-
-    const q = query(collection(db, "notes"), orderBy("createdAt", "desc"), limit(100));
-
-    const unsub = onSnapshot(q, (snapshot: any) => {
-      const list: NoteItem[] = [];
-      snapshot.forEach((docSnap: any) => {
-        const data = docSnap.data();
-        list.push({
-          id: docSnap.id,
-          ...data,
-        } as NoteItem);
-      });
-      setNotes(list);
-      setLoadingNotes(false);
-    });
-
-    return () => unsub();
-  }, [db, isMounted]);
-
-  // Load latest notes (activity) - 5 terbaru tanpa filter kategori
-  useEffect(() => {
-    if (!db || !isMounted) return;
-    const q = query(collection(db, "notes"), orderBy("createdAt", "desc"), limit(5));
-    const unsub = onSnapshot(q, (snapshot: any) => {
-      const list: NoteItem[] = [];
-      snapshot.forEach((docSnap: any) => {
-        const data = docSnap.data();
-        list.push({ id: docSnap.id, ...data } as NoteItem);
-      });
-      setLatestNotes(list);
-    });
-    return () => unsub();
-  }, [db, isMounted]);
-
-  // Load my invites (invite user ke note pribadi)
-  useEffect(() => {
-    if (!db || !user || !isMounted) return;
-    const q = query(
-      collection(db, "personal_note_invites"),
-      where("ownerId", "==", user.uid),
-      orderBy("createdAt", "desc"),
-      limit(20)
-    );
-    const unsub = onSnapshot(q, (snapshot: any) => {
-      const list: PersonalNoteInvite[] = [];
-      snapshot.forEach((docSnap: any) => {
-        list.push({ id: docSnap.id, ...docSnap.data() } as PersonalNoteInvite);
-      });
-      setMyInvites(list);
-    });
-    return () => unsub();
-  }, [db, user, isMounted]);
-
-  const handleSubmitNote = async () => {
-    if (!db || !user || !newNoteTitle.trim() || !newNoteContent.trim()) return;
-    setSubmitting(true);
-    try {
-      await addDoc(collection(db, "notes"), {
-        userId: user.uid,
-        userName: user.displayName || user.email?.split("@")[0] || "User",
-        userEmail: user.email || "",
-        userPhoto: user.photoURL || "",
-        title: newNoteTitle.trim(),
-        content: newNoteContent.trim(),
-        category: newNoteCategory,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-        likes: 0,
-        views: 0,
-      });
-      setNewNoteTitle("");
-      setNewNoteContent("");
-      setNewNoteCategory("makanan");
-      setShowCreateForm(false);
-    } catch (error) {
-      console.error("Error submitting note:", error);
-      alert("Gagal mengirim note. Coba lagi.");
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleInviteUser = async () => {
-    if (!db || !user || !inviteEmail.trim()) return;
-    setInviteStatus(null);
-    try {
-      // Cari user berdasarkan email
-      const q = query(collection(db, "users"), where("email", "==", inviteEmail.trim().toLowerCase()));
-      const snapshot = await new Promise<any>((resolve) => {
-        const unsub = onSnapshot(q, (snap: any) => {
-          unsub();
-          resolve(snap);
-        });
-      });
-      if (snapshot.empty) {
-        setInviteStatus("User dengan email tersebut tidak ditemukan.");
-        return;
-      }
-      const targetDoc = snapshot.docs[0];
-      const targetData = targetDoc.data();
-      await addDoc(collection(db, "personal_note_invites"), {
-        noteId: `personal_${user.uid}`,
-        ownerId: user.uid,
-        ownerName: user.displayName || user.email?.split("@")[0] || "User",
-        ownerEmail: user.email || "",
-        invitedUserId: targetDoc.id,
-        invitedUserName: targetData.displayName || targetData.email?.split("@")[0] || "User",
-        invitedUserEmail: targetData.email || "",
-        status: "pending",
-        createdAt: serverTimestamp(),
-      });
-      setInviteStatus(`Undangan berhasil dikirim ke ${targetData.displayName || targetData.email}.`);
-      setInviteEmail("");
-      setShowInviteForm(false);
-    } catch (error) {
-      console.error("Error inviting user:", error);
-      setInviteStatus("Gagal mengirim undangan. Coba lagi.");
-    }
-  };
-
-  const handleSubmitReport = async () => {
-    if (!db || !user || !reportNoteId || !reportReason.trim()) return;
-    try {
-      await addDoc(collection(db, "note_reports"), {
-        noteId: reportNoteId,
-        noteTitle: reportNoteTitle,
-        noteOwnerId: notes.find((n) => n.id === reportNoteId)?.userId || "",
-        noteOwnerName: notes.find((n) => n.id === reportNoteId)?.userName || "",
-        reporterId: user.uid,
-        reporterName: user.displayName || user.email?.split("@")[0] || "User",
-        reporterEmail: user.email || "",
-        reason: reportReason.trim(),
-        description: reportDescription.trim(),
-        status: "pending",
-        createdAt: serverTimestamp(),
-        adminEmail: ADMIN_EMAIL,
-      });
-      setReportStatus("Laporan berhasil dikirim ke admin. Terima kasih.");
-      setShowReportForm(false);
-      setReportNoteId(null);
-      setReportNoteTitle("");
-      setReportReason("");
-      setReportDescription("");
-    } catch (error) {
-      console.error("Error submitting report:", error);
-      setReportStatus("Gagal mengirim laporan. Coba lagi.");
-    }
-  };
-
-  const formatDate = (timestamp: any) => {
-    if (!timestamp) return "";
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    return date.toLocaleDateString("id-ID", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
-  const getCategoryLabel = (catId: string) => {
-    const cat = NOTES_CATEGORIES.find((c) => c.id === catId);
-    return cat ? cat.label : catId;
-  };
-
-  return (
-    <div
-      style={{
-        width: "100%",
-        padding: "0 40px",
-        maxWidth: "1600px",
-        margin: "0 auto",
-        fontFamily: FONT_FAMILY,
-      }}
-    >
-      {/* Title Notes - 150px biru */}
-      <h2
-        ref={titleRef}
-        style={{
-          fontFamily: FONT_FAMILY,
-          fontSize: "150px",
-          fontWeight: 700,
-          color: BLUE,
-          letterSpacing: "-0.04em",
-          lineHeight: 1,
-          margin: 0,
-          marginBottom: "20px",
-          textAlign: "left",
-          WebkitFontSmoothing: "antialiased",
-          MozOsxFontSmoothing: "grayscale",
-        }}
-      >
-        Notes
-      </h2>
-
-      {/* Deskripsi */}
-      <p
-        style={{
-          fontFamily: FONT_FAMILY,
-          fontSize: "20px",
-          fontWeight: 400,
-          color: "#333",
-          lineHeight: 1.6,
-          maxWidth: "800px",
-          margin: "0 0 40px 0",
-          letterSpacing: "-0.01em",
-        }}
-      >
-        Temukan dan bagikan catatan bermanfaat dari komunitas Menuru. Setiap catatan dikategorikan
-        untuk memudahkan pencarian. Bergabunglah dengan ribuan pengguna lainnya!
-      </p>
-
-      {/* Form buat note (hanya untuk user login) */}
-      {user && (
-        <div style={{ marginBottom: "32px" }}>
-          <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", alignItems: "center" }}>
-            <button
-              onClick={() => setShowCreateForm(!showCreateForm)}
-              style={{
-                padding: "14px 32px",
-                backgroundColor: BLUE,
-                color: WHITE,
-                border: "none",
-                borderRadius: "12px",
-                fontSize: "16px",
-                fontWeight: 800,
-                cursor: "pointer",
-                fontFamily: FONT_FAMILY,
-                letterSpacing: "0.02em",
-                boxShadow: "0 8px 24px rgba(13,60,252,0.3)",
-              }}
-            >
-              {showCreateForm ? "Tutup Form Note" : "+ Buat Note Baru"}
-            </button>
-            <button
-              onClick={() => setShowInviteForm(!showInviteForm)}
-              style={{
-                padding: "14px 32px",
-                backgroundColor: BLACK,
-                color: WHITE,
-                border: "none",
-                borderRadius: "12px",
-                fontSize: "16px",
-                fontWeight: 800,
-                cursor: "pointer",
-                fontFamily: FONT_FAMILY,
-                letterSpacing: "0.02em",
-                boxShadow: "0 8px 24px rgba(0,0,0,0.3)",
-              }}
-            >
-              {showInviteForm ? "Tutup Invite" : "+ Invite User ke Note Pribadi"}
-            </button>
-          </div>
-
-          {/* Form Invite User */}
-          {showInviteForm && (
-            <div
-              style={{
-                marginTop: "20px",
-                padding: "24px",
-                backgroundColor: BLACK,
-                borderRadius: "16px",
-                display: "flex",
-                flexDirection: "column",
-                gap: "16px",
-              }}
-            >
-              <h4 style={{ fontSize: "20px", fontWeight: 700, color: WHITE, margin: 0, fontFamily: FONT_FAMILY }}>
-                Invite User ke Note Pribadi
-              </h4>
-              <input
-                type="email"
-                value={inviteEmail}
-                onChange={(e) => setInviteEmail(e.target.value)}
-                placeholder="Masukkan email user yang ingin di-invite..."
-                style={{
-                  padding: "14px 18px",
-                  border: `2px solid ${BLUE}`,
-                  borderRadius: "10px",
-                  fontSize: "15px",
-                  fontFamily: FONT_FAMILY,
-                  outline: "none",
-                  color: BLACK,
-                  backgroundColor: WHITE,
-                }}
-              />
-              {inviteStatus && (
-                <div
-                  style={{
-                    fontSize: "13px",
-                    color: WHITE,
-                    fontFamily: FONT_FAMILY,
-                    padding: "10px 14px",
-                    backgroundColor: "rgba(255,255,255,0.15)",
-                    borderRadius: "8px",
-                  }}
-                >
-                  {inviteStatus}
-                </div>
-              )}
-              <button
-                onClick={handleInviteUser}
-                disabled={!inviteEmail.trim()}
-                style={{
-                  alignSelf: "flex-start",
-                  padding: "12px 28px",
-                  backgroundColor: inviteEmail.trim() ? BLUE : "#555",
-                  color: WHITE,
-                  border: "none",
-                  borderRadius: "10px",
-                  fontSize: "14px",
-                  fontWeight: 800,
-                  cursor: inviteEmail.trim() ? "pointer" : "not-allowed",
-                  fontFamily: FONT_FAMILY,
-                }}
-              >
-                Kirim Undangan
-              </button>
-
-              {myInvites.length > 0 && (
-                <div style={{ marginTop: "12px" }}>
-                  <div style={{ fontSize: "14px", fontWeight: 700, color: WHITE, marginBottom: "8px", fontFamily: FONT_FAMILY }}>
-                    Undangan Terkirim ({myInvites.length})
-                  </div>
-                  {myInvites.map((inv) => (
-                    <div
-                      key={inv.id}
-                      style={{
-                        fontSize: "12px",
-                        color: WHITE,
-                        fontFamily: FONT_FAMILY,
-                        padding: "6px 10px",
-                        backgroundColor: "rgba(255,255,255,0.1)",
-                        borderRadius: "6px",
-                        marginBottom: "4px",
-                      }}
-                    >
-                      {inv.invitedUserName} ({inv.invitedUserEmail}) - {inv.status}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {showCreateForm && (
-            <div
-              style={{
-                marginTop: "20px",
-                padding: "24px",
-                backgroundColor: "#f8f9ff",
-                borderRadius: "16px",
-                border: `1px solid ${BLUE}20`,
-                display: "flex",
-                flexDirection: "column",
-                gap: "16px",
-              }}
-            >
-              <input
-                type="text"
-                value={newNoteTitle}
-                onChange={(e) => setNewNoteTitle(e.target.value)}
-                placeholder="Judul note..."
-                style={{
-                  padding: "14px 18px",
-                  border: `2px solid ${BLUE}30`,
-                  borderRadius: "10px",
-                  fontSize: "16px",
-                  fontFamily: FONT_FAMILY,
-                  outline: "none",
-                  color: BLACK,
-                }}
-              />
-              <textarea
-                value={newNoteContent}
-                onChange={(e) => setNewNoteContent(e.target.value)}
-                placeholder="Tulis konten note di sini..."
-                rows={5}
-                style={{
-                  padding: "14px 18px",
-                  border: `2px solid ${BLUE}30`,
-                  borderRadius: "10px",
-                  fontSize: "15px",
-                  fontFamily: FONT_FAMILY,
-                  outline: "none",
-                  resize: "vertical",
-                  color: BLACK,
-                }}
-              />
-              <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
-                <label
-                  style={{
-                    fontSize: "14px",
-                    fontWeight: 700,
-                    color: BLACK,
-                    fontFamily: FONT_FAMILY,
-                  }}
-                >
-                  Kategori:
-                </label>
-                <select
-                  value={newNoteCategory}
-                  onChange={(e) => setNewNoteCategory(e.target.value)}
-                  style={{
-                    padding: "10px 16px",
-                    border: `2px solid ${BLUE}`,
-                    borderRadius: "10px",
-                    fontSize: "14px",
-                    fontFamily: FONT_FAMILY,
-                    outline: "none",
-                    backgroundColor: WHITE,
-                    color: BLUE,
-                    fontWeight: 600,
-                    cursor: "pointer",
-                  }}
-                >
-                  {NOTES_CATEGORIES.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                      {cat.label}
-                    </option>
-                  ))}
-                </select>
-                <button
-                  onClick={handleSubmitNote}
-                  disabled={submitting || !newNoteTitle.trim() || !newNoteContent.trim()}
-                  style={{
-                    padding: "12px 28px",
-                    backgroundColor:
-                      submitting || !newNoteTitle.trim() || !newNoteContent.trim() ? "#ccc" : BLUE,
-                    color: WHITE,
-                    border: "none",
-                    borderRadius: "10px",
-                    fontSize: "14px",
-                    fontWeight: 800,
-                    cursor:
-                      submitting || !newNoteTitle.trim() || !newNoteContent.trim()
-                        ? "not-allowed"
-                        : "pointer",
-                    fontFamily: FONT_FAMILY,
-                    marginLeft: "auto",
-                  }}
-                >
-                  {submitting ? "Mengirim..." : "Kirim Note"}
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Form Report Note ke Admin */}
-      {showReportForm && user && (
-        <div
-          style={{
-            marginBottom: "32px",
-            padding: "24px",
-            backgroundColor: BLUE,
-            borderRadius: "16px",
-            display: "flex",
-            flexDirection: "column",
-            gap: "16px",
-          }}
-        >
-          <h4 style={{ fontSize: "20px", fontWeight: 700, color: WHITE, margin: 0, fontFamily: FONT_FAMILY }}>
-            Laporkan Note ke Admin
-          </h4>
-          <div style={{ fontSize: "13px", color: WHITE, fontFamily: FONT_FAMILY, opacity: 0.9 }}>
-            Note: <strong>{reportNoteTitle}</strong>
-          </div>
-          <input
-            type="text"
-            value={reportReason}
-            onChange={(e) => setReportReason(e.target.value)}
-            placeholder="Alasan laporan (misal: spam, konten tidak pantas, dll)..."
-            style={{
-              padding: "14px 18px",
-              border: `2px solid ${WHITE}`,
-              borderRadius: "10px",
-              fontSize: "15px",
-              fontFamily: FONT_FAMILY,
-              outline: "none",
-              color: BLACK,
-              backgroundColor: WHITE,
-            }}
-          />
-          <textarea
-            value={reportDescription}
-            onChange={(e) => setReportDescription(e.target.value)}
-            placeholder="Deskripsi tambahan (opsional)..."
-            rows={3}
-            style={{
-              padding: "14px 18px",
-              border: `2px solid ${WHITE}`,
-              borderRadius: "10px",
-              fontSize: "14px",
-              fontFamily: FONT_FAMILY,
-              outline: "none",
-              resize: "vertical",
-              color: BLACK,
-              backgroundColor: WHITE,
-            }}
-          />
-          {reportStatus && (
-            <div
-              style={{
-                fontSize: "13px",
-                color: WHITE,
-                fontFamily: FONT_FAMILY,
-                padding: "10px 14px",
-                backgroundColor: "rgba(255,255,255,0.15)",
-                borderRadius: "8px",
-              }}
-            >
-              {reportStatus}
-            </div>
-          )}
-          <div style={{ display: "flex", gap: "10px" }}>
-            <button
-              onClick={handleSubmitReport}
-              disabled={!reportReason.trim()}
-              style={{
-                padding: "12px 28px",
-                backgroundColor: WHITE,
-                color: BLUE,
-                border: "none",
-                borderRadius: "10px",
-                fontSize: "14px",
-                fontWeight: 800,
-                cursor: reportReason.trim() ? "pointer" : "not-allowed",
-                fontFamily: FONT_FAMILY,
-              }}
-            >
-              Kirim Laporan
-            </button>
-            <button
-              onClick={() => {
-                setShowReportForm(false);
-                setReportNoteId(null);
-                setReportNoteTitle("");
-                setReportReason("");
-                setReportDescription("");
-                setReportStatus(null);
-              }}
-              style={{
-                padding: "12px 28px",
-                backgroundColor: "transparent",
-                color: WHITE,
-                border: `2px solid ${WHITE}`,
-                borderRadius: "10px",
-                fontSize: "14px",
-                fontWeight: 800,
-                cursor: "pointer",
-                fontFamily: FONT_FAMILY,
-              }}
-            >
-              Batal
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Aktivitas Terbaru */}
-      <div style={{ marginBottom: "40px" }}>
-        <h3
-          style={{
-            fontFamily: FONT_FAMILY,
-            fontSize: "24px",
-            fontWeight: 700,
-            color: BLACK,
-            margin: "0 0 16px 0",
-            letterSpacing: "-0.02em",
-          }}
-        >
-          Aktivitas Terbaru
-        </h3>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "10px",
-          }}
-        >
-          {latestNotes.length === 0 ? (
-            <div
-              style={{
-                padding: "20px",
-                backgroundColor: "#f8f9ff",
-                borderRadius: "12px",
-                color: "#999",
-                fontSize: "14px",
-                fontFamily: FONT_FAMILY,
-                textAlign: "center",
-              }}
-            >
-              Belum ada aktivitas terbaru
-            </div>
-          ) : (
-            latestNotes.map((note) => (
-              <div
-                key={note.id}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "12px",
-                  padding: "12px 16px",
-                  backgroundColor: "#f8f9ff",
-                  borderRadius: "12px",
-                  border: `1px solid ${BLUE}10`,
-                }}
-              >
-                <div
-                  style={{
-                    width: "36px",
-                    height: "36px",
-                    borderRadius: "50%",
-                    overflow: "hidden",
-                    backgroundColor: BLUE,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    flexShrink: 0,
-                  }}
-                >
-                  {note.userPhoto ? (
-                    <img
-                      src={note.userPhoto}
-                      alt={note.userName}
-                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                    />
-                  ) : (
-                    <span style={{ fontSize: "16px", fontWeight: 800, color: WHITE }}>
-                      {note.userName?.charAt(0)?.toUpperCase() || "U"}
-                    </span>
-                  )}
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div
-                    style={{
-                      fontSize: "14px",
-                      fontWeight: 700,
-                      color: BLACK,
-                      fontFamily: FONT_FAMILY,
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {note.userName}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: "12px",
-                      color: "#666",
-                      fontFamily: FONT_FAMILY,
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    Membuat note: <strong>{note.title}</strong> di kategori {getCategoryLabel(note.category)}
-                  </div>
-                </div>
-                <span
-                  style={{
-                    fontSize: "11px",
-                    color: BLUE,
-                    fontWeight: 600,
-                    fontFamily: FONT_FAMILY,
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {formatDate(note.createdAt)}
-                </span>
-              </div>
-            ))
-          )}
-        </div>
-      </div>
-
-      {/* Kategori Notes - sejajar ke bawah, bg biru teks putih */}
-      <div style={{ marginBottom: "40px" }}>
-        <h3
-          style={{
-            fontFamily: FONT_FAMILY,
-            fontSize: "24px",
-            fontWeight: 700,
-            color: BLACK,
-            margin: "0 0 16px 0",
-            letterSpacing: "-0.02em",
-          }}
-        >
-          Kategori Notes
-        </h3>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "12px",
-          }}
-        >
-          {NOTES_CATEGORIES.map((cat) => {
-            const catNotes = notes.filter((n) => n.category === cat.id);
-            return (
-              <div
-                key={cat.id}
-                style={{
-                  backgroundColor: BLUE,
-                  borderRadius: "16px",
-                  padding: "24px",
-                  color: WHITE,
-                }}
-              >
-                <h4
-                  style={{
-                    fontSize: "32px",
-                    fontWeight: 700,
-                    color: WHITE,
-                    margin: "0 0 16px 0",
-                    fontFamily: FONT_FAMILY,
-                    letterSpacing: "-0.02em",
-                  }}
-                >
-                  {cat.label}
-                </h4>
-
-                {catNotes.length === 0 ? (
-                  <div
-                    style={{
-                      fontSize: "14px",
-                      color: WHITE,
-                      fontFamily: FONT_FAMILY,
-                      opacity: 0.7,
-                      fontStyle: "italic",
-                    }}
-                  >
-                    Belum ada notes di kategori ini.
-                  </div>
-                ) : (
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-                      gap: "16px",
-                    }}
-                  >
-                    {catNotes.map((note) => (
-                      <div
-                        key={note.id}
-                        style={{
-                          backgroundColor: BLACK,
-                          borderRadius: "12px",
-                          padding: "16px",
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: "10px",
-                          position: "relative",
-                        }}
-                      >
-                        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                          <div
-                            style={{
-                              width: "32px",
-                              height: "32px",
-                              borderRadius: "50%",
-                              overflow: "hidden",
-                              backgroundColor: WHITE,
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              flexShrink: 0,
-                            }}
-                          >
-                            {note.userPhoto ? (
-                              <img
-                                src={note.userPhoto}
-                                alt={note.userName}
-                                style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                              />
-                            ) : (
-                              <span style={{ fontSize: "14px", fontWeight: 800, color: BLACK }}>
-                                {note.userName?.charAt(0)?.toUpperCase() || "U"}
-                              </span>
-                            )}
-                          </div>
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <div
-                              style={{
-                                fontSize: "13px",
-                                fontWeight: 700,
-                                color: WHITE,
-                                fontFamily: FONT_FAMILY,
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                whiteSpace: "nowrap",
-                              }}
-                            >
-                              {note.userName}
-                            </div>
-                            <div
-                              style={{
-                                fontSize: "10px",
-                                color: "rgba(255,255,255,0.6)",
-                                fontFamily: FONT_FAMILY,
-                              }}
-                            >
-                              {formatDate(note.createdAt)}
-                            </div>
-                          </div>
-                        </div>
-
-                        <h5
-                          style={{
-                            fontSize: "16px",
-                            fontWeight: 700,
-                            color: WHITE,
-                            margin: 0,
-                            fontFamily: FONT_FAMILY,
-                            lineHeight: 1.3,
-                          }}
-                        >
-                          {note.title}
-                        </h5>
-
-                        <p
-                          style={{
-                            fontSize: "13px",
-                            color: "rgba(255,255,255,0.85)",
-                            margin: 0,
-                            fontFamily: FONT_FAMILY,
-                            lineHeight: 1.5,
-                            display: "-webkit-box",
-                            WebkitLineClamp: 3,
-                            WebkitBoxOrient: "vertical",
-                            overflow: "hidden",
-                          }}
-                        >
-                          {note.content}
-                        </p>
-
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                            marginTop: "auto",
-                            paddingTop: "8px",
-                            borderTop: "1px solid rgba(255,255,255,0.1)",
-                          }}
-                        >
-                          <span
-                            style={{
-                              fontSize: "11px",
-                              color: "rgba(255,255,255,0.6)",
-                              fontFamily: FONT_FAMILY,
-                            }}
-                          >
-                            {note.likes || 0} likes - {note.views || 0} views
-                          </span>
-                          {user && user.uid !== note.userId && (
-                            <button
-                              onClick={() => {
-                                setReportNoteId(note.id);
-                                setReportNoteTitle(note.title);
-                                setShowReportForm(true);
-                                setReportStatus(null);
-                              }}
-                              style={{
-                                padding: "4px 10px",
-                                backgroundColor: BLUE,
-                                color: WHITE,
-                                border: "none",
-                                borderRadius: "6px",
-                                fontSize: "10px",
-                                fontWeight: 800,
-                                cursor: "pointer",
-                                fontFamily: FONT_FAMILY,
-                                letterSpacing: "0.3px",
-                              }}
-                            >
-                              Laporkan
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Sisi Kanan: Halo, nama user - design sama */}
-      {user && (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "flex-end",
-            marginTop: "20px",
-            marginBottom: "40px",
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: BLUE,
-              borderRadius: "16px",
-              padding: "20px 28px",
-              display: "flex",
-              alignItems: "center",
-              gap: "16px",
-              boxShadow: "0 8px 32px rgba(13,60,252,0.3)",
-            }}
-          >
-            <span
-              style={{
-                fontSize: "42px",
-                fontWeight: 700,
-                color: WHITE,
-                fontFamily: FONT_FAMILY,
-                letterSpacing: "-0.02em",
-                whiteSpace: "nowrap",
-              }}
-            >
-              Halo, {user.displayName || user.email?.split("@")[0] || "User"}
-            </span>
-            <div
-              style={{
-                width: "52px",
-                height: "52px",
-                borderRadius: "50%",
-                overflow: "hidden",
-                backgroundColor: WHITE,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                flexShrink: 0,
-              }}
-            >
-              {user.photoURL ? (
-                <img
-                  src={user.photoURL}
-                  alt={user.displayName || "User"}
-                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                  referrerPolicy="no-referrer"
-                />
-              ) : (
-                <span style={{ fontSize: "24px", fontWeight: 800, color: BLUE }}>
-                  {(user.displayName || user.email || "U").charAt(0).toUpperCase()}
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {loadingNotes && (
-        <div
-          style={{
-            padding: "40px 20px",
-            textAlign: "center",
-            color: "#999",
-            fontSize: "16px",
-            fontFamily: FONT_FAMILY,
-          }}
-        >
-          Memuat notes...
-        </div>
-      )}
-    </div>
-  );
-};
-
 // ===== MAIN PAGE =====
 export default function HomePage(): React.JSX.Element {
   const [showMain, setShowMain] = useState(false);
@@ -7428,6 +6424,7 @@ export default function HomePage(): React.JSX.Element {
   const [sayHeyUnreadCount, setSayHeyUnreadCount] = useState(0);
   const [locationText, setLocationText] = useState<string>("");
   const [showNotesSection, setShowNotesSection] = useState(false);
+  const [notes, setNotes] = useState<NoteEntry[]>([]);
 
   const [registeredUsers, setRegisteredUsers] = useState<NoteEntry[]>([]);
   const [hasSubmittedNote, setHasSubmittedNote] = useState(false);
@@ -7484,6 +6481,7 @@ export default function HomePage(): React.JSX.Element {
           userEmail: data.email || "",
           userPhoto: data.photoURL || "",
           text: data.text || "",
+          category: data.category || "",
           createdAt: data.createdAt || data.lastSeen || null,
         } as NoteEntry);
       });
@@ -7501,6 +6499,30 @@ export default function HomePage(): React.JSX.Element {
     });
     return () => unsub();
   }, [db, user, isMounted]);
+
+  // ===== NOTES FROM FIREBASE =====
+  useEffect(() => {
+    if (!db || !isMounted) return;
+    const q = query(collection(db, "notes"), orderBy("createdAt", "desc"), limit(50));
+    const unsub = onSnapshot(q, (snapshot: any) => {
+      const list: NoteEntry[] = [];
+      snapshot.forEach((docSnap: any) => {
+        const data = docSnap.data();
+        list.push({
+          id: docSnap.id,
+          userId: data.userId || docSnap.id,
+          userName: data.userName || data.userEmail?.split("@")[0] || "User",
+          userEmail: data.userEmail || "",
+          userPhoto: data.userPhoto || "",
+          text: data.text || "",
+          category: data.category || "",
+          createdAt: data.createdAt || null,
+        } as NoteEntry);
+      });
+      setNotes(list);
+    });
+    return () => unsub();
+  }, [db, isMounted]);
 
   // ===== LOCATION TRACKING =====
   useEffect(() => {
@@ -7693,15 +6715,15 @@ export default function HomePage(): React.JSX.Element {
     }
   }, [sayHeyOpen]);
 
-  // Smooth scroll to notes section when opened
+  // ===== ANIMASI NOTES SECTION =====
   useEffect(() => {
-    if (!showNotesSection) return;
-    const el = document.getElementById("notes-section");
-    if (el) {
-      setTimeout(() => {
-        el.scrollIntoView({ behavior: "smooth", block: "start" });
-      }, 150);
-    }
+    if (!showNotesSection || !notesSectionRef.current) return;
+    const el = notesSectionRef.current;
+    gsap.fromTo(
+      el,
+      { opacity: 0, y: 80 },
+      { opacity: 1, y: 0, duration: 1, ease: "power3.out" }
+    );
   }, [showNotesSection]);
 
   if (!isMounted || loading) {
@@ -8315,7 +7337,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                   Bergabung bersama kami di fitur Note
                 </h3>
                 <button
-                  onClick={() => setShowNotesSection((prev) => !prev)}
+                  onClick={() => setShowNotesSection(true)}
                   style={{
                     display: "inline-flex",
                     alignItems: "center",
@@ -8460,7 +7482,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                               whiteSpace: "nowrap",
                             }}
                           >
-                            {hasSubmittedNote ? "Sudah bergabung" : "Belum bergabung"}
+                            {hasSubmittedNote ? "✓ Sudah bergabung" : "Belum bergabung"}
                           </span>
                         )}
 
@@ -8486,22 +7508,174 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
               </div>
             </div>
 
-            {/* ===== NOTES SECTION (muncul saat tombol Bergabung diklik) ===== */}
+            {/* ===== NOTES SECTION ===== */}
             {showNotesSection && (
               <div
-                id="notes-section"
                 ref={notesSectionRef}
                 style={{
                   width: "100%",
-                  marginTop: "20px",
+                  marginTop: "60px",
                   marginBottom: "60px",
-                  paddingLeft: "0",
-                  paddingRight: "0",
-                  position: "relative",
-                  zIndex: 2,
+                  fontFamily: FONT_FAMILY,
                 }}
               >
-                <NotesSection user={user} db={db} isMounted={isMounted} />
+                {/* Judul Notes */}
+                <h2
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "150px",
+                    fontWeight: 700,
+                    color: BLUE,
+                    letterSpacing: "-0.04em",
+                    lineHeight: 1,
+                    margin: 0,
+                    marginBottom: "20px",
+                    textAlign: "left",
+                  }}
+                >
+                  Notes
+                </h2>
+
+                {/* Deskripsi */}
+                <p
+                  style={{
+                    fontFamily: FONT_FAMILY,
+                    fontSize: "20px",
+                    fontWeight: 500,
+                    color: BLACK,
+                    letterSpacing: "-0.01em",
+                    lineHeight: 1.6,
+                    margin: 0,
+                    marginBottom: "40px",
+                    maxWidth: "800px",
+                    textAlign: "left",
+                  }}
+                >
+                  Temukan catatan-catatan menarik dari komunitas Menuru. Semua catatan dikategorikan untuk memudahkan Anda menjelajahi topik yang Anda minati.
+                </p>
+
+                {/* Kategori */}
+                <div
+                  style={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: "16px",
+                    marginBottom: "40px",
+                  }}
+                >
+                  {NOTES_CATEGORIES.map((cat) => (
+                    <span
+                      key={cat}
+                      style={{
+                        fontFamily: FONT_FAMILY,
+                        fontSize: "18px",
+                        fontWeight: 700,
+                        color: BLACK,
+                        letterSpacing: "-0.01em",
+                        lineHeight: 1.3,
+                        cursor: "default",
+                      }}
+                    >
+                      {cat}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Aktivitas Terbaru */}
+                <div style={{ marginTop: "40px" }}>
+                  <h3
+                    style={{
+                      fontFamily: FONT_FAMILY,
+                      fontSize: "28px",
+                      fontWeight: 700,
+                      color: BLUE,
+                      letterSpacing: "-0.02em",
+                      lineHeight: 1.2,
+                      margin: 0,
+                      marginBottom: "20px",
+                    }}
+                  >
+                    Aktivitas Terbaru
+                  </h3>
+                  {notes.length === 0 ? (
+                    <div
+                      style={{
+                        padding: "40px",
+                        textAlign: "center",
+                        color: "#999",
+                        fontFamily: FONT_FAMILY,
+                        fontSize: "16px",
+                      }}
+                    >
+                      Belum ada catatan yang masuk.
+                    </div>
+                  ) : (
+                    <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                      {notes.map((note) => (
+                        <div
+                          key={note.id}
+                          style={{
+                            padding: "16px 20px",
+                            backgroundColor: BLUE,
+                            borderRadius: "12px",
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "6px",
+                          }}
+                        >
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "10px",
+                              flexWrap: "wrap",
+                            }}
+                          >
+                            <span
+                              style={{
+                                fontFamily: FONT_FAMILY,
+                                fontSize: "15px",
+                                fontWeight: 700,
+                                color: WHITE,
+                              }}
+                            >
+                              {note.userName}
+                            </span>
+                            {note.category && (
+                              <span
+                                style={{
+                                  fontFamily: FONT_FAMILY,
+                                  fontSize: "12px",
+                                  fontWeight: 700,
+                                  color: BLUE,
+                                  backgroundColor: WHITE,
+                                  padding: "2px 10px",
+                                  borderRadius: "4px",
+                                  letterSpacing: "0.5px",
+                                  textTransform: "uppercase",
+                                }}
+                              >
+                                {note.category}
+                              </span>
+                            )}
+                          </div>
+                          <div
+                            style={{
+                              fontFamily: FONT_FAMILY,
+                              fontSize: "14px",
+                              fontWeight: 400,
+                              color: WHITE,
+                              lineHeight: 1.5,
+                              opacity: 0.95,
+                            }}
+                          >
+                            {note.text}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </div>
@@ -8822,12 +7996,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           transform-origin: 50% 100%;
         }
         .footer-menuru-char {
-          display: inline-block;
-          will-change: transform, opacity;
-          color: #0D3CFC !important;
-          transform-origin: 50% 100%;
-        }
-        .notes-title-char {
           display: inline-block;
           will-change: transform, opacity;
           color: #0D3CFC !important;
