@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "menuru_studio.twa",
+    "sha256_cert_fingerprints": ["53:56:F3:74:12:4E:0A:FF:B2:5D:6E:7B:6B:2A:86:AF:D4:86:9C:9B:B3:97:17:80:1A:EA:9A:C0:36:4C:9D:FB"]
+  }
+}]
