@@ -52,6 +52,7 @@ const BLUE = "#0D3CFC";
 const WHITE = "#FFFFFF";
 const BLACK = "#000000";
 const LIME = "#E3FB96";
+const STORE_LINK = "https://apps.microsoft.com/detail/9nv1fg4b6xvn?hl=id-ID&gl=ID";
 
 const STABILO_COLORS = [
   { name: "Kuning", value: "#FFF59D" },
@@ -216,19 +217,47 @@ const HighlightIcon = ({ size = 16, color = "currentColor" }: { size?: number; c
   </svg>
 );
 
-// ===== MICROSOFT ICON (4 kotak warna) =====
-const MicrosoftIcon = ({ size = 24 }: { size?: number }) => (
+// ===== MICROSOFT STORE ICON (tas belanja + 4 kotak warna) =====
+const MicrosoftStoreIcon = ({ size = 32 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style={{ display: 'inline-block' }}>
-    <rect x="1" y="1" width="10" height="10" fill="#F25022" />
-    <rect x="13" y="1" width="10" height="10" fill="#7FBA00" />
-    <rect x="1" y="13" width="10" height="10" fill="#00A4EF" />
-    <rect x="13" y="13" width="10" height="10" fill="#FFB900" />
+    {/* Handle tas */}
+    <path d="M9 3.5C9 2.67157 9.67157 2 10.5 2H13.5C14.3284 2 15 2.67157 15 3.5V5H9V3.5Z" fill="#0078D4" />
+    {/* Badan tas */}
+    <path d="M4 5H20C20.5523 5 21 5.44772 21 6V20C21 20.5523 20.5523 21 20 21H4C3.44772 21 3 20.5523 3 20V6C3 5.44772 3.44772 5 4 5Z" fill="#0078D4" />
+    {/* 4 kotak warna di dalam tas */}
+    <rect x="6" y="8" width="5" height="5" fill="#F25022" />
+    <rect x="13" y="8" width="5" height="5" fill="#7FBA00" />
+    <rect x="6" y="14" width="5" height="5" fill="#00A4EF" />
+    <rect x="13" y="14" width="5" height="5" fill="#FFB900" />
   </svg>
 );
 
+// ===== MICROPHONE ICON =====
+const MicIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <rect x="9" y="2" width="6" height="12" rx="3" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M5 10V11C5 14.866 8.13401 18 12 18C15.866 18 19 14.866 19 11V10" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <line x1="12" y1="18" x2="12" y2="22" stroke={color} strokeWidth="2" strokeLinecap="round"/>
+    <line x1="8" y1="22" x2="16" y2="22" stroke={color} strokeWidth="2" strokeLinecap="round"/>
+  </svg>
+);
+
+// ===== STOP ICON =====
+const StopIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <rect x="6" y="6" width="12" height="12" rx="2" fill={color} />
+  </svg>
+);
+
+// ===== VOICE SUBMIT LOGIC =====
+const COMMANDS = {
+  simpan: ["simpan", "simpan catatan", "submit", "kirim", "save", "simpan note"],
+  batal: ["batal", "batalkan", "batal catatan", "cancel"],
+  hapus: ["hapus semua", "clear", "hapus isi", "kosongkan"],
+};
+
 const InstagramVerifiedBadge = ({ size = 16 }) => {
   const [showTooltip, setShowTooltip] = useState(false);
-  
   return (
     <span 
       style={{ position: 'relative', display: 'inline-block', marginLeft: '4px', verticalAlign: 'middle' }}
@@ -410,30 +439,8 @@ const NavbarButton = ({
   );
 };
 
-// ===== LEFT NAVBAR =====
-const LeftNavbar = () => {
-  return (
-    <div style={{
-      position: "fixed", top: "20px", left: "60px", zIndex: 9000,
-      display: "flex", alignItems: "center", gap: "8px", fontFamily: FONT_FAMILY,
-    }}>
-      <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "12px", marginRight: "16px" }}>
-        <img src="/images/nop.jpg" alt="Menuru" style={{
-          height: "60px", width: "auto", maxWidth: "none",
-          objectFit: "contain", display: "block", flexShrink: 0, mixBlendMode: "multiply",
-        }} />
-        <span style={{ color: BLUE, fontSize: "60px", fontWeight: 700, letterSpacing: "-0.03em", fontFamily: FONT_FAMILY, lineHeight: 1, whiteSpace: "nowrap" }}>Menuru</span>
-      </Link>
-
-      <NavbarButton label="Teams" panelTitle="Trust" panelDescription="Your security and privacy are our top priorities with end-to-end encryption." panelImage="/images/p0l.jpg" panelRightTitle="Why Trust Us" panelRightDescription="Our systems are monitored 24/7 to protect your data." iconType="trust" bigPanelWidth={850} bigPanelHeight={260} />
-      <NavbarButton label="Individual" panelTitle="Careers" panelDescription="Join our team and build a meaningful career in a supportive environment." panelImage="/images/xxz.jpg" panelRightTitle="Life at Menuru" panelRightDescription="A collaborative, flexible work culture with plenty of opportunities to grow together." iconType="career" bigPanelWidth={850} bigPanelHeight={260} />
-      <NavbarButton label="Resources" panelTitle="Docs & Brand" panelDescription="Access complete documentation and Menuru brand assets in one place." panelImage="/images/p0l.jpg" panelRightTitle="Docs & Brand" panelRightDescription="Guides, visual assets, and official Menuru brand references." iconType="resources" iconComponent={<StriperIcon size={22} color="#ffffff" />} bigPanelWidth={850} bigPanelHeight={340} buttonColor="#0D3CFC" buttonHoverColor="#0D3CFC" panelColor="#000000" iconButtonColor="#000000" iconButtonHoverColor="#000000" panelBoxColor="rgba(255,255,255,0.12)" panelBoxBorder="rgba(255,255,255,0.25)" labelTextColor="#ffffff" labelTextHoverColor="#ffffff" titleTextColor="#ffffff" descriptionTextColor="rgba(255,255,255,0.92)" isResources={true} />
-    </div>
-  );
-};
-
-// ===== RIGHT NAVBAR =====
-const RightNavbar = ({ user, auth, db, userDisplayName, router, onSayHeyToggle, sayHeyOpen }: any) => {
+// ===== FIXED NAVBAR (BLUR SEPANJANG NAVBAR) =====
+const FixedNavbar = ({ user, auth, db, userDisplayName, router, onSayHeyToggle, sayHeyOpen }: any) => {
   const displayName = userDisplayName || user?.displayName || user?.email?.split("@")[0] || "User";
   const photoURL = user?.photoURL || "";
 
@@ -450,71 +457,101 @@ const RightNavbar = ({ user, auth, db, userDisplayName, router, onSayHeyToggle, 
 
   const SayHeyButton = () => (
     <button onClick={onSayHeyToggle} style={{
-      position: "relative", display: "inline-flex", alignItems: "center", gap: "10px",
-      padding: "10px 18px", backgroundColor: sayHeyOpen ? BLACK : LIME,
-      borderRadius: "10px", border: `1px solid ${sayHeyOpen ? BLACK : LIME}`,
-      boxShadow: sayHeyOpen ? "0 8px 24px rgba(0,0,0,0.35)" : "0 8px 24px rgba(227,251,150,0.45)",
+      position: "relative", display: "inline-flex", alignItems: "center", gap: "8px",
+      padding: "8px 14px", backgroundColor: sayHeyOpen ? BLACK : LIME,
+      borderRadius: "8px", border: `1px solid ${sayHeyOpen ? BLACK : LIME}`,
+      boxShadow: sayHeyOpen ? "0 4px 12px rgba(0,0,0,0.25)" : "0 4px 12px rgba(227,251,150,0.35)",
       cursor: "pointer", transition: "all 0.2s ease",
     }}>
-      <SayHeyIcon size={18} color={sayHeyOpen ? WHITE : BLACK} />
-      <span style={{ color: sayHeyOpen ? WHITE : BLACK, fontSize: "14px", fontWeight: 700, letterSpacing: "0.02em", fontFamily: FONT_FAMILY, whiteSpace: "nowrap" }}>Say Hey</span>
-      <NorthEastArrow size={16} color={sayHeyOpen ? WHITE : BLACK} />
+      <SayHeyIcon size={16} color={sayHeyOpen ? WHITE : BLACK} />
+      <span style={{ color: sayHeyOpen ? WHITE : BLACK, fontSize: "13px", fontWeight: 700, letterSpacing: "0.02em", fontFamily: FONT_FAMILY, whiteSpace: "nowrap" }}>Say Hey</span>
     </button>
   );
 
-  if (!user) {
-    return (
-      <div style={{ position: "fixed", top: "20px", right: "24px", zIndex: 9000, display: "flex", alignItems: "center", gap: "10px", fontFamily: FONT_FAMILY }}>
-        <SayHeyButton />
-        <Link href="/signin" style={{
-          textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "10px",
-          padding: "10px 18px 10px 16px", backgroundColor: BLUE,
-          borderRadius: "10px", border: `1px solid ${BLUE}`,
-          boxShadow: "0 8px 24px rgba(13,60,252,0.35)", cursor: "pointer",
-        }}>
-          <PeopleIcon size={20} color="#ffffff" />
-          <span style={{ color: "#ffffff", fontSize: "14px", fontWeight: 700, letterSpacing: "0.02em", fontFamily: FONT_FAMILY, whiteSpace: "nowrap" }}>Sign In</span>
-        </Link>
-      </div>
-    );
-  }
-
   return (
-    <div style={{ position: "fixed", top: "20px", right: "24px", zIndex: 9000, fontFamily: FONT_FAMILY, display: "flex", alignItems: "center", gap: "10px" }}>
-      <SayHeyButton />
-      <div style={{
-        display: "flex", alignItems: "center", gap: "10px", padding: "10px 16px",
-        backgroundColor: BLUE, borderRadius: "10px", border: `1px solid ${BLUE}`,
-        boxShadow: "0 8px 24px rgba(13,60,252,0.35)",
-      }}>
-        <div style={{
-          width: "36px", height: "36px", borderRadius: "50%", overflow: "hidden",
-          backgroundColor: WHITE, display: "flex", alignItems: "center",
-          justifyContent: "center", flexShrink: 0,
-        }}>
-          {photoURL ? (
-            <img src={photoURL} alt={displayName} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} referrerPolicy="no-referrer" />
-          ) : (
-            <span style={{ fontSize: "16px", fontWeight: 800, color: BLUE }}>{displayName.charAt(0).toUpperCase()}</span>
-          )}
-        </div>
-        <span style={{ color: WHITE, fontSize: "14px", fontWeight: 700, letterSpacing: "0.02em", fontFamily: FONT_FAMILY, whiteSpace: "nowrap" }}>{displayName}</span>
+    <div style={{
+      position: "fixed",
+      top: 0,
+      left: 0,
+      right: 0,
+      zIndex: 9000,
+      height: "90px",
+      backgroundColor: "rgba(255, 255, 255, 0.75)",
+      backdropFilter: "blur(20px)",
+      WebkitBackdropFilter: "blur(20px)",
+      borderBottom: "1px solid rgba(13, 60, 252, 0.08)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      padding: "0 40px",
+      fontFamily: FONT_FAMILY,
+    }}>
+      {/* Kiri: Logo + judul + Navbar buttons */}
+      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "10px", marginRight: "14px" }}>
+          <img src="/images/nop.jpg" alt="Menuru" style={{
+            height: "48px", width: "auto", maxWidth: "none",
+            objectFit: "contain", display: "block", flexShrink: 0, mixBlendMode: "multiply",
+          }} />
+          <span style={{ color: BLUE, fontSize: "42px", fontWeight: 700, letterSpacing: "-0.03em", fontFamily: FONT_FAMILY, lineHeight: 1, whiteSpace: "nowrap" }}>Menuru</span>
+        </Link>
+
+        <NavbarButton label="Teams" panelTitle="Trust" panelDescription="Your security and privacy are our top priorities with end-to-end encryption." panelImage="/images/p0l.jpg" panelRightTitle="Why Trust Us" panelRightDescription="Our systems are monitored 24/7 to protect your data." iconType="trust" bigPanelWidth={850} bigPanelHeight={260} />
+        <NavbarButton label="Individual" panelTitle="Careers" panelDescription="Join our team and build a meaningful career in a supportive environment." panelImage="/images/xxz.jpg" panelRightTitle="Life at Menuru" panelRightDescription="A collaborative, flexible work culture with plenty of opportunities to grow together." iconType="career" bigPanelWidth={850} bigPanelHeight={260} />
+        <NavbarButton label="Resources" panelTitle="Docs & Brand" panelDescription="Access complete documentation and Menuru brand assets in one place." panelImage="/images/p0l.jpg" panelRightTitle="Docs & Brand" panelRightDescription="Guides, visual assets, and official Menuru brand references." iconType="resources" iconComponent={<StriperIcon size={22} color="#ffffff" />} bigPanelWidth={850} bigPanelHeight={340} buttonColor="#0D3CFC" buttonHoverColor="#0D3CFC" panelColor="#000000" iconButtonColor="#000000" iconButtonHoverColor="#000000" panelBoxColor="rgba(255,255,255,0.12)" panelBoxBorder="rgba(255,255,255,0.25)" labelTextColor="#ffffff" labelTextHoverColor="#ffffff" titleTextColor="#ffffff" descriptionTextColor="rgba(255,255,255,0.92)" isResources={true} />
       </div>
-      <button onClick={handleLogout} style={{
-        display: "inline-flex", alignItems: "center", gap: "8px",
-        padding: "10px 16px", backgroundColor: BLUE, color: WHITE,
-        borderRadius: "10px", border: `1px solid ${BLUE}`,
-        boxShadow: "0 8px 24px rgba(13,60,252,0.35)",
-        fontFamily: FONT_FAMILY, fontSize: "14px", fontWeight: 700, cursor: "pointer",
-      }}>
-        Logout
-        <LogoutIcon size={16} color={WHITE} />
-      </button>
+
+      {/* Kanan: Say Hey + User */}
+      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+        <SayHeyButton />
+        {!user ? (
+          <Link href="/signin" style={{
+            textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "8px",
+            padding: "8px 14px", backgroundColor: BLUE,
+            borderRadius: "8px", border: `1px solid ${BLUE}`,
+            boxShadow: "0 4px 12px rgba(13,60,252,0.25)", cursor: "pointer",
+          }}>
+            <PeopleIcon size={18} color="#ffffff" />
+            <span style={{ color: "#ffffff", fontSize: "13px", fontWeight: 700, letterSpacing: "0.02em", fontFamily: FONT_FAMILY, whiteSpace: "nowrap" }}>Sign In</span>
+          </Link>
+        ) : (
+          <>
+            <div style={{
+              display: "flex", alignItems: "center", gap: "8px", padding: "6px 12px",
+              backgroundColor: BLUE, borderRadius: "8px", border: `1px solid ${BLUE}`,
+              boxShadow: "0 4px 12px rgba(13,60,252,0.25)",
+            }}>
+              <div style={{
+                width: "30px", height: "30px", borderRadius: "50%", overflow: "hidden",
+                backgroundColor: WHITE, display: "flex", alignItems: "center",
+                justifyContent: "center", flexShrink: 0,
+              }}>
+                {photoURL ? (
+                  <img src={photoURL} alt={displayName} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} referrerPolicy="no-referrer" />
+                ) : (
+                  <span style={{ fontSize: "14px", fontWeight: 800, color: BLUE }}>{displayName.charAt(0).toUpperCase()}</span>
+                )}
+              </div>
+              <span style={{ color: WHITE, fontSize: "13px", fontWeight: 700, letterSpacing: "0.02em", fontFamily: FONT_FAMILY, whiteSpace: "nowrap" }}>{displayName}</span>
+            </div>
+            <button onClick={handleLogout} style={{
+              display: "inline-flex", alignItems: "center", gap: "6px",
+              padding: "8px 14px", backgroundColor: BLUE, color: WHITE,
+              borderRadius: "8px", border: `1px solid ${BLUE}`,
+              boxShadow: "0 4px 12px rgba(13,60,252,0.25)",
+              fontFamily: FONT_FAMILY, fontSize: "13px", fontWeight: 700, cursor: "pointer",
+            }}>
+              Logout
+              <LogoutIcon size={14} color={WHITE} />
+            </button>
+          </>
+        )}
+      </div>
     </div>
   );
 };
 
-// ===== FOOTER MENURU TITLE (DENGAN MICROSOFT DOWNLOAD) =====
+// ===== FOOTER MENURU TITLE (DENGAN MICROSOFT STORE) =====
 const FooterMenuruTitle = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLSpanElement>(null);
@@ -565,9 +602,9 @@ const FooterMenuruTitle = () => {
       overflow: "visible", display: "flex", flexDirection: "column",
       justifyContent: "flex-start", position: "relative",
     }}>
-      {/* ===== MICROSOFT DOWNLOAD LINK DI ATAS JUDUL MENURU ===== */}
+      {/* ===== MICROSOFT STORE LINK DI ATAS JUDUL MENURU ===== */}
       <a
-        href="https://apps.microsoft.com/detail/9nv1fg4b6xvn?hl=id-ID&gl=ID"
+        href={STORE_LINK}
         target="_blank"
         rel="noopener noreferrer"
         style={{
@@ -580,14 +617,10 @@ const FooterMenuruTitle = () => {
           alignSelf: "flex-start",
           transition: "transform 0.2s ease",
         }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.transform = "translateX(6px)";
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.transform = "translateX(0)";
-        }}
+        onMouseEnter={(e) => { e.currentTarget.style.transform = "translateX(6px)"; }}
+        onMouseLeave={(e) => { e.currentTarget.style.transform = "translateX(0)"; }}
       >
-        <MicrosoftIcon size={32} />
+        <MicrosoftStoreIcon size={36} />
         <span style={{
           fontFamily: FONT_FAMILY,
           fontSize: "24px",
@@ -793,7 +826,6 @@ const CollabIconList = ({ collaborators = [], collaboratorNames = {} }: any) => 
 
 // ===== NOTE EDITOR TOOLBAR =====
 const NoteEditorToolbar = ({
-  editorRef,
   onFormat,
   activeFormats,
   stabiloColor,
@@ -977,7 +1009,6 @@ export default function NotesPage(): React.JSX.Element {
   const [newGroupName, setNewGroupName] = useState("");
   const [newGroupMembers, setNewGroupMembers] = useState<{uid: string; name: string; email: string}[]>([]);
   const [memberSearchEmail, setMemberSearchEmail] = useState("");
-  const [memberSearchLoading, setMemberSearchLoading] = useState(false);
   const [memberSearchResults, setMemberSearchResults] = useState<any[]>([]);
   const [collaborateEmail, setCollaborateEmail] = useState("");
   const [auth, setAuth] = useState<any>(null);
@@ -987,6 +1018,7 @@ export default function NotesPage(): React.JSX.Element {
   const [authReady, setAuthReady] = useState(false);
   const videoRefs = useRef<{ [key: string]: HTMLVideoElement | null }>({});
   
+  // Editor states
   const noteEditorRef = useRef<HTMLDivElement>(null);
   const [activeFormats, setActiveFormats] = useState<any>({
     bold: false, italic: false, underline: false,
@@ -997,7 +1029,13 @@ export default function NotesPage(): React.JSX.Element {
   const [showStabiloPicker, setShowStabiloPicker] = useState(false);
   const [fontSize, setFontSize] = useState<number>(16);
   const [noteLabelColor, setNoteLabelColor] = useState<string>("");
-  
+
+  // ===== MICROPHONE / VOICE STATES =====
+  const [isListening, setIsListening] = useState(false);
+  const [voiceSupported, setVoiceSupported] = useState(false);
+  const [voiceStatus, setVoiceStatus] = useState<string>("");
+  const recognitionRef = useRef<any>(null);
+
   const preloaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
   const counterRef = useRef<HTMLSpanElement>(null);
@@ -1010,6 +1048,20 @@ export default function NotesPage(): React.JSX.Element {
   ];
 
   useEffect(() => { setIsMounted(true); }, []);
+
+  // ===== CEK SUPPORT WEB SPEECH API =====
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      setVoiceSupported(true);
+      const recognition = new SpeechRecognition();
+      recognition.lang = "id-ID";
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognitionRef.current = recognition;
+    }
+  }, []);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -1025,6 +1077,7 @@ export default function NotesPage(): React.JSX.Element {
     } catch (error) { console.error('Firebase initialization error:', error); }
   }, []);
 
+  // ===== LOAD NOTES =====
   useEffect(() => {
     if (!db || !isMounted || !user) {
       setNotes([]);
@@ -1074,6 +1127,7 @@ export default function NotesPage(): React.JSX.Element {
     return () => { unsubscribes.forEach((unsub) => unsub()); };
   }, [db, isMounted, user]);
 
+  // ===== AUTH =====
   useEffect(() => {
     if (!auth) return;
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -1098,6 +1152,7 @@ export default function NotesPage(): React.JSX.Element {
     return () => { if (unsubscribe) unsubscribe(); };
   }, [auth]);
 
+  // ===== PRELOADER =====
   useEffect(() => {
     if (!isMounted || loading) return;
     let killed = false;
@@ -1205,6 +1260,7 @@ export default function NotesPage(): React.JSX.Element {
     return true;
   };
 
+  // ===== EDITOR =====
   const handleFormat = (command: string, value?: string) => {
     if (!noteEditorRef.current) return;
     noteEditorRef.current.focus();
@@ -1224,9 +1280,105 @@ export default function NotesPage(): React.JSX.Element {
     });
   };
 
+  // ===== VOICE INPUT (MICROFON) =====
+  const startVoiceInput = () => {
+    if (!recognitionRef.current) {
+      alert("Browser Anda tidak mendukung fitur mikrofon. Gunakan Chrome/Edge terbaru.");
+      return;
+    }
+    if (!noteEditorRef.current) return;
+
+    try {
+      recognitionRef.current.start();
+      setIsListening(true);
+      setVoiceStatus("Mendengarkan... Ucapkan perintah atau isi catatan");
+    } catch (error) {
+      console.error("Start voice error:", error);
+      setVoiceStatus("Gagal memulai mikrofon");
+    }
+
+    let interimBase = noteEditorRef.current.innerHTML || "";
+
+    recognitionRef.current.onresult = (event: any) => {
+      let finalText = "";
+      let interimText = "";
+
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalText += transcript + " ";
+        } else {
+          interimText += transcript;
+        }
+      }
+
+      if (finalText.trim()) {
+        const lowerFinal = finalText.toLowerCase().trim();
+
+        // Cek perintah submit
+        if (COMMANDS.simpan.some(cmd => lowerFinal.includes(cmd))) {
+          stopVoiceInput();
+          setVoiceStatus("Menyimpan catatan...");
+          setTimeout(() => handleCreateNote(), 300);
+          return;
+        }
+
+        // Cek perintah batal
+        if (COMMANDS.batal.some(cmd => lowerFinal.includes(cmd))) {
+          stopVoiceInput();
+          setVoiceStatus("Membatalkan...");
+          setTimeout(() => {
+            setShowInlineNoteEditor(false);
+            setNewNote({ title: "", category: "", link: "" });
+            setNoteLabelColor("");
+            if (noteEditorRef.current) noteEditorRef.current.innerHTML = "";
+          }, 300);
+          return;
+        }
+
+        // Cek perintah hapus
+        if (COMMANDS.hapus.some(cmd => lowerFinal.includes(cmd))) {
+          if (noteEditorRef.current) noteEditorRef.current.innerHTML = "";
+          setVoiceStatus("Isi catatan dihapus");
+          return;
+        }
+
+        // Tambahkan teks ke editor
+        if (noteEditorRef.current) {
+          noteEditorRef.current.innerHTML = interimBase + finalText + interimText;
+        }
+      } else if (interimText) {
+        if (noteEditorRef.current) {
+          noteEditorRef.current.innerHTML = interimBase + interimText;
+        }
+      }
+    };
+
+    recognitionRef.current.onerror = (event: any) => {
+      console.error("Voice error:", event.error);
+      setVoiceStatus(`Error: ${event.error}`);
+      setIsListening(false);
+    };
+
+    recognitionRef.current.onend = () => {
+      setIsListening(false);
+      setVoiceStatus("");
+    };
+  };
+
+  const stopVoiceInput = () => {
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+      } catch (e) { console.error(e); }
+    }
+    setIsListening(false);
+    setVoiceStatus("");
+  };
+
+  // ===== MEMBER SEARCH =====
   const handleSearchMember = async (email: string) => {
     if (!email.trim() || !db) { setMemberSearchResults([]); return; }
-    setMemberSearchLoading(true);
     try {
       const q = query(collection(db, 'users'), where('email', '==', email.toLowerCase().trim()));
       const snap = await getDocs(q);
@@ -1236,7 +1388,6 @@ export default function NotesPage(): React.JSX.Element {
       });
       setMemberSearchResults(results);
     } catch (err) { console.error("Search error:", err); }
-    setMemberSearchLoading(false);
   };
 
   const addMemberToNewGroup = (member: any) => {
@@ -1257,8 +1408,9 @@ export default function NotesPage(): React.JSX.Element {
     setNewGroupMembers(newGroupMembers.filter(m => m.uid !== uid));
   };
 
+  // ===== CREATE NOTE =====
   const handleCreateNote = async () => {
-    if (!requireLogin("membuat catatan")) return;
+    if (!user) { alert("Silakan login terlebih dahulu"); return; }
     if (!db || !newNote.title.trim()) { alert("Judul catatan harus diisi"); return; }
 
     const descriptionHtml = noteEditorRef.current?.innerHTML || "";
@@ -1294,7 +1446,8 @@ export default function NotesPage(): React.JSX.Element {
       setNewGroupMembers([]);
       if (noteEditorRef.current) noteEditorRef.current.innerHTML = "";
       setShowInlineNoteEditor(false);
-      alert("Catatan berhasil dibuat!");
+      setVoiceStatus("Catatan berhasil disimpan!");
+      setTimeout(() => setVoiceStatus(""), 2000);
     } catch (error) {
       console.error("Error creating note:", error);
       alert("Gagal membuat catatan. Silakan coba lagi.");
@@ -1551,6 +1704,7 @@ export default function NotesPage(): React.JSX.Element {
       </Head>
 
       <div style={{ position: "relative", width: "100%", minHeight: "100vh", overflow: "hidden", backgroundColor: WHITE }}>
+        {/* PRELOADER */}
         <div ref={preloaderRef} style={{
           position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
           backgroundColor: WHITE, zIndex: 9999, fontFamily: FONT_FAMILY,
@@ -1581,29 +1735,15 @@ export default function NotesPage(): React.JSX.Element {
           </div>
         </div>
 
+        {/* MAIN PAGE */}
         <div ref={mainPageRef} style={{
           position: "relative", width: "100%", minHeight: "100vh",
           backgroundColor: WHITE, margin: 0, padding: 0,
           fontFamily: FONT_FAMILY, overflow: "visible",
           display: "flex", flexDirection: "column", willChange: "transform",
         }}>
-          <div style={{
-            position: "fixed", top: 0, left: 0, width: "200px", height: "120px",
-            pointerEvents: "none", zIndex: 8500,
-            backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)",
-            maskImage: "linear-gradient(to right, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%)",
-            WebkitMaskImage: "linear-gradient(to right, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%)",
-          }} />
-          <div style={{
-            position: "fixed", top: 0, right: 0, width: "200px", height: "120px",
-            pointerEvents: "none", zIndex: 8500,
-            backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)",
-            maskImage: "linear-gradient(to left, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%)",
-            WebkitMaskImage: "linear-gradient(to left, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%)",
-          }} />
-
-          <LeftNavbar />
-          <RightNavbar
+          {/* ===== FIXED NAVBAR DENGAN BLUR SEPANJANG ===== */}
+          <FixedNavbar
             user={user}
             auth={auth}
             db={db}
@@ -1613,9 +1753,10 @@ export default function NotesPage(): React.JSX.Element {
             sayHeyOpen={sayHeyOpen}
           />
 
+          {/* CONTENT */}
           <div style={{
             width: "100%", padding: "0 40px", maxWidth: "1600px",
-            margin: "0 auto", marginTop: "180px",
+            margin: "0 auto", marginTop: "160px",
             position: "relative", zIndex: 2,
           }}>
             <h2 style={{
@@ -1925,7 +2066,7 @@ export default function NotesPage(): React.JSX.Element {
                     <div style={{
                       fontSize: '28px', fontWeight: 700, color: BLUE,
                       fontFamily: FONT_FAMILY, marginBottom: '20px',
-                      display: 'flex', alignItems: 'center', gap: '12px',
+                      display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap',
                     }}>
                       Buat Catatan Baru
                       {noteLabelColor && (
@@ -1936,7 +2077,51 @@ export default function NotesPage(): React.JSX.Element {
                           fontFamily: FONT_FAMILY,
                         }}>Label Aktif</span>
                       )}
+                      {/* MIC BUTTON */}
+                      {voiceSupported && (
+                        <button
+                          type="button"
+                          onClick={isListening ? stopVoiceInput : startVoiceInput}
+                          style={{
+                            marginLeft: 'auto',
+                            display: 'inline-flex', alignItems: 'center', gap: '8px',
+                            padding: '10px 18px',
+                            backgroundColor: isListening ? '#EF4444' : BLUE,
+                            color: WHITE,
+                            border: 'none', borderRadius: '10px',
+                            fontFamily: FONT_FAMILY, fontSize: '14px',
+                            fontWeight: 700, cursor: 'pointer',
+                            boxShadow: isListening ? '0 0 0 4px rgba(239,68,68,0.2)' : '0 4px 12px rgba(13,60,252,0.25)',
+                            animation: isListening ? 'mic-pulse 1.2s ease-in-out infinite' : 'none',
+                          }}
+                        >
+                          {isListening ? <StopIcon size={18} color={WHITE} /> : <MicIcon size={18} color={WHITE} />}
+                          {isListening ? "Stop Rekam" : "Rekam Suara"}
+                        </button>
+                      )}
                     </div>
+
+                    {voiceStatus && (
+                      <div style={{
+                        padding: '12px 18px',
+                        backgroundColor: isListening ? '#FEE2E2' : '#E0E7FF',
+                        border: `1.5px solid ${isListening ? '#EF4444' : BLUE}`,
+                        borderRadius: '10px', marginBottom: '20px',
+                        fontSize: '14px', fontWeight: 600,
+                        color: isListening ? '#991B1B' : BLUE,
+                        fontFamily: FONT_FAMILY,
+                        display: 'flex', alignItems: 'center', gap: '10px',
+                      }}>
+                        {isListening && (
+                          <span style={{
+                            width: '10px', height: '10px', borderRadius: '50%',
+                            backgroundColor: '#EF4444',
+                            animation: 'mic-pulse 1s ease-in-out infinite',
+                          }} />
+                        )}
+                        {voiceStatus}
+                      </div>
+                    )}
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                       <input
@@ -2004,7 +2189,6 @@ export default function NotesPage(): React.JSX.Element {
                       />
 
                       <NoteEditorToolbar
-                        editorRef={noteEditorRef}
                         onFormat={handleFormat}
                         activeFormats={activeFormats}
                         stabiloColor={stabiloColor}
@@ -2022,7 +2206,7 @@ export default function NotesPage(): React.JSX.Element {
                         onInput={updateActiveFormats}
                         onKeyUp={updateActiveFormats}
                         onMouseUp={updateActiveFormats}
-                        data-placeholder="Tulis isi catatan di sini... (bisa bold, italic, underline, atur ukuran, rata kiri/tengah/kanan, dan beri label warna stabilo)"
+                        data-placeholder="Tulis isi catatan di sini... atau gunakan mikrofon di atas untuk berbicara. Ucapkan 'simpan' untuk submit, 'batal' untuk membatalkan, 'hapus semua' untuk clear."
                         style={{
                           width: '100%', minHeight: '250px', padding: '18px 20px',
                           backgroundColor: '#fafbff',
@@ -2031,6 +2215,20 @@ export default function NotesPage(): React.JSX.Element {
                           fontFamily: FONT_FAMILY, lineHeight: 1.6, overflowY: 'auto',
                         }}
                       />
+
+                      {/* Hint perintah suara */}
+                      {voiceSupported && (
+                        <div style={{
+                          padding: '12px 16px',
+                          backgroundColor: 'rgba(13,60,252,0.05)',
+                          borderRadius: '8px',
+                          fontSize: '13px', color: BLUE,
+                          fontFamily: FONT_FAMILY, fontWeight: 500,
+                          lineHeight: 1.6,
+                        }}>
+                          <strong>Perintah suara:</strong> Ucapkan <strong>"simpan"</strong> untuk submit otomatis, <strong>"batal"</strong> untuk batalkan, <strong>"hapus semua"</strong> untuk kosongkan isi catatan.
+                        </div>
+                      )}
 
                       <div>
                         <div style={{
@@ -2113,6 +2311,8 @@ export default function NotesPage(): React.JSX.Element {
                             setMemberSearchEmail("");
                             setMemberSearchResults([]);
                             if (noteEditorRef.current) noteEditorRef.current.innerHTML = "";
+                            setVoiceStatus("");
+                            stopVoiceInput();
                           }}
                           style={{
                             padding: '12px 24px', backgroundColor: 'transparent',
@@ -2530,6 +2730,16 @@ export default function NotesPage(): React.JSX.Element {
           color: #999;
           pointer-events: none;
           font-style: italic;
+        }
+        @keyframes mic-pulse {
+          0%, 100% {
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+            opacity: 1;
+          }
+          50% {
+            box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+            opacity: 0.8;
+          }
         }
       `}</style>
     </>
