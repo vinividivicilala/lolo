@@ -535,7 +535,7 @@ const FixedNavbar = ({ user, auth, db, userDisplayName, router, onSayHeyToggle, 
   );
 };
 
-// ===== FOOTER SECTION (BACKGROUND MINT COVERS ENTIRE FOOTER) =====
+// ===== FOOTER SECTION =====
 const FooterSection = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLSpanElement>(null);
@@ -594,7 +594,7 @@ const FooterSection = () => {
         boxSizing: "border-box",
       }}
     >
-      {/* ===== FOOTER LINKS ===== */}
+      {/* FOOTER LINKS */}
       <div
         style={{
           display: "flex",
@@ -671,17 +671,12 @@ const FooterSection = () => {
         ))}
       </div>
 
-      {/* ===== TERMS TEXT ===== */}
-      <div
-        style={{
-          maxWidth: "1400px",
-          margin: "40px auto 0 auto",
-          paddingTop: "20px",
-          borderTop: `1px solid ${BLUE}20`,
-          position: "relative",
-          zIndex: 1,
-        }}
-      >
+      {/* TERMS */}
+      <div style={{
+        maxWidth: "1400px", margin: "40px auto 0 auto",
+        paddingTop: "20px", borderTop: `1px solid ${BLUE}20`,
+        position: "relative", zIndex: 1,
+      }}>
         <p style={{
           fontFamily: FONT_FAMILY, fontSize: "14px", fontWeight: 400,
           color: BLUE, margin: 0, textAlign: "center",
@@ -691,7 +686,7 @@ const FooterSection = () => {
         </p>
       </div>
 
-      {/* ===== TOMBOL UNDUH MENURU (LINK KE MS STORE) ===== */}
+      {/* TOMBOL UNDUH MENURU - LINK KE MS STORE */}
       <div style={{ marginTop: "40px", marginBottom: "24px", position: "relative", zIndex: 1 }}>
         <a
           href={STORE_LINK}
@@ -708,6 +703,7 @@ const FooterSection = () => {
             borderRadius: "14px",
             boxShadow: "0 6px 24px rgba(0,0,0,0.12)",
             transition: "transform 0.2s ease, box-shadow 0.2s ease",
+            pointerEvents: "auto",
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.transform = "translateY(-3px)";
@@ -733,7 +729,7 @@ const FooterSection = () => {
         </a>
       </div>
 
-      {/* ===== JUDUL MENURU BESAR ===== */}
+      {/* JUDUL MENURU BESAR */}
       <div style={{ position: "relative", zIndex: 1 }}>
         <span
           ref={titleRef}
@@ -744,6 +740,7 @@ const FooterSection = () => {
             WebkitFontSmoothing: "antialiased", MozOsxFontSmoothing: "grayscale",
             willChange: "transform, opacity", whiteSpace: "nowrap",
             margin: 0, padding: 0, overflow: "visible", position: "relative",
+            pointerEvents: "none",
           }}
         >
           Menuru
@@ -1062,10 +1059,12 @@ export default function NotesPage(): React.JSX.Element {
   const [fontSize, setFontSize] = useState<number>(16);
   const [noteLabelColor, setNoteLabelColor] = useState<string>("");
 
+  // ===== VOICE INPUT STATE =====
   const [isListening, setIsListening] = useState(false);
   const [voiceSupported, setVoiceSupported] = useState(false);
   const [voiceStatus, setVoiceStatus] = useState<string>("");
   const recognitionRef = useRef<any>(null);
+  const voiceBaseHtmlRef = useRef<string>("");
 
   const preloaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
@@ -1080,6 +1079,7 @@ export default function NotesPage(): React.JSX.Element {
 
   useEffect(() => { setIsMounted(true); }, []);
 
+  // ===== SETUP SPEECH RECOGNITION =====
   useEffect(() => {
     if (typeof window === "undefined") return;
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -1089,6 +1089,70 @@ export default function NotesPage(): React.JSX.Element {
       rec.lang = "id-ID";
       rec.continuous = true;
       rec.interimResults = true;
+      
+      rec.onresult = (event: any) => {
+        let finalText = "";
+        let interimText = "";
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const transcript = event.results[i][0].transcript;
+          if (event.results[i].isFinal) finalText += transcript + " ";
+          else interimText += transcript;
+        }
+        
+        if (finalText.trim()) {
+          const lowerFinal = finalText.toLowerCase().trim();
+          
+          if (COMMANDS.simpan.some(cmd => lowerFinal.includes(cmd))) {
+            setVoiceStatus("Menyimpan catatan...");
+            try { rec.stop(); } catch (e) {}
+            setIsListening(false);
+            setTimeout(() => handleCreateNote(), 300);
+            return;
+          }
+          if (COMMANDS.batal.some(cmd => lowerFinal.includes(cmd))) {
+            setVoiceStatus("Membatalkan...");
+            try { rec.stop(); } catch (e) {}
+            setIsListening(false);
+            setTimeout(() => {
+              setShowInlineNoteEditor(false);
+              setNewNote({ title: "", category: "", link: "" });
+              setNoteLabelColor("");
+              if (noteEditorRef.current) noteEditorRef.current.innerHTML = "";
+            }, 300);
+            return;
+          }
+          if (COMMANDS.hapus.some(cmd => lowerFinal.includes(cmd))) {
+            if (noteEditorRef.current) noteEditorRef.current.innerHTML = "";
+            voiceBaseHtmlRef.current = "";
+            setVoiceStatus("Isi catatan dihapus");
+            return;
+          }
+          
+          if (noteEditorRef.current) {
+            noteEditorRef.current.innerHTML = voiceBaseHtmlRef.current + finalText + interimText;
+            voiceBaseHtmlRef.current = voiceBaseHtmlRef.current + finalText;
+          }
+        } else if (interimText) {
+          if (noteEditorRef.current) {
+            noteEditorRef.current.innerHTML = voiceBaseHtmlRef.current + interimText;
+          }
+        }
+      };
+      
+      rec.onerror = (event: any) => {
+        console.error("Voice error:", event.error);
+        if (event.error === "no-speech" || event.error === "aborted") {
+          setVoiceStatus("Tidak ada suara terdeteksi, coba lagi");
+        } else {
+          setVoiceStatus(`Error: ${event.error}`);
+        }
+        setIsListening(false);
+      };
+      
+      rec.onend = () => {
+        setIsListening(false);
+      };
+      
       recognitionRef.current = rec;
     }
   }, []);
@@ -1303,83 +1367,34 @@ export default function NotesPage(): React.JSX.Element {
     });
   };
 
-  const startVoiceInput = () => {
+  // ===== VOICE TOGGLE (KLIK SEKALI = AKTIF, KLIK LAGI = STOP) =====
+  const toggleVoiceInput = () => {
     if (!recognitionRef.current) {
       alert("Browser Anda tidak mendukung fitur mikrofon. Gunakan Chrome/Edge terbaru.");
       return;
     }
     if (!noteEditorRef.current) return;
 
+    if (isListening) {
+      // STOP
+      try { recognitionRef.current.stop(); } catch (e) { console.error(e); }
+      setIsListening(false);
+      setVoiceStatus("Mikrofon dimatikan");
+      setTimeout(() => setVoiceStatus(""), 1500);
+      return;
+    }
+
+    // START
+    voiceBaseHtmlRef.current = noteEditorRef.current.innerHTML || "";
     try {
       recognitionRef.current.start();
       setIsListening(true);
-      setVoiceStatus("Mendengarkan... Ucapkan isi catatan atau perintah 'simpan'");
-    } catch (error) { console.error("Start voice error:", error); }
-
-    let interimBase = noteEditorRef.current.innerHTML || "";
-
-    recognitionRef.current.onresult = (event: any) => {
-      let finalText = "";
-      let interimText = "";
-
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const transcript = event.results[i][0].transcript;
-        if (event.results[i].isFinal) finalText += transcript + " ";
-        else interimText += transcript;
-      }
-
-      if (finalText.trim()) {
-        const lowerFinal = finalText.toLowerCase().trim();
-        if (COMMANDS.simpan.some(cmd => lowerFinal.includes(cmd))) {
-          stopVoiceInput();
-          setVoiceStatus("Menyimpan catatan...");
-          setTimeout(() => handleCreateNote(), 300);
-          return;
-        }
-        if (COMMANDS.batal.some(cmd => lowerFinal.includes(cmd))) {
-          stopVoiceInput();
-          setVoiceStatus("Membatalkan...");
-          setTimeout(() => {
-            setShowInlineNoteEditor(false);
-            setNewNote({ title: "", category: "", link: "" });
-            setNoteLabelColor("");
-            if (noteEditorRef.current) noteEditorRef.current.innerHTML = "";
-          }, 300);
-          return;
-        }
-        if (COMMANDS.hapus.some(cmd => lowerFinal.includes(cmd))) {
-          if (noteEditorRef.current) noteEditorRef.current.innerHTML = "";
-          setVoiceStatus("Isi catatan dihapus");
-          return;
-        }
-        if (noteEditorRef.current) {
-          noteEditorRef.current.innerHTML = interimBase + finalText + interimText;
-        }
-      } else if (interimText) {
-        if (noteEditorRef.current) {
-          noteEditorRef.current.innerHTML = interimBase + interimText;
-        }
-      }
-    };
-
-    recognitionRef.current.onerror = (event: any) => {
-      console.error("Voice error:", event.error);
-      setVoiceStatus(`Error: ${event.error}`);
+      setVoiceStatus("Mendengarkan... Klik tombol lagi untuk berhenti. Ucapkan 'simpan' untuk submit.");
+    } catch (error) {
+      console.error("Start voice error:", error);
+      setVoiceStatus("Gagal memulai mikrofon, coba lagi");
       setIsListening(false);
-    };
-
-    recognitionRef.current.onend = () => {
-      setIsListening(false);
-      setVoiceStatus("");
-    };
-  };
-
-  const stopVoiceInput = () => {
-    if (recognitionRef.current) {
-      try { recognitionRef.current.stop(); } catch (e) { console.error(e); }
     }
-    setIsListening(false);
-    setVoiceStatus("");
   };
 
   const handleSearchMember = async (email: string) => {
@@ -2080,7 +2095,7 @@ export default function NotesPage(): React.JSX.Element {
                       {voiceSupported && (
                         <button
                           type="button"
-                          onClick={isListening ? stopVoiceInput : startVoiceInput}
+                          onClick={toggleVoiceInput}
                           style={{
                             marginLeft: 'auto',
                             display: 'inline-flex', alignItems: 'center', gap: '8px',
@@ -2091,7 +2106,7 @@ export default function NotesPage(): React.JSX.Element {
                             fontFamily: FONT_FAMILY, fontSize: '14px',
                             fontWeight: 700, cursor: 'pointer',
                             boxShadow: isListening ? '0 0 0 4px rgba(239,68,68,0.2)' : '0 4px 12px rgba(13,60,252,0.25)',
-                            animation: isListening ? 'mic-pulse 1.2s ease-in-out infinite' : 'none',
+                            transition: 'all 0.2s ease',
                           }}
                         >
                           {isListening ? <StopIcon size={18} color={WHITE} /> : <MicIcon size={18} color={WHITE} />}
@@ -2224,7 +2239,7 @@ export default function NotesPage(): React.JSX.Element {
                           fontFamily: FONT_FAMILY, fontWeight: 500,
                           lineHeight: 1.6,
                         }}>
-                          <strong>Perintah suara:</strong> Ucapkan <strong>"simpan"</strong> untuk submit otomatis, <strong>"batal"</strong> untuk batalkan, <strong>"hapus semua"</strong> untuk kosongkan isi catatan.
+                          <strong>Perintah suara:</strong> Ucapkan <strong>"simpan"</strong> untuk submit otomatis, <strong>"batal"</strong> untuk batalkan, <strong>"hapus semua"</strong> untuk kosongkan isi catatan. Klik tombol mic lagi untuk berhenti mendengarkan.
                         </div>
                       )}
 
@@ -2310,7 +2325,10 @@ export default function NotesPage(): React.JSX.Element {
                             setMemberSearchResults([]);
                             if (noteEditorRef.current) noteEditorRef.current.innerHTML = "";
                             setVoiceStatus("");
-                            stopVoiceInput();
+                            if (isListening) {
+                              try { recognitionRef.current?.stop(); } catch (e) {}
+                              setIsListening(false);
+                            }
                           }}
                           style={{
                             padding: '12px 24px', backgroundColor: 'transparent',
