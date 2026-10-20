@@ -535,8 +535,8 @@ const FixedNavbar = ({ user, auth, db, userDisplayName, router, onSayHeyToggle, 
   );
 };
 
-// ===== FOOTER MENURU TITLE (DENGAN MICROSOFT STORE + BG MINT) =====
-const FooterMenuruTitle = () => {
+// ===== FOOTER SECTION (BACKGROUND MINT COVERS ENTIRE FOOTER) =====
+const FooterSection = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLSpanElement>(null);
 
@@ -581,102 +581,39 @@ const FooterMenuruTitle = () => {
   }, []);
 
   return (
-    <div style={{
-      width: "100%",
-      padding: "0 20px 20px 20px",
-      backgroundColor: "#ffffff",
-      position: "relative",
-    }}>
-      {/* ===== BG MINT DENGAN BORDER RADIUS KIRI KANAN ===== */}
+    <div
+      ref={containerRef}
+      style={{
+        width: "calc(100% - 40px)",
+        margin: "100px auto 20px auto",
+        backgroundColor: MINT,
+        borderRadius: "32px",
+        padding: "60px 40px 40px 40px",
+        position: "relative",
+        overflow: "hidden",
+        boxSizing: "border-box",
+      }}
+    >
+      {/* ===== FOOTER LINKS ===== */}
       <div
-        ref={containerRef}
         style={{
-          width: "100%",
-          backgroundColor: MINT,
-          borderRadius: "32px 32px 32px 32px",
-          padding: "40px 40px 40px 40px",
-          overflow: "hidden",
           display: "flex",
-          flexDirection: "column",
-          justifyContent: "flex-start",
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+          maxWidth: "1400px",
+          margin: "0 auto",
+          gap: "40px",
+          flexWrap: "wrap",
           position: "relative",
+          zIndex: 1,
         }}
       >
-        {/* ===== LINK UNDUH MENURU (BISA DIKLIK) ===== */}
-        <a
-          href={STORE_LINK}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "12px",
-            marginBottom: "24px",
-            textDecoration: "none",
-            cursor: "pointer",
-            alignSelf: "flex-start",
-            transition: "transform 0.2s ease",
-            padding: "10px 18px",
-            backgroundColor: WHITE,
-            borderRadius: "12px",
-            boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
-          }}
-          onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-3px)"; }}
-          onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; }}
-        >
-          <MicrosoftStoreIcon size={32} />
-          <span style={{
-            fontFamily: FONT_FAMILY,
-            fontSize: "22px",
-            fontWeight: 700,
-            color: BLUE,
-            letterSpacing: "-0.02em",
-            lineHeight: 1.2,
-          }}>
-            Unduh Menuru
-          </span>
-          <NorthEastArrow size={22} color={BLUE} />
-        </a>
-
-        <span ref={titleRef} style={{
-          fontFamily: FONT_FAMILY, fontSize: "600px", fontWeight: 400, color: BLUE,
-          letterSpacing: "-0.05em", lineHeight: "0.85", display: "block", textAlign: "left",
-          WebkitFontSmoothing: "antialiased", MozOsxFontSmoothing: "grayscale",
-          willChange: "transform, opacity", whiteSpace: "nowrap",
-          margin: 0, padding: 0, overflow: "visible", position: "relative",
-        }}>Menuru</span>
-        <div style={{ width: "100%", display: "flex", justifyContent: "flex-start", marginTop: "10px" }}>
-          <span style={{ fontFamily: FONT_FAMILY, fontSize: "16px", fontWeight: 400, color: BLUE, letterSpacing: "0.01em", opacity: 0.85 }}>
-            2024 - 2026 Menuru. All rights reserved.
-          </span>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// ===== FOOTER LINKS =====
-const footerLinks = [
-  { title: "Get in Touch", links: ["Contact Us", "Instagram", "Live Chat"] },
-  { title: "Product", links: ["Shop", "Note", "Calendar", "Blog", "Donation", "Community", "Live Chat Agent", "Stories"] },
-  { title: "Attention", links: ["Privacy Policy", "Terms & Conditions", "About Us", "Terms of Use", "Cookies Policy", "Help Center"] },
-];
-
-const FooterSection = () => (
-  <>
-    <div style={{
-      width: "100%", padding: "60px 40px 40px 40px", backgroundColor: WHITE,
-      borderTop: "1px solid rgba(0,0,0,0.05)", marginTop: "100px",
-      position: "relative", overflow: "hidden",
-    }}>
-      <div style={{
-        display: "flex", justifyContent: "space-between", alignItems: "flex-start",
-        maxWidth: "1400px", margin: "0 auto", gap: "40px", flexWrap: "wrap",
-        position: "relative", zIndex: 1,
-      }}>
         {footerLinks.map((section, idx) => (
           <div key={idx} style={{ flex: "1", minWidth: "200px" }}>
-            <h3 style={{ fontFamily: FONT_FAMILY, fontSize: "28px", fontWeight: 600, color: BLACK, margin: 0, marginBottom: "16px", letterSpacing: "-0.01em" }}>
+            <h3 style={{
+              fontFamily: FONT_FAMILY, fontSize: "28px", fontWeight: 700,
+              color: BLUE, margin: 0, marginBottom: "16px", letterSpacing: "-0.01em",
+            }}>
               {section.title}
             </h3>
             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
@@ -705,7 +642,10 @@ const FooterSection = () => (
                 return (
                   <div key={linkIdx} style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                     <Link href={linkHref} style={{ textDecoration: "none" }}>
-                      <span style={{ fontFamily: FONT_FAMILY, fontSize: "20px", fontWeight: 400, color: BLUE, letterSpacing: "-0.01em", cursor: "pointer" }}>{link}</span>
+                      <span style={{
+                        fontFamily: FONT_FAMILY, fontSize: "20px", fontWeight: 500,
+                        color: BLUE, letterSpacing: "-0.01em", cursor: "pointer",
+                      }}>{link}</span>
                     </Link>
                     {isAttention && (
                       <span style={{
@@ -730,15 +670,103 @@ const FooterSection = () => (
           </div>
         ))}
       </div>
-      <div style={{ maxWidth: "1400px", margin: "40px auto 0 auto", paddingTop: "20px", borderTop: "1px solid rgba(0,0,0,0.05)", position: "relative", zIndex: 1 }}>
-        <p style={{ fontFamily: FONT_FAMILY, fontSize: "14px", fontWeight: 400, color: "#666", margin: 0, textAlign: "center", letterSpacing: "0.01em" }}>
+
+      {/* ===== TERMS TEXT ===== */}
+      <div
+        style={{
+          maxWidth: "1400px",
+          margin: "40px auto 0 auto",
+          paddingTop: "20px",
+          borderTop: `1px solid ${BLUE}20`,
+          position: "relative",
+          zIndex: 1,
+        }}
+      >
+        <p style={{
+          fontFamily: FONT_FAMILY, fontSize: "14px", fontWeight: 400,
+          color: BLUE, margin: 0, textAlign: "center",
+          letterSpacing: "0.01em", opacity: 0.8,
+        }}>
           Terms and conditions apply. By using this website, you agree to our Terms of Use and Privacy Policy.
         </p>
       </div>
+
+      {/* ===== TOMBOL UNDUH MENURU (LINK KE MS STORE) ===== */}
+      <div style={{ marginTop: "40px", marginBottom: "24px", position: "relative", zIndex: 1 }}>
+        <a
+          href={STORE_LINK}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "12px",
+            textDecoration: "none",
+            cursor: "pointer",
+            padding: "14px 22px",
+            backgroundColor: WHITE,
+            borderRadius: "14px",
+            boxShadow: "0 6px 24px rgba(0,0,0,0.12)",
+            transition: "transform 0.2s ease, box-shadow 0.2s ease",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = "translateY(-3px)";
+            e.currentTarget.style.boxShadow = "0 10px 32px rgba(0,0,0,0.18)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = "translateY(0)";
+            e.currentTarget.style.boxShadow = "0 6px 24px rgba(0,0,0,0.12)";
+          }}
+        >
+          <MicrosoftStoreIcon size={36} />
+          <span style={{
+            fontFamily: FONT_FAMILY,
+            fontSize: "24px",
+            fontWeight: 700,
+            color: BLUE,
+            letterSpacing: "-0.02em",
+            lineHeight: 1.2,
+          }}>
+            Unduh Menuru
+          </span>
+          <NorthEastArrow size={24} color={BLUE} />
+        </a>
+      </div>
+
+      {/* ===== JUDUL MENURU BESAR ===== */}
+      <div style={{ position: "relative", zIndex: 1 }}>
+        <span
+          ref={titleRef}
+          style={{
+            fontFamily: FONT_FAMILY, fontSize: "600px", fontWeight: 400,
+            color: BLUE, letterSpacing: "-0.05em", lineHeight: "0.85",
+            display: "block", textAlign: "left",
+            WebkitFontSmoothing: "antialiased", MozOsxFontSmoothing: "grayscale",
+            willChange: "transform, opacity", whiteSpace: "nowrap",
+            margin: 0, padding: 0, overflow: "visible", position: "relative",
+          }}
+        >
+          Menuru
+        </span>
+        <div style={{ width: "100%", display: "flex", justifyContent: "flex-start", marginTop: "10px" }}>
+          <span style={{
+            fontFamily: FONT_FAMILY, fontSize: "16px", fontWeight: 400,
+            color: BLUE, letterSpacing: "0.01em", opacity: 0.85,
+          }}>
+            2024 - 2026 Menuru. All rights reserved.
+          </span>
+        </div>
+      </div>
     </div>
-    <FooterMenuruTitle />
-  </>
-);
+  );
+};
+
+// ===== FOOTER LINKS DATA =====
+const footerLinks = [
+  { title: "Get in Touch", links: ["Contact Us", "Instagram", "Live Chat"] },
+  { title: "Product", links: ["Shop", "Note", "Calendar", "Blog", "Donation", "Community", "Live Chat Agent", "Stories"] },
+  { title: "Attention", links: ["Privacy Policy", "Terms & Conditions", "About Us", "Terms of Use", "Cookies Policy", "Help Center"] },
+];
 
 // ===== TOPIC DROPDOWN =====
 const TopicDropdown = ({ categories, notesByCategory, selectedTopic, onSelectTopic }: any) => {
@@ -1052,7 +1080,6 @@ export default function NotesPage(): React.JSX.Element {
 
   useEffect(() => { setIsMounted(true); }, []);
 
-  // ===== SETUP SPEECH RECOGNITION (NATIVE BROWSER, TANPA API) =====
   useEffect(() => {
     if (typeof window === "undefined") return;
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -1276,7 +1303,6 @@ export default function NotesPage(): React.JSX.Element {
     });
   };
 
-  // ===== VOICE INPUT (NATIVE BROWSER, TANPA API) =====
   const startVoiceInput = () => {
     if (!recognitionRef.current) {
       alert("Browser Anda tidak mendukung fitur mikrofon. Gunakan Chrome/Edge terbaru.");
@@ -1288,9 +1314,7 @@ export default function NotesPage(): React.JSX.Element {
       recognitionRef.current.start();
       setIsListening(true);
       setVoiceStatus("Mendengarkan... Ucapkan isi catatan atau perintah 'simpan'");
-    } catch (error) {
-      console.error("Start voice error:", error);
-    }
+    } catch (error) { console.error("Start voice error:", error); }
 
     let interimBase = noteEditorRef.current.innerHTML || "";
 
@@ -1300,16 +1324,12 @@ export default function NotesPage(): React.JSX.Element {
 
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const transcript = event.results[i][0].transcript;
-        if (event.results[i].isFinal) {
-          finalText += transcript + " ";
-        } else {
-          interimText += transcript;
-        }
+        if (event.results[i].isFinal) finalText += transcript + " ";
+        else interimText += transcript;
       }
 
       if (finalText.trim()) {
         const lowerFinal = finalText.toLowerCase().trim();
-
         if (COMMANDS.simpan.some(cmd => lowerFinal.includes(cmd))) {
           stopVoiceInput();
           setVoiceStatus("Menyimpan catatan...");
@@ -1332,7 +1352,6 @@ export default function NotesPage(): React.JSX.Element {
           setVoiceStatus("Isi catatan dihapus");
           return;
         }
-
         if (noteEditorRef.current) {
           noteEditorRef.current.innerHTML = interimBase + finalText + interimText;
         }
