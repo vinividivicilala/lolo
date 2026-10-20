@@ -53,7 +53,6 @@ const WHITE = "#FFFFFF";
 const BLACK = "#000000";
 const LIME = "#E3FB96";
 
-// Stabilo warna untuk label note
 const STABILO_COLORS = [
   { name: "Kuning", value: "#FFF59D" },
   { name: "Hijau", value: "#A5D6A7" },
@@ -65,7 +64,6 @@ const STABILO_COLORS = [
   { name: "Abu", value: "#CFD8DC" },
 ];
 
-// Font size options
 const FONT_SIZES = [12, 14, 16, 18, 20, 24, 28, 32, 40, 48, 56, 64];
 
 // ===== SVG ICONS =====
@@ -218,17 +216,22 @@ const HighlightIcon = ({ size = 16, color = "currentColor" }: { size?: number; c
   </svg>
 );
 
+// ===== MICROSOFT ICON (4 kotak warna) =====
+const MicrosoftIcon = ({ size = 24 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style={{ display: 'inline-block' }}>
+    <rect x="1" y="1" width="10" height="10" fill="#F25022" />
+    <rect x="13" y="1" width="10" height="10" fill="#7FBA00" />
+    <rect x="1" y="13" width="10" height="10" fill="#00A4EF" />
+    <rect x="13" y="13" width="10" height="10" fill="#FFB900" />
+  </svg>
+);
+
 const InstagramVerifiedBadge = ({ size = 16 }) => {
   const [showTooltip, setShowTooltip] = useState(false);
   
   return (
     <span 
-      style={{ 
-        position: 'relative', 
-        display: 'inline-block',
-        marginLeft: '4px',
-        verticalAlign: 'middle'
-      }}
+      style={{ position: 'relative', display: 'inline-block', marginLeft: '4px', verticalAlign: 'middle' }}
       onMouseEnter={() => setShowTooltip(true)}
       onMouseLeave={() => setShowTooltip(false)}
     >
@@ -236,16 +239,13 @@ const InstagramVerifiedBadge = ({ size = 16 }) => {
         <path fill="#0095F6" d="M12 2.2C13.6 3.8 16.2 3.8 17.8 2.2C18.6 3.8 20.2 5.4 21.8 6.2C20.2 7.8 20.2 10.4 21.8 12C20.2 13.6 20.2 16.2 21.8 17.8C20.2 18.6 18.6 20.2 17.8 21.8C16.2 20.2 13.6 20.2 12 21.8C10.4 20.2 7.8 20.2 6.2 21.8C5.4 20.2 3.8 18.6 2.2 17.8C3.8 16.2 3.8 13.6 2.2 12C3.8 10.4 3.8 7.8 2.2 6.2C3.8 5.4 5.4 3.8 6.2 2.2C7.8 3.8 10.4 3.8 12 2.2Z"/>
         <path d="M9.2 12.3l2 2 4.6-4.6" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
       </svg>
-      
       {showTooltip && (
         <div style={{
           position: 'absolute', bottom: '100%', left: '50%',
           transform: 'translateX(-50%)', backgroundColor: '#333',
           color: 'white', padding: '4px 8px', borderRadius: '4px',
           fontSize: '12px', whiteSpace: 'nowrap', marginBottom: '5px', zIndex: 1000
-        }}>
-          Akun Resmi
-        </div>
+        }}>Akun Resmi</div>
       )}
     </span>
   );
@@ -514,7 +514,7 @@ const RightNavbar = ({ user, auth, db, userDisplayName, router, onSayHeyToggle, 
   );
 };
 
-// ===== FOOTER MENURU TITLE =====
+// ===== FOOTER MENURU TITLE (DENGAN MICROSOFT DOWNLOAD) =====
 const FooterMenuruTitle = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLSpanElement>(null);
@@ -565,6 +565,42 @@ const FooterMenuruTitle = () => {
       overflow: "visible", display: "flex", flexDirection: "column",
       justifyContent: "flex-start", position: "relative",
     }}>
+      {/* ===== MICROSOFT DOWNLOAD LINK DI ATAS JUDUL MENURU ===== */}
+      <a
+        href="https://apps.microsoft.com/detail/9nv1fg4b6xvn?hl=id-ID&gl=ID"
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: "12px",
+          marginBottom: "24px",
+          textDecoration: "none",
+          cursor: "pointer",
+          alignSelf: "flex-start",
+          transition: "transform 0.2s ease",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = "translateX(6px)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = "translateX(0)";
+        }}
+      >
+        <MicrosoftIcon size={32} />
+        <span style={{
+          fontFamily: FONT_FAMILY,
+          fontSize: "24px",
+          fontWeight: 700,
+          color: BLUE,
+          letterSpacing: "-0.02em",
+          lineHeight: 1.2,
+        }}>
+          Unduh Menuru
+        </span>
+        <NorthEastArrow size={24} color={BLUE} />
+      </a>
+
       <span ref={titleRef} style={{
         fontFamily: FONT_FAMILY, fontSize: "600px", fontWeight: 400, color: BLUE,
         letterSpacing: "-0.05em", lineHeight: "0.85", display: "block", textAlign: "left",
@@ -783,7 +819,6 @@ const NoteEditorToolbar = ({
       borderRadius: '10px', border: `1.5px solid ${BLUE}30`,
       marginBottom: '16px', alignItems: 'center',
     }}>
-      {/* Bold, Italic, Underline */}
       <button type="button" onClick={() => onFormat('bold')} style={toolbarBtnStyle(activeFormats.bold)} title="Bold (Ctrl+B)">
         <BoldIcon size={16} color={activeFormats.bold ? WHITE : BLUE} />
       </button>
@@ -796,7 +831,6 @@ const NoteEditorToolbar = ({
 
       <div style={{ width: '1px', height: '24px', backgroundColor: `${BLUE}30`, margin: '0 4px' }} />
 
-      {/* Font Size */}
       <select value={fontSize} onChange={(e) => { setFontSize(Number(e.target.value)); onFormat('fontSize', e.target.value); }} style={{
         padding: '6px 10px', backgroundColor: WHITE, border: `1.5px solid ${BLUE}`,
         borderRadius: '6px', color: BLUE, fontSize: '13px',
@@ -809,7 +843,6 @@ const NoteEditorToolbar = ({
 
       <div style={{ width: '1px', height: '24px', backgroundColor: `${BLUE}30`, margin: '0 4px' }} />
 
-      {/* Alignment */}
       <button type="button" onClick={() => onFormat('justifyLeft')} style={toolbarBtnStyle(activeFormats.justifyLeft)} title="Rata Kiri">
         <AlignLeftIcon size={16} color={activeFormats.justifyLeft ? WHITE : BLUE} />
       </button>
@@ -822,12 +855,10 @@ const NoteEditorToolbar = ({
 
       <div style={{ width: '1px', height: '24px', backgroundColor: `${BLUE}30`, margin: '0 4px' }} />
 
-      {/* List */}
       <button type="button" onClick={() => onFormat('insertUnorderedList')} style={toolbarBtnStyle(activeFormats.insertUnorderedList)} title="Bullet List">
         <ListIcon size={16} color={activeFormats.insertUnorderedList ? WHITE : BLUE} />
       </button>
 
-      {/* Highlight / Stabilo */}
       <div style={{ position: 'relative' }}>
         <button type="button" onClick={() => setShowStabiloPicker(!showStabiloPicker)} style={toolbarBtnStyle(showStabiloPicker)} title="Label Warna Stabilo">
           <HighlightIcon size={16} color={showStabiloPicker ? WHITE : BLUE} />
@@ -841,9 +872,7 @@ const NoteEditorToolbar = ({
             boxShadow: '0 8px 24px rgba(13,60,252,0.25)', minWidth: '160px',
           }}>
             {STABILO_COLORS.map((color) => (
-              <button
-                key={color.value}
-                type="button"
+              <button key={color.value} type="button"
                 onClick={() => {
                   setStabiloColor(color.value);
                   onFormat('hiliteColor', color.value);
@@ -857,8 +886,7 @@ const NoteEditorToolbar = ({
                 title={color.name}
               />
             ))}
-            <button
-              type="button"
+            <button type="button"
               onClick={() => {
                 setStabiloColor('transparent');
                 onFormat('hiliteColor', 'transparent');
@@ -869,9 +897,7 @@ const NoteEditorToolbar = ({
                 backgroundColor: WHITE, border: `2px solid ${BLUE}`,
                 cursor: 'pointer', padding: 0, gridColumn: 'span 4',
                 fontFamily: FONT_FAMILY, fontSize: '11px', fontWeight: 700, color: BLUE,
-              }}
-              title="Hapus Label"
-            >Hapus Label</button>
+              }}>Hapus Label</button>
           </div>
         )}
       </div>
@@ -937,10 +963,9 @@ export default function NotesPage(): React.JSX.Element {
   const [isLoading, setIsLoading] = useState(true);
   const [showInlineNoteEditor, setShowInlineNoteEditor] = useState(false);
   const [showInlineGroupEditor, setShowInlineGroupEditor] = useState(false);
-  const [showInviteModal, setShowInviteModal] = useState(false);
-  const [showCollaborateModal, setShowCollaborateModal] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showEditNoteModal, setShowEditNoteModal] = useState(false);
+  const [showCollaborateModal, setShowCollaborateModal] = useState(false);
   const [groups, setGroups] = useState<Group[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [currentGroup, setCurrentGroup] = useState<Group | null>(null);
@@ -954,7 +979,6 @@ export default function NotesPage(): React.JSX.Element {
   const [memberSearchEmail, setMemberSearchEmail] = useState("");
   const [memberSearchLoading, setMemberSearchLoading] = useState(false);
   const [memberSearchResults, setMemberSearchResults] = useState<any[]>([]);
-  const [inviteEmail, setInviteEmail] = useState("");
   const [collaborateEmail, setCollaborateEmail] = useState("");
   const [auth, setAuth] = useState<any>(null);
   const [db, setDb] = useState<any>(null);
@@ -963,7 +987,6 @@ export default function NotesPage(): React.JSX.Element {
   const [authReady, setAuthReady] = useState(false);
   const videoRefs = useRef<{ [key: string]: HTMLVideoElement | null }>({});
   
-  // Editor states
   const noteEditorRef = useRef<HTMLDivElement>(null);
   const [activeFormats, setActiveFormats] = useState<any>({
     bold: false, italic: false, underline: false,
@@ -1002,7 +1025,6 @@ export default function NotesPage(): React.JSX.Element {
     } catch (error) { console.error('Firebase initialization error:', error); }
   }, []);
 
-  // LOAD NOTES MILIK SENDIRI + COLLABORATIVE
   useEffect(() => {
     if (!db || !isMounted || !user) {
       setNotes([]);
@@ -1052,7 +1074,6 @@ export default function NotesPage(): React.JSX.Element {
     return () => { unsubscribes.forEach((unsub) => unsub()); };
   }, [db, isMounted, user]);
 
-  // AUTH STATE
   useEffect(() => {
     if (!auth) return;
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -1077,7 +1098,6 @@ export default function NotesPage(): React.JSX.Element {
     return () => { if (unsubscribe) unsubscribe(); };
   }, [auth]);
 
-  // PRELOADER
   useEffect(() => {
     if (!isMounted || loading) return;
     let killed = false;
@@ -1185,7 +1205,6 @@ export default function NotesPage(): React.JSX.Element {
     return true;
   };
 
-  // ===== EDITOR FORMAT HANDLERS =====
   const handleFormat = (command: string, value?: string) => {
     if (!noteEditorRef.current) return;
     noteEditorRef.current.focus();
@@ -1205,7 +1224,6 @@ export default function NotesPage(): React.JSX.Element {
     });
   };
 
-  // ===== GROUP MEMBER SEARCH =====
   const handleSearchMember = async (email: string) => {
     if (!email.trim() || !db) { setMemberSearchResults([]); return; }
     setMemberSearchLoading(true);
@@ -1217,9 +1235,7 @@ export default function NotesPage(): React.JSX.Element {
         results.push({ uid: docSnap.id, ...docSnap.data() });
       });
       setMemberSearchResults(results);
-    } catch (err) {
-      console.error("Search error:", err);
-    }
+    } catch (err) { console.error("Search error:", err); }
     setMemberSearchLoading(false);
   };
 
@@ -1241,7 +1257,6 @@ export default function NotesPage(): React.JSX.Element {
     setNewGroupMembers(newGroupMembers.filter(m => m.uid !== uid));
   };
 
-  // ===== CREATE NOTE =====
   const handleCreateNote = async () => {
     if (!requireLogin("membuat catatan")) return;
     if (!db || !newNote.title.trim()) { alert("Judul catatan harus diisi"); return; }
@@ -1274,7 +1289,6 @@ export default function NotesPage(): React.JSX.Element {
         updatedAt: serverTimestamp()
       });
 
-      // Reset form
       setNewNote({ title: "", category: "", link: "" });
       setNoteLabelColor("");
       setNewGroupMembers([]);
@@ -1287,7 +1301,6 @@ export default function NotesPage(): React.JSX.Element {
     }
   };
 
-  // ===== CREATE GROUP =====
   const handleCreateGroup = async () => {
     if (!requireLogin("membuat grup")) return;
     if (!db || !newGroupName.trim()) { alert("Nama grup harus diisi"); return; }
@@ -1370,36 +1383,6 @@ export default function NotesPage(): React.JSX.Element {
       setCollaborateEmail("");
       setShowCollaborateModal(false);
       alert(`Undangan kolaborasi terkirim ke ${collaborateEmail}`);
-    } catch (error) { console.error(error); alert("Gagal mengundang."); }
-  };
-
-  const handleInviteUser = async () => {
-    if (!requireLogin("mengundang user")) return;
-    if (!db || !currentGroup || !inviteEmail.trim()) { alert("Email harus diisi"); return; }
-    try {
-      const invitedUser = await findUserByEmail(inviteEmail.trim());
-      let invitedUserId = invitedUser?.id;
-      let invitedUserName = invitedUser?.name || inviteEmail.split('@')[0];
-      if (!invitedUser) {
-        invitedUserId = await createUserRecord(inviteEmail.trim());
-        if (!invitedUserId) { alert("Gagal membuat user record"); return; }
-        invitedUserName = inviteEmail.split('@')[0];
-      }
-      if (currentGroup.members.includes(invitedUserId)) {
-        alert("User sudah menjadi anggota grup ini"); return;
-      }
-      await addDoc(collection(db, 'notifications'), {
-        type: 'group_invite',
-        groupId: currentGroup.id, groupName: currentGroup.name,
-        senderId: user.uid, senderName: userDisplayName, senderEmail: userEmail,
-        receiverId: invitedUserId, receiverEmail: inviteEmail.trim().toLowerCase(),
-        receiverName: invitedUserName, status: 'pending',
-        message: `${userDisplayName} mengundang Anda untuk bergabung dengan grup "${currentGroup.name}"`,
-        createdAt: serverTimestamp()
-      });
-      setInviteEmail("");
-      setShowInviteModal(false);
-      alert(`Undangan terkirim ke ${inviteEmail}`);
     } catch (error) { console.error(error); alert("Gagal mengundang."); }
   };
 
@@ -1568,7 +1551,6 @@ export default function NotesPage(): React.JSX.Element {
       </Head>
 
       <div style={{ position: "relative", width: "100%", minHeight: "100vh", overflow: "hidden", backgroundColor: WHITE }}>
-        {/* PRELOADER */}
         <div ref={preloaderRef} style={{
           position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
           backgroundColor: WHITE, zIndex: 9999, fontFamily: FONT_FAMILY,
@@ -1599,7 +1581,6 @@ export default function NotesPage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* MAIN PAGE */}
         <div ref={mainPageRef} style={{
           position: "relative", width: "100%", minHeight: "100vh",
           backgroundColor: WHITE, margin: 0, padding: 0,
@@ -1632,7 +1613,6 @@ export default function NotesPage(): React.JSX.Element {
             sayHeyOpen={sayHeyOpen}
           />
 
-          {/* CONTENT */}
           <div style={{
             width: "100%", padding: "0 40px", maxWidth: "1600px",
             margin: "0 auto", marginTop: "180px",
@@ -1686,7 +1666,6 @@ export default function NotesPage(): React.JSX.Element {
               </div>
             ) : (
               <>
-                {/* Actions row */}
                 <div style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                   flexWrap: 'wrap', gap: '20px', marginBottom: '30px'
@@ -1824,12 +1803,10 @@ export default function NotesPage(): React.JSX.Element {
                   </div>
                 </div>
 
-                {/* ===== INLINE GROUP EDITOR ===== */}
                 {showInlineGroupEditor && (
                   <div style={{
                     backgroundColor: WHITE, border: `2px solid ${BLUE}`,
-                    borderRadius: '16px', padding: '30px',
-                    marginBottom: '40px',
+                    borderRadius: '16px', padding: '30px', marginBottom: '40px',
                     boxShadow: '0 8px 32px rgba(13,60,252,0.15)',
                   }}>
                     <div style={{
@@ -1839,64 +1816,49 @@ export default function NotesPage(): React.JSX.Element {
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                       <input
-                        type="text"
-                        value={newGroupName}
+                        type="text" value={newGroupName}
                         onChange={(e) => setNewGroupName(e.target.value)}
                         placeholder="Nama Grup"
                         style={{
-                          width: '100%', padding: '14px 18px',
-                          backgroundColor: 'transparent',
+                          width: '100%', padding: '14px 18px', backgroundColor: 'transparent',
                           border: `1.5px solid ${BLUE}`, borderRadius: '10px',
                           color: BLUE, fontSize: '16px', outline: 'none',
                           fontFamily: FONT_FAMILY, fontWeight: 600,
                         }}
                       />
 
-                      {/* Tambah user ke grup */}
                       <div>
                         <div style={{
                           fontSize: '14px', fontWeight: 700, color: BLUE,
                           fontFamily: FONT_FAMILY, marginBottom: '10px',
                         }}>Tambahkan User ke Grup:</div>
 
-                        <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
-                          <input
-                            type="email"
-                            value={memberSearchEmail}
-                            onChange={(e) => {
-                              setMemberSearchEmail(e.target.value);
-                              handleSearchMember(e.target.value);
-                            }}
-                            placeholder="Cari email user..."
-                            style={{
-                              flex: 1, padding: '12px 16px',
-                              backgroundColor: 'transparent',
-                              border: `1.5px solid ${BLUE}`, borderRadius: '10px',
-                              color: BLUE, fontSize: '14px', outline: 'none',
-                              fontFamily: FONT_FAMILY, fontWeight: 500,
-                            }}
-                          />
-                          {memberSearchLoading && (
-                            <span style={{
-                              fontSize: '13px', color: BLUE,
-                              fontFamily: FONT_FAMILY, fontWeight: 600,
-                              display: 'flex', alignItems: 'center',
-                            }}>Mencari...</span>
-                          )}
-                        </div>
+                        <input
+                          type="email" value={memberSearchEmail}
+                          onChange={(e) => {
+                            setMemberSearchEmail(e.target.value);
+                            handleSearchMember(e.target.value);
+                          }}
+                          placeholder="Cari email user..."
+                          style={{
+                            width: '100%', padding: '12px 16px', backgroundColor: 'transparent',
+                            border: `1.5px solid ${BLUE}`, borderRadius: '10px',
+                            color: BLUE, fontSize: '14px', outline: 'none',
+                            fontFamily: FONT_FAMILY, fontWeight: 500,
+                          }}
+                        />
 
                         {memberSearchResults.length > 0 && (
                           <div style={{
                             backgroundColor: '#f8f9fa',
                             border: `1px solid ${BLUE}30`, borderRadius: '8px',
-                            marginBottom: '10px', maxHeight: '200px', overflowY: 'auto',
+                            marginTop: '10px', maxHeight: '200px', overflowY: 'auto',
                           }}>
                             {memberSearchResults.map((m) => (
                               <div key={m.uid} onClick={() => addMemberToNewGroup(m)} style={{
                                 padding: '12px 16px', cursor: 'pointer',
                                 borderBottom: `1px solid ${BLUE}15`,
-                                display: 'flex', justifyContent: 'space-between',
-                                alignItems: 'center',
+                                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                               }}
                                 onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#e8ebf5')}
                                 onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
@@ -1909,23 +1871,20 @@ export default function NotesPage(): React.JSX.Element {
                                     {m.email}
                                   </div>
                                 </div>
-                                <span style={{
-                                  fontSize: '20px', fontWeight: 'bold', color: BLUE,
-                                }}>+</span>
+                                <span style={{ fontSize: '20px', fontWeight: 'bold', color: BLUE }}>+</span>
                               </div>
                             ))}
                           </div>
                         )}
 
                         {newGroupMembers.length > 0 && (
-                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '10px' }}>
                             {newGroupMembers.map((m) => (
                               <div key={m.uid} style={{
                                 display: 'flex', alignItems: 'center', gap: '8px',
                                 padding: '6px 12px', backgroundColor: BLUE,
                                 color: WHITE, borderRadius: '20px',
-                                fontSize: '13px', fontFamily: FONT_FAMILY,
-                                fontWeight: 600,
+                                fontSize: '13px', fontFamily: FONT_FAMILY, fontWeight: 600,
                               }}>
                                 <span>{m.name}</span>
                                 <button onClick={() => removeMemberFromNewGroup(m.uid)} style={{
@@ -1957,12 +1916,10 @@ export default function NotesPage(): React.JSX.Element {
                   </div>
                 )}
 
-                {/* ===== INLINE NOTE EDITOR ===== */}
                 {showInlineNoteEditor && (
                   <div style={{
                     backgroundColor: WHITE, border: `2px solid ${BLUE}`,
-                    borderRadius: '16px', padding: '30px',
-                    marginBottom: '40px',
+                    borderRadius: '16px', padding: '30px', marginBottom: '40px',
                     boxShadow: '0 8px 32px rgba(13,60,252,0.15)',
                   }}>
                     <div style={{
@@ -1983,32 +1940,26 @@ export default function NotesPage(): React.JSX.Element {
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                       <input
-                        type="text"
-                        value={newNote.title}
+                        type="text" value={newNote.title}
                         onChange={(e) => setNewNote({...newNote, title: e.target.value})}
                         placeholder="Judul Catatan"
                         style={{
-                          width: '100%', padding: '18px 20px',
-                          backgroundColor: 'transparent',
+                          width: '100%', padding: '18px 20px', backgroundColor: 'transparent',
                           border: 'none', borderBottom: `2px solid ${BLUE}`,
                           color: BLUE, fontSize: '26px', outline: 'none',
                           fontFamily: FONT_FAMILY, fontWeight: 700,
                         }}
                       />
 
-                      {/* Kategori + Label Color */}
                       <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
-                        <select
-                          value={newNote.category}
+                        <select value={newNote.category}
                           onChange={(e) => setNewNote({...newNote, category: e.target.value})}
                           style={{
-                            flex: 1, minWidth: '200px',
-                            padding: '14px 18px', backgroundColor: BLUE,
-                            border: 'none', color: WHITE, fontSize: '16px',
-                            outline: 'none', fontFamily: FONT_FAMILY,
+                            flex: 1, minWidth: '200px', padding: '14px 18px',
+                            backgroundColor: BLUE, border: 'none', color: WHITE,
+                            fontSize: '16px', outline: 'none', fontFamily: FONT_FAMILY,
                             cursor: 'pointer', borderRadius: '10px', fontWeight: 600,
-                          }}
-                        >
+                          }}>
                           <option value="">Pilih Kategori</option>
                           {categories.map((category) => (
                             <option key={category} value={category}>{category}</option>
@@ -2018,9 +1969,7 @@ export default function NotesPage(): React.JSX.Element {
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                           <span style={{ fontSize: '13px', fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY }}>Label:</span>
                           {STABILO_COLORS.map((color) => (
-                            <button
-                              key={color.value}
-                              type="button"
+                            <button key={color.value} type="button"
                               onClick={() => setNoteLabelColor(noteLabelColor === color.value ? "" : color.value)}
                               style={{
                                 width: '28px', height: '28px', borderRadius: '50%',
@@ -2032,22 +1981,18 @@ export default function NotesPage(): React.JSX.Element {
                             />
                           ))}
                           {noteLabelColor && (
-                            <button
-                              type="button"
-                              onClick={() => setNoteLabelColor("")}
-                              style={{
-                                padding: '4px 10px', backgroundColor: 'transparent',
-                                border: `1.5px solid ${BLUE}`, borderRadius: '6px',
-                                color: BLUE, fontSize: '11px', fontWeight: 700,
-                                fontFamily: FONT_FAMILY, cursor: 'pointer',
-                              }}>Hapus</button>
+                            <button type="button" onClick={() => setNoteLabelColor("")} style={{
+                              padding: '4px 10px', backgroundColor: 'transparent',
+                              border: `1.5px solid ${BLUE}`, borderRadius: '6px',
+                              color: BLUE, fontSize: '11px', fontWeight: 700,
+                              fontFamily: FONT_FAMILY, cursor: 'pointer',
+                            }}>Hapus</button>
                           )}
                         </div>
                       </div>
 
                       <input
-                        type="text"
-                        value={newNote.link}
+                        type="text" value={newNote.link}
                         onChange={(e) => setNewNote({...newNote, link: e.target.value})}
                         placeholder="Link Video/Gambar (YouTube, Vimeo, dll.)"
                         style={{
@@ -2058,7 +2003,6 @@ export default function NotesPage(): React.JSX.Element {
                         }}
                       />
 
-                      {/* EDITOR TOOLBAR */}
                       <NoteEditorToolbar
                         editorRef={noteEditorRef}
                         onFormat={handleFormat}
@@ -2071,7 +2015,6 @@ export default function NotesPage(): React.JSX.Element {
                         setFontSize={setFontSize}
                       />
 
-                      {/* EDITOR AREA */}
                       <div
                         ref={noteEditorRef}
                         contentEditable
@@ -2085,12 +2028,10 @@ export default function NotesPage(): React.JSX.Element {
                           backgroundColor: '#fafbff',
                           border: `1.5px solid ${BLUE}`, borderRadius: '10px',
                           color: BLACK, fontSize: '16px', outline: 'none',
-                          fontFamily: FONT_FAMILY, lineHeight: 1.6,
-                          overflowY: 'auto',
+                          fontFamily: FONT_FAMILY, lineHeight: 1.6, overflowY: 'auto',
                         }}
                       />
 
-                      {/* Kolaborator untuk note */}
                       <div>
                         <div style={{
                           fontSize: '14px', fontWeight: 700, color: BLUE,
@@ -2100,17 +2041,14 @@ export default function NotesPage(): React.JSX.Element {
                           <CollabIcon size={16} color={BLUE} />
                           Tambah Kolaborator (Opsional):
                         </div>
-                        <input
-                          type="email"
-                          value={memberSearchEmail}
+                        <input type="email" value={memberSearchEmail}
                           onChange={(e) => {
                             setMemberSearchEmail(e.target.value);
                             handleSearchMember(e.target.value);
                           }}
                           placeholder="Cari email kolaborator..."
                           style={{
-                            width: '100%', padding: '12px 16px',
-                            backgroundColor: 'transparent',
+                            width: '100%', padding: '12px 16px', backgroundColor: 'transparent',
                             border: `1.5px solid ${BLUE}`, borderRadius: '10px',
                             color: BLUE, fontSize: '14px', outline: 'none',
                             fontFamily: FONT_FAMILY, fontWeight: 500,
@@ -2126,8 +2064,7 @@ export default function NotesPage(): React.JSX.Element {
                               <div key={m.uid} onClick={() => addMemberToNewGroup(m)} style={{
                                 padding: '12px 16px', cursor: 'pointer',
                                 borderBottom: `1px solid ${BLUE}15`,
-                                display: 'flex', justifyContent: 'space-between',
-                                alignItems: 'center',
+                                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                               }}
                                 onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#e8ebf5')}
                                 onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
@@ -2152,8 +2089,7 @@ export default function NotesPage(): React.JSX.Element {
                                 display: 'flex', alignItems: 'center', gap: '8px',
                                 padding: '6px 12px', backgroundColor: BLUE,
                                 color: WHITE, borderRadius: '20px',
-                                fontSize: '13px', fontFamily: FONT_FAMILY,
-                                fontWeight: 600,
+                                fontSize: '13px', fontFamily: FONT_FAMILY, fontWeight: 600,
                               }}>
                                 <span>{m.name}</span>
                                 <button onClick={() => removeMemberFromNewGroup(m.uid)} style={{
@@ -2243,7 +2179,6 @@ export default function NotesPage(): React.JSX.Element {
                               lineHeight: '1.3', color: BLUE, fontWeight: '700',
                             }}>{note.title}</div>
 
-                            {/* Collab Icons */}
                             {note.collaborators && note.collaborators.length > 0 && (
                               <CollabIconList
                                 collaborators={note.collaborators}
@@ -2252,7 +2187,6 @@ export default function NotesPage(): React.JSX.Element {
                             )}
                           </div>
 
-                          {/* Description - render HTML if available, else plain */}
                           {note.descriptionHtml ? (
                             <div
                               className="note-description-html"
@@ -2409,7 +2343,6 @@ export default function NotesPage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* EDIT NOTE MODAL */}
       {showEditNoteModal && currentNote && (
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
@@ -2488,7 +2421,6 @@ export default function NotesPage(): React.JSX.Element {
         </div>
       )}
 
-      {/* INVITE COLLABORATOR MODAL */}
       {showCollaborateModal && currentNote && (
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
