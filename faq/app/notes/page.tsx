@@ -52,6 +52,7 @@ const BLUE = "#0D3CFC";
 const WHITE = "#FFFFFF";
 const BLACK = "#000000";
 const LIME = "#E3FB96";
+const MINT = "#00E3AA";
 const STORE_LINK = "https://apps.microsoft.com/detail/9nv1fg4b6xvn?hl=id-ID&gl=ID";
 
 const STABILO_COLORS = [
@@ -217,14 +218,11 @@ const HighlightIcon = ({ size = 16, color = "currentColor" }: { size?: number; c
   </svg>
 );
 
-// ===== MICROSOFT STORE ICON (tas belanja + 4 kotak warna) =====
+// ===== MICROSOFT STORE ICON =====
 const MicrosoftStoreIcon = ({ size = 32 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style={{ display: 'inline-block' }}>
-    {/* Handle tas */}
     <path d="M9 3.5C9 2.67157 9.67157 2 10.5 2H13.5C14.3284 2 15 2.67157 15 3.5V5H9V3.5Z" fill="#0078D4" />
-    {/* Badan tas */}
     <path d="M4 5H20C20.5523 5 21 5.44772 21 6V20C21 20.5523 20.5523 21 20 21H4C3.44772 21 3 20.5523 3 20V6C3 5.44772 3.44772 5 4 5Z" fill="#0078D4" />
-    {/* 4 kotak warna di dalam tas */}
     <rect x="6" y="8" width="5" height="5" fill="#F25022" />
     <rect x="13" y="8" width="5" height="5" fill="#7FBA00" />
     <rect x="6" y="14" width="5" height="5" fill="#00A4EF" />
@@ -232,7 +230,6 @@ const MicrosoftStoreIcon = ({ size = 32 }: { size?: number }) => (
   </svg>
 );
 
-// ===== MICROPHONE ICON =====
 const MicIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <rect x="9" y="2" width="6" height="12" rx="3" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -242,14 +239,12 @@ const MicIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: stri
   </svg>
 );
 
-// ===== STOP ICON =====
 const StopIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <rect x="6" y="6" width="12" height="12" rx="2" fill={color} />
   </svg>
 );
 
-// ===== VOICE SUBMIT LOGIC =====
 const COMMANDS = {
   simpan: ["simpan", "simpan catatan", "submit", "kirim", "save", "simpan note"],
   batal: ["batal", "batalkan", "batal catatan", "cancel"],
@@ -439,7 +434,7 @@ const NavbarButton = ({
   );
 };
 
-// ===== FIXED NAVBAR (BLUR SEPANJANG NAVBAR) =====
+// ===== FIXED NAVBAR =====
 const FixedNavbar = ({ user, auth, db, userDisplayName, router, onSayHeyToggle, sayHeyOpen }: any) => {
   const displayName = userDisplayName || user?.displayName || user?.email?.split("@")[0] || "User";
   const photoURL = user?.photoURL || "";
@@ -470,23 +465,13 @@ const FixedNavbar = ({ user, auth, db, userDisplayName, router, onSayHeyToggle, 
 
   return (
     <div style={{
-      position: "fixed",
-      top: 0,
-      left: 0,
-      right: 0,
-      zIndex: 9000,
-      height: "90px",
+      position: "fixed", top: 0, left: 0, right: 0, zIndex: 9000, height: "90px",
       backgroundColor: "rgba(255, 255, 255, 0.75)",
-      backdropFilter: "blur(20px)",
-      WebkitBackdropFilter: "blur(20px)",
+      backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
       borderBottom: "1px solid rgba(13, 60, 252, 0.08)",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between",
-      padding: "0 40px",
-      fontFamily: FONT_FAMILY,
+      display: "flex", alignItems: "center", justifyContent: "space-between",
+      padding: "0 40px", fontFamily: FONT_FAMILY,
     }}>
-      {/* Kiri: Logo + judul + Navbar buttons */}
       <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
         <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "10px", marginRight: "14px" }}>
           <img src="/images/nop.jpg" alt="Menuru" style={{
@@ -501,7 +486,6 @@ const FixedNavbar = ({ user, auth, db, userDisplayName, router, onSayHeyToggle, 
         <NavbarButton label="Resources" panelTitle="Docs & Brand" panelDescription="Access complete documentation and Menuru brand assets in one place." panelImage="/images/p0l.jpg" panelRightTitle="Docs & Brand" panelRightDescription="Guides, visual assets, and official Menuru brand references." iconType="resources" iconComponent={<StriperIcon size={22} color="#ffffff" />} bigPanelWidth={850} bigPanelHeight={340} buttonColor="#0D3CFC" buttonHoverColor="#0D3CFC" panelColor="#000000" iconButtonColor="#000000" iconButtonHoverColor="#000000" panelBoxColor="rgba(255,255,255,0.12)" panelBoxBorder="rgba(255,255,255,0.25)" labelTextColor="#ffffff" labelTextHoverColor="#ffffff" titleTextColor="#ffffff" descriptionTextColor="rgba(255,255,255,0.92)" isResources={true} />
       </div>
 
-      {/* Kanan: Say Hey + User */}
       <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
         <SayHeyButton />
         {!user ? (
@@ -551,7 +535,7 @@ const FixedNavbar = ({ user, auth, db, userDisplayName, router, onSayHeyToggle, 
   );
 };
 
-// ===== FOOTER MENURU TITLE (DENGAN MICROSOFT STORE) =====
+// ===== FOOTER MENURU TITLE (DENGAN MICROSOFT STORE + BG MINT) =====
 const FooterMenuruTitle = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLSpanElement>(null);
@@ -597,54 +581,75 @@ const FooterMenuruTitle = () => {
   }, []);
 
   return (
-    <div ref={containerRef} style={{
-      width: "100%", padding: "0 40px 20px 40px", backgroundColor: "#ffffff",
-      overflow: "visible", display: "flex", flexDirection: "column",
-      justifyContent: "flex-start", position: "relative",
+    <div style={{
+      width: "100%",
+      padding: "0 20px 20px 20px",
+      backgroundColor: "#ffffff",
+      position: "relative",
     }}>
-      {/* ===== MICROSOFT STORE LINK DI ATAS JUDUL MENURU ===== */}
-      <a
-        href={STORE_LINK}
-        target="_blank"
-        rel="noopener noreferrer"
+      {/* ===== BG MINT DENGAN BORDER RADIUS KIRI KANAN ===== */}
+      <div
+        ref={containerRef}
         style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: "12px",
-          marginBottom: "24px",
-          textDecoration: "none",
-          cursor: "pointer",
-          alignSelf: "flex-start",
-          transition: "transform 0.2s ease",
+          width: "100%",
+          backgroundColor: MINT,
+          borderRadius: "32px 32px 32px 32px",
+          padding: "40px 40px 40px 40px",
+          overflow: "hidden",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "flex-start",
+          position: "relative",
         }}
-        onMouseEnter={(e) => { e.currentTarget.style.transform = "translateX(6px)"; }}
-        onMouseLeave={(e) => { e.currentTarget.style.transform = "translateX(0)"; }}
       >
-        <MicrosoftStoreIcon size={36} />
-        <span style={{
-          fontFamily: FONT_FAMILY,
-          fontSize: "24px",
-          fontWeight: 700,
-          color: BLUE,
-          letterSpacing: "-0.02em",
-          lineHeight: 1.2,
-        }}>
-          Unduh Menuru
-        </span>
-        <NorthEastArrow size={24} color={BLUE} />
-      </a>
+        {/* ===== LINK UNDUH MENURU (BISA DIKLIK) ===== */}
+        <a
+          href={STORE_LINK}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "12px",
+            marginBottom: "24px",
+            textDecoration: "none",
+            cursor: "pointer",
+            alignSelf: "flex-start",
+            transition: "transform 0.2s ease",
+            padding: "10px 18px",
+            backgroundColor: WHITE,
+            borderRadius: "12px",
+            boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-3px)"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; }}
+        >
+          <MicrosoftStoreIcon size={32} />
+          <span style={{
+            fontFamily: FONT_FAMILY,
+            fontSize: "22px",
+            fontWeight: 700,
+            color: BLUE,
+            letterSpacing: "-0.02em",
+            lineHeight: 1.2,
+          }}>
+            Unduh Menuru
+          </span>
+          <NorthEastArrow size={22} color={BLUE} />
+        </a>
 
-      <span ref={titleRef} style={{
-        fontFamily: FONT_FAMILY, fontSize: "600px", fontWeight: 400, color: BLUE,
-        letterSpacing: "-0.05em", lineHeight: "0.85", display: "block", textAlign: "left",
-        WebkitFontSmoothing: "antialiased", MozOsxFontSmoothing: "grayscale",
-        willChange: "transform, opacity", whiteSpace: "nowrap",
-        margin: 0, padding: 0, overflow: "visible", position: "relative",
-      }}>Menuru</span>
-      <div style={{ width: "100%", display: "flex", justifyContent: "flex-start", marginTop: "10px" }}>
-        <span style={{ fontFamily: FONT_FAMILY, fontSize: "16px", fontWeight: 400, color: BLUE, letterSpacing: "0.01em", opacity: 0.8 }}>
-          2024 - 2026 Menuru. All rights reserved.
-        </span>
+        <span ref={titleRef} style={{
+          fontFamily: FONT_FAMILY, fontSize: "600px", fontWeight: 400, color: BLUE,
+          letterSpacing: "-0.05em", lineHeight: "0.85", display: "block", textAlign: "left",
+          WebkitFontSmoothing: "antialiased", MozOsxFontSmoothing: "grayscale",
+          willChange: "transform, opacity", whiteSpace: "nowrap",
+          margin: 0, padding: 0, overflow: "visible", position: "relative",
+        }}>Menuru</span>
+        <div style={{ width: "100%", display: "flex", justifyContent: "flex-start", marginTop: "10px" }}>
+          <span style={{ fontFamily: FONT_FAMILY, fontSize: "16px", fontWeight: 400, color: BLUE, letterSpacing: "0.01em", opacity: 0.85 }}>
+            2024 - 2026 Menuru. All rights reserved.
+          </span>
+        </div>
       </div>
     </div>
   );
@@ -851,13 +856,13 @@ const NoteEditorToolbar = ({
       borderRadius: '10px', border: `1.5px solid ${BLUE}30`,
       marginBottom: '16px', alignItems: 'center',
     }}>
-      <button type="button" onClick={() => onFormat('bold')} style={toolbarBtnStyle(activeFormats.bold)} title="Bold (Ctrl+B)">
+      <button type="button" onClick={() => onFormat('bold')} style={toolbarBtnStyle(activeFormats.bold)} title="Bold">
         <BoldIcon size={16} color={activeFormats.bold ? WHITE : BLUE} />
       </button>
-      <button type="button" onClick={() => onFormat('italic')} style={toolbarBtnStyle(activeFormats.italic)} title="Italic (Ctrl+I)">
+      <button type="button" onClick={() => onFormat('italic')} style={toolbarBtnStyle(activeFormats.italic)} title="Italic">
         <ItalicIcon size={16} color={activeFormats.italic ? WHITE : BLUE} />
       </button>
-      <button type="button" onClick={() => onFormat('underline')} style={toolbarBtnStyle(activeFormats.underline)} title="Underline (Ctrl+U)">
+      <button type="button" onClick={() => onFormat('underline')} style={toolbarBtnStyle(activeFormats.underline)} title="Underline">
         <UnderlineIcon size={16} color={activeFormats.underline ? WHITE : BLUE} />
       </button>
 
@@ -1018,7 +1023,6 @@ export default function NotesPage(): React.JSX.Element {
   const [authReady, setAuthReady] = useState(false);
   const videoRefs = useRef<{ [key: string]: HTMLVideoElement | null }>({});
   
-  // Editor states
   const noteEditorRef = useRef<HTMLDivElement>(null);
   const [activeFormats, setActiveFormats] = useState<any>({
     bold: false, italic: false, underline: false,
@@ -1030,7 +1034,6 @@ export default function NotesPage(): React.JSX.Element {
   const [fontSize, setFontSize] = useState<number>(16);
   const [noteLabelColor, setNoteLabelColor] = useState<string>("");
 
-  // ===== MICROPHONE / VOICE STATES =====
   const [isListening, setIsListening] = useState(false);
   const [voiceSupported, setVoiceSupported] = useState(false);
   const [voiceStatus, setVoiceStatus] = useState<string>("");
@@ -1049,17 +1052,17 @@ export default function NotesPage(): React.JSX.Element {
 
   useEffect(() => { setIsMounted(true); }, []);
 
-  // ===== CEK SUPPORT WEB SPEECH API =====
+  // ===== SETUP SPEECH RECOGNITION (NATIVE BROWSER, TANPA API) =====
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (SpeechRecognition) {
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (SR) {
       setVoiceSupported(true);
-      const recognition = new SpeechRecognition();
-      recognition.lang = "id-ID";
-      recognition.continuous = true;
-      recognition.interimResults = true;
-      recognitionRef.current = recognition;
+      const rec = new SR();
+      rec.lang = "id-ID";
+      rec.continuous = true;
+      rec.interimResults = true;
+      recognitionRef.current = rec;
     }
   }, []);
 
@@ -1074,10 +1077,9 @@ export default function NotesPage(): React.JSX.Element {
       }
       setAuth(getAuth(app));
       setDb(getFirestore(app));
-    } catch (error) { console.error('Firebase initialization error:', error); }
+    } catch (error) { console.error('Firebase init error:', error); }
   }, []);
 
-  // ===== LOAD NOTES =====
   useEffect(() => {
     if (!db || !isMounted || !user) {
       setNotes([]);
@@ -1092,18 +1094,15 @@ export default function NotesPage(): React.JSX.Element {
         where('userId', '==', user.uid),
         orderBy('updatedAt', 'desc')
       );
-
       const unsub1 = onSnapshot(ownNotesQ, (snap: any) => {
         const ownNotes: Note[] = [];
         snap.forEach((docSnap: any) => {
           ownNotes.push({ id: docSnap.id, ...docSnap.data() });
         });
-
         const collabNotesQ = query(
           collection(db, 'userNotes'),
           where('collaborators', 'array-contains', user.uid)
         );
-
         getDocs(collabNotesQ).then((collabSnap) => {
           const collabNotes: Note[] = [];
           collabSnap.forEach((docSnap: any) => {
@@ -1127,7 +1126,6 @@ export default function NotesPage(): React.JSX.Element {
     return () => { unsubscribes.forEach((unsub) => unsub()); };
   }, [db, isMounted, user]);
 
-  // ===== AUTH =====
   useEffect(() => {
     if (!auth) return;
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -1152,7 +1150,6 @@ export default function NotesPage(): React.JSX.Element {
     return () => { if (unsubscribe) unsubscribe(); };
   }, [auth]);
 
-  // ===== PRELOADER =====
   useEffect(() => {
     if (!isMounted || loading) return;
     let killed = false;
@@ -1260,7 +1257,6 @@ export default function NotesPage(): React.JSX.Element {
     return true;
   };
 
-  // ===== EDITOR =====
   const handleFormat = (command: string, value?: string) => {
     if (!noteEditorRef.current) return;
     noteEditorRef.current.focus();
@@ -1280,7 +1276,7 @@ export default function NotesPage(): React.JSX.Element {
     });
   };
 
-  // ===== VOICE INPUT (MICROFON) =====
+  // ===== VOICE INPUT (NATIVE BROWSER, TANPA API) =====
   const startVoiceInput = () => {
     if (!recognitionRef.current) {
       alert("Browser Anda tidak mendukung fitur mikrofon. Gunakan Chrome/Edge terbaru.");
@@ -1291,10 +1287,9 @@ export default function NotesPage(): React.JSX.Element {
     try {
       recognitionRef.current.start();
       setIsListening(true);
-      setVoiceStatus("Mendengarkan... Ucapkan perintah atau isi catatan");
+      setVoiceStatus("Mendengarkan... Ucapkan isi catatan atau perintah 'simpan'");
     } catch (error) {
       console.error("Start voice error:", error);
-      setVoiceStatus("Gagal memulai mikrofon");
     }
 
     let interimBase = noteEditorRef.current.innerHTML || "";
@@ -1315,15 +1310,12 @@ export default function NotesPage(): React.JSX.Element {
       if (finalText.trim()) {
         const lowerFinal = finalText.toLowerCase().trim();
 
-        // Cek perintah submit
         if (COMMANDS.simpan.some(cmd => lowerFinal.includes(cmd))) {
           stopVoiceInput();
           setVoiceStatus("Menyimpan catatan...");
           setTimeout(() => handleCreateNote(), 300);
           return;
         }
-
-        // Cek perintah batal
         if (COMMANDS.batal.some(cmd => lowerFinal.includes(cmd))) {
           stopVoiceInput();
           setVoiceStatus("Membatalkan...");
@@ -1335,15 +1327,12 @@ export default function NotesPage(): React.JSX.Element {
           }, 300);
           return;
         }
-
-        // Cek perintah hapus
         if (COMMANDS.hapus.some(cmd => lowerFinal.includes(cmd))) {
           if (noteEditorRef.current) noteEditorRef.current.innerHTML = "";
           setVoiceStatus("Isi catatan dihapus");
           return;
         }
 
-        // Tambahkan teks ke editor
         if (noteEditorRef.current) {
           noteEditorRef.current.innerHTML = interimBase + finalText + interimText;
         }
@@ -1368,15 +1357,12 @@ export default function NotesPage(): React.JSX.Element {
 
   const stopVoiceInput = () => {
     if (recognitionRef.current) {
-      try {
-        recognitionRef.current.stop();
-      } catch (e) { console.error(e); }
+      try { recognitionRef.current.stop(); } catch (e) { console.error(e); }
     }
     setIsListening(false);
     setVoiceStatus("");
   };
 
-  // ===== MEMBER SEARCH =====
   const handleSearchMember = async (email: string) => {
     if (!email.trim() || !db) { setMemberSearchResults([]); return; }
     try {
@@ -1408,7 +1394,6 @@ export default function NotesPage(): React.JSX.Element {
     setNewGroupMembers(newGroupMembers.filter(m => m.uid !== uid));
   };
 
-  // ===== CREATE NOTE =====
   const handleCreateNote = async () => {
     if (!user) { alert("Silakan login terlebih dahulu"); return; }
     if (!db || !newNote.title.trim()) { alert("Judul catatan harus diisi"); return; }
@@ -1704,7 +1689,6 @@ export default function NotesPage(): React.JSX.Element {
       </Head>
 
       <div style={{ position: "relative", width: "100%", minHeight: "100vh", overflow: "hidden", backgroundColor: WHITE }}>
-        {/* PRELOADER */}
         <div ref={preloaderRef} style={{
           position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
           backgroundColor: WHITE, zIndex: 9999, fontFamily: FONT_FAMILY,
@@ -1735,14 +1719,12 @@ export default function NotesPage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* MAIN PAGE */}
         <div ref={mainPageRef} style={{
           position: "relative", width: "100%", minHeight: "100vh",
           backgroundColor: WHITE, margin: 0, padding: 0,
           fontFamily: FONT_FAMILY, overflow: "visible",
           display: "flex", flexDirection: "column", willChange: "transform",
         }}>
-          {/* ===== FIXED NAVBAR DENGAN BLUR SEPANJANG ===== */}
           <FixedNavbar
             user={user}
             auth={auth}
@@ -1753,7 +1735,6 @@ export default function NotesPage(): React.JSX.Element {
             sayHeyOpen={sayHeyOpen}
           />
 
-          {/* CONTENT */}
           <div style={{
             width: "100%", padding: "0 40px", maxWidth: "1600px",
             margin: "0 auto", marginTop: "160px",
@@ -2077,7 +2058,6 @@ export default function NotesPage(): React.JSX.Element {
                           fontFamily: FONT_FAMILY,
                         }}>Label Aktif</span>
                       )}
-                      {/* MIC BUTTON */}
                       {voiceSupported && (
                         <button
                           type="button"
@@ -2216,7 +2196,6 @@ export default function NotesPage(): React.JSX.Element {
                         }}
                       />
 
-                      {/* Hint perintah suara */}
                       {voiceSupported && (
                         <div style={{
                           padding: '12px 16px',
