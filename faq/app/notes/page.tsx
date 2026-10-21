@@ -309,6 +309,18 @@ const ReportIcon = ({ size = 16, color = "#DC2626" }: { size?: number; color?: s
   </svg>
 );
 
+const PlusIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <path d="M12 5v14M5 12h14" stroke={color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const CloseSmallIcon = ({ size = 18, color = "#ffffff" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <path d="M6 6L18 18M18 6L6 18" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
 const COMMANDS = {
   simpan: ["simpan", "simpan catatan", "submit", "kirim", "save", "simpan note"],
   batal: ["batal", "batalkan", "batal catatan", "cancel"],
@@ -577,7 +589,84 @@ const NavbarButton = ({
   );
 };
 
-// ===== SAY HEY SECTION =====
+// ===== GSAP ANIMATED BUTTON (untuk tombol +) =====
+const GSAPAddButton = ({ onClick, isOpen, label = "Tambah" }: { onClick: () => void; isOpen: boolean; label?: string }) => {
+  const btnRef = useRef<HTMLButtonElement>(null);
+  const iconRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!iconRef.current) return;
+    gsap.to(iconRef.current, {
+      rotation: isOpen ? 45 : 0,
+      duration: 0.4,
+      ease: "back.out(1.8)",
+    });
+  }, [isOpen]);
+
+  const handleEnter = () => {
+    if (!btnRef.current) return;
+    gsap.to(btnRef.current, {
+      scale: 1.1,
+      boxShadow: "0 6px 20px rgba(13,60,252,0.5)",
+      duration: 0.3,
+      ease: "power2.out",
+    });
+  };
+
+  const handleLeave = () => {
+    if (!btnRef.current) return;
+    gsap.to(btnRef.current, {
+      scale: 1,
+      boxShadow: "0 4px 12px rgba(13,60,252,0.35)",
+      duration: 0.3,
+      ease: "power2.out",
+    });
+  };
+
+  const handleClick = () => {
+    if (!btnRef.current) return;
+    gsap.timeline()
+      .to(btnRef.current, { scale: 0.9, duration: 0.15, ease: "power2.in" })
+      .to(btnRef.current, { scale: 1, duration: 0.25, ease: "back.out(2)" });
+    onClick();
+  };
+
+  return (
+    <button
+      ref={btnRef}
+      onClick={handleClick}
+      onMouseEnter={handleEnter}
+      onMouseLeave={handleLeave}
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '6px',
+        padding: '8px 14px',
+        backgroundColor: isOpen ? RED : WHITE,
+        color: isOpen ? WHITE : BLUE,
+        border: 'none',
+        borderRadius: '8px',
+        fontSize: '12px',
+        fontWeight: 800,
+        fontFamily: FONT_FAMILY,
+        letterSpacing: '0.3px',
+        cursor: 'pointer',
+        boxShadow: '0 4px 12px rgba(13,60,252,0.35)',
+        transition: 'background-color 0.2s ease',
+        minWidth: '80px',
+        whiteSpace: 'nowrap',
+      }}
+    >
+      <div ref={iconRef} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        {isOpen ? <CloseSmallIcon size={14} color={WHITE} /> : <PlusIcon size={14} color={BLUE} />}
+      </div>
+      <span>{isOpen ? 'Tutup' : label}</span>
+    </button>
+  );
+};
+
+// ===== SAY HEY SECTION (BODY KONTAK POLA BIRU-PUTIH-BIRU) =====
 const SayHeySection = ({
   user,
   db,
@@ -605,7 +694,6 @@ const SayHeySection = ({
   const [newBroadcastText, setNewBroadcastText] = useState("");
   const [showBroadcastForm, setShowBroadcastForm] = useState(false);
   
-  // Item yang dipilih (pengumuman/broadcast) untuk tampil di area kanan
   const [selectedItem, setSelectedItem] = useState<{ type: 'announcement' | 'broadcast' | null; data: any | null }>({ type: null, data: null });
   
   const [reportModal, setReportModal] = useState<{ open: boolean; target: any | null }>({ open: false, target: null });
@@ -613,7 +701,6 @@ const SayHeySection = ({
   const [reports, setReports] = useState<any[]>([]);
   const [showReports, setShowReports] = useState(false);
 
-  // Pengaduan
   const [complaints, setComplaints] = useState<any[]>([]);
   const [newComplaintText, setNewComplaintText] = useState("");
   const [showComplaintForm, setShowComplaintForm] = useState(false);
@@ -628,7 +715,6 @@ const SayHeySection = ({
     getCryptoKey().then(() => setEncryptionReady(true)).catch(() => setEncryptionReady(true));
   }, []);
 
-  // Load announcements
   useEffect(() => {
     if (!db) return;
     const q = query(collection(db, 'announcements'), orderBy('createdAt', 'desc'), limit(20));
@@ -642,7 +728,6 @@ const SayHeySection = ({
     return () => unsub();
   }, [db]);
 
-  // Load broadcasts
   useEffect(() => {
     if (!db) return;
     const q = query(collection(db, 'broadcasts'), orderBy('createdAt', 'desc'), limit(20));
@@ -656,7 +741,6 @@ const SayHeySection = ({
     return () => unsub();
   }, [db]);
 
-  // Load reports
   useEffect(() => {
     if (!db || !isAdmin) return;
     const q = query(collection(db, 'reports'), orderBy('createdAt', 'desc'), limit(50));
@@ -670,7 +754,6 @@ const SayHeySection = ({
     return () => unsub();
   }, [db, isAdmin]);
 
-  // Load complaints (pengaduan)
   useEffect(() => {
     if (!db || !user) return;
     let q;
@@ -689,7 +772,6 @@ const SayHeySection = ({
     return () => unsub();
   }, [db, user, isAdmin]);
 
-  // Load contacts
   useEffect(() => {
     if (!db || !user) return;
     let q;
@@ -720,7 +802,6 @@ const SayHeySection = ({
     return () => unsub();
   }, [db, user, isOwner]);
 
-  // Load tickets
   useEffect(() => {
     if (!db || !user) return;
     let q;
@@ -744,7 +825,6 @@ const SayHeySection = ({
     return () => unsub();
   }, [db, user, isOwner, selectedContact]);
 
-  // Load messages
   useEffect(() => {
     if (!db || !ticket) return;
     const q = query(collection(db, "sayhey_tickets", ticket.id, "messages"), orderBy("timestamp", "asc"));
@@ -766,7 +846,6 @@ const SayHeySection = ({
     return () => unsub();
   }, [db, ticket]);
 
-  // Unread count
   useEffect(() => {
     if (!db || !user) return;
     const q = isOwner
@@ -784,7 +863,6 @@ const SayHeySection = ({
     return () => unsub();
   }, [db, user, isOwner, onUnreadCountChange]);
 
-  // Mark as read
   useEffect(() => {
     if (!db || !ticket || !user) return;
     const unread = messages.filter((m) => m.senderId !== user.uid && !m.read);
@@ -837,7 +915,7 @@ const SayHeySection = ({
         userUnreadCount: 0,
         ownerUnreadCount: 0,
       });
-      const initialMessage = `Hey! 👋`;
+      const initialMessage = `Hey!`;
       const encryptedMessage = await encryptMessage(initialMessage);
       await addDoc(collection(db, "sayhey_tickets", ticketRef.id, "messages"), {
         senderId: user.uid,
@@ -929,8 +1007,7 @@ const SayHeySection = ({
       });
       setNewAnnouncementText("");
       setShowAnnouncementForm(false);
-      alert("Pengumuman berhasil ditambahkan!");
-    } catch (error) { console.error(error); alert("Gagal menambah pengumuman."); }
+    } catch (error) { console.error(error); }
   };
 
   const handleDeleteAnnouncement = async (id: string) => {
@@ -952,8 +1029,7 @@ const SayHeySection = ({
       });
       setNewBroadcastText("");
       setShowBroadcastForm(false);
-      alert("Broadcast berhasil dikirim!");
-    } catch (error) { console.error(error); alert("Gagal mengirim broadcast."); }
+    } catch (error) { console.error(error); }
   };
 
   const handleDeleteBroadcast = async (id: string) => {
@@ -999,7 +1075,6 @@ const SayHeySection = ({
     catch (error) { console.error(error); }
   };
 
-  // Submit complaint (pengaduan)
   const submitComplaint = async () => {
     if (!db || !user || !newComplaintText.trim()) {
       alert("Silakan isi pengaduan");
@@ -1038,7 +1113,6 @@ const SayHeySection = ({
     return date.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
   };
 
-  // Render delivery status for messages
   const renderDeliveryStatus = (msg: any, isMine: boolean) => {
     if (!isMine) return null;
     let label = "Terkirim";
@@ -1129,7 +1203,7 @@ const SayHeySection = ({
       </div>
 
       <div style={{ display: "flex", gap: "20px", minHeight: "700px", flexWrap: "wrap" }}>
-        {/* ===== LEFT PANEL: BODY KONTAK ===== */}
+        {/* ===== LEFT PANEL: BODY KONTAK POLA BIRU-PUTIH-BIRU ===== */}
         <div style={{
           width: "340px", flexShrink: 0,
           backgroundColor: WHITE,
@@ -1140,7 +1214,7 @@ const SayHeySection = ({
           height: "700px",
           boxShadow: "0 4px 16px rgba(0,0,0,0.05)",
         }}>
-          {/* Header Kontak */}
+          {/* HEADER BIRU */}
           <div style={{
             padding: "14px 18px",
             backgroundColor: BLUE,
@@ -1165,34 +1239,30 @@ const SayHeySection = ({
             }}>{contacts.length}</span>
           </div>
 
-          {/* Scrollable content — tanpa spacebar */}
-          <div style={{ flex: 1, overflowY: "auto", minHeight: 0, padding: 0, margin: 0 }}>
-            {/* PENGUMUMAN - WARNA BIRU FULL */}
+          {/* Scrollable content */}
+          <div style={{ flex: 1, overflowY: "auto", minHeight: 0 }}>
+            {/* === PENGUMUMAN — BIRU === */}
             <div style={{
               backgroundColor: BLUE,
               padding: "12px 16px",
-              margin: 0,
               color: WHITE,
-              borderRadius: 0,
             }}>
               <div style={{
                 display: "flex", alignItems: "center", justifyContent: "space-between",
-                marginBottom: "8px",
+                marginBottom: showAnnouncementForm ? "10px" : "8px",
+                gap: "8px",
               }}>
                 <span style={{
-                  fontSize: "12px", fontWeight: 800, color: WHITE,
+                  fontSize: "13px", fontWeight: 800, color: WHITE,
                   fontFamily: FONT_FAMILY, letterSpacing: "0.5px",
                   textTransform: "uppercase",
-                }}>📢 Pengumuman</span>
+                }}>Pengumuman</span>
                 {isAdmin && (
-                  <button
+                  <GSAPAddButton
                     onClick={() => { setShowAnnouncementForm(!showAnnouncementForm); setShowBroadcastForm(false); setShowComplaintForm(false); }}
-                    style={{
-                      padding: "2px 8px", backgroundColor: WHITE,
-                      color: BLUE, border: "none", borderRadius: "4px",
-                      fontSize: "10px", fontWeight: 800, cursor: "pointer",
-                      fontFamily: FONT_FAMILY,
-                    }}>{showAnnouncementForm ? '×' : '+'}</button>
+                    isOpen={showAnnouncementForm}
+                    label="Tambah"
+                  />
                 )}
               </div>
 
@@ -1262,40 +1332,35 @@ const SayHeySection = ({
                         background: 'transparent', border: 'none',
                         color: WHITE, cursor: 'pointer', fontSize: '12px',
                         fontFamily: FONT_FAMILY, padding: 0, lineHeight: 1,
-                      }}>×</button>
+                      }}>x</button>
                     )}
                   </div>
                 </div>
               ))}
             </div>
 
-            {/* BROADCASTING - WARNA BIRU FULL */}
+            {/* === BROADCASTING — PUTIH === */}
             <div style={{
-              backgroundColor: BLUE,
+              backgroundColor: WHITE,
               padding: "12px 16px",
-              margin: 0,
-              color: WHITE,
-              borderRadius: 0,
-              borderTop: '1px solid rgba(255,255,255,0.15)',
+              borderTop: `1px solid ${BLUE}15`,
             }}>
               <div style={{
                 display: "flex", alignItems: "center", justifyContent: "space-between",
-                marginBottom: "8px",
+                marginBottom: showBroadcastForm ? "10px" : "8px",
+                gap: "8px",
               }}>
                 <span style={{
-                  fontSize: "12px", fontWeight: 800, color: WHITE,
+                  fontSize: "13px", fontWeight: 800, color: BLUE,
                   fontFamily: FONT_FAMILY, letterSpacing: "0.5px",
                   textTransform: "uppercase",
-                }}>📡 Broadcasting</span>
+                }}>Broadcasting</span>
                 {isAdmin && (
-                  <button
+                  <GSAPAddButton
                     onClick={() => { setShowBroadcastForm(!showBroadcastForm); setShowAnnouncementForm(false); setShowComplaintForm(false); }}
-                    style={{
-                      padding: "2px 8px", backgroundColor: WHITE,
-                      color: BLUE, border: "none", borderRadius: "4px",
-                      fontSize: "10px", fontWeight: 800, cursor: "pointer",
-                      fontFamily: FONT_FAMILY,
-                    }}>{showBroadcastForm ? '×' : '+'}</button>
+                    isOpen={showBroadcastForm}
+                    label="Tambah"
+                  />
                 )}
               </div>
 
@@ -1308,14 +1373,14 @@ const SayHeySection = ({
                     rows={2}
                     style={{
                       width: '100%', padding: '8px', borderRadius: '6px',
-                      border: 'none', backgroundColor: WHITE,
+                      border: `1.5px solid ${BLUE}`, backgroundColor: '#f8f9fa',
                       color: BLACK, fontSize: '12px', fontFamily: FONT_FAMILY,
                       resize: 'none', outline: 'none',
                     }}
                   />
                   <button onClick={handleAddBroadcast} style={{
-                    padding: '6px', backgroundColor: WHITE,
-                    color: BLUE, border: 'none', borderRadius: '6px',
+                    padding: '6px', backgroundColor: BLUE,
+                    color: WHITE, border: 'none', borderRadius: '6px',
                     fontSize: '11px', fontWeight: 700, cursor: 'pointer',
                     fontFamily: FONT_FAMILY,
                   }}>Kirim Broadcast</button>
@@ -1324,7 +1389,7 @@ const SayHeySection = ({
 
               {broadcasts.length === 0 ? (
                 <div style={{
-                  fontSize: '11px', color: 'rgba(255,255,255,0.7)',
+                  fontSize: '11px', color: '#999',
                   fontStyle: 'italic', textAlign: 'center', padding: '4px',
                   fontFamily: FONT_FAMILY,
                 }}>Belum ada broadcast</div>
@@ -1332,19 +1397,19 @@ const SayHeySection = ({
                 <div key={b.id}
                   onClick={() => { setSelectedItem({ type: 'broadcast', data: b }); setSelectedContact(null); setTicket(null); }}
                   style={{
-                    padding: '8px 10px', backgroundColor: 'rgba(255,255,255,0.15)',
-                    borderRadius: '6px', border: '1px solid rgba(255,255,255,0.25)',
-                    fontSize: '11px', color: WHITE,
+                    padding: '8px 10px', backgroundColor: '#f8f9fa',
+                    borderRadius: '6px', border: `1px solid ${BLUE}30`,
+                    fontSize: '11px', color: BLACK,
                     fontFamily: FONT_FAMILY, lineHeight: 1.4,
                     marginBottom: '6px',
                     cursor: 'pointer',
                     transition: 'background-color 0.2s',
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.25)'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.15)'}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e8ebf5'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f8f9fa'}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '3px' }}>
-                    <span style={{ fontSize: '10px', fontWeight: 700, color: WHITE }}>
+                    <span style={{ fontSize: '10px', fontWeight: 700, color: BLUE }}>
                       {b.authorName || 'Admin'}
                     </span>
                     <VerifiedBadgeReal size={10} />
@@ -1357,46 +1422,44 @@ const SayHeySection = ({
                     WebkitBoxOrient: 'vertical',
                   }}>{b.text}</div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '9px', color: 'rgba(255,255,255,0.8)' }}>
+                    <span style={{ fontSize: '9px', color: BLUE, opacity: 0.7 }}>
                       {formatTime(b.createdAt)}
                     </span>
                     {isAdmin && (
                       <button onClick={(e) => { e.stopPropagation(); handleDeleteBroadcast(b.id); }} style={{
                         background: 'transparent', border: 'none',
-                        color: WHITE, cursor: 'pointer', fontSize: '12px',
+                        color: RED, cursor: 'pointer', fontSize: '12px',
                         fontFamily: FONT_FAMILY, padding: 0, lineHeight: 1,
-                      }}>×</button>
+                      }}>x</button>
                     )}
                   </div>
                 </div>
               ))}
             </div>
 
-            {/* PENGADUAN USER */}
+            {/* === PENGADUAN — BIRU === */}
             <div style={{
-              backgroundColor: WHITE,
+              backgroundColor: BLUE,
               padding: "12px 16px",
-              margin: 0,
-              borderTop: `1px solid ${BLUE}15`,
+              color: WHITE,
+              borderTop: `1px solid rgba(255,255,255,0.15)`,
             }}>
               <div style={{
                 display: "flex", alignItems: "center", justifyContent: "space-between",
-                marginBottom: "8px",
+                marginBottom: showComplaintForm ? "10px" : "8px",
+                gap: "8px",
               }}>
                 <span style={{
-                  fontSize: "12px", fontWeight: 800, color: BLUE,
+                  fontSize: "13px", fontWeight: 800, color: WHITE,
                   fontFamily: FONT_FAMILY, letterSpacing: "0.5px",
                   textTransform: "uppercase",
-                }}>📝 Pengaduan {isAdmin ? `(${pendingComplaints})` : ''}</span>
+                }}>Pengaduan {isAdmin && pendingComplaints > 0 ? `(${pendingComplaints})` : ''}</span>
                 {!isAdmin && (
-                  <button
+                  <GSAPAddButton
                     onClick={() => setShowComplaintForm(!showComplaintForm)}
-                    style={{
-                      padding: "2px 8px", backgroundColor: BLUE,
-                      color: WHITE, border: "none", borderRadius: "4px",
-                      fontSize: "10px", fontWeight: 800, cursor: "pointer",
-                      fontFamily: FONT_FAMILY,
-                    }}>{showComplaintForm ? '×' : '+'}</button>
+                    isOpen={showComplaintForm}
+                    label="Kirim"
+                  />
                 )}
               </div>
 
@@ -1409,14 +1472,14 @@ const SayHeySection = ({
                     rows={2}
                     style={{
                       width: '100%', padding: '8px', borderRadius: '6px',
-                      border: `1.5px solid ${BLUE}`, backgroundColor: '#f8f9fa',
+                      border: 'none', backgroundColor: WHITE,
                       color: BLACK, fontSize: '12px', fontFamily: FONT_FAMILY,
                       resize: 'none', outline: 'none',
                     }}
                   />
                   <button onClick={submitComplaint} style={{
-                    padding: '6px', backgroundColor: BLUE,
-                    color: WHITE, border: 'none', borderRadius: '6px',
+                    padding: '6px', backgroundColor: WHITE,
+                    color: BLUE, border: 'none', borderRadius: '6px',
                     fontSize: '11px', fontWeight: 700, cursor: 'pointer',
                     fontFamily: FONT_FAMILY,
                   }}>Kirim Pengaduan</button>
@@ -1425,20 +1488,20 @@ const SayHeySection = ({
 
               {complaints.length === 0 ? (
                 <div style={{
-                  fontSize: '11px', color: '#999',
+                  fontSize: '11px', color: 'rgba(255,255,255,0.7)',
                   fontStyle: 'italic', textAlign: 'center', padding: '4px',
                   fontFamily: FONT_FAMILY,
                 }}>Belum ada pengaduan</div>
               ) : complaints.slice(0, 3).map((c) => (
                 <div key={c.id} style={{
-                  padding: '8px 10px', backgroundColor: '#f8f9fa',
-                  borderRadius: '6px', border: `1px solid ${BLUE}30`,
-                  fontSize: '11px', color: BLACK,
+                  padding: '8px 10px', backgroundColor: 'rgba(255,255,255,0.15)',
+                  borderRadius: '6px', border: '1px solid rgba(255,255,255,0.25)',
+                  fontSize: '11px', color: WHITE,
                   fontFamily: FONT_FAMILY, lineHeight: 1.4,
                   marginBottom: '6px',
                 }}>
                   {isAdmin && (
-                    <div style={{ fontSize: '10px', fontWeight: 700, color: BLUE, marginBottom: '3px' }}>
+                    <div style={{ fontSize: '10px', fontWeight: 700, color: WHITE, marginBottom: '3px' }}>
                       Dari: {c.userName}
                     </div>
                   )}
@@ -1446,10 +1509,10 @@ const SayHeySection = ({
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{
                       padding: '1px 6px',
-                      backgroundColor: c.status === 'resolved' ? '#D1FAE5' : '#FEF3C7',
-                      color: c.status === 'resolved' ? '#065F46' : '#92400E',
+                      backgroundColor: c.status === 'resolved' ? '#D1FAE5' : 'rgba(255,255,255,0.3)',
+                      color: c.status === 'resolved' ? '#065F46' : WHITE,
                       borderRadius: '3px', fontSize: '9px', fontWeight: 700,
-                    }}>{c.status === 'resolved' ? '✓ Selesai' : '⏳ Pending'}</span>
+                    }}>{c.status === 'resolved' ? 'Selesai' : 'Pending'}</span>
                     {isAdmin && c.status !== 'resolved' && (
                       <button onClick={() => resolveComplaint(c.id)} style={{
                         padding: '2px 6px', backgroundColor: '#4ADE80',
@@ -1463,31 +1526,28 @@ const SayHeySection = ({
               ))}
             </div>
 
-            {/* REPORTS (ADMIN ONLY) */}
+            {/* === REPORTS — PUTIH (ADMIN ONLY) === */}
             {isAdmin && (
               <div style={{
                 backgroundColor: WHITE,
                 padding: "12px 16px",
-                margin: 0,
                 borderTop: `1px solid ${BLUE}15`,
               }}>
                 <div style={{
                   display: "flex", alignItems: "center", justifyContent: "space-between",
                   marginBottom: "8px",
+                  gap: "8px",
                 }}>
                   <span style={{
-                    fontSize: "12px", fontWeight: 800, color: RED,
+                    fontSize: "13px", fontWeight: 800, color: RED,
                     fontFamily: FONT_FAMILY, letterSpacing: "0.5px",
                     textTransform: "uppercase",
-                  }}>🚨 Laporan ({pendingReports})</span>
-                  <button
+                  }}>Laporan ({pendingReports})</span>
+                  <GSAPAddButton
                     onClick={() => setShowReports(!showReports)}
-                    style={{
-                      padding: "2px 8px", backgroundColor: RED,
-                      color: WHITE, border: "none", borderRadius: "4px",
-                      fontSize: "10px", fontWeight: 800, cursor: "pointer",
-                      fontFamily: FONT_FAMILY,
-                    }}>{showReports ? '×' : 'Lihat'}</button>
+                    isOpen={showReports}
+                    label="Lihat"
+                  />
                 </div>
 
                 {showReports && (
@@ -1521,7 +1581,7 @@ const SayHeySection = ({
                             backgroundColor: r.status === 'resolved' ? '#D1FAE5' : '#FEF3C7',
                             color: r.status === 'resolved' ? '#065F46' : '#92400E',
                             borderRadius: '3px', fontSize: '9px', fontWeight: 700,
-                          }}>{r.status === 'resolved' ? '✓ Selesai' : '⏳ Pending'}</span>
+                          }}>{r.status === 'resolved' ? 'Selesai' : 'Pending'}</span>
                           {r.status !== 'resolved' && (
                             <button onClick={() => resolveReport(r.id)} style={{
                               padding: '2px 6px', backgroundColor: '#4ADE80',
@@ -1538,15 +1598,14 @@ const SayHeySection = ({
               </div>
             )}
 
-            {/* CONTACTS - TANPA SPACEBAR */}
-            <div style={{ margin: 0, padding: 0 }}>
+            {/* === CONTACTS — PUTIH === */}
+            <div style={{ backgroundColor: WHITE, borderTop: `1px solid ${BLUE}15` }}>
               {contacts.length === 0 ? (
                 <div style={{
                   padding: "30px 16px", textAlign: "center", fontSize: "12px",
                   color: '#999', fontFamily: FONT_FAMILY, lineHeight: 1.5,
                 }}>
-                  {isOwner ? "No users online." : "Owner is currently offline."}<br />
-                  Please check back later.
+                  {isOwner ? "No users online." : "Owner is currently offline."}
                 </div>
               ) : contacts.map((c) => {
                 const cTicket = c.ticket;
@@ -1643,7 +1702,6 @@ const SayHeySection = ({
           border: `1px solid ${BLUE}20`,
           boxShadow: "0 4px 16px rgba(0,0,0,0.05)",
         }}>
-          {/* Tampilkan Pengumuman/Broadcast jika dipilih */}
           {selectedItem.type === 'announcement' && selectedItem.data && (
             <>
               <div style={{
@@ -1652,7 +1710,6 @@ const SayHeySection = ({
                 gap: "12px", flexShrink: 0,
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ fontSize: '20px' }}>📢</span>
                   <span style={{ fontSize: '16px', fontWeight: 700, fontFamily: FONT_FAMILY }}>
                     Pengumuman
                   </span>
@@ -1681,7 +1738,7 @@ const SayHeySection = ({
                   fontSize: '12px', color: '#999', fontFamily: FONT_FAMILY,
                   borderTop: `1px solid ${BLUE}15`, paddingTop: '12px',
                 }}>
-                  {formatDate(selectedItem.data.createdAt)} • {formatTime(selectedItem.data.createdAt)}
+                  {formatDate(selectedItem.data.createdAt)} - {formatTime(selectedItem.data.createdAt)}
                 </div>
               </div>
             </>
@@ -1695,7 +1752,6 @@ const SayHeySection = ({
                 gap: "12px", flexShrink: 0,
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ fontSize: '20px' }}>📡</span>
                   <span style={{ fontSize: '16px', fontWeight: 700, fontFamily: FONT_FAMILY }}>
                     Broadcasting
                   </span>
@@ -1724,13 +1780,12 @@ const SayHeySection = ({
                   fontSize: '12px', color: '#999', fontFamily: FONT_FAMILY,
                   borderTop: `1px solid ${BLUE}15`, paddingTop: '12px',
                 }}>
-                  {formatDate(selectedItem.data.createdAt)} • {formatTime(selectedItem.data.createdAt)}
+                  {formatDate(selectedItem.data.createdAt)} - {formatTime(selectedItem.data.createdAt)}
                 </div>
               </div>
             </>
           )}
 
-          {/* Chat panel */}
           {!selectedItem.type && (!ticket || !selectedContact) && (
             <div style={{
               flex: 1, display: "flex", alignItems: "center",
@@ -1802,7 +1857,7 @@ const SayHeySection = ({
                   <div style={{
                     textAlign: "center", color: "#999", fontSize: "14px",
                     padding: "30px 0", fontFamily: FONT_FAMILY,
-                  }}>No messages yet. Say hey! 👋</div>
+                  }}>Belum ada pesan</div>
                 ) : messages.map((msg, idx) => {
                   const isMine = msg.senderId === user?.uid;
                   const msgIsAdmin = msg.isAdmin || msg.senderName?.includes('(Admin)');
@@ -1889,7 +1944,7 @@ const SayHeySection = ({
                     background: 'transparent', border: 'none',
                     color: BLUE, cursor: 'pointer', fontSize: '16px',
                     fontFamily: FONT_FAMILY, padding: 0, lineHeight: 1,
-                  }}>×</button>
+                  }}>x</button>
                 </div>
               )}
               <div style={{
@@ -1924,7 +1979,6 @@ const SayHeySection = ({
         </div>
       </div>
 
-      {/* REPORT MODAL */}
       {reportModal.open && reportModal.target && (
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
@@ -3371,7 +3425,7 @@ export default function NotesPage(): React.JSX.Element {
                                   background: 'transparent', border: 'none',
                                   color: WHITE, cursor: 'pointer', fontSize: '16px',
                                   padding: 0, lineHeight: 1,
-                                }}>×</button>
+                                }}>x</button>
                               </div>
                             ))}
                           </div>
@@ -3794,7 +3848,7 @@ export default function NotesPage(): React.JSX.Element {
                                   fontSize: '32px', cursor: 'pointer', padding: '0',
                                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                                   width: '32px', height: '32px',
-                                }} title="Hapus Catatan">×</button>
+                                }} title="Hapus Catatan">x</button>
                               )}
                             </div>
                           </div>
