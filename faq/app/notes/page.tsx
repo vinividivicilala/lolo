@@ -259,31 +259,14 @@ const StopIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: str
   </svg>
 );
 
-// ===== VERIFIED INSTAGRAM REAL (Official) =====
-const VerifiedBadgeReal = ({ size = 16 }) => {
-  return (
-    <span style={{ position: 'relative', display: 'inline-block', marginLeft: '4px', verticalAlign: 'middle' }}>
-      <svg
-        width={size}
-        height={size}
-        viewBox="0 0 40 40"
-        xmlns="http://www.w3.org/2000/svg"
-        style={{ display: 'inline-block', verticalAlign: 'middle' }}
-      >
-        <path
-          fill="#0095F6"
-          d="M19.998 3.094 14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.03v-6.46h-6.419L25.358 0l-5.36 3.094Zm7.415 11.225 2.254 2.287-11.43 11.5-6.835-6.93 2.244-2.258 4.587 4.581 9.18-9.18Z"
-        />
-        <path
-          d="M0 0h40v40H0z"
-          fill="none"
-        />
-      </svg>
-    </span>
-  );
-};
+const VerifiedBadgeReal = ({ size = 16 }) => (
+  <span style={{ position: 'relative', display: 'inline-block', marginLeft: '4px', verticalAlign: 'middle' }}>
+    <svg width={size} height={size} viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" style={{ display: 'inline-block', verticalAlign: 'middle' }}>
+      <path fill="#0095F6" d="M19.998 3.094 14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.03v-6.46h-6.419L25.358 0l-5.36 3.094Zm7.415 11.225 2.254 2.287-11.43 11.5-6.835-6.93 2.244-2.258 4.587 4.581 9.18-9.18Z" />
+    </svg>
+  </span>
+);
 
-// ===== REPORT ICON =====
 const ReportIcon = ({ size = 16, color = "#DC2626" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -559,7 +542,7 @@ const NavbarButton = ({
   );
 };
 
-// ===== SAY HEY SECTION (DENGAN ADMIN TAG + VERIFIED + PENGUMUMAN + REPORT) =====
+// ===== SAY HEY SECTION =====
 const SayHeySection = ({
   user,
   db,
@@ -580,6 +563,9 @@ const SayHeySection = ({
   const [announcements, setAnnouncements] = useState<any[]>([]);
   const [newAnnouncementText, setNewAnnouncementText] = useState("");
   const [showAnnouncementForm, setShowAnnouncementForm] = useState(false);
+  const [broadcasts, setBroadcasts] = useState<any[]>([]);
+  const [newBroadcastText, setNewBroadcastText] = useState("");
+  const [showBroadcastForm, setShowBroadcastForm] = useState(false);
   const [reportModal, setReportModal] = useState<{ open: boolean; target: any | null }>({ open: false, target: null });
   const [reportReason, setReportReason] = useState("");
   const [reports, setReports] = useState<any[]>([]);
@@ -595,7 +581,7 @@ const SayHeySection = ({
     getCryptoKey().then(() => setEncryptionReady(true)).catch(() => setEncryptionReady(true));
   }, []);
 
-  // Load announcements (real-time)
+  // Load announcements
   useEffect(() => {
     if (!db) return;
     const q = query(collection(db, 'announcements'), orderBy('createdAt', 'desc'), limit(10));
@@ -609,7 +595,21 @@ const SayHeySection = ({
     return () => unsub();
   }, [db]);
 
-  // Load reports (real-time) - hanya admin
+  // Load broadcasts
+  useEffect(() => {
+    if (!db) return;
+    const q = query(collection(db, 'broadcasts'), orderBy('createdAt', 'desc'), limit(10));
+    const unsub = onSnapshot(q, (snap: any) => {
+      const list: any[] = [];
+      snap.forEach((docSnap: any) => {
+        list.push({ id: docSnap.id, ...docSnap.data() });
+      });
+      setBroadcasts(list);
+    });
+    return () => unsub();
+  }, [db]);
+
+  // Load reports
   useEffect(() => {
     if (!db || !isAdmin) return;
     const q = query(collection(db, 'reports'), orderBy('createdAt', 'desc'), limit(50));
@@ -623,7 +623,7 @@ const SayHeySection = ({
     return () => unsub();
   }, [db, isAdmin]);
 
-  // Load contacts (online users)
+  // Load contacts
   useEffect(() => {
     if (!db || !user) return;
     let q;
@@ -861,13 +861,35 @@ const SayHeySection = ({
     } catch (error) { console.error(error); alert("Gagal menambah pengumuman."); }
   };
 
-  // Admin: Delete announcement
   const handleDeleteAnnouncement = async (id: string) => {
     if (!isAdmin || !db) return;
     if (!confirm("Hapus pengumuman ini?")) return;
+    try { await deleteDoc(doc(db, 'announcements', id)); }
+    catch (error) { console.error(error); }
+  };
+
+  // Admin: Add broadcast
+  const handleAddBroadcast = async () => {
+    if (!isAdmin || !newBroadcastText.trim() || !db || !user) return;
     try {
-      await deleteDoc(doc(db, 'announcements', id));
-    } catch (error) { console.error(error); }
+      await addDoc(collection(db, 'broadcasts'), {
+        text: newBroadcastText.trim(),
+        authorId: user.uid,
+        authorName: user.displayName || OWNER_NAME,
+        authorEmail: user.email || OWNER_EMAIL,
+        createdAt: serverTimestamp(),
+      });
+      setNewBroadcastText("");
+      setShowBroadcastForm(false);
+      alert("Broadcast berhasil dikirim!");
+    } catch (error) { console.error(error); alert("Gagal mengirim broadcast."); }
+  };
+
+  const handleDeleteBroadcast = async (id: string) => {
+    if (!isAdmin || !db) return;
+    if (!confirm("Hapus broadcast ini?")) return;
+    try { await deleteDoc(doc(db, 'broadcasts', id)); }
+    catch (error) { console.error(error); }
   };
 
   // User: Report account
@@ -901,41 +923,16 @@ const SayHeySection = ({
     } catch (error) { console.error(error); alert("Gagal mengirim laporan."); }
   };
 
-  // Admin: Mark report as resolved
   const resolveReport = async (reportId: string) => {
     if (!isAdmin || !db) return;
-    try {
-      await updateDoc(doc(db, 'reports', reportId), { status: 'resolved' });
-    } catch (error) { console.error(error); }
+    try { await updateDoc(doc(db, 'reports', reportId), { status: 'resolved' }); }
+    catch (error) { console.error(error); }
   };
 
   const formatTime = (timestamp: any) => {
     if (!timestamp) return "";
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
     return date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
-  };
-
-  // Render contact name with "Admin" label + verified badge
-  const renderContactName = (c: any) => {
-    const isContactAdmin = c.email === ADMIN_EMAIL || c.email === OWNER_EMAIL;
-    return (
-      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
-        <span style={{ fontSize: '14px', fontWeight: 700, color: BLACK, fontFamily: FONT_FAMILY }}>
-          {c.displayName}
-        </span>
-        {isContactAdmin && (
-          <>
-            <span style={{
-              padding: '2px 8px', backgroundColor: BLUE, color: WHITE,
-              borderRadius: '4px', fontSize: '10px', fontWeight: 800,
-              letterSpacing: '0.5px', textTransform: 'uppercase',
-              fontFamily: FONT_FAMILY,
-            }}>Admin</span>
-            <VerifiedBadgeReal size={14} />
-          </>
-        )}
-      </div>
-    );
   };
 
   if (!user) {
@@ -971,6 +968,8 @@ const SayHeySection = ({
     );
   }
 
+  const pendingReports = reports.filter(r => r.status === 'pending').length;
+
   return (
     <div style={{
       width: "100%", backgroundColor: BLUE, borderRadius: "20px",
@@ -996,225 +995,299 @@ const SayHeySection = ({
       </div>
 
       <div style={{ display: "flex", gap: "20px", minHeight: "600px", flexWrap: "wrap" }}>
-        {/* ===== LEFT PANEL: CONTACTS + ANNOUNCEMENTS + REPORTS ===== */}
+        {/* ===== LEFT PANEL: BODY KONTAK (WHITE BG) ===== */}
         <div style={{
-          width: "320px", flexShrink: 0,
-          display: "flex", flexDirection: "column", gap: "16px",
-          height: "fit-content", maxHeight: "800px",
+          width: "340px", flexShrink: 0,
+          backgroundColor: WHITE,
+          borderRadius: "16px",
+          border: `1px solid ${BLUE}20`,
+          overflow: "hidden",
+          display: "flex", flexDirection: "column",
+          height: "700px",
+          boxShadow: "0 4px 16px rgba(0,0,0,0.05)",
         }}>
-          {/* ANNOUNCEMENTS */}
+          {/* Header Kontak */}
           <div style={{
-            backgroundColor: '#FFFBEB',
-            border: '2px solid #F59E0B',
-            borderRadius: '16px',
-            padding: '16px',
-            display: 'flex', flexDirection: 'column', gap: '10px',
+            padding: "14px 18px",
+            backgroundColor: BLUE,
+            color: WHITE,
+            fontWeight: 700,
+            fontSize: "14px",
+            fontFamily: FONT_FAMILY,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexShrink: 0,
           }}>
+            <span>{isOwner ? "Users Online" : "Owners Online"}</span>
+            <span style={{
+              fontSize: "11px",
+              color: BLUE,
+              padding: "2px 8px",
+              borderRadius: "4px",
+              backgroundColor: WHITE,
+              fontWeight: 800,
+              letterSpacing: "0.5px",
+            }}>{contacts.length}</span>
+          </div>
+
+          {/* Scrollable content: Announcements + Broadcasts + Reports + Contacts */}
+          <div style={{ flex: 1, overflowY: "auto", minHeight: 0 }}>
+            {/* PENGUMUMAN */}
             <div style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              gap: '8px',
+              padding: "12px 16px",
+              borderBottom: `1px solid ${BLUE}15`,
             }}>
-              <span style={{
-                fontSize: '14px', fontWeight: 800, color: '#92400E',
-                fontFamily: FONT_FAMILY, letterSpacing: '0.5px',
-                textTransform: 'uppercase',
-                display: 'flex', alignItems: 'center', gap: '6px',
+              <div style={{
+                display: "flex", alignItems: "center", justifyContent: "space-between",
+                marginBottom: "8px",
               }}>
-                📢 Pengumuman
-              </span>
-              {isAdmin && (
-                <button
-                  onClick={() => setShowAnnouncementForm(!showAnnouncementForm)}
-                  style={{
-                    padding: '4px 10px', backgroundColor: '#F59E0B',
-                    color: WHITE, border: 'none', borderRadius: '6px',
-                    fontSize: '11px', fontWeight: 800, cursor: 'pointer',
-                    fontFamily: FONT_FAMILY,
-                  }}
-                >{showAnnouncementForm ? 'Tutup' : '+ Tambah'}</button>
-              )}
-            </div>
-
-            {isAdmin && showAnnouncementForm && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <textarea
-                  value={newAnnouncementText}
-                  onChange={(e) => setNewAnnouncementText(e.target.value)}
-                  placeholder="Isi pengumuman..."
-                  rows={3}
-                  style={{
-                    width: '100%', padding: '10px', borderRadius: '8px',
-                    border: '1.5px solid #F59E0B', backgroundColor: WHITE,
-                    color: BLACK, fontSize: '13px', fontFamily: FONT_FAMILY,
-                    resize: 'none', outline: 'none',
-                  }}
-                />
-                <button
-                  onClick={handleAddAnnouncement}
-                  style={{
-                    padding: '8px', backgroundColor: '#F59E0B',
-                    color: WHITE, border: 'none', borderRadius: '8px',
-                    fontSize: '12px', fontWeight: 700, cursor: 'pointer',
-                    fontFamily: FONT_FAMILY,
-                  }}
-                >Kirim Pengumuman</button>
+                <span style={{
+                  fontSize: "11px", fontWeight: 800, color: BLUE,
+                  fontFamily: FONT_FAMILY, letterSpacing: "0.5px",
+                  textTransform: "uppercase",
+                  display: "flex", alignItems: "center", gap: "4px",
+                }}>📢 Pengumuman</span>
+                {isAdmin && (
+                  <button
+                    onClick={() => { setShowAnnouncementForm(!showAnnouncementForm); setShowBroadcastForm(false); }}
+                    style={{
+                      padding: "2px 8px", backgroundColor: BLUE,
+                      color: WHITE, border: "none", borderRadius: "4px",
+                      fontSize: "10px", fontWeight: 800, cursor: "pointer",
+                      fontFamily: FONT_FAMILY,
+                    }}>{showAnnouncementForm ? '×' : '+'}</button>
+                )}
               </div>
-            )}
 
-            <div style={{
-              maxHeight: '200px', overflowY: 'auto',
-              display: 'flex', flexDirection: 'column', gap: '8px',
-            }}>
+              {isAdmin && showAnnouncementForm && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '10px' }}>
+                  <textarea
+                    value={newAnnouncementText}
+                    onChange={(e) => setNewAnnouncementText(e.target.value)}
+                    placeholder="Isi pengumuman..."
+                    rows={2}
+                    style={{
+                      width: '100%', padding: '8px', borderRadius: '6px',
+                      border: `1.5px solid ${BLUE}`, backgroundColor: '#f8f9fa',
+                      color: BLACK, fontSize: '12px', fontFamily: FONT_FAMILY,
+                      resize: 'none', outline: 'none',
+                    }}
+                  />
+                  <button onClick={handleAddAnnouncement} style={{
+                    padding: '6px', backgroundColor: BLUE,
+                    color: WHITE, border: 'none', borderRadius: '6px',
+                    fontSize: '11px', fontWeight: 700, cursor: 'pointer',
+                    fontFamily: FONT_FAMILY,
+                  }}>Kirim Pengumuman</button>
+                </div>
+              )}
+
               {announcements.length === 0 ? (
                 <div style={{
-                  fontSize: '12px', color: '#92400E', opacity: 0.7,
-                  fontStyle: 'italic', textAlign: 'center', padding: '8px',
+                  fontSize: '11px', color: '#999',
+                  fontStyle: 'italic', textAlign: 'center', padding: '4px',
                   fontFamily: FONT_FAMILY,
                 }}>Belum ada pengumuman</div>
               ) : announcements.map((a) => (
                 <div key={a.id} style={{
-                  padding: '10px', backgroundColor: WHITE,
-                  borderRadius: '8px', border: '1px solid #FDE68A',
-                  fontSize: '12px', color: BLACK,
-                  fontFamily: FONT_FAMILY, lineHeight: 1.5,
+                  padding: '8px 10px', backgroundColor: '#FFFBEB',
+                  borderRadius: '6px', border: `1px solid #F59E0B40`,
+                  fontSize: '11px', color: BLACK,
+                  fontFamily: FONT_FAMILY, lineHeight: 1.4,
+                  marginBottom: '6px',
                   position: 'relative',
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '4px' }}>
-                    <span style={{ fontSize: '11px', fontWeight: 700, color: '#92400E' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '3px' }}>
+                    <span style={{ fontSize: '10px', fontWeight: 700, color: '#92400E' }}>
                       {a.authorName || 'Admin'}
                     </span>
-                    {a.authorEmail === ADMIN_EMAIL && <VerifiedBadgeReal size={12} />}
+                    <VerifiedBadgeReal size={10} />
                   </div>
-                  <div style={{ marginBottom: '4px' }}>{a.text}</div>
+                  <div style={{ marginBottom: '3px' }}>{a.text}</div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '10px', color: '#92400E', opacity: 0.7 }}>
+                    <span style={{ fontSize: '9px', color: '#92400E', opacity: 0.7 }}>
                       {formatTime(a.createdAt)}
                     </span>
                     {isAdmin && (
-                      <button
-                        onClick={() => handleDeleteAnnouncement(a.id)}
-                        style={{
-                          background: 'transparent', border: 'none',
-                          color: RED, cursor: 'pointer', fontSize: '14px',
-                          fontFamily: FONT_FAMILY, padding: 0,
-                        }}
-                      >×</button>
+                      <button onClick={() => handleDeleteAnnouncement(a.id)} style={{
+                        background: 'transparent', border: 'none',
+                        color: RED, cursor: 'pointer', fontSize: '12px',
+                        fontFamily: FONT_FAMILY, padding: 0, lineHeight: 1,
+                      }}>×</button>
                     )}
                   </div>
                 </div>
               ))}
             </div>
-          </div>
 
-          {/* REPORTS (ADMIN ONLY) */}
-          {isAdmin && (
+            {/* BROADCASTING */}
             <div style={{
-              backgroundColor: '#FEF2F2',
-              border: '2px solid #DC2626',
-              borderRadius: '16px',
-              padding: '16px',
-              display: 'flex', flexDirection: 'column', gap: '10px',
+              padding: "12px 16px",
+              borderBottom: `1px solid ${BLUE}15`,
             }}>
               <div style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                display: "flex", alignItems: "center", justifyContent: "space-between",
+                marginBottom: "8px",
               }}>
                 <span style={{
-                  fontSize: '14px', fontWeight: 800, color: '#991B1B',
-                  fontFamily: FONT_FAMILY, letterSpacing: '0.5px',
-                  textTransform: 'uppercase',
-                }}>
-                  🚨 Laporan User ({reports.filter(r => r.status === 'pending').length})
-                </span>
-                <button
-                  onClick={() => setShowReports(!showReports)}
-                  style={{
-                    padding: '4px 10px', backgroundColor: '#DC2626',
-                    color: WHITE, border: 'none', borderRadius: '6px',
-                    fontSize: '11px', fontWeight: 800, cursor: 'pointer',
-                    fontFamily: FONT_FAMILY,
-                  }}
-                >{showReports ? 'Tutup' : 'Lihat'}</button>
+                  fontSize: "11px", fontWeight: 800, color: BLUE,
+                  fontFamily: FONT_FAMILY, letterSpacing: "0.5px",
+                  textTransform: "uppercase",
+                  display: "flex", alignItems: "center", gap: "4px",
+                }}>📡 Broadcasting</span>
+                {isAdmin && (
+                  <button
+                    onClick={() => { setShowBroadcastForm(!showBroadcastForm); setShowAnnouncementForm(false); }}
+                    style={{
+                      padding: "2px 8px", backgroundColor: BLUE,
+                      color: WHITE, border: "none", borderRadius: "4px",
+                      fontSize: "10px", fontWeight: 800, cursor: "pointer",
+                      fontFamily: FONT_FAMILY,
+                    }}>{showBroadcastForm ? '×' : '+'}</button>
+                )}
               </div>
 
-              {showReports && (
-                <div style={{
-                  maxHeight: '300px', overflowY: 'auto',
-                  display: 'flex', flexDirection: 'column', gap: '8px',
-                }}>
-                  {reports.length === 0 ? (
-                    <div style={{
-                      fontSize: '12px', color: '#991B1B', opacity: 0.7,
-                      fontStyle: 'italic', textAlign: 'center', padding: '8px',
-                      fontFamily: FONT_FAMILY,
-                    }}>Belum ada laporan</div>
-                  ) : reports.map((r) => (
-                    <div key={r.id} style={{
-                      padding: '10px', backgroundColor: WHITE,
-                      borderRadius: '8px', border: '1px solid #FCA5A5',
-                      fontSize: '12px', color: BLACK,
-                      fontFamily: FONT_FAMILY, lineHeight: 1.5,
-                    }}>
-                      <div style={{ fontWeight: 700, color: '#991B1B', marginBottom: '2px' }}>
-                        Target: {r.targetName}
-                      </div>
-                      <div style={{ fontSize: '11px', marginBottom: '4px' }}>
-                        <strong>Pelapor:</strong> {r.reporterName}
-                      </div>
-                      <div style={{ fontSize: '11px', marginBottom: '4px' }}>
-                        <strong>Alasan:</strong> {r.reason}
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px' }}>
-                        <span style={{
-                          padding: '2px 8px',
-                          backgroundColor: r.status === 'resolved' ? '#D1FAE5' : '#FEF3C7',
-                          color: r.status === 'resolved' ? '#065F46' : '#92400E',
-                          borderRadius: '4px', fontSize: '10px', fontWeight: 700,
-                        }}>{r.status === 'resolved' ? '✓ Selesai' : '⏳ Pending'}</span>
-                        {r.status !== 'resolved' && (
-                          <button
-                            onClick={() => resolveReport(r.id)}
-                            style={{
-                              padding: '4px 8px', backgroundColor: '#4ADE80',
-                              color: WHITE, border: 'none', borderRadius: '6px',
-                              fontSize: '10px', fontWeight: 700, cursor: 'pointer',
-                              fontFamily: FONT_FAMILY,
-                            }}
-                          >Selesai</button>
-                        )}
-                      </div>
-                    </div>
-                  ))}
+              {isAdmin && showBroadcastForm && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '10px' }}>
+                  <textarea
+                    value={newBroadcastText}
+                    onChange={(e) => setNewBroadcastText(e.target.value)}
+                    placeholder="Isi broadcast..."
+                    rows={2}
+                    style={{
+                      width: '100%', padding: '8px', borderRadius: '6px',
+                      border: `1.5px solid ${BLUE}`, backgroundColor: '#f8f9fa',
+                      color: BLACK, fontSize: '12px', fontFamily: FONT_FAMILY,
+                      resize: 'none', outline: 'none',
+                    }}
+                  />
+                  <button onClick={handleAddBroadcast} style={{
+                    padding: '6px', backgroundColor: BLUE,
+                    color: WHITE, border: 'none', borderRadius: '6px',
+                    fontSize: '11px', fontWeight: 700, cursor: 'pointer',
+                    fontFamily: FONT_FAMILY,
+                  }}>Kirim Broadcast</button>
                 </div>
               )}
-            </div>
-          )}
 
-          {/* CONTACTS */}
-          <div style={{
-            width: "100%", backgroundColor: GREEN,
-            borderRadius: "16px", border: `1px solid ${GREEN}`, overflow: "hidden",
-            display: "flex", flexDirection: "column", maxHeight: "400px",
-            boxShadow: "0 8px 24px rgba(74,222,128,0.35)",
-          }}>
-            <div style={{
-              padding: "16px 20px", backgroundColor: LIME,
-              borderBottom: `1px solid ${LIME}`, fontSize: "14px", fontWeight: 800,
-              letterSpacing: "0.5px", textTransform: "uppercase", color: BLACK,
-              fontFamily: FONT_FAMILY, display: "flex", alignItems: "center",
-              justifyContent: "space-between",
-            }}>
-              <span>{isOwner ? "Users Online" : "Owners Online"}</span>
-              <span style={{
-                fontSize: "11px", color: BLACK, padding: "2px 8px",
-                borderRadius: "4px", backgroundColor: WHITE, fontWeight: 800,
-                letterSpacing: "0.5px",
-              }}>{contacts.length}</span>
+              {broadcasts.length === 0 ? (
+                <div style={{
+                  fontSize: '11px', color: '#999',
+                  fontStyle: 'italic', textAlign: 'center', padding: '4px',
+                  fontFamily: FONT_FAMILY,
+                }}>Belum ada broadcast</div>
+              ) : broadcasts.map((b) => (
+                <div key={b.id} style={{
+                  padding: '8px 10px', backgroundColor: '#E0E7FF',
+                  borderRadius: '6px', border: `1px solid ${BLUE}40`,
+                  fontSize: '11px', color: BLACK,
+                  fontFamily: FONT_FAMILY, lineHeight: 1.4,
+                  marginBottom: '6px',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '3px' }}>
+                    <span style={{ fontSize: '10px', fontWeight: 700, color: BLUE }}>
+                      {b.authorName || 'Admin'}
+                    </span>
+                    <VerifiedBadgeReal size={10} />
+                  </div>
+                  <div style={{ marginBottom: '3px' }}>{b.text}</div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '9px', color: BLUE, opacity: 0.7 }}>
+                      {formatTime(b.createdAt)}
+                    </span>
+                    {isAdmin && (
+                      <button onClick={() => handleDeleteBroadcast(b.id)} style={{
+                        background: 'transparent', border: 'none',
+                        color: RED, cursor: 'pointer', fontSize: '12px',
+                        fontFamily: FONT_FAMILY, padding: 0, lineHeight: 1,
+                      }}>×</button>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
-            <div style={{ overflowY: "auto", flex: 1, minHeight: 0 }}>
+
+            {/* REPORTS (ADMIN ONLY) */}
+            {isAdmin && (
+              <div style={{
+                padding: "12px 16px",
+                borderBottom: `1px solid ${BLUE}15`,
+              }}>
+                <div style={{
+                  display: "flex", alignItems: "center", justifyContent: "space-between",
+                  marginBottom: "8px",
+                }}>
+                  <span style={{
+                    fontSize: "11px", fontWeight: 800, color: RED,
+                    fontFamily: FONT_FAMILY, letterSpacing: "0.5px",
+                    textTransform: "uppercase",
+                    display: "flex", alignItems: "center", gap: "4px",
+                  }}>🚨 Laporan ({pendingReports})</span>
+                  <button
+                    onClick={() => setShowReports(!showReports)}
+                    style={{
+                      padding: "2px 8px", backgroundColor: RED,
+                      color: WHITE, border: "none", borderRadius: "4px",
+                      fontSize: "10px", fontWeight: 800, cursor: "pointer",
+                      fontFamily: FONT_FAMILY,
+                    }}>{showReports ? '×' : 'Lihat'}</button>
+                </div>
+
+                {showReports && (
+                  <div>
+                    {reports.length === 0 ? (
+                      <div style={{
+                        fontSize: '11px', color: '#999',
+                        fontStyle: 'italic', textAlign: 'center', padding: '4px',
+                        fontFamily: FONT_FAMILY,
+                      }}>Belum ada laporan</div>
+                    ) : reports.map((r) => (
+                      <div key={r.id} style={{
+                        padding: '8px 10px', backgroundColor: '#FEF2F2',
+                        borderRadius: '6px', border: `1px solid #FCA5A5`,
+                        fontSize: '11px', color: BLACK,
+                        fontFamily: FONT_FAMILY, lineHeight: 1.4,
+                        marginBottom: '6px',
+                      }}>
+                        <div style={{ fontWeight: 700, color: '#991B1B', marginBottom: '2px' }}>
+                          Target: {r.targetName}
+                        </div>
+                        <div style={{ marginBottom: '2px' }}>
+                          <strong>Pelapor:</strong> {r.reporterName}
+                        </div>
+                        <div style={{ marginBottom: '4px' }}>
+                          <strong>Alasan:</strong> {r.reason}
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{
+                            padding: '1px 6px',
+                            backgroundColor: r.status === 'resolved' ? '#D1FAE5' : '#FEF3C7',
+                            color: r.status === 'resolved' ? '#065F46' : '#92400E',
+                            borderRadius: '3px', fontSize: '9px', fontWeight: 700,
+                          }}>{r.status === 'resolved' ? '✓ Selesai' : '⏳ Pending'}</span>
+                          {r.status !== 'resolved' && (
+                            <button onClick={() => resolveReport(r.id)} style={{
+                              padding: '2px 6px', backgroundColor: '#4ADE80',
+                              color: WHITE, border: 'none', borderRadius: '4px',
+                              fontSize: '9px', fontWeight: 700, cursor: 'pointer',
+                              fontFamily: FONT_FAMILY,
+                            }}>Selesai</button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* CONTACTS */}
+            <div>
               {contacts.length === 0 ? (
                 <div style={{
                   padding: "40px 20px", textAlign: "center", fontSize: "13px",
-                  color: BLACK, fontFamily: FONT_FAMILY, lineHeight: 1.5, opacity: 0.85,
+                  color: '#999', fontFamily: FONT_FAMILY, lineHeight: 1.5,
                 }}>
                   {isOwner ? "No users online." : "Owner is currently offline."}<br />
                   Please check back later.
@@ -1225,24 +1298,24 @@ const SayHeySection = ({
                 const isContactAdmin = c.email === ADMIN_EMAIL || c.email === OWNER_EMAIL;
                 return (
                   <div key={c.uid} style={{
-                    padding: "14px 20px",
-                    borderBottom: `1px solid rgba(0,0,0,0.08)`,
-                    display: "flex", alignItems: "center", gap: "12px",
-                    backgroundColor: selectedContact?.uid === c.uid ? "rgba(0,0,0,0.12)" : "transparent",
+                    padding: "12px 16px",
+                    borderBottom: `1px solid ${BLUE}10`,
+                    display: "flex", alignItems: "center", gap: "10px",
+                    backgroundColor: selectedContact?.uid === c.uid ? `${BLUE}10` : "transparent",
                     transition: "background-color 0.2s ease",
                   }}>
                     <div
                       onClick={() => openChatWith(c)}
                       style={{
-                        width: "44px", height: "44px", borderRadius: "12px",
-                        overflow: "hidden", backgroundColor: WHITE, display: "flex",
+                        width: "40px", height: "40px", borderRadius: "10px",
+                        overflow: "hidden", backgroundColor: BLUE, display: "flex",
                         alignItems: "center", justifyContent: "center", flexShrink: 0,
                         cursor: 'pointer',
                       }}>
                       {c.photoURL ? (
                         <img src={c.photoURL} alt={c.displayName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                       ) : (
-                        <span style={{ fontSize: "18px", fontWeight: 800, color: BLUE }}>
+                        <span style={{ fontSize: "16px", fontWeight: 800, color: WHITE }}>
                           {c.displayName.charAt(0).toUpperCase()}
                         </span>
                       )}
@@ -1250,36 +1323,35 @@ const SayHeySection = ({
                     <div style={{ flex: 1, minWidth: 0, cursor: 'pointer' }} onClick={() => openChatWith(c)}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap', marginBottom: '2px' }}>
                         <span style={{
-                          fontSize: "14px", fontWeight: 700, color: BLACK,
+                          fontSize: "13px", fontWeight: 700, color: BLACK,
                           overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                           fontFamily: FONT_FAMILY,
                         }}>{c.displayName}</span>
                         {isContactAdmin && (
                           <>
                             <span style={{
-                              padding: '2px 8px', backgroundColor: BLUE, color: WHITE,
-                              borderRadius: '4px', fontSize: '10px', fontWeight: 800,
-                              letterSpacing: '0.5px', textTransform: 'uppercase',
+                              fontSize: '10px', fontWeight: 800,
+                              color: BLUE, letterSpacing: '0.3px',
                               fontFamily: FONT_FAMILY,
                             }}>Admin</span>
-                            <VerifiedBadgeReal size={14} />
+                            <VerifiedBadgeReal size={12} />
                           </>
                         )}
                       </div>
                       <div style={{
-                        fontSize: "11px", color: BLACK, fontFamily: FONT_FAMILY,
-                        display: "flex", alignItems: "center", gap: "6px",
+                        fontSize: "10px", color: BLUE, fontFamily: FONT_FAMILY,
+                        display: "flex", alignItems: "center", gap: "4px",
                         fontWeight: 600, opacity: 0.85,
                       }}>
-                        <BlinkingDot size={8} color={BLUE} />
+                        <BlinkingDot size={6} color={BLUE} />
                         {c.online ? "Online" : "Offline"}
                       </div>
                     </div>
                     {unread > 0 && (
                       <span style={{
-                        minWidth: "20px", height: "20px", padding: "0 6px",
-                        borderRadius: "10px", backgroundColor: BLUE, color: WHITE,
-                        fontSize: "11px", fontWeight: 800, fontFamily: FONT_FAMILY,
+                        minWidth: "18px", height: "18px", padding: "0 5px",
+                        borderRadius: "9px", backgroundColor: BLUE, color: WHITE,
+                        fontSize: "10px", fontWeight: 800, fontFamily: FONT_FAMILY,
                         display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
                       }}>{unread > 99 ? "99+" : unread}</span>
                     )}
@@ -1297,7 +1369,7 @@ const SayHeySection = ({
                         }}
                         title="Laporkan user ini"
                       >
-                        <ReportIcon size={16} color={RED} />
+                        <ReportIcon size={14} color={RED} />
                       </button>
                     )}
                   </div>
@@ -1307,11 +1379,13 @@ const SayHeySection = ({
           </div>
         </div>
 
-        {/* ===== RIGHT PANEL: CHAT ===== */}
+        {/* ===== RIGHT PANEL: CHAT (BODY PUTIH) ===== */}
         <div style={{
           flex: 1, minWidth: "300px", backgroundColor: WHITE,
           borderRadius: "16px", overflow: "hidden", display: "flex",
-          flexDirection: "column", height: "600px", color: BLACK,
+          flexDirection: "column", height: "700px", color: BLACK,
+          border: `1px solid ${BLUE}20`,
+          boxShadow: "0 4px 16px rgba(0,0,0,0.05)",
         }}>
           {!ticket || !selectedContact ? (
             <div style={{
@@ -1354,12 +1428,11 @@ const SayHeySection = ({
                       {(selectedContact.email === ADMIN_EMAIL || selectedContact.email === OWNER_EMAIL) && (
                         <>
                           <span style={{
-                            padding: '2px 8px', backgroundColor: BLUE, color: WHITE,
-                            borderRadius: '4px', fontSize: '10px', fontWeight: 800,
-                            letterSpacing: '0.5px', textTransform: 'uppercase',
+                            fontSize: '10px', fontWeight: 800,
+                            color: BLUE, letterSpacing: '0.3px',
                             fontFamily: FONT_FAMILY,
                           }}>Admin</span>
-                          <VerifiedBadgeReal size={14} />
+                          <VerifiedBadgeReal size={12} />
                         </>
                       )}
                     </div>
@@ -1391,17 +1464,17 @@ const SayHeySection = ({
                     <div key={msg.id || idx} style={{ alignSelf: isMine ? "flex-end" : "flex-start", maxWidth: "75%" }}>
                       <div style={{
                         padding: "10px 14px", borderRadius: "12px",
-                        backgroundColor: msgIsAdmin ? '#FEF3C7' : (isMine ? BLUE : "#ffffff"),
-                        color: msgIsAdmin ? BLACK : (isMine ? WHITE : BLACK),
+                        backgroundColor: isMine ? BLUE : "#f4f4f5",
+                        color: isMine ? WHITE : BLACK,
                         fontSize: "14px",
                         fontFamily: FONT_FAMILY, wordBreak: "break-word",
-                        border: msgIsAdmin ? `2px solid #F59E0B` : (isMine ? "none" : "1px solid rgba(0,0,0,0.06)"),
+                        border: isMine ? "none" : "1px solid rgba(0,0,0,0.06)",
                         boxShadow: isMine ? "none" : "0 2px 6px rgba(0,0,0,0.04)",
                       }}>
                         {!isMine && (
                           <div style={{
                             fontSize: "11px", fontWeight: 700,
-                            color: msgIsAdmin ? '#92400E' : BLUE,
+                            color: BLUE,
                             marginBottom: "4px",
                             display: 'flex', alignItems: 'center', gap: '4px',
                           }}>
@@ -1416,7 +1489,7 @@ const SayHeySection = ({
                         }}>
                           <span style={{
                             fontSize: "10px",
-                            color: msgIsAdmin ? '#92400E' : (isMine ? "rgba(255,255,255,0.85)" : "#999"),
+                            color: isMine ? "rgba(255,255,255,0.85)" : "#999",
                           }}>{formatTime(msg.timestamp)}</span>
                         </div>
                       </div>
@@ -2198,7 +2271,6 @@ export default function NotesPage(): React.JSX.Element {
     } catch (error) { console.error('Firebase init error:', error); }
   }, []);
 
-  // ===== LOAD NOTES MILIK USER SENDIRI (PRIVATE) + COLLABORATIVE =====
   useEffect(() => {
     if (!db || !isMounted || !user) {
       setNotes([]);
@@ -2509,20 +2581,6 @@ export default function NotesPage(): React.JSX.Element {
     } catch { return null; }
   };
 
-  const createUserRecord = async (email: string, name?: string) => {
-    if (!db) return null;
-    try {
-      const userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      await setDoc(doc(db, 'users', userId), {
-        id: userId, email: email.toLowerCase(),
-        name: name || email.split('@')[0],
-        displayName: name || email.split('@')[0],
-        createdAt: serverTimestamp(), updatedAt: serverTimestamp()
-      });
-      return userId;
-    } catch { return null; }
-  };
-
   const handleInviteCollaborator = async () => {
     if (!requireLogin("mengundang kolaborator")) return;
     if (!db || !currentNote || !collaborateEmail.trim()) { alert("Email harus diisi"); return; }
@@ -2530,11 +2588,7 @@ export default function NotesPage(): React.JSX.Element {
       const invitedUser = await findUserByEmail(collaborateEmail.trim());
       let invitedUserId = invitedUser?.id;
       let invitedUserName = invitedUser?.name || collaborateEmail.split('@')[0];
-      if (!invitedUser) {
-        invitedUserId = await createUserRecord(collaborateEmail.trim());
-        if (!invitedUserId) { alert("Gagal membuat user record"); return; }
-        invitedUserName = collaborateEmail.split('@')[0];
-      }
+      if (!invitedUser) { alert("User tidak ditemukan"); return; }
       if (currentNote.collaborators && currentNote.collaborators.includes(invitedUserId)) {
         alert("User sudah menjadi kolaborator catatan ini");
         return;
@@ -3117,77 +3171,6 @@ export default function NotesPage(): React.JSX.Element {
                           <strong>Perintah suara:</strong> Ucapkan <strong>"simpan"</strong> untuk submit otomatis, <strong>"batal"</strong> untuk batalkan, <strong>"hapus semua"</strong> untuk kosongkan isi catatan. Klik tombol mic lagi untuk berhenti mendengarkan.
                         </div>
                       )}
-
-                      <div>
-                        <div style={{
-                          fontSize: '14px', fontWeight: 700, color: BLUE,
-                          fontFamily: FONT_FAMILY, marginBottom: '10px',
-                          display: 'flex', alignItems: 'center', gap: '8px',
-                        }}>
-                          <CollabIcon size={16} color={BLUE} />
-                          Tambah Kolaborator (Opsional):
-                        </div>
-                        <input type="email" value={memberSearchEmail}
-                          onChange={(e) => {
-                            setMemberSearchEmail(e.target.value);
-                            handleSearchMember(e.target.value);
-                          }}
-                          placeholder="Cari email kolaborator..."
-                          style={{
-                            width: '100%', padding: '12px 16px', backgroundColor: 'transparent',
-                            border: `1.5px solid ${BLUE}`, borderRadius: '10px',
-                            color: BLUE, fontSize: '14px', outline: 'none',
-                            fontFamily: FONT_FAMILY, fontWeight: 500,
-                          }}
-                        />
-                        {memberSearchResults.length > 0 && (
-                          <div style={{
-                            backgroundColor: '#f8f9fa',
-                            border: `1px solid ${BLUE}30`, borderRadius: '8px',
-                            marginTop: '8px', maxHeight: '200px', overflowY: 'auto',
-                          }}>
-                            {memberSearchResults.map((m) => (
-                              <div key={m.uid} onClick={() => addMemberToNewGroup(m)} style={{
-                                padding: '12px 16px', cursor: 'pointer',
-                                borderBottom: `1px solid ${BLUE}15`,
-                                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                              }}
-                                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#e8ebf5')}
-                                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
-                              >
-                                <div>
-                                  <div style={{ fontSize: '14px', fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY }}>
-                                    {m.displayName || m.name || m.email?.split('@')[0]}
-                                  </div>
-                                  <div style={{ fontSize: '12px', color: BLUE, opacity: 0.7, fontFamily: FONT_FAMILY }}>
-                                    {m.email}
-                                  </div>
-                                </div>
-                                <span style={{ fontSize: '20px', fontWeight: 'bold', color: BLUE }}>+</span>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                        {newGroupMembers.length > 0 && (
-                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '10px' }}>
-                            {newGroupMembers.map((m) => (
-                              <div key={m.uid} style={{
-                                display: 'flex', alignItems: 'center', gap: '8px',
-                                padding: '6px 12px', backgroundColor: BLUE,
-                                color: WHITE, borderRadius: '20px',
-                                fontSize: '13px', fontFamily: FONT_FAMILY, fontWeight: 600,
-                              }}>
-                                <span>{m.name}</span>
-                                <button onClick={() => removeMemberFromNewGroup(m.uid)} style={{
-                                  background: 'transparent', border: 'none',
-                                  color: WHITE, cursor: 'pointer', fontSize: '16px',
-                                  padding: 0, lineHeight: 1,
-                                }}>×</button>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
 
                       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '15px', marginTop: '10px' }}>
                         <button
