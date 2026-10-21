@@ -25,8 +25,7 @@ import {
   getDocs,
   where,
   getDoc,
-  limit,
-  increment
+  limit
 } from "firebase/firestore";
 import { initializeApp, getApps } from "firebase/app";
 import gsap from "gsap";
@@ -158,33 +157,6 @@ const CollabIcon = ({ size = 16, color = "#0D3CFC" }: { size?: number; color?: s
     <circle cx="8.5" cy="7" r="4" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
     <path d="M20 8v6" stroke={color} strokeWidth="2" strokeLinecap="round"/>
     <path d="M23 11h-6" stroke={color} strokeWidth="2" strokeLinecap="round"/>
-  </svg>
-);
-
-const ReplyIcon = ({ size = 14, color = "currentColor" }: { size?: number; color?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <path d="M9 17L4 12L9 7" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M4 12H14C17.3137 12 20 14.6863 20 18V19" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-
-const CheckIcon = ({ size = 12, color = "currentColor" }: { size?: number; color?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <path d="M20 6L9 17L4 12" stroke={color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-
-const DoubleCheckIcon = ({ size = 12, color = "currentColor" }: { size?: number; color?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <path d="M1 12L5 16L13 8" stroke={color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M11 12L15 16L23 8" stroke={color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-
-const ClockIcon = ({ size = 12, color = "currentColor" }: { size?: number; color?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <circle cx="12" cy="12" r="10" stroke={color} strokeWidth="2.5" />
-    <path d="M12 6V12L16 14" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
@@ -598,11 +570,6 @@ const SayHeySection = ({
   const [reportReason, setReportReason] = useState("");
   const [reports, setReports] = useState<any[]>([]);
   const [showReports, setShowReports] = useState(false);
-  const [activeInfoPanel, setActiveInfoPanel] = useState<{ type: 'announcement' | 'broadcast' | 'complaint' | 'report' | null; data: any }>({ type: null, data: null });
-  const [complaints, setComplaints] = useState<any[]>([]);
-  const [newComplaintText, setNewComplaintText] = useState("");
-  const [showComplaintForm, setShowComplaintForm] = useState(false);
-  const [replyTo, setReplyTo] = useState<any | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -655,25 +622,6 @@ const SayHeySection = ({
     });
     return () => unsub();
   }, [db, isAdmin]);
-
-  // Load complaints (admin sees all, user sees own)
-  useEffect(() => {
-    if (!db || !user) return;
-    let q;
-    if (isAdmin) {
-      q = query(collection(db, 'complaints'), orderBy('createdAt', 'desc'), limit(50));
-    } else {
-      q = query(collection(db, 'complaints'), where('userId', '==', user.uid), orderBy('createdAt', 'desc'), limit(20));
-    }
-    const unsub = onSnapshot(q, (snap: any) => {
-      const list: any[] = [];
-      snap.forEach((docSnap: any) => {
-        list.push({ id: docSnap.id, ...docSnap.data() });
-      });
-      setComplaints(list);
-    });
-    return () => unsub();
-  }, [db, user, isAdmin]);
 
   // Load contacts
   useEffect(() => {
@@ -790,7 +738,6 @@ const SayHeySection = ({
   const openChatWith = async (contact: any) => {
     if (!db || !user) return;
     setSelectedContact(contact);
-    setActiveInfoPanel({ type: null, data: null });
     try {
       const existingQ = isOwner
         ? query(collection(db, "sayhey_tickets"), where("userId", "==", contact.uid), where("ownerId", "==", user.uid))
@@ -880,11 +827,6 @@ const SayHeySection = ({
         isEncrypted: true,
         deliveryStatus: "sent",
         isAdmin: isAdmin,
-        replyTo: replyTo ? {
-          messageId: replyTo.id,
-          senderName: replyTo.senderName,
-          text: replyTo.text.length > 60 ? replyTo.text.substring(0, 60) + "..." : replyTo.text,
-        } : null,
       });
       const updatePayload: any = {
         lastMessage: messageText.trim(),
@@ -898,11 +840,11 @@ const SayHeySection = ({
       }
       await updateDoc(ticketRef, updatePayload);
       setMessageText("");
-      setReplyTo(null);
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     } catch (error) { console.error(error); }
   };
 
+  // Admin: Add announcement
   const handleAddAnnouncement = async () => {
     if (!isAdmin || !newAnnouncementText.trim() || !db || !user) return;
     try {
@@ -926,6 +868,7 @@ const SayHeySection = ({
     catch (error) { console.error(error); }
   };
 
+  // Admin: Add broadcast
   const handleAddBroadcast = async () => {
     if (!isAdmin || !newBroadcastText.trim() || !db || !user) return;
     try {
@@ -949,29 +892,7 @@ const SayHeySection = ({
     catch (error) { console.error(error); }
   };
 
-  const handleSubmitComplaint = async () => {
-    if (!user || !db || !newComplaintText.trim()) return;
-    try {
-      await addDoc(collection(db, 'complaints'), {
-        userId: user.uid,
-        userName: user.displayName || user.email || "User",
-        userEmail: user.email || "",
-        text: newComplaintText.trim(),
-        status: 'pending',
-        createdAt: serverTimestamp(),
-      });
-      setNewComplaintText("");
-      setShowComplaintForm(false);
-      alert("Pengaduan berhasil dikirim ke admin");
-    } catch (error) { console.error(error); alert("Gagal mengirim pengaduan."); }
-  };
-
-  const handleResolveComplaint = async (id: string) => {
-    if (!isAdmin || !db) return;
-    try { await updateDoc(doc(db, 'complaints', id), { status: 'resolved' }); }
-    catch (error) { console.error(error); }
-  };
-
+  // User: Report account
   const handleReportUser = (target: any) => {
     if (!user) { alert("Silakan login untuk melaporkan user"); return; }
     if (target.uid === user.uid) { alert("Tidak bisa melaporkan diri sendiri"); return; }
@@ -1014,37 +935,6 @@ const SayHeySection = ({
     return date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
   };
 
-  // Render read status icon
-  const renderReadStatus = (msg: any, isMine: boolean) => {
-    if (!isMine) return null;
-    if (msg.read) {
-      return (
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '2px', fontSize: '10px', color: '#60A5FA' }}>
-          <DoubleCheckIcon size={12} color="#60A5FA" />
-        </span>
-      );
-    }
-    if (msg.deliveryStatus === 'delivered') {
-      return (
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '2px', fontSize: '10px', color: 'rgba(255,255,255,0.85)' }}>
-          <DoubleCheckIcon size={12} color="rgba(255,255,255,0.85)" />
-        </span>
-      );
-    }
-    if (msg.deliveryStatus === 'sending') {
-      return (
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '2px', fontSize: '10px', color: 'rgba(255,255,255,0.7)' }}>
-          <ClockIcon size={12} color="rgba(255,255,255,0.7)" />
-        </span>
-      );
-    }
-    return (
-      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '2px', fontSize: '10px', color: 'rgba(255,255,255,0.85)' }}>
-        <CheckIcon size={12} color="rgba(255,255,255,0.85)" />
-      </span>
-    );
-  };
-
   if (!user) {
     return (
       <div style={{
@@ -1079,7 +969,6 @@ const SayHeySection = ({
   }
 
   const pendingReports = reports.filter(r => r.status === 'pending').length;
-  const pendingComplaints = complaints.filter(c => c.status === 'pending').length;
 
   return (
     <div style={{
@@ -1105,22 +994,21 @@ const SayHeySection = ({
         </p>
       </div>
 
-      <div style={{ display: "flex", gap: "20px", minHeight: "700px", flexWrap: "wrap" }}>
-        {/* ===== LEFT PANEL: BODY KONTAK (WHITE, RAPAT) ===== */}
+      <div style={{ display: "flex", gap: "20px", minHeight: "600px", flexWrap: "wrap" }}>
+        {/* ===== LEFT PANEL: BODY KONTAK (WHITE BG) ===== */}
         <div style={{
           width: "340px", flexShrink: 0,
           backgroundColor: WHITE,
           borderRadius: "16px",
+          border: `1px solid ${BLUE}20`,
           overflow: "hidden",
           display: "flex", flexDirection: "column",
           height: "700px",
           boxShadow: "0 4px 16px rgba(0,0,0,0.05)",
-          padding: 0,
-          margin: 0,
         }}>
-          {/* Header biru */}
+          {/* Header Kontak */}
           <div style={{
-            padding: "12px 16px",
+            padding: "14px 18px",
             backgroundColor: BLUE,
             color: WHITE,
             fontWeight: 700,
@@ -1143,29 +1031,29 @@ const SayHeySection = ({
             }}>{contacts.length}</span>
           </div>
 
-          {/* Scrollable content */}
-          <div style={{ flex: 1, overflowY: "auto", minHeight: 0, padding: 0, margin: 0 }}>
-            {/* PENGUMUMAN - BIRU FULL */}
+          {/* Scrollable content: Announcements + Broadcasts + Reports + Contacts */}
+          <div style={{ flex: 1, overflowY: "auto", minHeight: 0 }}>
+            {/* PENGUMUMAN */}
             <div style={{
-              backgroundColor: BLUE,
-              padding: "10px 12px",
-              margin: 0,
+              padding: "12px 16px",
+              borderBottom: `1px solid ${BLUE}15`,
             }}>
               <div style={{
                 display: "flex", alignItems: "center", justifyContent: "space-between",
-                marginBottom: "6px",
+                marginBottom: "8px",
               }}>
                 <span style={{
-                  fontSize: "11px", fontWeight: 800, color: WHITE,
+                  fontSize: "11px", fontWeight: 800, color: BLUE,
                   fontFamily: FONT_FAMILY, letterSpacing: "0.5px",
                   textTransform: "uppercase",
+                  display: "flex", alignItems: "center", gap: "4px",
                 }}>📢 Pengumuman</span>
                 {isAdmin && (
                   <button
                     onClick={() => { setShowAnnouncementForm(!showAnnouncementForm); setShowBroadcastForm(false); }}
                     style={{
-                      padding: "2px 8px", backgroundColor: WHITE,
-                      color: BLUE, border: "none", borderRadius: "4px",
+                      padding: "2px 8px", backgroundColor: BLUE,
+                      color: WHITE, border: "none", borderRadius: "4px",
                       fontSize: "10px", fontWeight: 800, cursor: "pointer",
                       fontFamily: FONT_FAMILY,
                     }}>{showAnnouncementForm ? '×' : '+'}</button>
@@ -1173,23 +1061,23 @@ const SayHeySection = ({
               </div>
 
               {isAdmin && showAnnouncementForm && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '8px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '10px' }}>
                   <textarea
                     value={newAnnouncementText}
                     onChange={(e) => setNewAnnouncementText(e.target.value)}
                     placeholder="Isi pengumuman..."
                     rows={2}
                     style={{
-                      width: '100%', padding: '6px', borderRadius: '6px',
-                      border: `1.5px solid ${WHITE}`, backgroundColor: WHITE,
-                      color: BLACK, fontSize: '11px', fontFamily: FONT_FAMILY,
+                      width: '100%', padding: '8px', borderRadius: '6px',
+                      border: `1.5px solid ${BLUE}`, backgroundColor: '#f8f9fa',
+                      color: BLACK, fontSize: '12px', fontFamily: FONT_FAMILY,
                       resize: 'none', outline: 'none',
                     }}
                   />
                   <button onClick={handleAddAnnouncement} style={{
-                    padding: '5px', backgroundColor: WHITE,
-                    color: BLUE, border: 'none', borderRadius: '6px',
-                    fontSize: '10px', fontWeight: 700, cursor: 'pointer',
+                    padding: '6px', backgroundColor: BLUE,
+                    color: WHITE, border: 'none', borderRadius: '6px',
+                    fontSize: '11px', fontWeight: 700, cursor: 'pointer',
                     fontFamily: FONT_FAMILY,
                   }}>Kirim Pengumuman</button>
                 </div>
@@ -1197,66 +1085,63 @@ const SayHeySection = ({
 
               {announcements.length === 0 ? (
                 <div style={{
-                  fontSize: '10px', color: 'rgba(255,255,255,0.7)',
+                  fontSize: '11px', color: '#999',
                   fontStyle: 'italic', textAlign: 'center', padding: '4px',
                   fontFamily: FONT_FAMILY,
                 }}>Belum ada pengumuman</div>
               ) : announcements.map((a) => (
-                <div key={a.id}
-                  onClick={() => setActiveInfoPanel({ type: 'announcement', data: a })}
-                  style={{
-                    padding: '6px 8px', backgroundColor: 'rgba(255,255,255,0.15)',
-                    borderRadius: '6px', marginBottom: '4px',
-                    cursor: 'pointer', transition: 'background-color 0.2s',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.25)')}
-                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.15)')}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '2px' }}>
-                    <span style={{ fontSize: '10px', fontWeight: 700, color: WHITE }}>
+                <div key={a.id} style={{
+                  padding: '8px 10px', backgroundColor: '#FFFBEB',
+                  borderRadius: '6px', border: `1px solid #F59E0B40`,
+                  fontSize: '11px', color: BLACK,
+                  fontFamily: FONT_FAMILY, lineHeight: 1.4,
+                  marginBottom: '6px',
+                  position: 'relative',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '3px' }}>
+                    <span style={{ fontSize: '10px', fontWeight: 700, color: '#92400E' }}>
                       {a.authorName || 'Admin'}
                     </span>
                     <VerifiedBadgeReal size={10} />
                   </div>
-                  <div style={{
-                    fontSize: '10px', color: WHITE,
-                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                    fontFamily: FONT_FAMILY,
-                  }}>{a.text}</div>
-                  {isAdmin && (
-                    <button onClick={(e) => { e.stopPropagation(); handleDeleteAnnouncement(a.id); }} style={{
-                      background: 'transparent', border: 'none',
-                      color: WHITE, cursor: 'pointer', fontSize: '10px',
-                      fontFamily: FONT_FAMILY, padding: 0, lineHeight: 1,
-                      float: 'right', marginTop: '-14px',
-                    }}>×</button>
-                  )}
+                  <div style={{ marginBottom: '3px' }}>{a.text}</div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '9px', color: '#92400E', opacity: 0.7 }}>
+                      {formatTime(a.createdAt)}
+                    </span>
+                    {isAdmin && (
+                      <button onClick={() => handleDeleteAnnouncement(a.id)} style={{
+                        background: 'transparent', border: 'none',
+                        color: RED, cursor: 'pointer', fontSize: '12px',
+                        fontFamily: FONT_FAMILY, padding: 0, lineHeight: 1,
+                      }}>×</button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
 
-            {/* BROADCASTING - BIRU FULL */}
+            {/* BROADCASTING */}
             <div style={{
-              backgroundColor: BLUE,
-              padding: "10px 12px",
-              margin: 0,
-              borderTop: `1px solid rgba(255,255,255,0.2)`,
+              padding: "12px 16px",
+              borderBottom: `1px solid ${BLUE}15`,
             }}>
               <div style={{
                 display: "flex", alignItems: "center", justifyContent: "space-between",
-                marginBottom: "6px",
+                marginBottom: "8px",
               }}>
                 <span style={{
-                  fontSize: "11px", fontWeight: 800, color: WHITE,
+                  fontSize: "11px", fontWeight: 800, color: BLUE,
                   fontFamily: FONT_FAMILY, letterSpacing: "0.5px",
                   textTransform: "uppercase",
+                  display: "flex", alignItems: "center", gap: "4px",
                 }}>📡 Broadcasting</span>
                 {isAdmin && (
                   <button
                     onClick={() => { setShowBroadcastForm(!showBroadcastForm); setShowAnnouncementForm(false); }}
                     style={{
-                      padding: "2px 8px", backgroundColor: WHITE,
-                      color: BLUE, border: "none", borderRadius: "4px",
+                      padding: "2px 8px", backgroundColor: BLUE,
+                      color: WHITE, border: "none", borderRadius: "4px",
                       fontSize: "10px", fontWeight: 800, cursor: "pointer",
                       fontFamily: FONT_FAMILY,
                     }}>{showBroadcastForm ? '×' : '+'}</button>
@@ -1264,23 +1149,23 @@ const SayHeySection = ({
               </div>
 
               {isAdmin && showBroadcastForm && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '8px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '10px' }}>
                   <textarea
                     value={newBroadcastText}
                     onChange={(e) => setNewBroadcastText(e.target.value)}
                     placeholder="Isi broadcast..."
                     rows={2}
                     style={{
-                      width: '100%', padding: '6px', borderRadius: '6px',
-                      border: `1.5px solid ${WHITE}`, backgroundColor: WHITE,
-                      color: BLACK, fontSize: '11px', fontFamily: FONT_FAMILY,
+                      width: '100%', padding: '8px', borderRadius: '6px',
+                      border: `1.5px solid ${BLUE}`, backgroundColor: '#f8f9fa',
+                      color: BLACK, fontSize: '12px', fontFamily: FONT_FAMILY,
                       resize: 'none', outline: 'none',
                     }}
                   />
                   <button onClick={handleAddBroadcast} style={{
-                    padding: '5px', backgroundColor: WHITE,
-                    color: BLUE, border: 'none', borderRadius: '6px',
-                    fontSize: '10px', fontWeight: 700, cursor: 'pointer',
+                    padding: '6px', backgroundColor: BLUE,
+                    color: WHITE, border: 'none', borderRadius: '6px',
+                    fontSize: '11px', fontWeight: 700, cursor: 'pointer',
                     fontFamily: FONT_FAMILY,
                   }}>Kirim Broadcast</button>
                 </div>
@@ -1288,162 +1173,62 @@ const SayHeySection = ({
 
               {broadcasts.length === 0 ? (
                 <div style={{
-                  fontSize: '10px', color: 'rgba(255,255,255,0.7)',
+                  fontSize: '11px', color: '#999',
                   fontStyle: 'italic', textAlign: 'center', padding: '4px',
                   fontFamily: FONT_FAMILY,
                 }}>Belum ada broadcast</div>
               ) : broadcasts.map((b) => (
-                <div key={b.id}
-                  onClick={() => setActiveInfoPanel({ type: 'broadcast', data: b })}
-                  style={{
-                    padding: '6px 8px', backgroundColor: 'rgba(255,255,255,0.15)',
-                    borderRadius: '6px', marginBottom: '4px',
-                    cursor: 'pointer', transition: 'background-color 0.2s',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.25)')}
-                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.15)')}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '2px' }}>
-                    <span style={{ fontSize: '10px', fontWeight: 700, color: WHITE }}>
+                <div key={b.id} style={{
+                  padding: '8px 10px', backgroundColor: '#E0E7FF',
+                  borderRadius: '6px', border: `1px solid ${BLUE}40`,
+                  fontSize: '11px', color: BLACK,
+                  fontFamily: FONT_FAMILY, lineHeight: 1.4,
+                  marginBottom: '6px',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '3px' }}>
+                    <span style={{ fontSize: '10px', fontWeight: 700, color: BLUE }}>
                       {b.authorName || 'Admin'}
                     </span>
                     <VerifiedBadgeReal size={10} />
                   </div>
-                  <div style={{
-                    fontSize: '10px', color: WHITE,
-                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                    fontFamily: FONT_FAMILY,
-                  }}>{b.text}</div>
-                  {isAdmin && (
-                    <button onClick={(e) => { e.stopPropagation(); handleDeleteBroadcast(b.id); }} style={{
-                      background: 'transparent', border: 'none',
-                      color: WHITE, cursor: 'pointer', fontSize: '10px',
-                      fontFamily: FONT_FAMILY, padding: 0, lineHeight: 1,
-                      float: 'right', marginTop: '-14px',
-                    }}>×</button>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            {/* PENGADUAN - BIRU FULL (USER) */}
-            <div style={{
-              backgroundColor: BLUE,
-              padding: "10px 12px",
-              margin: 0,
-              borderTop: `1px solid rgba(255,255,255,0.2)`,
-            }}>
-              <div style={{
-                display: "flex", alignItems: "center", justifyContent: "space-between",
-                marginBottom: "6px",
-              }}>
-                <span style={{
-                  fontSize: "11px", fontWeight: 800, color: WHITE,
-                  fontFamily: FONT_FAMILY, letterSpacing: "0.5px",
-                  textTransform: "uppercase",
-                }}>📝 Pengaduan</span>
-                {!isAdmin && (
-                  <button
-                    onClick={() => setShowComplaintForm(!showComplaintForm)}
-                    style={{
-                      padding: "2px 8px", backgroundColor: WHITE,
-                      color: BLUE, border: "none", borderRadius: "4px",
-                      fontSize: "10px", fontWeight: 800, cursor: "pointer",
-                      fontFamily: FONT_FAMILY,
-                    }}>{showComplaintForm ? '×' : '+'}</button>
-                )}
-              </div>
-
-              {!isAdmin && showComplaintForm && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '8px' }}>
-                  <textarea
-                    value={newComplaintText}
-                    onChange={(e) => setNewComplaintText(e.target.value)}
-                    placeholder="Isi pengaduan ke admin..."
-                    rows={2}
-                    style={{
-                      width: '100%', padding: '6px', borderRadius: '6px',
-                      border: `1.5px solid ${WHITE}`, backgroundColor: WHITE,
-                      color: BLACK, fontSize: '11px', fontFamily: FONT_FAMILY,
-                      resize: 'none', outline: 'none',
-                    }}
-                  />
-                  <button onClick={handleSubmitComplaint} style={{
-                    padding: '5px', backgroundColor: WHITE,
-                    color: BLUE, border: 'none', borderRadius: '6px',
-                    fontSize: '10px', fontWeight: 700, cursor: 'pointer',
-                    fontFamily: FONT_FAMILY,
-                  }}>Kirim Pengaduan</button>
-                </div>
-              )}
-
-              {complaints.length === 0 ? (
-                <div style={{
-                  fontSize: '10px', color: 'rgba(255,255,255,0.7)',
-                  fontStyle: 'italic', textAlign: 'center', padding: '4px',
-                  fontFamily: FONT_FAMILY,
-                }}>{isAdmin ? 'Belum ada pengaduan' : 'Belum ada pengaduan terkirim'}</div>
-              ) : complaints.map((c) => (
-                <div key={c.id}
-                  onClick={() => setActiveInfoPanel({ type: 'complaint', data: c })}
-                  style={{
-                    padding: '6px 8px', backgroundColor: 'rgba(255,255,255,0.15)',
-                    borderRadius: '6px', marginBottom: '4px',
-                    cursor: 'pointer', transition: 'background-color 0.2s',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.25)')}
-                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.15)')}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '4px', marginBottom: '2px' }}>
-                    <span style={{ fontSize: '10px', fontWeight: 700, color: WHITE }}>
-                      {isAdmin ? c.userName : 'Pengaduan Saya'}
+                  <div style={{ marginBottom: '3px' }}>{b.text}</div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '9px', color: BLUE, opacity: 0.7 }}>
+                      {formatTime(b.createdAt)}
                     </span>
-                    <span style={{
-                      padding: '1px 4px',
-                      backgroundColor: c.status === 'resolved' ? '#4ADE80' : '#F59E0B',
-                      color: WHITE,
-                      borderRadius: '3px', fontSize: '8px', fontWeight: 700,
-                    }}>{c.status === 'resolved' ? '✓' : '⏳'}</span>
+                    {isAdmin && (
+                      <button onClick={() => handleDeleteBroadcast(b.id)} style={{
+                        background: 'transparent', border: 'none',
+                        color: RED, cursor: 'pointer', fontSize: '12px',
+                        fontFamily: FONT_FAMILY, padding: 0, lineHeight: 1,
+                      }}>×</button>
+                    )}
                   </div>
-                  <div style={{
-                    fontSize: '10px', color: WHITE,
-                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                    fontFamily: FONT_FAMILY,
-                  }}>{c.text}</div>
-                  {isAdmin && c.status !== 'resolved' && (
-                    <button onClick={(e) => { e.stopPropagation(); handleResolveComplaint(c.id); }} style={{
-                      background: 'transparent', border: 'none',
-                      color: WHITE, cursor: 'pointer', fontSize: '9px',
-                      fontFamily: FONT_FAMILY, padding: 0, lineHeight: 1,
-                      float: 'right', marginTop: '-12px', textDecoration: 'underline',
-                    }}>Selesai</button>
-                  )}
                 </div>
               ))}
             </div>
 
-            {/* LAPORAN - BIRU FULL (ADMIN) */}
+            {/* REPORTS (ADMIN ONLY) */}
             {isAdmin && (
               <div style={{
-                backgroundColor: BLUE,
-                padding: "10px 12px",
-                margin: 0,
-                borderTop: `1px solid rgba(255,255,255,0.2)`,
+                padding: "12px 16px",
+                borderBottom: `1px solid ${BLUE}15`,
               }}>
                 <div style={{
                   display: "flex", alignItems: "center", justifyContent: "space-between",
-                  marginBottom: "6px",
+                  marginBottom: "8px",
                 }}>
                   <span style={{
-                    fontSize: "11px", fontWeight: 800, color: WHITE,
+                    fontSize: "11px", fontWeight: 800, color: RED,
                     fontFamily: FONT_FAMILY, letterSpacing: "0.5px",
                     textTransform: "uppercase",
+                    display: "flex", alignItems: "center", gap: "4px",
                   }}>🚨 Laporan ({pendingReports})</span>
                   <button
                     onClick={() => setShowReports(!showReports)}
                     style={{
-                      padding: "2px 8px", backgroundColor: WHITE,
-                      color: BLUE, border: "none", borderRadius: "4px",
+                      padding: "2px 8px", backgroundColor: RED,
+                      color: WHITE, border: "none", borderRadius: "4px",
                       fontSize: "10px", fontWeight: 800, cursor: "pointer",
                       fontFamily: FONT_FAMILY,
                     }}>{showReports ? '×' : 'Lihat'}</button>
@@ -1453,45 +1238,43 @@ const SayHeySection = ({
                   <div>
                     {reports.length === 0 ? (
                       <div style={{
-                        fontSize: '10px', color: 'rgba(255,255,255,0.7)',
+                        fontSize: '11px', color: '#999',
                         fontStyle: 'italic', textAlign: 'center', padding: '4px',
                         fontFamily: FONT_FAMILY,
                       }}>Belum ada laporan</div>
                     ) : reports.map((r) => (
-                      <div key={r.id}
-                        onClick={() => setActiveInfoPanel({ type: 'report', data: r })}
-                        style={{
-                          padding: '6px 8px', backgroundColor: 'rgba(255,255,255,0.15)',
-                          borderRadius: '6px', marginBottom: '4px',
-                          cursor: 'pointer', transition: 'background-color 0.2s',
-                        }}
-                        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.25)')}
-                        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.15)')}
-                      >
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '2px' }}>
-                          <span style={{ fontSize: '10px', fontWeight: 700, color: WHITE }}>
-                            Target: {r.targetName}
-                          </span>
-                          <span style={{
-                            padding: '1px 4px',
-                            backgroundColor: r.status === 'resolved' ? '#4ADE80' : '#F59E0B',
-                            color: WHITE,
-                            borderRadius: '3px', fontSize: '8px', fontWeight: 700,
-                          }}>{r.status === 'resolved' ? '✓' : '⏳'}</span>
+                      <div key={r.id} style={{
+                        padding: '8px 10px', backgroundColor: '#FEF2F2',
+                        borderRadius: '6px', border: `1px solid #FCA5A5`,
+                        fontSize: '11px', color: BLACK,
+                        fontFamily: FONT_FAMILY, lineHeight: 1.4,
+                        marginBottom: '6px',
+                      }}>
+                        <div style={{ fontWeight: 700, color: '#991B1B', marginBottom: '2px' }}>
+                          Target: {r.targetName}
                         </div>
-                        <div style={{
-                          fontSize: '10px', color: WHITE,
-                          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                          fontFamily: FONT_FAMILY,
-                        }}>{r.reason}</div>
-                        {r.status !== 'resolved' && (
-                          <button onClick={(e) => { e.stopPropagation(); resolveReport(r.id); }} style={{
-                            background: 'transparent', border: 'none',
-                            color: WHITE, cursor: 'pointer', fontSize: '9px',
-                            fontFamily: FONT_FAMILY, padding: 0, lineHeight: 1,
-                            float: 'right', marginTop: '-12px', textDecoration: 'underline',
-                          }}>Selesai</button>
-                        )}
+                        <div style={{ marginBottom: '2px' }}>
+                          <strong>Pelapor:</strong> {r.reporterName}
+                        </div>
+                        <div style={{ marginBottom: '4px' }}>
+                          <strong>Alasan:</strong> {r.reason}
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{
+                            padding: '1px 6px',
+                            backgroundColor: r.status === 'resolved' ? '#D1FAE5' : '#FEF3C7',
+                            color: r.status === 'resolved' ? '#065F46' : '#92400E',
+                            borderRadius: '3px', fontSize: '9px', fontWeight: 700,
+                          }}>{r.status === 'resolved' ? '✓ Selesai' : '⏳ Pending'}</span>
+                          {r.status !== 'resolved' && (
+                            <button onClick={() => resolveReport(r.id)} style={{
+                              padding: '2px 6px', backgroundColor: '#4ADE80',
+                              color: WHITE, border: 'none', borderRadius: '4px',
+                              fontSize: '9px', fontWeight: 700, cursor: 'pointer',
+                              fontFamily: FONT_FAMILY,
+                            }}>Selesai</button>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -1499,40 +1282,8 @@ const SayHeySection = ({
               </div>
             )}
 
-            {/* ADMIN BODY - BIRU FULL */}
-            <div style={{
-              backgroundColor: BLUE,
-              padding: "10px 12px",
-              margin: 0,
-              borderTop: `1px solid rgba(255,255,255,0.2)`,
-            }}>
-              <div style={{
-                display: "flex", alignItems: "center", gap: "6px",
-                marginBottom: "6px",
-              }}>
-                <span style={{
-                  fontSize: "11px", fontWeight: 800, color: WHITE,
-                  fontFamily: FONT_FAMILY, letterSpacing: "0.5px",
-                  textTransform: "uppercase",
-                }}>👤 Admin</span>
-                <VerifiedBadgeReal size={12} />
-              </div>
-              <div style={{
-                padding: '6px 8px', backgroundColor: 'rgba(255,255,255,0.15)',
-                borderRadius: '6px',
-              }}>
-                <div style={{ fontSize: '10px', fontWeight: 700, color: WHITE, marginBottom: '2px' }}>
-                  {OWNER_NAME}
-                </div>
-                <div style={{
-                  fontSize: '10px', color: WHITE, opacity: 0.85,
-                  fontFamily: FONT_FAMILY,
-                }}>{OWNER_EMAIL}</div>
-              </div>
-            </div>
-
-            {/* CONTACTS - WHITE BG */}
-            <div style={{ backgroundColor: WHITE }}>
+            {/* CONTACTS */}
+            <div>
               {contacts.length === 0 ? (
                 <div style={{
                   padding: "40px 20px", textAlign: "center", fontSize: "13px",
@@ -1636,56 +1387,6 @@ const SayHeySection = ({
           border: `1px solid ${BLUE}20`,
           boxShadow: "0 4px 16px rgba(0,0,0,0.05)",
         }}>
-          {/* Info panel (pengumuman/broadcast/pengaduan/report) */}
-          {activeInfoPanel.type && (
-            <div style={{
-              padding: "16px 20px",
-              backgroundColor: BLUE,
-              color: WHITE,
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              gap: "12px",
-              flexShrink: 0,
-            }}>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{
-                  fontSize: "12px", fontWeight: 800, letterSpacing: "0.5px",
-                  textTransform: "uppercase", marginBottom: "4px",
-                  opacity: 0.85,
-                }}>
-                  {activeInfoPanel.type === 'announcement' ? '📢 Pengumuman' :
-                    activeInfoPanel.type === 'broadcast' ? '📡 Broadcasting' :
-                    activeInfoPanel.type === 'complaint' ? '📝 Pengaduan' :
-                    '🚨 Laporan'}
-                </div>
-                <div style={{
-                  fontSize: "14px", fontFamily: FONT_FAMILY,
-                  wordBreak: 'break-word', lineHeight: 1.5,
-                }}>
-                  {activeInfoPanel.data?.text || activeInfoPanel.data?.reason || ''}
-                </div>
-                <div style={{
-                  fontSize: "11px", opacity: 0.75, marginTop: "6px",
-                  fontFamily: FONT_FAMILY,
-                }}>
-                  {activeInfoPanel.data?.authorName || activeInfoPanel.data?.userName || activeInfoPanel.data?.reporterName || 'Admin'}
-                  {activeInfoPanel.data?.createdAt && ` • ${formatTime(activeInfoPanel.data.createdAt)}`}
-                </div>
-              </div>
-              <button
-                onClick={() => setActiveInfoPanel({ type: null, data: null })}
-                style={{
-                  background: 'transparent', border: `1.5px solid ${WHITE}`,
-                  color: WHITE, borderRadius: '6px',
-                  padding: '4px 10px', fontSize: '11px', fontWeight: 700,
-                  cursor: 'pointer', fontFamily: FONT_FAMILY,
-                  flexShrink: 0,
-                }}
-              >×</button>
-            </div>
-          )}
-
           {!ticket || !selectedContact ? (
             <div style={{
               flex: 1, display: "flex", alignItems: "center",
@@ -1769,7 +1470,6 @@ const SayHeySection = ({
                         fontFamily: FONT_FAMILY, wordBreak: "break-word",
                         border: isMine ? "none" : "1px solid rgba(0,0,0,0.06)",
                         boxShadow: isMine ? "none" : "0 2px 6px rgba(0,0,0,0.04)",
-                        position: 'relative',
                       }}>
                         {!isMine && (
                           <div style={{
@@ -1782,77 +1482,22 @@ const SayHeySection = ({
                             {msgIsAdmin && <VerifiedBadgeReal size={12} />}
                           </div>
                         )}
-                        {msg.replyTo && (
-                          <div style={{
-                            padding: '4px 8px',
-                            backgroundColor: isMine ? 'rgba(255,255,255,0.2)' : 'rgba(13,60,252,0.08)',
-                            borderLeft: `3px solid ${isMine ? WHITE : BLUE}`,
-                            borderRadius: '4px',
-                            marginBottom: '4px',
-                            fontSize: '11px',
-                            color: isMine ? WHITE : BLUE,
-                            fontStyle: 'italic',
-                            opacity: 0.9,
-                          }}>
-                            <strong>{msg.replyTo.senderName}:</strong> {msg.replyTo.text}
-                          </div>
-                        )}
                         <div>{msg.text}</div>
                         <div style={{
                           display: "flex", justifyContent: "flex-end",
-                          alignItems: "center", gap: "4px", marginTop: "4px",
+                          alignItems: "center", gap: "6px", marginTop: "4px",
                         }}>
-                          {renderReadStatus(msg, isMine)}
                           <span style={{
                             fontSize: "10px",
                             color: isMine ? "rgba(255,255,255,0.85)" : "#999",
                           }}>{formatTime(msg.timestamp)}</span>
                         </div>
                       </div>
-                      <button
-                        onClick={() => setReplyTo(msg)}
-                        style={{
-                          background: 'transparent', border: 'none',
-                          color: BLUE, fontSize: '10px', cursor: 'pointer',
-                          fontFamily: FONT_FAMILY, fontWeight: 700,
-                          marginTop: '2px', padding: 0,
-                          display: 'flex', alignItems: 'center', gap: '3px',
-                          alignSelf: isMine ? 'flex-end' : 'flex-start',
-                          marginLeft: isMine ? 'auto' : 0,
-                          marginRight: isMine ? 0 : 'auto',
-                        }}
-                      >
-                        <ReplyIcon size={10} color={BLUE} />
-                        Reply
-                      </button>
                     </div>
                   );
                 })}
                 <div ref={messagesEndRef} />
               </div>
-              {replyTo && (
-                <div style={{
-                  padding: "8px 20px",
-                  backgroundColor: "rgba(13,60,252,0.06)",
-                  borderTop: `1px solid ${BLUE}20`,
-                  display: "flex", alignItems: "center", gap: "10px",
-                  flexShrink: 0,
-                }}>
-                  <ReplyIcon size={14} color={BLUE} />
-                  <div style={{
-                    flex: 1, fontSize: "12px", color: BLUE,
-                    fontFamily: FONT_FAMILY, overflow: "hidden",
-                    textOverflow: "ellipsis", whiteSpace: "nowrap",
-                  }}>
-                    <strong>{replyTo.senderName}:</strong> {replyTo.text}
-                  </div>
-                  <button onClick={() => setReplyTo(null)} style={{
-                    background: "transparent", border: "none",
-                    color: BLUE, cursor: "pointer", fontSize: "16px",
-                    fontFamily: FONT_FAMILY, padding: 0, lineHeight: 1,
-                  }}>×</button>
-                </div>
-              )}
               <div style={{
                 padding: "14px 20px", borderTop: "1px solid rgba(0,0,0,0.06)",
                 display: "flex", gap: "10px", backgroundColor: WHITE, flexShrink: 0,
