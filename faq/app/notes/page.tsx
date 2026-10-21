@@ -224,7 +224,6 @@ const HighlightIcon = ({ size = 16, color = "currentColor" }: { size?: number; c
   </svg>
 );
 
-// ===== MICROSOFT STORE ICON =====
 const MicrosoftStoreIcon = ({ size = 32 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style={{ display: 'inline-block' }}>
     <path d="M9 3.5C9 2.67157 9.67157 2 10.5 2H13.5C14.3284 2 15 2.67157 15 3.5V5H9V3.5Z" fill="#0078D4" />
@@ -236,7 +235,6 @@ const MicrosoftStoreIcon = ({ size = 32 }: { size?: number }) => (
   </svg>
 );
 
-// ===== WINDOWS LOGO ICON =====
 const WindowsIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <rect x="2" y="2" width="9" height="9" fill={color} />
@@ -258,6 +256,38 @@ const MicIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: stri
 const StopIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <rect x="6" y="6" width="12" height="12" rx="2" fill={color} />
+  </svg>
+);
+
+// ===== VERIFIED INSTAGRAM REAL (Official) =====
+const VerifiedBadgeReal = ({ size = 16 }) => {
+  return (
+    <span style={{ position: 'relative', display: 'inline-block', marginLeft: '4px', verticalAlign: 'middle' }}>
+      <svg
+        width={size}
+        height={size}
+        viewBox="0 0 40 40"
+        xmlns="http://www.w3.org/2000/svg"
+        style={{ display: 'inline-block', verticalAlign: 'middle' }}
+      >
+        <path
+          fill="#0095F6"
+          d="M19.998 3.094 14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.03v-6.46h-6.419L25.358 0l-5.36 3.094Zm7.415 11.225 2.254 2.287-11.43 11.5-6.835-6.93 2.244-2.258 4.587 4.581 9.18-9.18Z"
+        />
+        <path
+          d="M0 0h40v40H0z"
+          fill="none"
+        />
+      </svg>
+    </span>
+  );
+};
+
+// ===== REPORT ICON =====
+const ReportIcon = ({ size = 16, color = "#DC2626" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <line x1="4" y1="22" x2="4" y2="15" stroke={color} strokeWidth="2" strokeLinecap="round"/>
   </svg>
 );
 
@@ -298,6 +328,77 @@ const InstagramVerifiedBadge = ({ size = 16 }) => {
     </span>
   );
 };
+
+// ===== FIREBASE ENCRYPTION =====
+const ENCRYPTION_KEY_BASE64 = "bWVudXJ1LXNlY3JldC1rZXktMjAyNi0zMmJ5dGVzISEh";
+const IV_LENGTH = 12;
+let cryptoKeyCache: CryptoKey | null = null;
+
+function base64ToUint8Array(base64: string): Uint8Array {
+  const binaryString = atob(base64);
+  const bytes = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) bytes[i] = binaryString.charCodeAt(i);
+  return bytes;
+}
+
+function uint8ArrayToBase64(uint8Array: Uint8Array): string {
+  let binary = "";
+  for (let i = 0; i < uint8Array.length; i++) binary += String.fromCharCode(uint8Array[i]);
+  return btoa(binary);
+}
+
+async function getCryptoKey(): Promise<CryptoKey> {
+  if (cryptoKeyCache) return cryptoKeyCache;
+  const keyData = base64ToUint8Array(ENCRYPTION_KEY_BASE64);
+  const keyBytes = keyData.slice(0, 32);
+  cryptoKeyCache = await window.crypto.subtle.importKey(
+    "raw", keyBytes, { name: "AES-GCM" }, false, ["encrypt", "decrypt"]
+  );
+  return cryptoKeyCache;
+}
+
+async function encryptMessage(text: string): Promise<string> {
+  try {
+    if (typeof window === "undefined" || !window.crypto) {
+      return `encrypted:${btoa(unescape(encodeURIComponent(text)))}`;
+    }
+    const key = await getCryptoKey();
+    const encoder = new TextEncoder();
+    const data = encoder.encode(text);
+    const iv = window.crypto.getRandomValues(new Uint8Array(IV_LENGTH));
+    const encrypted = await window.crypto.subtle.encrypt(
+      { name: "AES-GCM", iv: iv, tagLength: 128 }, key, data
+    );
+    const encryptedArray = new Uint8Array(encrypted);
+    const combined = new Uint8Array(iv.length + encryptedArray.length);
+    combined.set(iv, 0);
+    combined.set(encryptedArray, iv.length);
+    return `encrypted:${uint8ArrayToBase64(combined)}`;
+  } catch { return `plain:${btoa(unescape(encodeURIComponent(text)))}`; }
+}
+
+async function decryptMessage(encrypted: string): Promise<string> {
+  try {
+    if (typeof window === "undefined" || !window.crypto) {
+      if (encrypted.startsWith("encrypted:")) {
+        return decodeURIComponent(escape(atob(encrypted.substring("encrypted:".length))));
+      }
+      return encrypted;
+    }
+    if (encrypted.startsWith("plain:")) {
+      return decodeURIComponent(escape(atob(encrypted.substring("plain:".length))));
+    }
+    if (!encrypted.startsWith("encrypted:")) return encrypted;
+    const combined = base64ToUint8Array(encrypted.substring("encrypted:".length));
+    const iv = combined.slice(0, IV_LENGTH);
+    const encryptedData = combined.slice(IV_LENGTH);
+    const key = await getCryptoKey();
+    const decrypted = await window.crypto.subtle.decrypt(
+      { name: "AES-GCM", iv: iv, tagLength: 128 }, key, encryptedData
+    );
+    return new TextDecoder().decode(decrypted);
+  } catch { return "[Message cannot be decrypted]"; }
+}
 
 // ===== NAVBAR BUTTON =====
 const NavbarButton = ({
@@ -458,7 +559,7 @@ const NavbarButton = ({
   );
 };
 
-// ===== SAY HEY SECTION (SAMA SEPERTI HALAMAN UTAMA) =====
+// ===== SAY HEY SECTION (DENGAN ADMIN TAG + VERIFIED + PENGUMUMAN + REPORT) =====
 const SayHeySection = ({
   user,
   db,
@@ -476,6 +577,13 @@ const SayHeySection = ({
   const [messages, setMessages] = useState<any[]>([]);
   const [messageText, setMessageText] = useState("");
   const [encryptionReady, setEncryptionReady] = useState(false);
+  const [announcements, setAnnouncements] = useState<any[]>([]);
+  const [newAnnouncementText, setNewAnnouncementText] = useState("");
+  const [showAnnouncementForm, setShowAnnouncementForm] = useState(false);
+  const [reportModal, setReportModal] = useState<{ open: boolean; target: any | null }>({ open: false, target: null });
+  const [reportReason, setReportReason] = useState("");
+  const [reports, setReports] = useState<any[]>([]);
+  const [showReports, setShowReports] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -484,11 +592,38 @@ const SayHeySection = ({
   const isOwner = isAdmin;
 
   useEffect(() => {
-    getCryptoKey()
-      .then(() => setEncryptionReady(true))
-      .catch(() => setEncryptionReady(true));
+    getCryptoKey().then(() => setEncryptionReady(true)).catch(() => setEncryptionReady(true));
   }, []);
 
+  // Load announcements (real-time)
+  useEffect(() => {
+    if (!db) return;
+    const q = query(collection(db, 'announcements'), orderBy('createdAt', 'desc'), limit(10));
+    const unsub = onSnapshot(q, (snap: any) => {
+      const list: any[] = [];
+      snap.forEach((docSnap: any) => {
+        list.push({ id: docSnap.id, ...docSnap.data() });
+      });
+      setAnnouncements(list);
+    });
+    return () => unsub();
+  }, [db]);
+
+  // Load reports (real-time) - hanya admin
+  useEffect(() => {
+    if (!db || !isAdmin) return;
+    const q = query(collection(db, 'reports'), orderBy('createdAt', 'desc'), limit(50));
+    const unsub = onSnapshot(q, (snap: any) => {
+      const list: any[] = [];
+      snap.forEach((docSnap: any) => {
+        list.push({ id: docSnap.id, ...docSnap.data() });
+      });
+      setReports(list);
+    });
+    return () => unsub();
+  }, [db, isAdmin]);
+
+  // Load contacts (online users)
   useEffect(() => {
     if (!db || !user) return;
     let q;
@@ -519,6 +654,7 @@ const SayHeySection = ({
     return () => unsub();
   }, [db, user, isOwner]);
 
+  // Load tickets
   useEffect(() => {
     if (!db || !user) return;
     let q;
@@ -542,6 +678,7 @@ const SayHeySection = ({
     return () => unsub();
   }, [db, user, isOwner, selectedContact]);
 
+  // Load messages
   useEffect(() => {
     if (!db || !ticket) return;
     const q = query(collection(db, "sayhey_tickets", ticket.id, "messages"), orderBy("timestamp", "asc"));
@@ -563,6 +700,7 @@ const SayHeySection = ({
     return () => unsub();
   }, [db, ticket]);
 
+  // Unread count
   useEffect(() => {
     if (!db || !user) return;
     const q = isOwner
@@ -580,6 +718,7 @@ const SayHeySection = ({
     return () => unsub();
   }, [db, user, isOwner, onUnreadCountChange]);
 
+  // Mark as read
   useEffect(() => {
     if (!db || !ticket || !user) return;
     const unread = messages.filter((m) => m.senderId !== user.uid && !m.read);
@@ -677,7 +816,7 @@ const SayHeySection = ({
     try {
       const ticketRef = doc(db, "sayhey_tickets", ticket.id);
       await updateDoc(ticketRef, { typing: false, typingUserId: null, typingUserName: null });
-      const senderName = user.displayName || user.email || "User";
+      const senderName = isAdmin ? `${OWNER_NAME} (Admin)` : user.displayName || user.email || "User";
       const encryptedMessage = await encryptMessage(messageText.trim());
       await addDoc(collection(db, "sayhey_tickets", ticket.id, "messages"), {
         senderId: user.uid,
@@ -687,6 +826,7 @@ const SayHeySection = ({
         read: false,
         isEncrypted: true,
         deliveryStatus: "sent",
+        isAdmin: isAdmin,
       });
       const updatePayload: any = {
         lastMessage: messageText.trim(),
@@ -704,10 +844,98 @@ const SayHeySection = ({
     } catch (error) { console.error(error); }
   };
 
+  // Admin: Add announcement
+  const handleAddAnnouncement = async () => {
+    if (!isAdmin || !newAnnouncementText.trim() || !db || !user) return;
+    try {
+      await addDoc(collection(db, 'announcements'), {
+        text: newAnnouncementText.trim(),
+        authorId: user.uid,
+        authorName: user.displayName || OWNER_NAME,
+        authorEmail: user.email || OWNER_EMAIL,
+        createdAt: serverTimestamp(),
+      });
+      setNewAnnouncementText("");
+      setShowAnnouncementForm(false);
+      alert("Pengumuman berhasil ditambahkan!");
+    } catch (error) { console.error(error); alert("Gagal menambah pengumuman."); }
+  };
+
+  // Admin: Delete announcement
+  const handleDeleteAnnouncement = async (id: string) => {
+    if (!isAdmin || !db) return;
+    if (!confirm("Hapus pengumuman ini?")) return;
+    try {
+      await deleteDoc(doc(db, 'announcements', id));
+    } catch (error) { console.error(error); }
+  };
+
+  // User: Report account
+  const handleReportUser = (target: any) => {
+    if (!user) { alert("Silakan login untuk melaporkan user"); return; }
+    if (target.uid === user.uid) { alert("Tidak bisa melaporkan diri sendiri"); return; }
+    setReportModal({ open: true, target });
+    setReportReason("");
+  };
+
+  const submitReport = async () => {
+    if (!db || !user || !reportModal.target || !reportReason.trim()) {
+      alert("Silakan isi alasan laporan");
+      return;
+    }
+    try {
+      await addDoc(collection(db, 'reports'), {
+        reporterId: user.uid,
+        reporterName: user.displayName || user.email || "User",
+        reporterEmail: user.email || "",
+        targetId: reportModal.target.uid,
+        targetName: reportModal.target.displayName || reportModal.target.email || "User",
+        targetEmail: reportModal.target.email || "",
+        reason: reportReason.trim(),
+        status: 'pending',
+        createdAt: serverTimestamp(),
+      });
+      alert("Laporan berhasil dikirim ke admin");
+      setReportModal({ open: false, target: null });
+      setReportReason("");
+    } catch (error) { console.error(error); alert("Gagal mengirim laporan."); }
+  };
+
+  // Admin: Mark report as resolved
+  const resolveReport = async (reportId: string) => {
+    if (!isAdmin || !db) return;
+    try {
+      await updateDoc(doc(db, 'reports', reportId), { status: 'resolved' });
+    } catch (error) { console.error(error); }
+  };
+
   const formatTime = (timestamp: any) => {
     if (!timestamp) return "";
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
     return date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+  };
+
+  // Render contact name with "Admin" label + verified badge
+  const renderContactName = (c: any) => {
+    const isContactAdmin = c.email === ADMIN_EMAIL || c.email === OWNER_EMAIL;
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
+        <span style={{ fontSize: '14px', fontWeight: 700, color: BLACK, fontFamily: FONT_FAMILY }}>
+          {c.displayName}
+        </span>
+        {isContactAdmin && (
+          <>
+            <span style={{
+              padding: '2px 8px', backgroundColor: BLUE, color: WHITE,
+              borderRadius: '4px', fontSize: '10px', fontWeight: 800,
+              letterSpacing: '0.5px', textTransform: 'uppercase',
+              fontFamily: FONT_FAMILY,
+            }}>Admin</span>
+            <VerifiedBadgeReal size={14} />
+          </>
+        )}
+      </div>
+    );
   };
 
   if (!user) {
@@ -767,92 +995,323 @@ const SayHeySection = ({
         </p>
       </div>
 
-      <div style={{ display: "flex", gap: "20px", minHeight: "500px", flexWrap: "wrap" }}>
+      <div style={{ display: "flex", gap: "20px", minHeight: "600px", flexWrap: "wrap" }}>
+        {/* ===== LEFT PANEL: CONTACTS + ANNOUNCEMENTS + REPORTS ===== */}
         <div style={{
-          width: "300px", flexShrink: 0, backgroundColor: GREEN,
-          borderRadius: "16px", border: `1px solid ${GREEN}`, overflow: "hidden",
-          display: "flex", flexDirection: "column", height: "500px",
-          boxShadow: "0 8px 24px rgba(74,222,128,0.35)",
+          width: "320px", flexShrink: 0,
+          display: "flex", flexDirection: "column", gap: "16px",
+          height: "fit-content", maxHeight: "800px",
         }}>
+          {/* ANNOUNCEMENTS */}
           <div style={{
-            padding: "16px 20px", backgroundColor: LIME,
-            borderBottom: `1px solid ${LIME}`, fontSize: "14px", fontWeight: 800,
-            letterSpacing: "0.5px", textTransform: "uppercase", color: BLACK,
-            fontFamily: FONT_FAMILY, display: "flex", alignItems: "center",
-            justifyContent: "space-between",
+            backgroundColor: '#FFFBEB',
+            border: '2px solid #F59E0B',
+            borderRadius: '16px',
+            padding: '16px',
+            display: 'flex', flexDirection: 'column', gap: '10px',
           }}>
-            <span>{isOwner ? "Users Online" : "Owners Online"}</span>
-            <span style={{
-              fontSize: "11px", color: BLACK, padding: "2px 8px",
-              borderRadius: "4px", backgroundColor: WHITE, fontWeight: 800,
-              letterSpacing: "0.5px",
-            }}>{contacts.length}</span>
-          </div>
-          <div style={{ overflowY: "auto", flex: 1, minHeight: 0 }}>
-            {contacts.length === 0 ? (
-              <div style={{
-                padding: "40px 20px", textAlign: "center", fontSize: "13px",
-                color: BLACK, fontFamily: FONT_FAMILY, lineHeight: 1.5, opacity: 0.85,
+            <div style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              gap: '8px',
+            }}>
+              <span style={{
+                fontSize: '14px', fontWeight: 800, color: '#92400E',
+                fontFamily: FONT_FAMILY, letterSpacing: '0.5px',
+                textTransform: 'uppercase',
+                display: 'flex', alignItems: 'center', gap: '6px',
               }}>
-                {isOwner ? "No users online." : "Owner is currently offline."}<br />
-                Please check back later.
+                📢 Pengumuman
+              </span>
+              {isAdmin && (
+                <button
+                  onClick={() => setShowAnnouncementForm(!showAnnouncementForm)}
+                  style={{
+                    padding: '4px 10px', backgroundColor: '#F59E0B',
+                    color: WHITE, border: 'none', borderRadius: '6px',
+                    fontSize: '11px', fontWeight: 800, cursor: 'pointer',
+                    fontFamily: FONT_FAMILY,
+                  }}
+                >{showAnnouncementForm ? 'Tutup' : '+ Tambah'}</button>
+              )}
+            </div>
+
+            {isAdmin && showAnnouncementForm && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <textarea
+                  value={newAnnouncementText}
+                  onChange={(e) => setNewAnnouncementText(e.target.value)}
+                  placeholder="Isi pengumuman..."
+                  rows={3}
+                  style={{
+                    width: '100%', padding: '10px', borderRadius: '8px',
+                    border: '1.5px solid #F59E0B', backgroundColor: WHITE,
+                    color: BLACK, fontSize: '13px', fontFamily: FONT_FAMILY,
+                    resize: 'none', outline: 'none',
+                  }}
+                />
+                <button
+                  onClick={handleAddAnnouncement}
+                  style={{
+                    padding: '8px', backgroundColor: '#F59E0B',
+                    color: WHITE, border: 'none', borderRadius: '8px',
+                    fontSize: '12px', fontWeight: 700, cursor: 'pointer',
+                    fontFamily: FONT_FAMILY,
+                  }}
+                >Kirim Pengumuman</button>
               </div>
-            ) : contacts.map((c) => {
-              const cTicket = c.ticket;
-              const unread = cTicket ? (isOwner ? cTicket.ownerUnreadCount || 0 : cTicket.userUnreadCount || 0) : 0;
-              return (
-                <div key={c.uid} onClick={() => openChatWith(c)} style={{
-                  padding: "14px 20px", borderBottom: `1px solid rgba(0,0,0,0.08)`,
-                  cursor: "pointer", display: "flex", alignItems: "center", gap: "12px",
-                  backgroundColor: selectedContact?.uid === c.uid ? "rgba(0,0,0,0.12)" : "transparent",
-                  transition: "background-color 0.2s ease",
+            )}
+
+            <div style={{
+              maxHeight: '200px', overflowY: 'auto',
+              display: 'flex', flexDirection: 'column', gap: '8px',
+            }}>
+              {announcements.length === 0 ? (
+                <div style={{
+                  fontSize: '12px', color: '#92400E', opacity: 0.7,
+                  fontStyle: 'italic', textAlign: 'center', padding: '8px',
+                  fontFamily: FONT_FAMILY,
+                }}>Belum ada pengumuman</div>
+              ) : announcements.map((a) => (
+                <div key={a.id} style={{
+                  padding: '10px', backgroundColor: WHITE,
+                  borderRadius: '8px', border: '1px solid #FDE68A',
+                  fontSize: '12px', color: BLACK,
+                  fontFamily: FONT_FAMILY, lineHeight: 1.5,
+                  position: 'relative',
                 }}>
-                  <div style={{
-                    width: "44px", height: "44px", borderRadius: "12px",
-                    overflow: "hidden", backgroundColor: WHITE, display: "flex",
-                    alignItems: "center", justifyContent: "center", flexShrink: 0,
-                  }}>
-                    {c.photoURL ? (
-                      <img src={c.photoURL} alt={c.displayName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                    ) : (
-                      <span style={{ fontSize: "18px", fontWeight: 800, color: BLUE }}>
-                        {c.displayName.charAt(0).toUpperCase()}
-                      </span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '4px' }}>
+                    <span style={{ fontSize: '11px', fontWeight: 700, color: '#92400E' }}>
+                      {a.authorName || 'Admin'}
+                    </span>
+                    {a.authorEmail === ADMIN_EMAIL && <VerifiedBadgeReal size={12} />}
+                  </div>
+                  <div style={{ marginBottom: '4px' }}>{a.text}</div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '10px', color: '#92400E', opacity: 0.7 }}>
+                      {formatTime(a.createdAt)}
+                    </span>
+                    {isAdmin && (
+                      <button
+                        onClick={() => handleDeleteAnnouncement(a.id)}
+                        style={{
+                          background: 'transparent', border: 'none',
+                          color: RED, cursor: 'pointer', fontSize: '14px',
+                          fontFamily: FONT_FAMILY, padding: 0,
+                        }}
+                      >×</button>
                     )}
                   </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{
-                      fontSize: "14px", fontWeight: 700, color: BLACK,
-                      overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-                      marginBottom: "2px", fontFamily: FONT_FAMILY,
-                    }}>{c.displayName}</div>
-                    <div style={{
-                      fontSize: "11px", color: BLACK, fontFamily: FONT_FAMILY,
-                      display: "flex", alignItems: "center", gap: "6px",
-                      fontWeight: 600, opacity: 0.85,
-                    }}>
-                      <BlinkingDot size={8} color={BLUE} />
-                      {c.online ? "Online" : "Offline"}
-                    </div>
-                  </div>
-                  {unread > 0 && (
-                    <span style={{
-                      minWidth: "20px", height: "20px", padding: "0 6px",
-                      borderRadius: "10px", backgroundColor: BLUE, color: WHITE,
-                      fontSize: "11px", fontWeight: 800, fontFamily: FONT_FAMILY,
-                      display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-                    }}>{unread > 99 ? "99+" : unread}</span>
-                  )}
                 </div>
-              );
-            })}
+              ))}
+            </div>
+          </div>
+
+          {/* REPORTS (ADMIN ONLY) */}
+          {isAdmin && (
+            <div style={{
+              backgroundColor: '#FEF2F2',
+              border: '2px solid #DC2626',
+              borderRadius: '16px',
+              padding: '16px',
+              display: 'flex', flexDirection: 'column', gap: '10px',
+            }}>
+              <div style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              }}>
+                <span style={{
+                  fontSize: '14px', fontWeight: 800, color: '#991B1B',
+                  fontFamily: FONT_FAMILY, letterSpacing: '0.5px',
+                  textTransform: 'uppercase',
+                }}>
+                  🚨 Laporan User ({reports.filter(r => r.status === 'pending').length})
+                </span>
+                <button
+                  onClick={() => setShowReports(!showReports)}
+                  style={{
+                    padding: '4px 10px', backgroundColor: '#DC2626',
+                    color: WHITE, border: 'none', borderRadius: '6px',
+                    fontSize: '11px', fontWeight: 800, cursor: 'pointer',
+                    fontFamily: FONT_FAMILY,
+                  }}
+                >{showReports ? 'Tutup' : 'Lihat'}</button>
+              </div>
+
+              {showReports && (
+                <div style={{
+                  maxHeight: '300px', overflowY: 'auto',
+                  display: 'flex', flexDirection: 'column', gap: '8px',
+                }}>
+                  {reports.length === 0 ? (
+                    <div style={{
+                      fontSize: '12px', color: '#991B1B', opacity: 0.7,
+                      fontStyle: 'italic', textAlign: 'center', padding: '8px',
+                      fontFamily: FONT_FAMILY,
+                    }}>Belum ada laporan</div>
+                  ) : reports.map((r) => (
+                    <div key={r.id} style={{
+                      padding: '10px', backgroundColor: WHITE,
+                      borderRadius: '8px', border: '1px solid #FCA5A5',
+                      fontSize: '12px', color: BLACK,
+                      fontFamily: FONT_FAMILY, lineHeight: 1.5,
+                    }}>
+                      <div style={{ fontWeight: 700, color: '#991B1B', marginBottom: '2px' }}>
+                        Target: {r.targetName}
+                      </div>
+                      <div style={{ fontSize: '11px', marginBottom: '4px' }}>
+                        <strong>Pelapor:</strong> {r.reporterName}
+                      </div>
+                      <div style={{ fontSize: '11px', marginBottom: '4px' }}>
+                        <strong>Alasan:</strong> {r.reason}
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px' }}>
+                        <span style={{
+                          padding: '2px 8px',
+                          backgroundColor: r.status === 'resolved' ? '#D1FAE5' : '#FEF3C7',
+                          color: r.status === 'resolved' ? '#065F46' : '#92400E',
+                          borderRadius: '4px', fontSize: '10px', fontWeight: 700,
+                        }}>{r.status === 'resolved' ? '✓ Selesai' : '⏳ Pending'}</span>
+                        {r.status !== 'resolved' && (
+                          <button
+                            onClick={() => resolveReport(r.id)}
+                            style={{
+                              padding: '4px 8px', backgroundColor: '#4ADE80',
+                              color: WHITE, border: 'none', borderRadius: '6px',
+                              fontSize: '10px', fontWeight: 700, cursor: 'pointer',
+                              fontFamily: FONT_FAMILY,
+                            }}
+                          >Selesai</button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* CONTACTS */}
+          <div style={{
+            width: "100%", backgroundColor: GREEN,
+            borderRadius: "16px", border: `1px solid ${GREEN}`, overflow: "hidden",
+            display: "flex", flexDirection: "column", maxHeight: "400px",
+            boxShadow: "0 8px 24px rgba(74,222,128,0.35)",
+          }}>
+            <div style={{
+              padding: "16px 20px", backgroundColor: LIME,
+              borderBottom: `1px solid ${LIME}`, fontSize: "14px", fontWeight: 800,
+              letterSpacing: "0.5px", textTransform: "uppercase", color: BLACK,
+              fontFamily: FONT_FAMILY, display: "flex", alignItems: "center",
+              justifyContent: "space-between",
+            }}>
+              <span>{isOwner ? "Users Online" : "Owners Online"}</span>
+              <span style={{
+                fontSize: "11px", color: BLACK, padding: "2px 8px",
+                borderRadius: "4px", backgroundColor: WHITE, fontWeight: 800,
+                letterSpacing: "0.5px",
+              }}>{contacts.length}</span>
+            </div>
+            <div style={{ overflowY: "auto", flex: 1, minHeight: 0 }}>
+              {contacts.length === 0 ? (
+                <div style={{
+                  padding: "40px 20px", textAlign: "center", fontSize: "13px",
+                  color: BLACK, fontFamily: FONT_FAMILY, lineHeight: 1.5, opacity: 0.85,
+                }}>
+                  {isOwner ? "No users online." : "Owner is currently offline."}<br />
+                  Please check back later.
+                </div>
+              ) : contacts.map((c) => {
+                const cTicket = c.ticket;
+                const unread = cTicket ? (isOwner ? cTicket.ownerUnreadCount || 0 : cTicket.userUnreadCount || 0) : 0;
+                const isContactAdmin = c.email === ADMIN_EMAIL || c.email === OWNER_EMAIL;
+                return (
+                  <div key={c.uid} style={{
+                    padding: "14px 20px",
+                    borderBottom: `1px solid rgba(0,0,0,0.08)`,
+                    display: "flex", alignItems: "center", gap: "12px",
+                    backgroundColor: selectedContact?.uid === c.uid ? "rgba(0,0,0,0.12)" : "transparent",
+                    transition: "background-color 0.2s ease",
+                  }}>
+                    <div
+                      onClick={() => openChatWith(c)}
+                      style={{
+                        width: "44px", height: "44px", borderRadius: "12px",
+                        overflow: "hidden", backgroundColor: WHITE, display: "flex",
+                        alignItems: "center", justifyContent: "center", flexShrink: 0,
+                        cursor: 'pointer',
+                      }}>
+                      {c.photoURL ? (
+                        <img src={c.photoURL} alt={c.displayName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      ) : (
+                        <span style={{ fontSize: "18px", fontWeight: 800, color: BLUE }}>
+                          {c.displayName.charAt(0).toUpperCase()}
+                        </span>
+                      )}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0, cursor: 'pointer' }} onClick={() => openChatWith(c)}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap', marginBottom: '2px' }}>
+                        <span style={{
+                          fontSize: "14px", fontWeight: 700, color: BLACK,
+                          overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                          fontFamily: FONT_FAMILY,
+                        }}>{c.displayName}</span>
+                        {isContactAdmin && (
+                          <>
+                            <span style={{
+                              padding: '2px 8px', backgroundColor: BLUE, color: WHITE,
+                              borderRadius: '4px', fontSize: '10px', fontWeight: 800,
+                              letterSpacing: '0.5px', textTransform: 'uppercase',
+                              fontFamily: FONT_FAMILY,
+                            }}>Admin</span>
+                            <VerifiedBadgeReal size={14} />
+                          </>
+                        )}
+                      </div>
+                      <div style={{
+                        fontSize: "11px", color: BLACK, fontFamily: FONT_FAMILY,
+                        display: "flex", alignItems: "center", gap: "6px",
+                        fontWeight: 600, opacity: 0.85,
+                      }}>
+                        <BlinkingDot size={8} color={BLUE} />
+                        {c.online ? "Online" : "Offline"}
+                      </div>
+                    </div>
+                    {unread > 0 && (
+                      <span style={{
+                        minWidth: "20px", height: "20px", padding: "0 6px",
+                        borderRadius: "10px", backgroundColor: BLUE, color: WHITE,
+                        fontSize: "11px", fontWeight: 800, fontFamily: FONT_FAMILY,
+                        display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+                      }}>{unread > 99 ? "99+" : unread}</span>
+                    )}
+                    {!isContactAdmin && user && c.uid !== user.uid && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleReportUser(c);
+                        }}
+                        style={{
+                          background: 'transparent', border: 'none',
+                          cursor: 'pointer', padding: '4px',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          flexShrink: 0,
+                        }}
+                        title="Laporkan user ini"
+                      >
+                        <ReportIcon size={16} color={RED} />
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
 
+        {/* ===== RIGHT PANEL: CHAT ===== */}
         <div style={{
           flex: 1, minWidth: "300px", backgroundColor: WHITE,
           borderRadius: "16px", overflow: "hidden", display: "flex",
-          flexDirection: "column", height: "500px", color: BLACK,
+          flexDirection: "column", height: "600px", color: BLACK,
         }}>
           {!ticket || !selectedContact ? (
             <div style={{
@@ -888,9 +1347,22 @@ const SayHeySection = ({
                   <div style={{ minWidth: 0 }}>
                     <div style={{
                       fontSize: "15px", fontWeight: 800, color: BLACK,
-                      fontFamily: FONT_FAMILY, overflow: "hidden",
-                      textOverflow: "ellipsis", whiteSpace: "nowrap",
-                    }}>{selectedContact.displayName}</div>
+                      fontFamily: FONT_FAMILY, display: 'flex', alignItems: 'center',
+                      gap: '4px', flexWrap: 'wrap',
+                    }}>
+                      <span>{selectedContact.displayName}</span>
+                      {(selectedContact.email === ADMIN_EMAIL || selectedContact.email === OWNER_EMAIL) && (
+                        <>
+                          <span style={{
+                            padding: '2px 8px', backgroundColor: BLUE, color: WHITE,
+                            borderRadius: '4px', fontSize: '10px', fontWeight: 800,
+                            letterSpacing: '0.5px', textTransform: 'uppercase',
+                            fontFamily: FONT_FAMILY,
+                          }}>Admin</span>
+                          <VerifiedBadgeReal size={14} />
+                        </>
+                      )}
+                    </div>
                     <div style={{
                       fontSize: "11px", color: BLACK, fontFamily: FONT_FAMILY,
                       display: "flex", alignItems: "center", gap: "6px",
@@ -905,7 +1377,7 @@ const SayHeySection = ({
               <div ref={chatContainerRef} className="chat-messages-container" style={{
                 flex: 1, overflowY: "auto", padding: "20px",
                 display: "flex", flexDirection: "column", gap: "12px",
-                minHeight: 0, backgroundColor: "#fafafa",
+                minHeight: 0, backgroundColor: WHITE,
               }}>
                 {messages.length === 0 ? (
                   <div style={{
@@ -914,20 +1386,28 @@ const SayHeySection = ({
                   }}>No messages yet. Say hey! 👋</div>
                 ) : messages.map((msg, idx) => {
                   const isMine = msg.senderId === user?.uid;
+                  const msgIsAdmin = msg.isAdmin || msg.senderName?.includes('(Admin)');
                   return (
                     <div key={msg.id || idx} style={{ alignSelf: isMine ? "flex-end" : "flex-start", maxWidth: "75%" }}>
                       <div style={{
                         padding: "10px 14px", borderRadius: "12px",
-                        backgroundColor: isMine ? BLUE : "#ffffff",
-                        color: isMine ? WHITE : BLACK, fontSize: "14px",
+                        backgroundColor: msgIsAdmin ? '#FEF3C7' : (isMine ? BLUE : "#ffffff"),
+                        color: msgIsAdmin ? BLACK : (isMine ? WHITE : BLACK),
+                        fontSize: "14px",
                         fontFamily: FONT_FAMILY, wordBreak: "break-word",
-                        border: isMine ? "none" : "1px solid rgba(0,0,0,0.06)",
+                        border: msgIsAdmin ? `2px solid #F59E0B` : (isMine ? "none" : "1px solid rgba(0,0,0,0.06)"),
                         boxShadow: isMine ? "none" : "0 2px 6px rgba(0,0,0,0.04)",
                       }}>
                         {!isMine && (
                           <div style={{
-                            fontSize: "11px", fontWeight: 700, color: BLUE, marginBottom: "4px",
-                          }}>{msg.senderName}</div>
+                            fontSize: "11px", fontWeight: 700,
+                            color: msgIsAdmin ? '#92400E' : BLUE,
+                            marginBottom: "4px",
+                            display: 'flex', alignItems: 'center', gap: '4px',
+                          }}>
+                            <span>{msg.senderName}</span>
+                            {msgIsAdmin && <VerifiedBadgeReal size={12} />}
+                          </div>
                         )}
                         <div>{msg.text}</div>
                         <div style={{
@@ -936,7 +1416,7 @@ const SayHeySection = ({
                         }}>
                           <span style={{
                             fontSize: "10px",
-                            color: isMine ? "rgba(255,255,255,0.85)" : "#999",
+                            color: msgIsAdmin ? '#92400E' : (isMine ? "rgba(255,255,255,0.85)" : "#999"),
                           }}>{formatTime(msg.timestamp)}</span>
                         </div>
                       </div>
@@ -956,7 +1436,7 @@ const SayHeySection = ({
                       sendMessage();
                     }
                   }}
-                  placeholder="Type your message..."
+                  placeholder={isAdmin ? "Kirim pesan sebagai Admin..." : "Type your message..."}
                   style={{
                     flex: 1, padding: "12px 16px",
                     border: "1px solid rgba(0,0,0,0.1)", borderRadius: "10px",
@@ -976,6 +1456,60 @@ const SayHeySection = ({
           )}
         </div>
       </div>
+
+      {/* REPORT MODAL */}
+      {reportModal.open && reportModal.target && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.6)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 10001, padding: '20px', fontFamily: FONT_FAMILY,
+        }}>
+          <div style={{
+            backgroundColor: WHITE, borderRadius: '16px',
+            padding: '30px', maxWidth: '450px', width: '100%',
+            display: 'flex', flexDirection: 'column', gap: '16px',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <ReportIcon size={28} color={RED} />
+              <span style={{ fontSize: '20px', fontWeight: 700, color: BLACK }}>Laporkan User</span>
+            </div>
+            <div style={{ fontSize: '14px', color: BLACK }}>
+              Melaporkan: <strong>{reportModal.target.displayName}</strong>
+            </div>
+            <textarea
+              value={reportReason}
+              onChange={(e) => setReportReason(e.target.value)}
+              placeholder="Alasan laporan (contoh: spam, pelecehan, penipuan, dll.)"
+              rows={4}
+              style={{
+                width: '100%', padding: '12px', borderRadius: '10px',
+                border: `1.5px solid ${RED}`, backgroundColor: WHITE,
+                color: BLACK, fontSize: '14px', fontFamily: FONT_FAMILY,
+                resize: 'none', outline: 'none',
+              }}
+            />
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => { setReportModal({ open: false, target: null }); setReportReason(""); }}
+                style={{
+                  padding: '10px 20px', backgroundColor: 'transparent',
+                  border: `1.5px solid ${BLACK}`, borderRadius: '8px',
+                  color: BLACK, fontSize: '14px', cursor: 'pointer',
+                  fontFamily: FONT_FAMILY, fontWeight: 700,
+                }}>Batal</button>
+              <button
+                onClick={submitReport}
+                style={{
+                  padding: '10px 20px', backgroundColor: RED,
+                  border: 'none', borderRadius: '8px',
+                  color: WHITE, fontSize: '14px', cursor: 'pointer',
+                  fontFamily: FONT_FAMILY, fontWeight: 700,
+                }}>Kirim Laporan</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -984,6 +1518,7 @@ const SayHeySection = ({
 const FixedNavbar = ({ user, auth, db, userDisplayName, router, onSayHeyToggle, sayHeyOpen }: any) => {
   const displayName = userDisplayName || user?.displayName || user?.email?.split("@")[0] || "User";
   const photoURL = user?.photoURL || "";
+  const userIsAdmin = user?.email === ADMIN_EMAIL;
 
   const handleLogout = async () => {
     if (!auth) return;
@@ -1058,7 +1593,10 @@ const FixedNavbar = ({ user, auth, db, userDisplayName, router, onSayHeyToggle, 
                   <span style={{ fontSize: "14px", fontWeight: 800, color: BLUE }}>{displayName.charAt(0).toUpperCase()}</span>
                 )}
               </div>
-              <span style={{ color: WHITE, fontSize: "13px", fontWeight: 700, letterSpacing: "0.02em", fontFamily: FONT_FAMILY, whiteSpace: "nowrap" }}>{displayName}</span>
+              <span style={{ color: WHITE, fontSize: "13px", fontWeight: 700, letterSpacing: "0.02em", fontFamily: FONT_FAMILY, whiteSpace: "nowrap", display: 'flex', alignItems: 'center', gap: '4px' }}>
+                {displayName}
+                {userIsAdmin && <VerifiedBadgeReal size={12} />}
+              </span>
             </div>
             <button onClick={handleLogout} style={{
               display: "inline-flex", alignItems: "center", gap: "6px",
@@ -1136,7 +1674,6 @@ const FooterSection = () => {
         boxSizing: "border-box",
       }}
     >
-      {/* FOOTER LINKS + DOWNLOAD BUTTON */}
       <div style={{
         display: "flex", justifyContent: "space-between",
         alignItems: "flex-start", maxWidth: "1400px",
@@ -1203,20 +1740,15 @@ const FooterSection = () => {
           </div>
         ))}
 
-        {/* ===== DOWNLOAD FOR WINDOWS - SISI KANAN, BG MERAH ===== */}
         <div style={{ flex: "0 0 auto", minWidth: "200px" }}>
           <a
             href={STORE_LINK}
             target="_blank"
             rel="noopener noreferrer"
             style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "10px",
-              textDecoration: "none",
-              cursor: "pointer",
-              padding: "14px 22px",
-              backgroundColor: RED,
+              display: "inline-flex", alignItems: "center", gap: "10px",
+              textDecoration: "none", cursor: "pointer",
+              padding: "14px 22px", backgroundColor: RED,
               borderRadius: "12px",
               boxShadow: "0 6px 24px rgba(220,38,38,0.35)",
               transition: "transform 0.2s ease, boxShadow 0.2s ease",
@@ -1233,21 +1765,13 @@ const FooterSection = () => {
           >
             <WindowsIcon size={24} color={WHITE} />
             <span style={{
-              fontFamily: FONT_FAMILY,
-              fontSize: "18px",
-              fontWeight: 700,
-              color: WHITE,
-              letterSpacing: "-0.01em",
-              lineHeight: 1.2,
-              whiteSpace: "nowrap",
-            }}>
-              Download for Windows
-            </span>
+              fontFamily: FONT_FAMILY, fontSize: "18px", fontWeight: 700,
+              color: WHITE, letterSpacing: "-0.01em", lineHeight: 1.2, whiteSpace: "nowrap",
+            }}>Download for Windows</span>
           </a>
         </div>
       </div>
 
-      {/* TERMS */}
       <div style={{
         maxWidth: "1400px", margin: "40px auto 0 auto",
         paddingTop: "20px", borderTop: `1px solid ${BLUE}20`,
@@ -1262,20 +1786,15 @@ const FooterSection = () => {
         </p>
       </div>
 
-      {/* TOMBOL UNDUH MENURU - TANPA PANAH */}
       <div style={{ marginTop: "40px", marginBottom: "24px", position: "relative", zIndex: 1 }}>
         <a
           href={STORE_LINK}
           target="_blank"
           rel="noopener noreferrer"
           style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "12px",
-            textDecoration: "none",
-            cursor: "pointer",
-            padding: "14px 22px",
-            backgroundColor: WHITE,
+            display: "inline-flex", alignItems: "center", gap: "12px",
+            textDecoration: "none", cursor: "pointer",
+            padding: "14px 22px", backgroundColor: WHITE,
             borderRadius: "14px",
             boxShadow: "0 6px 24px rgba(0,0,0,0.12)",
             transition: "transform 0.2s ease, boxShadow 0.2s ease",
@@ -1292,19 +1811,12 @@ const FooterSection = () => {
         >
           <MicrosoftStoreIcon size={36} />
           <span style={{
-            fontFamily: FONT_FAMILY,
-            fontSize: "24px",
-            fontWeight: 700,
-            color: BLUE,
-            letterSpacing: "-0.02em",
-            lineHeight: 1.2,
-          }}>
-            Unduh Menuru
-          </span>
+            fontFamily: FONT_FAMILY, fontSize: "24px", fontWeight: 700,
+            color: BLUE, letterSpacing: "-0.02em", lineHeight: 1.2,
+          }}>Unduh Menuru</span>
         </a>
       </div>
 
-      {/* JUDUL MENURU BESAR */}
       <div style={{ position: "relative", zIndex: 1 }}>
         <span
           ref={titleRef}
@@ -1316,24 +1828,18 @@ const FooterSection = () => {
             willChange: "transform, opacity", whiteSpace: "nowrap",
             margin: 0, padding: 0, overflow: "visible", position: "relative",
             pointerEvents: "none",
-          }}
-        >
-          Menuru
-        </span>
+          }}>Menuru</span>
         <div style={{ width: "100%", display: "flex", justifyContent: "flex-start", marginTop: "10px" }}>
           <span style={{
             fontFamily: FONT_FAMILY, fontSize: "16px", fontWeight: 400,
             color: BLUE, letterSpacing: "0.01em", opacity: 0.85,
-          }}>
-            2024 - 2026 Menuru. All rights reserved.
-          </span>
+          }}>2024 - 2026 Menuru. All rights reserved.</span>
         </div>
       </div>
     </div>
   );
 };
 
-// ===== FOOTER LINKS DATA =====
 const footerLinks = [
   { title: "Get in Touch", links: ["Contact Us", "Instagram", "Live Chat"] },
   { title: "Product", links: ["Shop", "Note", "Calendar", "Blog", "Donation", "Community", "Live Chat Agent", "Stories"] },
@@ -1410,11 +1916,8 @@ const CollabIconList = ({ collaborators = [], collaboratorNames = {} }: any) => 
           backgroundColor: BLUE, color: WHITE,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           fontSize: '11px', fontWeight: 800, fontFamily: FONT_FAMILY,
-          border: `2px solid ${WHITE}`,
-          marginLeft: idx === 0 ? 0 : '-8px',
-        }}>
-          {String(name).charAt(0).toUpperCase()}
-        </div>
+          border: `2px solid ${WHITE}`, marginLeft: idx === 0 ? 0 : '-8px',
+        }}>{String(name).charAt(0).toUpperCase()}</div>
       ))}
       {collaborators.length > 3 && (
         <div style={{
@@ -1459,9 +1962,7 @@ const NoteEditorToolbar = ({
       <button type="button" onClick={() => onFormat('underline')} style={toolbarBtnStyle(activeFormats.underline)} title="Underline">
         <UnderlineIcon size={16} color={activeFormats.underline ? WHITE : BLUE} />
       </button>
-
       <div style={{ width: '1px', height: '24px', backgroundColor: `${BLUE}30`, margin: '0 4px' }} />
-
       <select value={fontSize} onChange={(e) => { setFontSize(Number(e.target.value)); onFormat('fontSize', e.target.value); }} style={{
         padding: '6px 10px', backgroundColor: WHITE, border: `1.5px solid ${BLUE}`,
         borderRadius: '6px', color: BLUE, fontSize: '13px',
@@ -1471,9 +1972,7 @@ const NoteEditorToolbar = ({
           <option key={size} value={size}>{size}px</option>
         ))}
       </select>
-
       <div style={{ width: '1px', height: '24px', backgroundColor: `${BLUE}30`, margin: '0 4px' }} />
-
       <button type="button" onClick={() => onFormat('justifyLeft')} style={toolbarBtnStyle(activeFormats.justifyLeft)} title="Rata Kiri">
         <AlignLeftIcon size={16} color={activeFormats.justifyLeft ? WHITE : BLUE} />
       </button>
@@ -1483,13 +1982,10 @@ const NoteEditorToolbar = ({
       <button type="button" onClick={() => onFormat('justifyRight')} style={toolbarBtnStyle(activeFormats.justifyRight)} title="Rata Kanan">
         <AlignRightIcon size={16} color={activeFormats.justifyRight ? WHITE : BLUE} />
       </button>
-
       <div style={{ width: '1px', height: '24px', backgroundColor: `${BLUE}30`, margin: '0 4px' }} />
-
       <button type="button" onClick={() => onFormat('insertUnorderedList')} style={toolbarBtnStyle(activeFormats.insertUnorderedList)} title="Bullet List">
         <ListIcon size={16} color={activeFormats.insertUnorderedList ? WHITE : BLUE} />
       </button>
-
       <div style={{ position: 'relative' }}>
         <button type="button" onClick={() => setShowStabiloPicker(!showStabiloPicker)} style={toolbarBtnStyle(showStabiloPicker)} title="Label Warna Stabilo">
           <HighlightIcon size={16} color={showStabiloPicker ? WHITE : BLUE} />
@@ -1504,11 +2000,7 @@ const NoteEditorToolbar = ({
           }}>
             {STABILO_COLORS.map((color) => (
               <button key={color.value} type="button"
-                onClick={() => {
-                  setStabiloColor(color.value);
-                  onFormat('hiliteColor', color.value);
-                  setShowStabiloPicker(false);
-                }}
+                onClick={() => { setStabiloColor(color.value); onFormat('hiliteColor', color.value); setShowStabiloPicker(false); }}
                 style={{
                   width: '28px', height: '28px', borderRadius: '50%',
                   backgroundColor: color.value, border: stabiloColor === color.value ? `3px solid ${BLUE}` : '2px solid transparent',
@@ -1518,11 +2010,7 @@ const NoteEditorToolbar = ({
               />
             ))}
             <button type="button"
-              onClick={() => {
-                setStabiloColor('transparent');
-                onFormat('hiliteColor', 'transparent');
-                setShowStabiloPicker(false);
-              }}
+              onClick={() => { setStabiloColor('transparent'); onFormat('hiliteColor', 'transparent'); setShowStabiloPicker(false); }}
               style={{
                 width: '28px', height: '28px', borderRadius: '50%',
                 backgroundColor: WHITE, border: `2px solid ${BLUE}`,
@@ -1535,77 +2023,6 @@ const NoteEditorToolbar = ({
     </div>
   );
 };
-
-// ===== FIREBASE ENCRYPTION (untuk Say Hey) =====
-const ENCRYPTION_KEY_BASE64 = "bWVudXJ1LXNlY3JldC1rZXktMjAyNi0zMmJ5dGVzISEh";
-const IV_LENGTH = 12;
-let cryptoKeyCache: CryptoKey | null = null;
-
-function base64ToUint8Array(base64: string): Uint8Array {
-  const binaryString = atob(base64);
-  const bytes = new Uint8Array(binaryString.length);
-  for (let i = 0; i < binaryString.length; i++) bytes[i] = binaryString.charCodeAt(i);
-  return bytes;
-}
-
-function uint8ArrayToBase64(uint8Array: Uint8Array): string {
-  let binary = "";
-  for (let i = 0; i < uint8Array.length; i++) binary += String.fromCharCode(uint8Array[i]);
-  return btoa(binary);
-}
-
-async function getCryptoKey(): Promise<CryptoKey> {
-  if (cryptoKeyCache) return cryptoKeyCache;
-  const keyData = base64ToUint8Array(ENCRYPTION_KEY_BASE64);
-  const keyBytes = keyData.slice(0, 32);
-  cryptoKeyCache = await window.crypto.subtle.importKey(
-    "raw", keyBytes, { name: "AES-GCM" }, false, ["encrypt", "decrypt"]
-  );
-  return cryptoKeyCache;
-}
-
-async function encryptMessage(text: string): Promise<string> {
-  try {
-    if (typeof window === "undefined" || !window.crypto) {
-      return `encrypted:${btoa(unescape(encodeURIComponent(text)))}`;
-    }
-    const key = await getCryptoKey();
-    const encoder = new TextEncoder();
-    const data = encoder.encode(text);
-    const iv = window.crypto.getRandomValues(new Uint8Array(IV_LENGTH));
-    const encrypted = await window.crypto.subtle.encrypt(
-      { name: "AES-GCM", iv: iv, tagLength: 128 }, key, data
-    );
-    const encryptedArray = new Uint8Array(encrypted);
-    const combined = new Uint8Array(iv.length + encryptedArray.length);
-    combined.set(iv, 0);
-    combined.set(encryptedArray, iv.length);
-    return `encrypted:${uint8ArrayToBase64(combined)}`;
-  } catch { return `plain:${btoa(unescape(encodeURIComponent(text)))}`; }
-}
-
-async function decryptMessage(encrypted: string): Promise<string> {
-  try {
-    if (typeof window === "undefined" || !window.crypto) {
-      if (encrypted.startsWith("encrypted:")) {
-        return decodeURIComponent(escape(atob(encrypted.substring("encrypted:".length))));
-      }
-      return encrypted;
-    }
-    if (encrypted.startsWith("plain:")) {
-      return decodeURIComponent(escape(atob(encrypted.substring("plain:".length))));
-    }
-    if (!encrypted.startsWith("encrypted:")) return encrypted;
-    const combined = base64ToUint8Array(encrypted.substring("encrypted:".length));
-    const iv = combined.slice(0, IV_LENGTH);
-    const encryptedData = combined.slice(IV_LENGTH);
-    const key = await getCryptoKey();
-    const decrypted = await window.crypto.subtle.decrypt(
-      { name: "AES-GCM", iv: iv, tagLength: 128 }, key, encryptedData
-    );
-    return new TextDecoder().decode(decrypted);
-  } catch { return "[Message cannot be decrypted]"; }
-}
 
 // ===== INTERFACES =====
 interface Note {
@@ -1781,26 +2198,52 @@ export default function NotesPage(): React.JSX.Element {
     } catch (error) { console.error('Firebase init error:', error); }
   }, []);
 
-  // ===== LOAD ALL NOTES (TANPA FILTER USER - BISA DILIHAT TANPA LOGIN) =====
+  // ===== LOAD NOTES MILIK USER SENDIRI (PRIVATE) + COLLABORATIVE =====
   useEffect(() => {
-    if (!db || !isMounted) return;
+    if (!db || !isMounted || !user) {
+      setNotes([]);
+      setIsLoading(false);
+      return;
+    }
     setIsLoading(true);
+    const unsubscribes: (() => void)[] = [];
     try {
-      const q = query(collection(db, 'userNotes'), orderBy('updatedAt', 'desc'), limit(100));
-      const unsub = onSnapshot(q, (snap: any) => {
-        const allNotes: Note[] = [];
+      const ownNotesQ = query(
+        collection(db, 'userNotes'),
+        where('userId', '==', user.uid),
+        orderBy('updatedAt', 'desc')
+      );
+      const unsub1 = onSnapshot(ownNotesQ, (snap: any) => {
+        const ownNotes: Note[] = [];
         snap.forEach((docSnap: any) => {
-          allNotes.push({ id: docSnap.id, ...docSnap.data() });
+          ownNotes.push({ id: docSnap.id, ...docSnap.data() });
         });
-        setNotes(allNotes);
-        setIsLoading(false);
+        const collabNotesQ = query(
+          collection(db, 'userNotes'),
+          where('collaborators', 'array-contains', user.uid)
+        );
+        getDocs(collabNotesQ).then((collabSnap) => {
+          const collabNotes: Note[] = [];
+          collabSnap.forEach((docSnap: any) => {
+            if (!ownNotes.some(n => n.id === docSnap.id)) {
+              collabNotes.push({ id: docSnap.id, ...docSnap.data(), isCollaborative: true });
+            }
+          });
+          setNotes([...ownNotes, ...collabNotes]);
+          setIsLoading(false);
+        }).catch((err) => {
+          console.error("Error loading collab notes:", err);
+          setNotes(ownNotes);
+          setIsLoading(false);
+        });
       });
-      return () => unsub();
+      unsubscribes.push(unsub1);
     } catch (error) {
       console.error("Error loading notes:", error);
       setIsLoading(false);
     }
-  }, [db, isMounted]);
+    return () => { unsubscribes.forEach((unsub) => unsub()); };
+  }, [db, isMounted, user]);
 
   useEffect(() => {
     if (!auth) return;
@@ -1817,6 +2260,7 @@ export default function NotesPage(): React.JSX.Element {
         setUser(null);
         setUserDisplayName("");
         setUserEmail("");
+        setNotes([]);
       }
       setAuthReady(true);
       setLoading(false);
@@ -2095,19 +2539,15 @@ export default function NotesPage(): React.JSX.Element {
         alert("User sudah menjadi kolaborator catatan ini");
         return;
       }
-      await addDoc(collection(db, 'notifications'), {
-        type: 'collaborate_invite',
-        noteId: currentNote.id, noteTitle: currentNote.title,
-        senderId: user.uid, senderName: userDisplayName, senderEmail: userEmail,
-        receiverId: invitedUserId, receiverEmail: collaborateEmail.trim().toLowerCase(),
-        receiverName: invitedUserName, status: 'pending',
-        message: `${userDisplayName} mengundang Anda untuk berkolaborasi pada catatan "${currentNote.title}"`,
-        createdAt: serverTimestamp()
+      await updateDoc(doc(db, 'userNotes', currentNote.id!), {
+        collaborators: arrayUnion(invitedUserId),
+        [`collaboratorNames.${invitedUserId}`]: invitedUserName,
+        isCollaborative: true,
       });
       setCollaborateEmail("");
       setShowCollaborateModal(false);
-      alert(`Undangan kolaborasi terkirim ke ${collaborateEmail}`);
-    } catch (error) { console.error(error); alert("Gagal mengundang."); }
+      alert(`Kolaborator ${invitedUserName} berhasil ditambahkan`);
+    } catch (error) { console.error(error); alert("Gagal menambahkan kolaborator."); }
   };
 
   const handleEditNote = async () => {
@@ -2279,7 +2719,6 @@ export default function NotesPage(): React.JSX.Element {
             margin: "0 auto", marginTop: "160px",
             position: "relative", zIndex: 2,
           }}>
-            {/* ===== JUDUL NOTES - TIDAK TEBAL, 450px ===== */}
             <h2 style={{
               fontFamily: FONT_FAMILY, fontSize: "450px", fontWeight: 400,
               color: BLUE, letterSpacing: "-0.04em", lineHeight: 1,
@@ -2294,7 +2733,6 @@ export default function NotesPage(): React.JSX.Element {
               Temukan catatan-catatan menarik dari komunitas Menuru. Semua catatan dikategorikan untuk memudahkan Anda menjelajahi topik yang Anda minati.
             </p>
 
-            {/* ===== SAY HEY SECTION (muncul jika diklik) ===== */}
             {showSayHey && (
               <div id="sayhey-section" style={{ marginBottom: "60px" }}>
                 <SayHeySection
@@ -2306,662 +2744,689 @@ export default function NotesPage(): React.JSX.Element {
               </div>
             )}
 
-            {/* Actions row */}
-            <div style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              flexWrap: 'wrap', gap: '20px', marginBottom: '30px'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
-                <TopicDropdown
-                  categories={categories}
-                  notesByCategory={notesByCategory}
-                  selectedTopic={selectedTopic}
-                  onSelectTopic={setSelectedTopic}
-                />
-              </div>
-
-              {user && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '15px', flexWrap: 'wrap' }}>
-                  <button
-                    onClick={() => {
-                      if (requireLogin("membuat grup")) {
-                        setShowInlineGroupEditor(!showInlineGroupEditor);
-                        setShowInlineNoteEditor(false);
-                      }
-                    }}
-                    style={{
-                      display: 'inline-flex', alignItems: 'center', gap: '8px',
-                      padding: '12px 20px',
-                      backgroundColor: showInlineGroupEditor ? BLACK : BLUE,
-                      color: WHITE, border: 'none', borderRadius: '10px',
-                      fontFamily: FONT_FAMILY, fontSize: '15px', fontWeight: 700, cursor: 'pointer',
-                    }}
-                  >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M12 5v14M5 12h14"/>
-                    </svg>
-                    {showInlineGroupEditor ? "Tutup Form Grup" : "Buat Grup"}
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (requireLogin("membuat catatan")) {
-                        setShowInlineNoteEditor(!showInlineNoteEditor);
-                        setShowInlineGroupEditor(false);
-                      }
-                    }}
-                    style={{
-                      display: 'inline-flex', alignItems: 'center', gap: '8px',
-                      padding: '12px 20px',
-                      backgroundColor: showInlineNoteEditor ? BLACK : BLUE,
-                      color: WHITE, border: 'none', borderRadius: '10px',
-                      fontFamily: FONT_FAMILY, fontSize: '15px', fontWeight: 700, cursor: 'pointer',
-                    }}
-                  >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M12 5v14M5 12h14"/>
-                    </svg>
-                    {showInlineNoteEditor ? "Tutup Form Catatan" : "Buat Catatan"}
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* Inline group editor */}
-            {showInlineGroupEditor && (
+            {!user ? (
               <div style={{
-                backgroundColor: WHITE, border: `2px solid ${BLUE}`,
-                borderRadius: '16px', padding: '30px', marginBottom: '40px',
-                boxShadow: '0 8px 32px rgba(13,60,252,0.15)',
+                display: 'flex', flexDirection: 'column',
+                alignItems: 'center', justifyContent: 'center',
+                padding: '80px 20px', marginTop: '40px',
+                gap: '30px', textAlign: 'center',
               }}>
                 <div style={{
-                  fontSize: '28px', fontWeight: 700, color: BLUE,
-                  fontFamily: FONT_FAMILY, marginBottom: '20px',
-                }}>Buat Grup Baru</div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                  <input
-                    type="text" value={newGroupName}
-                    onChange={(e) => setNewGroupName(e.target.value)}
-                    placeholder="Nama Grup"
-                    style={{
-                      width: '100%', padding: '14px 18px', backgroundColor: 'transparent',
-                      border: `1.5px solid ${BLUE}`, borderRadius: '10px',
-                      color: BLUE, fontSize: '16px', outline: 'none',
-                      fontFamily: FONT_FAMILY, fontWeight: 600,
-                    }}
-                  />
-
-                  <div>
-                    <div style={{
-                      fontSize: '14px', fontWeight: 700, color: BLUE,
-                      fontFamily: FONT_FAMILY, marginBottom: '10px',
-                    }}>Tambahkan User ke Grup:</div>
-
-                    <input
-                      type="email" value={memberSearchEmail}
-                      onChange={(e) => {
-                        setMemberSearchEmail(e.target.value);
-                        handleSearchMember(e.target.value);
-                      }}
-                      placeholder="Cari email user..."
-                      style={{
-                        width: '100%', padding: '12px 16px', backgroundColor: 'transparent',
-                        border: `1.5px solid ${BLUE}`, borderRadius: '10px',
-                        color: BLUE, fontSize: '14px', outline: 'none',
-                        fontFamily: FONT_FAMILY, fontWeight: 500,
-                      }}
-                    />
-
-                    {memberSearchResults.length > 0 && (
-                      <div style={{
-                        backgroundColor: '#f8f9fa',
-                        border: `1px solid ${BLUE}30`, borderRadius: '8px',
-                        marginTop: '10px', maxHeight: '200px', overflowY: 'auto',
-                      }}>
-                        {memberSearchResults.map((m) => (
-                          <div key={m.uid} onClick={() => addMemberToNewGroup(m)} style={{
-                            padding: '12px 16px', cursor: 'pointer',
-                            borderBottom: `1px solid ${BLUE}15`,
-                            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                          }}
-                            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#e8ebf5')}
-                            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
-                          >
-                            <div>
-                              <div style={{ fontSize: '14px', fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY }}>
-                                {m.displayName || m.name || m.email?.split('@')[0]}
-                              </div>
-                              <div style={{ fontSize: '12px', color: BLUE, opacity: 0.7, fontFamily: FONT_FAMILY }}>
-                                {m.email}
-                              </div>
-                            </div>
-                            <span style={{ fontSize: '20px', fontWeight: 'bold', color: BLUE }}>+</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
-                    {newGroupMembers.length > 0 && (
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '10px' }}>
-                        {newGroupMembers.map((m) => (
-                          <div key={m.uid} style={{
-                            display: 'flex', alignItems: 'center', gap: '8px',
-                            padding: '6px 12px', backgroundColor: BLUE,
-                            color: WHITE, borderRadius: '20px',
-                            fontSize: '13px', fontFamily: FONT_FAMILY, fontWeight: 600,
-                          }}>
-                            <span>{m.name}</span>
-                            <button onClick={() => removeMemberFromNewGroup(m.uid)} style={{
-                              background: 'transparent', border: 'none',
-                              color: WHITE, cursor: 'pointer', fontSize: '16px',
-                              padding: 0, lineHeight: 1,
-                            }}>×</button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '15px', marginTop: '10px' }}>
-                    <button onClick={() => { setShowInlineGroupEditor(false); setNewGroupName(""); setNewGroupMembers([]); setMemberSearchEmail(""); setMemberSearchResults([]); }} style={{
-                      padding: '12px 24px', backgroundColor: 'transparent',
-                      border: `1.5px solid ${BLUE}`, borderRadius: '10px',
-                      color: BLUE, fontSize: '14px', cursor: 'pointer',
-                      fontFamily: FONT_FAMILY, fontWeight: 700,
-                    }}>Batal</button>
-                    <button onClick={handleCreateGroup} style={{
-                      padding: '12px 24px', backgroundColor: BLUE,
-                      border: 'none', borderRadius: '10px', color: WHITE,
-                      fontSize: '14px', cursor: 'pointer',
-                      fontFamily: FONT_FAMILY, fontWeight: 700,
-                    }}>Buat Grup</button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Inline note editor */}
-            {showInlineNoteEditor && (
-              <div style={{
-                backgroundColor: WHITE, border: `2px solid ${BLUE}`,
-                borderRadius: '16px', padding: '30px', marginBottom: '40px',
-                boxShadow: '0 8px 32px rgba(13,60,252,0.15)',
-              }}>
-                <div style={{
-                  fontSize: '28px', fontWeight: 700, color: BLUE,
-                  fontFamily: FONT_FAMILY, marginBottom: '20px',
-                  display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap',
+                  fontFamily: FONT_FAMILY, fontSize: '40px', fontWeight: 700,
+                  color: BLUE, letterSpacing: '-0.02em', lineHeight: 1.2, maxWidth: '800px',
                 }}>
-                  Buat Catatan Baru
-                  {noteLabelColor && (
-                    <span style={{
-                      padding: '4px 12px', backgroundColor: noteLabelColor,
-                      color: BLACK, borderRadius: '4px', fontSize: '12px',
-                      fontWeight: 800, letterSpacing: '0.5px', textTransform: 'uppercase',
-                      fontFamily: FONT_FAMILY,
-                    }}>Label Aktif</span>
-                  )}
-                  {voiceSupported && (
-                    <button
-                      type="button"
-                      onClick={toggleVoiceInput}
-                      style={{
-                        marginLeft: 'auto',
-                        display: 'inline-flex', alignItems: 'center', gap: '8px',
-                        padding: '10px 18px',
-                        backgroundColor: isListening ? '#EF4444' : BLUE,
-                        color: WHITE,
-                        border: 'none', borderRadius: '10px',
-                        fontFamily: FONT_FAMILY, fontSize: '14px',
-                        fontWeight: 700, cursor: 'pointer',
-                        boxShadow: isListening ? '0 0 0 4px rgba(239,68,68,0.2)' : '0 4px 12px rgba(13,60,252,0.25)',
-                        transition: 'all 0.2s ease',
-                      }}
-                    >
-                      {isListening ? <StopIcon size={18} color={WHITE} /> : <MicIcon size={18} color={WHITE} />}
-                      {isListening ? "Stop Rekam" : "Rekam Suara"}
-                    </button>
-                  )}
+                  Silakan login terlebih dahulu untuk melihat catatan Anda
                 </div>
-
-                {voiceStatus && (
-                  <div style={{
-                    padding: '12px 18px',
-                    backgroundColor: isListening ? '#FEE2E2' : '#E0E7FF',
-                    border: `1.5px solid ${isListening ? '#EF4444' : BLUE}`,
-                    borderRadius: '10px', marginBottom: '20px',
-                    fontSize: '14px', fontWeight: 600,
-                    color: isListening ? '#991B1B' : BLUE,
-                    fontFamily: FONT_FAMILY,
-                    display: 'flex', alignItems: 'center', gap: '10px',
-                  }}>
-                    {isListening && (
-                      <span style={{
-                        width: '10px', height: '10px', borderRadius: '50%',
-                        backgroundColor: '#EF4444',
-                        animation: 'mic-pulse 1s ease-in-out infinite',
-                      }} />
-                    )}
-                    {voiceStatus}
-                  </div>
-                )}
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                  <input
-                    type="text" value={newNote.title}
-                    onChange={(e) => setNewNote({...newNote, title: e.target.value})}
-                    placeholder="Judul Catatan"
-                    style={{
-                      width: '100%', padding: '18px 20px', backgroundColor: 'transparent',
-                      border: 'none', borderBottom: `2px solid ${BLUE}`,
-                      color: BLUE, fontSize: '26px', outline: 'none',
-                      fontFamily: FONT_FAMILY, fontWeight: 700,
-                    }}
-                  />
-
-                  <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
-                    <select value={newNote.category}
-                      onChange={(e) => setNewNote({...newNote, category: e.target.value})}
-                      style={{
-                        flex: 1, minWidth: '200px', padding: '14px 18px',
-                        backgroundColor: BLUE, border: 'none', color: WHITE,
-                        fontSize: '16px', outline: 'none', fontFamily: FONT_FAMILY,
-                        cursor: 'pointer', borderRadius: '10px', fontWeight: 600,
-                      }}>
-                      <option value="">Pilih Kategori</option>
-                      {categories.map((category) => (
-                        <option key={category} value={category}>{category}</option>
-                      ))}
-                    </select>
-
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                      <span style={{ fontSize: '13px', fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY }}>Label:</span>
-                      {STABILO_COLORS.map((color) => (
-                        <button key={color.value} type="button"
-                          onClick={() => setNoteLabelColor(noteLabelColor === color.value ? "" : color.value)}
-                          style={{
-                            width: '28px', height: '28px', borderRadius: '50%',
-                            backgroundColor: color.value,
-                            border: noteLabelColor === color.value ? `3px solid ${BLUE}` : `2px solid ${BLUE}30`,
-                            cursor: 'pointer', padding: 0,
-                          }}
-                          title={color.name}
-                        />
-                      ))}
-                      {noteLabelColor && (
-                        <button type="button" onClick={() => setNoteLabelColor("")} style={{
-                          padding: '4px 10px', backgroundColor: 'transparent',
-                          border: `1.5px solid ${BLUE}`, borderRadius: '6px',
-                          color: BLUE, fontSize: '11px', fontWeight: 700,
-                          fontFamily: FONT_FAMILY, cursor: 'pointer',
-                        }}>Hapus</button>
-                      )}
-                    </div>
-                  </div>
-
-                  <input
-                    type="text" value={newNote.link}
-                    onChange={(e) => setNewNote({...newNote, link: e.target.value})}
-                    placeholder="Link Video/Gambar (YouTube, Vimeo, dll.)"
-                    style={{
-                      width: '100%', padding: '14px 18px', backgroundColor: 'transparent',
-                      border: `1.5px solid ${BLUE}`, borderRadius: '10px',
-                      color: BLUE, fontSize: '15px', outline: 'none',
-                      fontFamily: FONT_FAMILY, fontWeight: 600,
-                    }}
-                  />
-
-                  <NoteEditorToolbar
-                    onFormat={handleFormat}
-                    activeFormats={activeFormats}
-                    stabiloColor={stabiloColor}
-                    setStabiloColor={setStabiloColor}
-                    showStabiloPicker={showStabiloPicker}
-                    setShowStabiloPicker={setShowStabiloPicker}
-                    fontSize={fontSize}
-                    setFontSize={setFontSize}
-                  />
-
-                  <div
-                    ref={noteEditorRef}
-                    contentEditable
-                    suppressContentEditableWarning
-                    onInput={updateActiveFormats}
-                    onKeyUp={updateActiveFormats}
-                    onMouseUp={updateActiveFormats}
-                    data-placeholder="Tulis isi catatan di sini... atau gunakan mikrofon di atas untuk berbicara. Ucapkan 'simpan' untuk submit, 'batal' untuk membatalkan, 'hapus semua' untuk clear."
-                    style={{
-                      width: '100%', minHeight: '250px', padding: '18px 20px',
-                      backgroundColor: '#fafbff',
-                      border: `1.5px solid ${BLUE}`, borderRadius: '10px',
-                      color: BLACK, fontSize: '16px', outline: 'none',
-                      fontFamily: FONT_FAMILY, lineHeight: 1.6, overflowY: 'auto',
-                    }}
-                  />
-
-                  {voiceSupported && (
-                    <div style={{
-                      padding: '12px 16px',
-                      backgroundColor: 'rgba(13,60,252,0.05)',
-                      borderRadius: '8px',
-                      fontSize: '13px', color: BLUE,
-                      fontFamily: FONT_FAMILY, fontWeight: 500,
-                      lineHeight: 1.6,
-                    }}>
-                      <strong>Perintah suara:</strong> Ucapkan <strong>"simpan"</strong> untuk submit otomatis, <strong>"batal"</strong> untuk batalkan, <strong>"hapus semua"</strong> untuk kosongkan isi catatan. Klik tombol mic lagi untuk berhenti mendengarkan.
-                    </div>
-                  )}
-
-                  <div>
-                    <div style={{
-                      fontSize: '14px', fontWeight: 700, color: BLUE,
-                      fontFamily: FONT_FAMILY, marginBottom: '10px',
-                      display: 'flex', alignItems: 'center', gap: '8px',
-                    }}>
-                      <CollabIcon size={16} color={BLUE} />
-                      Tambah Kolaborator (Opsional):
-                    </div>
-                    <input type="email" value={memberSearchEmail}
-                      onChange={(e) => {
-                        setMemberSearchEmail(e.target.value);
-                        handleSearchMember(e.target.value);
-                      }}
-                      placeholder="Cari email kolaborator..."
-                      style={{
-                        width: '100%', padding: '12px 16px', backgroundColor: 'transparent',
-                        border: `1.5px solid ${BLUE}`, borderRadius: '10px',
-                        color: BLUE, fontSize: '14px', outline: 'none',
-                        fontFamily: FONT_FAMILY, fontWeight: 500,
-                      }}
+                <p style={{
+                  fontFamily: FONT_FAMILY, fontSize: '20px', fontWeight: 500,
+                  color: BLACK, letterSpacing: '-0.01em', lineHeight: 1.6,
+                  maxWidth: '700px', margin: 0,
+                }}>
+                  Catatan bersifat pribadi — setiap user hanya dapat melihat catatan miliknya sendiri dan catatan yang dibagikan oleh kolaborator.
+                </p>
+                <Link href="/signin" style={{
+                  textDecoration: 'none', display: 'inline-flex',
+                  alignItems: 'center', gap: '12px', padding: '18px 36px',
+                  backgroundColor: BLUE, color: WHITE, borderRadius: '12px',
+                  fontFamily: FONT_FAMILY, fontSize: '20px', fontWeight: 700,
+                  letterSpacing: '-0.01em', boxShadow: '0 12px 32px rgba(13,60,252,0.35)',
+                  marginTop: '20px',
+                }}>
+                  Sign In untuk Melanjutkan
+                  <NorthEastArrow size={24} color={WHITE} />
+                </Link>
+              </div>
+            ) : (
+              <>
+                <div style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  flexWrap: 'wrap', gap: '20px', marginBottom: '30px'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
+                    <TopicDropdown
+                      categories={categories}
+                      notesByCategory={notesByCategory}
+                      selectedTopic={selectedTopic}
+                      onSelectTopic={setSelectedTopic}
                     />
-                    {memberSearchResults.length > 0 && (
-                      <div style={{
-                        backgroundColor: '#f8f9fa',
-                        border: `1px solid ${BLUE}30`, borderRadius: '8px',
-                        marginTop: '8px', maxHeight: '200px', overflowY: 'auto',
-                      }}>
-                        {memberSearchResults.map((m) => (
-                          <div key={m.uid} onClick={() => addMemberToNewGroup(m)} style={{
-                            padding: '12px 16px', cursor: 'pointer',
-                            borderBottom: `1px solid ${BLUE}15`,
-                            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                          }}
-                            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#e8ebf5')}
-                            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
-                          >
-                            <div>
-                              <div style={{ fontSize: '14px', fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY }}>
-                                {m.displayName || m.name || m.email?.split('@')[0]}
-                              </div>
-                              <div style={{ fontSize: '12px', color: BLUE, opacity: 0.7, fontFamily: FONT_FAMILY }}>
-                                {m.email}
-                              </div>
-                            </div>
-                            <span style={{ fontSize: '20px', fontWeight: 'bold', color: BLUE }}>+</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    {newGroupMembers.length > 0 && (
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '10px' }}>
-                        {newGroupMembers.map((m) => (
-                          <div key={m.uid} style={{
-                            display: 'flex', alignItems: 'center', gap: '8px',
-                            padding: '6px 12px', backgroundColor: BLUE,
-                            color: WHITE, borderRadius: '20px',
-                            fontSize: '13px', fontFamily: FONT_FAMILY, fontWeight: 600,
-                          }}>
-                            <span>{m.name}</span>
-                            <button onClick={() => removeMemberFromNewGroup(m.uid)} style={{
-                              background: 'transparent', border: 'none',
-                              color: WHITE, cursor: 'pointer', fontSize: '16px',
-                              padding: 0, lineHeight: 1,
-                            }}>×</button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
                   </div>
 
-                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '15px', marginTop: '10px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '15px', flexWrap: 'wrap' }}>
                     <button
                       onClick={() => {
-                        setShowInlineNoteEditor(false);
-                        setNewNote({ title: "", category: "", link: "" });
-                        setNoteLabelColor("");
-                        setNewGroupMembers([]);
-                        setMemberSearchEmail("");
-                        setMemberSearchResults([]);
-                        if (noteEditorRef.current) noteEditorRef.current.innerHTML = "";
-                        setVoiceStatus("");
-                        if (isListening) {
-                          try { recognitionRef.current?.stop(); } catch (e) {}
-                          setIsListening(false);
+                        if (requireLogin("membuat grup")) {
+                          setShowInlineGroupEditor(!showInlineGroupEditor);
+                          setShowInlineNoteEditor(false);
                         }
                       }}
                       style={{
-                        padding: '12px 24px', backgroundColor: 'transparent',
-                        border: `1.5px solid ${BLUE}`, borderRadius: '10px',
-                        color: BLUE, fontSize: '14px', cursor: 'pointer',
-                        fontFamily: FONT_FAMILY, fontWeight: 700,
+                        display: 'inline-flex', alignItems: 'center', gap: '8px',
+                        padding: '12px 20px',
+                        backgroundColor: showInlineGroupEditor ? BLACK : BLUE,
+                        color: WHITE, border: 'none', borderRadius: '10px',
+                        fontFamily: FONT_FAMILY, fontSize: '15px', fontWeight: 700, cursor: 'pointer',
                       }}
-                    >Batal</button>
-                    <button onClick={handleCreateNote} style={{
-                      padding: '12px 24px', backgroundColor: BLUE,
-                      border: 'none', borderRadius: '10px', color: WHITE,
-                      fontSize: '14px', cursor: 'pointer',
-                      fontFamily: FONT_FAMILY, fontWeight: 700,
-                      display: 'flex', alignItems: 'center', gap: '8px',
-                    }}>
-                      Simpan Catatan
-                      <NorthEastArrow size={16} color={WHITE} />
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M12 5v14M5 12h14"/>
+                      </svg>
+                      {showInlineGroupEditor ? "Tutup Form Grup" : "Buat Grup"}
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (requireLogin("membuat catatan")) {
+                          setShowInlineNoteEditor(!showInlineNoteEditor);
+                          setShowInlineGroupEditor(false);
+                        }
+                      }}
+                      style={{
+                        display: 'inline-flex', alignItems: 'center', gap: '8px',
+                        padding: '12px 20px',
+                        backgroundColor: showInlineNoteEditor ? BLACK : BLUE,
+                        color: WHITE, border: 'none', borderRadius: '10px',
+                        fontFamily: FONT_FAMILY, fontSize: '15px', fontWeight: 700, cursor: 'pointer',
+                      }}
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M12 5v14M5 12h14"/>
+                      </svg>
+                      {showInlineNoteEditor ? "Tutup Form Catatan" : "Buat Catatan"}
                     </button>
                   </div>
                 </div>
-              </div>
-            )}
 
-            {/* Notes list */}
-            {isLoading ? (
-              <div style={{
-                display: 'flex', justifyContent: 'center', padding: '100px',
-                fontSize: '26px', fontFamily: FONT_FAMILY, color: BLUE, fontWeight: 700
-              }}>Memuat catatan...</div>
-            ) : filteredNotes.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '120px 20px', fontFamily: FONT_FAMILY }}>
-                <div style={{ fontSize: '32px', color: BLUE, marginBottom: '20px', fontWeight: 700 }}>
-                  {selectedTopic ? `Belum ada catatan di topik ${selectedTopic}` : 'Belum ada catatan'}
-                </div>
-                <div style={{ fontSize: '20px', color: BLUE, fontWeight: 500 }}>
-                  {selectedTopic ? 'Buat catatan pertama di topik ini' : 'Buat catatan pertama Anda'}
-                </div>
-              </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '60px', fontFamily: FONT_FAMILY }}>
-                {filteredNotes.map((note) => {
-                  const videoEmbedUrl = getVideoEmbedUrl(note.link);
-                  const isSaved = note.savedBy && user && note.savedBy.includes(user.uid);
-                  const userCanEdit = canEditNote(note);
-                  const userIsOwner = isNoteOwner(note);
+                {showInlineGroupEditor && (
+                  <div style={{
+                    backgroundColor: WHITE, border: `2px solid ${BLUE}`,
+                    borderRadius: '16px', padding: '30px', marginBottom: '40px',
+                    boxShadow: '0 8px 32px rgba(13,60,252,0.15)',
+                  }}>
+                    <div style={{
+                      fontSize: '28px', fontWeight: 700, color: BLUE,
+                      fontFamily: FONT_FAMILY, marginBottom: '20px',
+                    }}>Buat Grup Baru</div>
 
-                  return (
-                    <div key={note.id} style={{
-                      display: 'flex', flexDirection: 'column', gap: '20px',
-                      fontFamily: FONT_FAMILY, position: 'relative',
-                      padding: note.labelColor ? '20px' : '0',
-                      backgroundColor: note.labelColor || 'transparent',
-                      borderRadius: note.labelColor ? '12px' : '0',
-                    }}>
-                      {note.category && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                      <input
+                        type="text" value={newGroupName}
+                        onChange={(e) => setNewGroupName(e.target.value)}
+                        placeholder="Nama Grup"
+                        style={{
+                          width: '100%', padding: '14px 18px', backgroundColor: 'transparent',
+                          border: `1.5px solid ${BLUE}`, borderRadius: '10px',
+                          color: BLUE, fontSize: '16px', outline: 'none',
+                          fontFamily: FONT_FAMILY, fontWeight: 600,
+                        }}
+                      />
+
+                      <div>
                         <div style={{
-                          fontSize: '24px', color: BLUE, marginBottom: '10px',
-                          fontWeight: '700', fontFamily: FONT_FAMILY,
-                        }}>{note.category}</div>
-                      )}
+                          fontSize: '14px', fontWeight: 700, color: BLUE,
+                          fontFamily: FONT_FAMILY, marginBottom: '10px',
+                        }}>Tambahkan User ke Grup:</div>
 
-                      <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-                        <div style={{
-                          fontSize: '42px', fontFamily: FONT_FAMILY,
-                          lineHeight: '1.3', color: BLUE, fontWeight: '700',
-                        }}>{note.title}</div>
-
-                        {note.collaborators && note.collaborators.length > 0 && (
-                          <CollabIconList
-                            collaborators={note.collaborators}
-                            collaboratorNames={note.collaboratorNames}
-                          />
-                        )}
-                      </div>
-
-                      {note.descriptionHtml ? (
-                        <div
-                          className="note-description-html"
-                          dangerouslySetInnerHTML={{ __html: note.descriptionHtml }}
+                        <input
+                          type="email" value={memberSearchEmail}
+                          onChange={(e) => {
+                            setMemberSearchEmail(e.target.value);
+                            handleSearchMember(e.target.value);
+                          }}
+                          placeholder="Cari email user..."
                           style={{
-                            fontSize: '18px', fontFamily: FONT_FAMILY,
-                            lineHeight: '1.7', color: BLACK,
-                            marginTop: '15px', wordBreak: 'break-word',
+                            width: '100%', padding: '12px 16px', backgroundColor: 'transparent',
+                            border: `1.5px solid ${BLUE}`, borderRadius: '10px',
+                            color: BLUE, fontSize: '14px', outline: 'none',
+                            fontFamily: FONT_FAMILY, fontWeight: 500,
                           }}
                         />
-                      ) : note.description && (
-                        <div style={{
-                          fontSize: '18px', fontFamily: FONT_FAMILY,
-                          lineHeight: '1.7', color: BLACK,
-                          marginTop: '15px', whiteSpace: 'pre-wrap',
-                        }}>{note.description}</div>
-                      )}
 
-                      {note.thumbnail && !videoEmbedUrl && (
-                        <div style={{ margin: '20px 0' }}>
-                          <img src={note.thumbnail} alt="Thumbnail" style={{
-                            width: '100%', maxWidth: '600px', height: 'auto', borderRadius: '8px'
-                          }} />
-                        </div>
-                      )}
-
-                      {videoEmbedUrl && (
-                        <div style={{ margin: '20px 0', position: 'relative' }}>
-                          {videoEmbedUrl.includes('youtube.com/embed') || videoEmbedUrl.includes('vimeo.com') ? (
-                            <div style={{
-                              position: 'relative', paddingBottom: '56.25%', height: 0,
-                              overflow: 'hidden', backgroundColor: '#000', borderRadius: '8px',
-                            }}>
-                              <iframe src={videoEmbedUrl} style={{
-                                position: 'absolute', top: 0, left: 0,
-                                width: '100%', height: '100%', border: 'none',
-                              }} allowFullScreen />
-                            </div>
-                          ) : (
-                            <div style={{
-                              position: 'relative', backgroundColor: '#000',
-                              borderRadius: '8px', overflow: 'hidden',
-                            }}>
-                              <video
-                                ref={(el) => { if (note.id) videoRefs.current[note.id] = el; }}
-                                src={videoEmbedUrl}
-                                style={{
-                                  width: '100%', maxWidth: '600px', height: 'auto',
-                                  aspectRatio: '16/9', backgroundColor: '#000', cursor: 'pointer',
-                                }}
-                                onClick={() => togglePlayPause(note.id!)}
-                                controls
-                              />
-                            </div>
-                          )}
-                        </div>
-                      )}
-
-                      <div style={{
-                        display: 'flex', justifyContent: 'space-between',
-                        alignItems: 'center', marginTop: '15px',
-                        fontFamily: FONT_FAMILY, flexWrap: 'wrap', gap: '15px',
-                      }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
-                          <span style={{
-                            fontSize: '16px', color: BLUE, fontWeight: 600, fontFamily: FONT_FAMILY
-                          }}>{formatDate(note.updatedAt)}</span>
-                          <span style={{
-                            fontSize: '14px', color: BLUE, display: 'flex',
-                            alignItems: 'center', gap: '4px',
-                            fontFamily: FONT_FAMILY, fontWeight: 600,
-                          }}>
-                            oleh {note.userName}<InstagramVerifiedBadge />
-                          </span>
-                        </div>
-
-                        {user && (
+                        {memberSearchResults.length > 0 && (
                           <div style={{
-                            display: 'flex', alignItems: 'center', gap: '16px',
-                            fontFamily: FONT_FAMILY, flexWrap: 'wrap',
+                            backgroundColor: '#f8f9fa',
+                            border: `1px solid ${BLUE}30`, borderRadius: '8px',
+                            marginTop: '10px', maxHeight: '200px', overflowY: 'auto',
                           }}>
-                            <button onClick={() => handleSaveNote(note.id!)} style={{
-                              backgroundColor: 'transparent', border: 'none', color: BLUE,
-                              fontSize: '22px', cursor: 'pointer', padding: '5px',
-                              display: 'flex', alignItems: 'center', justifyContent: 'center',
-                              opacity: isSaved ? 0.5 : 1,
-                            }} title={isSaved ? "Disimpan" : "Simpan Catatan"}>
-                              <svg width="22" height="22" viewBox="0 0 24 24" fill={isSaved ? BLUE : "none"} stroke={BLUE} strokeWidth="2">
-                                <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/>
-                              </svg>
-                            </button>
+                            {memberSearchResults.map((m) => (
+                              <div key={m.uid} onClick={() => addMemberToNewGroup(m)} style={{
+                                padding: '12px 16px', cursor: 'pointer',
+                                borderBottom: `1px solid ${BLUE}15`,
+                                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                              }}
+                                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#e8ebf5')}
+                                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                              >
+                                <div>
+                                  <div style={{ fontSize: '14px', fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY }}>
+                                    {m.displayName || m.name || m.email?.split('@')[0]}
+                                  </div>
+                                  <div style={{ fontSize: '12px', color: BLUE, opacity: 0.7, fontFamily: FONT_FAMILY }}>
+                                    {m.email}
+                                  </div>
+                                </div>
+                                <span style={{ fontSize: '20px', fontWeight: 'bold', color: BLUE }}>+</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
 
-                            {userIsOwner && (
-                              <button onClick={() => { setCurrentNote(note); setShowCollaborateModal(true); }} style={{
-                                backgroundColor: 'transparent', border: 'none', color: BLUE,
-                                fontSize: '22px', cursor: 'pointer', padding: '5px',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                              }} title="Undang Kolaborator">
-                                <CollabIcon size={22} color={BLUE} />
-                              </button>
-                            )}
-
-                            {userCanEdit && (
-                              <button onClick={() => {
-                                setCurrentNote(note);
-                                setEditNote({
-                                  title: note.title, category: note.category,
-                                  link: note.link || '', description: note.description || '',
-                                });
-                                setShowEditNoteModal(true);
-                              }} style={{
-                                backgroundColor: 'transparent', border: 'none', color: BLUE,
-                                fontSize: '22px', cursor: 'pointer', padding: '5px',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                              }} title="Edit Catatan">
-                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={BLUE} strokeWidth="2">
-                                  <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
-                                </svg>
-                              </button>
-                            )}
-
-                            {note.link && (
-                              <a href={note.link} target="_blank" rel="noopener noreferrer" style={{
-                                color: BLUE, textDecoration: 'none', display: 'flex',
-                                alignItems: 'center', gap: '8px', fontSize: '16px',
-                                fontFamily: FONT_FAMILY, fontWeight: 700,
+                        {newGroupMembers.length > 0 && (
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '10px' }}>
+                            {newGroupMembers.map((m) => (
+                              <div key={m.uid} style={{
+                                display: 'flex', alignItems: 'center', gap: '8px',
+                                padding: '6px 12px', backgroundColor: BLUE,
+                                color: WHITE, borderRadius: '20px',
+                                fontSize: '13px', fontFamily: FONT_FAMILY, fontWeight: 600,
                               }}>
-                                Buka Link
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={BLUE} strokeWidth="2">
-                                  <path d="M7 17l9.2-9.2M17 17V7H7"/>
-                                </svg>
-                              </a>
-                            )}
-
-                            {note.userId === user?.uid && (
-                              <button onClick={() => handleDeleteNote(note.id!)} style={{
-                                backgroundColor: 'transparent', border: 'none', color: BLUE,
-                                fontSize: '32px', cursor: 'pointer', padding: '0',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                width: '32px', height: '32px',
-                              }} title="Hapus Catatan">×</button>
-                            )}
+                                <span>{m.name}</span>
+                                <button onClick={() => removeMemberFromNewGroup(m.uid)} style={{
+                                  background: 'transparent', border: 'none',
+                                  color: WHITE, cursor: 'pointer', fontSize: '16px',
+                                  padding: 0, lineHeight: 1,
+                                }}>×</button>
+                              </div>
+                            ))}
                           </div>
                         )}
                       </div>
+
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '15px', marginTop: '10px' }}>
+                        <button onClick={() => { setShowInlineGroupEditor(false); setNewGroupName(""); setNewGroupMembers([]); setMemberSearchEmail(""); setMemberSearchResults([]); }} style={{
+                          padding: '12px 24px', backgroundColor: 'transparent',
+                          border: `1.5px solid ${BLUE}`, borderRadius: '10px',
+                          color: BLUE, fontSize: '14px', cursor: 'pointer',
+                          fontFamily: FONT_FAMILY, fontWeight: 700,
+                        }}>Batal</button>
+                        <button onClick={handleCreateGroup} style={{
+                          padding: '12px 24px', backgroundColor: BLUE,
+                          border: 'none', borderRadius: '10px', color: WHITE,
+                          fontSize: '14px', cursor: 'pointer',
+                          fontFamily: FONT_FAMILY, fontWeight: 700,
+                        }}>Buat Grup</button>
+                      </div>
                     </div>
-                  );
-                })}
-              </div>
+                  </div>
+                )}
+
+                {showInlineNoteEditor && (
+                  <div style={{
+                    backgroundColor: WHITE, border: `2px solid ${BLUE}`,
+                    borderRadius: '16px', padding: '30px', marginBottom: '40px',
+                    boxShadow: '0 8px 32px rgba(13,60,252,0.15)',
+                  }}>
+                    <div style={{
+                      fontSize: '28px', fontWeight: 700, color: BLUE,
+                      fontFamily: FONT_FAMILY, marginBottom: '20px',
+                      display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap',
+                    }}>
+                      Buat Catatan Baru
+                      {noteLabelColor && (
+                        <span style={{
+                          padding: '4px 12px', backgroundColor: noteLabelColor,
+                          color: BLACK, borderRadius: '4px', fontSize: '12px',
+                          fontWeight: 800, letterSpacing: '0.5px', textTransform: 'uppercase',
+                          fontFamily: FONT_FAMILY,
+                        }}>Label Aktif</span>
+                      )}
+                      {voiceSupported && (
+                        <button
+                          type="button"
+                          onClick={toggleVoiceInput}
+                          style={{
+                            marginLeft: 'auto',
+                            display: 'inline-flex', alignItems: 'center', gap: '8px',
+                            padding: '10px 18px',
+                            backgroundColor: isListening ? '#EF4444' : BLUE,
+                            color: WHITE, border: 'none', borderRadius: '10px',
+                            fontFamily: FONT_FAMILY, fontSize: '14px',
+                            fontWeight: 700, cursor: 'pointer',
+                            boxShadow: isListening ? '0 0 0 4px rgba(239,68,68,0.2)' : '0 4px 12px rgba(13,60,252,0.25)',
+                            transition: 'all 0.2s ease',
+                          }}
+                        >
+                          {isListening ? <StopIcon size={18} color={WHITE} /> : <MicIcon size={18} color={WHITE} />}
+                          {isListening ? "Stop Rekam" : "Rekam Suara"}
+                        </button>
+                      )}
+                    </div>
+
+                    {voiceStatus && (
+                      <div style={{
+                        padding: '12px 18px',
+                        backgroundColor: isListening ? '#FEE2E2' : '#E0E7FF',
+                        border: `1.5px solid ${isListening ? '#EF4444' : BLUE}`,
+                        borderRadius: '10px', marginBottom: '20px',
+                        fontSize: '14px', fontWeight: 600,
+                        color: isListening ? '#991B1B' : BLUE,
+                        fontFamily: FONT_FAMILY,
+                        display: 'flex', alignItems: 'center', gap: '10px',
+                      }}>
+                        {isListening && (
+                          <span style={{
+                            width: '10px', height: '10px', borderRadius: '50%',
+                            backgroundColor: '#EF4444',
+                            animation: 'mic-pulse 1s ease-in-out infinite',
+                          }} />
+                        )}
+                        {voiceStatus}
+                      </div>
+                    )}
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                      <input
+                        type="text" value={newNote.title}
+                        onChange={(e) => setNewNote({...newNote, title: e.target.value})}
+                        placeholder="Judul Catatan"
+                        style={{
+                          width: '100%', padding: '18px 20px', backgroundColor: 'transparent',
+                          border: 'none', borderBottom: `2px solid ${BLUE}`,
+                          color: BLUE, fontSize: '26px', outline: 'none',
+                          fontFamily: FONT_FAMILY, fontWeight: 700,
+                        }}
+                      />
+
+                      <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
+                        <select value={newNote.category}
+                          onChange={(e) => setNewNote({...newNote, category: e.target.value})}
+                          style={{
+                            flex: 1, minWidth: '200px', padding: '14px 18px',
+                            backgroundColor: BLUE, border: 'none', color: WHITE,
+                            fontSize: '16px', outline: 'none', fontFamily: FONT_FAMILY,
+                            cursor: 'pointer', borderRadius: '10px', fontWeight: 600,
+                          }}>
+                          <option value="">Pilih Kategori</option>
+                          {categories.map((category) => (
+                            <option key={category} value={category}>{category}</option>
+                          ))}
+                        </select>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                          <span style={{ fontSize: '13px', fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY }}>Label:</span>
+                          {STABILO_COLORS.map((color) => (
+                            <button key={color.value} type="button"
+                              onClick={() => setNoteLabelColor(noteLabelColor === color.value ? "" : color.value)}
+                              style={{
+                                width: '28px', height: '28px', borderRadius: '50%',
+                                backgroundColor: color.value,
+                                border: noteLabelColor === color.value ? `3px solid ${BLUE}` : `2px solid ${BLUE}30`,
+                                cursor: 'pointer', padding: 0,
+                              }}
+                              title={color.name}
+                            />
+                          ))}
+                          {noteLabelColor && (
+                            <button type="button" onClick={() => setNoteLabelColor("")} style={{
+                              padding: '4px 10px', backgroundColor: 'transparent',
+                              border: `1.5px solid ${BLUE}`, borderRadius: '6px',
+                              color: BLUE, fontSize: '11px', fontWeight: 700,
+                              fontFamily: FONT_FAMILY, cursor: 'pointer',
+                            }}>Hapus</button>
+                          )}
+                        </div>
+                      </div>
+
+                      <input
+                        type="text" value={newNote.link}
+                        onChange={(e) => setNewNote({...newNote, link: e.target.value})}
+                        placeholder="Link Video/Gambar (YouTube, Vimeo, dll.)"
+                        style={{
+                          width: '100%', padding: '14px 18px', backgroundColor: 'transparent',
+                          border: `1.5px solid ${BLUE}`, borderRadius: '10px',
+                          color: BLUE, fontSize: '15px', outline: 'none',
+                          fontFamily: FONT_FAMILY, fontWeight: 600,
+                        }}
+                      />
+
+                      <NoteEditorToolbar
+                        onFormat={handleFormat}
+                        activeFormats={activeFormats}
+                        stabiloColor={stabiloColor}
+                        setStabiloColor={setStabiloColor}
+                        showStabiloPicker={showStabiloPicker}
+                        setShowStabiloPicker={setShowStabiloPicker}
+                        fontSize={fontSize}
+                        setFontSize={setFontSize}
+                      />
+
+                      <div
+                        ref={noteEditorRef}
+                        contentEditable
+                        suppressContentEditableWarning
+                        onInput={updateActiveFormats}
+                        onKeyUp={updateActiveFormats}
+                        onMouseUp={updateActiveFormats}
+                        data-placeholder="Tulis isi catatan di sini... atau gunakan mikrofon di atas untuk berbicara. Ucapkan 'simpan' untuk submit, 'batal' untuk membatalkan, 'hapus semua' untuk clear."
+                        style={{
+                          width: '100%', minHeight: '250px', padding: '18px 20px',
+                          backgroundColor: '#fafbff',
+                          border: `1.5px solid ${BLUE}`, borderRadius: '10px',
+                          color: BLACK, fontSize: '16px', outline: 'none',
+                          fontFamily: FONT_FAMILY, lineHeight: 1.6, overflowY: 'auto',
+                        }}
+                      />
+
+                      {voiceSupported && (
+                        <div style={{
+                          padding: '12px 16px',
+                          backgroundColor: 'rgba(13,60,252,0.05)',
+                          borderRadius: '8px',
+                          fontSize: '13px', color: BLUE,
+                          fontFamily: FONT_FAMILY, fontWeight: 500,
+                          lineHeight: 1.6,
+                        }}>
+                          <strong>Perintah suara:</strong> Ucapkan <strong>"simpan"</strong> untuk submit otomatis, <strong>"batal"</strong> untuk batalkan, <strong>"hapus semua"</strong> untuk kosongkan isi catatan. Klik tombol mic lagi untuk berhenti mendengarkan.
+                        </div>
+                      )}
+
+                      <div>
+                        <div style={{
+                          fontSize: '14px', fontWeight: 700, color: BLUE,
+                          fontFamily: FONT_FAMILY, marginBottom: '10px',
+                          display: 'flex', alignItems: 'center', gap: '8px',
+                        }}>
+                          <CollabIcon size={16} color={BLUE} />
+                          Tambah Kolaborator (Opsional):
+                        </div>
+                        <input type="email" value={memberSearchEmail}
+                          onChange={(e) => {
+                            setMemberSearchEmail(e.target.value);
+                            handleSearchMember(e.target.value);
+                          }}
+                          placeholder="Cari email kolaborator..."
+                          style={{
+                            width: '100%', padding: '12px 16px', backgroundColor: 'transparent',
+                            border: `1.5px solid ${BLUE}`, borderRadius: '10px',
+                            color: BLUE, fontSize: '14px', outline: 'none',
+                            fontFamily: FONT_FAMILY, fontWeight: 500,
+                          }}
+                        />
+                        {memberSearchResults.length > 0 && (
+                          <div style={{
+                            backgroundColor: '#f8f9fa',
+                            border: `1px solid ${BLUE}30`, borderRadius: '8px',
+                            marginTop: '8px', maxHeight: '200px', overflowY: 'auto',
+                          }}>
+                            {memberSearchResults.map((m) => (
+                              <div key={m.uid} onClick={() => addMemberToNewGroup(m)} style={{
+                                padding: '12px 16px', cursor: 'pointer',
+                                borderBottom: `1px solid ${BLUE}15`,
+                                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                              }}
+                                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#e8ebf5')}
+                                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                              >
+                                <div>
+                                  <div style={{ fontSize: '14px', fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY }}>
+                                    {m.displayName || m.name || m.email?.split('@')[0]}
+                                  </div>
+                                  <div style={{ fontSize: '12px', color: BLUE, opacity: 0.7, fontFamily: FONT_FAMILY }}>
+                                    {m.email}
+                                  </div>
+                                </div>
+                                <span style={{ fontSize: '20px', fontWeight: 'bold', color: BLUE }}>+</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        {newGroupMembers.length > 0 && (
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '10px' }}>
+                            {newGroupMembers.map((m) => (
+                              <div key={m.uid} style={{
+                                display: 'flex', alignItems: 'center', gap: '8px',
+                                padding: '6px 12px', backgroundColor: BLUE,
+                                color: WHITE, borderRadius: '20px',
+                                fontSize: '13px', fontFamily: FONT_FAMILY, fontWeight: 600,
+                              }}>
+                                <span>{m.name}</span>
+                                <button onClick={() => removeMemberFromNewGroup(m.uid)} style={{
+                                  background: 'transparent', border: 'none',
+                                  color: WHITE, cursor: 'pointer', fontSize: '16px',
+                                  padding: 0, lineHeight: 1,
+                                }}>×</button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '15px', marginTop: '10px' }}>
+                        <button
+                          onClick={() => {
+                            setShowInlineNoteEditor(false);
+                            setNewNote({ title: "", category: "", link: "" });
+                            setNoteLabelColor("");
+                            setNewGroupMembers([]);
+                            setMemberSearchEmail("");
+                            setMemberSearchResults([]);
+                            if (noteEditorRef.current) noteEditorRef.current.innerHTML = "";
+                            setVoiceStatus("");
+                            if (isListening) {
+                              try { recognitionRef.current?.stop(); } catch (e) {}
+                              setIsListening(false);
+                            }
+                          }}
+                          style={{
+                            padding: '12px 24px', backgroundColor: 'transparent',
+                            border: `1.5px solid ${BLUE}`, borderRadius: '10px',
+                            color: BLUE, fontSize: '14px', cursor: 'pointer',
+                            fontFamily: FONT_FAMILY, fontWeight: 700,
+                          }}
+                        >Batal</button>
+                        <button onClick={handleCreateNote} style={{
+                          padding: '12px 24px', backgroundColor: BLUE,
+                          border: 'none', borderRadius: '10px', color: WHITE,
+                          fontSize: '14px', cursor: 'pointer',
+                          fontFamily: FONT_FAMILY, fontWeight: 700,
+                          display: 'flex', alignItems: 'center', gap: '8px',
+                        }}>
+                          Simpan Catatan
+                          <NorthEastArrow size={16} color={WHITE} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {isLoading ? (
+                  <div style={{
+                    display: 'flex', justifyContent: 'center', padding: '100px',
+                    fontSize: '26px', fontFamily: FONT_FAMILY, color: BLUE, fontWeight: 700
+                  }}>Memuat catatan...</div>
+                ) : filteredNotes.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '120px 20px', fontFamily: FONT_FAMILY }}>
+                    <div style={{ fontSize: '32px', color: BLUE, marginBottom: '20px', fontWeight: 700 }}>
+                      {selectedTopic ? `Belum ada catatan di topik ${selectedTopic}` : 'Belum ada catatan'}
+                    </div>
+                    <div style={{ fontSize: '20px', color: BLUE, fontWeight: 500 }}>
+                      {selectedTopic ? 'Buat catatan pertama di topik ini' : 'Buat catatan pertama Anda'}
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '60px', fontFamily: FONT_FAMILY }}>
+                    {filteredNotes.map((note) => {
+                      const videoEmbedUrl = getVideoEmbedUrl(note.link);
+                      const isSaved = note.savedBy && user && note.savedBy.includes(user.uid);
+                      const userCanEdit = canEditNote(note);
+                      const userIsOwner = isNoteOwner(note);
+
+                      return (
+                        <div key={note.id} style={{
+                          display: 'flex', flexDirection: 'column', gap: '20px',
+                          fontFamily: FONT_FAMILY, position: 'relative',
+                          padding: note.labelColor ? '20px' : '0',
+                          backgroundColor: note.labelColor || 'transparent',
+                          borderRadius: note.labelColor ? '12px' : '0',
+                        }}>
+                          {note.category && (
+                            <div style={{
+                              fontSize: '24px', color: BLUE, marginBottom: '10px',
+                              fontWeight: '700', fontFamily: FONT_FAMILY,
+                            }}>{note.category}</div>
+                          )}
+
+                          <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+                            <div style={{
+                              fontSize: '42px', fontFamily: FONT_FAMILY,
+                              lineHeight: '1.3', color: BLUE, fontWeight: '700',
+                            }}>{note.title}</div>
+
+                            {note.collaborators && note.collaborators.length > 0 && (
+                              <CollabIconList
+                                collaborators={note.collaborators}
+                                collaboratorNames={note.collaboratorNames}
+                              />
+                            )}
+                          </div>
+
+                          {note.descriptionHtml ? (
+                            <div
+                              className="note-description-html"
+                              dangerouslySetInnerHTML={{ __html: note.descriptionHtml }}
+                              style={{
+                                fontSize: '18px', fontFamily: FONT_FAMILY,
+                                lineHeight: '1.7', color: BLACK,
+                                marginTop: '15px', wordBreak: 'break-word',
+                              }}
+                            />
+                          ) : note.description && (
+                            <div style={{
+                              fontSize: '18px', fontFamily: FONT_FAMILY,
+                              lineHeight: '1.7', color: BLACK,
+                              marginTop: '15px', whiteSpace: 'pre-wrap',
+                            }}>{note.description}</div>
+                          )}
+
+                          {note.thumbnail && !videoEmbedUrl && (
+                            <div style={{ margin: '20px 0' }}>
+                              <img src={note.thumbnail} alt="Thumbnail" style={{
+                                width: '100%', maxWidth: '600px', height: 'auto', borderRadius: '8px'
+                              }} />
+                            </div>
+                          )}
+
+                          {videoEmbedUrl && (
+                            <div style={{ margin: '20px 0', position: 'relative' }}>
+                              {videoEmbedUrl.includes('youtube.com/embed') || videoEmbedUrl.includes('vimeo.com') ? (
+                                <div style={{
+                                  position: 'relative', paddingBottom: '56.25%', height: 0,
+                                  overflow: 'hidden', backgroundColor: '#000', borderRadius: '8px',
+                                }}>
+                                  <iframe src={videoEmbedUrl} style={{
+                                    position: 'absolute', top: 0, left: 0,
+                                    width: '100%', height: '100%', border: 'none',
+                                  }} allowFullScreen />
+                                </div>
+                              ) : (
+                                <div style={{
+                                  position: 'relative', backgroundColor: '#000',
+                                  borderRadius: '8px', overflow: 'hidden',
+                                }}>
+                                  <video
+                                    ref={(el) => { if (note.id) videoRefs.current[note.id] = el; }}
+                                    src={videoEmbedUrl}
+                                    style={{
+                                      width: '100%', maxWidth: '600px', height: 'auto',
+                                      aspectRatio: '16/9', backgroundColor: '#000', cursor: 'pointer',
+                                    }}
+                                    onClick={() => togglePlayPause(note.id!)}
+                                    controls
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          <div style={{
+                            display: 'flex', justifyContent: 'space-between',
+                            alignItems: 'center', marginTop: '15px',
+                            fontFamily: FONT_FAMILY, flexWrap: 'wrap', gap: '15px',
+                          }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
+                              <span style={{
+                                fontSize: '16px', color: BLUE, fontWeight: 600, fontFamily: FONT_FAMILY
+                              }}>{formatDate(note.updatedAt)}</span>
+                              <span style={{
+                                fontSize: '14px', color: BLUE, display: 'flex',
+                                alignItems: 'center', gap: '4px',
+                                fontFamily: FONT_FAMILY, fontWeight: 600,
+                              }}>
+                                oleh {note.userName}<InstagramVerifiedBadge />
+                              </span>
+                            </div>
+
+                            <div style={{
+                              display: 'flex', alignItems: 'center', gap: '16px',
+                              fontFamily: FONT_FAMILY, flexWrap: 'wrap',
+                            }}>
+                              <button onClick={() => handleSaveNote(note.id!)} style={{
+                                backgroundColor: 'transparent', border: 'none', color: BLUE,
+                                fontSize: '22px', cursor: 'pointer', padding: '5px',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                opacity: isSaved ? 0.5 : 1,
+                              }} title={isSaved ? "Disimpan" : "Simpan Catatan"}>
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill={isSaved ? BLUE : "none"} stroke={BLUE} strokeWidth="2">
+                                  <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/>
+                                </svg>
+                              </button>
+
+                              {userIsOwner && (
+                                <button onClick={() => { setCurrentNote(note); setShowCollaborateModal(true); }} style={{
+                                  backgroundColor: 'transparent', border: 'none', color: BLUE,
+                                  fontSize: '22px', cursor: 'pointer', padding: '5px',
+                                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                }} title="Undang Kolaborator">
+                                  <CollabIcon size={22} color={BLUE} />
+                                </button>
+                              )}
+
+                              {userCanEdit && (
+                                <button onClick={() => {
+                                  setCurrentNote(note);
+                                  setEditNote({
+                                    title: note.title, category: note.category,
+                                    link: note.link || '', description: note.description || '',
+                                  });
+                                  setShowEditNoteModal(true);
+                                }} style={{
+                                  backgroundColor: 'transparent', border: 'none', color: BLUE,
+                                  fontSize: '22px', cursor: 'pointer', padding: '5px',
+                                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                }} title="Edit Catatan">
+                                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={BLUE} strokeWidth="2">
+                                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
+                                  </svg>
+                                </button>
+                              )}
+
+                              {note.link && (
+                                <a href={note.link} target="_blank" rel="noopener noreferrer" style={{
+                                  color: BLUE, textDecoration: 'none', display: 'flex',
+                                  alignItems: 'center', gap: '8px', fontSize: '16px',
+                                  fontFamily: FONT_FAMILY, fontWeight: 700,
+                                }}>
+                                  Buka Link
+                                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={BLUE} strokeWidth="2">
+                                    <path d="M7 17l9.2-9.2M17 17V7H7"/>
+                                  </svg>
+                                </a>
+                              )}
+
+                              {note.userId === user?.uid && (
+                                <button onClick={() => handleDeleteNote(note.id!)} style={{
+                                  backgroundColor: 'transparent', border: 'none', color: BLUE,
+                                  fontSize: '32px', cursor: 'pointer', padding: '0',
+                                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                  width: '32px', height: '32px',
+                                }} title="Hapus Catatan">×</button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </>
             )}
           </div>
 
