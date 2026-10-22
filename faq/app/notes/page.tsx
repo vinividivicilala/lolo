@@ -6714,76 +6714,72 @@ export default function NotesPage(): React.JSX.Element {
                             position: 'relative',
                           }}
                         >
-                          {/* ===== KOLOM KIRI: ANGKA + TITIK BULAT + GARIS ===== */}
+                          {/* ===== KOLOM KIRI: ANGKA (200px) + TITIK BULAT + GARIS PATAH-PATAH ===== */}
                           <div
                             style={{
-                              width: '260px',
+                              width: '320px',
                               flexShrink: 0,
                               position: 'relative',
                               display: 'flex',
-                              flexDirection: 'column',
-                              alignItems: 'flex-end',
-                              paddingRight: '30px',
+                              flexDirection: 'row',
+                              alignItems: 'flex-start',
+                              paddingRight: '40px',
                             }}
                           >
-                            {/* Angka 150px di samping garis */}
+                            {/* Angka 200px, tidak tebal, warna biru */}
                             <div
                               style={{
-                                fontSize: '150px',
-                                fontWeight: 800,
+                                fontSize: '200px',
+                                fontWeight: 400,
                                 fontFamily: FONT_FAMILY,
-                                color: hasResult ? BLUE : BLACK,
+                                color: BLUE,
                                 lineHeight: 0.85,
                                 letterSpacing: '-0.05em',
-                                marginTop: '10px',
-                                marginBottom: '20px',
+                                paddingTop: '10px',
                                 zIndex: 2,
                                 position: 'relative',
+                                flexShrink: 0,
                               }}
                             >
                               {resultNumber}
                             </div>
 
-                            {/* Titik bulat di awal (atas) + garis vertikal */}
+                            {/* Titik bulat biasa + garis patah-patah nyambung ke bawah */}
                             <div
                               style={{
                                 position: 'absolute',
                                 top: 0,
-                                right: '30px',
+                                right: '20px',
                                 bottom: 0,
-                                width: '3px',
+                                width: '6px',
                                 display: 'flex',
                                 flexDirection: 'column',
                                 alignItems: 'center',
                               }}
                             >
-                              {/* Titik bulat di atas */}
+                              {/* Titik bulat biasa (normal, tanpa border/ring) */}
                               <div
                                 style={{
-                                  width: '20px',
-                                  height: '20px',
+                                  width: '18px',
+                                  height: '18px',
                                   borderRadius: '50%',
-                                  backgroundColor: hasResult ? BLUE : BLACK,
-                                  border: `3px solid ${WHITE}`,
-                                  boxShadow: `0 0 0 3px ${
-                                    hasResult ? BLUE : BLACK
-                                  }`,
+                                  backgroundColor: BLUE,
                                   flexShrink: 0,
                                   zIndex: 3,
-                                  marginTop: '20px',
+                                  marginTop: '40px',
                                 }}
                               />
-                              {/* Garis patah-patah — biru (sudah submit) / hitam (belum submit) */}
+                              {/* Garis patah-patah biru yang nyambung ke bawah */}
                               <div
                                 style={{
                                   flex: 1,
                                   width: '3px',
                                   backgroundImage: `repeating-linear-gradient(
                                     to bottom,
-                                    ${hasResult ? BLUE : BLACK} 0px,
-                                    ${hasResult ? BLUE : BLACK} 10px,
-                                    transparent 10px,
-                                    transparent 20px
+                                    ${BLUE} 0px,
+                                    ${BLUE} 12px,
+                                    transparent 12px,
+                                    transparent 24px
                                   )`,
                                 }}
                               />
