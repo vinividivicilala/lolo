@@ -247,17 +247,27 @@ const StopIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: str
   </svg>
 );
 
-const ReportIcon = ({ size = 16, color = "#DC2626" }: { size?: number; color?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <line x1="4" y1="22" x2="4" y2="15" stroke={color} strokeWidth="2" strokeLinecap="round"/>
-  </svg>
-);
-
-const VerifiedBadgeReal = ({ size = 16 }) => (
-  <span style={{ position: 'relative', display: 'inline-block', marginLeft: '4px', verticalAlign: 'middle' }}>
-    <svg width={size} height={size} viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" style={{ display: 'inline-block', verticalAlign: 'middle' }}>
-      <path fill="#0095F6" d="M19.998 3.094 14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.03v-6.46h-6.419L25.358 0l-5.36 3.094Zm7.415 11.225 2.254 2.287-11.43 11.5-6.835-6.93 2.244-2.258 4.587 4.581 9.18-9.18Z"/>
+// ===== VERIFIED BADGE REAL (SIZE PROP) =====
+const VerifiedBadgeReal = ({ size = 16 }: { size?: number }) => (
+  <span 
+    style={{ 
+      position: 'relative', 
+      display: 'inline-block', 
+      marginLeft: '4px', 
+      verticalAlign: 'middle' 
+    }}
+  >
+    <svg 
+      width={size} 
+      height={size} 
+      viewBox="0 0 40 40" 
+      xmlns="http://www.w3.org/2000/svg" 
+      style={{ display: 'inline-block', verticalAlign: 'middle' }}
+    >
+      <path 
+        fill="#0095F6" 
+        d="M19.998 3.094 14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.03v-6.46h-6.419L25.358 0l-5.36 3.094Zm7.415 11.225 2.254 2.287-11.43 11.5-6.835-6.93 2.244-2.258 4.587 4.581 9.18-9.18Z"
+      />
     </svg>
   </span>
 );
@@ -527,13 +537,13 @@ const SayHeySection = ({ user, db, isAdmin, onUnreadCountChange }: any) => {
   const [newAnnouncementText, setNewAnnouncementText] = useState("");
   const [showAnnouncementForm, setShowAnnouncementForm] = useState(false);
   const [reports, setReports] = useState<any[]>([]);
+  const [myReports, setMyReports] = useState<any[]>([]);
   const [showReportForm, setShowReportForm] = useState(false);
   const [reportReason, setReportReason] = useState("");
   const [broadcasts, setBroadcasts] = useState<any[]>([]);
   const [newBroadcastText, setNewBroadcastText] = useState("");
   const [showBroadcastForm, setShowBroadcastForm] = useState(false);
   const [replyTo, setReplyTo] = useState<any | null>(null);
-  // Room mode: 'chat' | 'announcement' | 'broadcast'
   const [roomMode, setRoomMode] = useState<'chat' | 'announcement' | 'broadcast'>('chat');
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -546,6 +556,7 @@ const SayHeySection = ({ user, db, isAdmin, onUnreadCountChange }: any) => {
     getCryptoKey().then(() => setEncryptionReady(true)).catch(() => setEncryptionReady(true));
   }, []);
 
+  // Load announcements
   useEffect(() => {
     if (!db) return;
     const q = query(collection(db, 'announcements'), orderBy('createdAt', 'desc'), limit(30));
@@ -559,6 +570,7 @@ const SayHeySection = ({ user, db, isAdmin, onUnreadCountChange }: any) => {
     return () => unsub();
   }, [db]);
 
+  // Load broadcasts
   useEffect(() => {
     if (!db) return;
     const q = query(collection(db, 'broadcasts'), orderBy('createdAt', 'desc'), limit(30));
@@ -572,6 +584,7 @@ const SayHeySection = ({ user, db, isAdmin, onUnreadCountChange }: any) => {
     return () => unsub();
   }, [db]);
 
+  // Admin: Load all reports
   useEffect(() => {
     if (!db || !isAdmin) return;
     const q = query(collection(db, 'reports'), orderBy('createdAt', 'desc'), limit(50));
@@ -585,6 +598,26 @@ const SayHeySection = ({ user, db, isAdmin, onUnreadCountChange }: any) => {
     return () => unsub();
   }, [db, isAdmin]);
 
+  // User: Load my own reports (real-time)
+  useEffect(() => {
+    if (!db || !user) return;
+    const q = query(
+      collection(db, 'reports'),
+      where('reporterId', '==', user.uid),
+      orderBy('createdAt', 'desc'),
+      limit(20)
+    );
+    const unsub = onSnapshot(q, (snap: any) => {
+      const list: any[] = [];
+      snap.forEach((docSnap: any) => {
+        list.push({ id: docSnap.id, ...docSnap.data() });
+      });
+      setMyReports(list);
+    });
+    return () => unsub();
+  }, [db, user]);
+
+  // Load contacts
   useEffect(() => {
     if (!db || !user) return;
     let q;
@@ -615,6 +648,7 @@ const SayHeySection = ({ user, db, isAdmin, onUnreadCountChange }: any) => {
     return () => unsub();
   }, [db, user, isOwner]);
 
+  // Load tickets
   useEffect(() => {
     if (!db || !user) return;
     let q;
@@ -638,6 +672,7 @@ const SayHeySection = ({ user, db, isAdmin, onUnreadCountChange }: any) => {
     return () => unsub();
   }, [db, user, isOwner, selectedContact]);
 
+  // Load messages
   useEffect(() => {
     if (!db || !ticket) return;
     const q = query(collection(db, "sayhey_tickets", ticket.id, "messages"), orderBy("timestamp", "asc"));
@@ -659,6 +694,7 @@ const SayHeySection = ({ user, db, isAdmin, onUnreadCountChange }: any) => {
     return () => unsub();
   }, [db, ticket]);
 
+  // Unread count
   useEffect(() => {
     if (!db || !user) return;
     const q = isOwner
@@ -676,6 +712,7 @@ const SayHeySection = ({ user, db, isAdmin, onUnreadCountChange }: any) => {
     return () => unsub();
   }, [db, user, isOwner, onUnreadCountChange]);
 
+  // Mark as read
   useEffect(() => {
     if (!db || !ticket || !user) return;
     const unread = messages.filter((m) => m.senderId !== user.uid && !m.read);
@@ -841,8 +878,8 @@ const SayHeySection = ({ user, db, isAdmin, onUnreadCountChange }: any) => {
   };
 
   const submitReport = async () => {
-    if (!db || !user || !reportReason.trim()) {
-      alert("Silakan isi alasan laporan");
+    if (!db || !user || !reportReason.trim() || !selectedContact) {
+      alert("Pilih kontak dan isi alasan pengaduan");
       return;
     }
     try {
@@ -850,17 +887,17 @@ const SayHeySection = ({ user, db, isAdmin, onUnreadCountChange }: any) => {
         reporterId: user.uid,
         reporterName: user.displayName || user.email || "User",
         reporterEmail: user.email || "",
-        targetId: selectedContact?.uid || "",
-        targetName: selectedContact?.displayName || selectedContact?.email || "Unknown",
-        targetEmail: selectedContact?.email || "",
+        targetId: selectedContact.uid,
+        targetName: selectedContact.displayName || selectedContact.email || "Unknown",
+        targetEmail: selectedContact.email || "",
         reason: reportReason.trim(),
         status: 'pending',
         createdAt: serverTimestamp(),
       });
-      alert("Laporan berhasil dikirim");
+      alert("Pengaduan berhasil dikirim ke admin");
       setReportReason("");
       setShowReportForm(false);
-    } catch (error) { console.error(error); alert("Gagal mengirim laporan."); }
+    } catch (error) { console.error(error); alert("Gagal mengirim pengaduan."); }
   };
 
   const resolveReport = async (reportId: string) => {
@@ -925,7 +962,7 @@ const SayHeySection = ({ user, db, isAdmin, onUnreadCountChange }: any) => {
     }}>
       <div style={{ marginBottom: "12px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "6px" }}>
-          <SayHeyIcon size={28} color={WHITE} />
+          <SayHeyIcon size={32} color={WHITE} />
           <h3 style={{
             fontSize: "32px", fontWeight: 700, color: WHITE, margin: 0,
             letterSpacing: "-0.02em", fontFamily: FONT_FAMILY,
@@ -944,9 +981,9 @@ const SayHeySection = ({ user, db, isAdmin, onUnreadCountChange }: any) => {
       </div>
 
       <div style={{ display: "flex", gap: "12px", minHeight: "700px", flexWrap: "wrap" }}>
-        {/* ===== LEFT PANEL: KONTAK ===== */}
+        {/* ===== LEFT PANEL: KONTAK (COMPACT) ===== */}
         <div style={{
-          width: "320px", flexShrink: 0,
+          width: "340px", flexShrink: 0,
           display: "flex", flexDirection: "column", gap: "0",
           height: "fit-content", maxHeight: "900px",
           backgroundColor: WHITE,
@@ -954,36 +991,35 @@ const SayHeySection = ({ user, db, isAdmin, onUnreadCountChange }: any) => {
           overflow: "hidden",
           boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
         }}>
-          {/* HEADER PANEL */}
+          {/* HEADER */}
           <div style={{
             padding: "10px 12px",
             backgroundColor: BLUE,
             color: WHITE,
             display: "flex", alignItems: "center", justifyContent: "space-between",
           }}>
-            <span style={{
-              fontSize: "13px", fontWeight: 800, color: WHITE,
-              letterSpacing: "0.5px", textTransform: "uppercase",
-              fontFamily: FONT_FAMILY,
-            }}>Kontak</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <SayHeyIcon size={16} color={WHITE} />
+              <span style={{
+                fontSize: "13px", fontWeight: 800, color: WHITE,
+                letterSpacing: "0.5px", textTransform: "uppercase",
+                fontFamily: FONT_FAMILY,
+              }}>Kontak</span>
+            </div>
             <span style={{
               fontSize: "10px", color: BLUE, padding: "2px 7px",
               borderRadius: "8px", backgroundColor: WHITE, fontWeight: 800,
             }}>{contacts.length}</span>
           </div>
 
-          {/* BODY KONTAK */}
           <div style={{ flex: 1, overflowY: "auto", backgroundColor: WHITE }}>
-
-            {/* PENGUMUMAN - KLIK → MASUK ROOM PENGUMUMAN */}
+            {/* PENGUMUMAN */}
             <div style={{
               backgroundColor: BLUE,
-              padding: "6px 8px",
-              display: "flex", flexDirection: "column", gap: "4px",
+              padding: "8px 10px",
+              display: "flex", flexDirection: "column", gap: "6px",
             }}>
-              <div style={{
-                display: "flex", alignItems: "center", justifyContent: "space-between",
-              }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <button
                   onClick={() => setRoomMode('announcement')}
                   style={{
@@ -992,7 +1028,7 @@ const SayHeySection = ({ user, db, isAdmin, onUnreadCountChange }: any) => {
                   }}
                 >
                   <span style={{
-                    fontSize: "11px", fontWeight: 800, color: WHITE,
+                    fontSize: "12px", fontWeight: 800, color: WHITE,
                     fontFamily: FONT_FAMILY, letterSpacing: "0.5px",
                     textTransform: "uppercase",
                   }}>Pengumuman</span>
@@ -1001,14 +1037,13 @@ const SayHeySection = ({ user, db, isAdmin, onUnreadCountChange }: any) => {
                   <button
                     onClick={() => setShowAnnouncementForm(!showAnnouncementForm)}
                     style={{
-                      width: '20px', height: '20px',
+                      width: '22px', height: '22px',
                       backgroundColor: WHITE, color: BLUE,
                       border: 'none', borderRadius: '50%',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       cursor: 'pointer',
-                      fontSize: '14px', fontWeight: 700,
                     }}
-                  >+</button>
+                  ><PlusIcon size={12} color={BLUE} /></button>
                 )}
               </div>
 
@@ -1041,7 +1076,7 @@ const SayHeySection = ({ user, db, isAdmin, onUnreadCountChange }: any) => {
                 </div>
               )}
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                 {announcements.length === 0 ? (
                   <div style={{
                     fontSize: '10px', color: WHITE, opacity: 0.7,
@@ -1053,29 +1088,36 @@ const SayHeySection = ({ user, db, isAdmin, onUnreadCountChange }: any) => {
                     key={a.id}
                     onClick={() => setRoomMode('announcement')}
                     style={{
-                      padding: '5px 8px',
+                      padding: '6px 10px',
                       backgroundColor: WHITE,
-                      borderRadius: '8px 8px 8px 3px',
-                      fontSize: '10px', color: BLACK,
-                      fontFamily: FONT_FAMILY, lineHeight: 1.3,
+                      borderRadius: '10px 10px 10px 3px',
+                      fontSize: '11px', color: BLACK,
+                      fontFamily: FONT_FAMILY, lineHeight: 1.4,
                       cursor: 'pointer',
                       alignSelf: 'flex-start',
                       maxWidth: '94%',
                     }}
                   >
-                    <div style={{ fontSize: '9px', fontWeight: 700, color: BLUE, marginBottom: '1px', display: 'flex', alignItems: 'center', gap: '2px' }}>
-                      {a.authorName || 'Admin'}<VerifiedBadgeReal size={9} />
+                    <div style={{ 
+                      fontSize: '10px', fontWeight: 700, color: BLUE, 
+                      marginBottom: '2px', display: 'flex', alignItems: 'center', gap: '2px' 
+                    }}>
+                      {a.authorName || 'Admin'}
+                      <VerifiedBadgeReal size={12} />
                     </div>
-                    <div style={{ marginBottom: '1px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.text}</div>
-                    <div style={{ fontSize: '8px', color: '#666' }}>{formatTime(a.createdAt)}</div>
+                    <div style={{ 
+                      marginBottom: '2px', overflow: 'hidden', 
+                      textOverflow: 'ellipsis', whiteSpace: 'nowrap' 
+                    }}>{a.text}</div>
+                    <div style={{ fontSize: '9px', color: '#666' }}>{formatTime(a.createdAt)}</div>
                   </div>
                 ))}
                 {announcements.length > 3 && (
                   <div
                     onClick={() => setRoomMode('announcement')}
                     style={{
-                      fontSize: '9px', color: WHITE, textAlign: 'center',
-                      padding: '3px', cursor: 'pointer',
+                      fontSize: '10px', color: WHITE, textAlign: 'center',
+                      padding: '4px', cursor: 'pointer',
                       fontFamily: FONT_FAMILY, fontWeight: 700,
                       textDecoration: 'underline',
                     }}
@@ -1084,16 +1126,14 @@ const SayHeySection = ({ user, db, isAdmin, onUnreadCountChange }: any) => {
               </div>
             </div>
 
-            {/* BROADCASTING - KLIK → MASUK ROOM BROADCASTING */}
+            {/* BROADCASTING */}
             <div style={{
               backgroundColor: BLUE,
-              padding: "6px 8px",
-              display: "flex", flexDirection: "column", gap: "4px",
+              padding: "8px 10px",
+              display: "flex", flexDirection: "column", gap: "6px",
               borderTop: `1px solid rgba(255,255,255,0.15)`,
             }}>
-              <div style={{
-                display: "flex", alignItems: "center", justifyContent: "space-between",
-              }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <button
                   onClick={() => setRoomMode('broadcast')}
                   style={{
@@ -1102,7 +1142,7 @@ const SayHeySection = ({ user, db, isAdmin, onUnreadCountChange }: any) => {
                   }}
                 >
                   <span style={{
-                    fontSize: "11px", fontWeight: 800, color: WHITE,
+                    fontSize: "12px", fontWeight: 800, color: WHITE,
                     fontFamily: FONT_FAMILY, letterSpacing: "0.5px",
                     textTransform: "uppercase",
                   }}>Broadcasting</span>
@@ -1111,14 +1151,13 @@ const SayHeySection = ({ user, db, isAdmin, onUnreadCountChange }: any) => {
                   <button
                     onClick={() => setShowBroadcastForm(!showBroadcastForm)}
                     style={{
-                      width: '20px', height: '20px',
+                      width: '22px', height: '22px',
                       backgroundColor: WHITE, color: BLUE,
                       border: 'none', borderRadius: '50%',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       cursor: 'pointer',
-                      fontSize: '14px', fontWeight: 700,
                     }}
-                  >+</button>
+                  ><PlusIcon size={12} color={BLUE} /></button>
                 )}
               </div>
 
@@ -1151,7 +1190,7 @@ const SayHeySection = ({ user, db, isAdmin, onUnreadCountChange }: any) => {
                 </div>
               )}
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                 {broadcasts.length === 0 ? (
                   <div style={{
                     fontSize: '10px', color: WHITE, opacity: 0.7,
@@ -1163,29 +1202,36 @@ const SayHeySection = ({ user, db, isAdmin, onUnreadCountChange }: any) => {
                     key={b.id}
                     onClick={() => setRoomMode('broadcast')}
                     style={{
-                      padding: '5px 8px',
+                      padding: '6px 10px',
                       backgroundColor: WHITE,
-                      borderRadius: '8px 8px 8px 3px',
-                      fontSize: '10px', color: BLACK,
-                      fontFamily: FONT_FAMILY, lineHeight: 1.3,
+                      borderRadius: '10px 10px 10px 3px',
+                      fontSize: '11px', color: BLACK,
+                      fontFamily: FONT_FAMILY, lineHeight: 1.4,
                       cursor: 'pointer',
                       alignSelf: 'flex-start',
                       maxWidth: '94%',
                     }}
                   >
-                    <div style={{ fontSize: '9px', fontWeight: 700, color: BLUE, marginBottom: '1px', display: 'flex', alignItems: 'center', gap: '2px' }}>
-                      {b.authorName || 'Admin'}<VerifiedBadgeReal size={9} />
+                    <div style={{ 
+                      fontSize: '10px', fontWeight: 700, color: BLUE, 
+                      marginBottom: '2px', display: 'flex', alignItems: 'center', gap: '2px' 
+                    }}>
+                      {b.authorName || 'Admin'}
+                      <VerifiedBadgeReal size={12} />
                     </div>
-                    <div style={{ marginBottom: '1px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.text}</div>
-                    <div style={{ fontSize: '8px', color: '#666' }}>{formatTime(b.createdAt)}</div>
+                    <div style={{ 
+                      marginBottom: '2px', overflow: 'hidden', 
+                      textOverflow: 'ellipsis', whiteSpace: 'nowrap' 
+                    }}>{b.text}</div>
+                    <div style={{ fontSize: '9px', color: '#666' }}>{formatTime(b.createdAt)}</div>
                   </div>
                 ))}
                 {broadcasts.length > 3 && (
                   <div
                     onClick={() => setRoomMode('broadcast')}
                     style={{
-                      fontSize: '9px', color: WHITE, textAlign: 'center',
-                      padding: '3px', cursor: 'pointer',
+                      fontSize: '10px', color: WHITE, textAlign: 'center',
+                      padding: '4px', cursor: 'pointer',
                       fontFamily: FONT_FAMILY, fontWeight: 700,
                       textDecoration: 'underline',
                     }}
@@ -1194,35 +1240,32 @@ const SayHeySection = ({ user, db, isAdmin, onUnreadCountChange }: any) => {
               </div>
             </div>
 
-            {/* PENGADUAN USER - BG BIRU, FORM SEKALI KIRIM NYATU BG */}
+            {/* PENGADUAN USER */}
             <div style={{
               backgroundColor: BLUE,
-              padding: "6px 8px",
-              display: "flex", flexDirection: "column", gap: "4px",
+              padding: "8px 10px",
+              display: "flex", flexDirection: "column", gap: "6px",
               borderTop: `1px solid rgba(255,255,255,0.15)`,
             }}>
-              <div style={{
-                display: "flex", alignItems: "center", justifyContent: "space-between",
-              }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <span style={{
-                  fontSize: "11px", fontWeight: 800, color: WHITE,
+                  fontSize: "12px", fontWeight: 800, color: WHITE,
                   fontFamily: FONT_FAMILY, letterSpacing: "0.5px",
                   textTransform: "uppercase",
                 }}>Pengaduan User</span>
                 <button
                   onClick={() => setShowReportForm(!showReportForm)}
                   style={{
-                    width: '20px', height: '20px',
+                    width: '22px', height: '22px',
                     backgroundColor: WHITE, color: BLUE,
                     border: 'none', borderRadius: '50%',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     cursor: 'pointer',
-                    fontSize: '14px', fontWeight: 700,
                   }}
-                >+</button>
+                ><PlusIcon size={12} color={BLUE} /></button>
               </div>
 
-              {/* FORM PENGADUAN - NYATU DI BG KONTAK, SEKALI KIRIM */}
+              {/* FORM PENGADUAN - SEKALI KIRIM, NYATU BG */}
               {showReportForm && (
                 <div style={{
                   display: 'flex', flexDirection: 'column', gap: '4px',
@@ -1259,50 +1302,97 @@ const SayHeySection = ({ user, db, isAdmin, onUnreadCountChange }: any) => {
                       cursor: (!selectedContact || !reportReason.trim()) ? 'not-allowed' : 'pointer',
                       fontFamily: FONT_FAMILY,
                     }}
-                  >Kirim Pengaduan (sekali)</button>
+                  >Kirim Pengaduan</button>
                 </div>
               )}
 
-              {isAdmin && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                  {reports.length === 0 ? (
-                    <div style={{
-                      fontSize: '10px', color: WHITE, opacity: 0.7,
-                      fontStyle: 'italic', textAlign: 'center', padding: '4px',
-                      fontFamily: FONT_FAMILY,
-                    }}>Belum ada pengaduan</div>
-                  ) : reports.slice(0, 3).map((r) => (
+              {/* HASIL SUBMIT PENGADUAN - USER LIHAT HASIL LAPORANNYA */}
+              {!isAdmin && myReports.length > 0 && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <div style={{
+                    fontSize: '10px', color: WHITE, fontWeight: 700,
+                    fontFamily: FONT_FAMILY, opacity: 0.9,
+                  }}>Hasil Pengaduan Anda:</div>
+                  {myReports.slice(0, 3).map((r) => (
                     <div
                       key={r.id}
                       style={{
-                        padding: '5px 8px',
+                        padding: '6px 10px',
                         backgroundColor: WHITE,
-                        borderRadius: '8px 8px 8px 3px',
-                        fontSize: '10px', color: BLACK,
-                        fontFamily: FONT_FAMILY, lineHeight: 1.3,
+                        borderRadius: '10px 10px 10px 3px',
+                        fontSize: '11px', color: BLACK,
+                        fontFamily: FONT_FAMILY, lineHeight: 1.4,
                         alignSelf: 'flex-start',
                         maxWidth: '94%',
                       }}
                     >
-                      <div style={{ fontWeight: 700, color: RED, marginBottom: '1px', fontSize: '9px' }}>
+                      <div style={{ 
+                        fontWeight: 700, color: RED, marginBottom: '2px', fontSize: '10px' 
+                      }}>
                         Target: {r.targetName}
                       </div>
-                      <div style={{ fontSize: '9px', marginBottom: '1px' }}>Pelapor: {r.reporterName}</div>
-                      <div style={{ fontSize: '9px', marginBottom: '2px' }}>Alasan: {r.reason}</div>
+                      <div style={{ fontSize: '10px', marginBottom: '2px' }}>
+                        Alasan: {r.reason}
+                      </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <span style={{
-                          padding: '1px 5px',
+                          padding: '1px 6px',
                           backgroundColor: r.status === 'resolved' ? '#D1FAE5' : '#FEF3C7',
                           color: r.status === 'resolved' ? '#065F46' : '#92400E',
-                          borderRadius: '3px', fontSize: '8px', fontWeight: 700,
+                          borderRadius: '4px', fontSize: '9px', fontWeight: 700,
+                        }}>{r.status === 'resolved' ? 'resolved' : 'pending'}</span>
+                        <span style={{ fontSize: '9px', color: '#666' }}>
+                          {formatTime(r.createdAt)}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* ADMIN: LIHAT SEMUA LAPORAN */}
+              {isAdmin && reports.length > 0 && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <div style={{
+                    fontSize: '10px', color: WHITE, fontWeight: 700,
+                    fontFamily: FONT_FAMILY, opacity: 0.9,
+                  }}>Semua Pengaduan ({reports.filter(r => r.status === 'pending').length} pending):</div>
+                  {reports.slice(0, 3).map((r) => (
+                    <div
+                      key={r.id}
+                      style={{
+                        padding: '6px 10px',
+                        backgroundColor: WHITE,
+                        borderRadius: '10px 10px 10px 3px',
+                        fontSize: '11px', color: BLACK,
+                        fontFamily: FONT_FAMILY, lineHeight: 1.4,
+                        alignSelf: 'flex-start',
+                        maxWidth: '94%',
+                      }}
+                    >
+                      <div style={{ fontWeight: 700, color: RED, marginBottom: '2px', fontSize: '10px' }}>
+                        Target: {r.targetName}
+                      </div>
+                      <div style={{ fontSize: '10px', marginBottom: '1px' }}>
+                        Pelapor: {r.reporterName}
+                      </div>
+                      <div style={{ fontSize: '10px', marginBottom: '3px' }}>
+                        Alasan: {r.reason}
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{
+                          padding: '1px 6px',
+                          backgroundColor: r.status === 'resolved' ? '#D1FAE5' : '#FEF3C7',
+                          color: r.status === 'resolved' ? '#065F46' : '#92400E',
+                          borderRadius: '4px', fontSize: '9px', fontWeight: 700,
                         }}>{r.status === 'resolved' ? 'resolved' : 'pending'}</span>
                         {r.status !== 'resolved' && (
                           <button
                             onClick={() => resolveReport(r.id)}
                             style={{
-                              padding: '2px 5px', backgroundColor: GREEN,
-                              color: WHITE, border: 'none', borderRadius: '3px',
-                              fontSize: '8px', fontWeight: 700, cursor: 'pointer',
+                              padding: '2px 6px', backgroundColor: GREEN,
+                              color: WHITE, border: 'none', borderRadius: '4px',
+                              fontSize: '9px', fontWeight: 700, cursor: 'pointer',
                               fontFamily: FONT_FAMILY,
                             }}
                           >Selesai</button>
@@ -1312,16 +1402,32 @@ const SayHeySection = ({ user, db, isAdmin, onUnreadCountChange }: any) => {
                   ))}
                 </div>
               )}
+
+              {isAdmin && reports.length === 0 && (
+                <div style={{
+                  fontSize: '10px', color: WHITE, opacity: 0.7,
+                  fontStyle: 'italic', textAlign: 'center', padding: '4px',
+                  fontFamily: FONT_FAMILY,
+                }}>Belum ada pengaduan</div>
+              )}
+
+              {!isAdmin && myReports.length === 0 && (
+                <div style={{
+                  fontSize: '10px', color: WHITE, opacity: 0.7,
+                  fontStyle: 'italic', textAlign: 'center', padding: '4px',
+                  fontFamily: FONT_FAMILY,
+                }}>Belum ada pengaduan yang Anda kirim</div>
+              )}
             </div>
 
             {/* CONTACT LIST */}
             <div style={{
               borderTop: `1px solid rgba(0,0,0,0.08)`,
               backgroundColor: WHITE,
-              padding: '6px 8px',
+              padding: '8px 10px',
             }}>
               <div style={{
-                fontSize: "11px", fontWeight: 800, color: BLUE,
+                fontSize: "12px", fontWeight: 800, color: BLUE,
                 fontFamily: FONT_FAMILY, letterSpacing: "0.5px",
                 textTransform: "uppercase",
                 display: "flex", alignItems: "center", justifyContent: "space-between",
@@ -1329,7 +1435,7 @@ const SayHeySection = ({ user, db, isAdmin, onUnreadCountChange }: any) => {
               }}>
                 <span>{isOwner ? "Users Online" : "Owners Online"}</span>
                 <span style={{
-                  fontSize: "9px", color: WHITE, padding: "1px 5px",
+                  fontSize: "10px", color: WHITE, padding: "1px 5px",
                   borderRadius: "6px", backgroundColor: BLUE, fontWeight: 800,
                 }}>{contacts.length}</span>
               </div>
@@ -1348,9 +1454,9 @@ const SayHeySection = ({ user, db, isAdmin, onUnreadCountChange }: any) => {
                   <div
                     key={c.uid}
                     style={{
-                      padding: "6px 4px",
+                      padding: "8px 6px",
                       borderBottom: `1px solid rgba(0,0,0,0.05)`,
-                      display: "flex", alignItems: "center", gap: "6px",
+                      display: "flex", alignItems: "center", gap: "8px",
                       backgroundColor: selectedContact?.uid === c.uid ? "rgba(13,60,252,0.08)" : "transparent",
                       borderRadius: '6px',
                     }}
@@ -1358,7 +1464,7 @@ const SayHeySection = ({ user, db, isAdmin, onUnreadCountChange }: any) => {
                     <div
                       onClick={() => openChatWith(c)}
                       style={{
-                        width: "32px", height: "32px", borderRadius: "8px",
+                        width: "36px", height: "36px", borderRadius: "10px",
                         overflow: "hidden", backgroundColor: BLUE, display: "flex",
                         alignItems: "center", justifyContent: "center", flexShrink: 0,
                         cursor: 'pointer',
@@ -1366,46 +1472,46 @@ const SayHeySection = ({ user, db, isAdmin, onUnreadCountChange }: any) => {
                       {c.photoURL ? (
                         <img src={c.photoURL} alt={c.displayName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                       ) : (
-                        <span style={{ fontSize: "13px", fontWeight: 800, color: WHITE }}>
+                        <span style={{ fontSize: "14px", fontWeight: 800, color: WHITE }}>
                           {c.displayName.charAt(0).toUpperCase()}
                         </span>
                       )}
                     </div>
                     <div style={{ flex: 1, minWidth: 0, cursor: 'pointer' }} onClick={() => openChatWith(c)}>
                       <div style={{
-                        display: 'flex', alignItems: 'center', gap: '3px',
-                        flexWrap: 'wrap', marginBottom: '1px',
+                        display: 'flex', alignItems: 'center', gap: '4px',
+                        flexWrap: 'wrap', marginBottom: '2px',
                       }}>
                         <span style={{
-                          fontSize: "11px", fontWeight: 700, color: BLUE,
+                          fontSize: "12px", fontWeight: 700, color: BLUE,
                           overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                           fontFamily: FONT_FAMILY,
                         }}>{c.displayName}</span>
                         {isContactAdmin && (
                           <>
                             <span style={{
-                              fontSize: '8px', fontWeight: 800, color: BLUE,
+                              fontSize: '9px', fontWeight: 800, color: BLUE,
                               fontFamily: FONT_FAMILY,
                               letterSpacing: '0.3px',
                             }}>Admin</span>
-                            <VerifiedBadgeReal size={10} />
+                            <VerifiedBadgeReal size={14} />
                           </>
                         )}
                       </div>
                       <div style={{
-                        fontSize: "9px", color: BLUE, fontFamily: FONT_FAMILY,
-                        display: "flex", alignItems: "center", gap: "3px",
+                        fontSize: "10px", color: BLUE, fontFamily: FONT_FAMILY,
+                        display: "flex", alignItems: "center", gap: "4px",
                         fontWeight: 600, opacity: 0.85,
                       }}>
-                        <BlinkingDot size={5} color={BLUE} />
+                        <BlinkingDot size={6} color={BLUE} />
                         {c.online ? "Online" : "Offline"}
                       </div>
                     </div>
                     {unread > 0 && (
                       <span style={{
-                        minWidth: "16px", height: "16px", padding: "0 4px",
-                        borderRadius: "8px", backgroundColor: BLUE, color: WHITE,
-                        fontSize: "9px", fontWeight: 800, fontFamily: FONT_FAMILY,
+                        minWidth: "18px", height: "18px", padding: "0 5px",
+                        borderRadius: "9px", backgroundColor: BLUE, color: WHITE,
+                        fontSize: "10px", fontWeight: 800, fontFamily: FONT_FAMILY,
                         display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
                       }}>{unread > 99 ? "99+" : unread}</span>
                     )}
@@ -1416,7 +1522,7 @@ const SayHeySection = ({ user, db, isAdmin, onUnreadCountChange }: any) => {
           </div>
         </div>
 
-        {/* ===== RIGHT PANEL: ROOM (chat / announcement / broadcast) ===== */}
+        {/* ===== RIGHT PANEL: ROOM ===== */}
         <div style={{
           flex: 1, minWidth: "300px", backgroundColor: WHITE,
           borderRadius: "12px", overflow: "hidden", display: "flex",
@@ -1439,7 +1545,7 @@ const SayHeySection = ({ user, db, isAdmin, onUnreadCountChange }: any) => {
                   onClick={() => setRoomMode('chat')}
                   style={{
                     background: 'transparent', border: '1.5px solid white',
-                    color: WHITE, borderRadius: '6px', padding: '3px 10px',
+                    color: WHITE, borderRadius: '6px', padding: '4px 12px',
                     fontSize: '11px', fontWeight: 700, cursor: 'pointer',
                     fontFamily: FONT_FAMILY,
                   }}
@@ -1467,11 +1573,14 @@ const SayHeySection = ({ user, db, isAdmin, onUnreadCountChange }: any) => {
                       maxWidth: '80%',
                       border: '1px solid rgba(0,0,0,0.06)',
                       boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
-                      position: 'relative',
                     }}
                   >
-                    <div style={{ fontSize: '11px', fontWeight: 700, color: BLUE, marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '3px' }}>
-                      {a.authorName || 'Admin'}<VerifiedBadgeReal size={11} />
+                    <div style={{ 
+                      fontSize: '11px', fontWeight: 700, color: BLUE, 
+                      marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '3px' 
+                    }}>
+                      {a.authorName || 'Admin'}
+                      <VerifiedBadgeReal size={18} />
                     </div>
                     <div>{a.text}</div>
                     <div style={{
@@ -1512,7 +1621,7 @@ const SayHeySection = ({ user, db, isAdmin, onUnreadCountChange }: any) => {
                   onClick={() => setRoomMode('chat')}
                   style={{
                     background: 'transparent', border: '1.5px solid white',
-                    color: WHITE, borderRadius: '6px', padding: '3px 10px',
+                    color: WHITE, borderRadius: '6px', padding: '4px 12px',
                     fontSize: '11px', fontWeight: 700, cursor: 'pointer',
                     fontFamily: FONT_FAMILY,
                   }}
@@ -1542,8 +1651,12 @@ const SayHeySection = ({ user, db, isAdmin, onUnreadCountChange }: any) => {
                       boxShadow: '0 2px 6px rgba(0,0,0,0.04)',
                     }}
                   >
-                    <div style={{ fontSize: '11px', fontWeight: 700, color: BLUE, marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '3px' }}>
-                      {b.authorName || 'Admin'}<VerifiedBadgeReal size={11} />
+                    <div style={{ 
+                      fontSize: '11px', fontWeight: 700, color: BLUE, 
+                      marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '3px' 
+                    }}>
+                      {b.authorName || 'Admin'}
+                      <VerifiedBadgeReal size={18} />
                     </div>
                     <div>{b.text}</div>
                     <div style={{
@@ -1568,7 +1681,7 @@ const SayHeySection = ({ user, db, isAdmin, onUnreadCountChange }: any) => {
             </>
           )}
 
-          {/* ROOM CHAT PRIBADI */}
+          {/* ROOM CHAT */}
           {roomMode === 'chat' && (
             <>
               {!ticket || !selectedContact ? (
@@ -1590,14 +1703,14 @@ const SayHeySection = ({ user, db, isAdmin, onUnreadCountChange }: any) => {
                   }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0 }}>
                       <div style={{
-                        width: "32px", height: "32px", borderRadius: "8px",
+                        width: "36px", height: "36px", borderRadius: "8px",
                         overflow: "hidden", backgroundColor: WHITE, display: "flex",
                         alignItems: "center", justifyContent: "center", flexShrink: 0,
                       }}>
                         {selectedContact.photoURL ? (
                           <img src={selectedContact.photoURL} alt={selectedContact.displayName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                         ) : (
-                          <span style={{ fontSize: "13px", fontWeight: 800, color: BLUE }}>
+                          <span style={{ fontSize: "14px", fontWeight: 800, color: BLUE }}>
                             {(selectedContact.displayName || "U").charAt(0).toUpperCase()}
                           </span>
                         )}
@@ -1612,20 +1725,20 @@ const SayHeySection = ({ user, db, isAdmin, onUnreadCountChange }: any) => {
                           {(selectedContact.email === ADMIN_EMAIL || selectedContact.email === OWNER_EMAIL) && (
                             <>
                               <span style={{
-                                fontSize: '8px', fontWeight: 800, color: WHITE,
+                                fontSize: '9px', fontWeight: 800, color: WHITE,
                                 fontFamily: FONT_FAMILY,
                                 letterSpacing: '0.3px',
                               }}>Admin</span>
-                              <VerifiedBadgeReal size={10} />
+                              <VerifiedBadgeReal size={14} />
                             </>
                           )}
                         </div>
                         <div style={{
-                          fontSize: "9px", color: WHITE, fontFamily: FONT_FAMILY,
-                          display: "flex", alignItems: "center", gap: "3px",
+                          fontSize: "10px", color: WHITE, fontFamily: FONT_FAMILY,
+                          display: "flex", alignItems: "center", gap: "4px",
                           fontWeight: 600, opacity: 0.85,
                         }}>
-                          <BlinkingDot size={5} color={WHITE} />
+                          <BlinkingDot size={6} color={WHITE} />
                           {selectedContact.online ? "Online" : "Offline"}
                         </div>
                       </div>
@@ -1648,7 +1761,7 @@ const SayHeySection = ({ user, db, isAdmin, onUnreadCountChange }: any) => {
                       return (
                         <div key={msg.id || idx} style={{ alignSelf: isMine ? "flex-end" : "flex-start", maxWidth: "75%" }}>
                           <div style={{
-                            padding: "8px 12px", borderRadius: "10px",
+                            padding: "10px 14px", borderRadius: "10px",
                             backgroundColor: msgIsAdmin ? '#FEF3C7' : (isMine ? BLUE : "#ffffff"),
                             color: msgIsAdmin ? BLACK : (isMine ? WHITE : BLACK),
                             fontSize: "13px",
@@ -1657,13 +1770,13 @@ const SayHeySection = ({ user, db, isAdmin, onUnreadCountChange }: any) => {
                           }}>
                             {!isMine && (
                               <div style={{
-                                fontSize: "10px", fontWeight: 700,
+                                fontSize: "11px", fontWeight: 700,
                                 color: msgIsAdmin ? '#92400E' : BLUE,
-                                marginBottom: "3px",
+                                marginBottom: "4px",
                                 display: 'flex', alignItems: 'center', gap: '3px',
                               }}>
                                 <span>{msg.senderName}</span>
-                                {msgIsAdmin && <VerifiedBadgeReal size={10} />}
+                                {msgIsAdmin && <VerifiedBadgeReal size={16} />}
                               </div>
                             )}
                             {msg.replyTo && (
@@ -1680,7 +1793,7 @@ const SayHeySection = ({ user, db, isAdmin, onUnreadCountChange }: any) => {
                             <div>{msg.text}</div>
                             <div style={{
                               display: "flex", justifyContent: "flex-end",
-                              alignItems: "center", gap: "5px", marginTop: "3px",
+                              alignItems: "center", gap: "5px", marginTop: "4px",
                             }}>
                               <button
                                 onClick={() => setReplyTo(msg)}
@@ -1848,9 +1961,13 @@ const FixedNavbar = ({ user, auth, db, userDisplayName, router, onSayHeyToggle, 
                   <span style={{ fontSize: "13px", fontWeight: 800, color: BLUE }}>{displayName.charAt(0).toUpperCase()}</span>
                 )}
               </div>
-              <span style={{ color: WHITE, fontSize: "12px", fontWeight: 700, letterSpacing: "0.02em", fontFamily: FONT_FAMILY, whiteSpace: "nowrap", display: 'flex', alignItems: 'center', gap: '3px' }}>
+              <span style={{ 
+                color: WHITE, fontSize: "12px", fontWeight: 700, 
+                letterSpacing: "0.02em", fontFamily: FONT_FAMILY, 
+                whiteSpace: "nowrap", display: 'flex', alignItems: 'center', gap: '4px' 
+              }}>
                 {displayName}
-                {userIsAdmin && <VerifiedBadgeReal size={11} />}
+                {userIsAdmin && <VerifiedBadgeReal size={14} />}
               </span>
             </div>
             <button onClick={handleLogout} style={{
