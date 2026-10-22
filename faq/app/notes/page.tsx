@@ -4738,7 +4738,6 @@ interface Note {
   collaborators?: string[];
   collaboratorNames?: { [key: string]: string };
   isCollaborative?: boolean;
-  resultNumber?: number;
 }
 
 interface Group {
@@ -6685,7 +6684,7 @@ export default function NotesPage(): React.JSX.Element {
                     style={{
                       display: 'flex',
                       flexDirection: 'column',
-                      gap: '60px',
+                      gap: '0',
                       fontFamily: FONT_FAMILY,
                     }}
                   >
@@ -6696,425 +6695,412 @@ export default function NotesPage(): React.JSX.Element {
                       const userCanEdit = canEditNote(note);
                       const userIsOwner = isNoteOwner(note);
 
-                      // Nomor hasil submit otomatis: 01, 02, 03, ...
                       const resultNumber = String(noteIndex + 1).padStart(2, '0');
-                      const hasResult = !!(note.description || note.descriptionHtml);
-                      const lineStyle: React.CSSProperties = hasResult
-                        ? {
-                            borderLeft: `3px solid ${BLUE}`,
-                            paddingLeft: '20px',
-                          }
-                        : {
-                            borderLeft: `3px dashed ${BLUE}80`,
-                            paddingLeft: '20px',
-                          };
+                      const hasResult = !!(
+                        (note.description && note.description.trim()) ||
+                        (note.descriptionHtml &&
+                          note.descriptionHtml.replace(/<[^>]*>/g, '').trim())
+                      );
+                      const isLast = noteIndex === filteredNotes.length - 1;
 
                       return (
                         <div
                           key={note.id}
                           style={{
                             display: 'flex',
-                            gap: '24px',
-                            alignItems: 'flex-start',
+                            gap: '0',
+                            alignItems: 'stretch',
                             fontFamily: FONT_FAMILY,
                             position: 'relative',
                           }}
                         >
-                          {/* ===== NOMOR + GARIS ===== */}
+                          {/* ===== AREA NOMOR + GARIS VERTIKAL ===== */}
                           <div
                             style={{
+                              width: '130px',
+                              flexShrink: 0,
                               display: 'flex',
                               flexDirection: 'column',
                               alignItems: 'center',
-                              gap: '8px',
-                              flexShrink: 0,
-                              paddingTop: '8px',
+                              position: 'relative',
                             }}
                           >
+                            {/* Nomor — font 45px, putih, tanpa bulat */}
                             <div
                               style={{
-                                width: '64px',
-                                height: '64px',
-                                borderRadius: '50%',
-                                backgroundColor: hasResult ? BLUE : WHITE,
-                                border: hasResult
-                                  ? 'none'
-                                  : `3px dashed ${BLUE}80`,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                color: hasResult ? WHITE : BLUE,
-                                fontSize: '24px',
+                                fontSize: '45px',
                                 fontWeight: 800,
                                 fontFamily: FONT_FAMILY,
-                                boxShadow: hasResult
-                                  ? `0 6px 18px ${BLUE}40`
-                                  : 'none',
+                                color: WHITE,
+                                lineHeight: 1,
+                                letterSpacing: '-0.02em',
+                                padding: '6px 0',
+                                textShadow: `0 2px 8px rgba(0,0,0,0.15)`,
+                                zIndex: 2,
                               }}
                             >
                               {resultNumber}
                             </div>
+
+                            {/* Garis vertikal penghubung */}
+                            <div
+                              style={{
+                                position: 'absolute',
+                                top: '60px',
+                                bottom: isLast ? 'auto' : 0,
+                                height: isLast ? '80px' : 'auto',
+                                left: '50%',
+                                transform: 'translateX(-50%)',
+                                width: '3px',
+                                zIndex: 1,
+                                backgroundImage: hasResult
+                                  ? 'none'
+                                  : `repeating-linear-gradient(
+                                      to bottom,
+                                      ${WHITE} 0px,
+                                      ${WHITE} 10px,
+                                      transparent 10px,
+                                      transparent 20px
+                                    )`,
+                                backgroundColor: hasResult
+                                  ? WHITE
+                                  : 'transparent',
+                              }}
+                            />
                           </div>
 
-                          {/* ===== CONTENT CARD ===== */}
+                          {/* ===== AREA BG BIRU + CARD ===== */}
                           <div
                             style={{
                               flex: 1,
                               minWidth: 0,
                               display: 'flex',
                               flexDirection: 'column',
-                              gap: '16px',
-                              ...lineStyle,
+                              gap: '0',
+                              paddingBottom: isLast ? '0' : '40px',
                             }}
                           >
-                            {/* TOPIK dengan background melengkung */}
-                            {note.category && (
-                              <div
-                                style={{
-                                  display: 'inline-flex',
-                                  alignSelf: 'flex-start',
-                                  alignItems: 'center',
-                                  gap: '8px',
-                                  padding: '8px 20px',
-                                  backgroundColor: BLUE,
-                                  color: WHITE,
-                                  borderRadius: '999px',
-                                  fontFamily: FONT_FAMILY,
-                                  fontSize: '15px',
-                                  fontWeight: 800,
-                                  letterSpacing: '0.04em',
-                                  textTransform: 'uppercase',
-                                  boxShadow: `0 6px 18px ${BLUE}40`,
-                                }}
-                              >
-                                <span
-                                  style={{
-                                    width: '8px',
-                                    height: '8px',
-                                    borderRadius: '50%',
-                                    backgroundColor: WHITE,
-                                  }}
-                                />
-                                {note.category}
-                              </div>
-                            )}
-
-                            {/* JUDUL NOTE dengan background melengkung */}
+                            {/* Container BG Biru untuk area submit note */}
                             <div
                               style={{
-                                padding: '18px 24px',
-                                backgroundColor: '#F4F6FF',
-                                border: `1.5px solid ${BLUE}30`,
-                                borderRadius: '24px 24px 24px 6px',
-                                boxShadow: `0 8px 24px ${BLUE}10`,
+                                backgroundColor: BLUE,
+                                borderRadius: '28px',
+                                padding: '24px 28px',
                                 display: 'flex',
-                                alignItems: 'center',
-                                flexWrap: 'wrap',
-                                gap: '12px',
+                                flexDirection: 'column',
+                                gap: '18px',
+                                boxShadow: `0 8px 32px ${BLUE}40`,
                               }}
                             >
-                              <span
-                                style={{
-                                  fontSize: '34px',
-                                  fontFamily: FONT_FAMILY,
-                                  lineHeight: '1.25',
-                                  color: BLUE,
-                                  fontWeight: 800,
-                                  flex: 1,
-                                  minWidth: 0,
-                                  wordBreak: 'break-word',
-                                }}
-                              >
-                                {note.title}
-                              </span>
-                              {note.collaborators &&
-                                note.collaborators.length > 0 && (
-                                  <CollabIconList
-                                    collaborators={note.collaborators}
-                                    collaboratorNames={note.collaboratorNames}
-                                  />
-                                )}
-                            </div>
-
-                            {/* DESKRIPSI NOTE dengan background melengkung */}
-                            {(note.descriptionHtml || note.description) && (
-                              <div
-                                style={{
-                                  padding: '20px 24px',
-                                  backgroundColor: note.labelColor
-                                    ? `${note.labelColor}60`
-                                    : '#FBFBFF',
-                                  border: `1.5px solid ${BLUE}25`,
-                                  borderRadius: '24px 6px 24px 24px',
-                                  boxShadow: `0 6px 20px ${BLUE}0D`,
-                                }}
-                              >
-                                {note.descriptionHtml ? (
-                                  <div
-                                    className="note-description-html"
-                                    dangerouslySetInnerHTML={{
-                                      __html: note.descriptionHtml,
-                                    }}
-                                    style={{
-                                      fontSize: '17px',
-                                      fontFamily: FONT_FAMILY,
-                                      lineHeight: '1.7',
-                                      color: BLACK,
-                                      wordBreak: 'break-word',
-                                    }}
-                                  />
-                                ) : (
-                                  <div
-                                    style={{
-                                      fontSize: '17px',
-                                      fontFamily: FONT_FAMILY,
-                                      lineHeight: '1.7',
-                                      color: BLACK,
-                                      whiteSpace: 'pre-wrap',
-                                      wordBreak: 'break-word',
-                                    }}
-                                  >
-                                    {note.description}
-                                  </div>
-                                )}
-                              </div>
-                            )}
-
-                            {/* VIDEO */}
-                            {videoEmbedUrl && (
-                              <div
-                                style={{
-                                  margin: '4px 0',
-                                  position: 'relative',
-                                }}
-                              >
-                                {videoEmbedUrl.includes('youtube.com/embed') ||
-                                videoEmbedUrl.includes('vimeo.com') ? (
-                                  <div
-                                    style={{
-                                      position: 'relative',
-                                      paddingBottom: '56.25%',
-                                      height: 0,
-                                      overflow: 'hidden',
-                                      backgroundColor: '#000',
-                                      borderRadius: '20px',
-                                    }}
-                                  >
-                                    <iframe
-                                      src={videoEmbedUrl}
-                                      style={{
-                                        position: 'absolute',
-                                        top: 0,
-                                        left: 0,
-                                        width: '100%',
-                                        height: '100%',
-                                        border: 'none',
-                                      }}
-                                      allowFullScreen
-                                    />
-                                  </div>
-                                ) : (
-                                  <div
-                                    style={{
-                                      position: 'relative',
-                                      backgroundColor: '#000',
-                                      borderRadius: '20px',
-                                      overflow: 'hidden',
-                                    }}
-                                  >
-                                    <video
-                                      ref={(el) => {
-                                        if (note.id)
-                                          videoRefs.current[note.id] = el;
-                                      }}
-                                      src={videoEmbedUrl}
-                                      style={{
-                                        width: '100%',
-                                        maxWidth: '600px',
-                                        height: 'auto',
-                                        aspectRatio: '16/9',
-                                        backgroundColor: '#000',
-                                        cursor: 'pointer',
-                                      }}
-                                      onClick={() => togglePlayPause(note.id!)}
-                                      controls
-                                    />
-                                  </div>
-                                )}
-                              </div>
-                            )}
-
-                            {/* TANGGAL + NAMA dengan background melengkung (style beda) */}
-                            <div
-                              style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                flexWrap: 'wrap',
-                                gap: '12px',
-                              }}
-                            >
-                              <div
-                                style={{
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '8px',
-                                  padding: '8px 18px',
-                                  backgroundColor: '#E8F5E9',
-                                  border: `1.5px solid #4ADE8055`,
-                                  borderRadius: '999px',
-                                  fontSize: '14px',
-                                  color: '#065F46',
-                                  fontWeight: 700,
-                                  fontFamily: FONT_FAMILY,
-                                  boxShadow: '0 4px 12px rgba(74,222,128,0.15)',
-                                }}
-                              >
-                                <svg
-                                  width="14"
-                                  height="14"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  stroke="#065F46"
-                                  strokeWidth="2.5"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                >
-                                  <rect x="3" y="4" width="18" height="18" rx="2" />
-                                  <line x1="16" y1="2" x2="16" y2="6" />
-                                  <line x1="8" y1="2" x2="8" y2="6" />
-                                  <line x1="3" y1="10" x2="21" y2="10" />
-                                </svg>
-                                {formatDate(note.updatedAt)}
-                              </div>
-                              <div
-                                style={{
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '8px',
-                                  padding: '8px 18px',
-                                  backgroundColor: '#FFF7E6',
-                                  border: `1.5px solid #F59E0B55`,
-                                  borderRadius: '999px',
-                                  fontSize: '14px',
-                                  color: '#92400E',
-                                  fontWeight: 700,
-                                  fontFamily: FONT_FAMILY,
-                                  boxShadow: '0 4px 12px rgba(245,158,11,0.15)',
-                                }}
-                              >
-                                <span
+                              {/* TOPIK - card melengkung putih */}
+                              {note.category && (
+                                <div
                                   style={{
-                                    width: '22px',
-                                    height: '22px',
-                                    borderRadius: '50%',
-                                    backgroundColor: '#F59E0B',
-                                    color: WHITE,
                                     display: 'inline-flex',
+                                    alignSelf: 'flex-start',
                                     alignItems: 'center',
-                                    justifyContent: 'center',
-                                    fontSize: '11px',
+                                    gap: '8px',
+                                    padding: '8px 22px',
+                                    backgroundColor: WHITE,
+                                    color: BLUE,
+                                    borderRadius: '24px 4px 24px 24px',
+                                    fontFamily: FONT_FAMILY,
+                                    fontSize: '15px',
                                     fontWeight: 800,
+                                    letterSpacing: '0.04em',
+                                    textTransform: 'uppercase',
+                                    border: `2px solid ${WHITE}`,
+                                    boxShadow: `0 4px 12px rgba(0,0,0,0.1)`,
                                   }}
                                 >
-                                  {note.userName.charAt(0).toUpperCase()}
-                                </span>
-                                oleh {note.userName}
-                                <InstagramVerifiedBadge />
-                              </div>
-                            </div>
+                                  {note.category}
+                                </div>
+                              )}
 
-                            {/* ACTION BUTTONS */}
-                            <div
-                              style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '14px',
-                                flexWrap: 'wrap',
-                                paddingTop: '4px',
-                              }}
-                            >
-                              <button
-                                onClick={() => handleSaveNote(note.id!)}
+                              {/* JUDUL NOTE - card melengkung putih beda design */}
+                              <div
                                 style={{
-                                  backgroundColor: 'transparent',
-                                  border: 'none',
-                                  color: BLUE,
-                                  fontSize: '22px',
-                                  cursor: 'pointer',
-                                  padding: '5px',
+                                  padding: '18px 24px',
+                                  backgroundColor: WHITE,
+                                  border: `2px solid ${WHITE}`,
+                                  borderRadius: '6px 28px 28px 28px',
+                                  boxShadow: `0 6px 20px rgba(0,0,0,0.12)`,
                                   display: 'flex',
                                   alignItems: 'center',
-                                  justifyContent: 'center',
-                                  opacity: isSaved ? 0.5 : 1,
+                                  flexWrap: 'wrap',
+                                  gap: '12px',
                                 }}
                               >
-                                <svg
-                                  width="22"
-                                  height="22"
-                                  viewBox="0 0 24 24"
-                                  fill={isSaved ? BLUE : 'none'}
-                                  stroke={BLUE}
-                                  strokeWidth="2"
-                                >
-                                  <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z" />
-                                </svg>
-                              </button>
-                              {userCanEdit && (
-                                <button
-                                  onClick={() => {
-                                    setCurrentNote(note);
-                                    setEditNote({
-                                      title: note.title,
-                                      category: note.category,
-                                      link: note.link || '',
-                                      description: note.description || '',
-                                    });
-                                    setShowEditNoteModal(true);
+                                <span
+                                  style={{
+                                    fontSize: '34px',
+                                    fontFamily: FONT_FAMILY,
+                                    lineHeight: '1.25',
+                                    color: BLUE,
+                                    fontWeight: 800,
+                                    flex: 1,
+                                    minWidth: 0,
+                                    wordBreak: 'break-word',
                                   }}
+                                >
+                                  {note.title}
+                                </span>
+                                {note.collaborators &&
+                                  note.collaborators.length > 0 && (
+                                    <CollabIconList
+                                      collaborators={note.collaborators}
+                                      collaboratorNames={note.collaboratorNames}
+                                    />
+                                  )}
+                              </div>
+
+                              {/* DESKRIPSI NOTE - card melengkung putih beda design */}
+                              {(note.descriptionHtml || note.description) && (
+                                <div
+                                  style={{
+                                    padding: '20px 24px',
+                                    backgroundColor: WHITE,
+                                    border: `2px solid ${WHITE}`,
+                                    borderRadius: '28px 6px 28px 28px',
+                                    boxShadow: `0 6px 20px rgba(0,0,0,0.12)`,
+                                  }}
+                                >
+                                  {note.descriptionHtml ? (
+                                    <div
+                                      className="note-description-html"
+                                      dangerouslySetInnerHTML={{
+                                        __html: note.descriptionHtml,
+                                      }}
+                                      style={{
+                                        fontSize: '17px',
+                                        fontFamily: FONT_FAMILY,
+                                        lineHeight: '1.7',
+                                        color: BLACK,
+                                        wordBreak: 'break-word',
+                                      }}
+                                    />
+                                  ) : (
+                                    <div
+                                      style={{
+                                        fontSize: '17px',
+                                        fontFamily: FONT_FAMILY,
+                                        lineHeight: '1.7',
+                                        color: BLACK,
+                                        whiteSpace: 'pre-wrap',
+                                        wordBreak: 'break-word',
+                                      }}
+                                    >
+                                      {note.description}
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+
+                              {/* VIDEO */}
+                              {videoEmbedUrl && (
+                                <div
+                                  style={{
+                                    margin: '4px 0',
+                                    position: 'relative',
+                                  }}
+                                >
+                                  {videoEmbedUrl.includes('youtube.com/embed') ||
+                                  videoEmbedUrl.includes('vimeo.com') ? (
+                                    <div
+                                      style={{
+                                        position: 'relative',
+                                        paddingBottom: '56.25%',
+                                        height: 0,
+                                        overflow: 'hidden',
+                                        backgroundColor: '#000',
+                                        borderRadius: '20px',
+                                      }}
+                                    >
+                                      <iframe
+                                        src={videoEmbedUrl}
+                                        style={{
+                                          position: 'absolute',
+                                          top: 0,
+                                          left: 0,
+                                          width: '100%',
+                                          height: '100%',
+                                          border: 'none',
+                                        }}
+                                        allowFullScreen
+                                      />
+                                    </div>
+                                  ) : (
+                                    <div
+                                      style={{
+                                        position: 'relative',
+                                        backgroundColor: '#000',
+                                        borderRadius: '20px',
+                                        overflow: 'hidden',
+                                      }}
+                                    >
+                                      <video
+                                        ref={(el) => {
+                                          if (note.id)
+                                            videoRefs.current[note.id] = el;
+                                        }}
+                                        src={videoEmbedUrl}
+                                        style={{
+                                          width: '100%',
+                                          maxWidth: '600px',
+                                          height: 'auto',
+                                          aspectRatio: '16/9',
+                                          backgroundColor: '#000',
+                                          cursor: 'pointer',
+                                        }}
+                                        onClick={() => togglePlayPause(note.id!)}
+                                        controls
+                                      />
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+
+                              {/* TANGGAL + NAMA - card melengkung putih beda design */}
+                              <div
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  flexWrap: 'wrap',
+                                  gap: '12px',
+                                }}
+                              >
+                                <div
+                                  style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                    padding: '8px 20px',
+                                    backgroundColor: WHITE,
+                                    border: `2px solid ${WHITE}`,
+                                    borderRadius: '20px 4px 20px 20px',
+                                    fontSize: '14px',
+                                    color: BLUE,
+                                    fontWeight: 700,
+                                    fontFamily: FONT_FAMILY,
+                                    boxShadow: `0 4px 12px rgba(0,0,0,0.1)`,
+                                  }}
+                                >
+                                  {formatDate(note.updatedAt)}
+                                </div>
+                                <div
+                                  style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                    padding: '8px 20px',
+                                    backgroundColor: WHITE,
+                                    border: `2px solid ${WHITE}`,
+                                    borderRadius: '4px 20px 20px 20px',
+                                    fontSize: '14px',
+                                    color: BLUE,
+                                    fontWeight: 700,
+                                    fontFamily: FONT_FAMILY,
+                                    boxShadow: `0 4px 12px rgba(0,0,0,0.1)`,
+                                  }}
+                                >
+                                  oleh {note.userName}
+                                  <InstagramVerifiedBadge />
+                                </div>
+                              </div>
+
+                              {/* ACTION BUTTONS */}
+                              <div
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '14px',
+                                  flexWrap: 'wrap',
+                                  paddingTop: '4px',
+                                }}
+                              >
+                                <button
+                                  onClick={() => handleSaveNote(note.id!)}
                                   style={{
                                     backgroundColor: 'transparent',
                                     border: 'none',
-                                    color: BLUE,
+                                    color: WHITE,
                                     fontSize: '22px',
                                     cursor: 'pointer',
                                     padding: '5px',
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
+                                    opacity: isSaved ? 0.5 : 1,
                                   }}
                                 >
                                   <svg
                                     width="22"
                                     height="22"
                                     viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke={BLUE}
+                                    fill={isSaved ? WHITE : 'none'}
+                                    stroke={WHITE}
                                     strokeWidth="2"
                                   >
-                                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
+                                    <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z" />
                                   </svg>
                                 </button>
-                              )}
-                              {note.userId === user?.uid && (
-                                <button
-                                  onClick={() => handleDeleteNote(note.id!)}
-                                  style={{
-                                    backgroundColor: 'transparent',
-                                    border: 'none',
-                                    color: BLUE,
-                                    fontSize: '32px',
-                                    cursor: 'pointer',
-                                    padding: '0',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    width: '32px',
-                                    height: '32px',
-                                  }}
-                                >
-                                  ×
-                                </button>
-                              )}
+                                {userCanEdit && (
+                                  <button
+                                    onClick={() => {
+                                      setCurrentNote(note);
+                                      setEditNote({
+                                        title: note.title,
+                                        category: note.category,
+                                        link: note.link || '',
+                                        description: note.description || '',
+                                      });
+                                      setShowEditNoteModal(true);
+                                    }}
+                                    style={{
+                                      backgroundColor: 'transparent',
+                                      border: 'none',
+                                      color: WHITE,
+                                      fontSize: '22px',
+                                      cursor: 'pointer',
+                                      padding: '5px',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                    }}
+                                  >
+                                    <svg
+                                      width="22"
+                                      height="22"
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke={WHITE}
+                                      strokeWidth="2"
+                                    >
+                                      <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
+                                    </svg>
+                                  </button>
+                                )}
+                                {note.userId === user?.uid && (
+                                  <button
+                                    onClick={() => handleDeleteNote(note.id!)}
+                                    style={{
+                                      backgroundColor: 'transparent',
+                                      border: 'none',
+                                      color: WHITE,
+                                      fontSize: '32px',
+                                      cursor: 'pointer',
+                                      padding: '0',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      width: '32px',
+                                      height: '32px',
+                                    }}
+                                  >
+                                    ×
+                                  </button>
+                                )}
+                              </div>
                             </div>
                           </div>
                         </div>
