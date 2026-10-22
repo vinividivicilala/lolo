@@ -367,18 +367,8 @@ const CollabIcon = ({
       strokeLinecap="round"
       strokeLinejoin="round"
     />
-    <path
-      d="M20 8v6"
-      stroke={color}
-      strokeWidth="2"
-      strokeLinecap="round"
-    />
-    <path
-      d="M23 11h-6"
-      stroke={color}
-      strokeWidth="2"
-      strokeLinecap="round"
-    />
+    <path d="M20 8v6" stroke={color} strokeWidth="2" strokeLinecap="round" />
+    <path d="M23 11h-6" stroke={color} strokeWidth="2" strokeLinecap="round" />
   </svg>
 );
 
@@ -4748,6 +4738,7 @@ interface Note {
   collaborators?: string[];
   collaboratorNames?: { [key: string]: string };
   isCollaborative?: boolean;
+  resultNumber?: number;
 }
 
 interface Group {
@@ -6698,214 +6689,348 @@ export default function NotesPage(): React.JSX.Element {
                       fontFamily: FONT_FAMILY,
                     }}
                   >
-                    {filteredNotes.map((note) => {
+                    {filteredNotes.map((note, noteIndex) => {
                       const videoEmbedUrl = getVideoEmbedUrl(note.link);
                       const isSaved =
                         note.savedBy && user && note.savedBy.includes(user.uid);
                       const userCanEdit = canEditNote(note);
                       const userIsOwner = isNoteOwner(note);
 
-                      // ===== LABEL COLOR BODY + BORDER =====
-                      const noteContainerStyle: React.CSSProperties = {
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '20px',
-                        fontFamily: FONT_FAMILY,
-                        position: 'relative',
-                        padding: '20px',
-                        backgroundColor: note.labelColor || 'transparent',
-                        borderRadius: '12px',
-                        border: note.labelColor ? `3px solid ${BLUE}` : 'none',
-                        boxShadow: note.labelColor
-                          ? `0 4px 16px ${BLUE}20`
-                          : 'none',
-                      };
+                      // Nomor hasil submit otomatis: 01, 02, 03, ...
+                      const resultNumber = String(noteIndex + 1).padStart(2, '0');
+                      const hasResult = !!(note.description || note.descriptionHtml);
+                      const lineStyle: React.CSSProperties = hasResult
+                        ? {
+                            borderLeft: `3px solid ${BLUE}`,
+                            paddingLeft: '20px',
+                          }
+                        : {
+                            borderLeft: `3px dashed ${BLUE}80`,
+                            paddingLeft: '20px',
+                          };
 
                       return (
-                        <div key={note.id} style={noteContainerStyle}>
-                          {note.category && (
-                            <div
-                              style={{
-                                fontSize: '24px',
-                                color: BLUE,
-                                marginBottom: '10px',
-                                fontWeight: '700',
-                                fontFamily: FONT_FAMILY,
-                              }}
-                            >
-                              {note.category}
-                            </div>
-                          )}
+                        <div
+                          key={note.id}
+                          style={{
+                            display: 'flex',
+                            gap: '24px',
+                            alignItems: 'flex-start',
+                            fontFamily: FONT_FAMILY,
+                            position: 'relative',
+                          }}
+                        >
+                          {/* ===== NOMOR + GARIS ===== */}
                           <div
                             style={{
                               display: 'flex',
+                              flexDirection: 'column',
                               alignItems: 'center',
-                              flexWrap: 'wrap',
-                              gap: '12px',
+                              gap: '8px',
+                              flexShrink: 0,
+                              paddingTop: '8px',
                             }}
                           >
                             <div
                               style={{
-                                fontSize: '42px',
+                                width: '64px',
+                                height: '64px',
+                                borderRadius: '50%',
+                                backgroundColor: hasResult ? BLUE : WHITE,
+                                border: hasResult
+                                  ? 'none'
+                                  : `3px dashed ${BLUE}80`,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: hasResult ? WHITE : BLUE,
+                                fontSize: '24px',
+                                fontWeight: 800,
                                 fontFamily: FONT_FAMILY,
-                                lineHeight: '1.3',
-                                color: BLUE,
-                                fontWeight: '700',
+                                boxShadow: hasResult
+                                  ? `0 6px 18px ${BLUE}40`
+                                  : 'none',
                               }}
                             >
-                              {note.title}
+                              {resultNumber}
                             </div>
-                            {note.collaborators &&
-                              note.collaborators.length > 0 && (
-                                <CollabIconList
-                                  collaborators={note.collaborators}
-                                  collaboratorNames={note.collaboratorNames}
-                                />
-                              )}
                           </div>
-                          {note.descriptionHtml ? (
-                            <div
-                              className="note-description-html"
-                              dangerouslySetInnerHTML={{
-                                __html: note.descriptionHtml,
-                              }}
-                              style={{
-                                fontSize: '18px',
-                                fontFamily: FONT_FAMILY,
-                                lineHeight: '1.7',
-                                color: BLACK,
-                                marginTop: '15px',
-                                wordBreak: 'break-word',
-                              }}
-                            />
-                          ) : (
-                            note.description && (
+
+                          {/* ===== CONTENT CARD ===== */}
+                          <div
+                            style={{
+                              flex: 1,
+                              minWidth: 0,
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '16px',
+                              ...lineStyle,
+                            }}
+                          >
+                            {/* TOPIK dengan background melengkung */}
+                            {note.category && (
                               <div
                                 style={{
-                                  fontSize: '18px',
+                                  display: 'inline-flex',
+                                  alignSelf: 'flex-start',
+                                  alignItems: 'center',
+                                  gap: '8px',
+                                  padding: '8px 20px',
+                                  backgroundColor: BLUE,
+                                  color: WHITE,
+                                  borderRadius: '999px',
                                   fontFamily: FONT_FAMILY,
-                                  lineHeight: '1.7',
-                                  color: BLACK,
-                                  marginTop: '15px',
-                                  whiteSpace: 'pre-wrap',
+                                  fontSize: '15px',
+                                  fontWeight: 800,
+                                  letterSpacing: '0.04em',
+                                  textTransform: 'uppercase',
+                                  boxShadow: `0 6px 18px ${BLUE}40`,
                                 }}
                               >
-                                {note.description}
+                                <span
+                                  style={{
+                                    width: '8px',
+                                    height: '8px',
+                                    borderRadius: '50%',
+                                    backgroundColor: WHITE,
+                                  }}
+                                />
+                                {note.category}
                               </div>
-                            )
-                          )}
-                          {videoEmbedUrl && (
+                            )}
+
+                            {/* JUDUL NOTE dengan background melengkung */}
                             <div
                               style={{
-                                margin: '20px 0',
-                                position: 'relative',
+                                padding: '18px 24px',
+                                backgroundColor: '#F4F6FF',
+                                border: `1.5px solid ${BLUE}30`,
+                                borderRadius: '24px 24px 24px 6px',
+                                boxShadow: `0 8px 24px ${BLUE}10`,
+                                display: 'flex',
+                                alignItems: 'center',
+                                flexWrap: 'wrap',
+                                gap: '12px',
                               }}
                             >
-                              {videoEmbedUrl.includes('youtube.com/embed') ||
-                              videoEmbedUrl.includes('vimeo.com') ? (
-                                <div
-                                  style={{
-                                    position: 'relative',
-                                    paddingBottom: '56.25%',
-                                    height: 0,
-                                    overflow: 'hidden',
-                                    backgroundColor: '#000',
-                                    borderRadius: '8px',
-                                  }}
-                                >
-                                  <iframe
-                                    src={videoEmbedUrl}
-                                    style={{
-                                      position: 'absolute',
-                                      top: 0,
-                                      left: 0,
-                                      width: '100%',
-                                      height: '100%',
-                                      border: 'none',
-                                    }}
-                                    allowFullScreen
+                              <span
+                                style={{
+                                  fontSize: '34px',
+                                  fontFamily: FONT_FAMILY,
+                                  lineHeight: '1.25',
+                                  color: BLUE,
+                                  fontWeight: 800,
+                                  flex: 1,
+                                  minWidth: 0,
+                                  wordBreak: 'break-word',
+                                }}
+                              >
+                                {note.title}
+                              </span>
+                              {note.collaborators &&
+                                note.collaborators.length > 0 && (
+                                  <CollabIconList
+                                    collaborators={note.collaborators}
+                                    collaboratorNames={note.collaboratorNames}
                                   />
-                                </div>
-                              ) : (
-                                <div
-                                  style={{
-                                    position: 'relative',
-                                    backgroundColor: '#000',
-                                    borderRadius: '8px',
-                                    overflow: 'hidden',
-                                  }}
-                                >
-                                  <video
-                                    ref={(el) => {
-                                      if (note.id) videoRefs.current[note.id] = el;
-                                    }}
-                                    src={videoEmbedUrl}
-                                    style={{
-                                      width: '100%',
-                                      maxWidth: '600px',
-                                      height: 'auto',
-                                      aspectRatio: '16/9',
-                                      backgroundColor: '#000',
-                                      cursor: 'pointer',
-                                    }}
-                                    onClick={() => togglePlayPause(note.id!)}
-                                    controls
-                                  />
-                                </div>
-                              )}
+                                )}
                             </div>
-                          )}
-                          <div
-                            style={{
-                              display: 'flex',
-                              justifyContent: 'space-between',
-                              alignItems: 'center',
-                              marginTop: '15px',
-                              fontFamily: FONT_FAMILY,
-                              flexWrap: 'wrap',
-                              gap: '15px',
-                            }}
-                          >
+
+                            {/* DESKRIPSI NOTE dengan background melengkung */}
+                            {(note.descriptionHtml || note.description) && (
+                              <div
+                                style={{
+                                  padding: '20px 24px',
+                                  backgroundColor: note.labelColor
+                                    ? `${note.labelColor}60`
+                                    : '#FBFBFF',
+                                  border: `1.5px solid ${BLUE}25`,
+                                  borderRadius: '24px 6px 24px 24px',
+                                  boxShadow: `0 6px 20px ${BLUE}0D`,
+                                }}
+                              >
+                                {note.descriptionHtml ? (
+                                  <div
+                                    className="note-description-html"
+                                    dangerouslySetInnerHTML={{
+                                      __html: note.descriptionHtml,
+                                    }}
+                                    style={{
+                                      fontSize: '17px',
+                                      fontFamily: FONT_FAMILY,
+                                      lineHeight: '1.7',
+                                      color: BLACK,
+                                      wordBreak: 'break-word',
+                                    }}
+                                  />
+                                ) : (
+                                  <div
+                                    style={{
+                                      fontSize: '17px',
+                                      fontFamily: FONT_FAMILY,
+                                      lineHeight: '1.7',
+                                      color: BLACK,
+                                      whiteSpace: 'pre-wrap',
+                                      wordBreak: 'break-word',
+                                    }}
+                                  >
+                                    {note.description}
+                                  </div>
+                                )}
+                              </div>
+                            )}
+
+                            {/* VIDEO */}
+                            {videoEmbedUrl && (
+                              <div
+                                style={{
+                                  margin: '4px 0',
+                                  position: 'relative',
+                                }}
+                              >
+                                {videoEmbedUrl.includes('youtube.com/embed') ||
+                                videoEmbedUrl.includes('vimeo.com') ? (
+                                  <div
+                                    style={{
+                                      position: 'relative',
+                                      paddingBottom: '56.25%',
+                                      height: 0,
+                                      overflow: 'hidden',
+                                      backgroundColor: '#000',
+                                      borderRadius: '20px',
+                                    }}
+                                  >
+                                    <iframe
+                                      src={videoEmbedUrl}
+                                      style={{
+                                        position: 'absolute',
+                                        top: 0,
+                                        left: 0,
+                                        width: '100%',
+                                        height: '100%',
+                                        border: 'none',
+                                      }}
+                                      allowFullScreen
+                                    />
+                                  </div>
+                                ) : (
+                                  <div
+                                    style={{
+                                      position: 'relative',
+                                      backgroundColor: '#000',
+                                      borderRadius: '20px',
+                                      overflow: 'hidden',
+                                    }}
+                                  >
+                                    <video
+                                      ref={(el) => {
+                                        if (note.id)
+                                          videoRefs.current[note.id] = el;
+                                      }}
+                                      src={videoEmbedUrl}
+                                      style={{
+                                        width: '100%',
+                                        maxWidth: '600px',
+                                        height: 'auto',
+                                        aspectRatio: '16/9',
+                                        backgroundColor: '#000',
+                                        cursor: 'pointer',
+                                      }}
+                                      onClick={() => togglePlayPause(note.id!)}
+                                      controls
+                                    />
+                                  </div>
+                                )}
+                              </div>
+                            )}
+
+                            {/* TANGGAL + NAMA dengan background melengkung (style beda) */}
                             <div
                               style={{
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: '20px',
                                 flexWrap: 'wrap',
+                                gap: '12px',
                               }}
                             >
-                              <span
+                              <div
                                 style={{
-                                  fontSize: '16px',
-                                  color: BLUE,
-                                  fontWeight: 600,
-                                  fontFamily: FONT_FAMILY,
-                                }}
-                              >
-                                {formatDate(note.updatedAt)}
-                              </span>
-                              <span
-                                style={{
-                                  fontSize: '14px',
-                                  color: BLUE,
-                                  display: 'flex',
+                                  display: 'inline-flex',
                                   alignItems: 'center',
-                                  gap: '4px',
+                                  gap: '8px',
+                                  padding: '8px 18px',
+                                  backgroundColor: '#E8F5E9',
+                                  border: `1.5px solid #4ADE8055`,
+                                  borderRadius: '999px',
+                                  fontSize: '14px',
+                                  color: '#065F46',
+                                  fontWeight: 700,
                                   fontFamily: FONT_FAMILY,
-                                  fontWeight: 600,
+                                  boxShadow: '0 4px 12px rgba(74,222,128,0.15)',
                                 }}
                               >
+                                <svg
+                                  width="14"
+                                  height="14"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="#065F46"
+                                  strokeWidth="2.5"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                >
+                                  <rect x="3" y="4" width="18" height="18" rx="2" />
+                                  <line x1="16" y1="2" x2="16" y2="6" />
+                                  <line x1="8" y1="2" x2="8" y2="6" />
+                                  <line x1="3" y1="10" x2="21" y2="10" />
+                                </svg>
+                                {formatDate(note.updatedAt)}
+                              </div>
+                              <div
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '8px',
+                                  padding: '8px 18px',
+                                  backgroundColor: '#FFF7E6',
+                                  border: `1.5px solid #F59E0B55`,
+                                  borderRadius: '999px',
+                                  fontSize: '14px',
+                                  color: '#92400E',
+                                  fontWeight: 700,
+                                  fontFamily: FONT_FAMILY,
+                                  boxShadow: '0 4px 12px rgba(245,158,11,0.15)',
+                                }}
+                              >
+                                <span
+                                  style={{
+                                    width: '22px',
+                                    height: '22px',
+                                    borderRadius: '50%',
+                                    backgroundColor: '#F59E0B',
+                                    color: WHITE,
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '11px',
+                                    fontWeight: 800,
+                                  }}
+                                >
+                                  {note.userName.charAt(0).toUpperCase()}
+                                </span>
                                 oleh {note.userName}
                                 <InstagramVerifiedBadge />
-                              </span>
+                              </div>
                             </div>
+
+                            {/* ACTION BUTTONS */}
                             <div
                               style={{
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: '16px',
-                                fontFamily: FONT_FAMILY,
+                                gap: '14px',
                                 flexWrap: 'wrap',
+                                paddingTop: '4px',
                               }}
                             >
                               <button
