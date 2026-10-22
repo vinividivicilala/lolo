@@ -6686,6 +6686,7 @@ export default function NotesPage(): React.JSX.Element {
                       flexDirection: 'column',
                       gap: '0',
                       fontFamily: FONT_FAMILY,
+                      position: 'relative',
                     }}
                   >
                     {filteredNotes.map((note, noteIndex) => {
@@ -6701,7 +6702,6 @@ export default function NotesPage(): React.JSX.Element {
                         (note.descriptionHtml &&
                           note.descriptionHtml.replace(/<[^>]*>/g, '').trim())
                       );
-                      const isLast = noteIndex === filteredNotes.length - 1;
 
                       return (
                         <div
@@ -6714,72 +6714,90 @@ export default function NotesPage(): React.JSX.Element {
                             position: 'relative',
                           }}
                         >
-                          {/* ===== AREA NOMOR + GARIS VERTIKAL ===== */}
+                          {/* ===== KOLOM KIRI: ANGKA + TITIK BULAT + GARIS ===== */}
                           <div
                             style={{
-                              width: '150px',
+                              width: '260px',
                               flexShrink: 0,
+                              position: 'relative',
                               display: 'flex',
                               flexDirection: 'column',
-                              alignItems: 'center',
-                              position: 'relative',
+                              alignItems: 'flex-end',
+                              paddingRight: '30px',
                             }}
                           >
-                            {/* Nomor — font 70px, warna biru, tanpa bulat */}
+                            {/* Angka 150px di samping garis */}
                             <div
                               style={{
-                                fontSize: '70px',
+                                fontSize: '150px',
                                 fontWeight: 800,
                                 fontFamily: FONT_FAMILY,
-                                color: BLUE,
-                                lineHeight: 1,
-                                letterSpacing: '-0.03em',
-                                padding: '6px 0',
+                                color: hasResult ? BLUE : BLACK,
+                                lineHeight: 0.85,
+                                letterSpacing: '-0.05em',
+                                marginTop: '10px',
+                                marginBottom: '20px',
                                 zIndex: 2,
+                                position: 'relative',
                               }}
                             >
                               {resultNumber}
                             </div>
 
-                            {/* Garis vertikal penghubung — biru */}
+                            {/* Titik bulat di awal (atas) + garis vertikal */}
                             <div
                               style={{
                                 position: 'absolute',
-                                top: '90px',
-                                bottom: isLast ? 'auto' : 0,
-                                height: isLast ? '80px' : 'auto',
-                                left: '50%',
-                                transform: 'translateX(-50%)',
+                                top: 0,
+                                right: '30px',
+                                bottom: 0,
                                 width: '3px',
-                                zIndex: 1,
-                                backgroundImage: hasResult
-                                  ? 'none'
-                                  : `repeating-linear-gradient(
-                                      to bottom,
-                                      ${BLUE} 0px,
-                                      ${BLUE} 10px,
-                                      transparent 10px,
-                                      transparent 20px
-                                    )`,
-                                backgroundColor: hasResult
-                                  ? BLUE
-                                  : 'transparent',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
                               }}
-                            />
+                            >
+                              {/* Titik bulat di atas */}
+                              <div
+                                style={{
+                                  width: '20px',
+                                  height: '20px',
+                                  borderRadius: '50%',
+                                  backgroundColor: hasResult ? BLUE : BLACK,
+                                  border: `3px solid ${WHITE}`,
+                                  boxShadow: `0 0 0 3px ${
+                                    hasResult ? BLUE : BLACK
+                                  }`,
+                                  flexShrink: 0,
+                                  zIndex: 3,
+                                  marginTop: '20px',
+                                }}
+                              />
+                              {/* Garis patah-patah — biru (sudah submit) / hitam (belum submit) */}
+                              <div
+                                style={{
+                                  flex: 1,
+                                  width: '3px',
+                                  backgroundImage: `repeating-linear-gradient(
+                                    to bottom,
+                                    ${hasResult ? BLUE : BLACK} 0px,
+                                    ${hasResult ? BLUE : BLACK} 10px,
+                                    transparent 10px,
+                                    transparent 20px
+                                  )`,
+                                }}
+                              />
+                            </div>
                           </div>
 
-                          {/* ===== AREA BG BIRU + CARD ===== */}
+                          {/* ===== KANAN: BG BIRU + CARD ===== */}
                           <div
                             style={{
                               flex: 1,
                               minWidth: 0,
-                              display: 'flex',
-                              flexDirection: 'column',
-                              gap: '0',
-                              paddingBottom: isLast ? '0' : '40px',
+                              paddingBottom: '40px',
                             }}
                           >
-                            {/* Container BG Biru untuk area submit note */}
                             <div
                               style={{
                                 backgroundColor: BLUE,
@@ -6791,7 +6809,7 @@ export default function NotesPage(): React.JSX.Element {
                                 boxShadow: `0 8px 32px ${BLUE}40`,
                               }}
                             >
-                              {/* TOPIK - card melengkung putih */}
+                              {/* TOPIK */}
                               {note.category && (
                                 <div
                                   style={{
@@ -6816,7 +6834,7 @@ export default function NotesPage(): React.JSX.Element {
                                 </div>
                               )}
 
-                              {/* JUDUL NOTE - card melengkung putih beda design */}
+                              {/* JUDUL NOTE */}
                               <div
                                 style={{
                                   padding: '18px 24px',
@@ -6853,7 +6871,7 @@ export default function NotesPage(): React.JSX.Element {
                                   )}
                               </div>
 
-                              {/* DESKRIPSI NOTE - card melengkung putih beda design */}
+                              {/* DESKRIPSI */}
                               {(note.descriptionHtml || note.description) && (
                                 <div
                                   style={{
@@ -6959,7 +6977,7 @@ export default function NotesPage(): React.JSX.Element {
                                 </div>
                               )}
 
-                              {/* TANGGAL + NAMA - card melengkung putih beda design */}
+                              {/* TANGGAL + NAMA */}
                               <div
                                 style={{
                                   display: 'flex',
