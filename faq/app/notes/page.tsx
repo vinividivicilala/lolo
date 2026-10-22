@@ -6717,7 +6717,7 @@ export default function NotesPage(): React.JSX.Element {
                           {/* ===== AREA NOMOR + GARIS VERTIKAL ===== */}
                           <div
                             style={{
-                              width: '130px',
+                              width: '150px',
                               flexShrink: 0,
                               display: 'flex',
                               flexDirection: 'column',
@@ -6725,28 +6725,27 @@ export default function NotesPage(): React.JSX.Element {
                               position: 'relative',
                             }}
                           >
-                            {/* Nomor — font 45px, putih, tanpa bulat */}
+                            {/* Nomor — font 70px, warna biru, tanpa bulat */}
                             <div
                               style={{
-                                fontSize: '45px',
+                                fontSize: '70px',
                                 fontWeight: 800,
                                 fontFamily: FONT_FAMILY,
-                                color: WHITE,
+                                color: BLUE,
                                 lineHeight: 1,
-                                letterSpacing: '-0.02em',
+                                letterSpacing: '-0.03em',
                                 padding: '6px 0',
-                                textShadow: `0 2px 8px rgba(0,0,0,0.15)`,
                                 zIndex: 2,
                               }}
                             >
                               {resultNumber}
                             </div>
 
-                            {/* Garis vertikal penghubung */}
+                            {/* Garis vertikal penghubung — biru */}
                             <div
                               style={{
                                 position: 'absolute',
-                                top: '60px',
+                                top: '90px',
                                 bottom: isLast ? 'auto' : 0,
                                 height: isLast ? '80px' : 'auto',
                                 left: '50%',
@@ -6757,13 +6756,13 @@ export default function NotesPage(): React.JSX.Element {
                                   ? 'none'
                                   : `repeating-linear-gradient(
                                       to bottom,
-                                      ${WHITE} 0px,
-                                      ${WHITE} 10px,
+                                      ${BLUE} 0px,
+                                      ${BLUE} 10px,
                                       transparent 10px,
                                       transparent 20px
                                     )`,
                                 backgroundColor: hasResult
-                                  ? WHITE
+                                  ? BLUE
                                   : 'transparent',
                               }}
                             />
