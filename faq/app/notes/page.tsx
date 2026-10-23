@@ -4747,6 +4747,7 @@ interface Group {
   ownerName: string;
   members: string[];
   memberNames?: { [key: string]: string };
+  memberEmails?: { [key: string]: string };
   createdAt: any;
 }
 
@@ -5354,15 +5355,21 @@ export default function NotesPage(): React.JSX.Element {
       const memberNames: { [key: string]: string } = {
         [user.uid]: userDisplayName,
       };
+      const memberEmails: { [key: string]: string } = {
+        [user.uid]: userEmail,
+      };
       newGroupMembers.forEach((m) => {
         memberNames[m.uid] = m.name;
+        memberEmails[m.uid] = m.email;
       });
       await addDoc(collection(db, 'groups'), {
         name: newGroupName.trim(),
         ownerId: user.uid,
         ownerName: userDisplayName,
+        ownerEmail: userEmail,
         members: memberIds,
         memberNames,
+        memberEmails,
         createdAt: serverTimestamp(),
       });
       setNewGroupName('');
@@ -5372,6 +5379,17 @@ export default function NotesPage(): React.JSX.Element {
     } catch (error) {
       console.error('Error creating group:', error);
       alert('Gagal membuat grup.');
+    }
+  };
+
+  const handleDeleteGroup = async (groupId: string) => {
+    if (!user || !db) return;
+    if (!confirm('Apakah Anda yakin ingin menghapus grup ini?')) return;
+    try {
+      await deleteDoc(doc(db, 'groups', groupId));
+    } catch (error) {
+      console.error('Error deleting group:', error);
+      alert('Gagal menghapus grup.');
     }
   };
 
@@ -5967,6 +5985,7 @@ export default function NotesPage(): React.JSX.Element {
                   </div>
                 </div>
 
+                {/* ===== FORM BUAT GRUP ===== */}
                 {showInlineGroupEditor && (
                   <div
                     style={{
@@ -6024,7 +6043,7 @@ export default function NotesPage(): React.JSX.Element {
                             marginBottom: '10px',
                           }}
                         >
-                          Tambahkan User ke Grup:
+                          Pilih User dari Firebase (email + nama):
                         </div>
                         <input
                           type="email"
@@ -6054,7 +6073,7 @@ export default function NotesPage(): React.JSX.Element {
                               border: `1px solid ${BLUE}30`,
                               borderRadius: '8px',
                               marginTop: '10px',
-                              maxHeight: '200px',
+                              maxHeight: '240px',
                               overflowY: 'auto',
                             }}
                           >
@@ -6069,20 +6088,25 @@ export default function NotesPage(): React.JSX.Element {
                                   display: 'flex',
                                   justifyContent: 'space-between',
                                   alignItems: 'center',
+                                  gap: '10px',
                                 }}
                               >
-                                <div>
+                                <div style={{ minWidth: 0, flex: 1 }}>
                                   <div
                                     style={{
                                       fontSize: '14px',
                                       fontWeight: 700,
                                       color: BLUE,
                                       fontFamily: FONT_FAMILY,
+                                      overflow: 'hidden',
+                                      textOverflow: 'ellipsis',
+                                      whiteSpace: 'nowrap',
                                     }}
                                   >
                                     {m.displayName ||
                                       m.name ||
-                                      m.email?.split('@')[0]}
+                                      m.email?.split('@')[0] ||
+                                      'User'}
                                   </div>
                                   <div
                                     style={{
@@ -6090,6 +6114,9 @@ export default function NotesPage(): React.JSX.Element {
                                       color: BLUE,
                                       opacity: 0.7,
                                       fontFamily: FONT_FAMILY,
+                                      overflow: 'hidden',
+                                      textOverflow: 'ellipsis',
+                                      whiteSpace: 'nowrap',
                                     }}
                                   >
                                     {m.email}
@@ -6100,6 +6127,7 @@ export default function NotesPage(): React.JSX.Element {
                                     fontSize: '20px',
                                     fontWeight: 'bold',
                                     color: BLUE,
+                                    flexShrink: 0,
                                   }}
                                 >
                                   +
@@ -6134,6 +6162,14 @@ export default function NotesPage(): React.JSX.Element {
                                 }}
                               >
                                 <span>{m.name}</span>
+                                <span
+                                  style={{
+                                    fontSize: '11px',
+                                    opacity: 0.8,
+                                  }}
+                                >
+                                  ({m.email})
+                                </span>
                                 <button
                                   onClick={() => removeMemberFromNewGroup(m.uid)}
                                   style={{
@@ -6640,6 +6676,282 @@ export default function NotesPage(): React.JSX.Element {
                           <NorthEastArrow size={16} color={WHITE} />
                         </button>
                       </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* ===== DAFTAR GRUP PERMANENT ===== */}
+                {groups.length > 0 && (
+                  <div style={{ marginBottom: '60px' }}>
+                    <h3
+                      style={{
+                        fontSize: '32px',
+                        fontWeight: 800,
+                        color: BLUE,
+                        fontFamily: FONT_FAMILY,
+                        marginBottom: '20px',
+                        letterSpacing: '-0.02em',
+                      }}
+                    >
+                      Grup Anda ({groups.length})
+                    </h3>
+                    <div
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '24px',
+                      }}
+                    >
+                      {groups.map((group) => (
+                        <div
+                          key={group.id}
+                          style={{
+                            backgroundColor: BLUE,
+                            borderRadius: '28px',
+                            padding: '24px 28px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '18px',
+                            boxShadow: `0 8px 32px ${BLUE}40`,
+                          }}
+                        >
+                          {/* NAMA GRUP - card putih melengkung */}
+                          <div
+                            style={{
+                              display: 'inline-flex',
+                              alignSelf: 'flex-start',
+                              alignItems: 'center',
+                              gap: '10px',
+                              padding: '8px 22px',
+                              backgroundColor: WHITE,
+                              color: BLUE,
+                              borderRadius: '24px 4px 24px 24px',
+                              fontFamily: FONT_FAMILY,
+                              fontSize: '15px',
+                              fontWeight: 800,
+                              letterSpacing: '0.04em',
+                              textTransform: 'uppercase',
+                              border: `2px solid ${WHITE}`,
+                              boxShadow: `0 4px 12px rgba(0,0,0,0.1)`,
+                            }}
+                          >
+                            Grup
+                          </div>
+
+                          {/* JUDUL GRUP - card putih melengkung */}
+                          <div
+                            style={{
+                              padding: '18px 24px',
+                              backgroundColor: WHITE,
+                              border: `2px solid ${WHITE}`,
+                              borderRadius: '6px 28px 28px 28px',
+                              boxShadow: `0 6px 20px rgba(0,0,0,0.12)`,
+                              display: 'flex',
+                              alignItems: 'center',
+                              flexWrap: 'wrap',
+                              gap: '12px',
+                            }}
+                          >
+                            <span
+                              style={{
+                                fontSize: '30px',
+                                fontFamily: FONT_FAMILY,
+                                lineHeight: '1.25',
+                                color: BLUE,
+                                fontWeight: 800,
+                                flex: 1,
+                                minWidth: 0,
+                                wordBreak: 'break-word',
+                              }}
+                            >
+                              {group.name}
+                            </span>
+                            <span
+                              style={{
+                                padding: '4px 12px',
+                                backgroundColor: BLUE,
+                                color: WHITE,
+                                borderRadius: '20px',
+                                fontSize: '12px',
+                                fontWeight: 800,
+                                fontFamily: FONT_FAMILY,
+                              }}
+                            >
+                              {group.members?.length || 0} members
+                            </span>
+                          </div>
+
+                          {/* DAFTAR MEMBER - card putih melengkung */}
+                          <div
+                            style={{
+                              padding: '20px 24px',
+                              backgroundColor: WHITE,
+                              border: `2px solid ${WHITE}`,
+                              borderRadius: '28px 6px 28px 28px',
+                              boxShadow: `0 6px 20px rgba(0,0,0,0.12)`,
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '12px',
+                            }}
+                          >
+                            <div
+                              style={{
+                                fontSize: '14px',
+                                fontWeight: 800,
+                                color: BLUE,
+                                fontFamily: FONT_FAMILY,
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.5px',
+                              }}
+                            >
+                              Anggota Grup
+                            </div>
+                            <div
+                              style={{
+                                display: 'flex',
+                                flexWrap: 'wrap',
+                                gap: '10px',
+                              }}
+                            >
+                              {(group.members || []).map((memberId) => {
+                                const memberName =
+                                  group.memberNames?.[memberId] ||
+                                  'User';
+                                const memberEmail =
+                                  group.memberEmails?.[memberId] || '';
+                                return (
+                                  <div
+                                    key={memberId}
+                                    style={{
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      gap: '10px',
+                                      padding: '8px 16px',
+                                      backgroundColor: '#F0F4FF',
+                                      border: `1.5px solid ${BLUE}30`,
+                                      borderRadius: '20px 4px 20px 20px',
+                                    }}
+                                  >
+                                    <div
+                                      style={{
+                                        width: '28px',
+                                        height: '28px',
+                                        borderRadius: '50%',
+                                        backgroundColor: BLUE,
+                                        color: WHITE,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        fontSize: '12px',
+                                        fontWeight: 800,
+                                        fontFamily: FONT_FAMILY,
+                                      }}
+                                    >
+                                      {memberName.charAt(0).toUpperCase()}
+                                    </div>
+                                    <div
+                                      style={{
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        gap: '2px',
+                                      }}
+                                    >
+                                      <span
+                                        style={{
+                                          fontSize: '13px',
+                                          fontWeight: 700,
+                                          color: BLUE,
+                                          fontFamily: FONT_FAMILY,
+                                        }}
+                                      >
+                                        {memberName}
+                                      </span>
+                                      {memberEmail && (
+                                        <span
+                                          style={{
+                                            fontSize: '11px',
+                                            color: BLUE,
+                                            opacity: 0.7,
+                                            fontFamily: FONT_FAMILY,
+                                          }}
+                                        >
+                                          {memberEmail}
+                                        </span>
+                                      )}
+                                    </div>
+                                    {memberId === group.ownerId && (
+                                      <span
+                                        style={{
+                                          fontSize: '9px',
+                                          fontWeight: 800,
+                                          color: WHITE,
+                                          backgroundColor: BLUE,
+                                          padding: '2px 8px',
+                                          borderRadius: '10px',
+                                          fontFamily: FONT_FAMILY,
+                                        }}
+                                      >
+                                        OWNER
+                                      </span>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+
+                          {/* TANGGAL + HAPUS - card putih melengkung */}
+                          <div
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              flexWrap: 'wrap',
+                              gap: '12px',
+                            }}
+                          >
+                            <div
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                padding: '8px 20px',
+                                backgroundColor: WHITE,
+                                border: `2px solid ${WHITE}`,
+                                borderRadius: '20px 4px 20px 20px',
+                                fontSize: '14px',
+                                color: BLUE,
+                                fontWeight: 700,
+                                fontFamily: FONT_FAMILY,
+                                boxShadow: `0 4px 12px rgba(0,0,0,0.1)`,
+                              }}
+                            >
+                              {formatDate(group.createdAt)}
+                            </div>
+                            {group.ownerId === user?.uid && (
+                              <button
+                                onClick={() => handleDeleteGroup(group.id!)}
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '8px',
+                                  padding: '8px 20px',
+                                  backgroundColor: WHITE,
+                                  border: `2px solid ${WHITE}`,
+                                  borderRadius: '4px 20px 20px 20px',
+                                  fontSize: '14px',
+                                  color: RED,
+                                  fontWeight: 700,
+                                  fontFamily: FONT_FAMILY,
+                                  cursor: 'pointer',
+                                  boxShadow: `0 4px 12px rgba(0,0,0,0.1)`,
+                                }}
+                              >
+                                Hapus Grup
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 )}
