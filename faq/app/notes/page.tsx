@@ -3354,7 +3354,8 @@ const SayHeySection = ({ user, db, isAdmin, onUnreadCountChange }: any) => {
                           msg.isAdmin || msg.senderName?.includes('(Admin)');
                         const statusText = getStatusText(msg);
                         return (
-                          <div                            key={msg.id || idx}
+                          <div
+                            key={msg.id || idx}
                             style={{
                               alignSelf: isMine ? 'flex-end' : 'flex-start',
                               maxWidth: '75%',
@@ -6701,7 +6702,6 @@ export default function NotesPage(): React.JSX.Element {
                         (note.descriptionHtml &&
                           note.descriptionHtml.replace(/<[^>]*>/g, '').trim())
                       );
-                      const isLast = noteIndex === filteredNotes.length - 1;
 
                       return (
                         <div
@@ -6714,16 +6714,16 @@ export default function NotesPage(): React.JSX.Element {
                             position: 'relative',
                           }}
                         >
-                          {/* ===== KOLOM KIRI: ANGKA 200px + GARIS PATAH-PATAH + TITIK BULAT ===== */}
+                          {/* ===== KOLOM KIRI: ANGKA (200px) + TITIK BULAT + GARIS PATAH-PATAH ===== */}
                           <div
                             style={{
-                              width: '340px',
+                              width: '320px',
                               flexShrink: 0,
                               position: 'relative',
                               display: 'flex',
                               flexDirection: 'row',
                               alignItems: 'flex-start',
-                              paddingRight: '30px',
+                              paddingRight: '40px',
                             }}
                           >
                             {/* Angka 200px, tidak tebal, warna biru */}
@@ -6744,21 +6744,20 @@ export default function NotesPage(): React.JSX.Element {
                               {resultNumber}
                             </div>
 
-                            {/* Kolom vertikal: titik bulat + garis patah-patah */}
+                            {/* Titik bulat biasa + garis patah-patah nyambung ke bawah */}
                             <div
                               style={{
                                 position: 'absolute',
                                 top: 0,
-                                right: '30px',
+                                right: '20px',
                                 bottom: 0,
-                                width: '18px',
+                                width: '6px',
                                 display: 'flex',
                                 flexDirection: 'column',
                                 alignItems: 'center',
-                                zIndex: 3,
                               }}
                             >
-                              {/* Titik bulat biasa di awal note */}
+                              {/* Titik bulat biasa (normal, tanpa border/ring) */}
                               <div
                                 style={{
                                   width: '18px',
@@ -6766,10 +6765,11 @@ export default function NotesPage(): React.JSX.Element {
                                   borderRadius: '50%',
                                   backgroundColor: BLUE,
                                   flexShrink: 0,
-                                  marginTop: '60px',
+                                  zIndex: 3,
+                                  marginTop: '40px',
                                 }}
                               />
-                              {/* Garis patah-patah vertikal ke bawah (nyambung ke titik bulat berikutnya) */}
+                              {/* Garis patah-patah biru yang nyambung ke bawah */}
                               <div
                                 style={{
                                   flex: 1,
@@ -6781,38 +6781,9 @@ export default function NotesPage(): React.JSX.Element {
                                     transparent 12px,
                                     transparent 24px
                                   )`,
-                                  display: isLast ? 'none' : 'block',
                                 }}
                               />
                             </div>
-                          </div>
-
-                          {/* ===== GARIS PATAH-PATAH HORIZONTAL DARI CARD KE TITIK BULAT ===== */}
-                          <div
-                            style={{
-                              width: '40px',
-                              flexShrink: 0,
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              position: 'relative',
-                            }}
-                          >
-                            <div
-                              style={{
-                                height: '3px',
-                                width: '100%',
-                                backgroundImage: `repeating-linear-gradient(
-                                  to right,
-                                  ${BLUE} 0px,
-                                  ${BLUE} 12px,
-                                  transparent 12px,
-                                  transparent 24px
-                                )`,
-                                alignSelf: 'flex-start',
-                                marginTop: '68px',
-                              }}
-                            />
                           </div>
 
                           {/* ===== KANAN: BG BIRU + CARD ===== */}
