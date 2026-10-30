@@ -2820,7 +2820,7 @@ const SayHeySection = ({ user, db, isAdmin, onUnreadCountChange }: any) => {
                               color: WHITE,
                             }}
                           >
-                            {c.displayName.charAt(0).toUpperCase()}
+                           {(c.displayName || 'U').charAt(0).toUpperCase()}
                           </span>
                         )}
                       </div>
@@ -4464,7 +4464,7 @@ const CollabIconList = ({ collaborators = [], collaboratorNames = {} }: any) => 
               marginLeft: idx === 0 ? 0 : '-6px',
             }}
           >
-            {String(name).charAt(0).toUpperCase()}
+          {String(name || '?').charAt(0).toUpperCase()}
           </div>
         ))}
       {collaborators.length > 3 && (
@@ -7016,7 +7016,7 @@ export default function NotesPage(): React.JSX.Element {
                                     fontWeight: 800,
                                   }}
                                 >
-                                  {note.userName.charAt(0).toUpperCase()}
+                                  {(note.userName || 'U').charAt(0).toUpperCase()}
                                 </span>
                                 oleh {note.userName}
                                 <InstagramVerifiedBadge />
