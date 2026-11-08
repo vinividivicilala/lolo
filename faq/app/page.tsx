@@ -834,9 +834,15 @@ interface NoteEntry {
   userPhoto?: string;
   text?: string;
   category?: string;
+  title?: string;
+  descriptionHtml?: string;
+  description?: string;
+  link?: string;
   hasKendala?: boolean;
   adminTagged?: boolean;
   createdAt: any;
+  updatedAt?: any;
+  labelColor?: string;
 }
 
 interface InviteUser {
@@ -939,7 +945,7 @@ const HeroMenuruTitle = () => {
       ref={containerRef}
       style={{
         width: "100%", 
-        paddingTop: "120px", // Jarak tambahan agar tidak menabrak logo
+        paddingTop: "120px",
         paddingBottom: "20px",
         display: "flex", alignItems: "center", justifyContent: "center",
         position: "relative", backgroundColor: WHITE,
@@ -1022,7 +1028,7 @@ const FooterSection = () => {
       style={{
         width: "calc(100% - 40px)",
         margin: "100px auto 20px auto",
-        backgroundColor: BLUE, // Warna biru
+        backgroundColor: BLUE,
         borderRadius: "32px",
         padding: "60px 40px 40px 40px",
         position: "relative",
@@ -4521,6 +4527,7 @@ export default function HomePage(): React.JSX.Element {
   const [locationText, setLocationText] = useState<string>("");
   const [showNotesSection, setShowNotesSection] = useState(false);
   const [notes, setNotes] = useState<NoteEntry[]>([]);
+  const [submittedNotes, setSubmittedNotes] = useState<NoteEntry[]>([]);
   const [inviteUsers, setInviteUsers] = useState<InviteUser[]>([]);
   const [showInvitePanel, setShowInvitePanel] = useState(false);
   const [inviteSearch, setInviteSearch] = useState("");
@@ -4604,32 +4611,39 @@ export default function HomePage(): React.JSX.Element {
     return () => unsub();
   }, [db, isMounted]);
 
+  // === DETEKSI APAKAH USER SUDAH SUBMIT NOTE (UNTUK STATUS BERGABUNG) ===
   useEffect(() => {
     if (!db || !user || !isMounted) return;
-    const q = query(collection(db, "notes"), where("userId", "==", user.uid), limit(1));
+    const q = query(collection(db, "userNotes"), where("userId", "==", user.uid), limit(1));
     const unsub = onSnapshot(q, (snapshot: any) => { setHasSubmittedNote(!snapshot.empty); });
     return () => unsub();
   }, [db, user, isMounted]);
 
+  // === AMBIL DATA DARI userNotes UNTUK DITAMPILKAN SEBAGAI CARD ===
   useEffect(() => {
     if (!db || !isMounted) return;
-    const q = query(collection(db, "notes"), orderBy("createdAt", "desc"), limit(100));
+    const q = query(collection(db, "userNotes"), orderBy("updatedAt", "desc"), limit(50));
     const unsub = onSnapshot(q, (snapshot: any) => {
       const list: NoteEntry[] = [];
       snapshot.forEach((docSnap: any) => {
         const data = docSnap.data();
-        const text = data.text || "";
-        const hasKendala = containsKendala(text);
         list.push({
-          id: docSnap.id, userId: data.userId || docSnap.id,
+          id: docSnap.id,
+          userId: data.userId,
           userName: data.userName || data.userEmail?.split("@")[0] || "User",
-          userEmail: data.userEmail || "", userPhoto: data.userPhoto || "",
-          text: text, category: data.category || "",
-          hasKendala: hasKendala, adminTagged: data.adminTagged || hasKendala,
-          createdAt: data.createdAt || null,
+          userEmail: data.userEmail || "",
+          userPhoto: data.userPhoto || "",
+          title: data.title || "Tanpa Judul",
+          description: data.description || "",
+          descriptionHtml: data.descriptionHtml || "",
+          category: data.category || "Lainnya",
+          link: data.link || "",
+          labelColor: data.labelColor || "",
+          createdAt: data.createdAt,
+          updatedAt: data.updatedAt,
         } as NoteEntry);
       });
-      setNotes(list);
+      setSubmittedNotes(list);
     });
     return () => unsub();
   }, [db, isMounted]);
@@ -5166,9 +5180,10 @@ export default function HomePage(): React.JSX.Element {
 
               <div
                 style={{
-                  width: "100%", backgroundColor: BLUE, borderRadius: "12px",
-                  padding: "16px 24px", display: "flex", alignItems: "center",
+                  width: "100%", backgroundColor: BLUE, borderRadius: "24px",
+                  padding: "24px 28px", display: "flex", alignItems: "center",
                   gap: "16px", flexWrap: "wrap", minHeight: "70px",
+                  boxShadow: "0 8px 32px rgba(13,60,252,0.3)",
                 }}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
@@ -5184,6 +5199,7 @@ export default function HomePage(): React.JSX.Element {
                   )}
                   {registeredUsers.map((n) => {
                     const isCurrentUser = user && n.userId === user.uid;
+                    const userHasNote = hasSubmittedNote && isCurrentUser;
                     return (
                       <div key={n.id} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                         {isCurrentUser && (
@@ -5238,7 +5254,7 @@ export default function HomePage(): React.JSX.Element {
                               letterSpacing: "-0.02em", lineHeight: 1.1, whiteSpace: "nowrap",
                             }}
                           >
-                            {hasSubmittedNote ? "✓ Sudah bergabung" : "Belum bergabung"}
+                            {userHasNote ? "✓ Sudah bergabung" : "Belum bergabung"}
                           </span>
                         )}
                         {!isCurrentUser && activeNoteUser === n.id && (
@@ -5258,6 +5274,53 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               </div>
             </div>
+
+            {/* ===== CARD NOTE DARI SUBMIT USER (DITAMPILKAN DI HALAMAN UTAMA) ===== */}
+            {showNotesSection && submittedNotes.length > 0 && (
+              <div style={{ marginTop: "60px", marginBottom: "60px", fontFamily: FONT_FAMILY }}>
+                <h3 style={{ fontSize: "40px", fontWeight: 800, color: BLUE, marginBottom: "30px", letterSpacing: "-0.02em" }}>
+                  Catatan dari Komunitas
+                </h3>
+                <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+                  {submittedNotes.map((note) => (
+                    <div key={note.id} style={{ backgroundColor: BLUE, borderRadius: "28px", padding: "24px 28px", display: "flex", flexDirection: "column", gap: "18px", boxShadow: `0 8px 32px ${BLUE}40` }}>
+                      
+                      {note.category && (
+                        <div style={{ display: "inline-flex", alignSelf: "flex-start", alignItems: "center", gap: "8px", padding: "8px 22px", backgroundColor: WHITE, color: BLUE, borderRadius: "24px 4px 24px 24px", fontFamily: FONT_FAMILY, fontSize: "15px", fontWeight: 800, letterSpacing: "0.04em", textTransform: "uppercase", border: `2px solid ${WHITE}`, boxShadow: `0 4px 12px rgba(0,0,0,0.1)` }}>
+                          {note.category}
+                        </div>
+                      )}
+
+                      <div style={{ padding: "18px 24px", backgroundColor: WHITE, border: `2px solid ${WHITE}`, borderRadius: "6px 28px 28px 28px", boxShadow: `0 6px 20px rgba(0,0,0,0.12)`, display: "flex", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
+                        <span style={{ fontSize: "34px", fontFamily: FONT_FAMILY, lineHeight: "1.25", color: BLUE, fontWeight: 800, flex: 1, minWidth: 0, wordBreak: "break-word" }}>
+                          {note.title}
+                        </span>
+                      </div>
+
+                      {(note.descriptionHtml || note.description) && (
+                        <div style={{ padding: "20px 24px", backgroundColor: WHITE, border: `2px solid ${WHITE}`, borderRadius: "28px 6px 28px 28px", boxShadow: `0 6px 20px rgba(0,0,0,0.12)` }}>
+                          {note.descriptionHtml ? (
+                            <div className="note-description-html" dangerouslySetInnerHTML={{ __html: note.descriptionHtml }} style={{ fontSize: "17px", fontFamily: FONT_FAMILY, lineHeight: "1.7", color: BLACK, wordBreak: "break-word" }} />
+                          ) : (
+                            <div style={{ fontSize: "17px", fontFamily: FONT_FAMILY, lineHeight: "1.7", color: BLACK, whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{note.description}</div>
+                          )}
+                        </div>
+                      )}
+
+                      <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
+                        <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "8px 20px", backgroundColor: WHITE, border: `2px solid ${WHITE}`, borderRadius: "20px 4px 20px 20px", fontSize: "14px", color: BLUE, fontWeight: 700, fontFamily: FONT_FAMILY, boxShadow: `0 4px 12px rgba(0,0,0,0.1)` }}>
+                          {note.updatedAt ? new Date(note.updatedAt.toDate()).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }) : "Baru saja"}
+                        </div>
+                        <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "8px 20px", backgroundColor: WHITE, border: `2px solid ${WHITE}`, borderRadius: "4px 20px 20px 20px", fontSize: "14px", color: BLUE, fontWeight: 700, fontFamily: FONT_FAMILY, boxShadow: `0 4px 12px rgba(0,0,0,0.1)` }}>
+                          oleh {note.userName}
+                          <VerifiedBadgeBlue size={22} />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {showNotesSection && (
               <div
@@ -5687,6 +5750,11 @@ export default function HomePage(): React.JSX.Element {
           0%, 100% { opacity: 0.35; }
           50% { opacity: 1; }
         }
+        .note-description-html b, .note-description-html strong { font-weight: 700; }
+        .note-description-html i, .note-description-html em { font-style: italic; }
+        .note-description-html u { text-decoration: underline; }
+        .note-description-html ul { padding-left: 24px; margin: 8px 0; }
+        .note-description-html li { margin-bottom: 4px; }
       `}</style>
     </>
   );
