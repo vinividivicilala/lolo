@@ -5559,26 +5559,38 @@ export default function HomePage(): React.JSX.Element {
                         {categoryNotes.length > 0 ? (
                           <div style={{ display: "flex", flexDirection: "column", gap: "8px", paddingLeft: "20px" }}>
                             {categoryNotes.map((note) => (
-                              <div key={note.id} style={{ padding: "16px 20px", backgroundColor: BLUE, borderRadius: "12px", display: "flex", flexDirection: "column", gap: "6px", boxShadow: "0 4px 12px rgba(13,60,252,0.15)" }}>
-                                <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
-                                  <span style={{ fontFamily: FONT_FAMILY, fontSize: "18px", fontWeight: 700, color: WHITE }}>
+                              <div key={note.id} style={{ backgroundColor: BLUE, borderRadius: "28px", padding: "24px 28px", display: "flex", flexDirection: "column", gap: "18px", boxShadow: `0 8px 32px ${BLUE}40`, maxWidth: "700px" }}>
+                                
+                                {note.category && (
+                                  <div style={{ display: "inline-flex", alignSelf: "flex-start", alignItems: "center", gap: "8px", padding: "8px 22px", backgroundColor: WHITE, color: BLUE, borderRadius: "24px 4px 24px 24px", fontFamily: FONT_FAMILY, fontSize: "15px", fontWeight: 800, letterSpacing: "0.04em", textTransform: "uppercase", border: `2px solid ${WHITE}`, boxShadow: `0 4px 12px rgba(0,0,0,0.1)` }}>
+                                    {note.category}
+                                  </div>
+                                )}
+
+                                <div style={{ padding: "18px 24px", backgroundColor: WHITE, border: `2px solid ${WHITE}`, borderRadius: "6px 28px 28px 28px", boxShadow: `0 6px 20px rgba(0,0,0,0.12)`, display: "flex", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
+                                  <span style={{ fontSize: "34px", fontFamily: FONT_FAMILY, lineHeight: "1.25", color: BLUE, fontWeight: 800, flex: 1, minWidth: 0, wordBreak: "break-word" }}>
                                     {note.title}
                                   </span>
-                                  {note.labelColor && (
-                                    <span style={{ backgroundColor: note.labelColor, color: BLACK, padding: "2px 8px", borderRadius: "4px", fontSize: "10px", fontWeight: 800, fontFamily: FONT_FAMILY }}>Label</span>
-                                  )}
                                 </div>
+
                                 {(note.descriptionHtml || note.description) && (
-                                  <div style={{ marginTop: "4px" }}>
+                                  <div style={{ padding: "20px 24px", backgroundColor: WHITE, border: `2px solid ${WHITE}`, borderRadius: "28px 6px 28px 28px", boxShadow: `0 6px 20px rgba(0,0,0,0.12)` }}>
                                     {note.descriptionHtml ? (
-                                      <div dangerouslySetInnerHTML={{ __html: note.descriptionHtml }} style={{ fontFamily: FONT_FAMILY, fontSize: "14px", color: WHITE, lineHeight: 1.5, opacity: 0.95 }} />
+                                      <div className="note-description-html" dangerouslySetInnerHTML={{ __html: note.descriptionHtml }} style={{ fontSize: "17px", fontFamily: FONT_FAMILY, lineHeight: "1.7", color: BLACK, wordBreak: "break-word" }} />
                                     ) : (
-                                      <div style={{ fontFamily: FONT_FAMILY, fontSize: "14px", color: WHITE, lineHeight: 1.5, opacity: 0.95 }}>{note.description}</div>
+                                      <div style={{ fontSize: "17px", fontFamily: FONT_FAMILY, lineHeight: "1.7", color: BLACK, whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{note.description}</div>
                                     )}
                                   </div>
                                 )}
-                                <div style={{ marginTop: "8px", display: "flex", alignItems: "center", gap: "6px", fontFamily: FONT_FAMILY, fontSize: "12px", color: "rgba(255,255,255,0.8)" }}>
-                                  <VerifiedBadgeWhite size={14} /> {note.userName} · {note.updatedAt ? new Date(note.updatedAt.toDate()).toLocaleDateString("id-ID") : "Baru saja"}
+
+                                <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
+                                  <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "8px 20px", backgroundColor: WHITE, border: `2px solid ${WHITE}`, borderRadius: "20px 4px 20px 20px", fontSize: "14px", color: BLUE, fontWeight: 700, fontFamily: FONT_FAMILY, boxShadow: `0 4px 12px rgba(0,0,0,0.1)` }}>
+                                    {note.updatedAt ? new Date(note.updatedAt.toDate()).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }) : "Baru saja"}
+                                  </div>
+                                  <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "8px 20px", backgroundColor: WHITE, border: `2px solid ${WHITE}`, borderRadius: "4px 20px 20px 20px", fontSize: "14px", color: BLUE, fontWeight: 700, fontFamily: FONT_FAMILY, boxShadow: `0 4px 12px rgba(0,0,0,0.1)` }}>
+                                    oleh {note.userName}
+                                    <VerifiedBadgeBlue size={22} />
+                                  </div>
                                 </div>
                               </div>
                             ))}
