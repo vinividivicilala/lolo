@@ -4543,7 +4543,6 @@ export default function HomePage(): React.JSX.Element {
   const [noteHovered, setNoteHovered] = useState(false);
   const [locationText, setLocationText] = useState<string>("");
   const [showNotesSection, setShowNotesSection] = useState(false);
-  const [notes, setNotes] = useState<NoteEntry[]>([]);
   const [submittedNotes, setSubmittedNotes] = useState<NoteEntry[]>([]);
   const [inviteUsers, setInviteUsers] = useState<InviteUser[]>([]);
   const [showInvitePanel, setShowInvitePanel] = useState(false);
@@ -4637,7 +4636,7 @@ export default function HomePage(): React.JSX.Element {
     return () => unsub();
   }, [db, user, isMounted]);
 
-  // === AMBIL DATA DARI userNotes UNTUK DITAMPILKAN SEBAGAI CARD (PRIVATE) ===
+  // === AMBIL DATA DARI userNotes UNTUK DITAMPILKAN DI KATEGORI ===
   useEffect(() => {
     if (!db || !user || !isMounted) return;
     const q = query(
@@ -4869,6 +4868,11 @@ export default function HomePage(): React.JSX.Element {
     if (!q) return true;
     return u.displayName.toLowerCase().includes(q) || u.email.toLowerCase().includes(q);
   });
+
+  // === FUNGSI UNTUK MENGELOMPOKKAN CATATAN BERDASARKAN KATEGORI ===
+  const getNotesByCategory = (categoryName: string) => {
+    return submittedNotes.filter(note => note.category === categoryName);
+  };
 
   if (!isMounted || loading) {
     return (
@@ -5336,53 +5340,6 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
 
-            {/* ===== CARD NOTE DARI SUBMIT USER (DITAMPILKAN DI HALAMAN UTAMA) ===== */}
-            {showNotesSection && submittedNotes.length > 0 && (
-              <div style={{ marginTop: "60px", marginBottom: "60px", fontFamily: FONT_FAMILY }}>
-                <h3 style={{ fontSize: "40px", fontWeight: 800, color: BLUE, marginBottom: "30px", letterSpacing: "-0.02em" }}>
-                  Catatan Pribadi Anda
-                </h3>
-                <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-                  {submittedNotes.map((note) => (
-                    <div key={note.id} style={{ backgroundColor: BLUE, borderRadius: "28px", padding: "24px 28px", display: "flex", flexDirection: "column", gap: "18px", boxShadow: `0 8px 32px ${BLUE}40` }}>
-                      
-                      {note.category && (
-                        <div style={{ display: "inline-flex", alignSelf: "flex-start", alignItems: "center", gap: "8px", padding: "8px 22px", backgroundColor: WHITE, color: BLUE, borderRadius: "24px 4px 24px 24px", fontFamily: FONT_FAMILY, fontSize: "15px", fontWeight: 800, letterSpacing: "0.04em", textTransform: "uppercase", border: `2px solid ${WHITE}`, boxShadow: `0 4px 12px rgba(0,0,0,0.1)` }}>
-                          {note.category}
-                        </div>
-                      )}
-
-                      <div style={{ padding: "18px 24px", backgroundColor: WHITE, border: `2px solid ${WHITE}`, borderRadius: "6px 28px 28px 28px", boxShadow: `0 6px 20px rgba(0,0,0,0.12)`, display: "flex", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
-                        <span style={{ fontSize: "34px", fontFamily: FONT_FAMILY, lineHeight: "1.25", color: BLUE, fontWeight: 800, flex: 1, minWidth: 0, wordBreak: "break-word" }}>
-                          {note.title}
-                        </span>
-                      </div>
-
-                      {(note.descriptionHtml || note.description) && (
-                        <div style={{ padding: "20px 24px", backgroundColor: WHITE, border: `2px solid ${WHITE}`, borderRadius: "28px 6px 28px 28px", boxShadow: `0 6px 20px rgba(0,0,0,0.12)` }}>
-                          {note.descriptionHtml ? (
-                            <div className="note-description-html" dangerouslySetInnerHTML={{ __html: note.descriptionHtml }} style={{ fontSize: "17px", fontFamily: FONT_FAMILY, lineHeight: "1.7", color: BLACK, wordBreak: "break-word" }} />
-                          ) : (
-                            <div style={{ fontSize: "17px", fontFamily: FONT_FAMILY, lineHeight: "1.7", color: BLACK, whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{note.description}</div>
-                          )}
-                        </div>
-                      )}
-
-                      <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
-                        <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "8px 20px", backgroundColor: WHITE, border: `2px solid ${WHITE}`, borderRadius: "20px 4px 20px 20px", fontSize: "14px", color: BLUE, fontWeight: 700, fontFamily: FONT_FAMILY, boxShadow: `0 4px 12px rgba(0,0,0,0.1)` }}>
-                          {note.updatedAt ? new Date(note.updatedAt.toDate()).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }) : "Baru saja"}
-                        </div>
-                        <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "8px 20px", backgroundColor: WHITE, border: `2px solid ${WHITE}`, borderRadius: "4px 20px 20px 20px", fontSize: "14px", color: BLUE, fontWeight: 700, fontFamily: FONT_FAMILY, boxShadow: `0 4px 12px rgba(0,0,0,0.1)` }}>
-                          oleh {note.userName}
-                          <VerifiedBadgeBlue size={22} />
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
             {showNotesSection && (
               <div
                 ref={notesSectionRef}
@@ -5585,9 +5542,10 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 )}
 
+                {/* ===== DAFTAR KATEGORI NOTE ===== */}
                 <div style={{ display: "flex", flexDirection: "column", gap: "24px", marginBottom: "50px" }}>
                   {NOTES_CATEGORIES.map((cat) => {
-                    const categoryNotes = notes.filter((n) => n.category === cat);
+                    const categoryNotes = getNotesByCategory(cat);
                     return (
                       <div key={cat} style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                         <span
@@ -5601,35 +5559,27 @@ export default function HomePage(): React.JSX.Element {
                         {categoryNotes.length > 0 ? (
                           <div style={{ display: "flex", flexDirection: "column", gap: "8px", paddingLeft: "20px" }}>
                             {categoryNotes.map((note) => (
-                              <div key={note.id} style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                              <div key={note.id} style={{ padding: "16px 20px", backgroundColor: BLUE, borderRadius: "12px", display: "flex", flexDirection: "column", gap: "6px", boxShadow: "0 4px 12px rgba(13,60,252,0.15)" }}>
                                 <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
-                                  <span style={{ fontFamily: FONT_FAMILY, fontSize: "16px", fontWeight: 700, color: BLUE }}>
-                                    {note.userName}
+                                  <span style={{ fontFamily: FONT_FAMILY, fontSize: "18px", fontWeight: 700, color: WHITE }}>
+                                    {note.title}
                                   </span>
-                                  {note.adminTagged && (
-                                    <span
-                                      style={{
-                                        display: "inline-flex", alignItems: "center", gap: "4px",
-                                        padding: "3px 10px", backgroundColor: BLUE, color: WHITE,
-                                        borderRadius: "4px", fontSize: "10px", fontWeight: 800,
-                                        letterSpacing: "0.5px", textTransform: "uppercase",
-                                        fontFamily: FONT_FAMILY,
-                                      }}
-                                    >
-                                      <AdminTagIcon size={12} color={WHITE} />
-                                      Admin
-                                    </span>
+                                  {note.labelColor && (
+                                    <span style={{ backgroundColor: note.labelColor, color: BLACK, padding: "2px 8px", borderRadius: "4px", fontSize: "10px", fontWeight: 800, fontFamily: FONT_FAMILY }}>Label</span>
                                   )}
                                 </div>
-                                <span
-                                  style={{
-                                    fontFamily: FONT_FAMILY, fontSize: "15px",
-                                    fontWeight: 400, color: BLACK, lineHeight: 1.5,
-                                    paddingLeft: "10px",
-                                  }}
-                                >
-                                  {note.text}
-                                </span>
+                                {(note.descriptionHtml || note.description) && (
+                                  <div style={{ marginTop: "4px" }}>
+                                    {note.descriptionHtml ? (
+                                      <div dangerouslySetInnerHTML={{ __html: note.descriptionHtml }} style={{ fontFamily: FONT_FAMILY, fontSize: "14px", color: WHITE, lineHeight: 1.5, opacity: 0.95 }} />
+                                    ) : (
+                                      <div style={{ fontFamily: FONT_FAMILY, fontSize: "14px", color: WHITE, lineHeight: 1.5, opacity: 0.95 }}>{note.description}</div>
+                                    )}
+                                  </div>
+                                )}
+                                <div style={{ marginTop: "8px", display: "flex", alignItems: "center", gap: "6px", fontFamily: FONT_FAMILY, fontSize: "12px", color: "rgba(255,255,255,0.8)" }}>
+                                  <VerifiedBadgeWhite size={14} /> {note.userName} · {note.updatedAt ? new Date(note.updatedAt.toDate()).toLocaleDateString("id-ID") : "Baru saja"}
+                                </div>
                               </div>
                             ))}
                           </div>
@@ -5638,91 +5588,15 @@ export default function HomePage(): React.JSX.Element {
                             style={{
                               fontFamily: FONT_FAMILY, fontSize: "14px",
                               fontWeight: 500, color: "#999", paddingLeft: "20px",
-                              fontStyle: "italic", animation: "loading-blink 1.2s ease-in-out infinite",
+                              fontStyle: "italic",
                             }}
                           >
-                            Memuat catatan...
+                            Belum ada catatan di kategori ini.
                           </span>
                         )}
                       </div>
                     );
                   })}
-                </div>
-
-                <div style={{ marginTop: "40px" }}>
-                  <h3
-                    style={{
-                      fontFamily: FONT_FAMILY, fontSize: "28px", fontWeight: 700,
-                      color: BLUE, letterSpacing: "-0.02em", lineHeight: 1.2,
-                      margin: 0, marginBottom: "20px",
-                    }}
-                  >
-                    Aktivitas Terbaru
-                  </h3>
-                  {notes.length === 0 ? (
-                    <div
-                      style={{
-                        padding: "40px", textAlign: "center", color: "#999",
-                        fontFamily: FONT_FAMILY, fontSize: "16px",
-                        fontStyle: "italic", animation: "loading-blink 1.2s ease-in-out infinite",
-                      }}
-                    >
-                      Memuat catatan...
-                    </div>
-                  ) : (
-                    <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                      {notes.map((note) => (
-                        <div
-                          key={note.id}
-                          style={{
-                            padding: "16px 20px", backgroundColor: BLUE,
-                            borderRadius: "12px", display: "flex",
-                            flexDirection: "column", gap: "6px",
-                          }}
-                        >
-                          <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
-                            <span style={{ fontFamily: FONT_FAMILY, fontSize: "15px", fontWeight: 700, color: WHITE }}>
-                              {note.userName}
-                            </span>
-                            {note.category && (
-                              <span
-                                style={{
-                                  fontFamily: FONT_FAMILY, fontSize: "12px",
-                                  fontWeight: 700, color: BLUE, backgroundColor: WHITE,
-                                  padding: "2px 10px", borderRadius: "4px",
-                                  letterSpacing: "0.5px", textTransform: "uppercase",
-                                }}
-                              >
-                                {note.category}
-                              </span>
-                            )}
-                            {note.adminTagged && (
-                              <span
-                                style={{
-                                  display: "inline-flex", alignItems: "center", gap: "4px",
-                                  padding: "3px 10px", backgroundColor: WHITE, color: BLUE,
-                                  borderRadius: "4px", fontSize: "10px", fontWeight: 800,
-                                  letterSpacing: "0.5px", textTransform: "uppercase",
-                                  fontFamily: FONT_FAMILY,
-                                }}
-                              >
-                                <AdminTagIcon size={12} color={BLUE} />
-                                Admin
-                              </span>
-                            )}
-                          </div>
-                          <div
-                            style={{
-                              fontFamily: FONT_FAMILY, fontSize: "14px",
-                              fontWeight: 400, color: WHITE, lineHeight: 1.5, opacity: 0.95,
-                            }}
-                          >
-                            {note.text}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
                 </div>
               </div>
             )}
