@@ -594,15 +594,6 @@ const ShieldBanIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?
   </svg>
 );
 
-const SayHeyIcon = ({ size = 22, color = "#000000" }: { size?: number; color?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M21 11.5C21 16.1944 16.9706 20 12 20C10.8452 20 9.74371 19.7964 8.73507 19.4276L4 21L5.45177 16.7441C4.53668 15.3762 4 13.7581 4 12C4 7.30558 8.02944 3.5 12 3.5C16.9706 3.5 21 7.30558 21 11.5Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    <circle cx="9" cy="11.5" r="1" fill={color} />
-    <circle cx="12" cy="11.5" r="1" fill={color} />
-    <circle cx="15" cy="11.5" r="1" fill={color} />
-  </svg>
-);
-
 const InviteIcon = ({ size = 20, color = "currentColor" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <path d="M16 21V19C16 16.7909 14.2091 15 12 15H5C2.79086 15 1 16.7909 1 19V21" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -639,7 +630,7 @@ const MicrosoftStoreIcon = ({ size = 32 }: { size?: number }) => (
   </svg>
 );
 
-// ===== VERIFIED BADGE (WHITE) =====
+// ===== VERIFIED BADGE (WHITE & BLUE) =====
 const VerifiedBadgeWhite = ({ size = 16 }: { size?: number }) => (
   <span
     style={{
@@ -658,6 +649,30 @@ const VerifiedBadgeWhite = ({ size = 16 }: { size?: number }) => (
     >
       <path
         fill="#FFFFFF"
+        d="M19.998 3.094 14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.03v-6.46h-6.419L25.358 0l-5.36 3.094Zm7.415 11.225 2.254 2.287-11.43 11.5-6.835-6.93 2.244-2.258 4.587 4.581 9.18-9.18Z"
+      />
+    </svg>
+  </span>
+);
+
+const VerifiedBadgeBlue = ({ size = 16 }: { size?: number }) => (
+  <span
+    style={{
+      position: "relative",
+      display: "inline-block",
+      marginLeft: "4px",
+      verticalAlign: "middle",
+    }}
+  >
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 40 40"
+      xmlns="http://www.w3.org/2000/svg"
+      style={{ display: "inline-block", verticalAlign: "middle" }}
+    >
+      <path
+        fill={BLUE}
         d="M19.998 3.094 14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.03v-6.46h-6.419L25.358 0l-5.36 3.094Zm7.415 11.225 2.254 2.287-11.43 11.5-6.835-6.93 2.244-2.258 4.587 4.581 9.18-9.18Z"
       />
     </svg>
@@ -831,41 +846,6 @@ interface InviteUser {
   photoURL?: string;
 }
 
-interface SayHeyTicket {
-  id: string;
-  userId: string;
-  userName: string;
-  userEmail: string;
-  userPhoto?: string;
-  ownerId: string;
-  ownerName: string;
-  ownerEmail: string;
-  ownerPhoto?: string;
-  status: "waiting" | "active" | "closed";
-  createdAt: any;
-  lastMessage?: string;
-  lastMessageTime?: any;
-  lastMessageSender?: string;
-  typing: boolean;
-  typingUserId?: string | null;
-  typingUserName?: string | null;
-  userUnreadCount: number;
-  ownerUnreadCount: number;
-}
-
-interface SayHeyMessage {
-  id: string;
-  senderId: string;
-  senderName: string;
-  text: string;
-  timestamp: any;
-  read: boolean;
-  isEncrypted?: boolean;
-  isAdmin?: boolean;
-  deliveryStatus?: "sending" | "sent" | "delivered" | "read" | "failed";
-  replyTo?: { messageId: string; senderName: string; text: string } | null;
-}
-
 // ===== TOP BANNER =====
 const TopBanner = () => {
   return (
@@ -906,16 +886,19 @@ const TopBanner = () => {
           target="_blank"
           rel="noopener noreferrer"
           style={{
-            color: WHITE,
+            color: BLUE,
             fontWeight: 800,
             textDecoration: "none",
             display: "inline-flex",
             alignItems: "center",
             gap: "6px",
+            backgroundColor: WHITE,
+            padding: "2px 8px",
+            borderRadius: "6px",
           }}
         >
           Farid Ardiansyah
-          <VerifiedBadgeWhite size={18} />
+          <VerifiedBadgeBlue size={16} />
         </a>
       </span>
     </div>
@@ -955,7 +938,9 @@ const HeroMenuruTitle = () => {
     <div
       ref={containerRef}
       style={{
-        width: "100%", paddingTop: "20px", paddingBottom: "20px",
+        width: "100%", 
+        paddingTop: "120px", // Jarak tambahan agar tidak menabrak logo
+        paddingBottom: "20px",
         display: "flex", alignItems: "center", justifyContent: "center",
         position: "relative", backgroundColor: WHITE,
       }}
@@ -1037,12 +1022,13 @@ const FooterSection = () => {
       style={{
         width: "calc(100% - 40px)",
         margin: "100px auto 20px auto",
-        backgroundColor: MINT,
+        backgroundColor: BLUE, // Warna biru
         borderRadius: "32px",
         padding: "60px 40px 40px 40px",
         position: "relative",
         overflow: "hidden",
         boxSizing: "border-box",
+        color: WHITE,
       }}
     >
       <div
@@ -1057,7 +1043,7 @@ const FooterSection = () => {
             <h3
               style={{
                 fontFamily: FONT_FAMILY, fontSize: "28px", fontWeight: 700,
-                color: BLUE, margin: 0, marginBottom: "16px", letterSpacing: "-0.01em",
+                color: WHITE, margin: 0, marginBottom: "16px", letterSpacing: "-0.01em",
               }}
             >
               {section.title}
@@ -1092,7 +1078,7 @@ const FooterSection = () => {
                       <span
                         style={{
                           fontFamily: FONT_FAMILY, fontSize: "20px", fontWeight: 500,
-                          color: BLUE, letterSpacing: "-0.01em", cursor: "pointer",
+                          color: WHITE, letterSpacing: "-0.01em", cursor: "pointer",
                         }}
                       >
                         {link}
@@ -1101,7 +1087,7 @@ const FooterSection = () => {
                     {isAttention && (
                       <span
                         style={{
-                          backgroundColor: WHITE, border: `1.5px solid ${BLUE}`, color: BLUE,
+                          backgroundColor: WHITE, border: `1.5px solid ${WHITE}`, color: BLUE,
                           padding: "2px 8px", borderRadius: "4px", fontSize: "10px",
                           fontWeight: 800, fontFamily: FONT_FAMILY, letterSpacing: "0.5px",
                           textTransform: "uppercase", display: "inline-block",
@@ -1113,7 +1099,7 @@ const FooterSection = () => {
                     {isStories && (
                       <span
                         style={{
-                          backgroundColor: WHITE, border: `1.5px solid ${BLUE}`, color: BLUE,
+                          backgroundColor: WHITE, border: `1.5px solid ${WHITE}`, color: BLUE,
                           padding: "2px 8px", borderRadius: "4px", fontSize: "10px",
                           fontWeight: 800, fontFamily: FONT_FAMILY, letterSpacing: "0.5px",
                           textTransform: "uppercase", display: "inline-block",
@@ -1158,12 +1144,12 @@ const FooterSection = () => {
       <div
         style={{
           maxWidth: "1400px", margin: "40px auto 0 auto", paddingTop: "20px",
-          borderTop: `1px solid ${BLUE}20`, position: "relative", zIndex: 1,
+          borderTop: `1px solid rgba(255,255,255,0.2)`, position: "relative", zIndex: 1,
         }}
       >
         <p
           style={{
-            fontFamily: FONT_FAMILY, fontSize: "14px", fontWeight: 400, color: BLUE,
+            fontFamily: FONT_FAMILY, fontSize: "14px", fontWeight: 400, color: WHITE,
             margin: 0, textAlign: "center", letterSpacing: "0.01em", opacity: 0.8,
           }}
         >
@@ -1200,7 +1186,7 @@ const FooterSection = () => {
         <span
           ref={titleRef}
           style={{
-            fontFamily: FONT_FAMILY, fontSize: "600px", fontWeight: 400, color: BLUE,
+            fontFamily: FONT_FAMILY, fontSize: "600px", fontWeight: 400, color: WHITE,
             letterSpacing: "-0.05em", lineHeight: "0.85", display: "block", textAlign: "left",
             WebkitFontSmoothing: "antialiased", MozOsxFontSmoothing: "grayscale",
             willChange: "transform, opacity", whiteSpace: "nowrap", margin: 0, padding: 0,
@@ -1212,7 +1198,7 @@ const FooterSection = () => {
         <div style={{ width: "100%", display: "flex", justifyContent: "flex-start", marginTop: "10px" }}>
           <span
             style={{
-              fontFamily: FONT_FAMILY, fontSize: "16px", fontWeight: 400, color: BLUE,
+              fontFamily: FONT_FAMILY, fontSize: "16px", fontWeight: 400, color: WHITE,
               letterSpacing: "0.01em", opacity: 0.85,
             }}
           >
@@ -1691,10 +1677,9 @@ const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
 
 // ===== RIGHT NAVBAR =====
 const RightNavbar = ({
-  user, auth, db, onSayHeyToggle, sayHeyOpen, sayHeyUnreadCount, locationText,
+  user, auth, db, locationText,
 }: {
-  user: any; auth: any; db: any; onSayHeyToggle: () => void;
-  sayHeyOpen: boolean; sayHeyUnreadCount: number; locationText: string;
+  user: any; auth: any; db: any; locationText: string;
 }) => {
   const displayName = user?.displayName || user?.email?.split("@")[0] || "User";
   const photoURL = user?.photoURL || "";
@@ -1715,50 +1700,6 @@ const RightNavbar = ({
     }
   };
 
-  const SayHeyButton = () => (
-    <button
-      onClick={onSayHeyToggle}
-      style={{
-        position: "relative", display: "inline-flex", alignItems: "center", gap: "10px",
-        padding: "10px 18px", backgroundColor: sayHeyOpen ? BLACK : LIME,
-        borderRadius: "10px", border: `1px solid ${sayHeyOpen ? BLACK : LIME}`,
-        boxShadow: sayHeyOpen
-          ? "0 8px 24px rgba(0,0,0,0.35)"
-          : "0 8px 24px rgba(227,251,150,0.45)",
-        cursor: "pointer", transition: "all 0.2s ease",
-      }}
-      onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.05)"; }}
-      onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = "scale(1)"; }}
-    >
-      <SayHeyIcon size={18} color={sayHeyOpen ? WHITE : BLACK} />
-      <span
-        style={{
-          color: sayHeyOpen ? WHITE : BLACK, fontSize: "14px", fontWeight: 700,
-          letterSpacing: "0.02em", fontFamily: FONT_FAMILY, whiteSpace: "nowrap",
-        }}
-      >
-        Say Hey
-      </span>
-      <NorthEastArrow size={16} color={sayHeyOpen ? WHITE : BLACK} />
-
-      {sayHeyUnreadCount > 0 && !sayHeyOpen && (
-        <span
-          style={{
-            position: "absolute", top: "-6px", right: "-6px",
-            minWidth: "20px", height: "20px", padding: "0 6px",
-            borderRadius: "10px", backgroundColor: BLUE, color: WHITE,
-            fontSize: "11px", fontWeight: 800, fontFamily: FONT_FAMILY,
-            display: "flex", alignItems: "center", justifyContent: "center",
-            border: `2px solid ${WHITE}`, boxShadow: "0 2px 8px rgba(13,60,252,0.5)",
-            animation: "badge-pop 0.4s ease-out",
-          }}
-        >
-          {sayHeyUnreadCount > 99 ? "99+" : sayHeyUnreadCount}
-        </span>
-      )}
-    </button>
-  );
-
   if (!user) {
     return (
       <div
@@ -1769,7 +1710,6 @@ const RightNavbar = ({
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <SayHeyButton />
           <Link
             href="/signin"
             style={{
@@ -1817,7 +1757,6 @@ const RightNavbar = ({
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-        <SayHeyButton />
         <div
           style={{
             display: "flex", alignItems: "center", gap: "10px",
@@ -1896,640 +1835,6 @@ const RightNavbar = ({
           {locationText}
         </div>
       )}
-    </div>
-  );
-};
-
-// ===== SAY HEY SECTION =====
-const SayHeySection = ({
-  user, db, isAdmin, onUnreadCountChange,
-}: {
-  user: any; db: any; isAdmin: boolean; onUnreadCountChange?: (count: number) => void;
-}) => {
-  const [contacts, setContacts] = useState<any[]>([]);
-  const [selectedContact, setSelectedContact] = useState<any | null>(null);
-  const [ticket, setTicket] = useState<SayHeyTicket | null>(null);
-  const [messages, setMessages] = useState<SayHeyMessage[]>([]);
-  const [messageText, setMessageText] = useState("");
-  const [encryptionReady, setEncryptionReady] = useState(false);
-  const [replyTo, setReplyTo] = useState<SayHeyMessage | null>(null);
-
-  const chatContainerRef = useRef<HTMLDivElement>(null);
-  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const isOwner = isAdmin;
-
-  useEffect(() => {
-    getCryptoKey()
-      .then(() => setEncryptionReady(true))
-      .catch(() => setEncryptionReady(true));
-  }, []);
-
-  useEffect(() => {
-    if (!db || !user) return;
-    let q;
-    if (isOwner) {
-      q = query(collection(db, "users"), where("online", "==", true));
-    } else {
-      q = query(collection(db, "users"), where("online", "==", true), where("email", "==", OWNER_EMAIL));
-    }
-
-    const unsub = onSnapshot(q, (snapshot: any) => {
-      const list: any[] = [];
-      snapshot.forEach((docSnap: any) => {
-        const data = docSnap.data();
-        if (isOwner) {
-          if (docSnap.id === user.uid) return;
-          if (data.email === ADMIN_EMAIL) return;
-        }
-        list.push({
-          uid: docSnap.id,
-          displayName: data.displayName || data.name || data.email || "User",
-          email: data.email || "",
-          photoURL: data.photoURL || "",
-          online: data.online || false,
-        });
-      });
-      setContacts(list);
-    });
-    return () => unsub();
-  }, [db, user, isOwner]);
-
-  useEffect(() => {
-    if (!db || !ticket) return;
-    const q = query(collection(db, "sayhey_tickets", ticket.id, "messages"), orderBy("timestamp", "asc"));
-    const unsub = onSnapshot(q, async (snapshot: any) => {
-      const list: SayHeyMessage[] = [];
-      for (const docSnap of snapshot.docs) {
-        const data = docSnap.data();
-        let text = data.text || "";
-        if (data.isEncrypted) {
-          try { text = await decryptMessage(text); } catch { text = "[Encrypted]"; }
-        }
-        list.push({ id: docSnap.id, ...data, text } as SayHeyMessage);
-      }
-      setMessages(list);
-      requestAnimationFrame(() => {
-        if (chatContainerRef.current) {
-          chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
-        }
-      });
-    });
-    return () => unsub();
-  }, [db, ticket]);
-
-  useEffect(() => {
-    if (!db || !user) return;
-    const q = isOwner
-      ? query(collection(db, "sayhey_tickets"), where("ownerId", "==", user.uid))
-      : query(collection(db, "sayhey_tickets"), where("userId", "==", user.uid));
-
-    const unsub = onSnapshot(q, (snapshot: any) => {
-      let total = 0;
-      snapshot.forEach((docSnap: any) => {
-        const data = docSnap.data();
-        const unread = isOwner ? data.ownerUnreadCount || 0 : data.userUnreadCount || 0;
-        total += unread;
-      });
-      if (onUnreadCountChange) onUnreadCountChange(total);
-    });
-    return () => unsub();
-  }, [db, user, isOwner, onUnreadCountChange]);
-
-  useEffect(() => {
-    if (!db || !ticket || !user) return;
-    const unread = messages.filter((m) => m.senderId !== user.uid && !m.read);
-    if (unread.length === 0) return;
-    unread.forEach(async (msg) => {
-      const msgRef = doc(db, "sayhey_tickets", ticket.id, "messages", msg.id);
-      await updateDoc(msgRef, { read: true, deliveryStatus: "read" });
-    });
-    const ticketRef = doc(db, "sayhey_tickets", ticket.id);
-    if (isOwner) {
-      updateDoc(ticketRef, { ownerUnreadCount: 0 }).catch(() => {});
-    } else {
-      updateDoc(ticketRef, { userUnreadCount: 0 }).catch(() => {});
-    }
-  }, [messages, ticket, db, user, isOwner]);
-
-  const openChatWith = async (contact: any) => {
-    if (!db || !user) return;
-    setSelectedContact(contact);
-    try {
-      const existingQ = isOwner
-        ? query(collection(db, "sayhey_tickets"), where("userId", "==", contact.uid), where("ownerId", "==", user.uid))
-        : query(collection(db, "sayhey_tickets"), where("userId", "==", user.uid), where("ownerId", "==", contact.uid));
-
-      const existingSnap = await new Promise<any>((resolve) => {
-        const unsub = onSnapshot(existingQ, (snap: any) => { unsub(); resolve(snap); });
-      });
-
-      if (!existingSnap.empty) {
-        const docSnap = existingSnap.docs[0];
-        setTicket({ id: docSnap.id, ...docSnap.data() } as SayHeyTicket);
-        return;
-      }
-
-      const ticketRef = await addDoc(collection(db, "sayhey_tickets"), {
-        userId: isOwner ? contact.uid : user.uid,
-        userName: isOwner ? contact.displayName : user.displayName || user.email || "User",
-        userEmail: isOwner ? contact.email : user.email || "",
-        userPhoto: isOwner ? contact.photoURL : user.photoURL || "",
-        ownerId: isOwner ? user.uid : contact.uid,
-        ownerName: isOwner ? user.displayName || OWNER_NAME : contact.displayName || OWNER_NAME,
-        ownerEmail: isOwner ? user.email || OWNER_EMAIL : contact.email || OWNER_EMAIL,
-        ownerPhoto: isOwner ? user.photoURL || "" : contact.photoURL || "",
-        status: "active",
-        createdAt: serverTimestamp(),
-        lastMessage: "",
-        lastMessageTime: serverTimestamp(),
-        lastMessageSender: "",
-        typing: false,
-        typingUserId: null,
-        typingUserName: null,
-        userUnreadCount: 0,
-        ownerUnreadCount: 0,
-      });
-
-      const initialMessage = `Hey!`;
-      const encryptedMessage = await encryptMessage(initialMessage);
-      await addDoc(collection(db, "sayhey_tickets", ticketRef.id, "messages"), {
-        senderId: user.uid,
-        senderName: user.displayName || user.email || "User",
-        text: encryptedMessage,
-        timestamp: serverTimestamp(),
-        read: false,
-        isEncrypted: true,
-        deliveryStatus: "sent",
-      });
-
-      await updateDoc(ticketRef, {
-        lastMessage: initialMessage,
-        lastMessageTime: serverTimestamp(),
-        lastMessageSender: user.displayName || user.email || "User",
-      });
-
-      const newTicketSnap = await getDoc(ticketRef);
-      setTicket({ id: newTicketSnap.id, ...newTicketSnap.data() } as SayHeyTicket);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const sendMessage = async () => {
-    if (!db || !ticket || !messageText.trim() || !user || !encryptionReady) return;
-    try {
-      const ticketRef = doc(db, "sayhey_tickets", ticket.id);
-      const senderName = isAdmin ? `${OWNER_NAME} (Admin)` : user.displayName || user.email || "User";
-      const encryptedMessage = await encryptMessage(messageText.trim());
-
-      await addDoc(collection(db, "sayhey_tickets", ticket.id, "messages"), {
-        senderId: user.uid,
-        senderName,
-        text: encryptedMessage,
-        timestamp: serverTimestamp(),
-        read: false,
-        isEncrypted: true,
-        deliveryStatus: "sent",
-        isAdmin,
-        replyTo: replyTo
-          ? { messageId: replyTo.id, senderName: replyTo.senderName, text: replyTo.text }
-          : null,
-      });
-
-      const updatePayload: any = {
-        lastMessage: messageText.trim(),
-        lastMessageTime: serverTimestamp(),
-        lastMessageSender: senderName,
-      };
-      if (isOwner) updatePayload.userUnreadCount = (ticket.userUnreadCount || 0) + 1;
-      else updatePayload.ownerUnreadCount = (ticket.ownerUnreadCount || 0) + 1;
-
-      await updateDoc(ticketRef, updatePayload);
-      setMessageText("");
-      setReplyTo(null);
-      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const formatTime = (timestamp: any) => {
-    if (!timestamp) return "";
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    return date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
-  };
-
-  if (!user) {
-    return (
-      <div
-        style={{
-          width: "100%", backgroundColor: BLUE, borderRadius: "20px",
-          padding: "60px 40px", display: "flex", flexDirection: "column",
-          alignItems: "center", justifyContent: "center", gap: "20px",
-          fontFamily: FONT_FAMILY, color: WHITE, marginBottom: "40px", minHeight: "300px",
-        }}
-      >
-        <SayHeyIcon size={64} color={WHITE} />
-        <h3
-          style={{
-            fontSize: "48px", fontWeight: 700, color: WHITE, margin: 0,
-            letterSpacing: "-0.02em", textAlign: "center", fontFamily: FONT_FAMILY,
-          }}
-        >
-          Say Hey
-        </h3>
-        <p
-          style={{
-            fontSize: "18px", fontWeight: 500, color: WHITE, margin: 0,
-            textAlign: "center", maxWidth: "600px", lineHeight: 1.5,
-            opacity: 0.95, fontFamily: FONT_FAMILY,
-          }}
-        >
-          Please sign in to your account to start a real-time conversation.
-        </p>
-        <Link
-          href="/signin"
-          style={{
-            textDecoration: "none", display: "inline-flex", alignItems: "center",
-            gap: "10px", padding: "14px 28px", backgroundColor: WHITE, color: BLUE,
-            borderRadius: "12px", fontSize: "16px", fontWeight: 800,
-            fontFamily: FONT_FAMILY, letterSpacing: "0.02em", marginTop: "10px",
-          }}
-        >
-          Sign In to Continue
-          <NorthEastArrow size={20} color={BLUE} />
-        </Link>
-      </div>
-    );
-  }
-
-  return (
-    <div
-      style={{
-        width: "100%", backgroundColor: BLUE, borderRadius: "20px",
-        padding: "20px", fontFamily: FONT_FAMILY, color: WHITE,
-        marginBottom: "40px", minHeight: "600px",
-      }}
-    >
-      <div style={{ marginBottom: "12px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "6px" }}>
-          <SayHeyIcon size={32} color={WHITE} />
-          <h3
-            style={{
-              fontSize: "32px", fontWeight: 700, color: WHITE, margin: 0,
-              letterSpacing: "-0.02em", fontFamily: FONT_FAMILY,
-            }}
-          >
-            Say Hey
-          </h3>
-        </div>
-      </div>
-
-      <div style={{ display: "flex", gap: "12px", minHeight: "700px", flexWrap: "wrap" }}>
-        {/* Panel Kontak */}
-        <div
-          style={{
-            width: "340px", flexShrink: 0, display: "flex", flexDirection: "column",
-            backgroundColor: WHITE, borderRadius: "12px", overflow: "hidden",
-            boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
-          }}
-        >
-          <div
-            style={{
-              padding: "10px 12px", backgroundColor: BLUE, color: WHITE,
-              display: "flex", alignItems: "center", justifyContent: "space-between",
-            }}
-          >
-            <span
-              style={{
-                fontSize: "13px", fontWeight: 800, color: WHITE,
-                letterSpacing: "0.5px", textTransform: "uppercase", fontFamily: FONT_FAMILY,
-              }}
-            >
-              Kontak
-            </span>
-            <span
-              style={{
-                fontSize: "10px", color: BLUE, padding: "2px 7px",
-                borderRadius: "8px", backgroundColor: WHITE, fontWeight: 800,
-              }}
-            >
-              {contacts.length}
-            </span>
-          </div>
-          <div style={{ flex: 1, overflowY: "auto", backgroundColor: WHITE, padding: "8px 10px" }}>
-            {contacts.length === 0 ? (
-              <div
-                style={{
-                  padding: "14px", textAlign: "center", fontSize: "11px",
-                  color: BLUE, fontFamily: FONT_FAMILY, opacity: 0.7,
-                }}
-              >
-                {isOwner ? "No users online." : "Owner is currently offline."}
-              </div>
-            ) : (
-              contacts.map((c) => (
-                <div
-                  key={c.uid}
-                  onClick={() => openChatWith(c)}
-                  style={{
-                    padding: "8px 6px",
-                    borderBottom: `1px solid rgba(0,0,0,0.05)`,
-                    display: "flex", alignItems: "center", gap: "8px",
-                    backgroundColor:
-                      selectedContact?.uid === c.uid ? "rgba(13,60,252,0.08)" : "transparent",
-                    borderRadius: "6px", cursor: "pointer",
-                  }}
-                >
-                  <div
-                    style={{
-                      width: "36px", height: "36px", borderRadius: "10px",
-                      overflow: "hidden", backgroundColor: BLUE,
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      flexShrink: 0,
-                    }}
-                  >
-                    {c.photoURL ? (
-                      <img
-                        src={c.photoURL}
-                        alt={c.displayName}
-                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                      />
-                    ) : (
-                      <span style={{ fontSize: "14px", fontWeight: 800, color: WHITE }}>
-                        {c.displayName.charAt(0).toUpperCase()}
-                      </span>
-                    )}
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "4px", marginBottom: "2px" }}>
-                      <span
-                        style={{
-                          fontSize: "12px", fontWeight: 700, color: BLUE,
-                          overflow: "hidden", textOverflow: "ellipsis",
-                          whiteSpace: "nowrap", fontFamily: FONT_FAMILY,
-                        }}
-                      >
-                        {c.displayName}
-                      </span>
-                      {(c.email === ADMIN_EMAIL || c.email === OWNER_EMAIL) && (
-                        <VerifiedBadgeWhite size={14} />
-                      )}
-                    </div>
-                    <div
-                      style={{
-                        fontSize: "10px", color: BLUE, fontFamily: FONT_FAMILY,
-                        display: "flex", alignItems: "center", gap: "4px",
-                        fontWeight: 600, opacity: 0.85,
-                      }}
-                    >
-                      <BlinkingDot size={6} color={BLUE} />
-                      {c.online ? "Online" : "Offline"}
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-
-        {/* Panel Chat */}
-        <div
-          style={{
-            flex: 1, minWidth: "300px", backgroundColor: WHITE,
-            borderRadius: "12px", overflow: "hidden", display: "flex",
-            flexDirection: "column", height: "700px", color: BLACK,
-            boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
-          }}
-        >
-          {!ticket || !selectedContact ? (
-            <div
-              style={{
-                flex: 1, display: "flex", alignItems: "center", justifyContent: "center",
-                flexDirection: "column", gap: "12px", color: "#999",
-                fontSize: "14px", fontFamily: FONT_FAMILY, padding: "20px", textAlign: "center",
-              }}
-            >
-              <SayHeyIcon size={40} color="#ccc" />
-              <span>{isOwner ? "Pilih user online untuk mulai chat" : "Pilih owner untuk mulai chat"}</span>
-            </div>
-          ) : (
-            <>
-              <div
-                style={{
-                  padding: "12px 16px", backgroundColor: BLUE, color: WHITE,
-                  display: "flex", alignItems: "center", gap: "10px", flexShrink: 0,
-                }}
-              >
-                <div
-                  style={{
-                    width: "36px", height: "36px", borderRadius: "8px",
-                    overflow: "hidden", backgroundColor: WHITE,
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    flexShrink: 0,
-                  }}
-                >
-                  {selectedContact.photoURL ? (
-                    <img
-                      src={selectedContact.photoURL}
-                      alt={selectedContact.displayName}
-                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                    />
-                  ) : (
-                    <span style={{ fontSize: "14px", fontWeight: 800, color: BLUE }}>
-                      {(selectedContact.displayName || "U").charAt(0).toUpperCase()}
-                    </span>
-                  )}
-                </div>
-                <div
-                  style={{
-                    fontSize: "13px", fontWeight: 800, color: WHITE,
-                    fontFamily: FONT_FAMILY, display: "flex", alignItems: "center", gap: "6px",
-                  }}
-                >
-                  {selectedContact.displayName}
-                  {(selectedContact.email === ADMIN_EMAIL || selectedContact.email === OWNER_EMAIL) && (
-                    <VerifiedBadgeWhite size={16} />
-                  )}
-                </div>
-              </div>
-
-              <div
-                ref={chatContainerRef}
-                className="chat-messages-container"
-                style={{
-                  flex: 1, overflowY: "auto", padding: "16px",
-                  display: "flex", flexDirection: "column", gap: "8px",
-                  minHeight: 0, backgroundColor: WHITE,
-                }}
-              >
-                {messages.length === 0 ? (
-                  <div
-                    style={{
-                      textAlign: "center", color: "#999", fontSize: "13px",
-                      padding: "30px 0", fontFamily: FONT_FAMILY,
-                    }}
-                  >
-                    No messages yet. Say hey!
-                  </div>
-                ) : (
-                  messages.map((msg, idx) => {
-                    const isMine = msg.senderId === user?.uid;
-                    const msgIsAdmin = msg.isAdmin || msg.senderName?.includes("(Admin)");
-                    return (
-                      <div
-                        key={msg.id || idx}
-                        style={{ alignSelf: isMine ? "flex-end" : "flex-start", maxWidth: "75%" }}
-                      >
-                        <div
-                          style={{
-                            padding: "10px 14px", borderRadius: "10px",
-                            backgroundColor: msgIsAdmin ? "#FEF3C7" : isMine ? BLUE : "#ffffff",
-                            color: msgIsAdmin ? BLACK : isMine ? WHITE : BLACK,
-                            fontSize: "13px", fontFamily: FONT_FAMILY, wordBreak: "break-word",
-                            border: msgIsAdmin
-                              ? `1.5px solid #F59E0B`
-                              : isMine
-                              ? "none"
-                              : "1px solid rgba(0,0,0,0.06)",
-                          }}
-                        >
-                          {!isMine && (
-                            <div
-                              style={{
-                                fontSize: "11px", fontWeight: 700,
-                                color: msgIsAdmin ? "#92400E" : BLUE,
-                                marginBottom: "4px", display: "flex",
-                                alignItems: "center", gap: "6px",
-                              }}
-                            >
-                              {msg.senderName}
-                              {msgIsAdmin && <VerifiedBadgeWhite size={14} />}
-                            </div>
-                          )}
-                          {msg.replyTo && (
-                            <div
-                              style={{
-                                padding: "4px 8px", marginBottom: "4px",
-                                backgroundColor: isMine
-                                  ? "rgba(255,255,255,0.18)"
-                                  : "rgba(13,60,252,0.08)",
-                                borderLeft: `2px solid ${isMine ? WHITE : BLUE}`,
-                                borderRadius: "4px", fontSize: "10px", fontStyle: "italic",
-                              }}
-                            >
-                              <strong>{msg.replyTo.senderName}:</strong> {msg.replyTo.text}
-                            </div>
-                          )}
-                          <div>{msg.text}</div>
-                          <div
-                            style={{
-                              display: "flex", justifyContent: "flex-end",
-                              alignItems: "center", gap: "5px", marginTop: "4px",
-                            }}
-                          >
-                            <button
-                              onClick={() => setReplyTo(msg)}
-                              style={{
-                                background: "transparent", border: "none",
-                                color: isMine ? "rgba(255,255,255,0.7)" : "#666",
-                                cursor: "pointer", fontSize: "9px",
-                                fontFamily: FONT_FAMILY, padding: 0, fontWeight: 600,
-                              }}
-                            >
-                              reply
-                            </button>
-                            <span
-                              style={{
-                                fontSize: "9px",
-                                color: msgIsAdmin
-                                  ? "#92400E"
-                                  : isMine
-                                  ? "rgba(255,255,255,0.85)"
-                                  : "#999",
-                              }}
-                            >
-                              {formatTime(msg.timestamp)}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-
-              {replyTo && (
-                <div
-                  style={{
-                    display: "flex", alignItems: "center", gap: "8px",
-                    padding: "6px 12px", backgroundColor: "#F0F4FF",
-                  }}
-                >
-                  <div
-                    style={{
-                      flex: 1, fontSize: "11px", color: BLUE,
-                      fontFamily: FONT_FAMILY, overflow: "hidden",
-                      textOverflow: "ellipsis", whiteSpace: "nowrap",
-                    }}
-                  >
-                    <strong>{replyTo.senderName}:</strong> {replyTo.text}
-                  </div>
-                  <button
-                    onClick={() => setReplyTo(null)}
-                    style={{
-                      background: "transparent", border: "none", color: BLUE,
-                      cursor: "pointer", fontSize: "16px", lineHeight: 1, padding: 0,
-                    }}
-                  >
-                    ×
-                  </button>
-                </div>
-              )}
-
-              <div
-                style={{
-                  padding: "12px 16px", borderTop: "1px solid rgba(0,0,0,0.06)",
-                  display: "flex", gap: "8px", backgroundColor: WHITE, flexShrink: 0,
-                }}
-              >
-                <input
-                  type="text"
-                  value={messageText}
-                  onChange={(e) => setMessageText(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey && messageText.trim()) {
-                      e.preventDefault();
-                      sendMessage();
-                    }
-                  }}
-                  placeholder="Type your message..."
-                  style={{
-                    flex: 1, padding: "10px 14px",
-                    border: "1px solid rgba(0,0,0,0.1)", borderRadius: "8px",
-                    fontSize: "13px", outline: "none", fontFamily: FONT_FAMILY,
-                    backgroundColor: WHITE, color: BLACK,
-                  }}
-                />
-                <button
-                  onClick={sendMessage}
-                  disabled={!messageText.trim()}
-                  style={{
-                    padding: "10px 20px",
-                    backgroundColor: messageText.trim() ? BLUE : "#ccc",
-                    color: WHITE, border: "none", borderRadius: "8px",
-                    cursor: messageText.trim() ? "pointer" : "not-allowed",
-                    fontFamily: FONT_FAMILY, fontSize: "12px",
-                    fontWeight: 800, letterSpacing: "0.5px", textTransform: "uppercase",
-                  }}
-                >
-                  Send
-                </button>
-              </div>
-            </>
-          )}
-        </div>
-      </div>
     </div>
   );
 };
@@ -5213,8 +4518,6 @@ export default function HomePage(): React.JSX.Element {
   const [isMounted, setIsMounted] = useState(false);
   const [navbarShifted, setNavbarShifted] = useState(false);
   const [noteHovered, setNoteHovered] = useState(false);
-  const [sayHeyOpen, setSayHeyOpen] = useState(false);
-  const [sayHeyUnreadCount, setSayHeyUnreadCount] = useState(0);
   const [locationText, setLocationText] = useState<string>("");
   const [showNotesSection, setShowNotesSection] = useState(false);
   const [notes, setNotes] = useState<NoteEntry[]>([]);
@@ -5446,14 +4749,6 @@ export default function HomePage(): React.JSX.Element {
   }, [activeNoteUser]);
 
   useEffect(() => {
-    if (!sayHeyOpen) return;
-    const el = document.getElementById("sayhey-section");
-    if (el) {
-      setTimeout(() => { el.scrollIntoView({ behavior: "smooth", block: "start" }); }, 150);
-    }
-  }, [sayHeyOpen]);
-
-  useEffect(() => {
     if (!showNotesSection || !notesSectionRef.current) return;
     const el = notesSectionRef.current;
     gsap.fromTo(el, { opacity: 0, y: 80 }, { opacity: 1, y: 0, duration: 1, ease: "power3.out" });
@@ -5641,9 +4936,6 @@ export default function HomePage(): React.JSX.Element {
             user={user}
             auth={auth}
             db={db}
-            onSayHeyToggle={() => setSayHeyOpen((prev) => !prev)}
-            sayHeyOpen={sayHeyOpen}
-            sayHeyUnreadCount={sayHeyUnreadCount}
             locationText={locationText}
           />
           <CookieConsentPopup user={user} db={db} isMounted={isMounted} />
@@ -5709,22 +5001,6 @@ export default function HomePage(): React.JSX.Element {
               </div>
             </div>
           </div>
-
-          {sayHeyOpen && (
-            <div
-              id="sayhey-section"
-              style={{
-                width: "100%", padding: "0 40px", maxWidth: "1600px",
-                margin: "40px auto 0 auto", marginBottom: "40px",
-                position: "relative", zIndex: 2,
-              }}
-            >
-              <SayHeySection
-                user={user} db={db} isAdmin={isAdmin}
-                onUnreadCountChange={setSayHeyUnreadCount}
-              />
-            </div>
-          )}
 
           <div
             style={{
@@ -6386,7 +5662,7 @@ export default function HomePage(): React.JSX.Element {
         .menuru-char { display: inline-block; will-change: transform, opacity; }
         .split-char-livechat { display: inline-block; will-change: transform, opacity, filter; }
         .hero-menuru-char { display: inline-block; will-change: transform, opacity; color: #0D3CFC !important; transform-origin: 50% 100%; }
-        .footer-menuru-char { display: inline-block; will-change: transform, opacity; color: #0D3CFC !important; transform-origin: 50% 100%; }
+        .footer-menuru-char { display: inline-block; will-change: transform, opacity; color: #FFFFFF !important; transform-origin: 50% 100%; }
         .physics-char { display: inline-block; will-change: transform, opacity; color: #0D3CFC !important; transform-origin: center center; opacity: 1 !important; visibility: visible !important; }
         .chat-messages-container::-webkit-scrollbar,
         .chat-list-container::-webkit-scrollbar,
