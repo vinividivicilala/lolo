@@ -120,13 +120,9 @@ function getTimezoneCity(): string {
   }
 }
 
-// Lokasi real-time tanpa API pihak ketiga:
-// - Nama kota dari timezone browser (update otomatis bila user pindah TZ)
-// - IP publik via WebRTC (untuk audit internal)
 async function detectLocationName(): Promise<string> {
   try {
     const tzCity = getTimezoneCity();
-    // WebRTC IP tetap diambil untuk dipakai sebagai identitas audit (tidak dikirim ke pihak ketiga)
     await getPublicIPViaWebRTC();
     if (tzCity && tzCity !== "Indonesia") {
       return `${tzCity}, Indonesia`;
@@ -437,11 +433,14 @@ const OWNER_NAME = "Farid Ardiansyah";
 const OWNER_EMAIL = "faridardiansyah061@gmail.com";
 const TOUR_STORAGE_KEY = "menuru_livechat_tour_completed_v1";
 const COOKIE_CONSENT_STORAGE_KEY = "menuru_cookie_consent_v1";
+const DEVELOPER_BANNER_DISMISSED_KEY = "menuru_developer_banner_dismissed_v1";
+const DEVELOPER_URL = "https://farid-ardiansyah.netlify.app/";
 const BLUE = "#0D3CFC";
 const WHITE = "#FFFFFF";
 const BLACK = "#000000";
 const LIME = "#E3FB96";
 const GREEN = "#4ADE80";
+const MINT = "#00E3AA";
 
 // ===== NOTES CATEGORIES =====
 const NOTES_CATEGORIES = [
@@ -621,6 +620,12 @@ const AdminTagIcon = ({ size = 14, color = "#ffffff" }: { size?: number; color?:
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <path d="M12 2L4 5V11C4 16 8 20 12 22C16 20 20 16 20 11V5L12 2Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     <path d="M9 12L11 14L15 10" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const VerifiedIcon = ({ size = 20, color = "#0095F6" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" style={{ display: "inline-block", verticalAlign: "middle", flexShrink: 0 }}>
+    <path fill={color} d="M19.998 3.094 14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.03v-6.46h-6.419L25.358 0l-5.36 3.094Zm7.415 11.225 2.254 2.287-11.43 11.5-6.835-6.93 2.244-2.258 4.587 4.581 9.18-9.18Z" />
   </svg>
 );
 
@@ -823,6 +828,156 @@ interface SayHeyMessage {
   isEncrypted?: boolean;
   deliveryStatus?: "sending" | "sent" | "delivered" | "read" | "failed";
 }
+
+// ===== DEVELOPER BANNER (DI ATAS NAVBAR) =====
+const DeveloperBanner = () => {
+  const [visible, setVisible] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
+  const bannerRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const saved = localStorage.getItem(DEVELOPER_BANNER_DISMISSED_KEY);
+      if (saved === "true") {
+        setDismissed(true);
+        return;
+      }
+    } catch (e) {}
+    setVisible(true);
+  }, []);
+
+  useEffect(() => {
+    if (!visible || !bannerRef.current || !contentRef.current) return;
+    const banner = bannerRef.current;
+    const content = contentRef.current;
+    gsap.set(banner, { height: 0, opacity: 0 });
+    gsap.set(content, { y: -20, opacity: 0 });
+    const tl = gsap.timeline();
+    tl.to(banner, { height: 56, opacity: 1, duration: 0.55, ease: "power3.out" })
+      .to(content, { y: 0, opacity: 1, duration: 0.5, ease: "back.out(1.4)" }, "-=0.25");
+    return () => { tl.kill(); };
+  }, [visible]);
+
+  const handleClose = () => {
+    if (!bannerRef.current || !contentRef.current) {
+      setVisible(false);
+      try { localStorage.setItem(DEVELOPER_BANNER_DISMISSED_KEY, "true"); } catch (e) {}
+      return;
+    }
+    const tl = gsap.timeline({
+      onComplete: () => {
+        setVisible(false);
+        setDismissed(true);
+        try { localStorage.setItem(DEVELOPER_BANNER_DISMISSED_KEY, "true"); } catch (e) {}
+      },
+    });
+    tl.to(contentRef.current, { y: -20, opacity: 0, duration: 0.3, ease: "power2.in" })
+      .to(bannerRef.current, { height: 0, opacity: 0, duration: 0.45, ease: "power3.inOut" }, "-=0.1");
+  };
+
+  if (!visible || dismissed) return null;
+
+  return (
+    <div
+      ref={bannerRef}
+      style={{
+        width: "100%",
+        backgroundColor: BLUE,
+        overflow: "hidden",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        position: "relative",
+        zIndex: 9100,
+        fontFamily: FONT_FAMILY,
+      }}
+    >
+      <div
+        ref={contentRef}
+        style={{
+          width: "100%",
+          maxWidth: "1600px",
+          padding: "0 60px",
+          height: "56px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "16px",
+          position: "relative",
+        }}
+      >
+        <span
+          style={{
+            fontSize: "14px",
+            fontWeight: 600,
+            color: WHITE,
+            letterSpacing: "0.01em",
+            textAlign: "center",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "8px",
+            flexWrap: "wrap",
+            justifyContent: "center",
+          }}
+        >
+          <span>Website this is build the develope Farid Ardiansyah</span>
+          <a
+            href={DEVELOPER_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              color: WHITE,
+              textDecoration: "underline",
+              fontWeight: 800,
+              fontSize: "14px",
+              letterSpacing: "0.01em",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "4px",
+            }}
+          >
+            farid-ardiansyah.netlify.app
+            <NorthEastArrow size={14} color={WHITE} />
+          </a>
+        </span>
+        <button
+          onClick={handleClose}
+          aria-label="Close developer banner"
+          style={{
+            position: "absolute",
+            right: "20px",
+            top: "50%",
+            transform: "translateY(-50%)",
+            width: "30px",
+            height: "30px",
+            borderRadius: "50%",
+            backgroundColor: "rgba(255,255,255,0.18)",
+            border: `1.5px solid rgba(255,255,255,0.4)`,
+            color: WHITE,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+            padding: 0,
+            transition: "background-color 0.2s ease, transform 0.2s ease",
+          }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLButtonElement).style.backgroundColor = "rgba(255,255,255,0.35)";
+            gsap.to(e.currentTarget, { rotate: 90, scale: 1.08, duration: 0.3, ease: "power2.out" });
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLButtonElement).style.backgroundColor = "rgba(255,255,255,0.18)";
+            gsap.to(e.currentTarget, { rotate: 0, scale: 1, duration: 0.3, ease: "power2.out" });
+          }}
+        >
+          <CloseIcon size={14} color={WHITE} />
+        </button>
+      </div>
+    </div>
+  );
+};
 
 // ===== HERO MENURU TITLE =====
 const HeroMenuruTitle = () => {
@@ -1209,13 +1364,13 @@ const NavbarButton = ({
 };
 
 // ===== LEFT NAVBAR =====
-const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
+const LeftNavbar = ({ shifted, topOffset = 0 }: { shifted: boolean; topOffset?: number }) => {
   return (
     <div
       style={{
-        position: "fixed", top: "20px", left: shifted ? "340px" : "60px",
+        position: "fixed", top: `${20 + topOffset}px`, left: shifted ? "340px" : "60px",
         zIndex: 9000, display: "flex", alignItems: "center", gap: "8px",
-        fontFamily: FONT_FAMILY, transition: "left 0.6s cubic-bezier(0.65, 0, 0.35, 1)", willChange: "left",
+        fontFamily: FONT_FAMILY, transition: "left 0.6s cubic-bezier(0.65, 0, 0.35, 1), top 0.4s ease", willChange: "left, top",
       }}
     >
       <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "12px", marginRight: "16px" }}>
@@ -1257,10 +1412,10 @@ const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
 
 // ===== RIGHT NAVBAR =====
 const RightNavbar = ({
-  user, auth, db, onSayHeyToggle, sayHeyOpen, sayHeyUnreadCount, locationText,
+  user, auth, db, onSayHeyToggle, sayHeyOpen, sayHeyUnreadCount, locationText, topOffset = 0,
 }: {
   user: any; auth: any; db: any; onSayHeyToggle: () => void;
-  sayHeyOpen: boolean; sayHeyUnreadCount: number; locationText: string;
+  sayHeyOpen: boolean; sayHeyUnreadCount: number; locationText: string; topOffset?: number;
 }) => {
   const displayName = user?.displayName || user?.email?.split("@")[0] || "User";
   const photoURL = user?.photoURL || "";
@@ -1311,7 +1466,7 @@ const RightNavbar = ({
 
   if (!user) {
     return (
-      <div style={{ position: "fixed", top: "20px", right: "24px", zIndex: 9000, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "10px", fontFamily: FONT_FAMILY }}>
+      <div style={{ position: "fixed", top: `${20 + topOffset}px`, right: "24px", zIndex: 9000, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "10px", fontFamily: FONT_FAMILY, transition: "top 0.4s ease" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <SayHeyButton />
           <Link
@@ -1339,7 +1494,7 @@ const RightNavbar = ({
   }
 
   return (
-    <div style={{ position: "fixed", top: "20px", right: "24px", zIndex: 9000, fontFamily: FONT_FAMILY, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "10px" }}>
+    <div style={{ position: "fixed", top: `${20 + topOffset}px`, right: "24px", zIndex: 9000, fontFamily: FONT_FAMILY, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "10px", transition: "top 0.4s ease" }}>
       <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
         <SayHeyButton />
         <div
@@ -1392,7 +1547,7 @@ const RightNavbar = ({
   );
 };
 
-// ===== SAY HEY SECTION =====
+// ===== SAY HEY SECTION (REDESIGN: STYLE CARD FOOTER NOTE) =====
 const SayHeySection = ({
   user, db, isAdmin, onUnreadCountChange,
 }: {
@@ -1404,6 +1559,7 @@ const SayHeySection = ({
   const [messages, setMessages] = useState<SayHeyMessage[]>([]);
   const [messageText, setMessageText] = useState("");
   const [encryptionReady, setEncryptionReady] = useState(false);
+  const [replyTo, setReplyTo] = useState<SayHeyMessage | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -1507,6 +1663,7 @@ const SayHeySection = ({
   const openChatWith = async (contact: any) => {
     if (!db || !user) return;
     setSelectedContact(contact);
+    setReplyTo(null);
     try {
       const existingQ = isOwner
         ? query(collection(db, "sayhey_tickets"), where("userId", "==", contact.uid), where("ownerId", "==", user.uid))
@@ -1575,6 +1732,7 @@ const SayHeySection = ({
       await addDoc(collection(db, "sayhey_tickets", ticket.id, "messages"), {
         senderId: user.uid, senderName, text: encryptedMessage,
         timestamp: serverTimestamp(), read: false, isEncrypted: true, deliveryStatus: "sent",
+        replyTo: replyTo ? { messageId: replyTo.id, senderName: replyTo.senderName, text: replyTo.text.length > 50 ? replyTo.text.substring(0, 50) + "..." : replyTo.text } : null,
       });
       const updatePayload: any = {
         lastMessage: messageText.trim(), lastMessageTime: serverTimestamp(), lastMessageSender: senderName,
@@ -1588,6 +1746,7 @@ const SayHeySection = ({
       }
       await updateDoc(ticketRef, updatePayload);
       setMessageText("");
+      setReplyTo(null);
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     } catch (error) { console.error(error); }
   };
@@ -1613,15 +1772,40 @@ const SayHeySection = ({
     return date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
   };
 
+  // ===== NOT LOGGED IN STATE =====
   if (!user) {
     return (
-      <div style={{ width: "100%", backgroundColor: BLUE, borderRadius: "20px", padding: "60px 40px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "20px", fontFamily: FONT_FAMILY, color: WHITE, marginBottom: "40px", minHeight: "300px" }}>
+      <div
+        style={{
+          width: "100%",
+          backgroundColor: BLUE,
+          borderRadius: "28px",
+          padding: "60px 40px",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "20px",
+          fontFamily: FONT_FAMILY,
+          color: WHITE,
+          minHeight: "300px",
+          boxShadow: `0 8px 32px ${BLUE}40`,
+        }}
+      >
         <SayHeyIcon size={64} color={WHITE} />
         <h3 style={{ fontSize: "48px", fontWeight: 700, color: WHITE, margin: 0, letterSpacing: "-0.02em", textAlign: "center", fontFamily: FONT_FAMILY }}>Say Hey</h3>
         <p style={{ fontSize: "18px", fontWeight: 500, color: WHITE, margin: 0, textAlign: "center", maxWidth: "600px", lineHeight: 1.5, opacity: 0.95, fontFamily: FONT_FAMILY }}>
           Please sign in to your account to start a real-time conversation. Your chat is private and encrypted end-to-end.
         </p>
-        <Link href="/signin" style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "10px", padding: "14px 28px", backgroundColor: WHITE, color: BLUE, borderRadius: "12px", fontSize: "16px", fontWeight: 800, fontFamily: FONT_FAMILY, letterSpacing: "0.02em", marginTop: "10px" }}>
+        <Link
+          href="/signin"
+          style={{
+            textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "10px",
+            padding: "14px 28px", backgroundColor: WHITE, color: BLUE, borderRadius: "12px",
+            fontSize: "16px", fontWeight: 800, fontFamily: FONT_FAMILY,
+            letterSpacing: "0.02em", marginTop: "10px",
+          }}
+        >
           Sign In to Continue
           <NorthEastArrow size={20} color={BLUE} />
         </Link>
@@ -1629,60 +1813,202 @@ const SayHeySection = ({
     );
   }
 
+  // ===== LOGGED IN STATE: REDESIGN LIKE NOTE CARD =====
   return (
-    <div style={{ width: "100%", backgroundColor: BLUE, borderRadius: "20px", padding: "40px", fontFamily: FONT_FAMILY, color: WHITE, marginBottom: "40px", minHeight: "600px" }}>
-      <div style={{ marginBottom: "30px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "12px" }}>
-          <SayHeyIcon size={40} color={WHITE} />
-          <h3 style={{ fontSize: "48px", fontWeight: 700, color: WHITE, margin: 0, letterSpacing: "-0.02em", fontFamily: FONT_FAMILY }}>Say Hey</h3>
-        </div>
-        <p style={{ fontSize: "16px", fontWeight: 500, color: WHITE, margin: 0, lineHeight: 1.5, opacity: 0.95, fontFamily: FONT_FAMILY }}>
-          {ticket ? "You are now connected in a real-time chat." : isOwner ? "Select an online user below to start a real-time conversation." : "Select the owner below to start a real-time conversation."}
-        </p>
+    <div
+      style={{
+        width: "100%",
+        backgroundColor: BLUE,
+        borderRadius: "28px",
+        padding: "24px 28px",
+        display: "flex",
+        flexDirection: "column",
+        gap: "18px",
+        boxShadow: `0 8px 32px ${BLUE}40`,
+        fontFamily: FONT_FAMILY,
+      }}
+    >
+      {/* Pill "SAY HEY" ala "GRUP" */}
+      <div
+        style={{
+          display: "inline-flex",
+          alignSelf: "flex-start",
+          alignItems: "center",
+          gap: "10px",
+          padding: "8px 22px",
+          backgroundColor: WHITE,
+          color: BLUE,
+          borderRadius: "24px 4px 24px 24px",
+          fontFamily: FONT_FAMILY,
+          fontSize: "15px",
+          fontWeight: 800,
+          letterSpacing: "0.04em",
+          textTransform: "uppercase",
+          border: `2px solid ${WHITE}`,
+          boxShadow: `0 4px 12px rgba(0,0,0,0.1)`,
+        }}
+      >
+        <SayHeyIcon size={18} color={BLUE} />
+        Say Hey
       </div>
 
-      <div style={{ display: "flex", gap: "20px", minHeight: "500px", flexWrap: "wrap" }}>
-        <div style={{ width: "300px", flexShrink: 0, backgroundColor: GREEN, borderRadius: "16px", border: `1px solid ${GREEN}`, overflow: "hidden", display: "flex", flexDirection: "column", height: "500px", boxShadow: "0 8px 24px rgba(74,222,128,0.35)" }}>
-          <div style={{ padding: "16px 20px", backgroundColor: LIME, borderBottom: `1px solid ${LIME}`, fontSize: "14px", fontWeight: 800, letterSpacing: "0.5px", textTransform: "uppercase", color: BLACK, fontFamily: FONT_FAMILY, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <span>{isOwner ? "Users Online" : "Owners Online"}</span>
-            <span style={{ fontSize: "11px", color: BLACK, padding: "2px 8px", borderRadius: "4px", backgroundColor: WHITE, fontWeight: 800, letterSpacing: "0.5px" }}>{contacts.length}</span>
+      {/* Judul besar (style note card title) */}
+      <div
+        style={{
+          padding: "18px 24px",
+          backgroundColor: WHITE,
+          border: `2px solid ${WHITE}`,
+          borderRadius: "6px 28px 28px 28px",
+          boxShadow: `0 6px 20px rgba(0,0,0,0.12)`,
+          display: "flex",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: "12px",
+        }}
+      >
+        <span
+          style={{
+            fontSize: "34px",
+            fontFamily: FONT_FAMILY,
+            lineHeight: "1.25",
+            color: BLUE,
+            fontWeight: 800,
+            flex: 1,
+            minWidth: 0,
+            wordBreak: "break-word",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "10px",
+          }}
+        >
+          Realtime Chat
+          <VerifiedIcon size={28} />
+        </span>
+        <span
+          style={{
+            padding: "4px 12px",
+            backgroundColor: BLUE,
+            color: WHITE,
+            borderRadius: "20px",
+            fontSize: "12px",
+            fontWeight: 800,
+            fontFamily: FONT_FAMILY,
+          }}
+        >
+          {isOwner ? "Admin Mode" : "User Mode"}
+        </span>
+      </div>
+
+      {/* Konten: 2 kolom (kontak + chat) */}
+      <div
+        style={{
+          padding: "20px 24px",
+          backgroundColor: WHITE,
+          border: `2px solid ${WHITE}`,
+          borderRadius: "28px 6px 28px 28px",
+          boxShadow: `0 6px 20px rgba(0,0,0,0.12)`,
+          display: "flex",
+          gap: "16px",
+          minHeight: "500px",
+          flexWrap: "wrap",
+        }}
+      >
+        {/* KOLOM KONTAK */}
+        <div
+          style={{
+            width: "300px",
+            flexShrink: 0,
+            display: "flex",
+            flexDirection: "column",
+            backgroundColor: "#F0F4FF",
+            border: `1.5px solid ${BLUE}30`,
+            borderRadius: "20px",
+            overflow: "hidden",
+            height: "500px",
+          }}
+        >
+          <div
+            style={{
+              padding: "14px 18px",
+              backgroundColor: BLUE,
+              color: WHITE,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              flexShrink: 0,
+            }}
+          >
+            <span style={{ fontSize: "13px", fontWeight: 800, letterSpacing: "0.5px", textTransform: "uppercase", fontFamily: FONT_FAMILY }}>
+              {isOwner ? "Users Online" : "Owners Online"}
+            </span>
+            <span
+              style={{
+                fontSize: "10px", color: BLUE, padding: "2px 8px",
+                borderRadius: "8px", backgroundColor: WHITE, fontWeight: 800,
+              }}
+            >
+              {contacts.length}
+            </span>
           </div>
-          <div style={{ overflowY: "auto", flex: 1, minHeight: 0 }}>
+          <div style={{ flex: 1, overflowY: "auto", padding: "8px 10px" }}>
             {contacts.length === 0 ? (
-              <div style={{ padding: "40px 20px", textAlign: "center", fontSize: "13px", color: BLACK, fontFamily: FONT_FAMILY, lineHeight: 1.5, opacity: 0.85 }}>
-                {isOwner ? "No users online." : "Owner is currently offline."}<br />Please check back later.
+              <div style={{ padding: "30px 14px", textAlign: "center", fontSize: "12px", color: BLUE, fontFamily: FONT_FAMILY, opacity: 0.7, lineHeight: 1.5 }}>
+                {isOwner ? "No users online." : "Owner is currently offline."}
+                <br />Please check back later.
               </div>
             ) : (
               contacts.map((c) => {
                 const cTicket = c.ticket;
                 const unread = cTicket ? (isOwner ? cTicket.ownerUnreadCount || 0 : cTicket.userUnreadCount || 0) : 0;
+                const isOnlineAdmin = c.email === ADMIN_EMAIL || c.email === OWNER_EMAIL;
                 return (
                   <div
                     key={c.uid}
                     onClick={() => openChatWith(c)}
                     style={{
-                      padding: "14px 20px", borderBottom: `1px solid rgba(0,0,0,0.08)`, cursor: "pointer",
-                      display: "flex", alignItems: "center", gap: "12px",
-                      backgroundColor: selectedContact?.uid === c.uid ? "rgba(0,0,0,0.12)" : "transparent",
+                      padding: "10px 12px",
+                      borderBottom: `1px solid ${BLUE}15`,
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                      backgroundColor: selectedContact?.uid === c.uid ? `${BLUE}12` : "transparent",
+                      borderRadius: "10px",
                       transition: "background-color 0.2s ease",
                     }}
                   >
-                    <div style={{ width: "44px", height: "44px", borderRadius: "12px", overflow: "hidden", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <div
+                      style={{
+                        width: "40px", height: "40px", borderRadius: "12px", overflow: "hidden",
+                        backgroundColor: BLUE, display: "flex", alignItems: "center",
+                        justifyContent: "center", flexShrink: 0,
+                      }}
+                    >
                       {c.photoURL ? (
                         <img src={c.photoURL} alt={c.displayName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                       ) : (
-                        <span style={{ fontSize: "18px", fontWeight: 800, color: BLUE }}>{c.displayName.charAt(0).toUpperCase()}</span>
+                        <span style={{ fontSize: "16px", fontWeight: 800, color: WHITE }}>{c.displayName.charAt(0).toUpperCase()}</span>
                       )}
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: "14px", fontWeight: 700, color: BLACK, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginBottom: "2px", fontFamily: FONT_FAMILY }}>{c.displayName}</div>
-                      <div style={{ fontSize: "11px", color: BLACK, fontFamily: FONT_FAMILY, display: "flex", alignItems: "center", gap: "6px", fontWeight: 600, opacity: 0.85 }}>
-                        <BlinkingDot size={8} color={BLUE} />
+                      <div style={{ fontSize: "13px", fontWeight: 700, color: BLUE, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginBottom: "2px", fontFamily: FONT_FAMILY, display: "flex", alignItems: "center", gap: "6px" }}>
+                        {c.displayName}
+                        {isOnlineAdmin && <VerifiedIcon size={18} />}
+                      </div>
+                      <div style={{ fontSize: "10px", color: BLUE, fontFamily: FONT_FAMILY, display: "flex", alignItems: "center", gap: "6px", fontWeight: 600, opacity: 0.85 }}>
+                        <BlinkingDot size={7} color={BLUE} />
                         {c.online ? "Online" : "Offline"}
                       </div>
                     </div>
                     {unread > 0 && (
-                      <span style={{ minWidth: "20px", height: "20px", padding: "0 6px", borderRadius: "10px", backgroundColor: BLUE, color: WHITE, fontSize: "11px", fontWeight: 800, fontFamily: FONT_FAMILY, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <span
+                        style={{
+                          minWidth: "20px", height: "20px", padding: "0 6px",
+                          borderRadius: "10px", backgroundColor: BLUE, color: WHITE,
+                          fontSize: "11px", fontWeight: 800, fontFamily: FONT_FAMILY,
+                          display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+                        }}
+                      >
                         {unread > 99 ? "99+" : unread}
                       </span>
                     )}
@@ -1693,17 +2019,46 @@ const SayHeySection = ({
           </div>
         </div>
 
-        <div style={{ flex: 1, minWidth: "300px", backgroundColor: WHITE, borderRadius: "16px", overflow: "hidden", display: "flex", flexDirection: "column", height: "500px", color: BLACK }}>
+        {/* KOLOM CHAT */}
+        <div
+          style={{
+            flex: 1, minWidth: "300px",
+            backgroundColor: "#F8FAFF",
+            border: `1.5px solid ${BLUE}30`,
+            borderRadius: "20px",
+            overflow: "hidden",
+            display: "flex", flexDirection: "column",
+            height: "500px", color: BLACK,
+          }}
+        >
           {!ticket || !selectedContact ? (
-            <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: "12px", color: "#999", fontSize: "15px", fontFamily: FONT_FAMILY, padding: "20px", textAlign: "center" }}>
-              <SayHeyIcon size={48} color="#ccc" />
+            <div
+              style={{
+                flex: 1, display: "flex", alignItems: "center", justifyContent: "center",
+                flexDirection: "column", gap: "12px", color: "#999",
+                fontSize: "14px", fontFamily: FONT_FAMILY, padding: "20px", textAlign: "center",
+              }}
+            >
+              <SayHeyIcon size={48} color={`${BLUE}40`} />
               <span>{isOwner ? "Select an online user on the left to start chatting" : "Select the owner on the left to start chatting"}</span>
             </div>
           ) : (
             <>
-              <div style={{ padding: "16px 20px", backgroundColor: LIME, color: BLACK, display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", flexShrink: 0, borderBottom: `1px solid ${LIME}` }}>
+              <div
+                style={{
+                  padding: "14px 20px", backgroundColor: BLUE, color: WHITE,
+                  display: "flex", alignItems: "center", justifyContent: "space-between",
+                  gap: "12px", flexShrink: 0,
+                }}
+              >
                 <div style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: 0 }}>
-                  <div style={{ width: "40px", height: "40px", borderRadius: "10px", overflow: "hidden", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <div
+                    style={{
+                      width: "40px", height: "40px", borderRadius: "10px", overflow: "hidden",
+                      backgroundColor: WHITE, display: "flex", alignItems: "center",
+                      justifyContent: "center", flexShrink: 0,
+                    }}
+                  >
                     {selectedContact.photoURL ? (
                       <img src={selectedContact.photoURL} alt={selectedContact.displayName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                     ) : (
@@ -1711,27 +2066,70 @@ const SayHeySection = ({
                     )}
                   </div>
                   <div style={{ minWidth: 0 }}>
-                    <div style={{ fontSize: "15px", fontWeight: 800, color: BLACK, fontFamily: FONT_FAMILY, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{selectedContact.displayName}</div>
-                    <div style={{ fontSize: "11px", color: BLACK, fontFamily: FONT_FAMILY, display: "flex", alignItems: "center", gap: "6px", fontWeight: 600, opacity: 0.85 }}>
-                      <BlinkingDot size={8} color={BLUE} />
+                    <div style={{ fontSize: "15px", fontWeight: 800, color: WHITE, fontFamily: FONT_FAMILY, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: "6px" }}>
+                      {selectedContact.displayName}
+                      {(selectedContact.email === ADMIN_EMAIL || selectedContact.email === OWNER_EMAIL) && <VerifiedIcon size={18} />}
+                    </div>
+                    <div style={{ fontSize: "11px", color: WHITE, fontFamily: FONT_FAMILY, display: "flex", alignItems: "center", gap: "6px", fontWeight: 600, opacity: 0.9 }}>
+                      <BlinkingDot size={7} color={WHITE} />
                       {selectedContact.online ? "Online" : "Offline"}
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div ref={chatContainerRef} className="chat-messages-container" style={{ flex: 1, overflowY: "auto", padding: "20px", display: "flex", flexDirection: "column", gap: "12px", minHeight: 0, backgroundColor: "#fafafa" }}>
+              <div
+                ref={chatContainerRef}
+                className="chat-messages-container"
+                style={{
+                  flex: 1, overflowY: "auto", padding: "20px",
+                  display: "flex", flexDirection: "column", gap: "12px", minHeight: 0,
+                  backgroundColor: "#F8FAFF",
+                }}
+              >
                 {messages.length === 0 ? (
                   <div style={{ textAlign: "center", color: "#999", fontSize: "14px", padding: "30px 0", fontFamily: FONT_FAMILY }}>No messages yet. Say hey! 👋</div>
                 ) : (
                   messages.map((msg, idx) => {
                     const isMine = msg.senderId === user?.uid;
                     return (
-                      <div key={msg.id || idx} style={{ alignSelf: isMine ? "flex-end" : "flex-start", maxWidth: "75%" }}>
-                        <div style={{ padding: "10px 14px", borderRadius: "12px", backgroundColor: isMine ? BLUE : "#ffffff", color: isMine ? WHITE : BLACK, fontSize: "14px", fontFamily: FONT_FAMILY, wordBreak: "break-word", border: isMine ? "none" : "1px solid rgba(0,0,0,0.06)", boxShadow: isMine ? "none" : "0 2px 6px rgba(0,0,0,0.04)" }}>
+                      <div key={msg.id || idx} style={{ alignSelf: isMine ? "flex-end" : "flex-start", maxWidth: "78%" }}>
+                        <div
+                          style={{
+                            padding: "12px 16px",
+                            borderRadius: "16px",
+                            backgroundColor: isMine ? BLUE : WHITE,
+                            color: isMine ? WHITE : BLACK,
+                            fontSize: "14px",
+                            fontFamily: FONT_FAMILY,
+                            wordBreak: "break-word",
+                            border: isMine ? "none" : `1px solid ${BLUE}20`,
+                            boxShadow: isMine ? `0 4px 12px ${BLUE}30` : "0 2px 8px rgba(0,0,0,0.05)",
+                          }}
+                        >
                           {!isMine && <div style={{ fontSize: "11px", fontWeight: 700, color: BLUE, marginBottom: "4px" }}>{msg.senderName}</div>}
+                          {msg.replyTo && (
+                            <div
+                              style={{
+                                padding: "6px 10px",
+                                backgroundColor: isMine ? "rgba(255,255,255,0.2)" : `${BLUE}12`,
+                                borderLeft: `3px solid ${isMine ? WHITE : BLUE}`,
+                                borderRadius: "4px", marginBottom: "6px",
+                                fontSize: "11px", color: isMine ? WHITE : BLUE,
+                                fontStyle: "italic", fontFamily: FONT_FAMILY,
+                              }}
+                            >
+                              <strong>{msg.replyTo.senderName}:</strong> {msg.replyTo.text}
+                            </div>
+                          )}
                           <div>{msg.text}</div>
-                          <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "6px", marginTop: "4px" }}>
+                          <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "8px", marginTop: "4px" }}>
+                            <button
+                              onClick={() => setReplyTo(msg)}
+                              style={{ background: "transparent", border: "none", color: isMine ? "rgba(255,255,255,0.75)" : BLUE, cursor: "pointer", fontSize: "9px", fontFamily: FONT_FAMILY, padding: 0, fontWeight: 700 }}
+                            >
+                              reply
+                            </button>
                             {renderDeliveryStatus(msg, isMine)}
                             <span style={{ fontSize: "10px", color: isMine ? "rgba(255,255,255,0.85)" : "#999" }}>{formatTime(msg.timestamp)}</span>
                           </div>
@@ -1741,25 +2139,42 @@ const SayHeySection = ({
                   })
                 )}
                 {ticket.typing && ticket.typingUserId !== user?.uid && (
-                  <div style={{ alignSelf: "flex-start", fontSize: "13px", color: "#666", fontStyle: "italic", fontFamily: FONT_FAMILY, padding: "4px 10px" }}>
+                  <div style={{ alignSelf: "flex-start", fontSize: "12px", color: BLUE, fontStyle: "italic", fontFamily: FONT_FAMILY, padding: "4px 10px", display: "flex", alignItems: "center", gap: "6px" }}>
+                    <BlinkingDot size={7} color={BLUE} />
                     {ticket.typingUserName} is typing...
                   </div>
                 )}
                 <div ref={messagesEndRef} />
               </div>
 
-              <div style={{ padding: "14px 20px", borderTop: "1px solid rgba(0,0,0,0.06)", display: "flex", gap: "10px", backgroundColor: WHITE, flexShrink: 0 }}>
+              {replyTo && (
+                <div style={{ padding: "8px 20px", backgroundColor: `${BLUE}08`, borderTop: `1px solid ${BLUE}20`, display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 }}>
+                  <ReplyIcon size={14} color={BLUE} />
+                  <div style={{ flex: 1, fontSize: "12px", color: BLUE, fontFamily: FONT_FAMILY, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    <strong>{replyTo.senderName}:</strong> {replyTo.text}
+                  </div>
+                  <button onClick={() => setReplyTo(null)} style={{ background: "transparent", border: "none", color: BLUE, cursor: "pointer", fontSize: "16px", fontFamily: FONT_FAMILY, padding: 0, lineHeight: 1 }}>×</button>
+                </div>
+              )}
+
+              <div style={{ padding: "14px 20px", borderTop: `1px solid ${BLUE}20`, display: "flex", gap: "10px", backgroundColor: WHITE, flexShrink: 0 }}>
                 <input
                   type="text" value={messageText} onChange={handleTyping}
                   onKeyPress={(e) => { if (e.key === "Enter" && !e.shiftKey && messageText.trim()) { e.preventDefault(); sendMessage(); } }}
                   placeholder="Type your message..."
-                  style={{ flex: 1, padding: "12px 16px", border: "1px solid rgba(0,0,0,0.1)", borderRadius: "10px", fontSize: "14px", outline: "none", fontFamily: FONT_FAMILY, backgroundColor: WHITE, color: BLACK }}
+                  style={{
+                    flex: 1, padding: "12px 16px",
+                    border: `1.5px solid ${BLUE}30`, borderRadius: "12px",
+                    fontSize: "14px", outline: "none",
+                    fontFamily: FONT_FAMILY, backgroundColor: WHITE, color: BLACK,
+                  }}
                 />
                 <button
                   onClick={sendMessage} disabled={!messageText.trim()}
                   style={{
-                    padding: "12px 24px", backgroundColor: messageText.trim() ? BLUE : "#ccc",
-                    color: WHITE, border: "none", borderRadius: "10px",
+                    padding: "12px 24px",
+                    backgroundColor: messageText.trim() ? BLUE : "#ccc",
+                    color: WHITE, border: "none", borderRadius: "12px",
                     cursor: messageText.trim() ? "pointer" : "not-allowed",
                     fontFamily: FONT_FAMILY, fontSize: "13px", fontWeight: 800,
                     letterSpacing: "0.5px", textTransform: "uppercase",
@@ -1770,6 +2185,33 @@ const SayHeySection = ({
               </div>
             </>
           )}
+        </div>
+      </div>
+
+      {/* Footer info (style note footer) */}
+      <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
+        <div
+          style={{
+            display: "inline-flex", alignItems: "center", gap: "8px",
+            padding: "8px 20px", backgroundColor: WHITE,
+            border: `2px solid ${WHITE}`, borderRadius: "20px 4px 20px 20px",
+            fontSize: "14px", color: BLUE, fontWeight: 700,
+            fontFamily: FONT_FAMILY, boxShadow: `0 4px 12px rgba(0,0,0,0.1)`,
+          }}
+        >
+          <BlinkingDot size={8} color={BLUE} />
+          End-to-end encrypted
+        </div>
+        <div
+          style={{
+            display: "inline-flex", alignItems: "center", gap: "8px",
+            padding: "8px 20px", backgroundColor: WHITE,
+            border: `2px solid ${WHITE}`, borderRadius: "4px 20px 20px 20px",
+            fontSize: "14px", color: BLUE, fontWeight: 700,
+            fontFamily: FONT_FAMILY, boxShadow: `0 4px 12px rgba(0,0,0,0.1)`,
+          }}
+        >
+          Realtime via Firebase
         </div>
       </div>
     </div>
@@ -2192,7 +2634,7 @@ const AppealChatRoom = ({ user, isAdmin, db, appealTicket, onClose }: any) => {
   );
 };
 
-// ===== LIVE CHAT AGENT (PWA NOTIF REMOVED) =====
+// ===== LIVE CHAT AGENT =====
 const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBannedAppealChat }: any) => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
@@ -3177,6 +3619,7 @@ export default function HomePage(): React.JSX.Element {
   const [inviteSearch, setInviteSearch] = useState("");
   const [invitedUsers, setInvitedUsers] = useState<{ [uid: string]: boolean }>({});
   const [inviteToast, setInviteToast] = useState<string | null>(null);
+  const [bannerHeight, setBannerHeight] = useState<number>(0);
 
   const [registeredUsers, setRegisteredUsers] = useState<NoteEntry[]>([]);
   const [hasSubmittedNote, setHasSubmittedNote] = useState(false);
@@ -3194,8 +3637,37 @@ export default function HomePage(): React.JSX.Element {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const noteJoinRef = useRef<HTMLDivElement>(null);
   const notesSectionRef = useRef<HTMLDivElement>(null);
+  const developerBannerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { setIsMounted(true); }, []);
+
+  // Pantau tinggi banner developer untuk offset navbar
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    let observer: MutationObserver | null = null;
+    const update = () => {
+      const saved = (() => { try { return localStorage.getItem(DEVELOPER_BANNER_DISMISSED_KEY); } catch { return null; } })();
+      if (saved === "true") { setBannerHeight(0); return; }
+      const el = document.getElementById("developer-banner");
+      if (el) setBannerHeight(el.offsetHeight || 0);
+      else setBannerHeight(0);
+    };
+    update();
+    const t1 = setTimeout(update, 100);
+    const t2 = setTimeout(update, 700);
+    const t3 = setTimeout(update, 1500);
+    const interval = setInterval(update, 800);
+    const container = document.getElementById("developer-banner");
+    if (container && typeof MutationObserver !== "undefined") {
+      observer = new MutationObserver(update);
+      observer.observe(container, { attributes: true, childList: true, subtree: true });
+    }
+    return () => {
+      clearTimeout(t1); clearTimeout(t2); clearTimeout(t3);
+      clearInterval(interval);
+      if (observer) observer.disconnect();
+    };
+  }, [isMounted]);
 
   useEffect(() => {
     if (!auth || !isMounted) return;
@@ -3297,10 +3769,7 @@ export default function HomePage(): React.JSX.Element {
       setLocationText(loc);
     });
 
-    // Update lokasi secara berkala untuk real-time (bila user pindah timezone)
-    const interval = setInterval(() => {
-      saveUserLocation(user);
-    }, 60 * 60 * 1000); // tiap 1 jam
+    const interval = setInterval(() => { saveUserLocation(user); }, 60 * 60 * 1000);
 
     return () => { clearTimeout(t); clearInterval(interval); unsub(); };
   }, [db, isMounted, user]);
@@ -3528,6 +3997,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         />
       </noscript>
 
+      {/* ===== BANNER DEVELOPER DI ATAS NAVBAR ===== */}
+      <div id="developer-banner" ref={developerBannerRef}>
+        <DeveloperBanner />
+      </div>
+
       <div ref={wrapperRef} style={{ position: "relative", width: "100%", minHeight: "100vh", overflow: "hidden", backgroundColor: WHITE }}>
         <div
           ref={preloaderRef}
@@ -3568,17 +4042,20 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           <div style={{ position: "fixed", top: 0, left: 0, width: "200px", height: "120px", pointerEvents: "none", zIndex: 8500, backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)", maskImage: "linear-gradient(to right, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%)", WebkitMaskImage: "linear-gradient(to right, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%)" }} />
           <div style={{ position: "fixed", top: 0, right: 0, width: "200px", height: "120px", pointerEvents: "none", zIndex: 8500, backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)", maskImage: "linear-gradient(to left, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%)", WebkitMaskImage: "linear-gradient(to left, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%)" }} />
 
-          <LeftNavbar shifted={navbarShifted} />
+          <LeftNavbar shifted={navbarShifted} topOffset={bannerHeight} />
           <RightNavbar
             user={user} auth={auth} db={db}
             onSayHeyToggle={() => setSayHeyOpen((prev) => !prev)}
             sayHeyOpen={sayHeyOpen}
             sayHeyUnreadCount={sayHeyUnreadCount}
             locationText={locationText}
+            topOffset={bannerHeight}
           />
           <CookieConsentPopup user={user} db={db} isMounted={isMounted} />
 
-          <HeroMenuruTitle />
+          <div style={{ paddingTop: bannerHeight, transition: "padding-top 0.45s ease" }}>
+            <HeroMenuruTitle />
+          </div>
 
           <div style={{ width: "100%", padding: "0 40px", maxWidth: "1600px", margin: "0 auto", marginTop: "40px", position: "relative", zIndex: 2 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "60px", flexWrap: "wrap" }}>
