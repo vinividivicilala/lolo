@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import Head from "next/head";
 import Link from "next/link";
-import Script from "next/script";
 import { initializeApp, getApps } from "firebase/app";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
 import {
@@ -639,21 +638,26 @@ const MicrosoftStoreIcon = ({ size = 32 }: { size?: number }) => (
   </svg>
 );
 
-// ===== INSTAGRAM VERIFIED BADGE =====
-const InstagramVerifiedReal = ({ size = 28 }: { size?: number }) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 40 40"
-    xmlns="http://www.w3.org/2000/svg"
-    style={{ display: "inline-block", verticalAlign: "middle", flexShrink: 0 }}
-  >
-    <path
-      fill="#0095F6"
-      d="M19.998 3.094 14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.03v-6.46h-6.419L25.358 0l-5.36 3.094Zm7.415 11.225 2.254 2.287-11.43 11.5-6.835-6.93 2.244-2.258 4.587 4.581 9.18-9.18Z"
-    />
-  </svg>
-);
+// ===== INSTAGRAM VERIFIED BADGE (BULAT PUTIH + VERIFIED BIRU) =====
+const InstagramVerifiedReal = ({ size = 28, variant = "blue" }: { size?: number; variant?: "blue" | "white" }) => {
+  const whiteBg = variant === "white";
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 40 40"
+      xmlns="http://www.w3.org/2000/svg"
+      style={{ display: "inline-block", verticalAlign: "middle", flexShrink: 0 }}
+    >
+      <circle cx="20" cy="20" r="20" fill={whiteBg ? "#FFFFFF" : "#0095F6"} />
+      <path
+        fill={whiteBg ? "#0095F6" : "#FFFFFF"}
+        d="M19.998 7.094 15.638 4l-2.972 5.15H10.432v6.354L5 18.64 8.094 24 5 29.359l5.432 3.137v5.905h5.975L15.638 44l5.36-3.094L26.358 44l3.232-5.6h6.162v-6.01L40 29.359 36.905 24 40 18.641l-5.248-3.03v-6.46h-6.419L26.358 4l-5.36 3.094Zm7.415 11.225 2.254 2.287-11.43 11.5-6.835-6.93 2.244-2.258 4.587 4.581 9.18-9.18Z"
+        transform="translate(-5, -4) scale(1.05)"
+      />
+    </svg>
+  );
+};
 
 const BlinkingDot = ({ size = 10, color = BLUE }: { size?: number; color?: string }) => (
   <span
@@ -857,7 +861,7 @@ interface SayHeyMessage {
   replyTo?: { messageId: string; senderName: string; text: string } | null;
 }
 
-// ===== TOP BANNER =====
+// ===== TOP BANNER (TANPA UNDERLINE, DENGAN VERIFIED BADGE) =====
 const TopBanner = () => {
   return (
     <div
@@ -883,9 +887,9 @@ const TopBanner = () => {
           fontWeight: 600,
           letterSpacing: "0.02em",
           textAlign: "center",
-          whiteSpace: "nowrap",
-          overflow: "hidden",
-          textOverflow: "ellipsis",
+          display: "flex",
+          alignItems: "center",
+          gap: "8px",
         }}
       >
         Website this is build the develope{" "}
@@ -896,10 +900,14 @@ const TopBanner = () => {
           style={{
             color: WHITE,
             fontWeight: 800,
-            textDecoration: "underline",
-            textUnderlineOffset: "2px",
+            textDecoration: "none",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "6px",
           }}
         >
+          <InstagramVerifiedReal size={20} variant="white" />
+          <InstagramVerifiedReal size={20} variant="blue" />
           Farid Ardiansyah
         </a>
       </span>
@@ -1493,7 +1501,12 @@ const RightNavbar = ({
           </div>
           <span style={{ color: WHITE, fontSize: "14px", fontWeight: 700, letterSpacing: "0.02em", fontFamily: FONT_FAMILY, whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: "6px" }}>
             {displayName}
-            {userIsAdmin && <InstagramVerifiedReal size={22} />}
+            {userIsAdmin && (
+              <>
+                <InstagramVerifiedReal size={20} variant="white" />
+                <InstagramVerifiedReal size={20} variant="blue" />
+              </>
+            )}
           </span>
         </div>
         <Link
@@ -1755,7 +1768,12 @@ const SayHeySection = ({
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "4px", marginBottom: "2px" }}>
                     <span style={{ fontSize: "12px", fontWeight: 700, color: BLUE, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontFamily: FONT_FAMILY }}>{c.displayName}</span>
-                    {(c.email === ADMIN_EMAIL || c.email === OWNER_EMAIL) && <InstagramVerifiedReal size={18} />}
+                    {(c.email === ADMIN_EMAIL || c.email === OWNER_EMAIL) && (
+                      <>
+                        <InstagramVerifiedReal size={16} variant="white" />
+                        <InstagramVerifiedReal size={16} variant="blue" />
+                      </>
+                    )}
                   </div>
                   <div style={{ fontSize: "10px", color: BLUE, fontFamily: FONT_FAMILY, display: "flex", alignItems: "center", gap: "4px", fontWeight: 600, opacity: 0.85 }}>
                     <BlinkingDot size={6} color={BLUE} />
@@ -1786,7 +1804,12 @@ const SayHeySection = ({
                 </div>
                 <div style={{ fontSize: "13px", fontWeight: 800, color: WHITE, fontFamily: FONT_FAMILY, display: "flex", alignItems: "center", gap: "6px" }}>
                   {selectedContact.displayName}
-                  {(selectedContact.email === ADMIN_EMAIL || selectedContact.email === OWNER_EMAIL) && <InstagramVerifiedReal size={20} />}
+                  {(selectedContact.email === ADMIN_EMAIL || selectedContact.email === OWNER_EMAIL) && (
+                    <>
+                      <InstagramVerifiedReal size={18} variant="white" />
+                      <InstagramVerifiedReal size={18} variant="blue" />
+                    </>
+                  )}
                 </div>
               </div>
 
@@ -1808,7 +1831,12 @@ const SayHeySection = ({
                         {!isMine && (
                           <div style={{ fontSize: "11px", fontWeight: 700, color: msgIsAdmin ? "#92400E" : BLUE, marginBottom: "4px", display: "flex", alignItems: "center", gap: "6px" }}>
                             {msg.senderName}
-                            {msgIsAdmin && <InstagramVerifiedReal size={18} />}
+                            {msgIsAdmin && (
+                              <>
+                                <InstagramVerifiedReal size={16} variant="white" />
+                                <InstagramVerifiedReal size={16} variant="blue" />
+                              </>
+                            )}
                           </div>
                         )}
                         {msg.replyTo && (
@@ -3505,54 +3533,6 @@ export default function HomePage(): React.JSX.Element {
         <meta name="twitter:image" content="/images/ai.jpg" />
       </Head>
 
-      <Script
-        id="gtm-script"
-        strategy="afterInteractive"
-        dangerouslySetInnerHTML={{
-          __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-MRD7N2G4');`,
-        }}
-      />
-
-      <Script
-        id="adsbygoogle-init"
-        async
-        strategy="afterInteractive"
-        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6198767676395468"
-        crossOrigin="anonymous"
-      />
-
-      <Script
-        id="gtag-js"
-        async
-        strategy="afterInteractive"
-        src="https://www.googletagmanager.com/gtag/js?id=G-GEE1R59BDE"
-      />
-      <Script
-        id="gtag-config"
-        strategy="afterInteractive"
-        dangerouslySetInnerHTML={{
-          __html: `
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-GEE1R59BDE');
-          `,
-        }}
-      />
-
-      <noscript>
-        <iframe
-          src="https://www.googletagmanager.com/ns.html?id=GTM-MRD7N2G4"
-          height="0"
-          width="0"
-          style={{ display: "none", visibility: "hidden" }}
-        />
-      </noscript>
-
       <div ref={wrapperRef} style={{ position: "relative", width: "100%", minHeight: "100vh", overflow: "hidden", backgroundColor: WHITE }}>
         <div ref={preloaderRef} style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", backgroundColor: WHITE, zIndex: 9999, fontFamily: FONT_FAMILY, overflow: "hidden", willChange: "transform" }}>
           <span ref={counterRef} style={{ position: "absolute", top: "10px", right: "40px", fontSize: "400px", fontWeight: 400, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.04em", lineHeight: 0.9, display: "inline-block", willChange: "transform, opacity", userSelect: "none", pointerEvents: "none" }}>01</span>
@@ -3751,7 +3731,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                             <div style={{ flex: 1, minWidth: 0 }}>
                               <div style={{ fontFamily: FONT_FAMILY, fontSize: "14px", fontWeight: 700, color: BLUE, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: "6px" }}>
                                 {iu.displayName}
-                                {(iu.email === ADMIN_EMAIL || iu.email === OWNER_EMAIL) && <InstagramVerifiedReal size={18} />}
+                                {(iu.email === ADMIN_EMAIL || iu.email === OWNER_EMAIL) && (
+                                  <>
+                                    <InstagramVerifiedReal size={16} variant="white" />
+                                    <InstagramVerifiedReal size={16} variant="blue" />
+                                  </>
+                                )}
                               </div>
                               <div style={{ fontFamily: FONT_FAMILY, fontSize: "11px", fontWeight: 500, color: BLUE, opacity: 0.75, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{iu.email}</div>
                             </div>
