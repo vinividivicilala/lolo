@@ -639,23 +639,29 @@ const MicrosoftStoreIcon = ({ size = 32 }: { size?: number }) => (
   </svg>
 );
 
-// ===== INSTAGRAM VERIFIED BADGE =====
-// variant="white" -> lingkaran putih + centang biru (untuk background biru)
-// variant="blue"  -> lingkaran biru + centang putih (untuk background putih)
-const InstagramVerified = ({ size = 22 }: { size?: number }) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 40 40"
-    xmlns="http://www.w3.org/2000/svg"
-    style={{ display: "inline-block", verticalAlign: "middle", flexShrink: 0 }}
+// ===== VERIFIED BADGE (WHITE) =====
+const VerifiedBadgeWhite = ({ size = 16 }: { size?: number }) => (
+  <span
+    style={{
+      position: "relative",
+      display: "inline-block",
+      marginLeft: "4px",
+      verticalAlign: "middle",
+    }}
   >
-    <circle cx="20" cy="20" r="20" fill={WHITE} />
-    <path
-      fill={BLUE}
-      d="M19.998 8.5 16.05 5.75l-2.614 4.53H8.186v5.59L3.5 18.5l2.722 4.72-2.722 4.72 4.686 2.72v5.19h5.25L16.05 40.5l3.948-2.72 3.948 2.72 2.844-4.93h5.42v-5.29l4.34-2.6-2.722-4.72 2.722-4.72-4.34-2.6V9.5h-5.42l-2.844-4.93-3.948 2.72Zm6.52 9.85 1.98 2.01-10.06 10.12-6.01-6.1 1.97-1.99 4.04 4.03 8.08-8.07Z"
-    />
-  </svg>
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 40 40"
+      xmlns="http://www.w3.org/2000/svg"
+      style={{ display: "inline-block", verticalAlign: "middle" }}
+    >
+      <path
+        fill="#FFFFFF"
+        d="M19.998 3.094 14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.03v-6.46h-6.419L25.358 0l-5.36 3.094Zm7.415 11.225 2.254 2.287-11.43 11.5-6.835-6.93 2.244-2.258 4.587 4.581 9.18-9.18Z"
+      />
+    </svg>
+  </span>
 );
 
 const BlinkingDot = ({ size = 10, color = BLUE }: { size?: number; color?: string }) => (
@@ -909,7 +915,7 @@ const TopBanner = () => {
           }}
         >
           Farid Ardiansyah
-          <InstagramVerified size={18} />
+          <VerifiedBadgeWhite size={18} />
         </a>
       </span>
     </div>
@@ -1848,7 +1854,7 @@ const RightNavbar = ({
             }}
           >
             {displayName}
-            {userIsAdmin && <InstagramVerified size={20} />}
+            {userIsAdmin && <VerifiedBadgeWhite size={18} />}
           </span>
         </div>
         <Link
@@ -2267,7 +2273,7 @@ const SayHeySection = ({
                         {c.displayName}
                       </span>
                       {(c.email === ADMIN_EMAIL || c.email === OWNER_EMAIL) && (
-                        <InstagramVerified size={16} />
+                        <VerifiedBadgeWhite size={14} />
                       )}
                     </div>
                     <div
@@ -2343,7 +2349,7 @@ const SayHeySection = ({
                 >
                   {selectedContact.displayName}
                   {(selectedContact.email === ADMIN_EMAIL || selectedContact.email === OWNER_EMAIL) && (
-                    <InstagramVerified size={18} />
+                    <VerifiedBadgeWhite size={16} />
                   )}
                 </div>
               </div>
@@ -2398,7 +2404,7 @@ const SayHeySection = ({
                               }}
                             >
                               {msg.senderName}
-                              {msgIsAdmin && <InstagramVerified size={16} />}
+                              {msgIsAdmin && <VerifiedBadgeWhite size={14} />}
                             </div>
                           )}
                           {msg.replyTo && (
@@ -6112,7 +6118,7 @@ export default function HomePage(): React.JSX.Element {
                               >
                                 {iu.displayName}
                                 {(iu.email === ADMIN_EMAIL || iu.email === OWNER_EMAIL) && (
-                                  <InstagramVerified size={18} />
+                                  <VerifiedBadgeWhite size={16} />
                                 )}
                               </div>
                               <div
