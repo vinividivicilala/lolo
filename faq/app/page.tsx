@@ -843,6 +843,10 @@ interface NoteEntry {
   createdAt: any;
   updatedAt?: any;
   labelColor?: string;
+  savedBy?: string[];
+  collaborators?: string[];
+  collaboratorNames?: { [key: string]: string };
+  collaboratorEmails?: { [key: string]: string };
 }
 
 interface InviteUser {
@@ -850,6 +854,19 @@ interface InviteUser {
   displayName: string;
   email: string;
   photoURL?: string;
+}
+
+interface NoteInvitation {
+  id: string;
+  noteId: string;
+  noteTitle: string;
+  inviterId: string;
+  inviterName: string;
+  inviterEmail: string;
+  inviteeId: string;
+  inviteeEmail: string;
+  status: "pending" | "accepted" | "declined";
+  createdAt: any;
 }
 
 // ===== TOP BANNER =====
@@ -4537,6 +4554,7 @@ export default function HomePage(): React.JSX.Element {
   const [registeredUsers, setRegisteredUsers] = useState<NoteEntry[]>([]);
   const [hasSubmittedNote, setHasSubmittedNote] = useState(false);
   const [activeNoteUser, setActiveNoteUser] = useState<string | null>(null);
+  const [pendingInvites, setPendingInvites] = useState<NoteInvitation[]>([]);
 
   const [adminAppealTicket, setAdminAppealTicket] = useState<AppealTicket | null>(null);
   const [showAdminAppealSection, setShowAdminAppealSection] = useState(false);
@@ -4619,10 +4637,15 @@ export default function HomePage(): React.JSX.Element {
     return () => unsub();
   }, [db, user, isMounted]);
 
-  // === AMBIL DATA DARI userNotes UNTUK DITAMPILKAN SEBAGAI CARD ===
+  // === AMBIL DATA DARI userNotes UNTUK DITAMPILKAN SEBAGAI CARD (PRIVATE) ===
   useEffect(() => {
-    if (!db || !isMounted) return;
-    const q = query(collection(db, "userNotes"), orderBy("updatedAt", "desc"), limit(50));
+    if (!db || !user || !isMounted) return;
+    const q = query(
+      collection(db, "userNotes"), 
+      where("userId", "==", user.uid), 
+      orderBy("updatedAt", "desc"), 
+      limit(50)
+    );
     const unsub = onSnapshot(q, (snapshot: any) => {
       const list: NoteEntry[] = [];
       snapshot.forEach((docSnap: any) => {
@@ -4646,7 +4669,25 @@ export default function HomePage(): React.JSX.Element {
       setSubmittedNotes(list);
     });
     return () => unsub();
-  }, [db, isMounted]);
+  }, [db, user, isMounted]);
+
+  // === AMBIL DATA UNDANGAN (NOTIFIKASI UNTUK USER YANG DI-INVITE) ===
+  useEffect(() => {
+    if (!db || !user || !isMounted) return;
+    const q = query(
+      collection(db, "note_invitations"),
+      where("inviteeId", "==", user.uid),
+      where("status", "==", "pending")
+    );
+    const unsub = onSnapshot(q, (snapshot: any) => {
+      const list: NoteInvitation[] = [];
+      snapshot.forEach((docSnap: any) => {
+        list.push({ id: docSnap.id, ...docSnap.data() } as NoteInvitation);
+      });
+      setPendingInvites(list);
+    });
+    return () => unsub();
+  }, [db, user, isMounted]);
 
   useEffect(() => {
     if (!db || !isMounted) return;
@@ -4775,30 +4816,50 @@ export default function HomePage(): React.JSX.Element {
       return;
     }
     try {
-      const inviteUrl = `${window.location.origin}${window.location.pathname}?invite=${inviteUser.uid}#notes-invite`;
-      if (navigator.share) {
-        await navigator.share({
-          title: "Menuru Notes Invitation",
-          text: `Hai ${inviteUser.displayName}, bergabunglah bersama kami di fitur Note Menuru!`,
-          url: inviteUrl,
-        });
-      } else {
-        await navigator.clipboard.writeText(inviteUrl);
-      }
+      // Kirim undangan langsung ke database Firebase (TANPA LINK)
+      await addDoc(collection(db, "note_invitations"), {
+        inviterId: user.uid,
+        inviterName: user.displayName || user.email?.split("@")[0] || "User",
+        inviterEmail: user.email || "",
+        inviteeId: inviteUser.uid,
+        inviteeEmail: inviteUser.email || "",
+        status: "pending",
+        createdAt: serverTimestamp(),
+      });
+
       setInvitedUsers((prev) => ({ ...prev, [inviteUser.uid]: true }));
-      setInviteToast(`Undangan terkirim ke ${inviteUser.displayName}`);
+      setInviteToast(`Undangan berhasil dikirim ke ${inviteUser.displayName}`);
       setTimeout(() => setInviteToast(null), 2500);
     } catch (error) {
       console.error("Invite error:", error);
-      try {
-        const inviteUrl = `${window.location.origin}${window.location.pathname}?invite=${inviteUser.uid}#notes-invite`;
-        await navigator.clipboard.writeText(inviteUrl);
-        setInvitedUsers((prev) => ({ ...prev, [inviteUser.uid]: true }));
-        setInviteToast(`Link undangan untuk ${inviteUser.displayName} tersalin`);
-        setTimeout(() => setInviteToast(null), 2500);
-      } catch (e) {
-        console.error(e);
-      }
+      setInviteToast("Gagal mengirim undangan.");
+      setTimeout(() => setInviteToast(null), 2500);
+    }
+  };
+
+  const handleAcceptInvite = async (inviteId: string) => {
+    try {
+      const inviteRef = doc(db, "note_invitations", inviteId);
+      await updateDoc(inviteRef, { status: "accepted" });
+      setPendingInvites((prev) => prev.filter((i) => i.id !== inviteId));
+      setInviteToast("Undangan diterima!");
+      setTimeout(() => setInviteToast(null), 2500);
+    } catch (error) {
+      console.error("Accept invite error:", error);
+      setInviteToast("Gagal menerima undangan.");
+      setTimeout(() => setInviteToast(null), 2500);
+    }
+  };
+
+  const handleDeclineInvite = async (inviteId: string) => {
+    try {
+      const inviteRef = doc(db, "note_invitations", inviteId);
+      await updateDoc(inviteRef, { status: "declined" });
+      setPendingInvites((prev) => prev.filter((i) => i.id !== inviteId));
+      setInviteToast("Undangan ditolak.");
+      setTimeout(() => setInviteToast(null), 2500);
+    } catch (error) {
+      console.error("Decline invite error:", error);
     }
   };
 
@@ -5279,7 +5340,7 @@ export default function HomePage(): React.JSX.Element {
             {showNotesSection && submittedNotes.length > 0 && (
               <div style={{ marginTop: "60px", marginBottom: "60px", fontFamily: FONT_FAMILY }}>
                 <h3 style={{ fontSize: "40px", fontWeight: 800, color: BLUE, marginBottom: "30px", letterSpacing: "-0.02em" }}>
-                  Catatan dari Komunitas
+                  Catatan Pribadi Anda
                 </h3>
                 <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
                   {submittedNotes.map((note) => (
@@ -5346,6 +5407,27 @@ export default function HomePage(): React.JSX.Element {
                 >
                   Temukan catatan-catatan menarik dari komunitas Menuru. Semua catatan dikategorikan untuk memudahkan Anda menjelajahi topik yang Anda minati.
                 </p>
+
+                {/* ===== NOTIFIKASI UNDANGAN MASUK ===== */}
+                {pendingInvites.length > 0 && (
+                  <div style={{ marginBottom: "40px", backgroundColor: BLUE, borderRadius: "16px", padding: "24px", display: "flex", flexDirection: "column", gap: "16px", maxWidth: "700px" }}>
+                    <div style={{ fontSize: "20px", fontWeight: 700, color: WHITE, display: "flex", alignItems: "center", gap: "10px" }}>
+                      <InviteIcon size={24} color={WHITE} />
+                      Undangan Masuk ({pendingInvites.length})
+                    </div>
+                    {pendingInvites.map((inv) => (
+                      <div key={inv.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", backgroundColor: WHITE, padding: "12px 16px", borderRadius: "10px", flexWrap: "wrap", gap: "10px" }}>
+                        <div style={{ fontFamily: FONT_FAMILY, color: BLUE }}>
+                          <span style={{ fontWeight: 800 }}>{inv.inviterName}</span> mengundang Anda untuk berkolaborasi di Notes.
+                        </div>
+                        <div style={{ display: "flex", gap: "8px" }}>
+                          <button onClick={() => handleAcceptInvite(inv.id)} style={{ padding: "6px 16px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "6px", fontWeight: 700, cursor: "pointer", fontFamily: FONT_FAMILY, fontSize: "12px" }}>ACC</button>
+                          <button onClick={() => handleDeclineInvite(inv.id)} style={{ padding: "6px 16px", backgroundColor: "transparent", color: BLUE, border: `1.5px solid ${BLUE}`, borderRadius: "6px", fontWeight: 700, cursor: "pointer", fontFamily: FONT_FAMILY, fontSize: "12px" }}>Tolak</button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
 
                 <div style={{ marginBottom: "40px", display: "flex", alignItems: "center", gap: "16px", flexWrap: "wrap" }}>
                   <button
