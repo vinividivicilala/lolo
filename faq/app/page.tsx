@@ -782,6 +782,7 @@ interface OnlineUser {
   online: boolean;
   lastSeen?: any;
   isAgent?: boolean;
+  isAnonymous?: boolean;
 }
 
 interface LastMessagePreview {
@@ -877,29 +878,6 @@ interface NoteInvitation {
   status: "pending" | "accepted" | "declined";
   createdAt: any;
 }
-
-// ===== HELPER: GET DISPLAY NAME =====
-const getDisplayName = (
-  userId: string,
-  fallbackName: string,
-  fallbackEmail: string,
-  registeredUsers: any[],
-  currentUser?: any
-) => {
-  // Jika user adalah current user dan anonim
-  if (currentUser && currentUser.uid === userId) {
-    // Cek di registeredUsers
-    const u = registeredUsers.find(r => r.userId === userId);
-    if (u?.isAnonymous) return "Anonim";
-    // Fallback: cek currentUser punya isAnonymous
-    if (currentUser.isAnonymous) return "Anonim";
-  }
-  // Cek di registeredUsers apakah user ini anonim
-  const userRecord = registeredUsers.find(r => r.userId === userId);
-  if (userRecord?.isAnonymous) return "Anonim";
-  // Fallback name atau email
-  return fallbackName || fallbackEmail?.split("@")[0] || "User";
-};
 
 // ===== TOP BANNER =====
 const TopBanner = () => {
@@ -1820,7 +1798,7 @@ const DashboardOverlay = ({ user, db, onClose }: { user: any; db: any; onClose: 
     ? "Anonim"
     : user?.displayName || user?.email?.split("@")[0] || "User";
 
-  // Tampilkan nama Gmail/email asli
+  // Tampilkan nama Gmail/email asli dari Firebase Auth
   const gmailName = user?.displayName || user?.email?.split("@")[0] || "User";
   const gmailEmail = user?.email || "Email tidak tersedia";
 
@@ -1908,7 +1886,7 @@ const DashboardOverlay = ({ user, db, onClose }: { user: any; db: any; onClose: 
             {/* Card User Profile */}
             <div style={{ backgroundColor: BLUE, borderRadius: "24px", padding: "24px", marginBottom: "24px", display: "flex", flexDirection: "column", gap: "16px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-                <div style={{ width: "64px", height: "64px", borderRadius: "50%", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", flexShrink: 0 }}>
+                <div style={{ width: "64px", height: "64px", borderRadius: "8px", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", flexShrink: 0 }}>
                   {user?.photoURL && !isAnonymous ? (
                     <img src={user.photoURL} alt="User" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                   ) : (
@@ -1922,7 +1900,7 @@ const DashboardOverlay = ({ user, db, onClose }: { user: any; db: any; onClose: 
                     {displayName}
                   </h3>
                   <p style={{ fontSize: "14px", margin: 0, color: "rgba(255,255,255,0.8)", wordBreak: "break-word" }}>
-                    {user?.email || "Email tidak tersedia"}
+                    {gmailEmail}
                   </p>
                 </div>
               </div>
@@ -1975,7 +1953,7 @@ const DashboardOverlay = ({ user, db, onClose }: { user: any; db: any; onClose: 
             {/* Card Identitas Akun */}
             <div style={{ backgroundColor: "#F0F4FF", borderRadius: "24px", padding: "24px", display: "flex", flexDirection: "column", gap: "16px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-                <div style={{ width: "64px", height: "64px", borderRadius: "50%", backgroundColor: BLUE, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", flexShrink: 0 }}>
+                <div style={{ width: "64px", height: "64px", borderRadius: "8px", backgroundColor: BLUE, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", flexShrink: 0 }}>
                   {user?.photoURL && !isAnonymous ? (
                     <img src={user.photoURL} alt="User" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                   ) : (
@@ -2035,9 +2013,9 @@ const DashboardOverlay = ({ user, db, onClose }: { user: any; db: any; onClose: 
               </button>
             </div>
 
-            {/* Teks ru 2026 di bawah */}
-            <div style={{ marginTop: "auto", paddingTop: "40px", textAlign: "center", overflow: "hidden" }}>
-              <span style={{ fontFamily: FONT_FAMILY, fontSize: "120px", fontWeight: 400, color: BLUE, letterSpacing: "-0.05em", lineHeight: 0.9, display: "block", userSelect: "none", textTransform: "lowercase" }}>
+            {/* Teks ru 2026 di bawah kiri layar */}
+            <div style={{ marginTop: "auto", paddingTop: "40px", textAlign: "left", overflow: "hidden", marginLeft: "-24px" }}>
+              <span style={{ fontFamily: FONT_FAMILY, fontSize: "250px", fontWeight: 400, color: BLUE, letterSpacing: "-0.05em", lineHeight: 0.9, display: "block", userSelect: "none", textTransform: "lowercase" }}>
                 ru 2026
               </span>
             </div>
@@ -2152,7 +2130,7 @@ const RightNavbar = ({
         >
           <div
             style={{
-              width: "36px", height: "36px", borderRadius: "50%",
+              width: "36px", height: "36px", borderRadius: "8px",
               overflow: "hidden", backgroundColor: WHITE,
               display: "flex", alignItems: "center", justifyContent: "center",
               flexShrink: 0,
@@ -3217,7 +3195,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
           lastSeen: data.lastSeen,
           isAgent: data.email === ADMIN_EMAIL,
           isAnonymous: data.isAnonymous === true,
-        } as any;
+        };
         if (!item.isAgent) users.push(item);
       });
       setOnlineUsers(users);
@@ -3757,7 +3735,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
             </div>
           ) : (
             list.map((u) => {
-              const displayName = (u as any).isAnonymous ? "Anonim" : u.displayName;
+              const displayName = u.isAnonymous ? "Anonim" : u.displayName;
               return (
                 <div
                   key={u.uid}
@@ -3775,7 +3753,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
                       fontWeight: 800, fontSize: "14px", overflow: "hidden", flexShrink: 0,
                     }}
                   >
-                    {u.photoURL && !(u as any).isAnonymous ? (
+                    {u.photoURL && !u.isAnonymous ? (
                       <img
                         src={u.photoURL}
                         alt={u.displayName}
@@ -4951,6 +4929,9 @@ export default function HomePage(): React.JSX.Element {
           await updateDoc(doc(db, "users", currentUser.uid), {
             online: true,
             lastSeen: serverTimestamp(),
+            email: currentUser.email || "",
+            displayName: currentUser.displayName || currentUser.email?.split("@")[0] || "User",
+            photoURL: currentUser.photoURL || "",
           });
         } catch (error) {
           console.error("Error updating online status:", error);
