@@ -854,6 +854,7 @@ interface NoteEntry {
   collaborators?: string[];
   collaboratorNames?: { [key: string]: string };
   collaboratorEmails?: { [key: string]: string };
+  isAnonymous?: boolean;
 }
 
 interface InviteUser {
@@ -861,6 +862,7 @@ interface InviteUser {
   displayName: string;
   email: string;
   photoURL?: string;
+  isAnonymous?: boolean;
 }
 
 interface NoteInvitation {
@@ -875,6 +877,29 @@ interface NoteInvitation {
   status: "pending" | "accepted" | "declined";
   createdAt: any;
 }
+
+// ===== HELPER: GET DISPLAY NAME =====
+const getDisplayName = (
+  userId: string,
+  fallbackName: string,
+  fallbackEmail: string,
+  registeredUsers: any[],
+  currentUser?: any
+) => {
+  // Jika user adalah current user dan anonim
+  if (currentUser && currentUser.uid === userId) {
+    // Cek di registeredUsers
+    const u = registeredUsers.find(r => r.userId === userId);
+    if (u?.isAnonymous) return "Anonim";
+    // Fallback: cek currentUser punya isAnonymous
+    if (currentUser.isAnonymous) return "Anonim";
+  }
+  // Cek di registeredUsers apakah user ini anonim
+  const userRecord = registeredUsers.find(r => r.userId === userId);
+  if (userRecord?.isAnonymous) return "Anonim";
+  // Fallback name atau email
+  return fallbackName || fallbackEmail?.split("@")[0] || "User";
+};
 
 // ===== TOP BANNER =====
 const TopBanner = () => {
@@ -1713,15 +1738,23 @@ const DashboardOverlay = ({ user, db, onClose }: { user: any; db: any; onClose: 
   const [activeTab, setActiveTab] = useState<"main" | "settings">("main");
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   // Ambil status anonim dari Firestore
   useEffect(() => {
-    if (!user || !db) return;
+    if (!user || !db) {
+      setLoading(false);
+      return;
+    }
     const userRef = doc(db, "users", user.uid);
     getDoc(userRef).then((snap) => {
       if (snap.exists()) {
         setIsAnonymous(snap.data().isAnonymous === true);
       }
+      setLoading(false);
+    }).catch((err) => {
+      console.error("Gagal load user data:", err);
+      setLoading(false);
     });
   }, [user, db]);
 
@@ -1786,6 +1819,10 @@ const DashboardOverlay = ({ user, db, onClose }: { user: any; db: any; onClose: 
   const displayName = isAnonymous
     ? "Anonim"
     : user?.displayName || user?.email?.split("@")[0] || "User";
+
+  // Tampilkan nama Gmail/email asli
+  const gmailName = user?.displayName || user?.email?.split("@")[0] || "User";
+  const gmailEmail = user?.email || "Email tidak tersedia";
 
   return (
     <div
@@ -1934,7 +1971,7 @@ const DashboardOverlay = ({ user, db, onClose }: { user: any; db: any; onClose: 
             </div>
           </>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "24px", flex: 1 }}>
             {/* Card Identitas Akun */}
             <div style={{ backgroundColor: "#F0F4FF", borderRadius: "24px", padding: "24px", display: "flex", flexDirection: "column", gap: "16px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
@@ -1952,8 +1989,13 @@ const DashboardOverlay = ({ user, db, onClose }: { user: any; db: any; onClose: 
                     {displayName}
                   </h3>
                   <p style={{ fontSize: "14px", margin: 0, color: BLUE, opacity: 0.8, wordBreak: "break-word" }}>
-                    {user?.email || "Email tidak tersedia"}
+                    {gmailEmail}
                   </p>
+                  {!isAnonymous && gmailName && (
+                    <p style={{ fontSize: "12px", margin: "4px 0 0 0", color: BLUE, opacity: 0.6 }}>
+                      Gmail: {gmailName}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
@@ -1973,7 +2015,7 @@ const DashboardOverlay = ({ user, db, onClose }: { user: any; db: any; onClose: 
               </p>
               <button
                 onClick={handleToggleAnonymous}
-                disabled={saving}
+                disabled={saving || loading}
                 style={{
                   alignSelf: "flex-start",
                   padding: "12px 24px",
@@ -1983,7 +2025,7 @@ const DashboardOverlay = ({ user, db, onClose }: { user: any; db: any; onClose: 
                   borderRadius: "10px",
                   fontSize: "14px",
                   fontWeight: 700,
-                  cursor: saving ? "not-allowed" : "pointer",
+                  cursor: saving || loading ? "not-allowed" : "pointer",
                   display: "flex",
                   alignItems: "center",
                   gap: "8px",
@@ -1991,6 +2033,13 @@ const DashboardOverlay = ({ user, db, onClose }: { user: any; db: any; onClose: 
               >
                 {saving ? "Menyimpan..." : isAnonymous ? "✓ Anonim Aktif" : "Aktifkan Anonim"}
               </button>
+            </div>
+
+            {/* Teks ru 2026 di bawah */}
+            <div style={{ marginTop: "auto", paddingTop: "40px", textAlign: "center", overflow: "hidden" }}>
+              <span style={{ fontFamily: FONT_FAMILY, fontSize: "120px", fontWeight: 400, color: BLUE, letterSpacing: "-0.05em", lineHeight: 0.9, display: "block", userSelect: "none", textTransform: "lowercase" }}>
+                ru 2026
+              </span>
             </div>
           </div>
         )}
@@ -2008,6 +2057,19 @@ const RightNavbar = ({
   const displayName = user?.displayName || user?.email?.split("@")[0] || "User";
   const photoURL = user?.photoURL || "";
   const userIsAdmin = user?.email === ADMIN_EMAIL;
+  const [isAnonymous, setIsAnonymous] = useState(false);
+
+  useEffect(() => {
+    if (!user || !db) return;
+    const userRef = doc(db, "users", user.uid);
+    getDoc(userRef).then((snap) => {
+      if (snap.exists()) {
+        setIsAnonymous(snap.data().isAnonymous === true);
+      }
+    }).catch(() => {});
+  }, [user, db]);
+
+  const displayNameAnon = isAnonymous ? "Anonim" : displayName;
 
   const handleLogout = async () => {
     if (!auth) return;
@@ -2096,7 +2158,7 @@ const RightNavbar = ({
               flexShrink: 0,
             }}
           >
-            {photoURL ? (
+            {photoURL && !isAnonymous ? (
               <img
                 src={photoURL}
                 alt={displayName}
@@ -2105,7 +2167,7 @@ const RightNavbar = ({
               />
             ) : (
               <span style={{ fontSize: "16px", fontWeight: 800, color: BLUE }}>
-                {displayName.charAt(0).toUpperCase()}
+                {displayNameAnon.charAt(0).toUpperCase()}
               </span>
             )}
           </div>
@@ -2116,7 +2178,7 @@ const RightNavbar = ({
               whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: "6px",
             }}
           >
-            {displayName}
+            {displayNameAnon}
             {userIsAdmin && <VerifiedBadgeWhite size={18} />}
           </span>
         </div>
@@ -3154,7 +3216,8 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
           online: data.online || false,
           lastSeen: data.lastSeen,
           isAgent: data.email === ADMIN_EMAIL,
-        };
+          isAnonymous: data.isAnonymous === true,
+        } as any;
         if (!item.isAgent) users.push(item);
       });
       setOnlineUsers(users);
@@ -3693,54 +3756,57 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
               No users online
             </div>
           ) : (
-            list.map((u) => (
-              <div
-                key={u.uid}
-                style={{
-                  padding: "12px 16px", borderBottom: "1px solid #f0f0f0",
-                  display: "flex", alignItems: "center", gap: "10px",
-                  fontFamily: FONT_FAMILY,
-                }}
-              >
+            list.map((u) => {
+              const displayName = (u as any).isAnonymous ? "Anonim" : u.displayName;
+              return (
                 <div
+                  key={u.uid}
                   style={{
-                    width: "36px", height: "36px", borderRadius: "8px",
-                    backgroundColor: BLUE, color: WHITE,
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    fontWeight: 800, fontSize: "14px", overflow: "hidden", flexShrink: 0,
+                    padding: "12px 16px", borderBottom: "1px solid #f0f0f0",
+                    display: "flex", alignItems: "center", gap: "10px",
+                    fontFamily: FONT_FAMILY,
                   }}
                 >
-                  {u.photoURL ? (
-                    <img
-                      src={u.photoURL}
-                      alt={u.displayName}
-                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                    />
-                  ) : (
-                    <AgentIcon size={20} color={WHITE} />
-                  )}
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
                   <div
                     style={{
-                      fontSize: "13px", fontWeight: 700, color: "#000",
-                      overflow: "hidden", textOverflow: "ellipsis",
-                      whiteSpace: "nowrap", marginBottom: "3px",
+                      width: "36px", height: "36px", borderRadius: "8px",
+                      backgroundColor: BLUE, color: WHITE,
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      fontWeight: 800, fontSize: "14px", overflow: "hidden", flexShrink: 0,
                     }}
                   >
-                    {u.displayName}
+                    {u.photoURL && !(u as any).isAnonymous ? (
+                      <img
+                        src={u.photoURL}
+                        alt={u.displayName}
+                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                      />
+                    ) : (
+                      <AgentIcon size={20} color={WHITE} />
+                    )}
                   </div>
-                  <span
-                    style={{
-                      display: "inline-block", fontSize: "10px", fontWeight: 800,
-                      color: BLUE, letterSpacing: "0.5px", textTransform: "uppercase",
-                    }}
-                  >
-                    Online
-                  </span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div
+                      style={{
+                        fontSize: "13px", fontWeight: 700, color: "#000",
+                        overflow: "hidden", textOverflow: "ellipsis",
+                        whiteSpace: "nowrap", marginBottom: "3px",
+                      }}
+                    >
+                      {displayName}
+                    </div>
+                    <span
+                      style={{
+                        display: "inline-block", fontSize: "10px", fontWeight: 800,
+                        color: BLUE, letterSpacing: "0.5px", textTransform: "uppercase",
+                      }}
+                    >
+                      Online
+                    </span>
+                  </div>
                 </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       </div>
@@ -4907,6 +4973,7 @@ export default function HomePage(): React.JSX.Element {
           userEmail: data.email || "", userPhoto: data.photoURL || "",
           text: data.text || "", category: data.category || "",
           createdAt: data.createdAt || data.lastSeen || null,
+          isAnonymous: data.isAnonymous === true,
         } as NoteEntry);
       });
       setRegisteredUsers(list);
@@ -4925,6 +4992,7 @@ export default function HomePage(): React.JSX.Element {
           uid: docSnap.id,
           displayName: data.displayName || data.name || data.email?.split("@")[0] || "User",
           email: data.email || "", photoURL: data.photoURL || "",
+          isAnonymous: data.isAnonymous === true,
         });
       });
       setInviteUsers(list);
@@ -5131,7 +5199,7 @@ export default function HomePage(): React.JSX.Element {
       });
 
       setInvitedUsers((prev) => ({ ...prev, [inviteUser.uid]: true }));
-      setInviteToast(`Undangan berhasil dikirim ke ${inviteUser.displayName}`);
+      setInviteToast(`Undangan berhasil dikirim ke ${inviteUser.isAnonymous ? "Anonim" : inviteUser.displayName}`);
       setTimeout(() => setInviteToast(null), 2500);
     } catch (error) {
       console.error("Invite error:", error);
@@ -5573,6 +5641,7 @@ export default function HomePage(): React.JSX.Element {
                   {registeredUsers.map((n) => {
                     const isCurrentUser = user && n.userId === user.uid;
                     const userHasNote = hasSubmittedNote && isCurrentUser;
+                    const displayName = n.isAnonymous ? "Anonim" : (n.userName || n.userEmail?.split("@")[0] || "User");
                     return (
                       <div key={n.id} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                         {isCurrentUser && (
@@ -5591,7 +5660,7 @@ export default function HomePage(): React.JSX.Element {
                                 letterSpacing: "-0.02em", lineHeight: 1.1, whiteSpace: "nowrap",
                               }}
                             >
-                              {n.userName || n.userEmail?.split("@")[0] || "User"}
+                              {displayName}
                             </span>
                           </>
                         )}
@@ -5608,7 +5677,7 @@ export default function HomePage(): React.JSX.Element {
                           onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.transform = "scale(1.15)"; }}
                           onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.transform = "scale(1)"; }}
                         >
-                          {n.userPhoto ? (
+                          {n.userPhoto && !n.isAnonymous ? (
                             <img
                               src={n.userPhoto} alt="User"
                               style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
@@ -5616,7 +5685,7 @@ export default function HomePage(): React.JSX.Element {
                             />
                           ) : (
                             <span style={{ fontSize: "20px", fontWeight: 800, color: BLUE }}>
-                              {(n.userName || n.userEmail || "U").charAt(0).toUpperCase()}
+                              {displayName.charAt(0).toUpperCase()}
                             </span>
                           )}
                         </div>
@@ -5638,7 +5707,7 @@ export default function HomePage(): React.JSX.Element {
                               letterSpacing: "-0.02em", lineHeight: 1.1, whiteSpace: "nowrap",
                             }}
                           >
-                            {n.userName || n.userEmail?.split("@")[0] || "User"}
+                            {displayName}
                           </span>
                         )}
                       </div>
@@ -5765,6 +5834,7 @@ export default function HomePage(): React.JSX.Element {
                       )}
                       {filteredInviteUsers.map((iu) => {
                         const isInvited = invitedUsers[iu.uid];
+                        const displayName = iu.isAnonymous ? "Anonim" : iu.displayName;
                         return (
                           <div
                             key={iu.uid}
@@ -5781,7 +5851,7 @@ export default function HomePage(): React.JSX.Element {
                                 flexShrink: 0,
                               }}
                             >
-                              {iu.photoURL ? (
+                              {iu.photoURL && !iu.isAnonymous ? (
                                 <img
                                   src={iu.photoURL} alt={iu.displayName}
                                   style={{ width: "100%", height: "100%", objectFit: "cover" }}
@@ -5789,7 +5859,7 @@ export default function HomePage(): React.JSX.Element {
                                 />
                               ) : (
                                 <span style={{ fontSize: "16px", fontWeight: 800, color: WHITE }}>
-                                  {iu.displayName.charAt(0).toUpperCase()}
+                                  {displayName.charAt(0).toUpperCase()}
                                 </span>
                               )}
                             </div>
@@ -5802,7 +5872,7 @@ export default function HomePage(): React.JSX.Element {
                                   display: "flex", alignItems: "center", gap: "6px",
                                 }}
                               >
-                                {iu.displayName}
+                                {displayName}
                                 {(iu.email === ADMIN_EMAIL || iu.email === OWNER_EMAIL) && (
                                   <VerifiedBadgeWhite size={16} />
                                 )}
@@ -5866,42 +5936,46 @@ export default function HomePage(): React.JSX.Element {
                         </span>
                         {categoryNotes.length > 0 ? (
                           <div style={{ display: "flex", flexDirection: "column", gap: "8px", paddingLeft: "20px" }}>
-                            {categoryNotes.map((note) => (
-                              <div key={note.id} style={{ backgroundColor: BLUE, borderRadius: "28px", padding: "24px 28px", display: "flex", flexDirection: "column", gap: "18px", boxShadow: `0 8px 32px ${BLUE}40`, maxWidth: "700px" }}>
-                                
-                                {note.category && (
-                                  <div style={{ display: "inline-flex", alignSelf: "flex-start", alignItems: "center", gap: "8px", padding: "8px 22px", backgroundColor: WHITE, color: BLUE, borderRadius: "24px 4px 24px 24px", fontFamily: FONT_FAMILY, fontSize: "15px", fontWeight: 800, letterSpacing: "0.04em", textTransform: "uppercase", border: `2px solid ${WHITE}`, boxShadow: `0 4px 12px rgba(0,0,0,0.1)` }}>
-                                    {note.category}
-                                  </div>
-                                )}
+                            {categoryNotes.map((note) => {
+                              const noteUser = registeredUsers.find(r => r.userId === note.userId);
+                              const displayName = noteUser?.isAnonymous ? "Anonim" : (note.userName || "User");
+                              return (
+                                <div key={note.id} style={{ backgroundColor: BLUE, borderRadius: "28px", padding: "24px 28px", display: "flex", flexDirection: "column", gap: "18px", boxShadow: `0 8px 32px ${BLUE}40`, maxWidth: "700px" }}>
+                                  
+                                  {note.category && (
+                                    <div style={{ display: "inline-flex", alignSelf: "flex-start", alignItems: "center", gap: "8px", padding: "8px 22px", backgroundColor: WHITE, color: BLUE, borderRadius: "24px 4px 24px 24px", fontFamily: FONT_FAMILY, fontSize: "15px", fontWeight: 800, letterSpacing: "0.04em", textTransform: "uppercase", border: `2px solid ${WHITE}`, boxShadow: `0 4px 12px rgba(0,0,0,0.1)` }}>
+                                      {note.category}
+                                    </div>
+                                  )}
 
-                                <div style={{ padding: "18px 24px", backgroundColor: WHITE, border: `2px solid ${WHITE}`, borderRadius: "6px 28px 28px 28px", boxShadow: `0 6px 20px rgba(0,0,0,0.12)`, display: "flex", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
-                                  <span style={{ fontSize: "34px", fontFamily: FONT_FAMILY, lineHeight: "1.25", color: BLUE, fontWeight: 800, flex: 1, minWidth: 0, wordBreak: "break-word" }}>
-                                    {note.title}
-                                  </span>
+                                  <div style={{ padding: "18px 24px", backgroundColor: WHITE, border: `2px solid ${WHITE}`, borderRadius: "6px 28px 28px 28px", boxShadow: `0 6px 20px rgba(0,0,0,0.12)`, display: "flex", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
+                                    <span style={{ fontSize: "34px", fontFamily: FONT_FAMILY, lineHeight: "1.25", color: BLUE, fontWeight: 800, flex: 1, minWidth: 0, wordBreak: "break-word" }}>
+                                      {note.title}
+                                    </span>
+                                  </div>
+
+                                  {(note.descriptionHtml || note.description) && (
+                                    <div style={{ padding: "20px 24px", backgroundColor: WHITE, border: `2px solid ${WHITE}`, borderRadius: "28px 6px 28px 28px", boxShadow: `0 6px 20px rgba(0,0,0,0.12)` }}>
+                                      {note.descriptionHtml ? (
+                                        <div className="note-description-html" dangerouslySetInnerHTML={{ __html: note.descriptionHtml }} style={{ fontSize: "17px", fontFamily: FONT_FAMILY, lineHeight: "1.7", color: BLACK, wordBreak: "break-word" }} />
+                                      ) : (
+                                        <div style={{ fontSize: "17px", fontFamily: FONT_FAMILY, lineHeight: "1.7", color: BLACK, whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{note.description}</div>
+                                      )}
+                                    </div>
+                                  )}
+
+                                  <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
+                                    <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "8px 20px", backgroundColor: WHITE, border: `2px solid ${WHITE}`, borderRadius: "20px 4px 20px 20px", fontSize: "14px", color: BLUE, fontWeight: 700, fontFamily: FONT_FAMILY, boxShadow: `0 4px 12px rgba(0,0,0,0.1)` }}>
+                                      {note.updatedAt ? new Date(note.updatedAt.toDate()).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }) : "Baru saja"}
+                                    </div>
+                                    <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "8px 20px", backgroundColor: WHITE, border: `2px solid ${WHITE}`, borderRadius: "4px 20px 20px 20px", fontSize: "14px", color: BLUE, fontWeight: 700, fontFamily: FONT_FAMILY, boxShadow: `0 4px 12px rgba(0,0,0,0.1)` }}>
+                                      oleh {displayName}
+                                      <VerifiedBadgeBlue size={22} />
+                                    </div>
+                                  </div>
                                 </div>
-
-                                {(note.descriptionHtml || note.description) && (
-                                  <div style={{ padding: "20px 24px", backgroundColor: WHITE, border: `2px solid ${WHITE}`, borderRadius: "28px 6px 28px 28px", boxShadow: `0 6px 20px rgba(0,0,0,0.12)` }}>
-                                    {note.descriptionHtml ? (
-                                      <div className="note-description-html" dangerouslySetInnerHTML={{ __html: note.descriptionHtml }} style={{ fontSize: "17px", fontFamily: FONT_FAMILY, lineHeight: "1.7", color: BLACK, wordBreak: "break-word" }} />
-                                    ) : (
-                                      <div style={{ fontSize: "17px", fontFamily: FONT_FAMILY, lineHeight: "1.7", color: BLACK, whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{note.description}</div>
-                                    )}
-                                  </div>
-                                )}
-
-                                <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
-                                  <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "8px 20px", backgroundColor: WHITE, border: `2px solid ${WHITE}`, borderRadius: "20px 4px 20px 20px", fontSize: "14px", color: BLUE, fontWeight: 700, fontFamily: FONT_FAMILY, boxShadow: `0 4px 12px rgba(0,0,0,0.1)` }}>
-                                    {note.updatedAt ? new Date(note.updatedAt.toDate()).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }) : "Baru saja"}
-                                  </div>
-                                  <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "8px 20px", backgroundColor: WHITE, border: `2px solid ${WHITE}`, borderRadius: "4px 20px 20px 20px", fontSize: "14px", color: BLUE, fontWeight: 700, fontFamily: FONT_FAMILY, boxShadow: `0 4px 12px rgba(0,0,0,0.1)` }}>
-                                    oleh {note.userName}
-                                    <VerifiedBadgeBlue size={22} />
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
+                              );
+                            })}
                           </div>
                         ) : (
                           <span
