@@ -511,6 +511,13 @@ const SearchIcon = ({ size = 16, color = "currentColor" }: { size?: number; colo
   </svg>
 );
 
+const PlusIcon = ({ size = 18, color = "currentColor" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <line x1="12" y1="5" x2="12" y2="19" stroke={color} strokeWidth="2.5" strokeLinecap="round" />
+    <line x1="5" y1="12" x2="19" y2="12" stroke={color} strokeWidth="2.5" strokeLinecap="round" />
+  </svg>
+);
+
 const CloseIcon = ({ size = 18, color = "currentColor" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <path d="M6 6L18 18M18 6L6 18" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -1701,7 +1708,16 @@ const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
 // ===== DASHBOARD OVERLAY =====
 const DashboardOverlay = ({ user, onClose }: { user: any; onClose: () => void }) => {
   const overlayRef = useRef<HTMLDivElement>(null);
+  const closeIconRef = useRef<HTMLDivElement>(null);
   const [isClosing, setIsClosing] = useState(false);
+
+  // Mendapatkan nama user atau "Anonim" jika tidak ada displayName
+  const getAnonymousName = () => {
+    if (user?.displayName) return user.displayName;
+    // Jika hanya email, tampilkan "Anonim"
+    if (user?.email) return "Anonim";
+    return "Anonim";
+  };
 
   useEffect(() => {
     if (!overlayRef.current) return;
@@ -1712,13 +1728,34 @@ const DashboardOverlay = ({ user, onClose }: { user: any; onClose: () => void })
     );
   }, []);
 
+  // Animasi GSAP untuk ikon + saat di-hover
+  const handleIconEnter = () => {
+    if (!closeIconRef.current || isClosing) return;
+    gsap.to(closeIconRef.current, { rotation: 45, scale: 1.2, duration: 0.3, ease: "power2.out" });
+  };
+
+  const handleIconLeave = () => {
+    if (!closeIconRef.current || isClosing) return;
+    gsap.to(closeIconRef.current, { rotation: 0, scale: 1, duration: 0.3, ease: "power2.out" });
+  };
+
   const handleClose = () => {
     if (isClosing || !overlayRef.current) return;
     setIsClosing(true);
+    // Animasi rotasi + saat di-klik
+    if (closeIconRef.current) {
+      gsap.to(closeIconRef.current, {
+        rotation: 90,
+        scale: 0,
+        duration: 0.4,
+        ease: "back.in(1.7)",
+      });
+    }
     gsap.to(overlayRef.current, {
       x: "100%",
       duration: 0.5,
       ease: "power3.in",
+      delay: 0.2,
       onComplete: () => {
         onClose();
       },
@@ -1731,17 +1768,17 @@ const DashboardOverlay = ({ user, onClose }: { user: any; onClose: () => void })
       style={{
         position: "fixed",
         top: 0,
-        right: 0, // Mentok layar kanan
+        right: 0,
         bottom: 0,
         width: "100%",
-        maxWidth: "600px", // Lebar maksimal overlay
-        backgroundColor: BLUE,
+        maxWidth: "600px",
+        backgroundColor: WHITE,
         zIndex: 9998, 
         display: "flex",
         flexDirection: "column",
         fontFamily: FONT_FAMILY,
-        color: WHITE,
-        boxShadow: "-10px 0 40px rgba(0,0,0,0.4)",
+        color: BLUE,
+        boxShadow: "-10px 0 40px rgba(0,0,0,0.2)",
         overflow: "hidden",
       }}
     >
@@ -1752,19 +1789,20 @@ const DashboardOverlay = ({ user, onClose }: { user: any; onClose: () => void })
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          borderBottom: `1px solid rgba(255,255,255,0.15)`,
           flexShrink: 0,
         }}
       >
-        <h2 style={{ fontSize: "28px", fontWeight: 800, margin: 0, color: WHITE }}>
+        <h2 style={{ fontSize: "28px", fontWeight: 800, margin: 0, color: BLUE }}>
           Dashboard
         </h2>
         <button
           onClick={handleClose}
+          onMouseEnter={handleIconEnter}
+          onMouseLeave={handleIconLeave}
           disabled={isClosing}
           style={{
-            background: "transparent",
-            border: `1.5px solid ${WHITE}`,
+            background: BLUE,
+            border: "none",
             color: WHITE,
             borderRadius: "50%",
             width: "40px",
@@ -1773,51 +1811,70 @@ const DashboardOverlay = ({ user, onClose }: { user: any; onClose: () => void })
             alignItems: "center",
             justifyContent: "center",
             cursor: isClosing ? "not-allowed" : "pointer",
-            transition: "background 0.2s",
           }}
-          onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "rgba(255,255,255,0.2)"; }}
-          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent"; }}
         >
-          <CloseIcon size={24} color={WHITE} />
+          <div ref={closeIconRef} style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <PlusIcon size={24} color={WHITE} />
+          </div>
         </button>
       </div>
 
       {/* Konten Overlay */}
       <div style={{ padding: "24px", flex: 1, overflowY: "auto" }}>
-        <div style={{ backgroundColor: "rgba(255,255,255,0.1)", borderRadius: "16px", padding: "20px", marginBottom: "20px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "16px" }}>
-            <div style={{ width: "60px", height: "60px", borderRadius: "50%", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", flexShrink: 0 }}>
+        {/* Card User Profile */}
+        <div style={{ backgroundColor: BLUE, borderRadius: "24px", padding: "24px", marginBottom: "24px", display: "flex", flexDirection: "column", gap: "16px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+            <div style={{ width: "64px", height: "64px", borderRadius: "50%", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", flexShrink: 0 }}>
               {user?.photoURL ? (
                 <img src={user.photoURL} alt="User" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               ) : (
-                <span style={{ fontSize: "24px", fontWeight: 800, color: BLUE }}>
-                  {(user?.displayName || user?.email || "U").charAt(0).toUpperCase()}
+                <span style={{ fontSize: "28px", fontWeight: 800, color: BLUE }}>
+                  {getAnonymousName().charAt(0).toUpperCase()}
                 </span>
               )}
             </div>
-            <div>
-              <h3 style={{ fontSize: "20px", fontWeight: 700, margin: 0, color: WHITE }}>
-                {user?.displayName || user?.email?.split("@")[0] || "User"}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <h3 style={{ fontSize: "22px", fontWeight: 800, margin: 0, color: WHITE, wordBreak: "break-word" }}>
+                {getAnonymousName()}
               </h3>
-              <p style={{ fontSize: "14px", margin: 0, opacity: 0.8 }}>
+              <p style={{ fontSize: "14px", margin: 0, color: "rgba(255,255,255,0.8)", wordBreak: "break-word" }}>
                 {user?.email || "Email tidak tersedia"}
               </p>
             </div>
           </div>
           <p style={{ fontSize: "14px", lineHeight: 1.6, color: "rgba(255,255,255,0.9)", margin: 0 }}>
-            Selamat datang di Dashboard Anda. Di sini Anda dapat mengelola catatan, pengaturan akun, dan aktivitas lainnya.
+            Selamat datang di Dashboard Anda. Kelola pengaturan akun dan aktivitas Anda di sini.
           </p>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-          <button style={{ display: "flex", alignItems: "center", gap: "12px", padding: "16px", backgroundColor: "rgba(255,255,255,0.1)", border: "none", borderRadius: "12px", color: WHITE, fontSize: "16px", fontWeight: 600, cursor: "pointer", textAlign: "left", transition: "background 0.2s" }} onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.2)")} onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)")}>
-            <DocsIcon size={20} color={WHITE} /> Catatan Saya
-          </button>
-          <button style={{ display: "flex", alignItems: "center", gap: "12px", padding: "16px", backgroundColor: "rgba(255,255,255,0.1)", border: "none", borderRadius: "12px", color: WHITE, fontSize: "16px", fontWeight: 600, cursor: "pointer", textAlign: "left", transition: "background 0.2s" }} onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.2)")} onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)")}>
-            <TrustIcon size={20} color={WHITE} /> Pengaturan Privasi
-          </button>
-          <button style={{ display: "flex", alignItems: "center", gap: "12px", padding: "16px", backgroundColor: "rgba(255,255,255,0.1)", border: "none", borderRadius: "12px", color: WHITE, fontSize: "16px", fontWeight: 600, cursor: "pointer", textAlign: "left", transition: "background 0.2s" }} onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.2)")} onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)")}>
-            <InviteIcon size={20} color={WHITE} /> Undangan Kolaborasi
+        {/* Card Pengaturan Privasi */}
+        <div style={{ backgroundColor: BLUE, borderRadius: "24px", padding: "24px", marginBottom: "24px", display: "flex", flexDirection: "column", gap: "12px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <div style={{ width: "40px", height: "40px", borderRadius: "12px", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <TrustIcon size={24} color={BLUE} />
+            </div>
+            <h3 style={{ fontSize: "20px", fontWeight: 700, margin: 0, color: WHITE }}>
+              Pengaturan Privasi
+            </h3>
+          </div>
+          <p style={{ fontSize: "14px", lineHeight: 1.6, color: "rgba(255,255,255,0.9)", margin: 0 }}>
+            Atur privasi akun Anda, termasuk siapa yang dapat melihat catatan dan informasi pribadi Anda. Data Anda aman dan terenkripsi.
+          </p>
+          <button
+            style={{
+              alignSelf: "flex-start",
+              padding: "10px 20px",
+              backgroundColor: WHITE,
+              color: BLUE,
+              border: "none",
+              borderRadius: "10px",
+              fontSize: "14px",
+              fontWeight: 700,
+              cursor: "pointer",
+              marginTop: "8px",
+            }}
+          >
+            Buka Pengaturan
           </button>
         </div>
       </div>
