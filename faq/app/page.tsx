@@ -1701,15 +1701,29 @@ const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
 // ===== DASHBOARD OVERLAY =====
 const DashboardOverlay = ({ user, onClose }: { user: any; onClose: () => void }) => {
   const overlayRef = useRef<HTMLDivElement>(null);
+  const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {
     if (!overlayRef.current) return;
     gsap.fromTo(
       overlayRef.current,
       { x: "100%" },
-      { x: "0%", duration: 0.6, ease: "power3.out" }
+      { x: "0%", duration: 0.7, ease: "power4.out" }
     );
   }, []);
+
+  const handleClose = () => {
+    if (isClosing || !overlayRef.current) return;
+    setIsClosing(true);
+    gsap.to(overlayRef.current, {
+      x: "100%",
+      duration: 0.5,
+      ease: "power3.in",
+      onComplete: () => {
+        onClose();
+      },
+    });
+  };
 
   return (
     <div
@@ -1717,17 +1731,18 @@ const DashboardOverlay = ({ user, onClose }: { user: any; onClose: () => void })
       style={{
         position: "fixed",
         top: 0,
-        right: "24px", // Menyesuaikan dengan tombol biru di kanan
+        right: 0, // Mentok layar kanan
         bottom: 0,
-        width: "calc(100% - 48px)", // Lebar sampai tombol biru
-        maxWidth: "600px", // Lebar maksimal agar tidak terlalu lebar di desktop
+        width: "100%",
+        maxWidth: "600px", // Lebar maksimal overlay
         backgroundColor: BLUE,
-        zIndex: 9998, // Di bawah preloader tapi di atas konten utama
+        zIndex: 9998, 
         display: "flex",
         flexDirection: "column",
         fontFamily: FONT_FAMILY,
         color: WHITE,
-        boxShadow: "-10px 0 30px rgba(0,0,0,0.3)",
+        boxShadow: "-10px 0 40px rgba(0,0,0,0.4)",
+        overflow: "hidden",
       }}
     >
       {/* Header Overlay */}
@@ -1738,13 +1753,15 @@ const DashboardOverlay = ({ user, onClose }: { user: any; onClose: () => void })
           alignItems: "center",
           justifyContent: "space-between",
           borderBottom: `1px solid rgba(255,255,255,0.15)`,
+          flexShrink: 0,
         }}
       >
         <h2 style={{ fontSize: "28px", fontWeight: 800, margin: 0, color: WHITE }}>
           Dashboard
         </h2>
         <button
-          onClick={onClose}
+          onClick={handleClose}
+          disabled={isClosing}
           style={{
             background: "transparent",
             border: `1.5px solid ${WHITE}`,
@@ -1755,7 +1772,7 @@ const DashboardOverlay = ({ user, onClose }: { user: any; onClose: () => void })
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            cursor: "pointer",
+            cursor: isClosing ? "not-allowed" : "pointer",
             transition: "background 0.2s",
           }}
           onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "rgba(255,255,255,0.2)"; }}
@@ -1769,7 +1786,7 @@ const DashboardOverlay = ({ user, onClose }: { user: any; onClose: () => void })
       <div style={{ padding: "24px", flex: 1, overflowY: "auto" }}>
         <div style={{ backgroundColor: "rgba(255,255,255,0.1)", borderRadius: "16px", padding: "20px", marginBottom: "20px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "16px" }}>
-            <div style={{ width: "60px", height: "60px", borderRadius: "50%", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+            <div style={{ width: "60px", height: "60px", borderRadius: "50%", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", flexShrink: 0 }}>
               {user?.photoURL ? (
                 <img src={user.photoURL} alt="User" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               ) : (
