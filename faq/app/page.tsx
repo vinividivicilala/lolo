@@ -1706,18 +1706,24 @@ const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
 };
 
 // ===== DASHBOARD OVERLAY =====
-const DashboardOverlay = ({ user, onClose }: { user: any; onClose: () => void }) => {
+const DashboardOverlay = ({ user, db, onClose }: { user: any; db: any; onClose: () => void }) => {
   const overlayRef = useRef<HTMLDivElement>(null);
   const closeIconRef = useRef<HTMLDivElement>(null);
   const [isClosing, setIsClosing] = useState(false);
+  const [activeTab, setActiveTab] = useState<"main" | "settings">("main");
+  const [isAnonymous, setIsAnonymous] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-  // Mendapatkan nama user atau "Anonim" jika tidak ada displayName
-  const getAnonymousName = () => {
-    if (user?.displayName) return user.displayName;
-    // Jika hanya email, tampilkan "Anonim"
-    if (user?.email) return "Anonim";
-    return "Anonim";
-  };
+  // Ambil status anonim dari Firestore
+  useEffect(() => {
+    if (!user || !db) return;
+    const userRef = doc(db, "users", user.uid);
+    getDoc(userRef).then((snap) => {
+      if (snap.exists()) {
+        setIsAnonymous(snap.data().isAnonymous === true);
+      }
+    });
+  }, [user, db]);
 
   useEffect(() => {
     if (!overlayRef.current) return;
@@ -1742,7 +1748,6 @@ const DashboardOverlay = ({ user, onClose }: { user: any; onClose: () => void })
   const handleClose = () => {
     if (isClosing || !overlayRef.current) return;
     setIsClosing(true);
-    // Animasi rotasi + saat di-klik
     if (closeIconRef.current) {
       gsap.to(closeIconRef.current, {
         rotation: 90,
@@ -1761,6 +1766,26 @@ const DashboardOverlay = ({ user, onClose }: { user: any; onClose: () => void })
       },
     });
   };
+
+  const handleToggleAnonymous = async () => {
+    if (!user || !db || saving) return;
+    setSaving(true);
+    const newValue = !isAnonymous;
+    try {
+      await updateDoc(doc(db, "users", user.uid), { isAnonymous: newValue });
+      setIsAnonymous(newValue);
+    } catch (error) {
+      console.error("Gagal mengubah status anonim:", error);
+      alert("Gagal menyimpan pengaturan.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Tampilan nama: Anonim jika diaktifkan, atau nama asli
+  const displayName = isAnonymous
+    ? "Anonim"
+    : user?.displayName || user?.email?.split("@")[0] || "User";
 
   return (
     <div
@@ -1792,9 +1817,29 @@ const DashboardOverlay = ({ user, onClose }: { user: any; onClose: () => void })
           flexShrink: 0,
         }}
       >
-        <h2 style={{ fontSize: "28px", fontWeight: 800, margin: 0, color: BLUE }}>
-          Dashboard
-        </h2>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          {activeTab === "settings" && (
+            <button
+              onClick={() => setActiveTab("main")}
+              style={{
+                background: "transparent",
+                border: "none",
+                color: BLUE,
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                padding: 0,
+              }}
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M15 18L9 12L15 6" stroke={BLUE} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+          )}
+          <h2 style={{ fontSize: "28px", fontWeight: 800, margin: 0, color: BLUE }}>
+            {activeTab === "main" ? "Dashboard" : "Pengaturan Privasi"}
+          </h2>
+        </div>
         <button
           onClick={handleClose}
           onMouseEnter={handleIconEnter}
@@ -1820,63 +1865,135 @@ const DashboardOverlay = ({ user, onClose }: { user: any; onClose: () => void })
       </div>
 
       {/* Konten Overlay */}
-      <div style={{ padding: "24px", flex: 1, overflowY: "auto" }}>
-        {/* Card User Profile */}
-        <div style={{ backgroundColor: BLUE, borderRadius: "24px", padding: "24px", marginBottom: "24px", display: "flex", flexDirection: "column", gap: "16px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-            <div style={{ width: "64px", height: "64px", borderRadius: "50%", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", flexShrink: 0 }}>
-              {user?.photoURL ? (
-                <img src={user.photoURL} alt="User" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-              ) : (
-                <span style={{ fontSize: "28px", fontWeight: 800, color: BLUE }}>
-                  {getAnonymousName().charAt(0).toUpperCase()}
-                </span>
-              )}
-            </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <h3 style={{ fontSize: "22px", fontWeight: 800, margin: 0, color: WHITE, wordBreak: "break-word" }}>
-                {getAnonymousName()}
-              </h3>
-              <p style={{ fontSize: "14px", margin: 0, color: "rgba(255,255,255,0.8)", wordBreak: "break-word" }}>
-                {user?.email || "Email tidak tersedia"}
+      <div style={{ padding: "24px", flex: 1, overflowY: "auto", display: "flex", flexDirection: "column" }}>
+        {activeTab === "main" ? (
+          <>
+            {/* Card User Profile */}
+            <div style={{ backgroundColor: BLUE, borderRadius: "24px", padding: "24px", marginBottom: "24px", display: "flex", flexDirection: "column", gap: "16px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+                <div style={{ width: "64px", height: "64px", borderRadius: "50%", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", flexShrink: 0 }}>
+                  {user?.photoURL && !isAnonymous ? (
+                    <img src={user.photoURL} alt="User" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  ) : (
+                    <span style={{ fontSize: "28px", fontWeight: 800, color: BLUE }}>
+                      {displayName.charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <h3 style={{ fontSize: "22px", fontWeight: 800, margin: 0, color: WHITE, wordBreak: "break-word" }}>
+                    {displayName}
+                  </h3>
+                  <p style={{ fontSize: "14px", margin: 0, color: "rgba(255,255,255,0.8)", wordBreak: "break-word" }}>
+                    {user?.email || "Email tidak tersedia"}
+                  </p>
+                </div>
+              </div>
+              <p style={{ fontSize: "14px", lineHeight: 1.6, color: "rgba(255,255,255,0.9)", margin: 0 }}>
+                Selamat datang di Dashboard Anda. Kelola pengaturan akun dan aktivitas Anda di sini.
               </p>
             </div>
-          </div>
-          <p style={{ fontSize: "14px", lineHeight: 1.6, color: "rgba(255,255,255,0.9)", margin: 0 }}>
-            Selamat datang di Dashboard Anda. Kelola pengaturan akun dan aktivitas Anda di sini.
-          </p>
-        </div>
 
-        {/* Card Pengaturan Privasi */}
-        <div style={{ backgroundColor: BLUE, borderRadius: "24px", padding: "24px", marginBottom: "24px", display: "flex", flexDirection: "column", gap: "12px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <div style={{ width: "40px", height: "40px", borderRadius: "12px", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <TrustIcon size={24} color={BLUE} />
+            {/* Card Pengaturan Privasi */}
+            <div style={{ backgroundColor: BLUE, borderRadius: "24px", padding: "24px", marginBottom: "24px", display: "flex", flexDirection: "column", gap: "12px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                <div style={{ width: "40px", height: "40px", borderRadius: "12px", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <TrustIcon size={24} color={BLUE} />
+                </div>
+                <h3 style={{ fontSize: "20px", fontWeight: 700, margin: 0, color: WHITE }}>
+                  Pengaturan Privasi
+                </h3>
+              </div>
+              <p style={{ fontSize: "14px", lineHeight: 1.6, color: "rgba(255,255,255,0.9)", margin: 0 }}>
+                Atur privasi akun Anda, termasuk menyembunyikan nama asli dan menampilkan diri sebagai anonim di seluruh platform.
+              </p>
+              <button
+                onClick={() => setActiveTab("settings")}
+                style={{
+                  alignSelf: "flex-start",
+                  padding: "10px 20px",
+                  backgroundColor: WHITE,
+                  color: BLUE,
+                  border: "none",
+                  borderRadius: "10px",
+                  fontSize: "14px",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  marginTop: "8px",
+                }}
+              >
+                Buka Pengaturan
+              </button>
             </div>
-            <h3 style={{ fontSize: "20px", fontWeight: 700, margin: 0, color: WHITE }}>
-              Pengaturan Privasi
-            </h3>
+
+            {/* Teks Menuru di Bawah */}
+            <div style={{ marginTop: "auto", paddingTop: "40px", textAlign: "center", overflow: "hidden" }}>
+              <span style={{ fontFamily: FONT_FAMILY, fontSize: "250px", fontWeight: 400, color: BLUE, letterSpacing: "-0.05em", lineHeight: 0.8, display: "block", userSelect: "none" }}>
+                Menuru
+              </span>
+            </div>
+          </>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+            {/* Card Identitas Akun */}
+            <div style={{ backgroundColor: "#F0F4FF", borderRadius: "24px", padding: "24px", display: "flex", flexDirection: "column", gap: "16px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+                <div style={{ width: "64px", height: "64px", borderRadius: "50%", backgroundColor: BLUE, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", flexShrink: 0 }}>
+                  {user?.photoURL && !isAnonymous ? (
+                    <img src={user.photoURL} alt="User" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  ) : (
+                    <span style={{ fontSize: "28px", fontWeight: 800, color: WHITE }}>
+                      {displayName.charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <h3 style={{ fontSize: "22px", fontWeight: 800, margin: 0, color: BLUE, wordBreak: "break-word" }}>
+                    {displayName}
+                  </h3>
+                  <p style={{ fontSize: "14px", margin: 0, color: BLUE, opacity: 0.8, wordBreak: "break-word" }}>
+                    {user?.email || "Email tidak tersedia"}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Card Toggle Anonim */}
+            <div style={{ backgroundColor: "#F0F4FF", borderRadius: "24px", padding: "24px", display: "flex", flexDirection: "column", gap: "16px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                <div style={{ width: "40px", height: "40px", borderRadius: "12px", backgroundColor: BLUE, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <TrustIcon size={24} color={WHITE} />
+                </div>
+                <h3 style={{ fontSize: "20px", fontWeight: 700, margin: 0, color: BLUE }}>
+                  Sembunyikan Nama (Anonim)
+                </h3>
+              </div>
+              <p style={{ fontSize: "14px", lineHeight: 1.6, color: BLUE, margin: 0 }}>
+                Jika diaktifkan, nama Anda akan diganti menjadi <strong>"Anonim"</strong> di seluruh platform (chat, catatan, dan aktivitas lainnya). Email asli Anda tetap terlihat di halaman ini.
+              </p>
+              <button
+                onClick={handleToggleAnonymous}
+                disabled={saving}
+                style={{
+                  alignSelf: "flex-start",
+                  padding: "12px 24px",
+                  backgroundColor: isAnonymous ? BLUE : "transparent",
+                  color: isAnonymous ? WHITE : BLUE,
+                  border: `2px solid ${BLUE}`,
+                  borderRadius: "10px",
+                  fontSize: "14px",
+                  fontWeight: 700,
+                  cursor: saving ? "not-allowed" : "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                }}
+              >
+                {saving ? "Menyimpan..." : isAnonymous ? "✓ Anonim Aktif" : "Aktifkan Anonim"}
+              </button>
+            </div>
           </div>
-          <p style={{ fontSize: "14px", lineHeight: 1.6, color: "rgba(255,255,255,0.9)", margin: 0 }}>
-            Atur privasi akun Anda, termasuk siapa yang dapat melihat catatan dan informasi pribadi Anda. Data Anda aman dan terenkripsi.
-          </p>
-          <button
-            style={{
-              alignSelf: "flex-start",
-              padding: "10px 20px",
-              backgroundColor: WHITE,
-              color: BLUE,
-              border: "none",
-              borderRadius: "10px",
-              fontSize: "14px",
-              fontWeight: 700,
-              cursor: "pointer",
-              marginTop: "8px",
-            }}
-          >
-            Buka Pengaturan
-          </button>
-        </div>
+        )}
       </div>
     </div>
   );
@@ -5168,7 +5285,7 @@ export default function HomePage(): React.JSX.Element {
         </div>
 
         {/* Overlay Dashboard */}
-        {showDashboard && <DashboardOverlay user={user} onClose={() => setShowDashboard(false)} />}
+        {showDashboard && <DashboardOverlay user={user} db={db} onClose={() => setShowDashboard(false)} />}
 
         <div
           ref={mainPageRef}
