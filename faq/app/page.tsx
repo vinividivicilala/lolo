@@ -1698,11 +1698,121 @@ const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
   );
 };
 
+// ===== DASHBOARD OVERLAY =====
+const DashboardOverlay = ({ user, onClose }: { user: any; onClose: () => void }) => {
+  const overlayRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!overlayRef.current) return;
+    gsap.fromTo(
+      overlayRef.current,
+      { x: "100%" },
+      { x: "0%", duration: 0.6, ease: "power3.out" }
+    );
+  }, []);
+
+  return (
+    <div
+      ref={overlayRef}
+      style={{
+        position: "fixed",
+        top: 0,
+        right: "24px", // Menyesuaikan dengan tombol biru di kanan
+        bottom: 0,
+        width: "calc(100% - 48px)", // Lebar sampai tombol biru
+        maxWidth: "600px", // Lebar maksimal agar tidak terlalu lebar di desktop
+        backgroundColor: BLUE,
+        zIndex: 9998, // Di bawah preloader tapi di atas konten utama
+        display: "flex",
+        flexDirection: "column",
+        fontFamily: FONT_FAMILY,
+        color: WHITE,
+        boxShadow: "-10px 0 30px rgba(0,0,0,0.3)",
+      }}
+    >
+      {/* Header Overlay */}
+      <div
+        style={{
+          padding: "24px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          borderBottom: `1px solid rgba(255,255,255,0.15)`,
+        }}
+      >
+        <h2 style={{ fontSize: "28px", fontWeight: 800, margin: 0, color: WHITE }}>
+          Dashboard
+        </h2>
+        <button
+          onClick={onClose}
+          style={{
+            background: "transparent",
+            border: `1.5px solid ${WHITE}`,
+            color: WHITE,
+            borderRadius: "50%",
+            width: "40px",
+            height: "40px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+            transition: "background 0.2s",
+          }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "rgba(255,255,255,0.2)"; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent"; }}
+        >
+          <CloseIcon size={24} color={WHITE} />
+        </button>
+      </div>
+
+      {/* Konten Overlay */}
+      <div style={{ padding: "24px", flex: 1, overflowY: "auto" }}>
+        <div style={{ backgroundColor: "rgba(255,255,255,0.1)", borderRadius: "16px", padding: "20px", marginBottom: "20px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "16px" }}>
+            <div style={{ width: "60px", height: "60px", borderRadius: "50%", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+              {user?.photoURL ? (
+                <img src={user.photoURL} alt="User" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              ) : (
+                <span style={{ fontSize: "24px", fontWeight: 800, color: BLUE }}>
+                  {(user?.displayName || user?.email || "U").charAt(0).toUpperCase()}
+                </span>
+              )}
+            </div>
+            <div>
+              <h3 style={{ fontSize: "20px", fontWeight: 700, margin: 0, color: WHITE }}>
+                {user?.displayName || user?.email?.split("@")[0] || "User"}
+              </h3>
+              <p style={{ fontSize: "14px", margin: 0, opacity: 0.8 }}>
+                {user?.email || "Email tidak tersedia"}
+              </p>
+            </div>
+          </div>
+          <p style={{ fontSize: "14px", lineHeight: 1.6, color: "rgba(255,255,255,0.9)", margin: 0 }}>
+            Selamat datang di Dashboard Anda. Di sini Anda dapat mengelola catatan, pengaturan akun, dan aktivitas lainnya.
+          </p>
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          <button style={{ display: "flex", alignItems: "center", gap: "12px", padding: "16px", backgroundColor: "rgba(255,255,255,0.1)", border: "none", borderRadius: "12px", color: WHITE, fontSize: "16px", fontWeight: 600, cursor: "pointer", textAlign: "left", transition: "background 0.2s" }} onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.2)")} onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)")}>
+            <DocsIcon size={20} color={WHITE} /> Catatan Saya
+          </button>
+          <button style={{ display: "flex", alignItems: "center", gap: "12px", padding: "16px", backgroundColor: "rgba(255,255,255,0.1)", border: "none", borderRadius: "12px", color: WHITE, fontSize: "16px", fontWeight: 600, cursor: "pointer", textAlign: "left", transition: "background 0.2s" }} onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.2)")} onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)")}>
+            <TrustIcon size={20} color={WHITE} /> Pengaturan Privasi
+          </button>
+          <button style={{ display: "flex", alignItems: "center", gap: "12px", padding: "16px", backgroundColor: "rgba(255,255,255,0.1)", border: "none", borderRadius: "12px", color: WHITE, fontSize: "16px", fontWeight: 600, cursor: "pointer", textAlign: "left", transition: "background 0.2s" }} onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.2)")} onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)")}>
+            <InviteIcon size={20} color={WHITE} /> Undangan Kolaborasi
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // ===== RIGHT NAVBAR =====
 const RightNavbar = ({
-  user, auth, db, locationText,
+  user, auth, db, locationText, onOpenDashboard,
 }: {
-  user: any; auth: any; db: any; locationText: string;
+  user: any; auth: any; db: any; locationText: string; onOpenDashboard: () => void;
 }) => {
   const displayName = user?.displayName || user?.email?.split("@")[0] || "User";
   const photoURL = user?.photoURL || "";
@@ -1819,19 +1929,19 @@ const RightNavbar = ({
             {userIsAdmin && <VerifiedBadgeWhite size={18} />}
           </span>
         </div>
-        <Link
-          href="/dashboard"
+        <button
+          onClick={onOpenDashboard}
           style={{
             textDecoration: "none", display: "inline-flex", alignItems: "center",
             gap: "8px", padding: "10px 16px", backgroundColor: BLUE, color: WHITE,
             borderRadius: "10px", border: `1px solid ${BLUE}`,
             boxShadow: "0 8px 24px rgba(13,60,252,0.35)",
-            fontFamily: FONT_FAMILY, fontSize: "14px", fontWeight: 700,
+            fontFamily: FONT_FAMILY, fontSize: "14px", fontWeight: 700, cursor: "pointer",
           }}
         >
           Dashboard
           <NorthEastArrow size={16} color={WHITE} />
-        </Link>
+        </button>
         <button
           onClick={handleLogout}
           style={{
@@ -4560,6 +4670,9 @@ export default function HomePage(): React.JSX.Element {
   const [bannedAppealTicket, setBannedAppealTicket] = useState<AppealTicket | null>(null);
   const [showBannedAppealSection, setShowBannedAppealSection] = useState(false);
 
+  // State untuk overlay dashboard
+  const [showDashboard, setShowDashboard] = useState(false);
+
   const preloaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
   const counterRef = useRef<HTMLSpanElement>(null);
@@ -4980,6 +5093,9 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
+        {/* Overlay Dashboard */}
+        {showDashboard && <DashboardOverlay user={user} onClose={() => setShowDashboard(false)} />}
+
         <div
           ref={mainPageRef}
           style={{
@@ -5016,6 +5132,7 @@ export default function HomePage(): React.JSX.Element {
             auth={auth}
             db={db}
             locationText={locationText}
+            onOpenDashboard={() => setShowDashboard(true)}
           />
           <CookieConsentPopup user={user} db={db} isMounted={isMounted} />
 
