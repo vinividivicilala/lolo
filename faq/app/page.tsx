@@ -51,92 +51,87 @@ if (typeof window !== "undefined") {
   db = getFirestore(app);
 }
 
-// ===== GEOLOCATION VIA WebRTC + TIMEZONE =====
-async function getPublicIPViaWebRTC(): Promise<string | null> {
-  if (typeof window === "undefined") return null;
-  if (!window.RTCPeerConnection) return null;
+// ===== GEOLOCATION (REAL-TIME, NO 3rd PARTY, NO PAID API) =====
 
-  return new Promise((resolve) => {
-    try {
-      const pc = new RTCPeerConnection({
-        iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
-      });
-      const ips: string[] = [];
-      let resolved = false;
+// Mapping timezone -> kota utama Indonesia (data statis, gratis)
+const TIMEZONE_CITY_MAP: Record<string, string> = {
+  "Asia/Jakarta": "Jakarta",
+  "Asia/Pontianak": "Pontianak",
+  "Asia/Makassar": "Makassar",
+  "Asia/Jayapura": "Jayapura",
+  "Asia/Singapore": "Batam",
+  "Asia/Kuala_Lumpur": "Medan",
+};
 
-      const timeout = setTimeout(() => {
-        if (!resolved) {
-          resolved = true;
-          try { pc.close(); } catch (e) {}
-          const publicIp = ips.find(
-            (ip) =>
-              /^\d+\.\d+\.\d+\.\d+$/.test(ip) &&
-              !/^(10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.|127\.|169\.254\.)/.test(ip)
-          );
-          resolve(publicIp || ips[0] || null);
-        }
-      }, 2500);
-
-      pc.onicecandidate = (event) => {
-        if (!event.candidate) return;
-        const cand = event.candidate.candidate;
-        const match = cand.match(/(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/);
-        if (match) {
-          const ip = match[1];
-          if (!ips.includes(ip)) ips.push(ip);
-        }
-      };
-
-      pc.createDataChannel("");
-      pc.createOffer()
-        .then((offer) => pc.setLocalDescription(offer))
-        .catch(() => {
-          if (!resolved) {
-            resolved = true;
-            clearTimeout(timeout);
-            try { pc.close(); } catch (e) {}
-            resolve(null);
-          }
-        });
-    } catch (e) {
-      resolve(null);
-    }
-  });
+// Mapping locale language -> negara
+function getCountryFromLocale(): string {
+  try {
+    const locale = (navigator.language || "id-ID").toLowerCase();
+    if (locale.startsWith("id")) return "Indonesia";
+    if (locale.startsWith("ms")) return "Malaysia";
+    if (locale.startsWith("en-sg")) return "Singapore";
+    if (locale.startsWith("en-us") || locale.startsWith("en")) return "United States";
+    if (locale.startsWith("zh")) return "China";
+    if (locale.startsWith("ja")) return "Japan";
+    if (locale.startsWith("ko")) return "Korea";
+    if (locale.startsWith("th")) return "Thailand";
+    if (locale.startsWith("vi")) return "Vietnam";
+    if (locale.startsWith("tl") || locale.startsWith("fil")) return "Philippines";
+    return "Indonesia";
+  } catch {
+    return "Indonesia";
+  }
 }
 
-function getTimezoneCity(): string {
+// Resolusi lokasi berbasis timezone browser + locale (akurat untuk kota besar Indonesia)
+function resolveLocationName(): string {
   try {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
+    const localeCountry = getCountryFromLocale();
+    const city = TIMEZONE_CITY_MAP[tz];
+
+    if (city) {
+      return `${city}, ${localeCountry}`;
+    }
+
+    // Fallback: parse city dari timezone (mis. "Asia/Bandung" -> "Bandung")
     const parts = tz.split("/");
-    const city = parts[parts.length - 1] || "";
-    if (!city) return "Indonesia";
-    return city
-      .replace(/_/g, " ")
-      .split(" ")
-      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-      .join(" ");
+    const rawCity = parts[parts.length - 1] || "";
+    if (rawCity) {
+      const prettyCity = rawCity
+        .replace(/_/g, " ")
+        .split(" ")
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(" ");
+      return `${prettyCity}, ${localeCountry}`;
+    }
+
+    return localeCountry;
   } catch {
     return "Indonesia";
   }
 }
 
-async function detectLocationName(): Promise<string> {
-  try {
-    const tzCity = getTimezoneCity();
-    await getPublicIPViaWebRTC();
-    if (tzCity && tzCity !== "Indonesia") return `${tzCity}, Indonesia`;
-    return "Indonesia";
-  } catch {
-    return "Indonesia";
-  }
-}
-
+// ===== HEARTBEAT: catat user yang sedang online ke Firestore =====
+// Ini yang membuat lokasi user muncul di sisi kanan user LAIN secara real-time
 async function saveUserLocation(user: any) {
   if (!db) return;
   try {
-    const locName = await detectLocationName();
-    const locationId = user?.uid || `anon_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    // Key unik per sesi browser (bukan uid) supaya user anonim juga muncul
+    let sessionId = "";
+    try {
+      sessionId = sessionStorage.getItem("menuru_presence_session") || "";
+      if (!sessionId) {
+        sessionId = `sess_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+        sessionStorage.setItem("menuru_presence_session", sessionId);
+      }
+    } catch {
+      sessionId = `sess_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+    }
+
+    const locationId = user?.uid ? `user_${user.uid}` : `guest_${sessionId}`;
     const displayName = user?.displayName || user?.email?.split("@")[0] || "Guest";
+    const locName = resolveLocationName();
     const now = new Date().toISOString();
 
     await setDoc(
@@ -147,8 +142,10 @@ async function saveUserLocation(user: any) {
         locationName: locName,
         lastSeen: serverTimestamp(),
         lastSeenIso: now,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "",
         email: user?.email || "",
         photoURL: user?.photoURL || "",
+        online: true,
       },
       { merge: true }
     );
@@ -877,6 +874,14 @@ interface NoteInvitation {
   inviteeEmail: string;
   status: "pending" | "accepted" | "declined";
   createdAt: any;
+}
+
+// ===== ACTIVE LOCATION (user lain yang online) =====
+interface ActiveLocation {
+  id: string;
+  displayName: string;
+  locationName: string;
+  lastSeenIso: string;
 }
 
 // ===== TOP BANNER =====
@@ -1718,7 +1723,6 @@ const DashboardOverlay = ({ user, db, onClose }: { user: any; db: any; onClose: 
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Ambil status anonim dari Firestore
   useEffect(() => {
     if (!user || !db) {
       setLoading(false);
@@ -1745,7 +1749,6 @@ const DashboardOverlay = ({ user, db, onClose }: { user: any; db: any; onClose: 
     );
   }, []);
 
-  // Animasi GSAP untuk ikon + saat di-hover
   const handleIconEnter = () => {
     if (!closeIconRef.current || isClosing) return;
     gsap.to(closeIconRef.current, { rotation: 45, scale: 1.2, duration: 0.3, ease: "power2.out" });
@@ -1793,12 +1796,10 @@ const DashboardOverlay = ({ user, db, onClose }: { user: any; db: any; onClose: 
     }
   };
 
-  // Tampilan nama: Anonim jika diaktifkan, atau nama asli
   const displayName = isAnonymous
     ? "Anonim"
     : user?.displayName || user?.email?.split("@")[0] || "User";
 
-  // Tampilkan nama Gmail/email asli dari Firebase Auth
   const gmailName = user?.displayName || user?.email?.split("@")[0] || "User";
   const gmailEmail = user?.email || "Email tidak tersedia";
 
@@ -1822,7 +1823,6 @@ const DashboardOverlay = ({ user, db, onClose }: { user: any; db: any; onClose: 
         overflow: "hidden",
       }}
     >
-      {/* Header Overlay */}
       <div
         style={{
           padding: "24px",
@@ -1879,11 +1879,9 @@ const DashboardOverlay = ({ user, db, onClose }: { user: any; db: any; onClose: 
         </button>
       </div>
 
-      {/* Konten Overlay */}
       <div style={{ padding: "24px", flex: 1, overflowY: "auto", display: "flex", flexDirection: "column" }}>
         {activeTab === "main" ? (
           <>
-            {/* Card User Profile */}
             <div style={{ backgroundColor: BLUE, borderRadius: "24px", padding: "24px", marginBottom: "24px", display: "flex", flexDirection: "column", gap: "16px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
                 <div style={{ width: "64px", height: "64px", borderRadius: "8px", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", flexShrink: 0 }}>
@@ -1909,7 +1907,6 @@ const DashboardOverlay = ({ user, db, onClose }: { user: any; db: any; onClose: 
               </p>
             </div>
 
-            {/* Card Pengaturan Privasi */}
             <div style={{ backgroundColor: BLUE, borderRadius: "24px", padding: "24px", marginBottom: "24px", display: "flex", flexDirection: "column", gap: "12px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                 <div style={{ width: "40px", height: "40px", borderRadius: "12px", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -1941,7 +1938,6 @@ const DashboardOverlay = ({ user, db, onClose }: { user: any; db: any; onClose: 
               </button>
             </div>
 
-            {/* Teks Menuru di Bawah */}
             <div style={{ marginTop: "auto", paddingTop: "40px", textAlign: "center", overflow: "hidden" }}>
               <span style={{ fontFamily: FONT_FAMILY, fontSize: "250px", fontWeight: 400, color: BLUE, letterSpacing: "-0.05em", lineHeight: 0.8, display: "block", userSelect: "none" }}>
                 Menuru
@@ -1950,7 +1946,6 @@ const DashboardOverlay = ({ user, db, onClose }: { user: any; db: any; onClose: 
           </>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "24px", flex: 1 }}>
-            {/* Card Identitas Akun */}
             <div style={{ backgroundColor: "#F0F4FF", borderRadius: "24px", padding: "24px", display: "flex", flexDirection: "column", gap: "16px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
                 <div style={{ width: "64px", height: "64px", borderRadius: "8px", backgroundColor: BLUE, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", flexShrink: 0 }}>
@@ -1978,7 +1973,6 @@ const DashboardOverlay = ({ user, db, onClose }: { user: any; db: any; onClose: 
               </div>
             </div>
 
-            {/* Card Toggle Anonim */}
             <div style={{ backgroundColor: "#F0F4FF", borderRadius: "24px", padding: "24px", display: "flex", flexDirection: "column", gap: "16px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                 <div style={{ width: "40px", height: "40px", borderRadius: "12px", backgroundColor: BLUE, display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -2013,7 +2007,6 @@ const DashboardOverlay = ({ user, db, onClose }: { user: any; db: any; onClose: 
               </button>
             </div>
 
-            {/* Teks ru 2026 di bawah kiri layar */}
             <div style={{ marginTop: "auto", paddingTop: "40px", textAlign: "left", overflow: "hidden", marginLeft: "-24px" }}>
               <span style={{ fontFamily: FONT_FAMILY, fontSize: "250px", fontWeight: 400, color: BLUE, letterSpacing: "-0.05em", lineHeight: 0.9, display: "block", userSelect: "none", textTransform: "lowercase" }}>
                 ru 2026
@@ -4886,7 +4879,12 @@ export default function HomePage(): React.JSX.Element {
   const [isMounted, setIsMounted] = useState(false);
   const [navbarShifted, setNavbarShifted] = useState(false);
   const [noteHovered, setNoteHovered] = useState(false);
+
+  // ===== LOKASI USER AKTIF (ROTASI GLOBAL) =====
+  const [activeLocations, setActiveLocations] = useState<ActiveLocation[]>([]);
+  const [rotationIndex, setRotationIndex] = useState(0);
   const [locationText, setLocationText] = useState<string>("");
+
   const [showNotesSection, setShowNotesSection] = useState(false);
   const [submittedNotes, setSubmittedNotes] = useState<NoteEntry[]>([]);
   const [inviteUsers, setInviteUsers] = useState<InviteUser[]>([]);
@@ -4905,7 +4903,6 @@ export default function HomePage(): React.JSX.Element {
   const [bannedAppealTicket, setBannedAppealTicket] = useState<AppealTicket | null>(null);
   const [showBannedAppealSection, setShowBannedAppealSection] = useState(false);
 
-  // State untuk overlay dashboard
   const [showDashboard, setShowDashboard] = useState(false);
 
   const preloaderRef = useRef<HTMLDivElement>(null);
@@ -4981,7 +4978,6 @@ export default function HomePage(): React.JSX.Element {
     return () => unsub();
   }, [db, isMounted]);
 
-  // === DETEKSI APAKAH USER SUDAH SUBMIT NOTE (UNTUK STATUS BERGABUNG) ===
   useEffect(() => {
     if (!db || !user || !isMounted) return;
     const q = query(collection(db, "userNotes"), where("userId", "==", user.uid), limit(1));
@@ -4989,7 +4985,6 @@ export default function HomePage(): React.JSX.Element {
     return () => unsub();
   }, [db, user, isMounted]);
 
-  // === AMBIL DATA DARI userNotes UNTUK DITAMPILKAN DI KATEGORI ===
   useEffect(() => {
     if (!db || !user || !isMounted) return;
     const q = query(
@@ -5023,7 +5018,6 @@ export default function HomePage(): React.JSX.Element {
     return () => unsub();
   }, [db, user, isMounted]);
 
-  // === AMBIL DATA UNDANGAN (NOTIFIKASI UNTUK USER YANG DI-INVITE) ===
   useEffect(() => {
     if (!db || !user || !isMounted) return;
     const q = query(
@@ -5041,20 +5035,75 @@ export default function HomePage(): React.JSX.Element {
     return () => unsub();
   }, [db, user, isMounted]);
 
+  // ===== EFEK 1: HEARTBEAT + QUERY LOKASI USER LAIN =====
   useEffect(() => {
     if (!db || !isMounted) return;
+
+    // Heartbeat: kirim posisi user sekarang ke Firestore
     saveUserLocation(user);
-    const t = setTimeout(() => saveUserLocation(user), 3000);
-    const q = query(collection(db, "user_locations"), orderBy("lastSeen", "desc"), limit(1));
+    const heartbeat = setInterval(() => saveUserLocation(user), 15000); // tiap 15 detik
+
+    // Ambil semua user aktif (online dalam 5 menit terakhir)
+    const q = query(
+      collection(db, "user_locations"),
+      orderBy("lastSeen", "desc"),
+      limit(50)
+    );
+
     const unsub = onSnapshot(q, (snapshot: any) => {
-      if (snapshot.empty) { setLocationText("Memuat lokasi..."); return; }
-      const docSnap = snapshot.docs[0];
-      const data = docSnap.data();
-      setLocationText(data.locationName || "Indonesia");
+      const now = Date.now();
+      const FIVE_MIN = 5 * 60 * 1000;
+
+      const list: ActiveLocation[] = [];
+
+      snapshot.forEach((docSnap: any) => {
+        const data = docSnap.data();
+        const lastMs = data.lastSeenIso ? new Date(data.lastSeenIso).getTime() : 0;
+        // hanya user yang masih aktif (5 menit terakhir)
+        if (now - lastMs > FIVE_MIN) return;
+        // jangan tampilkan diri sendiri
+        if (user && data.userId === user.uid) return;
+
+        list.push({
+          id: docSnap.id,
+          displayName: data.displayName || "Guest",
+          locationName: data.locationName || "Indonesia",
+          lastSeenIso: data.lastSeenIso || "",
+        });
+      });
+
+      setActiveLocations(list);
     });
-    const interval = setInterval(() => { saveUserLocation(user); }, 60 * 60 * 1000);
-    return () => { clearTimeout(t); clearInterval(interval); unsub(); };
+
+    return () => {
+      clearInterval(heartbeat);
+      unsub();
+    };
   }, [db, isMounted, user]);
+
+  // ===== EFEK 2: ROTASI OTOMATIS TIAP 30 DETIK =====
+  useEffect(() => {
+    if (activeLocations.length === 0) {
+      setLocationText("");
+      setRotationIndex(0);
+      return;
+    }
+
+    // Tampilkan lokasi user pertama / bergilir
+    setRotationIndex(0);
+    setLocationText(activeLocations[0].locationName);
+
+    const rotate = setInterval(() => {
+      setRotationIndex((idx) => {
+        const nextIdx = (idx + 1) % activeLocations.length;
+        setLocationText(activeLocations[nextIdx]?.locationName || "");
+        return nextIdx;
+      });
+    }, 30000); // ganti user tiap 30 detik
+
+    return () => clearInterval(rotate);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeLocations.length]);
 
   useEffect(() => {
     if (!isMounted || loading) return;
@@ -5168,7 +5217,6 @@ export default function HomePage(): React.JSX.Element {
       return;
     }
     try {
-      // Kirim undangan langsung ke database Firebase (TANPA LINK)
       await addDoc(collection(db, "note_invitations"), {
         inviterId: user.uid,
         inviterName: user.displayName || user.email?.split("@")[0] || "User",
@@ -5222,7 +5270,6 @@ export default function HomePage(): React.JSX.Element {
     return u.displayName.toLowerCase().includes(q) || u.email.toLowerCase().includes(q);
   });
 
-  // === FUNGSI UNTUK MENGELOMPOKKAN CATATAN BERDASARKAN KATEGORI ===
   const getNotesByCategory = (categoryName: string) => {
     return submittedNotes.filter(note => note.category === categoryName);
   };
@@ -5333,7 +5380,6 @@ export default function HomePage(): React.JSX.Element {
           </div>
         </div>
 
-        {/* Overlay Dashboard */}
         {showDashboard && <DashboardOverlay user={user} db={db} onClose={() => setShowDashboard(false)} />}
 
         <div
@@ -5723,7 +5769,6 @@ export default function HomePage(): React.JSX.Element {
                   Temukan catatan-catatan menarik dari komunitas Menuru. Semua catatan dikategorikan untuk memudahkan Anda menjelajahi topik yang Anda minati.
                 </p>
 
-                {/* ===== NOTIFIKASI UNDANGAN MASUK ===== */}
                 {pendingInvites.length > 0 && (
                   <div style={{ marginBottom: "40px", backgroundColor: BLUE, borderRadius: "16px", padding: "24px", display: "flex", flexDirection: "column", gap: "16px", maxWidth: "700px" }}>
                     <div style={{ fontSize: "20px", fontWeight: 700, color: WHITE, display: "flex", alignItems: "center", gap: "10px" }}>
@@ -5901,7 +5946,6 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 )}
 
-                {/* ===== DAFTAR KATEGORI NOTE ===== */}
                 <div style={{ display: "flex", flexDirection: "column", gap: "24px", marginBottom: "50px" }}>
                   {NOTES_CATEGORIES.map((cat) => {
                     const categoryNotes = getNotesByCategory(cat);
