@@ -53,7 +53,6 @@ if (typeof window !== "undefined") {
 
 // ===== GEOLOCATION (REAL-TIME, NO 3rd PARTY, NO PAID API) =====
 
-// Mapping timezone -> kota utama Indonesia (data statis, gratis)
 const TIMEZONE_CITY_MAP: Record<string, string> = {
   "Asia/Jakarta": "Jakarta",
   "Asia/Pontianak": "Pontianak",
@@ -63,7 +62,6 @@ const TIMEZONE_CITY_MAP: Record<string, string> = {
   "Asia/Kuala_Lumpur": "Medan",
 };
 
-// Mapping locale language -> negara
 function getCountryFromLocale(): string {
   try {
     const locale = (navigator.language || "id-ID").toLowerCase();
@@ -83,18 +81,12 @@ function getCountryFromLocale(): string {
   }
 }
 
-// Resolusi lokasi berbasis timezone browser + locale (akurat untuk kota besar Indonesia)
 function resolveLocationName(): string {
   try {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
     const localeCountry = getCountryFromLocale();
     const city = TIMEZONE_CITY_MAP[tz];
-
-    if (city) {
-      return `${city}, ${localeCountry}`;
-    }
-
-    // Fallback: parse city dari timezone (mis. "Asia/Bandung" -> "Bandung")
+    if (city) return `${city}, ${localeCountry}`;
     const parts = tz.split("/");
     const rawCity = parts[parts.length - 1] || "";
     if (rawCity) {
@@ -105,19 +97,15 @@ function resolveLocationName(): string {
         .join(" ");
       return `${prettyCity}, ${localeCountry}`;
     }
-
     return localeCountry;
   } catch {
     return "Indonesia";
   }
 }
 
-// ===== HEARTBEAT: catat user yang sedang online ke Firestore =====
-// Ini yang membuat lokasi user muncul di sisi kanan user LAIN secara real-time
 async function saveUserLocation(user: any) {
   if (!db) return;
   try {
-    // Key unik per sesi browser (bukan uid) supaya user anonim juga muncul
     let sessionId = "";
     try {
       sessionId = sessionStorage.getItem("menuru_presence_session") || "";
@@ -128,12 +116,10 @@ async function saveUserLocation(user: any) {
     } catch {
       sessionId = `sess_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
     }
-
     const locationId = user?.uid ? `user_${user.uid}` : `guest_${sessionId}`;
     const displayName = user?.displayName || user?.email?.split("@")[0] || "Guest";
     const locName = resolveLocationName();
     const now = new Date().toISOString();
-
     await setDoc(
       doc(db, "user_locations", locationId),
       {
@@ -434,6 +420,17 @@ const MINT = "#00E3AA";
 const RED = "#DC2626";
 const STORE_LINK = "https://apps.microsoft.com/detail/9nv1fg4b6xvn?hl=id-ID&gl=ID";
 const FARID_LINK = "https://farid-ardiansyah.netlify.app/";
+
+// ===== FOOTER GALLERY IMAGES =====
+const FOOTER_GALLERY_IMAGES = [
+  "/images/a1.JPG",
+  "/images/a2.JPG",
+  "/images/a3.JPG",
+  "/images/a4.JPG",
+  "/images/a5.JPG",
+  "/images/a6.JPG",
+  "/images/a71.JPG",
+];
 
 // ===== NOTES CATEGORIES =====
 const NOTES_CATEGORIES = [
@@ -876,7 +873,6 @@ interface NoteInvitation {
   createdAt: any;
 }
 
-// ===== ACTIVE LOCATION (user lain yang online) =====
 interface ActiveLocation {
   id: string;
   displayName: string;
@@ -1002,6 +998,7 @@ const HeroMenuruTitle = () => {
 const FooterSection = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLSpanElement>(null);
+  const galleryRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -1039,6 +1036,29 @@ const FooterSection = () => {
       if (ctx) ctx.revert();
       if (split && split.revert) split.revert();
     };
+  }, []);
+
+  // Animasi muncul galeri footer (stagger)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!galleryRef.current) return;
+    const items = galleryRef.current.querySelectorAll(".footer-gallery-item");
+    if (items.length === 0) return;
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        items,
+        { opacity: 0, y: 40, scale: 0.85 },
+        {
+          opacity: 1, y: 0, scale: 1,
+          duration: 0.8, stagger: 0.08, ease: "back.out(1.6)",
+          scrollTrigger: {
+            trigger: galleryRef.current,
+            start: "top 95%", toggleActions: "play none none reverse",
+          },
+        }
+      );
+    }, galleryRef);
+    return () => ctx.revert();
   }, []);
 
   useEffect(() => {
@@ -1218,6 +1238,59 @@ const FooterSection = () => {
             Unduh Menuru
           </span>
         </a>
+      </div>
+
+      {/* ===== GALERI GAMBAR DI ATAS TEKS MENURU BESAR ===== */}
+      <div
+        ref={galleryRef}
+        className="footer-gallery-row"
+        style={{
+          position: "relative",
+          zIndex: 1,
+          display: "flex",
+          alignItems: "flex-end",
+          justifyContent: "flex-start",
+          gap: "2px",
+          flexWrap: "nowrap",
+          marginBottom: "10px",
+          width: "100%",
+          overflow: "hidden",
+          pointerEvents: "none",
+        }}
+      >
+        {FOOTER_GALLERY_IMAGES.map((src, i) => (
+          <div
+            key={i}
+            className="footer-gallery-item"
+            style={{
+              flex: "1 1 0",
+              minWidth: 0,
+              display: "flex",
+              alignItems: "flex-end",
+              justifyContent: "center",
+              height: "clamp(120px, 18vw, 280px)",
+              overflow: "hidden",
+            }}
+          >
+            <img
+              src={src}
+              alt={`footer-gallery-${i + 1}`}
+              className="footer-gallery-img"
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "contain",
+                objectPosition: "bottom center",
+                display: "block",
+                mixBlendMode: "screen",
+                userSelect: "none",
+                pointerEvents: "none",
+                filter: "drop-shadow(0 6px 14px rgba(0,0,0,0.25))",
+              }}
+              draggable={false}
+            />
+          </div>
+        ))}
       </div>
 
       <div style={{ position: "relative", zIndex: 1 }}>
@@ -4880,7 +4953,6 @@ export default function HomePage(): React.JSX.Element {
   const [navbarShifted, setNavbarShifted] = useState(false);
   const [noteHovered, setNoteHovered] = useState(false);
 
-  // ===== LOKASI USER AKTIF (ROTASI GLOBAL) =====
   const [activeLocations, setActiveLocations] = useState<ActiveLocation[]>([]);
   const [rotationIndex, setRotationIndex] = useState(0);
   const [locationText, setLocationText] = useState<string>("");
@@ -5035,35 +5107,24 @@ export default function HomePage(): React.JSX.Element {
     return () => unsub();
   }, [db, user, isMounted]);
 
-  // ===== EFEK 1: HEARTBEAT + QUERY LOKASI USER LAIN =====
   useEffect(() => {
     if (!db || !isMounted) return;
-
-    // Heartbeat: kirim posisi user sekarang ke Firestore
     saveUserLocation(user);
-    const heartbeat = setInterval(() => saveUserLocation(user), 15000); // tiap 15 detik
-
-    // Ambil semua user aktif (online dalam 5 menit terakhir)
+    const heartbeat = setInterval(() => saveUserLocation(user), 15000);
     const q = query(
       collection(db, "user_locations"),
       orderBy("lastSeen", "desc"),
       limit(50)
     );
-
     const unsub = onSnapshot(q, (snapshot: any) => {
       const now = Date.now();
       const FIVE_MIN = 5 * 60 * 1000;
-
       const list: ActiveLocation[] = [];
-
       snapshot.forEach((docSnap: any) => {
         const data = docSnap.data();
         const lastMs = data.lastSeenIso ? new Date(data.lastSeenIso).getTime() : 0;
-        // hanya user yang masih aktif (5 menit terakhir)
         if (now - lastMs > FIVE_MIN) return;
-        // jangan tampilkan diri sendiri
         if (user && data.userId === user.uid) return;
-
         list.push({
           id: docSnap.id,
           displayName: data.displayName || "Guest",
@@ -5071,36 +5132,29 @@ export default function HomePage(): React.JSX.Element {
           lastSeenIso: data.lastSeenIso || "",
         });
       });
-
       setActiveLocations(list);
     });
-
     return () => {
       clearInterval(heartbeat);
       unsub();
     };
   }, [db, isMounted, user]);
 
-  // ===== EFEK 2: ROTASI OTOMATIS TIAP 30 DETIK =====
   useEffect(() => {
     if (activeLocations.length === 0) {
       setLocationText("");
       setRotationIndex(0);
       return;
     }
-
-    // Tampilkan lokasi user pertama / bergilir
     setRotationIndex(0);
     setLocationText(activeLocations[0].locationName);
-
     const rotate = setInterval(() => {
       setRotationIndex((idx) => {
         const nextIdx = (idx + 1) % activeLocations.length;
         setLocationText(activeLocations[nextIdx]?.locationName || "");
         return nextIdx;
       });
-    }, 30000); // ganti user tiap 30 detik
-
+    }, 30000);
     return () => clearInterval(rotate);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeLocations.length]);
@@ -5226,7 +5280,6 @@ export default function HomePage(): React.JSX.Element {
         status: "pending",
         createdAt: serverTimestamp(),
       });
-
       setInvitedUsers((prev) => ({ ...prev, [inviteUser.uid]: true }));
       setInviteToast(`Undangan berhasil dikirim ke ${inviteUser.isAnonymous ? "Anonim" : inviteUser.displayName}`);
       setTimeout(() => setInviteToast(null), 2500);
@@ -6130,6 +6183,24 @@ export default function HomePage(): React.JSX.Element {
         .note-description-html u { text-decoration: underline; }
         .note-description-html ul { padding-left: 24px; margin: 8px 0; }
         .note-description-html li { margin-bottom: 4px; }
+
+        /* ===== FOOTER GALLERY ===== */
+        .footer-gallery-row {
+          gap: 2px !important;
+        }
+        .footer-gallery-item img {
+          mix-blend-mode: screen !important;
+        }
+        @media (max-width: 768px) {
+          .footer-gallery-row {
+            gap: 1px !important;
+            flex-wrap: nowrap !important;
+            overflow-x: auto !important;
+          }
+          .footer-gallery-item {
+            height: clamp(80px, 22vw, 160px) !important;
+          }
+        }
       `}</style>
     </>
   );
