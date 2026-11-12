@@ -103,23 +103,31 @@ function resolveLocationName(): string {
   }
 }
 
+// ===== LOKASI DISIMPAN 1x — pakai setDoc dengan ID tetap =====
+// ID tetap: user_<uid> untuk login, guest_<sessionId> untuk anonim
+function getPresenceDocId(user: any): string {
+  if (user?.uid) return `user_${user.uid}`;
+  try {
+    let sessionId = sessionStorage.getItem("menuru_presence_session") || "";
+    if (!sessionId) {
+      sessionId = `sess_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+      sessionStorage.setItem("menuru_presence_session", sessionId);
+    }
+    return `guest_${sessionId}`;
+  } catch {
+    return `guest_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+  }
+}
+
 async function saveUserLocation(user: any) {
   if (!db) return;
   try {
-    let sessionId = "";
-    try {
-      sessionId = sessionStorage.getItem("menuru_presence_session") || "";
-      if (!sessionId) {
-        sessionId = `sess_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
-        sessionStorage.setItem("menuru_presence_session", sessionId);
-      }
-    } catch {
-      sessionId = `sess_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
-    }
-    const locationId = user?.uid ? `user_${user.uid}` : `guest_${sessionId}`;
+    const locationId = getPresenceDocId(user);
     const displayName = user?.displayName || user?.email?.split("@")[0] || "Guest";
     const locName = resolveLocationName();
     const now = new Date().toISOString();
+
+    // setDoc dengan ID tetap = 1 dokumen per user, merge=true tidak buat dokumen baru
     await setDoc(
       doc(db, "user_locations", locationId),
       {
@@ -137,6 +145,22 @@ async function saveUserLocation(user: any) {
     );
   } catch (e) {
     console.error("saveUserLocation error:", e);
+  }
+}
+
+// Heartbeat ringan: hanya update lastSeenIso + lastSeen (field saja)
+async function heartbeatLocation(user: any) {
+  if (!db) return;
+  try {
+    const locationId = getPresenceDocId(user);
+    await updateDoc(doc(db, "user_locations", locationId), {
+      lastSeen: serverTimestamp(),
+      lastSeenIso: new Date().toISOString(),
+      online: true,
+    });
+  } catch (e) {
+    // Dokumen mungkin belum ada (race) — panggil saveUserLocation sekali
+    try { await saveUserLocation(user); } catch {}
   }
 }
 
@@ -1038,7 +1062,7 @@ const FooterSection = () => {
     };
   }, []);
 
-  // Animasi muncul galeri footer (stagger)
+  // Animasi muncul galeri footer (stagger, smooth)
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (!galleryRef.current) return;
@@ -1047,10 +1071,10 @@ const FooterSection = () => {
     const ctx = gsap.context(() => {
       gsap.fromTo(
         items,
-        { opacity: 0, y: 40, scale: 0.85 },
+        { opacity: 0, y: 60, scale: 0.9 },
         {
           opacity: 1, y: 0, scale: 1,
-          duration: 0.8, stagger: 0.08, ease: "back.out(1.6)",
+          duration: 0.9, stagger: 0.1, ease: "back.out(1.5)",
           scrollTrigger: {
             trigger: galleryRef.current,
             start: "top 95%", toggleActions: "play none none reverse",
@@ -1240,21 +1264,23 @@ const FooterSection = () => {
         </a>
       </div>
 
-      {/* ===== GALERI GAMBAR DI ATAS TEKS MENURU BESAR ===== */}
+      {/* ===== GALERI GAMBAR DI ATAS TEKS MENURU BESAR =====
+          - Ukuran lebih besar (clamp lebih tinggi)
+          - Ada jarak antar foto (gap lebih besar)
+          - mixBlendMode screen: background putih foto hilang menyatu dengan biru footer
+      */}
       <div
         ref={galleryRef}
         className="footer-gallery-row"
         style={{
           position: "relative",
           zIndex: 1,
-          display: "flex",
-          alignItems: "flex-end",
-          justifyContent: "flex-start",
-          gap: "2px",
-          flexWrap: "nowrap",
-          marginBottom: "10px",
+          display: "grid",
+          gridTemplateColumns: "repeat(7, 1fr)",
+          gap: "12px",
+          alignItems: "end",
+          marginBottom: "20px",
           width: "100%",
-          overflow: "hidden",
           pointerEvents: "none",
         }}
       >
@@ -1263,13 +1289,12 @@ const FooterSection = () => {
             key={i}
             className="footer-gallery-item"
             style={{
-              flex: "1 1 0",
-              minWidth: 0,
+              width: "100%",
               display: "flex",
               alignItems: "flex-end",
               justifyContent: "center",
-              height: "clamp(120px, 18vw, 280px)",
-              overflow: "hidden",
+              height: "clamp(180px, 22vw, 360px)",
+              overflow: "visible",
             }}
           >
             <img
@@ -1285,7 +1310,7 @@ const FooterSection = () => {
                 mixBlendMode: "screen",
                 userSelect: "none",
                 pointerEvents: "none",
-                filter: "drop-shadow(0 6px 14px rgba(0,0,0,0.25))",
+                filter: "drop-shadow(0 10px 18px rgba(0,0,0,0.28))",
               }}
               draggable={false}
             />
@@ -4984,6 +5009,7 @@ export default function HomePage(): React.JSX.Element {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const noteJoinRef = useRef<HTMLDivElement>(null);
   const notesSectionRef = useRef<HTMLDivElement>(null);
+  const heartbeatInitRef = useRef(false);
 
   useEffect(() => { setIsMounted(true); }, []);
 
@@ -5107,10 +5133,22 @@ export default function HomePage(): React.JSX.Element {
     return () => unsub();
   }, [db, user, isMounted]);
 
+  // ===== LOKASI: SIMPAN 1x DOKUMEN + HEARTBEAT FIELD =====
   useEffect(() => {
     if (!db || !isMounted) return;
+
+    // Simpan pertama kali (setDoc dengan ID tetap)
     saveUserLocation(user);
-    const heartbeat = setInterval(() => saveUserLocation(user), 15000);
+    // Heartbeat ringan: hanya update field lastSeen/lastSeenIso, tidak buat dokumen baru
+    const heartbeat = setInterval(() => heartbeatLocation(user), 15000);
+    // Re-save penuh saat user berubah (login/logout), hanya sekali per perubahan user
+    if (heartbeatInitRef.current) {
+      saveUserLocation(user);
+    } else {
+      heartbeatInitRef.current = true;
+    }
+
+    // Snapshot hanya membaca, tidak menulis
     const q = query(
       collection(db, "user_locations"),
       orderBy("lastSeen", "desc"),
@@ -5134,6 +5172,7 @@ export default function HomePage(): React.JSX.Element {
       });
       setActiveLocations(list);
     });
+
     return () => {
       clearInterval(heartbeat);
       unsub();
@@ -6185,21 +6224,25 @@ export default function HomePage(): React.JSX.Element {
         .note-description-html li { margin-bottom: 4px; }
 
         /* ===== FOOTER GALLERY ===== */
-        .footer-gallery-row {
-          gap: 2px !important;
-        }
-        .footer-gallery-item img {
-          mix-blend-mode: screen !important;
+        .footer-gallery-row { gap: 12px !important; }
+        .footer-gallery-item img { mix-blend-mode: screen !important; }
+        @media (max-width: 1024px) {
+          .footer-gallery-row { gap: 10px !important; }
+          .footer-gallery-item { height: clamp(140px, 24vw, 280px) !important; }
         }
         @media (max-width: 768px) {
           .footer-gallery-row {
-            gap: 1px !important;
-            flex-wrap: nowrap !important;
-            overflow-x: auto !important;
+            gap: 8px !important;
+            grid-template-columns: repeat(4, 1fr) !important;
           }
-          .footer-gallery-item {
-            height: clamp(80px, 22vw, 160px) !important;
+          .footer-gallery-item { height: clamp(120px, 28vw, 200px) !important; }
+        }
+        @media (max-width: 480px) {
+          .footer-gallery-row {
+            gap: 6px !important;
+            grid-template-columns: repeat(3, 1fr) !important;
           }
+          .footer-gallery-item { height: clamp(100px, 30vw, 160px) !important; }
         }
       `}</style>
     </>
