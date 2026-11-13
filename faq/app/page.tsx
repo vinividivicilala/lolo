@@ -1071,7 +1071,6 @@ interface NoteInvitation {
 }
 
 // ===== FARID VERIFIED PANEL =====
-// Animasi diatur menggunakan CSS & setTimeout agar reliable.
 const FaridVerifiedPanel = ({
   open,
   anchorRect,
@@ -1084,7 +1083,6 @@ const FaridVerifiedPanel = ({
   const [phase, setPhase] = useState<"loading" | "panel">("loading");
   const panelRef = useRef<HTMLDivElement>(null);
 
-  // Reset & timer untuk transisi ke panel
   useEffect(() => {
     if (open) {
       setPhase("loading");
@@ -1095,7 +1093,6 @@ const FaridVerifiedPanel = ({
     }
   }, [open]);
 
-  // Animasi panel muncul ke bawah (saat phase = panel)
   useEffect(() => {
     if (open && phase === "panel" && panelRef.current && anchorRect) {
       gsap.fromTo(
@@ -1117,7 +1114,6 @@ const FaridVerifiedPanel = ({
 
   return (
     <>
-      {/* Backdrop untuk klik di luar menutup */}
       <div
         onClick={onClose}
         style={{
@@ -1154,7 +1150,6 @@ const FaridVerifiedPanel = ({
               pointerEvents: "auto",
             }}
           >
-            {/* CSS-only loading verified badge animation */}
             <div style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                <svg width="24" height="24" viewBox="0 0 40 40" style={{ animation: 'verifiedPop 1.8s ease-in-out forwards' }}>
                  <g style={{ transformOrigin: "center center" }}>
@@ -1186,7 +1181,7 @@ const FaridVerifiedPanel = ({
             ref={panelRef}
             style={{
               width: "100%",
-              height: 0, // dianimasikan oleh gsap
+              height: 0,
               backgroundColor: BLUE,
               border: `2px solid ${WHITE}`,
               borderRadius: "6px",
@@ -5424,8 +5419,6 @@ const LiveChatAgent = ({
                 color: WHITE,
                 fontFamily: FONT_FAMILY,
               }}
-            {
-              }
             >
               <div
                 style={{
