@@ -1070,110 +1070,8 @@ interface NoteInvitation {
   createdAt: any;
 }
 
-// ===== VERIFIED LOADING ANIMATION =====
-// Design = SAMA dengan VerifiedBadgeWhite/Blue.
-// Yang dianimasikan: badge star-burst + checkmark di dalamnya.
-// Tidak ada bulat / ring tambahan.
-const VerifiedLoadingBadge = ({
-  size = 24,
-  badgeColor = WHITE,
-  checkColor = BLUE,
-  onComplete,
-}: {
-  size?: number;
-  badgeColor?: string;
-  checkColor?: string;
-  onComplete?: () => void;
-}) => {
-  const badgeRef = useRef<SVGGElement>(null);
-  const checkRef = useRef<SVGPathElement>(null);
-
-  useEffect(() => {
-    if (!badgeRef.current || !checkRef.current) return;
-    const badge = badgeRef.current;
-    const check = checkRef.current;
-
-    gsap.set(badge, {
-      scale: 0.3,
-      opacity: 0,
-      rotate: -25,
-      transformOrigin: "center center",
-    });
-    gsap.set(check, {
-      strokeDasharray: 100,
-      strokeDashoffset: 100,
-      opacity: 0,
-    });
-
-    const tl = gsap.timeline({ onComplete });
-
-    tl.to(badge, {
-      scale: 1,
-      opacity: 1,
-      rotate: 0,
-      duration: 0.5,
-      ease: "back.out(2.5)",
-    });
-
-    tl.to(badge, {
-      scale: 1.12,
-      duration: 0.35,
-      ease: "sine.inOut",
-      yoyo: true,
-      repeat: 1,
-    });
-
-    tl.to(check, {
-      opacity: 1,
-      strokeDashoffset: 0,
-      duration: 0.5,
-      ease: "power2.out",
-    });
-
-    tl.to(badge, {
-      scale: 1.18,
-      duration: 0.2,
-      ease: "power2.out",
-    });
-    tl.to(badge, {
-      scale: 1,
-      duration: 0.3,
-      ease: "back.out(2)",
-    });
-
-    return () => tl.kill();
-  }, []);
-
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 40 40"
-      xmlns="http://www.w3.org/2000/svg"
-      style={{ display: "block", overflow: "visible" }}
-    >
-      <g ref={badgeRef} style={{ transformOrigin: "center center" }}>
-        <path
-          fill={badgeColor}
-          d="M19.998 3.094 14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.03v-6.46h-6.419L25.358 0l-5.36 3.094Z"
-        />
-        <path
-          ref={checkRef}
-          d="M15 20L18 23L25 16"
-          stroke={checkColor}
-          strokeWidth="3.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          fill="none"
-        />
-      </g>
-    </svg>
-  );
-};
-
 // ===== FARID VERIFIED PANEL =====
-// Fase 1: animasi loading verified badge
-// Fase 2: panel biru muncul ke bawah dari tombol Farid
+// Animasi diatur menggunakan CSS & setTimeout agar reliable.
 const FaridVerifiedPanel = ({
   open,
   anchorRect,
@@ -1183,47 +1081,43 @@ const FaridVerifiedPanel = ({
   anchorRect: DOMRect | null;
   onClose: () => void;
 }) => {
-  const panelRef = useRef<HTMLDivElement>(null);
   const [phase, setPhase] = useState<"loading" | "panel">("loading");
+  const panelRef = useRef<HTMLDivElement>(null);
 
+  // Reset & timer untuk transisi ke panel
   useEffect(() => {
     if (open) {
       setPhase("loading");
+      const timer = setTimeout(() => {
+        setPhase("panel");
+      }, 1800); // Durasi animasi loading CSS (1.8s)
+      return () => clearTimeout(timer);
     }
   }, [open]);
 
+  // Animasi panel muncul ke bawah (saat phase = panel)
   useEffect(() => {
-    if (!open || !anchorRect) return;
-    if (phase !== "panel") return;
-    const panel = panelRef.current;
-    if (!panel) return;
-
-    gsap.set(panel, {
-      height: 0,
-      opacity: 1,
-      scaleY: 0.4,
-      transformOrigin: "top center",
-    });
-
-    const tl = gsap.timeline();
-    tl.to(panel, {
-      height: anchorRect.height,
-      scaleY: 1,
-      duration: 0.45,
-      ease: "power3.out",
-    });
-
-    return () => tl.kill();
+    if (open && phase === "panel" && panelRef.current && anchorRect) {
+      gsap.fromTo(
+        panelRef.current,
+        { height: 0, opacity: 0, scaleY: 0.4 },
+        {
+          height: anchorRect.height,
+          opacity: 1,
+          scaleY: 1,
+          duration: 0.45,
+          ease: "power3.out",
+          transformOrigin: "top center",
+        }
+      );
+    }
   }, [phase, open, anchorRect]);
-
-  const handleLoadingDone = useCallback(() => {
-    setPhase("panel");
-  }, []);
 
   if (!open || !anchorRect) return null;
 
   return (
     <>
+      {/* Backdrop untuk klik di luar menutup */}
       <div
         onClick={onClose}
         style={{
@@ -1260,12 +1154,30 @@ const FaridVerifiedPanel = ({
               pointerEvents: "auto",
             }}
           >
-            <VerifiedLoadingBadge
-              size={24}
-              badgeColor={WHITE}
-              checkColor={BLUE}
-              onComplete={handleLoadingDone}
-            />
+            {/* CSS-only loading verified badge animation */}
+            <div style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+               <svg width="24" height="24" viewBox="0 0 40 40" style={{ animation: 'verifiedPop 1.8s ease-in-out forwards' }}>
+                 <g style={{ transformOrigin: "center center" }}>
+                    <path
+                      fill={WHITE}
+                      d="M19.998 3.094 14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.03v-6.46h-6.419L25.358 0l-5.36 3.094Z"
+                    />
+                    <path
+                      d="M15 20L18 23L25 16"
+                      stroke={BLUE}
+                      strokeWidth="3.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      fill="none"
+                      style={{
+                        strokeDasharray: 100,
+                        strokeDashoffset: 100,
+                        animation: 'drawCheck 0.8s ease-out 0.8s forwards'
+                      }}
+                    />
+                 </g>
+               </svg>
+            </div>
           </div>
         )}
 
@@ -1274,7 +1186,7 @@ const FaridVerifiedPanel = ({
             ref={panelRef}
             style={{
               width: "100%",
-              height: 0,
+              height: 0, // dianimasikan oleh gsap
               backgroundColor: BLUE,
               border: `2px solid ${WHITE}`,
               borderRadius: "6px",
@@ -2949,7 +2861,7 @@ const DashboardOverlay = ({
   );
 };
 
-// ===== RIGHT NAVBAR (tanpa alamat) =====
+// ===== RIGHT NAVBAR =====
 const RightNavbar = ({
   user,
   auth,
@@ -5512,6 +5424,8 @@ const LiveChatAgent = ({
                 color: WHITE,
                 fontFamily: FONT_FAMILY,
               }}
+            {
+              }
             >
               <div
                 style={{
@@ -9114,6 +9028,38 @@ export default function HomePage(): React.JSX.Element {
             opacity: 0.35;
           }
           50% {
+            opacity: 1;
+          }
+        }
+        @keyframes verifiedPop {
+          0% {
+            transform: scale(0.3) rotate(-25deg);
+            opacity: 0;
+          }
+          20% {
+            transform: scale(1) rotate(0deg);
+            opacity: 1;
+          }
+          40% {
+            transform: scale(1.12) rotate(0deg);
+          }
+          60% {
+            transform: scale(1) rotate(0deg);
+          }
+          80% {
+            transform: scale(1.18) rotate(0deg);
+          }
+          100% {
+            transform: scale(1) rotate(0deg);
+          }
+        }
+        @keyframes drawCheck {
+          0% {
+            stroke-dashoffset: 100;
+            opacity: 0;
+          }
+          100% {
+            stroke-dashoffset: 0;
             opacity: 1;
           }
         }
