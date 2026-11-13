@@ -51,116 +51,6 @@ if (typeof window !== "undefined") {
   db = getFirestore(app);
 }
 
-// ===== GEOLOCATION =====
-const TIMEZONE_CITY_MAP: Record<string, string> = {
-  "Asia/Jakarta": "Jakarta",
-  "Asia/Pontianak": "Pontianak",
-  "Asia/Makassar": "Makassar",
-  "Asia/Jayapura": "Jayapura",
-  "Asia/Singapore": "Batam",
-  "Asia/Kuala_Lumpur": "Medan",
-};
-
-function getCountryFromLocale(): string {
-  try {
-    const locale = (navigator.language || "id-ID").toLowerCase();
-    if (locale.startsWith("id")) return "Indonesia";
-    if (locale.startsWith("ms")) return "Malaysia";
-    if (locale.startsWith("en-sg")) return "Singapore";
-    if (locale.startsWith("en-us") || locale.startsWith("en")) return "United States";
-    if (locale.startsWith("zh")) return "China";
-    if (locale.startsWith("ja")) return "Japan";
-    if (locale.startsWith("ko")) return "Korea";
-    if (locale.startsWith("th")) return "Thailand";
-    if (locale.startsWith("vi")) return "Vietnam";
-    if (locale.startsWith("tl") || locale.startsWith("fil")) return "Philippines";
-    return "Indonesia";
-  } catch {
-    return "Indonesia";
-  }
-}
-
-function resolveLocationName(): string {
-  try {
-    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
-    const localeCountry = getCountryFromLocale();
-    const city = TIMEZONE_CITY_MAP[tz];
-    if (city) return `${city}, ${localeCountry}`;
-
-    const parts = tz.split("/");
-    const rawCity = parts[parts.length - 1] || "";
-    if (rawCity) {
-      const prettyCity = rawCity
-        .replace(/_/g, " ")
-        .split(" ")
-        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-        .join(" ");
-      return `${prettyCity}, ${localeCountry}`;
-    }
-    return localeCountry;
-  } catch {
-    return "Indonesia";
-  }
-}
-
-function getPresenceDocId(user: any): string {
-  if (user?.uid) return `user_${user.uid}`;
-  try {
-    let sessionId = sessionStorage.getItem("menuru_presence_session") || "";
-    if (!sessionId) {
-      sessionId = `sess_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
-      sessionStorage.setItem("menuru_presence_session", sessionId);
-    }
-    return `guest_${sessionId}`;
-  } catch {
-    return `guest_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
-  }
-}
-
-async function saveUserLocation(user: any) {
-  if (!db) return;
-  try {
-    const locationId = getPresenceDocId(user);
-    const displayName = user?.displayName || user?.email?.split("@")[0] || "Guest";
-    const locName = resolveLocationName();
-    const now = new Date().toISOString();
-
-    await setDoc(
-      doc(db, "user_locations", locationId),
-      {
-        userId: user?.uid || null,
-        displayName,
-        locationName: locName,
-        lastSeen: serverTimestamp(),
-        lastSeenIso: now,
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "",
-        email: user?.email || "",
-        photoURL: user?.photoURL || "",
-        online: true,
-      },
-      { merge: true }
-    );
-  } catch (e) {
-    console.error("saveUserLocation error:", e);
-  }
-}
-
-async function heartbeatLocation(user: any) {
-  if (!db) return;
-  try {
-    const locationId = getPresenceDocId(user);
-    await updateDoc(doc(db, "user_locations", locationId), {
-      lastSeen: serverTimestamp(),
-      lastSeenIso: new Date().toISOString(),
-      online: true,
-    });
-  } catch (e) {
-    try {
-      await saveUserLocation(user);
-    } catch {}
-  }
-}
-
 // ===== ENCRYPTION =====
 const ENCRYPTION_KEY_BASE64 = "bWVudXJ1LXNlY3JldC1rZXktMjAyNi0zMmJ5dGVzISEh";
 const IV_LENGTH = 12;
@@ -465,7 +355,6 @@ const AGENT_NAME = "Farid Ardiansyah";
 const OWNER_NAME = "Farid Ardiansyah";
 const OWNER_EMAIL = "faridardiansyah061@gmail.com";
 const TOUR_STORAGE_KEY = "menuru_livechat_tour_completed_v1";
-const COOKIE_CONSENT_STORAGE_KEY = "menuru_cookie_consent_v1";
 const BLUE = "#0D3CFC";
 const WHITE = "#FFFFFF";
 const BLACK = "#000000";
@@ -718,24 +607,9 @@ const AgentIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: st
 
 const StriperIcon = ({ size = 22, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-    <path
-      d="M3 6H21"
-      stroke={color}
-      strokeWidth="3.5"
-      strokeLinecap="round"
-    />
-    <path
-      d="M3 12H21"
-      stroke={color}
-      strokeWidth="3.5"
-      strokeLinecap="round"
-    />
-    <path
-      d="M3 18H21"
-      stroke={color}
-      strokeWidth="3.5"
-      strokeLinecap="round"
-    />
+    <path d="M3 6H21" stroke={color} strokeWidth="3.5" strokeLinecap="round" />
+    <path d="M3 12H21" stroke={color} strokeWidth="3.5" strokeLinecap="round" />
+    <path d="M3 18H21" stroke={color} strokeWidth="3.5" strokeLinecap="round" />
   </svg>
 );
 
@@ -881,18 +755,8 @@ const ShieldBanIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?
       strokeLinecap="round"
       strokeLinejoin="round"
     />
-    <path
-      d="M9 9L15 15"
-      stroke={color}
-      strokeWidth="2"
-      strokeLinecap="round"
-    />
-    <path
-      d="M15 9L9 15"
-      stroke={color}
-      strokeWidth="2"
-      strokeLinecap="round"
-    />
+    <path d="M9 9L15 15" stroke={color} strokeWidth="2" strokeLinecap="round" />
+    <path d="M15 9L9 15" stroke={color} strokeWidth="2" strokeLinecap="round" />
   </svg>
 );
 
@@ -914,18 +778,8 @@ const InviteIcon = ({ size = 20, color = "currentColor" }: { size?: number; colo
       strokeLinecap="round"
       strokeLinejoin="round"
     />
-    <path
-      d="M20 8V14"
-      stroke={color}
-      strokeWidth="2"
-      strokeLinecap="round"
-    />
-    <path
-      d="M23 11H17"
-      stroke={color}
-      strokeWidth="2"
-      strokeLinecap="round"
-    />
+    <path d="M20 8V14" stroke={color} strokeWidth="2" strokeLinecap="round" />
+    <path d="M23 11H17" stroke={color} strokeWidth="2" strokeLinecap="round" />
   </svg>
 );
 
@@ -955,7 +809,7 @@ const MicrosoftStoreIcon = ({ size = 32 }: { size?: number }) => (
   </svg>
 );
 
-// ===== VERIFIED BADGES (blue & white) =====
+// ===== VERIFIED BADGES =====
 const VerifiedBadgeWhite = ({ size = 16 }: { size?: number }) => (
   <span
     style={{
@@ -1216,20 +1070,12 @@ interface NoteInvitation {
   createdAt: any;
 }
 
-interface ActiveLocation {
-  id: string;
-  displayName: string;
-  locationName: string;
-  lastSeenIso: string;
-}
-
-// ===== VERIFIED BADGE LOADING ANIMATION =====
-// Design = SAMA PERSIS dengan VerifiedBadgeWhite/Blue di banner biru.
-// Path "M19.998 3.094..." adalah path asli badge verified Instagram (star-burst + check).
-// Yang dianimasikan: (1) badge star-burst scale-up, (2) checkmark stroke-draw di dalam badge.
-// TIDAK ada bulat/ring tambahan.
+// ===== VERIFIED LOADING ANIMATION =====
+// Design = SAMA dengan VerifiedBadgeWhite/Blue.
+// Yang dianimasikan: badge star-burst + checkmark di dalamnya.
+// Tidak ada bulat / ring tambahan.
 const VerifiedLoadingBadge = ({
-  size = 26,
+  size = 24,
   badgeColor = WHITE,
   checkColor = BLUE,
   onComplete,
@@ -1261,7 +1107,6 @@ const VerifiedLoadingBadge = ({
 
     const tl = gsap.timeline({ onComplete });
 
-    // 1) Badge verified star-burst pop-in
     tl.to(badge, {
       scale: 1,
       opacity: 1,
@@ -1270,7 +1115,6 @@ const VerifiedLoadingBadge = ({
       ease: "back.out(2.5)",
     });
 
-    // 2) Badge berdenyut halus (loading feel)
     tl.to(badge, {
       scale: 1.12,
       duration: 0.35,
@@ -1279,7 +1123,6 @@ const VerifiedLoadingBadge = ({
       repeat: 1,
     });
 
-    // 3) Checkmark draw di dalam badge
     tl.to(check, {
       opacity: 1,
       strokeDashoffset: 0,
@@ -1287,7 +1130,6 @@ const VerifiedLoadingBadge = ({
       ease: "power2.out",
     });
 
-    // 4) Badge pop lagi sebagai konfirmasi
     tl.to(badge, {
       scale: 1.18,
       duration: 0.2,
@@ -1308,10 +1150,7 @@ const VerifiedLoadingBadge = ({
       height={size}
       viewBox="0 0 40 40"
       xmlns="http://www.w3.org/2000/svg"
-      style={{
-        display: "block",
-        overflow: "visible",
-      }}
+      style={{ display: "block", overflow: "visible" }}
     >
       <g ref={badgeRef} style={{ transformOrigin: "center center" }}>
         <path
@@ -1333,8 +1172,8 @@ const VerifiedLoadingBadge = ({
 };
 
 // ===== FARID VERIFIED PANEL =====
-// Fase 1: loading verified badge animasi
-// Fase 2: panel biru keluar ke bawah seukuran tombol
+// Fase 1: animasi loading verified badge
+// Fase 2: panel biru muncul ke bawah dari tombol Farid
 const FaridVerifiedPanel = ({
   open,
   anchorRect,
@@ -1347,14 +1186,12 @@ const FaridVerifiedPanel = ({
   const panelRef = useRef<HTMLDivElement>(null);
   const [phase, setPhase] = useState<"loading" | "panel">("loading");
 
-  // Reset ke loading setiap kali panel dibuka
   useEffect(() => {
     if (open) {
       setPhase("loading");
     }
   }, [open]);
 
-  // Animasi panel biru turun ke bawah (saat phase = panel)
   useEffect(() => {
     if (!open || !anchorRect) return;
     if (phase !== "panel") return;
@@ -1387,7 +1224,6 @@ const FaridVerifiedPanel = ({
 
   return (
     <>
-      {/* Backdrop klik luar untuk menutup */}
       <div
         onClick={onClose}
         style={{
@@ -1457,10 +1293,7 @@ const FaridVerifiedPanel = ({
               height="18"
               viewBox="0 0 40 40"
               xmlns="http://www.w3.org/2000/svg"
-              style={{
-                display: "block",
-                flexShrink: 0,
-              }}
+              style={{ display: "block", flexShrink: 0 }}
             >
               <path
                 fill={WHITE}
@@ -1572,7 +1405,8 @@ const TopBanner = () => {
             }}
             onMouseEnter={(e) => {
               (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.05)";
-              (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 4px 14px rgba(0,0,0,0.2)";
+              (e.currentTarget as HTMLButtonElement).style.boxShadow =
+                "0 4px 14px rgba(0,0,0,0.2)";
             }}
             onMouseLeave={(e) => {
               (e.currentTarget as HTMLButtonElement).style.transform = "scale(1)";
@@ -1585,11 +1419,7 @@ const TopBanner = () => {
         </span>
       </div>
 
-      <FaridVerifiedPanel
-        open={showPanel}
-        anchorRect={anchorRect}
-        onClose={handleClose}
-      />
+      <FaridVerifiedPanel open={showPanel} anchorRect={anchorRect} onClose={handleClose} />
     </>
   );
 };
@@ -1818,13 +1648,7 @@ const FooterSection = () => {
             >
               {section.title}
             </h3>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "8px",
-              }}
-            >
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
               {section.links.map((link, linkIdx) => {
                 let linkHref = "#";
                 let isAttention = false;
@@ -1863,11 +1687,7 @@ const FooterSection = () => {
                 return (
                   <div
                     key={linkIdx}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "10px",
-                    }}
+                    style={{ display: "flex", alignItems: "center", gap: "10px" }}
                   >
                     <Link href={linkHref} style={{ textDecoration: "none" }}>
                       <span
@@ -2135,205 +1955,6 @@ const FooterSection = () => {
   );
 };
 
-// ===== COOKIE CONSENT POPUP =====
-const CookieConsentPopup = ({ user, db, isMounted }: { user: any; db: any; isMounted: boolean }) => {
-  const [visible, setVisible] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const cardRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!isMounted) return;
-    let cancelled = false;
-
-    const checkConsent = async () => {
-      if (user && db) {
-        try {
-          const userRef = doc(db, "users", user.uid);
-          const snap = await getDoc(userRef);
-          if (!cancelled && snap.exists()) {
-            const data = snap.data();
-            const consent = data?.cookieConsent;
-            if (consent?.accepted === true) {
-              setVisible(false);
-              return;
-            }
-          }
-        } catch (err) {
-          console.error("Error:", err);
-        }
-      }
-      try {
-        const local = localStorage.getItem(COOKIE_CONSENT_STORAGE_KEY);
-        if (local === "accepted") {
-          if (!cancelled) setVisible(false);
-          return;
-        }
-      } catch (e) {}
-      if (!cancelled) setVisible(true);
-    };
-
-    checkConsent();
-    return () => {
-      cancelled = true;
-    };
-  }, [user, db, isMounted]);
-
-  useEffect(() => {
-    if (visible && cardRef.current) {
-      gsap.fromTo(
-        cardRef.current,
-        { opacity: 0, y: 40, scale: 0.96 },
-        { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: "power3.out" }
-      );
-    }
-  }, [visible]);
-
-  const handleAccept = async () => {
-    if (saving) return;
-    setSaving(true);
-    const nowIso = new Date().toISOString();
-    const consentPayload = {
-      accepted: true,
-      acceptedAt: nowIso,
-      policyVersion: "v1",
-      userAgent: typeof navigator !== "undefined" ? navigator.userAgent : "",
-    };
-
-    if (user && db) {
-      try {
-        const userRef = doc(db, "users", user.uid);
-        await setDoc(
-          userRef,
-          {
-            cookieConsent: consentPayload,
-            cookieConsentUpdatedAt: serverTimestamp(),
-          },
-          { merge: true }
-        );
-        try {
-          await addDoc(collection(db, "cookie_consents_log"), {
-            userId: user.uid,
-            userEmail: user.email || "",
-            userName: user.displayName || "",
-            ...consentPayload,
-            timestamp: serverTimestamp(),
-          });
-        } catch (logErr) {
-          console.error(logErr);
-        }
-      } catch (err) {
-        console.error(err);
-      }
-    }
-
-    try {
-      localStorage.setItem(COOKIE_CONSENT_STORAGE_KEY, "accepted");
-    } catch (e) {}
-
-    if (cardRef.current) {
-      gsap.to(cardRef.current, {
-        opacity: 0,
-        y: 40,
-        scale: 0.96,
-        duration: 0.35,
-        ease: "power2.in",
-        onComplete: () => setVisible(false),
-      });
-    } else {
-      setVisible(false);
-    }
-    setSaving(false);
-  };
-
-  if (!visible) return null;
-
-  return (
-    <div
-      style={{
-        position: "fixed",
-        right: "24px",
-        bottom: "24px",
-        zIndex: 9500,
-        maxWidth: "380px",
-        width: "calc(100% - 48px)",
-        fontFamily: FONT_FAMILY,
-      }}
-    >
-      <div
-        ref={cardRef}
-        style={{
-          backgroundColor: "rgba(255,255,255,0.85)",
-          backdropFilter: "blur(20px)",
-          borderRadius: "16px",
-          border: "1px solid rgba(255,255,255,0.5)",
-          boxShadow: "0 12px 40px rgba(0,0,0,0.15)",
-          padding: "20px 22px",
-          display: "flex",
-          flexDirection: "column",
-          gap: "14px",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <div
-            style={{
-              width: "34px",
-              height: "34px",
-              borderRadius: "50%",
-              backgroundColor: BLUE,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-            }}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="12" r="9" stroke="#ffffff" strokeWidth="2" />
-              <circle cx="9" cy="10" r="1.4" fill="#ffffff" />
-              <circle cx="15" cy="9" r="1.2" fill="#ffffff" />
-              <circle cx="14" cy="15" r="1.4" fill="#ffffff" />
-              <circle cx="9.5" cy="15.5" r="1" fill="#ffffff" />
-            </svg>
-          </div>
-          <span style={{ fontSize: "15px", fontWeight: 700, color: "#000000" }}>
-            Cookies
-          </span>
-        </div>
-        <p style={{ fontSize: "13px", lineHeight: 1.55, color: "#333333", margin: 0 }}>
-          We use cookies to improve your experience and analyse site usage.{" "}
-          <Link
-            href="/cookie-policy"
-            style={{
-              color: BLUE,
-              textDecoration: "underline",
-              fontWeight: 600,
-            }}
-          >
-            Cookie Policy
-          </Link>
-        </p>
-        <button
-          onClick={handleAccept}
-          disabled={saving}
-          style={{
-            alignSelf: "flex-end",
-            padding: "10px 24px",
-            backgroundColor: saving ? "#7d97f7" : BLUE,
-            color: "#ffffff",
-            border: "none",
-            borderRadius: "10px",
-            fontSize: "14px",
-            fontWeight: 700,
-            cursor: saving ? "not-allowed" : "pointer",
-            fontFamily: FONT_FAMILY,
-          }}
-        >
-          {saving ? "Saving..." : "Accept"}
-        </button>
-      </div>
-    </div>
-  );
-};
-
 // ===== NAVBAR BUTTON =====
 const NavbarButton = ({
   label,
@@ -2467,11 +2088,7 @@ const NavbarButton = ({
         >
           {iconComponent ? (
             <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
+              style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
             >
               <StriperIcon size={13} color={strokeColor} />
             </div>
@@ -2989,11 +2606,7 @@ const DashboardOverlay = ({
         >
           <div
             ref={closeIconRef}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
+            style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
           >
             <PlusIcon size={24} color={WHITE} />
           </div>
@@ -3169,14 +2782,7 @@ const DashboardOverlay = ({
             </div>
           </>
         ) : (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "24px",
-              flex: 1,
-            }}
-          >
+          <div style={{ display: "flex", flexDirection: "column", gap: "24px", flex: 1 }}>
             <div
               style={{
                 backgroundColor: "#F0F4FF",
@@ -3343,18 +2949,16 @@ const DashboardOverlay = ({
   );
 };
 
-// ===== RIGHT NAVBAR =====
+// ===== RIGHT NAVBAR (tanpa alamat) =====
 const RightNavbar = ({
   user,
   auth,
   db,
-  locationText,
   onOpenDashboard,
 }: {
   user: any;
   auth: any;
   db: any;
-  locationText: string;
   onOpenDashboard: () => void;
 }) => {
   const displayName = user?.displayName || user?.email?.split("@")[0] || "User";
@@ -3444,21 +3048,6 @@ const RightNavbar = ({
             </span>
           </Link>
         </div>
-        {locationText && (
-          <div
-            style={{
-              fontSize: "20px",
-              fontWeight: 700,
-              color: BLUE,
-              letterSpacing: "-0.02em",
-              fontFamily: FONT_FAMILY,
-              whiteSpace: "nowrap",
-              textAlign: "right",
-            }}
-          >
-            {locationText}
-          </div>
-        )}
       </div>
     );
   }
@@ -3507,12 +3096,7 @@ const RightNavbar = ({
               <img
                 src={photoURL}
                 alt={displayName}
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                  display: "block",
-                }}
+                style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
                 referrerPolicy="no-referrer"
               />
             ) : (
@@ -3582,21 +3166,6 @@ const RightNavbar = ({
           <LogoutIcon size={16} color={WHITE} />
         </button>
       </div>
-      {locationText && (
-        <div
-          style={{
-            fontSize: "20px",
-            fontWeight: 700,
-            color: BLUE,
-            letterSpacing: "-0.02em",
-            fontFamily: FONT_FAMILY,
-            whiteSpace: "nowrap",
-            textAlign: "right",
-          }}
-        >
-          {locationText}
-        </div>
-      )}
     </div>
   );
 };
@@ -4687,10 +4256,7 @@ const AppealChatRoom = ({
                   >
                     {renderDeliveryStatus(msg, isMine)}
                     <span
-                      style={{
-                        fontSize: "10px",
-                        color: isMine ? WHITE : "#999",
-                      }}
+                      style={{ fontSize: "10px", color: isMine ? WHITE : "#999" }}
                     >
                       {formatTime(msg.timestamp)}
                     </span>
@@ -5055,10 +4621,7 @@ const LiveChatAgent = ({
     if (!db || !user || !isMounted) return;
     let q;
     if (isAdmin) {
-      q = query(
-        collection(db, "appeal_tickets"),
-        orderBy("createdAt", "desc")
-      );
+      q = query(collection(db, "appeal_tickets"), orderBy("createdAt", "desc"));
     } else {
       q = query(
         collection(db, "appeal_tickets"),
@@ -5085,8 +4648,7 @@ const LiveChatAgent = ({
         const data = docSnap.data();
         const item: OnlineUser = {
           uid: docSnap.id,
-          displayName:
-            data.displayName || data.name || data.email || "User",
+          displayName: data.displayName || data.name || data.email || "User",
           email: data.email || "",
           photoURL: data.photoURL || "",
           online: data.online || false,
@@ -5105,10 +4667,7 @@ const LiveChatAgent = ({
     if (!db || !user || !isMounted) return;
     let q;
     if (isAdmin) {
-      q = query(
-        collection(db, "livechat_tickets"),
-        orderBy("createdAt", "desc")
-      );
+      q = query(collection(db, "livechat_tickets"), orderBy("createdAt", "desc"));
     } else {
       q = query(
         collection(db, "livechat_tickets"),
@@ -6533,13 +6092,7 @@ const LiveChatAgent = ({
             }}
           >
             {ticket.isBanned && (
-              <StabiloBadge
-                label="BANNED"
-                bg={WHITE}
-                text={BLUE}
-                border={WHITE}
-                size="sm"
-              />
+              <StabiloBadge label="BANNED" bg={WHITE} text={BLUE} border={WHITE} size="sm" />
             )}
             <StabiloBadge
               label={statusStyle.label}
@@ -7502,10 +7055,6 @@ export default function HomePage(): React.JSX.Element {
   const [navbarShifted, setNavbarShifted] = useState(false);
   const [noteHovered, setNoteHovered] = useState(false);
 
-  const [activeLocations, setActiveLocations] = useState<ActiveLocation[]>([]);
-  const [rotationIndex, setRotationIndex] = useState(0);
-  const [locationText, setLocationText] = useState<string>("");
-
   const [showNotesSection, setShowNotesSection] = useState(false);
   const [submittedNotes, setSubmittedNotes] = useState<NoteEntry[]>([]);
   const [inviteUsers, setInviteUsers] = useState<InviteUser[]>([]);
@@ -7537,7 +7086,6 @@ export default function HomePage(): React.JSX.Element {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const noteJoinRef = useRef<HTMLDivElement>(null);
   const notesSectionRef = useRef<HTMLDivElement>(null);
-  const heartbeatInitRef = useRef(false);
 
   useEffect(() => {
     setIsMounted(true);
@@ -7691,63 +7239,6 @@ export default function HomePage(): React.JSX.Element {
     });
     return () => unsub();
   }, [db, user, isMounted]);
-
-  useEffect(() => {
-    if (!db || !isMounted) return;
-    saveUserLocation(user);
-    const heartbeat = setInterval(() => heartbeatLocation(user), 15000);
-    if (heartbeatInitRef.current) saveUserLocation(user);
-    else heartbeatInitRef.current = true;
-
-    const q = query(
-      collection(db, "user_locations"),
-      orderBy("lastSeen", "desc"),
-      limit(50)
-    );
-    const unsub = onSnapshot(q, (snapshot: any) => {
-      const now = Date.now();
-      const FIVE_MIN = 5 * 60 * 1000;
-      const list: ActiveLocation[] = [];
-      snapshot.forEach((docSnap: any) => {
-        const data = docSnap.data();
-        const lastMs = data.lastSeenIso
-          ? new Date(data.lastSeenIso).getTime()
-          : 0;
-        if (now - lastMs > FIVE_MIN) return;
-        if (user && data.userId === user.uid) return;
-        list.push({
-          id: docSnap.id,
-          displayName: data.displayName || "Guest",
-          locationName: data.locationName || "Indonesia",
-          lastSeenIso: data.lastSeenIso || "",
-        });
-      });
-      setActiveLocations(list);
-    });
-    return () => {
-      clearInterval(heartbeat);
-      unsub();
-    };
-  }, [db, isMounted, user]);
-
-  useEffect(() => {
-    if (activeLocations.length === 0) {
-      setLocationText("");
-      setRotationIndex(0);
-      return;
-    }
-    setRotationIndex(0);
-    setLocationText(activeLocations[0].locationName);
-    const rotate = setInterval(() => {
-      setRotationIndex((idx) => {
-        const nextIdx = (idx + 1) % activeLocations.length;
-        setLocationText(activeLocations[nextIdx]?.locationName || "");
-        return nextIdx;
-      });
-    }, 30000);
-    return () => clearInterval(rotate);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeLocations.length]);
 
   useEffect(() => {
     if (!isMounted || loading) return;
@@ -8212,10 +7703,8 @@ export default function HomePage(): React.JSX.Element {
             user={user}
             auth={auth}
             db={db}
-            locationText={locationText}
             onOpenDashboard={() => setShowDashboard(true)}
           />
-          <CookieConsentPopup user={user} db={db} isMounted={isMounted} />
 
           <div style={{ marginTop: "44px" }}>
             <HeroMenuruTitle />
@@ -8759,7 +8248,9 @@ export default function HomePage(): React.JSX.Element {
                               whiteSpace: "nowrap",
                             }}
                           >
-                            {userHasNote ? "✓ Sudah bergabung" : "Belum bergabung"}
+                            {userHasNote
+                              ? "✓ Sudah bergabung"
+                              : "Belum bergabung"}
                           </span>
                         )}
                         {!isCurrentUser && activeNoteUser === n.id && (
