@@ -180,30 +180,18 @@ async function getCryptoKey(): Promise<CryptoKey> {
   if (cryptoKey) return cryptoKey;
   const keyData = base64ToUint8Array(ENCRYPTION_KEY_BASE64);
   const keyBytes = keyData.slice(0, 32);
-  cryptoKey = await window.crypto.subtle.importKey(
-    "raw",
-    keyBytes,
-    { name: "AES-GCM" },
-    false,
-    ["encrypt", "decrypt"]
-  );
+  cryptoKey = await window.crypto.subtle.importKey("raw", keyBytes, { name: "AES-GCM" }, false, ["encrypt", "decrypt"]);
   return cryptoKey;
 }
 
 async function encryptMessage(text: string): Promise<string> {
   try {
-    if (typeof window === "undefined" || !window.crypto) {
-      return `encrypted:${btoa(unescape(encodeURIComponent(text)))}`;
-    }
+    if (typeof window === "undefined" || !window.crypto) return `encrypted:${btoa(unescape(encodeURIComponent(text)))}`;
     const key = await getCryptoKey();
     const encoder = new TextEncoder();
     const data = encoder.encode(text);
     const iv = window.crypto.getRandomValues(new Uint8Array(IV_LENGTH));
-    const encrypted = await window.crypto.subtle.encrypt(
-      { name: "AES-GCM", iv: iv, tagLength: 128 },
-      key,
-      data
-    );
+    const encrypted = await window.crypto.subtle.encrypt({ name: "AES-GCM", iv: iv, tagLength: 128 }, key, data);
     const encryptedArray = new Uint8Array(encrypted);
     const combined = new Uint8Array(iv.length + encryptedArray.length);
     combined.set(iv, 0);
@@ -229,17 +217,12 @@ async function decryptMessage(encrypted: string): Promise<string> {
       return decodeURIComponent(escape(atob(encoded)));
     }
     if (!encrypted.startsWith("encrypted:")) return encrypted;
-
     const base64Data = encrypted.substring("encrypted:".length);
     const combined = base64ToUint8Array(base64Data);
     const iv = combined.slice(0, IV_LENGTH);
     const encryptedData = combined.slice(IV_LENGTH);
     const key = await getCryptoKey();
-    const decrypted = await window.crypto.subtle.decrypt(
-      { name: "AES-GCM", iv: iv, tagLength: 128 },
-      key,
-      encryptedData
-    );
+    const decrypted = await window.crypto.subtle.decrypt({ name: "AES-GCM", iv: iv, tagLength: 128 }, key, encryptedData);
     const decoder = new TextDecoder();
     return decoder.decode(decrypted);
   } catch (error) {
@@ -248,9 +231,7 @@ async function decryptMessage(encrypted: string): Promise<string> {
       try {
         const encoded = encrypted.includes(":") ? encrypted.split(":")[1] : encrypted;
         return decodeURIComponent(escape(atob(encoded)));
-      } catch {
-        return "[Message cannot be decrypted]";
-      }
+      } catch { return "[Message cannot be decrypted]"; }
     }
     return encrypted;
   }
@@ -258,166 +239,59 @@ async function decryptMessage(encrypted: string): Promise<string> {
 
 // ===== ANTI-BOT KEYWORDS =====
 const BAN_KEYWORDS = {
-  JUDOL: [
-    "judi", "slot", "poker", "casino", "roulette", "blackjack", "baccarat",
-    "togel", "toto", "4d", "3d", "2d", "colok", "macau", "singapore",
-    "hongkong", "sydney", "bandar", "bookie", "odds", "bet", "taruhan",
-    "jackpot", "progressive", "bonus", "deposit", "withdraw", "wd",
-    "live casino", "online casino", "gambling", "judol", "slot online",
-    "maxwin", "scatter", "wild", "free spin", "situs judi", "agen judi",
-    "bo", "qq", "domino", "capsa", "ceme", "taruhan bola", "sportsbook",
-    "parlay", "mix parlay", "over under", "handicap", "1x2",
-  ],
-  PHISHING: [
-    "phishing", "scam", "fraud", "penipuan", "tipu", "rekening", "transfer",
-    "minta uang", "pinjam uang", "kartu kredit", "kartu atm", "pin", "password",
-    "otp", "verifikasi", "validasi", "konfirmasi", "akun bank", "nomor rekening",
-    "no rek", "rek", "minta kirim", "kirim ke", "bayar ke", "setor ke",
-    "investasi bodong", "money game", "ponzi", "phising", "pishing",
-    "data pribadi", "informasi pribadi", "ktp", "nik", "kk", "akte",
-    "ijazah", "transkrip", "password bank", "m-banking", "mobile banking",
-    "internet banking", "i-banking", "e-banking",
-  ],
-  MALICIOUS: [
-    "<script", "javascript:", "onclick", "onload", "eval(", "document.",
-    "window.", "alert(", "prompt(", "confirm(", "function", "var ",
-    "const ", "let ", "=>", "===", "!==", "localStorage", "sessionStorage",
-    "document.cookie", "fetch(", "XMLHttpRequest", "$.ajax", "axios.",
-    "require(", "import ", "export ", "module.exports",
-  ],
-  SUSPICIOUS_LINKS: [
-    "bit.ly", "tinyurl", "shorturl", "rb.gy", "cutt.ly", "t.co", "ow.ly",
-    "buff.ly", "adf.ly", "shorte.st", "goo.gl", "is.gd", "v.gd", "migre.me",
-    "tiny.cc", "short.link", ".xyz", ".top", ".club", ".online", ".site",
-    ".win", ".bid", ".loan", ".date", ".download", ".stream", ".watch",
-    ".free", ".click", ".biz", ".info", ".name", ".pro", ".tech", ".store",
-    ".shop", ".live", ".app", ".dev", ".work", ".cloud", ".host",
-  ],
+  JUDOL: ["judi", "slot", "poker", "casino", "roulette", "blackjack", "baccarat", "togel", "toto", "4d", "3d", "2d", "colok", "macau", "singapore", "hongkong", "sydney", "bandar", "bookie", "odds", "bet", "taruhan", "jackpot", "progressive", "bonus", "deposit", "withdraw", "wd", "live casino", "online casino", "gambling", "judol", "slot online", "maxwin", "scatter", "wild", "free spin", "situs judi", "agen judi", "bo", "qq", "domino", "capsa", "ceme", "taruhan bola", "sportsbook", "parlay", "mix parlay", "over under", "handicap", "1x2"],
+  PHISHING: ["phishing", "scam", "fraud", "penipuan", "tipu", "rekening", "transfer", "minta uang", "pinjam uang", "kartu kredit", "kartu atm", "pin", "password", "otp", "verifikasi", "validasi", "konfirmasi", "akun bank", "nomor rekening", "no rek", "rek", "minta kirim", "kirim ke", "bayar ke", "setor ke", "investasi bodong", "money game", "ponzi", "phising", "pishing", "data pribadi", "informasi pribadi", "ktp", "nik", "kk", "akte", "ijazah", "transkrip", "password bank", "m-banking", "mobile banking", "internet banking", "i-banking", "e-banking"],
+  MALICIOUS: ["<script", "javascript:", "onclick", "onload", "eval(", "document.", "window.", "alert(", "prompt(", "confirm(", "function", "var ", "const ", "let ", "=>", "===", "!==", "localStorage", "sessionStorage", "document.cookie", "fetch(", "XMLHttpRequest", "$.ajax", "axios.", "require(", "import ", "export ", "module.exports"],
+  SUSPICIOUS_LINKS: ["bit.ly", "tinyurl", "shorturl", "rb.gy", "cutt.ly", "t.co", "ow.ly", "buff.ly", "adf.ly", "shorte.st", "goo.gl", "is.gd", "v.gd", "migre.me", "tiny.cc", "short.link", ".xyz", ".top", ".club", ".online", ".site", ".win", ".bid", ".loan", ".date", ".download", ".stream", ".watch", ".free", ".click", ".biz", ".info", ".name", ".pro", ".tech", ".store", ".shop", ".live", ".app", ".dev", ".work", ".cloud", ".host"],
 };
 
 function containsBannedContent(text: string): { isBanned: boolean; reason: string } {
   const lowerText = text.toLowerCase();
-  for (const keyword of BAN_KEYWORDS.JUDOL) {
-    if (lowerText.includes(keyword)) return { isBanned: true, reason: `Online Gambling (${keyword})` };
-  }
-  for (const keyword of BAN_KEYWORDS.PHISHING) {
-    if (lowerText.includes(keyword)) return { isBanned: true, reason: `Phishing/Scam (${keyword})` };
-  }
-  for (const keyword of BAN_KEYWORDS.MALICIOUS) {
-    if (lowerText.includes(keyword)) return { isBanned: true, reason: `Malicious Content (${keyword})` };
-  }
-  for (const keyword of BAN_KEYWORDS.SUSPICIOUS_LINKS) {
-    if (lowerText.includes(keyword)) return { isBanned: true, reason: `Suspicious Link (${keyword})` };
-  }
+  for (const keyword of BAN_KEYWORDS.JUDOL) { if (lowerText.includes(keyword)) return { isBanned: true, reason: `Online Gambling (${keyword})` }; }
+  for (const keyword of BAN_KEYWORDS.PHISHING) { if (lowerText.includes(keyword)) return { isBanned: true, reason: `Phishing/Scam (${keyword})` }; }
+  for (const keyword of BAN_KEYWORDS.MALICIOUS) { if (lowerText.includes(keyword)) return { isBanned: true, reason: `Malicious Content (${keyword})` }; }
+  for (const keyword of BAN_KEYWORDS.SUSPICIOUS_LINKS) { if (lowerText.includes(keyword)) return { isBanned: true, reason: `Suspicious Link (${keyword})` }; }
   const ipPattern = /[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+/;
   if (ipPattern.test(lowerText)) return { isBanned: true, reason: "Suspicious IP Address" };
   const repeatedNumber = /[0-9]{10,}/;
   if (repeatedNumber.test(lowerText)) return { isBanned: true, reason: "Suspicious Number" };
-  const transferPatterns = [
-    /kirim ke rek/i, /transfer ke/i, /bayar ke/i, /setor ke/i,
-    /minta kirim/i, /mohon kirim/i, /tolong kirim/i,
-  ];
-  for (const pattern of transferPatterns) {
-    if (pattern.test(lowerText)) return { isBanned: true, reason: "Transfer/Payment Request" };
-  }
+  const transferPatterns = [/kirim ke rek/i, /transfer ke/i, /bayar ke/i, /setor ke/i, /minta kirim/i, /mohon kirim/i, /tolong kirim/i];
+  for (const pattern of transferPatterns) { if (pattern.test(lowerText)) return { isBanned: true, reason: "Transfer/Payment Request" }; }
   return { isBanned: false, reason: "" };
 }
 
-const KENDALA_KEYWORDS = [
-  "kendala", "masalah", "error", "bug", "tidak bisa", "gagal", "rusak",
-  "bermasalah", "terkendala", "help", "tolong", "bantuan", "issue",
-  "crash", "not working", "tidak berfungsi", "stuck", "macet", "lemot",
-  "lambat", "susah", "sulit", "bingung", "tidak jelas", "tidak paham",
-  "butuh bantuan", "mohon bantuan", "problem", "trouble", "fail", "failed",
-];
+const KENDALA_KEYWORDS = ["kendala", "masalah", "error", "bug", "tidak bisa", "gagal", "rusak", "bermasalah", "terkendala", "help", "tolong", "bantuan", "issue", "crash", "not working", "tidak berfungsi", "stuck", "macet", "lemot", "lambat", "susah", "sulit", "bingung", "tidak jelas", "tidak paham", "butuh bantuan", "mohon bantuan", "problem", "trouble", "fail", "failed"];
 
 function containsKendala(text: string): boolean {
   const lowerText = text.toLowerCase();
   return KENDALA_KEYWORDS.some((keyword) => lowerText.includes(keyword));
 }
 
-async function banUserPermanent(
-  userId: string,
-  userEmail: string,
-  userName: string,
-  reason: string,
-  message: string
-) {
+async function banUserPermanent(userId: string, userEmail: string, userName: string, reason: string, message: string) {
   if (!db) return;
   try {
     const now = new Date().toISOString();
-    await setDoc(doc(db, "bot_blocks", userId), {
-      userId,
-      userEmail,
-      userName,
-      isBlocked: true,
-      blockedAt: now,
-      blockedReason: reason,
-      blockedMessage: message,
-      canCreateTicket: false,
-      canSendMessage: false,
-      violations: [{ type: "BANNED", reason, timestamp: now, message, confidence: 100 }],
-      totalViolations: 1,
-      warningCount: 0,
-      firstViolation: now,
-      lastViolation: now,
-    });
-    await updateDoc(doc(db, "users", userId), {
-      botBlocked: true,
-      botBlockedAt: serverTimestamp(),
-      botBlockedReason: reason,
-      botBlockedMessage: message,
-      canCreateTicket: false,
-      canSendMessage: false,
-    });
-    await addDoc(collection(db, "bot_violations_log"), {
-      userId,
-      userEmail,
-      userName,
-      violation: { type: "BANNED", reason, timestamp: now, message, confidence: 100 },
-      timestamp: serverTimestamp(),
-      resolved: false,
-      isBan: true,
-    });
-  } catch (error) {
-    console.error("Error banning user:", error);
-  }
+    await setDoc(doc(db, "bot_blocks", userId), { userId, userEmail, userName, isBlocked: true, blockedAt: now, blockedReason: reason, blockedMessage: message, canCreateTicket: false, canSendMessage: false, violations: [{ type: "BANNED", reason, timestamp: now, message, confidence: 100 }], totalViolations: 1, warningCount: 0, firstViolation: now, lastViolation: now });
+    await updateDoc(doc(db, "users", userId), { botBlocked: true, botBlockedAt: serverTimestamp(), botBlockedReason: reason, botBlockedMessage: message, canCreateTicket: false, canSendMessage: false });
+    await addDoc(collection(db, "bot_violations_log"), { userId, userEmail, userName, violation: { type: "BANNED", reason, timestamp: now, message, confidence: 100 }, timestamp: serverTimestamp(), resolved: false, isBan: true });
+  } catch (error) { console.error("Error banning user:", error); }
 }
 
 async function checkBanStatus(userId: string): Promise<any> {
-  if (!db) {
-    return { isBanned: false, reason: "", message: "", canCreateTicket: true, canSendMessage: true };
-  }
+  if (!db) return { isBanned: false, reason: "", message: "", canCreateTicket: true, canSendMessage: true };
   try {
     const botDoc = await getDoc(doc(db, "bot_blocks", userId));
     if (botDoc.exists()) {
       const data = botDoc.data();
-      return {
-        isBanned: data.isBlocked || false,
-        reason: data.blockedReason || "",
-        message: data.blockedMessage || "",
-        canCreateTicket: data.canCreateTicket !== false,
-        canSendMessage: data.canSendMessage !== false,
-      };
+      return { isBanned: data.isBlocked || false, reason: data.blockedReason || "", message: data.blockedMessage || "", canCreateTicket: data.canCreateTicket !== false, canSendMessage: data.canSendMessage !== false };
     }
     const userDoc = await getDoc(doc(db, "users", userId));
     if (userDoc.exists()) {
       const userData = userDoc.data();
-      if (userData.botBlocked === true) {
-        return {
-          isBanned: true,
-          reason: userData.botBlockedReason || "Blocked by system",
-          message: userData.botBlockedMessage || "",
-          canCreateTicket: userData.canCreateTicket !== false,
-          canSendMessage: userData.canSendMessage !== false,
-        };
-      }
+      if (userData.botBlocked === true) return { isBanned: true, reason: userData.botBlockedReason || "Blocked by system", message: userData.botBlockedMessage || "", canCreateTicket: userData.canCreateTicket !== false, canSendMessage: userData.canSendMessage !== false };
     }
     return { isBanned: false, reason: "", message: "", canCreateTicket: true, canSendMessage: true };
-  } catch (error) {
-    console.error("Error checking ban:", error);
-    return { isBanned: false, reason: "", message: "", canCreateTicket: true, canSendMessage: true };
-  }
+  } catch (error) { console.error("Error checking ban:", error); return { isBanned: false, reason: "", message: "", canCreateTicket: true, canSendMessage: true }; }
 }
 
 // ===== CONSTANTS =====
@@ -438,21 +312,9 @@ const RED = "#DC2626";
 const STORE_LINK = "https://apps.microsoft.com/detail/9nv1fg4b6xvn?hl=id-ID&gl=ID";
 const FARID_LINK = "https://farid-ardiansyah.netlify.app/";
 
-const FOOTER_GALLERY_IMAGES = [
-  "/images/a1.JPG",
-  "/images/a2.JPG",
-  "/images/a3.JPG",
-  "/images/a4.JPG",
-  "/images/a5.JPG",
-  "/images/a6.JPG",
-  "/images/a71.JPG",
-];
+const FOOTER_GALLERY_IMAGES = ["/images/a1.JPG", "/images/a2.JPG", "/images/a3.JPG", "/images/a4.JPG", "/images/a5.JPG", "/images/a6.JPG", "/images/a71.JPG"];
 
-const NOTES_CATEGORIES = [
-  "Makanan", "Minuman", "Coding", "Teknologi", "Pendidikan", "Kesehatan",
-  "Olahraga", "Seni", "Musik", "Bisnis", "Keuangan", "Traveling", "Otomotif",
-  "Game", "Fashion",
-];
+const NOTES_CATEGORIES = ["Makanan", "Minuman", "Coding", "Teknologi", "Pendidikan", "Kesehatan", "Olahraga", "Seni", "Musik", "Bisnis", "Keuangan", "Traveling", "Otomotif", "Game", "Fashion"];
 
 const STATUS_STYLES: any = {
   waiting: { label: "Waiting", bg: WHITE, text: BLUE, border: BLUE },
@@ -534,14 +396,14 @@ const CloseIcon = ({ size = 18, color = "currentColor" }: { size?: number; color
 );
 
 const PeopleIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <circle cx="12" cy="8" r="4" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     <path d="M4 21V19C4 16.7909 5.79086 15 8 15H16C18.2091 15 20 16.7909 20 19V21" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
 const AgentIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <circle cx="12" cy="7" r="4" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     <path d="M5 21V19C5 16.7909 6.79086 15 9 15H15C17.2091 15 19 16.7909 19 19V21" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     <path d="M16 3L18 5L16 7" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -550,7 +412,7 @@ const AgentIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: st
 );
 
 const StriperIcon = ({ size = 22, color = "#ffffff" }: { size?: number; color?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <path d="M3 6H21" stroke={color} strokeWidth="3.5" strokeLinecap="round" />
     <path d="M3 12H21" stroke={color} strokeWidth="3.5" strokeLinecap="round" />
     <path d="M3 18H21" stroke={color} strokeWidth="3.5" strokeLinecap="round" />
@@ -558,14 +420,14 @@ const StriperIcon = ({ size = 22, color = "#ffffff" }: { size?: number; color?: 
 );
 
 const TrustIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <path d="M12 2L4 5V11C4 16 8 20 12 22C16 20 20 16 20 11V5L12 2Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     <path d="M9 12L11 14L15 10" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
 const CareerIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <rect x="2" y="7" width="20" height="14" rx="2" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     <path d="M8 7V5C8 3.89543 8.89543 3 10 3H14C15.1046 3 16 3.89543 16 5V7" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     <path d="M2 13H22" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -573,14 +435,14 @@ const CareerIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?: s
 );
 
 const ResourcesIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <path d="M4 4H10C11.1046 4 12 4.89543 12 6V20C12 18.8954 11.1046 18 10 18H4V4Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     <path d="M20 4H14C12.8954 4 12 4.89543 12 6V20C12 18.8954 12.8954 18 14 18H20V4Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
 const DocsIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <path d="M14 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     <path d="M14 2V8H20" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     <path d="M8 13H16" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -589,7 +451,7 @@ const DocsIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: str
 );
 
 const BrandIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <path d="M20.59 13.41L11 3.83C10.6 3.43 10.06 3.2 9.5 3.2H4C2.9 3.2 2 4.1 2 5.2V10.7C2 11.26 2.22 11.8 2.63 12.2L12.21 21.79C13 22.57 14.27 22.57 15.06 21.79L20.59 16.26C21.37 15.47 21.37 14.2 20.59 13.41Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     <circle cx="7" cy="7" r="1.5" fill={color} />
   </svg>
@@ -646,7 +508,7 @@ const MicrosoftStoreIcon = ({ size = 32 }: { size?: number }) => (
   </svg>
 );
 
-// ===== VERIFIED BADGE =====
+// ===== VERIFIED BADGES (blue & white) =====
 const VerifiedBadgeWhite = ({ size = 16 }: { size?: number }) => (
   <span style={{ position: "relative", display: "inline-block", marginLeft: "4px", verticalAlign: "middle" }}>
     <svg width={size} height={size} viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" style={{ display: "inline-block", verticalAlign: "middle" }}>
@@ -670,9 +532,7 @@ const BlinkingDot = ({ size = 10, color = BLUE }: { size?: number; color?: strin
 const StabiloBadge = ({ label, bg, text, border, size = "sm" }: { label: string; bg: string; text: string; border: string; size?: "sm" | "md"; }) => {
   const isSmall = size === "sm";
   return (
-    <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", padding: isSmall ? "3px 9px" : "4px 11px", borderRadius: "4px", border: `1.5px solid ${border}`, backgroundColor: bg, color: text, fontSize: isSmall ? "10px" : "11px", fontWeight: 800, letterSpacing: "0.6px", textTransform: "uppercase", fontFamily: FONT_FAMILY, lineHeight: 1.3, whiteSpace: "nowrap" }}>
-      {label}
-    </span>
+    <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", padding: isSmall ? "3px 9px" : "4px 11px", borderRadius: "4px", border: `1.5px solid ${border}`, backgroundColor: bg, color: text, fontSize: isSmall ? "10px" : "11px", fontWeight: 800, letterSpacing: "0.6px", textTransform: "uppercase", fontFamily: FONT_FAMILY, lineHeight: 1.3, whiteSpace: "nowrap" }}>{label}</span>
   );
 };
 
@@ -695,175 +555,198 @@ interface InviteUser { uid: string; displayName: string; email: string; photoURL
 interface NoteInvitation { id: string; noteId: string; noteTitle: string; inviterId: string; inviterName: string; inviterEmail: string; inviteeId: string; inviteeEmail: string; status: "pending" | "accepted" | "declined"; createdAt: any; }
 interface ActiveLocation { id: string; displayName: string; locationName: string; lastSeenIso: string; }
 
-// ===== YOUTUBE-STYLE VERIFIED PANEL (muncul ke bawah dari tombol Farid, seukuran tombol) =====
+// ===== FAIRID BUTTON DROPDOWN (Verified loading + Panel biru ke bawah, tanpa redirect) =====
+// 1) Klik tombol → muncul animasi loading verified Instagram (ring spin + centang pop di dalam badge verified).
+// 2) Setelah loading selesai → panel biru muncul KE BAWAH dari tombol, seukuran tombol.
+// 3) Panel tetap tampil. Klik tombol/luar panel untuk menutup.
 const VerifiedDropPanel = ({
   open,
   anchorRect,
-  onDone,
+  onClose,
 }: {
   open: boolean;
   anchorRect: DOMRect | null;
-  onDone: () => void;
+  onClose: () => void;
 }) => {
+  const overlayRef = useRef<HTMLDivElement>(null);
+  const loaderRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const ringRef = useRef<SVGCircleElement>(null);
   const checkRef = useRef<SVGPathElement>(null);
-  const badgeRef = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
+  const loaderBadgeRef = useRef<HTMLDivElement>(null);
+  const panelBadgeRef = useRef<HTMLDivElement>(null);
+  const [phase, setPhase] = useState<"loading" | "panel">("loading");
 
   useEffect(() => {
     if (!open || !anchorRect) return;
-    setVisible(true);
+    setPhase("loading");
+
+    const loader = loaderRef.current;
     const panel = panelRef.current;
     const ring = ringRef.current;
     const check = checkRef.current;
-    const badge = badgeRef.current;
-    if (!panel || !ring || !check || !badge) return;
+    const loaderBadge = loaderBadgeRef.current;
+    const panelBadge = panelBadgeRef.current;
+    if (!loader || !panel || !ring || !check || !loaderBadge || !panelBadge) return;
 
-    gsap.set(panel, { height: 0, opacity: 1, scaleY: 0.3, transformOrigin: "top center" });
-    gsap.set(badge, { scale: 0.5, opacity: 0 });
+    // Reset
+    gsap.set(loader, { opacity: 1, scale: 1 });
+    gsap.set(panel, { height: 0, opacity: 0, scaleY: 0.3, transformOrigin: "top center" });
+    gsap.set(loaderBadge, { scale: 0.6, opacity: 0 });
+    gsap.set(panelBadge, { scale: 0.6, opacity: 0 });
+    gsap.set(ring, { strokeDasharray: 250, strokeDashoffset: 250, opacity: 1, rotate: -90, transformOrigin: "center" });
     gsap.set(check, { strokeDasharray: 80, strokeDashoffset: 80, opacity: 0 });
-    gsap.set(ring, { strokeDasharray: 250, strokeDashoffset: 250, opacity: 1 });
 
-    const tl = gsap.timeline({
-      onComplete: () => {
-        onDone();
-      },
-    });
+    const tl = gsap.timeline();
 
-    // 1) Panel biru turun keluar SETINGGI TOMBOL, seukuran tombol
-    tl.to(panel, {
-      height: anchorRect.height,
-      scaleY: 1,
-      duration: 0.4,
-      ease: "power3.out",
-    });
-
-    // 2) Badge verified Instagram pop masuk
-    tl.to(badge, { scale: 1, opacity: 1, duration: 0.35, ease: "back.out(2)" }, "-=0.15");
-
-    // 3) Ring spin (Instagram verified loading)
-    tl.to(ring, { strokeDashoffset: 0, duration: 0.9, ease: "power2.inOut" }, "-=0.2");
-
-    // 4) Checkmark pop
-    tl.to(check, { opacity: 1, strokeDashoffset: 0, duration: 0.4, ease: "power2.out" });
-
-    // 5) Tahan sebentar
-    tl.to({}, { duration: 0.2 });
-
-    // 6) Badge menyusut, panel naik ke atas menghilang
-    tl.to(badge, { scale: 0.6, opacity: 0, duration: 0.25, ease: "power2.in" });
-    tl.to(panel, { height: 0, scaleY: 0.3, opacity: 0, duration: 0.35, ease: "power3.in" });
+    // Loading: badge verified Instagram masuk
+    tl.to(loaderBadge, { scale: 1, opacity: 1, duration: 0.35, ease: "back.out(2)" });
+    // Ring berputar (loading)
+    tl.to(ring, { strokeDashoffset: 0, duration: 1.0, ease: "power2.inOut" }, "-=0.1");
+    // Centang verified pop di dalam badge
+    tl.to(check, { opacity: 1, strokeDashoffset: 0, duration: 0.35, ease: "power2.out" });
+    // Tahan supaya centang kelihatan
+    tl.to({}, { duration: 0.25 });
+    // Loading selesai → fade out loader
+    tl.to(loader, { opacity: 0, scale: 0.5, duration: 0.3, ease: "power2.in" });
+    // Switch ke phase panel
+    tl.call(() => setPhase("panel"));
+    // Panel biru ke bawah dari tombol, seukuran tombol
+    tl.to(panel, { height: anchorRect.height, opacity: 1, scaleY: 1, duration: 0.45, ease: "power3.out" });
+    // Badge verified di panel muncul
+    tl.to(panelBadge, { scale: 1, opacity: 1, duration: 0.35, ease: "back.out(2)" }, "-=0.15");
 
     return () => tl.kill();
-  }, [open, anchorRect, onDone]);
+  }, [open, anchorRect]);
 
-  if (!visible || !anchorRect) return null;
+  if (!open || !anchorRect) return null;
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        top: anchorRect.top,
-        left: anchorRect.left,
-        width: anchorRect.width,
-        zIndex: 9800,
-        pointerEvents: "none",
-      }}
-    >
+    <>
+      {/* Backdrop untuk klik di luar menutup */}
+      <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 9700, background: "transparent" }} />
       <div
-        ref={panelRef}
+        ref={overlayRef}
         style={{
-          width: "100%",
-          height: 0,
-          backgroundColor: BLUE,
-          border: `2px solid ${WHITE}`,
-          borderRadius: "8px",
-          boxShadow: `0 10px 30px rgba(13,60,252,0.5)`,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          overflow: "hidden",
-          transformOrigin: "top center",
+          position: "fixed",
+          top: anchorRect.top,
+          left: anchorRect.left,
+          width: anchorRect.width,
+          zIndex: 9800,
+          pointerEvents: "none",
         }}
       >
-        <div
-          ref={badgeRef}
-          style={{
-            width: "26px",
-            height: "26px",
-            position: "relative",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexShrink: 0,
-          }}
-        >
-          <svg
-            width="26"
-            height="26"
-            viewBox="0 0 26 26"
-            style={{ position: "absolute", top: 0, left: 0, transform: "rotate(-90deg)" }}
+        {phase === "loading" && (
+          <div
+            ref={loaderRef}
+            style={{
+              width: "100%",
+              height: anchorRect.height,
+              backgroundColor: BLUE,
+              border: `2px solid ${WHITE}`,
+              borderRadius: "6px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: `0 8px 24px rgba(13,60,252,0.55)`,
+              pointerEvents: "auto",
+            }}
           >
-            <circle
-              ref={ringRef}
-              cx="13"
-              cy="13"
-              r="11"
-              fill="none"
-              stroke={WHITE}
-              strokeWidth="2"
-              strokeLinecap="round"
-            />
-          </svg>
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 40 40"
-            xmlns="http://www.w3.org/2000/svg"
-            style={{ display: "block", position: "relative", zIndex: 2 }}
+            <div
+              ref={loaderBadgeRef}
+              style={{
+                width: "26px",
+                height: "26px",
+                position: "relative",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <svg
+                width="26"
+                height="26"
+                viewBox="0 0 26 26"
+                style={{ position: "absolute", top: 0, left: 0, transform: "rotate(-90deg)", transformOrigin: "center" }}
+              >
+                <circle
+                  ref={ringRef}
+                  cx="13"
+                  cy="13"
+                  r="11"
+                  fill="none"
+                  stroke={WHITE}
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+              </svg>
+              <svg width="18" height="18" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" style={{ display: "block", position: "relative", zIndex: 2 }}>
+                <path fill={WHITE} d="M19.998 3.094 14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.03v-6.46h-6.419L25.358 0l-5.36 3.094Z" />
+                <path ref={checkRef} d="M16 20L19 23L25 16" stroke={BLUE} strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+              </svg>
+            </div>
+          </div>
+        )}
+
+        {phase === "panel" && (
+          <div
+            ref={panelRef}
+            style={{
+              width: "100%",
+              height: 0,
+              backgroundColor: BLUE,
+              border: `2px solid ${WHITE}`,
+              borderRadius: "6px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: `0 10px 30px rgba(13,60,252,0.55)`,
+              overflow: "hidden",
+              transformOrigin: "top center",
+              pointerEvents: "auto",
+            }}
           >
-            <path
-              fill={WHITE}
-              d="M19.998 3.094 14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.03v-6.46h-6.419L25.358 0l-5.36 3.094Z"
-            />
-            <path
-              ref={checkRef}
-              d="M16 20L19 23L25 16"
-              stroke={BLUE}
-              strokeWidth="3.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              fill="none"
-            />
-          </svg>
-        </div>
+            <div
+              ref={panelBadgeRef}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "6px",
+              }}
+            >
+              <svg width="18" height="18" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" style={{ display: "block" }}>
+                <path fill={WHITE} d="M19.998 3.094 14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.03v-6.46h-6.419L25.358 0l-5.36 3.094Z" />
+                <path d="M16 20L19 23L25 16" stroke={BLUE} strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+              </svg>
+              <span style={{ fontFamily: FONT_FAMILY, fontSize: "12px", fontWeight: 800, color: WHITE, letterSpacing: "0.02em", whiteSpace: "nowrap" }}>
+                Verified
+              </span>
+            </div>
+          </div>
+        )}
       </div>
-    </div>
+    </>
   );
 };
 
 // ===== TOP BANNER =====
 const TopBanner = () => {
-  const [showVerify, setShowVerify] = useState(false);
+  const [showPanel, setShowPanel] = useState(false);
   const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null);
   const btnRef = useRef<HTMLButtonElement>(null);
 
   const handleClickFarid = (e: React.MouseEvent) => {
     e.preventDefault();
-    if (showVerify) return;
+    if (showPanel) {
+      setShowPanel(false);
+      return;
+    }
     if (btnRef.current) {
       const rect = btnRef.current.getBoundingClientRect();
       setAnchorRect(rect);
     }
-    setShowVerify(true);
-  };
-
-  const handleVerifyDone = () => {
-    if (typeof window !== "undefined") {
-      window.open(FARID_LINK, "_blank", "noopener,noreferrer");
-    }
-    setShowVerify(false);
+    setShowPanel(true);
   };
 
   return (
@@ -884,21 +767,7 @@ const TopBanner = () => {
           fontFamily: FONT_FAMILY,
         }}
       >
-        <span
-          style={{
-            color: WHITE,
-            fontSize: "14px",
-            fontWeight: 600,
-            letterSpacing: "0.02em",
-            textAlign: "center",
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-          }}
-        >
+        <span style={{ color: WHITE, fontSize: "14px", fontWeight: 600, letterSpacing: "0.02em", textAlign: "center", display: "flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
           Website this is build the develope{" "}
           <button
             ref={btnRef}
@@ -920,14 +789,8 @@ const TopBanner = () => {
               lineHeight: 1.4,
               transition: "transform 0.2s ease, box-shadow 0.2s ease",
             }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.05)";
-              (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 4px 14px rgba(0,0,0,0.2)";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.transform = "scale(1)";
-              (e.currentTarget as HTMLButtonElement).style.boxShadow = "none";
-            }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.05)"; (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 4px 14px rgba(0,0,0,0.2)"; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = "scale(1)"; (e.currentTarget as HTMLButtonElement).style.boxShadow = "none"; }}
           >
             Farid Ardiansyah
             <VerifiedBadgeBlue size={16} />
@@ -935,11 +798,7 @@ const TopBanner = () => {
         </span>
       </div>
 
-      <VerifiedDropPanel
-        open={showVerify}
-        anchorRect={anchorRect}
-        onDone={handleVerifyDone}
-      />
+      <VerifiedDropPanel open={showPanel} anchorRect={anchorRect} onClose={() => setShowPanel(false)} />
     </>
   );
 };
@@ -955,7 +814,6 @@ const HeroMenuruTitle = () => {
   useEffect(() => {
     if (!isMounted) return;
     if (!titleRef.current) return;
-
     const title = titleRef.current;
     const ctx = gsap.context(() => {
       const split = new SplitText(title, { type: "chars", charsClass: "hero-menuru-char" });
@@ -963,35 +821,17 @@ const HeroMenuruTitle = () => {
       gsap.to(split.chars, { opacity: 1, y: 0, rotationX: 0, scale: 1, duration: 1.4, stagger: 0.09, ease: "back.out(1.8)", delay: 0.2 });
       return () => { if (split) split.revert(); };
     }, containerRef);
-
     return () => ctx.revert();
   }, [isMounted]);
 
   return (
-    <div
-      ref={containerRef}
-      style={{
-        width: "100%", paddingTop: "120px", paddingBottom: "20px",
-        display: "flex", alignItems: "center", justifyContent: "center",
-        position: "relative", backgroundColor: WHITE,
-      }}
-    >
-      <h1
-        ref={titleRef}
-        style={{
-          fontFamily: FONT_FAMILY, fontSize: "600px", fontWeight: 400, color: BLUE,
-          letterSpacing: "-0.05em", lineHeight: 0.85, margin: 0, textAlign: "center",
-          userSelect: "none", whiteSpace: "nowrap", display: "inline-block",
-          WebkitFontSmoothing: "antialiased", MozOsxFontSmoothing: "grayscale",
-        }}
-      >
-        Menuru
-      </h1>
+    <div ref={containerRef} style={{ width: "100%", paddingTop: "120px", paddingBottom: "20px", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", backgroundColor: WHITE }}>
+      <h1 ref={titleRef} style={{ fontFamily: FONT_FAMILY, fontSize: "600px", fontWeight: 400, color: BLUE, letterSpacing: "-0.05em", lineHeight: 0.85, margin: 0, textAlign: "center", userSelect: "none", whiteSpace: "nowrap", display: "inline-block", WebkitFontSmoothing: "antialiased", MozOsxFontSmoothing: "grayscale" }}>Menuru</h1>
     </div>
   );
 };
 
-// ===== FOOTER SECTION (mentok layar bawah) =====
+// ===== FOOTER SECTION =====
 const FooterSection = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLSpanElement>(null);
@@ -1003,24 +843,14 @@ const FooterSection = () => {
     const title = titleRef.current;
     let split: any = null;
     let ctx: any = null;
-
     const setup = () => {
       split = new SplitText(title, { type: "chars", charsClass: "footer-menuru-char" });
       ctx = gsap.context(() => {
         gsap.set(split.chars, { yPercent: 120, opacity: 0, rotationX: -90, transformOrigin: "50% 100%", force3D: true });
-        gsap.to(split.chars, {
-          yPercent: 0, opacity: 1, rotationX: 0, duration: 1, stagger: 0.08, ease: "back.out(1.7)",
-          scrollTrigger: { trigger: containerRef.current, start: "top 90%", end: "top 40%", scrub: 1, toggleActions: "play none none reverse", invalidateOnRefresh: true },
-        });
+        gsap.to(split.chars, { yPercent: 0, opacity: 1, rotationX: 0, duration: 1, stagger: 0.08, ease: "back.out(1.7)", scrollTrigger: { trigger: containerRef.current, start: "top 90%", end: "top 40%", scrub: 1, toggleActions: "play none none reverse", invalidateOnRefresh: true } });
       }, containerRef);
     };
-
-    if (document.fonts && document.fonts.ready) {
-      document.fonts.ready.then(() => setTimeout(setup, 50));
-    } else {
-      setTimeout(setup, 200);
-    }
-
+    if (document.fonts && document.fonts.ready) { document.fonts.ready.then(() => setTimeout(setup, 50)); } else { setTimeout(setup, 200); }
     return () => { if (ctx) ctx.revert(); if (split && split.revert) split.revert(); };
   }, []);
 
@@ -1030,10 +860,7 @@ const FooterSection = () => {
     const items = galleryRef.current.querySelectorAll(".footer-gallery-item");
     if (items.length === 0) return;
     const ctx = gsap.context(() => {
-      gsap.fromTo(items, { opacity: 0, y: 60, scale: 0.9 }, {
-        opacity: 1, y: 0, scale: 1, duration: 0.9, stagger: 0.1, ease: "back.out(1.5)",
-        scrollTrigger: { trigger: galleryRef.current, start: "top 95%", toggleActions: "play none none reverse" },
-      });
+      gsap.fromTo(items, { opacity: 0, y: 60, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.9, stagger: 0.1, ease: "back.out(1.5)", scrollTrigger: { trigger: galleryRef.current, start: "top 95%", toggleActions: "play none none reverse" } });
     }, galleryRef);
     return () => ctx.revert();
   }, []);
@@ -1048,38 +875,16 @@ const FooterSection = () => {
   }, []);
 
   return (
-    <div
-      ref={containerRef}
-      style={{
-        width: "calc(100% - 40px)",
-        margin: "100px auto 20px auto",
-        backgroundColor: BLUE,
-        borderRadius: "32px",
-        padding: "60px 40px 40px 40px",
-        position: "relative",
-        overflow: "hidden",
-        boxSizing: "border-box",
-        color: WHITE,
-      }}
-    >
-      <div
-        style={{
-          display: "flex", justifyContent: "space-between", alignItems: "flex-start",
-          maxWidth: "1400px", margin: "0 auto", gap: "40px", flexWrap: "wrap",
-          position: "relative", zIndex: 1,
-        }}
-      >
+    <div ref={containerRef} style={{ width: "calc(100% - 40px)", margin: "100px auto 20px auto", backgroundColor: BLUE, borderRadius: "32px", padding: "60px 40px 40px 40px", position: "relative", overflow: "hidden", boxSizing: "border-box", color: WHITE }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", maxWidth: "1400px", margin: "0 auto", gap: "40px", flexWrap: "wrap", position: "relative", zIndex: 1 }}>
         {footerLinks.map((section, idx) => (
           <div key={idx} style={{ flex: "1", minWidth: "200px" }}>
-            <h3 style={{ fontFamily: FONT_FAMILY, fontSize: "28px", fontWeight: 700, color: WHITE, margin: 0, marginBottom: "16px", letterSpacing: "-0.01em" }}>
-              {section.title}
-            </h3>
+            <h3 style={{ fontFamily: FONT_FAMILY, fontSize: "28px", fontWeight: 700, color: WHITE, margin: 0, marginBottom: "16px", letterSpacing: "-0.01em" }}>{section.title}</h3>
             <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
               {section.links.map((link, linkIdx) => {
                 let linkHref = "#";
                 let isAttention = false;
                 let isStories = false;
-
                 if (link === "Contact Us") linkHref = "/contact";
                 else if (link === "Live Chat") linkHref = "/live-chat";
                 else if (link === "Live Chat Agent") linkHref = "/live-chat-agent";
@@ -1097,34 +902,21 @@ const FooterSection = () => {
                 else if (link === "Donation") linkHref = "/notfounds";
                 else if (link === "Community") linkHref = "/notfounds";
                 else if (link === "Instagram") linkHref = "https://instagram.com/menuru";
-
                 return (
                   <div key={linkIdx} style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                     <Link href={linkHref} style={{ textDecoration: "none" }}>
-                      <span style={{ fontFamily: FONT_FAMILY, fontSize: "20px", fontWeight: 500, color: WHITE, letterSpacing: "-0.01em", cursor: "pointer" }}>
-                        {link}
-                      </span>
+                      <span style={{ fontFamily: FONT_FAMILY, fontSize: "20px", fontWeight: 500, color: WHITE, letterSpacing: "-0.01em", cursor: "pointer" }}>{link}</span>
                     </Link>
-                    {isAttention && (
-                      <span style={{ backgroundColor: WHITE, border: `1.5px solid ${WHITE}`, color: BLUE, padding: "2px 8px", borderRadius: "4px", fontSize: "10px", fontWeight: 800, fontFamily: FONT_FAMILY, letterSpacing: "0.5px", textTransform: "uppercase", display: "inline-block" }}>Updated</span>
-                    )}
-                    {isStories && (
-                      <span style={{ backgroundColor: WHITE, border: `1.5px solid ${WHITE}`, color: BLUE, padding: "2px 8px", borderRadius: "4px", fontSize: "10px", fontWeight: 800, fontFamily: FONT_FAMILY, letterSpacing: "0.5px", textTransform: "uppercase", display: "inline-block" }}>New</span>
-                    )}
+                    {isAttention && (<span style={{ backgroundColor: WHITE, border: `1.5px solid ${WHITE}`, color: BLUE, padding: "2px 8px", borderRadius: "4px", fontSize: "10px", fontWeight: 800, fontFamily: FONT_FAMILY, letterSpacing: "0.5px", textTransform: "uppercase", display: "inline-block" }}>Updated</span>)}
+                    {isStories && (<span style={{ backgroundColor: WHITE, border: `1.5px solid ${WHITE}`, color: BLUE, padding: "2px 8px", borderRadius: "4px", fontSize: "10px", fontWeight: 800, fontFamily: FONT_FAMILY, letterSpacing: "0.5px", textTransform: "uppercase", display: "inline-block" }}>New</span>)}
                   </div>
                 );
               })}
             </div>
           </div>
         ))}
-
         <div style={{ flex: "0 0 auto", minWidth: "200px" }}>
-          <a
-            href={STORE_LINK}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ display: "inline-flex", alignItems: "center", gap: "10px", textDecoration: "none", cursor: "pointer", padding: "14px 22px", backgroundColor: RED, borderRadius: "12px", boxShadow: "0 6px 24px rgba(220,38,38,0.35)", transition: "transform 0.2s ease, boxShadow 0.2s ease", pointerEvents: "auto" }}
-          >
+          <a href={STORE_LINK} target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: "10px", textDecoration: "none", cursor: "pointer", padding: "14px 22px", backgroundColor: RED, borderRadius: "12px", boxShadow: "0 6px 24px rgba(220,38,38,0.35)", transition: "transform 0.2s ease, boxShadow 0.2s ease", pointerEvents: "auto" }}>
             <WindowsIcon size={24} color={WHITE} />
             <span style={{ fontFamily: FONT_FAMILY, fontSize: "18px", fontWeight: 700, color: WHITE, letterSpacing: "-0.01em", lineHeight: 1.2, whiteSpace: "nowrap" }}>Download for Windows</span>
           </a>
@@ -1132,52 +924,28 @@ const FooterSection = () => {
       </div>
 
       <div style={{ maxWidth: "1400px", margin: "40px auto 0 auto", paddingTop: "20px", borderTop: `1px solid rgba(255,255,255,0.2)`, position: "relative", zIndex: 1 }}>
-        <p style={{ fontFamily: FONT_FAMILY, fontSize: "14px", fontWeight: 400, color: WHITE, margin: 0, textAlign: "center", letterSpacing: "0.01em", opacity: 0.8 }}>
-          Terms and conditions apply. By using this website, you agree to our Terms of Use and Privacy Policy.
-        </p>
+        <p style={{ fontFamily: FONT_FAMILY, fontSize: "14px", fontWeight: 400, color: WHITE, margin: 0, textAlign: "center", letterSpacing: "0.01em", opacity: 0.8 }}>Terms and conditions apply. By using this website, you agree to our Terms of Use and Privacy Policy.</p>
       </div>
 
       <div style={{ marginTop: "40px", marginBottom: "24px", position: "relative", zIndex: 1 }}>
-        <a
-          href={STORE_LINK}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ display: "inline-flex", alignItems: "center", gap: "12px", textDecoration: "none", cursor: "pointer", padding: "14px 22px", backgroundColor: WHITE, borderRadius: "14px", boxShadow: "0 6px 24px rgba(0,0,0,0.12)", transition: "transform 0.2s ease, boxShadow 0.2s ease", pointerEvents: "auto" }}
-        >
+        <a href={STORE_LINK} target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: "12px", textDecoration: "none", cursor: "pointer", padding: "14px 22px", backgroundColor: WHITE, borderRadius: "14px", boxShadow: "0 6px 24px rgba(0,0,0,0.12)", transition: "transform 0.2s ease, boxShadow 0.2s ease", pointerEvents: "auto" }}>
           <MicrosoftStoreIcon size={36} />
           <span style={{ fontFamily: FONT_FAMILY, fontSize: "24px", fontWeight: 700, color: BLUE, letterSpacing: "-0.02em", lineHeight: 1.2 }}>Unduh Menuru</span>
         </a>
       </div>
 
-      <div
-        ref={galleryRef}
-        className="footer-gallery-row"
-        style={{ position: "relative", zIndex: 1, display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: "12px", alignItems: "end", marginBottom: "20px", width: "100%", pointerEvents: "none" }}
-      >
+      <div ref={galleryRef} className="footer-gallery-row" style={{ position: "relative", zIndex: 1, display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: "12px", alignItems: "end", marginBottom: "20px", width: "100%", pointerEvents: "none" }}>
         {FOOTER_GALLERY_IMAGES.map((src, i) => (
           <div key={i} className="footer-gallery-item" style={{ width: "100%", display: "flex", alignItems: "flex-end", justifyContent: "center", height: "clamp(180px, 22vw, 360px)", overflow: "visible" }}>
-            <img
-              src={src}
-              alt={`footer-gallery-${i + 1}`}
-              className="footer-gallery-img"
-              style={{ width: "100%", height: "100%", objectFit: "contain", objectPosition: "bottom center", display: "block", mixBlendMode: "screen", userSelect: "none", pointerEvents: "none", filter: "drop-shadow(0 10px 18px rgba(0,0,0,0.28))" }}
-              draggable={false}
-            />
+            <img src={src} alt={`footer-gallery-${i + 1}`} className="footer-gallery-img" style={{ width: "100%", height: "100%", objectFit: "contain", objectPosition: "bottom center", display: "block", mixBlendMode: "screen", userSelect: "none", pointerEvents: "none", filter: "drop-shadow(0 10px 18px rgba(0,0,0,0.28))" }} draggable={false} />
           </div>
         ))}
       </div>
 
       <div style={{ position: "relative", zIndex: 1 }}>
-        <span
-          ref={titleRef}
-          style={{ fontFamily: FONT_FAMILY, fontSize: "600px", fontWeight: 400, color: WHITE, letterSpacing: "-0.05em", lineHeight: "0.85", display: "block", textAlign: "left", WebkitFontSmoothing: "antialiased", MozOsxFontSmoothing: "grayscale", willChange: "transform, opacity", whiteSpace: "nowrap", margin: 0, padding: 0, overflow: "visible", position: "relative", pointerEvents: "none" }}
-        >
-          Menuru
-        </span>
+        <span ref={titleRef} style={{ fontFamily: FONT_FAMILY, fontSize: "600px", fontWeight: 400, color: WHITE, letterSpacing: "-0.05em", lineHeight: "0.85", display: "block", textAlign: "left", WebkitFontSmoothing: "antialiased", MozOsxFontSmoothing: "grayscale", willChange: "transform, opacity", whiteSpace: "nowrap", margin: 0, padding: 0, overflow: "visible", position: "relative", pointerEvents: "none" }}>Menuru</span>
         <div style={{ width: "100%", display: "flex", justifyContent: "flex-start", marginTop: "10px" }}>
-          <span style={{ fontFamily: FONT_FAMILY, fontSize: "16px", fontWeight: 400, color: WHITE, letterSpacing: "0.01em", opacity: 0.85 }}>
-            2024 - 2026 Menuru. All rights reserved.
-          </span>
+          <span style={{ fontFamily: FONT_FAMILY, fontSize: "16px", fontWeight: 400, color: WHITE, letterSpacing: "0.01em", opacity: 0.85 }}>2024 - 2026 Menuru. All rights reserved.</span>
         </div>
       </div>
     </div>
@@ -1216,9 +984,7 @@ const CookieConsentPopup = ({ user, db, isMounted }: { user: any; db: any; isMou
   }, [user, db, isMounted]);
 
   useEffect(() => {
-    if (visible && cardRef.current) {
-      gsap.fromTo(cardRef.current, { opacity: 0, y: 40, scale: 0.96 }, { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: "power3.out" });
-    }
+    if (visible && cardRef.current) gsap.fromTo(cardRef.current, { opacity: 0, y: 40, scale: 0.96 }, { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: "power3.out" });
   }, [visible]);
 
   const handleAccept = async () => {
@@ -1226,24 +992,16 @@ const CookieConsentPopup = ({ user, db, isMounted }: { user: any; db: any; isMou
     setSaving(true);
     const nowIso = new Date().toISOString();
     const consentPayload = { accepted: true, acceptedAt: nowIso, policyVersion: "v1", userAgent: typeof navigator !== "undefined" ? navigator.userAgent : "" };
-
     if (user && db) {
       try {
         const userRef = doc(db, "users", user.uid);
         await setDoc(userRef, { cookieConsent: consentPayload, cookieConsentUpdatedAt: serverTimestamp() }, { merge: true });
-        try {
-          await addDoc(collection(db, "cookie_consents_log"), { userId: user.uid, userEmail: user.email || "", userName: user.displayName || "", ...consentPayload, timestamp: serverTimestamp() });
-        } catch (logErr) { console.error(logErr); }
+        try { await addDoc(collection(db, "cookie_consents_log"), { userId: user.uid, userEmail: user.email || "", userName: user.displayName || "", ...consentPayload, timestamp: serverTimestamp() }); } catch (logErr) { console.error(logErr); }
       } catch (err) { console.error(err); }
     }
-
     try { localStorage.setItem(COOKIE_CONSENT_STORAGE_KEY, "accepted"); } catch (e) {}
-
-    if (cardRef.current) {
-      gsap.to(cardRef.current, { opacity: 0, y: 40, scale: 0.96, duration: 0.35, ease: "power2.in", onComplete: () => setVisible(false) });
-    } else {
-      setVisible(false);
-    }
+    if (cardRef.current) gsap.to(cardRef.current, { opacity: 0, y: 40, scale: 0.96, duration: 0.35, ease: "power2.in", onComplete: () => setVisible(false) });
+    else setVisible(false);
     setSaving(false);
   };
 
@@ -1264,43 +1022,23 @@ const CookieConsentPopup = ({ user, db, isMounted }: { user: any; db: any; isMou
           </div>
           <span style={{ fontSize: "15px", fontWeight: 700, color: "#000000" }}>Cookies</span>
         </div>
-        <p style={{ fontSize: "13px", lineHeight: 1.55, color: "#333333", margin: 0 }}>
-          We use cookies to improve your experience and analyse site usage.{" "}
-          <Link href="/cookie-policy" style={{ color: BLUE, textDecoration: "underline", fontWeight: 600 }}>Cookie Policy</Link>
-        </p>
-        <button onClick={handleAccept} disabled={saving} style={{ alignSelf: "flex-end", padding: "10px 24px", backgroundColor: saving ? "#7d97f7" : BLUE, color: "#ffffff", border: "none", borderRadius: "10px", fontSize: "14px", fontWeight: 700, cursor: saving ? "not-allowed" : "pointer", fontFamily: FONT_FAMILY }}>
-          {saving ? "Saving..." : "Accept"}
-        </button>
+        <p style={{ fontSize: "13px", lineHeight: 1.55, color: "#333333", margin: 0 }}>We use cookies to improve your experience and analyse site usage.{" "}<Link href="/cookie-policy" style={{ color: BLUE, textDecoration: "underline", fontWeight: 600 }}>Cookie Policy</Link></p>
+        <button onClick={handleAccept} disabled={saving} style={{ alignSelf: "flex-end", padding: "10px 24px", backgroundColor: saving ? "#7d97f7" : BLUE, color: "#ffffff", border: "none", borderRadius: "10px", fontSize: "14px", fontWeight: 700, cursor: saving ? "not-allowed" : "pointer", fontFamily: FONT_FAMILY }}>{saving ? "Saving..." : "Accept"}</button>
       </div>
     </div>
   );
 };
 
 // ===== NAVBAR BUTTON =====
-const NavbarButton = ({
-  label, panelTitle, panelDescription, panelImage, panelRightTitle, panelRightDescription,
-  iconType, bigPanelWidth = 850, bigPanelHeight = 260,
-  buttonColor = BLUE, buttonHoverColor = "#000000", panelColor = BLUE,
-  iconButtonColor = "#000000", iconButtonHoverColor = BLUE,
-  panelBoxColor = "rgba(255,255,255,0.12)", panelBoxBorder = "rgba(255,255,255,0.25)",
-  labelTextColor = "#ffffff", labelTextHoverColor = "#ffffff",
-  titleTextColor = "#ffffff", descriptionTextColor = "rgba(255,255,255,0.9)",
-  iconComponent = null, isResources = false,
-}: any) => {
+const NavbarButton = ({ label, panelTitle, panelDescription, panelImage, panelRightTitle, panelRightDescription, iconType, bigPanelWidth = 850, bigPanelHeight = 260, buttonColor = BLUE, buttonHoverColor = "#000000", panelColor = BLUE, iconButtonColor = "#000000", iconButtonHoverColor = BLUE, panelBoxColor = "rgba(255,255,255,0.12)", panelBoxBorder = "rgba(255,255,255,0.25)", labelTextColor = "#ffffff", labelTextHoverColor = "#ffffff", titleTextColor = "#ffffff", descriptionTextColor = "rgba(255,255,255,0.9)", iconComponent = null, isResources = false }: any) => {
   const [open, setOpen] = useState(false);
   const linesTopRef = useRef<SVGLineElement>(null);
   const linesBottomRef = useRef<SVGLineElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const handleEnter = () => {
-    if (closeTimeoutRef.current) { clearTimeout(closeTimeoutRef.current); closeTimeoutRef.current = null; }
-    setOpen(true);
-  };
-  const handleLeave = () => {
-    if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
-    closeTimeoutRef.current = setTimeout(() => setOpen(false), 250);
-  };
+  const handleEnter = () => { if (closeTimeoutRef.current) { clearTimeout(closeTimeoutRef.current); closeTimeoutRef.current = null; } setOpen(true); };
+  const handleLeave = () => { if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current); closeTimeoutRef.current = setTimeout(() => setOpen(false), 250); };
 
   useEffect(() => () => { if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current); }, []);
 
@@ -1317,11 +1055,8 @@ const NavbarButton = ({
 
   useEffect(() => {
     if (!panelRef.current) return;
-    if (open) {
-      gsap.fromTo(panelRef.current, { opacity: 0, y: -20, scale: 0.96 }, { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: "power3.out" });
-    } else {
-      gsap.to(panelRef.current, { opacity: 0, y: -20, scale: 0.96, duration: 0.25, ease: "power2.in" });
-    }
+    if (open) gsap.fromTo(panelRef.current, { opacity: 0, y: -20, scale: 0.96 }, { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: "power3.out" });
+    else gsap.to(panelRef.current, { opacity: 0, y: -20, scale: 0.96, duration: 0.25, ease: "power2.in" });
   }, [open]);
 
   const strokeColor = open ? labelTextHoverColor : labelTextColor;
@@ -1331,11 +1066,7 @@ const NavbarButton = ({
       <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "8px 14px", backgroundColor: open ? buttonHoverColor : buttonColor, backdropFilter: "blur(20px)", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.18)", boxShadow: open ? "0 8px 24px rgba(0,0,0,0.35)" : `0 8px 24px ${buttonColor}55`, transition: "background-color 0.25s ease", cursor: "pointer", position: "relative", zIndex: 2 }}>
         <span style={{ color: open ? labelTextHoverColor : labelTextColor, fontSize: "13px", fontWeight: 600, letterSpacing: "0.02em", fontFamily: FONT_FAMILY, whiteSpace: "nowrap" }}>{label}</span>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "20px", height: "20px", backgroundColor: open ? iconButtonHoverColor : iconButtonColor, borderRadius: "6px" }}>
-          {iconComponent ? (
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <StriperIcon size={13} color={strokeColor} />
-            </div>
-          ) : (
+          {iconComponent ? (<div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}><StriperIcon size={13} color={strokeColor} /></div>) : (
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" style={{ display: "block" }}>
               <line ref={linesTopRef} x1="4" y1="7" x2="20" y2="7" stroke={strokeColor} strokeWidth="2.5" strokeLinecap="round" />
               <line ref={linesBottomRef} x1="4" y1="17" x2="20" y2="17" stroke={strokeColor} strokeWidth="2.5" strokeLinecap="round" />
@@ -1343,7 +1074,6 @@ const NavbarButton = ({
           )}
         </div>
       </div>
-
       {open && (
         <div ref={panelRef} onMouseEnter={handleEnter} onMouseLeave={handleLeave} style={{ position: "absolute", top: "calc(100% + 10px)", left: "0px", width: `${bigPanelWidth}px`, minHeight: `${bigPanelHeight}px`, backgroundColor: panelColor, backdropFilter: "blur(24px)", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.2)", boxShadow: `0 8px 32px ${panelColor}55`, zIndex: 1, fontFamily: FONT_FAMILY, color: titleTextColor, padding: "22px 26px", display: "flex", gap: "20px", alignItems: "flex-start" }}>
           <div style={{ flex: "1 1 0", minWidth: 0, display: "flex", flexDirection: "column", gap: "12px" }}>
@@ -1374,7 +1104,6 @@ const NavbarButton = ({
               </>
             )}
           </div>
-
           <div style={{ flex: "0 0 380px", display: "flex", flexDirection: "column", gap: "12px" }}>
             <div style={{ backgroundColor: panelBoxColor, border: `1px solid ${panelBoxBorder}`, borderRadius: "12px", padding: "14px", display: "flex", flexDirection: "column", gap: "10px" }}>
               <img src={panelImage} alt={panelTitle} style={{ width: "100%", height: "170px", objectFit: "contain", display: "block", borderRadius: "10px" }} />
@@ -1396,7 +1125,6 @@ const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
         <img src="/images/gfssa.jpg" alt="Menuru" style={{ height: "60px", width: "auto", maxWidth: "none", objectFit: "contain", display: "block", flexShrink: 0, mixBlendMode: "multiply" }} />
         <span style={{ color: BLUE, fontSize: "60px", fontWeight: 700, letterSpacing: "-0.03em", fontFamily: FONT_FAMILY, lineHeight: 1, whiteSpace: "nowrap" }}>Menuru</span>
       </Link>
-
       <NavbarButton label="Teams" panelTitle="Trust" panelDescription="Your security and privacy are our top priorities with end-to-end encryption." panelImage="/images/p0l.jpg" panelRightTitle="Why Trust Us" panelRightDescription="Our systems are monitored 24/7 to protect your data." iconType="trust" bigPanelWidth={850} bigPanelHeight={260} />
       <NavbarButton label="Individual" panelTitle="Careers" panelDescription="Join our team and build a meaningful career in a supportive environment." panelImage="/images/xxz.jpg" panelRightTitle="Life at Menuru" panelRightDescription="A collaborative, flexible work culture with plenty of opportunities to grow together." iconType="career" bigPanelWidth={850} bigPanelHeight={260} />
       <NavbarButton label="Resources" panelTitle="Docs & Brand" panelDescription="Access complete documentation and Menuru brand assets in one place." panelImage="/images/p0l.jpg" panelRightTitle="Docs & Brand" panelRightDescription="Guides, visual assets, and official Menuru brand references." iconType="resources" iconComponent={<StriperIcon size={22} color="#ffffff" />} bigPanelWidth={850} bigPanelHeight={340} buttonColor={BLUE} buttonHoverColor={BLUE} panelColor="#000000" iconButtonColor="#000000" iconButtonHoverColor="#000000" panelBoxColor="rgba(255,255,255,0.12)" panelBoxBorder="rgba(255,255,255,0.25)" labelTextColor="#ffffff" labelTextHoverColor="#ffffff" titleTextColor="#ffffff" descriptionTextColor="rgba(255,255,255,0.92)" isResources={true} />
@@ -1417,10 +1145,7 @@ const DashboardOverlay = ({ user, db, onClose }: { user: any; db: any; onClose: 
   useEffect(() => {
     if (!user || !db) { setLoading(false); return; }
     const userRef = doc(db, "users", user.uid);
-    getDoc(userRef).then((snap) => {
-      if (snap.exists()) { setIsAnonymous(snap.data().isAnonymous === true); }
-      setLoading(false);
-    }).catch((err) => { console.error("Gagal load user data:", err); setLoading(false); });
+    getDoc(userRef).then((snap) => { if (snap.exists()) setIsAnonymous(snap.data().isAnonymous === true); setLoading(false); }).catch((err) => { console.error("Gagal load user data:", err); setLoading(false); });
   }, [user, db]);
 
   useEffect(() => {
@@ -1472,11 +1197,7 @@ const DashboardOverlay = ({ user, db, onClose }: { user: any; db: any; onClose: 
             <div style={{ backgroundColor: BLUE, borderRadius: "24px", padding: "24px", marginBottom: "24px", display: "flex", flexDirection: "column", gap: "16px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
                 <div style={{ width: "64px", height: "64px", borderRadius: "8px", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", flexShrink: 0 }}>
-                  {user?.photoURL && !isAnonymous ? (
-                    <img src={user.photoURL} alt="User" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                  ) : (
-                    <span style={{ fontSize: "28px", fontWeight: 800, color: BLUE }}>{displayName.charAt(0).toUpperCase()}</span>
-                  )}
+                  {user?.photoURL && !isAnonymous ? (<img src={user.photoURL} alt="User" style={{ width: "100%", height: "100%", objectFit: "cover" }} />) : (<span style={{ fontSize: "28px", fontWeight: 800, color: BLUE }}>{displayName.charAt(0).toUpperCase()}</span>)}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <h3 style={{ fontSize: "22px", fontWeight: 800, margin: 0, color: WHITE, wordBreak: "break-word" }}>{displayName}</h3>
@@ -1485,18 +1206,14 @@ const DashboardOverlay = ({ user, db, onClose }: { user: any; db: any; onClose: 
               </div>
               <p style={{ fontSize: "14px", lineHeight: 1.6, color: "rgba(255,255,255,0.9)", margin: 0 }}>Selamat datang di Dashboard Anda. Kelola pengaturan akun dan aktivitas Anda di sini.</p>
             </div>
-
             <div style={{ backgroundColor: BLUE, borderRadius: "24px", padding: "24px", marginBottom: "24px", display: "flex", flexDirection: "column", gap: "12px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                <div style={{ width: "40px", height: "40px", borderRadius: "12px", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <TrustIcon size={24} color={BLUE} />
-                </div>
+                <div style={{ width: "40px", height: "40px", borderRadius: "12px", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center" }}><TrustIcon size={24} color={BLUE} /></div>
                 <h3 style={{ fontSize: "20px", fontWeight: 700, margin: 0, color: WHITE }}>Pengaturan Privasi</h3>
               </div>
               <p style={{ fontSize: "14px", lineHeight: 1.6, color: "rgba(255,255,255,0.9)", margin: 0 }}>Atur privasi akun Anda, termasuk menyembunyikan nama asli dan menampilkan diri sebagai anonim di seluruh platform.</p>
               <button onClick={() => setActiveTab("settings")} style={{ alignSelf: "flex-start", padding: "10px 20px", backgroundColor: WHITE, color: BLUE, border: "none", borderRadius: "10px", fontSize: "14px", fontWeight: 700, cursor: "pointer", marginTop: "8px" }}>Buka Pengaturan</button>
             </div>
-
             <div style={{ marginTop: "auto", paddingTop: "40px", textAlign: "center", overflow: "hidden" }}>
               <span style={{ fontFamily: FONT_FAMILY, fontSize: "250px", fontWeight: 400, color: BLUE, letterSpacing: "-0.05em", lineHeight: 0.8, display: "block", userSelect: "none" }}>Menuru</span>
             </div>
@@ -1506,35 +1223,23 @@ const DashboardOverlay = ({ user, db, onClose }: { user: any; db: any; onClose: 
             <div style={{ backgroundColor: "#F0F4FF", borderRadius: "24px", padding: "24px", display: "flex", flexDirection: "column", gap: "16px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
                 <div style={{ width: "64px", height: "64px", borderRadius: "8px", backgroundColor: BLUE, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", flexShrink: 0 }}>
-                  {user?.photoURL && !isAnonymous ? (
-                    <img src={user.photoURL} alt="User" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                  ) : (
-                    <span style={{ fontSize: "28px", fontWeight: 800, color: WHITE }}>{displayName.charAt(0).toUpperCase()}</span>
-                  )}
+                  {user?.photoURL && !isAnonymous ? (<img src={user.photoURL} alt="User" style={{ width: "100%", height: "100%", objectFit: "cover" }} />) : (<span style={{ fontSize: "28px", fontWeight: 800, color: WHITE }}>{displayName.charAt(0).toUpperCase()}</span>)}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <h3 style={{ fontSize: "22px", fontWeight: 800, margin: 0, color: BLUE, wordBreak: "break-word" }}>{displayName}</h3>
                   <p style={{ fontSize: "14px", margin: 0, color: BLUE, opacity: 0.8, wordBreak: "break-word" }}>{gmailEmail}</p>
-                  {!isAnonymous && gmailName && (
-                    <p style={{ fontSize: "12px", margin: "4px 0 0 0", color: BLUE, opacity: 0.6 }}>Gmail: {gmailName}</p>
-                  )}
+                  {!isAnonymous && gmailName && (<p style={{ fontSize: "12px", margin: "4px 0 0 0", color: BLUE, opacity: 0.6 }}>Gmail: {gmailName}</p>)}
                 </div>
               </div>
             </div>
-
             <div style={{ backgroundColor: "#F0F4FF", borderRadius: "24px", padding: "24px", display: "flex", flexDirection: "column", gap: "16px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                <div style={{ width: "40px", height: "40px", borderRadius: "12px", backgroundColor: BLUE, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <TrustIcon size={24} color={WHITE} />
-                </div>
+                <div style={{ width: "40px", height: "40px", borderRadius: "12px", backgroundColor: BLUE, display: "flex", alignItems: "center", justifyContent: "center" }}><TrustIcon size={24} color={WHITE} /></div>
                 <h3 style={{ fontSize: "20px", fontWeight: 700, margin: 0, color: BLUE }}>Sembunyikan Nama (Anonim)</h3>
               </div>
               <p style={{ fontSize: "14px", lineHeight: 1.6, color: BLUE, margin: 0 }}>Jika diaktifkan, nama Anda akan diganti menjadi <strong>"Anonim"</strong> di seluruh platform (chat, catatan, dan aktivitas lainnya). Email asli Anda tetap terlihat di halaman ini.</p>
-              <button onClick={handleToggleAnonymous} disabled={saving || loading} style={{ alignSelf: "flex-start", padding: "12px 24px", backgroundColor: isAnonymous ? BLUE : "transparent", color: isAnonymous ? WHITE : BLUE, border: `2px solid ${BLUE}`, borderRadius: "10px", fontSize: "14px", fontWeight: 700, cursor: saving || loading ? "not-allowed" : "pointer", display: "flex", alignItems: "center", gap: "8px" }}>
-                {saving ? "Menyimpan..." : isAnonymous ? "✓ Anonim Aktif" : "Aktifkan Anonim"}
-              </button>
+              <button onClick={handleToggleAnonymous} disabled={saving || loading} style={{ alignSelf: "flex-start", padding: "12px 24px", backgroundColor: isAnonymous ? BLUE : "transparent", color: isAnonymous ? WHITE : BLUE, border: `2px solid ${BLUE}`, borderRadius: "10px", fontSize: "14px", fontWeight: 700, cursor: saving || loading ? "not-allowed" : "pointer", display: "flex", alignItems: "center", gap: "8px" }}>{saving ? "Menyimpan..." : isAnonymous ? "✓ Anonim Aktif" : "Aktifkan Anonim"}</button>
             </div>
-
             <div style={{ marginTop: "auto", paddingTop: "40px", textAlign: "left", overflow: "hidden", marginLeft: "-24px" }}>
               <span style={{ fontFamily: FONT_FAMILY, fontSize: "250px", fontWeight: 400, color: BLUE, letterSpacing: "-0.05em", lineHeight: 0.9, display: "block", userSelect: "none", textTransform: "lowercase" }}>ru 2026</span>
             </div>
@@ -1577,9 +1282,7 @@ const RightNavbar = ({ user, auth, db, locationText, onOpenDashboard }: { user: 
             <span style={{ color: "#ffffff", fontSize: "14px", fontWeight: 700, letterSpacing: "0.02em", fontFamily: FONT_FAMILY, whiteSpace: "nowrap" }}>Sign In</span>
           </Link>
         </div>
-        {locationText && (
-          <div style={{ fontSize: "20px", fontWeight: 700, color: BLUE, letterSpacing: "-0.02em", fontFamily: FONT_FAMILY, whiteSpace: "nowrap", textAlign: "right" }}>{locationText}</div>
-        )}
+        {locationText && (<div style={{ fontSize: "20px", fontWeight: 700, color: BLUE, letterSpacing: "-0.02em", fontFamily: FONT_FAMILY, whiteSpace: "nowrap", textAlign: "right" }}>{locationText}</div>)}
       </div>
     );
   }
@@ -1589,11 +1292,7 @@ const RightNavbar = ({ user, auth, db, locationText, onOpenDashboard }: { user: 
       <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 16px", backgroundColor: BLUE, borderRadius: "10px", border: `1px solid ${BLUE}`, boxShadow: "0 8px 24px rgba(13,60,252,0.35)" }}>
           <div style={{ width: "36px", height: "36px", borderRadius: "8px", overflow: "hidden", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-            {photoURL && !isAnonymous ? (
-              <img src={photoURL} alt={displayName} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} referrerPolicy="no-referrer" />
-            ) : (
-              <span style={{ fontSize: "16px", fontWeight: 800, color: BLUE }}>{displayNameAnon.charAt(0).toUpperCase()}</span>
-            )}
+            {photoURL && !isAnonymous ? (<img src={photoURL} alt={displayName} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} referrerPolicy="no-referrer" />) : (<span style={{ fontSize: "16px", fontWeight: 800, color: BLUE }}>{displayNameAnon.charAt(0).toUpperCase()}</span>)}
           </div>
           <span style={{ color: WHITE, fontSize: "14px", fontWeight: 700, letterSpacing: "0.02em", fontFamily: FONT_FAMILY, whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: "6px" }}>
             {displayNameAnon}
@@ -1609,9 +1308,7 @@ const RightNavbar = ({ user, auth, db, locationText, onOpenDashboard }: { user: 
           <LogoutIcon size={16} color={WHITE} />
         </button>
       </div>
-      {locationText && (
-        <div style={{ fontSize: "20px", fontWeight: 700, color: BLUE, letterSpacing: "-0.02em", fontFamily: FONT_FAMILY, whiteSpace: "nowrap", textAlign: "right" }}>{locationText}</div>
-      )}
+      {locationText && (<div style={{ fontSize: "20px", fontWeight: 700, color: BLUE, letterSpacing: "-0.02em", fontFamily: FONT_FAMILY, whiteSpace: "nowrap", textAlign: "right" }}>{locationText}</div>)}
     </div>
   );
 };
@@ -1637,50 +1334,38 @@ const OnboardingTour = ({ steps, onComplete, isActive, currentStep, setCurrentSt
         let top = 0;
         let left = 0;
         let arrow: "top" | "bottom" | "left" | "right" = "bottom";
-
         const spaceBelow = window.innerHeight - rect.bottom;
         const spaceAbove = rect.top;
         const spaceRight = window.innerWidth - rect.right;
         const spaceLeft = rect.left;
         let pos = step.position || "bottom";
-
         if (pos === "bottom" && spaceBelow < tooltipHeight + gap) pos = spaceAbove > spaceBelow ? "top" : "bottom";
         if (pos === "top" && spaceAbove < tooltipHeight + gap) pos = spaceBelow > spaceAbove ? "bottom" : "top";
         if (pos === "right" && spaceRight < tooltipWidth + gap) pos = spaceLeft > spaceRight ? "left" : "right";
         if (pos === "left" && spaceLeft < tooltipWidth + gap) pos = spaceRight > spaceLeft ? "right" : "left";
-
         if (pos === "bottom") { top = rect.bottom + gap + arrowSize; left = rect.left + rect.width / 2 - tooltipWidth / 2; arrow = "top"; }
         else if (pos === "top") { top = rect.top - tooltipHeight - gap - arrowSize; left = rect.left + rect.width / 2 - tooltipWidth / 2; arrow = "bottom"; }
         else if (pos === "left") { top = rect.top + rect.height / 2 - tooltipHeight / 2; left = rect.left - tooltipWidth - gap - arrowSize; arrow = "right"; }
         else if (pos === "right") { top = rect.top + rect.height / 2 - tooltipHeight / 2; left = rect.right + gap + arrowSize; arrow = "left"; }
-
         const padding = 12;
         if (left < padding) left = padding;
         if (left + tooltipWidth > window.innerWidth - padding) left = window.innerWidth - tooltipWidth - padding;
         if (top < padding) top = padding;
         if (top + tooltipHeight > window.innerHeight - padding) top = window.innerHeight - tooltipHeight - padding;
-
         setTooltipPos({ top, left });
         setArrowPos(arrow);
-      } else { setTargetRect(null); }
+      } else setTargetRect(null);
     };
-
     updateRect();
     const el = document.querySelector(`[data-tour="${step.target}"]`);
     if (el) (el as HTMLElement).scrollIntoView({ behavior: "smooth", block: "center" });
     const timeout = setTimeout(updateRect, 400);
     window.addEventListener("resize", updateRect);
     window.addEventListener("scroll", updateRect, true);
-
-    return () => {
-      window.removeEventListener("resize", updateRect);
-      window.removeEventListener("scroll", updateRect, true);
-      clearTimeout(timeout);
-    };
+    return () => { window.removeEventListener("resize", updateRect); window.removeEventListener("scroll", updateRect, true); clearTimeout(timeout); };
   }, [isActive, currentStep, step]);
 
   if (!isActive || !step) return null;
-
   const handleNext = () => { if (currentStep < steps.length - 1) setCurrentStep(currentStep + 1); else onComplete(); };
   const handlePrev = () => { if (currentStep > 0) setCurrentStep(currentStep - 1); };
   const handleSkip = () => onComplete();
@@ -1698,9 +1383,7 @@ const OnboardingTour = ({ steps, onComplete, isActive, currentStep, setCurrentSt
   return (
     <>
       <div onClick={handleSkip} style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.6)", zIndex: 9998, pointerEvents: "auto" }} />
-      {targetRect && (
-        <div style={{ position: "fixed", top: targetRect.top - 6, left: targetRect.left - 6, width: targetRect.width + 12, height: targetRect.height + 12, borderRadius: "12px", boxShadow: `0 0 0 9999px rgba(0,0,0,0.6), 0 0 0 3px ${BLUE}`, zIndex: 9999, pointerEvents: "none", transition: "all 0.3s ease" }} />
-      )}
+      {targetRect && (<div style={{ position: "fixed", top: targetRect.top - 6, left: targetRect.left - 6, width: targetRect.width + 12, height: targetRect.height + 12, borderRadius: "12px", boxShadow: `0 0 0 9999px rgba(0,0,0,0.6), 0 0 0 3px ${BLUE}`, zIndex: 9999, pointerEvents: "none", transition: "all 0.3s ease" }} />)}
       <div style={{ position: "fixed", top: tooltipPos.top, left: tooltipPos.left, width: "340px", backgroundColor: BLUE, borderRadius: "14px", padding: "22px 24px", zIndex: 10000, fontFamily: FONT_FAMILY, transition: "all 0.3s ease" }}>
         {renderArrow()}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
@@ -1718,9 +1401,7 @@ const OnboardingTour = ({ steps, onComplete, isActive, currentStep, setCurrentSt
           </button>
         </div>
         <div style={{ display: "flex", justifyContent: "center", gap: "5px", marginTop: "14px" }}>
-          {steps.map((_: any, i: number) => (
-            <div key={i} style={{ width: i === currentStep ? "18px" : "6px", height: "6px", borderRadius: "3px", backgroundColor: i === currentStep ? WHITE : "rgba(255,255,255,0.35)", transition: "all 0.3s ease" }} />
-          ))}
+          {steps.map((_: any, i: number) => (<div key={i} style={{ width: i === currentStep ? "18px" : "6px", height: "6px", borderRadius: "3px", backgroundColor: i === currentStep ? WHITE : "rgba(255,255,255,0.35)", transition: "all 0.3s ease" }} />))}
         </div>
       </div>
     </>
@@ -1754,9 +1435,7 @@ const RollingNewMessage = ({ senderName, message }: { senderName: string; messag
       <div ref={textRef} style={{ display: "flex", alignItems: "center", gap: "6px", overflow: "hidden", width: "100%" }}>
         <span style={{ fontWeight: 700, color: BLUE, flexShrink: 0 }}>{senderName}</span>
         <span style={{ color: "#666", flexShrink: 0 }}>from</span>
-        <span style={{ color: BLUE, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontStyle: "italic", fontWeight: 500 }}>
-          {safeMessage.length > 60 ? safeMessage.substring(0, 60) + "..." : safeMessage}
-        </span>
+        <span style={{ color: BLUE, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontStyle: "italic", fontWeight: 500 }}>{safeMessage.length > 60 ? safeMessage.substring(0, 60) + "..." : safeMessage}</span>
       </div>
     </div>
   );
@@ -1766,20 +1445,13 @@ const RollingNewMessage = ({ senderName, message }: { senderName: string; messag
 const CloseRoomButton = ({ onConfirm, disabled }: { onConfirm: () => void; disabled?: boolean }) => {
   const btnRef = useRef<HTMLButtonElement>(null);
   const iconRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (iconRef.current) gsap.fromTo(iconRef.current, { rotate: 0, scale: 0.7, opacity: 0 }, { rotate: 360, scale: 1, opacity: 1, duration: 0.7, ease: "back.out(1.6)" });
-  }, []);
-
+  useEffect(() => { if (iconRef.current) gsap.fromTo(iconRef.current, { rotate: 0, scale: 0.7, opacity: 0 }, { rotate: 360, scale: 1, opacity: 1, duration: 0.7, ease: "back.out(1.6)" }); }, []);
   const handleEnter = () => { if (disabled) return; if (btnRef.current) gsap.to(btnRef.current, { scale: 1.08, duration: 0.25, ease: "power2.out" }); if (iconRef.current) gsap.to(iconRef.current, { rotate: "+=90", duration: 0.35, ease: "power2.out" }); };
   const handleLeave = () => { if (disabled) return; if (btnRef.current) gsap.to(btnRef.current, { scale: 1, duration: 0.25, ease: "power2.out" }); };
   const handleClick = () => { if (disabled) return; if (btnRef.current) gsap.timeline().to(btnRef.current, { scale: 0.92, duration: 0.12, ease: "power2.in" }).to(btnRef.current, { scale: 1, duration: 0.2, ease: "back.out(2)" }); onConfirm(); };
-
   return (
     <button ref={btnRef} onClick={handleClick} onMouseEnter={handleEnter} onMouseLeave={handleLeave} disabled={disabled} style={{ width: "36px", height: "36px", display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: WHITE, border: `1.5px solid ${WHITE}`, borderRadius: "8px", cursor: disabled ? "not-allowed" : "pointer", padding: 0, opacity: disabled ? 0.4 : 1 }}>
-      <div ref={iconRef} style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <CloseIcon size={16} color={BLUE} />
-      </div>
+      <div ref={iconRef} style={{ display: "flex", alignItems: "center", justifyContent: "center" }}><CloseIcon size={16} color={BLUE} /></div>
     </button>
   );
 };
@@ -1787,10 +1459,7 @@ const CloseRoomButton = ({ onConfirm, disabled }: { onConfirm: () => void; disab
 // ===== BANNED INFO BANNER =====
 const BannedInfoBanner = ({ banReason, banMessage, onAppeal, hasAppeal }: { banReason: string; banMessage: string; onAppeal: () => void; hasAppeal: boolean; }) => {
   const bannerRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (bannerRef.current) gsap.fromTo(bannerRef.current, { opacity: 0, y: -20 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" });
-  }, []);
-
+  useEffect(() => { if (bannerRef.current) gsap.fromTo(bannerRef.current, { opacity: 0, y: -20 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }); }, []);
   return (
     <div ref={bannerRef} style={{ backgroundColor: BLUE, padding: "20px 24px", display: "flex", flexDirection: "column", gap: "12px", borderBottom: `2px solid ${WHITE}`, flexShrink: 0 }}>
       <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
@@ -1798,15 +1467,9 @@ const BannedInfoBanner = ({ banReason, banMessage, onAppeal, hasAppeal }: { banR
         <span style={{ fontSize: "18px", fontWeight: 800, color: WHITE, fontFamily: FONT_FAMILY, letterSpacing: "0.5px", textTransform: "uppercase" }}>Account Permanently Banned</span>
       </div>
       <div style={{ fontSize: "14px", color: WHITE, fontFamily: FONT_FAMILY, lineHeight: 1.5, opacity: 0.95 }}><strong>Reason:</strong> {banReason || "Suspicious Activity"}</div>
-      {banMessage && (
-        <div style={{ fontSize: "13px", color: WHITE, fontFamily: FONT_FAMILY, lineHeight: 1.5, opacity: 0.9, padding: "10px 14px", backgroundColor: "rgba(255,255,255,0.15)", borderRadius: "8px", border: `1px solid rgba(255,255,255,0.3)` }}>{banMessage}</div>
-      )}
-      {!hasAppeal && (
-        <button onClick={onAppeal} style={{ alignSelf: "flex-start", padding: "10px 20px", backgroundColor: WHITE, color: BLUE, border: `2px solid ${WHITE}`, borderRadius: "8px", fontSize: "13px", fontWeight: 800, cursor: "pointer", fontFamily: FONT_FAMILY, letterSpacing: "0.5px", textTransform: "uppercase", marginTop: "4px" }}>Ajukan Banding</button>
-      )}
-      {hasAppeal && (
-        <div style={{ alignSelf: "flex-start", padding: "8px 16px", backgroundColor: WHITE, color: BLUE, border: `1.5px solid ${WHITE}`, borderRadius: "8px", fontSize: "12px", fontWeight: 700, fontFamily: FONT_FAMILY, letterSpacing: "0.5px", textTransform: "uppercase" }}>Banding Sedang Diproses</div>
-      )}
+      {banMessage && (<div style={{ fontSize: "13px", color: WHITE, fontFamily: FONT_FAMILY, lineHeight: 1.5, opacity: 0.9, padding: "10px 14px", backgroundColor: "rgba(255,255,255,0.15)", borderRadius: "8px", border: `1px solid rgba(255,255,255,0.3)` }}>{banMessage}</div>)}
+      {!hasAppeal && (<button onClick={onAppeal} style={{ alignSelf: "flex-start", padding: "10px 20px", backgroundColor: WHITE, color: BLUE, border: `2px solid ${WHITE}`, borderRadius: "8px", fontSize: "13px", fontWeight: 800, cursor: "pointer", fontFamily: FONT_FAMILY, letterSpacing: "0.5px", textTransform: "uppercase", marginTop: "4px" }}>Ajukan Banding</button>)}
+      {hasAppeal && (<div style={{ alignSelf: "flex-start", padding: "8px 16px", backgroundColor: WHITE, color: BLUE, border: `1.5px solid ${WHITE}`, borderRadius: "8px", fontSize: "12px", fontWeight: 700, fontFamily: FONT_FAMILY, letterSpacing: "0.5px", textTransform: "uppercase" }}>Banding Sedang Diproses</div>)}
     </div>
   );
 };
@@ -1874,10 +1537,7 @@ const AppealChatRoom = ({ user, isAdmin, db, appealTicket, onClose }: any) => {
       await updateDoc(ticketRef, { typing: false, typingUserId: null, typingUserName: null });
       const senderName = isAdmin ? AGENT_NAME : user.displayName || user.email || "User";
       const encryptedMessage = await encryptMessage(messageText.trim());
-      await addDoc(collection(db, "appeal_tickets", appealTicket.id, "messages"), {
-        senderId: user.uid, senderName, text: encryptedMessage, timestamp: serverTimestamp(), read: false, isEncrypted: true, deliveryStatus: "sent",
-        replyTo: replyTo ? { messageId: replyTo.id, senderName: replyTo.senderName, text: replyTo.text.length > 50 ? replyTo.text.substring(0, 50) + "..." : replyTo.text } : null,
-      });
+      await addDoc(collection(db, "appeal_tickets", appealTicket.id, "messages"), { senderId: user.uid, senderName, text: encryptedMessage, timestamp: serverTimestamp(), read: false, isEncrypted: true, deliveryStatus: "sent", replyTo: replyTo ? { messageId: replyTo.id, senderName: replyTo.senderName, text: replyTo.text.length > 50 ? replyTo.text.substring(0, 50) + "..." : replyTo.text } : null });
       await updateDoc(ticketRef, { lastMessage: messageText.trim(), lastMessageTime: serverTimestamp(), lastMessageSender: senderName, status: "active", agentId: isAdmin ? user.uid : appealTicket.agentId, agentName: isAdmin ? AGENT_NAME : appealTicket.agentName });
       setMessageText(""); setReplyTo(null);
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
@@ -1892,18 +1552,10 @@ const AppealChatRoom = ({ user, isAdmin, db, appealTicket, onClose }: any) => {
     else if (msg.deliveryStatus === "delivered") { label = "Delivered"; icon = <DoubleCheckIcon size={11} color="#ffffff" />; }
     else if (msg.deliveryStatus === "sending") { label = "Sending"; icon = <ClockIcon size={11} color="#ffffff" />; }
     else if (msg.deliveryStatus === "failed") { label = "Failed"; icon = <ErrorIcon size={11} color="#ffffff" />; }
-    return (
-      <span style={{ display: "inline-flex", alignItems: "center", gap: "3px", fontSize: "10px", color: "#ffffff", fontFamily: FONT_FAMILY, fontWeight: 500 }}>
-        {label}{icon}
-      </span>
-    );
+    return (<span style={{ display: "inline-flex", alignItems: "center", gap: "3px", fontSize: "10px", color: "#ffffff", fontFamily: FONT_FAMILY, fontWeight: 500 }}>{label}{icon}</span>);
   };
 
-  const formatTime = (timestamp: any) => {
-    if (!timestamp) return "";
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    return date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
-  };
+  const formatTime = (timestamp: any) => { if (!timestamp) return ""; const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp); return date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }); };
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", backgroundColor: WHITE, borderRadius: "12px", overflow: "hidden", border: `2px solid ${BLUE}` }}>
@@ -1919,7 +1571,7 @@ const AppealChatRoom = ({ user, isAdmin, db, appealTicket, onClose }: any) => {
       </div>
       <div style={{ padding: "12px 20px", backgroundColor: "rgba(13,60,252,0.08)", borderBottom: `1px solid ${BLUE}30`, flexShrink: 0 }}>
         <div style={{ fontSize: "12px", color: BLUE, fontFamily: FONT_FAMILY, fontWeight: 600 }}><strong>Alasan banned:</strong> {appealTicket.banReason || "Suspicious Activity"}</div>
-        {appealTicket.banMessage && <div style={{ fontSize: "11px", color: BLUE, fontFamily: FONT_FAMILY, marginTop: "4px", opacity: 0.8 }}>{appealTicket.banMessage}</div>}
+        {appealTicket.banMessage && (<div style={{ fontSize: "11px", color: BLUE, fontFamily: FONT_FAMILY, marginTop: "4px", opacity: 0.8 }}>{appealTicket.banMessage}</div>)}
       </div>
       <div ref={chatMessagesContainerRef} className="chat-messages-container" style={{ flex: 1, overflowY: "auto", padding: "20px", display: "flex", flexDirection: "column", gap: "12px", minHeight: 0 }}>
         {messages.length === 0 ? (
@@ -1931,20 +1583,14 @@ const AppealChatRoom = ({ user, isAdmin, db, appealTicket, onClose }: any) => {
               <div key={msg.id || idx} style={{ alignSelf: isMine ? "flex-end" : "flex-start", maxWidth: "75%" }}>
                 <div style={{ padding: "12px 16px", borderRadius: "12px", backgroundColor: isMine ? BLUE : "#f4f4f5", color: isMine ? WHITE : BLACK, fontSize: "14px", fontFamily: FONT_FAMILY, wordBreak: "break-word", border: isMine ? "none" : "1px solid rgba(0,0,0,0.05)" }}>
                   {!isMine && <div style={{ fontSize: "12px", fontWeight: 700, color: BLUE, marginBottom: "4px" }}>{msg.senderName}</div>}
-                  {msg.replyTo && (
-                    <div style={{ padding: "6px 10px", backgroundColor: isMine ? "rgba(255,255,255,0.2)" : "rgba(13,60,252,0.1)", borderLeft: `3px solid ${isMine ? WHITE : BLUE}`, borderRadius: "4px", marginBottom: "6px", fontSize: "11px", color: isMine ? WHITE : BLUE, fontStyle: "italic", fontFamily: FONT_FAMILY }}>
-                      <strong>{msg.replyTo.senderName}:</strong> {msg.replyTo.text}
-                    </div>
-                  )}
+                  {msg.replyTo && (<div style={{ padding: "6px 10px", backgroundColor: isMine ? "rgba(255,255,255,0.2)" : "rgba(13,60,252,0.1)", borderLeft: `3px solid ${isMine ? WHITE : BLUE}`, borderRadius: "4px", marginBottom: "6px", fontSize: "11px", color: isMine ? WHITE : BLUE, fontStyle: "italic", fontFamily: FONT_FAMILY }}><strong>{msg.replyTo.senderName}:</strong> {msg.replyTo.text}</div>)}
                   <div>{msg.text}</div>
                   <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "6px", marginTop: "5px" }}>
                     {renderDeliveryStatus(msg, isMine)}
                     <span style={{ fontSize: "10px", color: isMine ? WHITE : "#999" }}>{formatTime(msg.timestamp)}</span>
                   </div>
                 </div>
-                <button onClick={() => setReplyTo(msg)} style={{ background: "transparent", border: "none", color: BLUE, fontSize: "10px", cursor: "pointer", fontFamily: FONT_FAMILY, fontWeight: 700, marginTop: "2px", display: "flex", alignItems: "center", gap: "4px", alignSelf: isMine ? "flex-end" : "flex-start" }}>
-                  <ReplyIcon size={10} color={BLUE} />Reply
-                </button>
+                <button onClick={() => setReplyTo(msg)} style={{ background: "transparent", border: "none", color: BLUE, fontSize: "10px", cursor: "pointer", fontFamily: FONT_FAMILY, fontWeight: 700, marginTop: "2px", display: "flex", alignItems: "center", gap: "4px", alignSelf: isMine ? "flex-end" : "flex-start" }}><ReplyIcon size={10} color={BLUE} />Reply</button>
               </div>
             );
           })
@@ -1954,9 +1600,7 @@ const AppealChatRoom = ({ user, isAdmin, db, appealTicket, onClose }: any) => {
       {replyTo && (
         <div style={{ padding: "8px 20px", backgroundColor: "rgba(13,60,252,0.06)", borderTop: `1px solid ${BLUE}20`, display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 }}>
           <ReplyIcon size={14} color={BLUE} />
-          <div style={{ flex: 1, fontSize: "12px", color: BLUE, fontFamily: FONT_FAMILY, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-            <strong>{replyTo.senderName}:</strong> {replyTo.text}
-          </div>
+          <div style={{ flex: 1, fontSize: "12px", color: BLUE, fontFamily: FONT_FAMILY, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}><strong>{replyTo.senderName}:</strong> {replyTo.text}</div>
           <button onClick={() => setReplyTo(null)} style={{ background: "transparent", border: "none", color: BLUE, cursor: "pointer", fontSize: "16px", fontFamily: FONT_FAMILY, padding: 0, lineHeight: 1 }}>×</button>
         </div>
       )}
@@ -2035,10 +1679,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
     if (isAdmin) return;
     try {
       const completed = localStorage.getItem(TOUR_STORAGE_KEY);
-      if (!completed) {
-        const t = setTimeout(() => { setTourStep(0); setShowTour(true); }, 1500);
-        return () => clearTimeout(t);
-      }
+      if (!completed) { const t = setTimeout(() => { setTourStep(0); setShowTour(true); }, 1500); return () => clearTimeout(t); }
     } catch (e) {}
   }, [isMounted, isAdmin]);
 
@@ -2052,10 +1693,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
     if (!isMounted) return;
     if (liveChatTitleRef.current) {
       const splitTitle = new SplitText(liveChatTitleRef.current, { type: "chars", charsClass: "split-char-livechat" });
-      gsap.fromTo(splitTitle.chars, { opacity: 0, y: 30, filter: "blur(8px)" }, {
-        opacity: 1, y: 0, filter: "blur(0px)", duration: 0.8, stagger: 0.05, ease: "back.out(1.2)",
-        scrollTrigger: { trigger: liveChatTitleRef.current, start: "top 85%", end: "bottom 70%", toggleActions: "play none none reverse" },
-      });
+      gsap.fromTo(splitTitle.chars, { opacity: 0, y: 30, filter: "blur(8px)" }, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.8, stagger: 0.05, ease: "back.out(1.2)", scrollTrigger: { trigger: liveChatTitleRef.current, start: "top 85%", end: "bottom 70%", toggleActions: "play none none reverse" } });
     }
     return () => { ScrollTrigger.getAll().forEach((trigger) => trigger.kill()); };
   }, [isMounted]);
@@ -2086,11 +1724,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
     let q;
     if (isAdmin) q = query(collection(db, "appeal_tickets"), orderBy("createdAt", "desc"));
     else q = query(collection(db, "appeal_tickets"), where("userId", "==", user.uid), orderBy("createdAt", "desc"));
-    const unsub = onSnapshot(q, (snapshot: any) => {
-      const list: AppealTicket[] = [];
-      snapshot.forEach((docSnap: any) => { list.push({ id: docSnap.id, ...docSnap.data() } as AppealTicket); });
-      setAppealTickets(list);
-    });
+    const unsub = onSnapshot(q, (snapshot: any) => { const list: AppealTicket[] = []; snapshot.forEach((docSnap: any) => { list.push({ id: docSnap.id, ...docSnap.data() } as AppealTicket); }); setAppealTickets(list); });
     return () => unsub();
   }, [db, user, isAdmin, isMounted]);
 
@@ -2262,9 +1896,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
     const hasActiveTicket = tickets.some((t) => t.userId === user.uid && (t.status === "waiting" || t.status === "active") && !t.isAnnouncement && !t.isBroadcast);
     if (hasActiveTicket) { alert("You still have an active chat with an agent."); return; }
     try {
-      const ticketRef = await addDoc(collection(db, "livechat_tickets"), {
-        userId: user.uid, userName: user.displayName || user.email || "User", userEmail: user.email, userPhoto: user.photoURL || "", status: "waiting", topic: selectedTopic, createdAt: serverTimestamp(), unreadCount: 0, typing: false, typingUserId: null, typingUserName: null, isAnnouncement: false, isBroadcast: false,
-      });
+      const ticketRef = await addDoc(collection(db, "livechat_tickets"), { userId: user.uid, userName: user.displayName || user.email || "User", userEmail: user.email, userPhoto: user.photoURL || "", status: "waiting", topic: selectedTopic, createdAt: serverTimestamp(), unreadCount: 0, typing: false, typingUserId: null, typingUserName: null, isAnnouncement: false, isBroadcast: false });
       const initialMessage = `Hello, I would like to ask about: ${selectedTopic}`;
       const encryptedMessage = await encryptMessage(initialMessage);
       await addDoc(collection(db, "livechat_tickets", ticketRef.id, "messages"), { senderId: user.uid, senderName: user.displayName || user.email || "User", text: encryptedMessage, timestamp: serverTimestamp(), read: false, isEncrypted: true, isBotDetected: false, deliveryStatus: "sent" });
@@ -2294,15 +1926,8 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
       await updateDoc(ticketRef, { typing: false, typingUserId: null, typingUserName: null });
       const senderName = isAdmin ? AGENT_NAME : user.displayName || user.email || "User";
       const encryptedMessage = await encryptMessage(messageText.trim());
-      await addDoc(collection(db, "livechat_tickets", selectedTicket.id, "messages"), {
-        senderId: user.uid, senderName, text: encryptedMessage, timestamp: serverTimestamp(), read: false, isEncrypted: true, isBotDetected: false, deliveryStatus: "sent",
-        replyTo: replyTo ? { messageId: replyTo.id, senderName: replyTo.senderName, text: replyTo.text.length > 50 ? replyTo.text.substring(0, 50) + "..." : replyTo.text } : null,
-      });
-      await updateDoc(ticketRef, {
-        lastMessage: messageText.trim(), lastMessageTime: serverTimestamp(), lastMessageSender: senderName,
-        ...(selectedTicket.status === "waiting" && { status: "active" }),
-        ...(isAdmin && { agentId: user.uid, agentName: AGENT_NAME, status: selectedTicket.status === "waiting" ? "active" : selectedTicket.status }),
-      });
+      await addDoc(collection(db, "livechat_tickets", selectedTicket.id, "messages"), { senderId: user.uid, senderName, text: encryptedMessage, timestamp: serverTimestamp(), read: false, isEncrypted: true, isBotDetected: false, deliveryStatus: "sent", replyTo: replyTo ? { messageId: replyTo.id, senderName: replyTo.senderName, text: replyTo.text.length > 50 ? replyTo.text.substring(0, 50) + "..." : replyTo.text } : null });
+      await updateDoc(ticketRef, { lastMessage: messageText.trim(), lastMessageTime: serverTimestamp(), lastMessageSender: senderName, ...(selectedTicket.status === "waiting" && { status: "active" }), ...(isAdmin && { agentId: user.uid, agentName: AGENT_NAME, status: selectedTicket.status === "waiting" ? "active" : selectedTicket.status }) });
       setMessageText(""); setBanMessage(null); setReplyTo(null);
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     } catch (error) { console.error(error); alert("An error occurred."); }
@@ -2310,20 +1935,17 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
 
   const takeTicket = async (ticketId: string) => {
     if (!db || !isAdmin || !user) return;
-    try { await updateDoc(doc(db, "livechat_tickets", ticketId), { agentId: user.uid, agentName: AGENT_NAME, status: "active" }); }
-    catch (error) { console.error(error); }
+    try { await updateDoc(doc(db, "livechat_tickets", ticketId), { agentId: user.uid, agentName: AGENT_NAME, status: "active" }); } catch (error) { console.error(error); }
   };
 
   const resolveTicket = async (ticketId: string) => {
     if (!db || !isAdmin) return;
-    try { await updateDoc(doc(db, "livechat_tickets", ticketId), { status: "resolved" }); }
-    catch (error) { console.error(error); }
+    try { await updateDoc(doc(db, "livechat_tickets", ticketId), { status: "resolved" }); } catch (error) { console.error(error); }
   };
 
   const handleCloseRoom = async () => {
     if (!db || !selectedTicket) return;
-    try { await updateDoc(doc(db, "livechat_tickets", selectedTicket.id), { status: "closed" }); setShowCloseConfirm(true); setTimeout(() => setShowCloseConfirm(false), 2200); }
-    catch (error) { console.error(error); }
+    try { await updateDoc(doc(db, "livechat_tickets", selectedTicket.id), { status: "closed" }); setShowCloseConfirm(true); setTimeout(() => setShowCloseConfirm(false), 2200); } catch (error) { console.error(error); }
   };
 
   const createAppealTicket = async () => {
@@ -2331,9 +1953,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
     try {
       const existingAppeal = appealTickets.find((t) => t.userId === user.uid && t.status !== "closed" && t.status !== "resolved");
       if (existingAppeal) { onOpenBannedAppealChat(existingAppeal); return; }
-      const ticketRef = await addDoc(collection(db, "appeal_tickets"), {
-        userId: user.uid, userName: user.displayName || user.email || "User", userEmail: user.email, userPhoto: user.photoURL || "", status: "waiting", topic: "Banding Banned", banReason, banMessage: banMessage || "", createdAt: serverTimestamp(), unreadCount: 0, typing: false, typingUserId: null, typingUserName: null,
-      });
+      const ticketRef = await addDoc(collection(db, "appeal_tickets"), { userId: user.uid, userName: user.displayName || user.email || "User", userEmail: user.email, userPhoto: user.photoURL || "", status: "waiting", topic: "Banding Banned", banReason, banMessage: banMessage || "", createdAt: serverTimestamp(), unreadCount: 0, typing: false, typingUserId: null, typingUserName: null });
       const initialMessage = `Saya mengajukan banding atas banned akun saya.\n\nAlasan banned: ${banReason}\n\nMohon ditinjau kembali. Terima kasih.`;
       const encryptedMessage = await encryptMessage(initialMessage);
       await addDoc(collection(db, "appeal_tickets", ticketRef.id, "messages"), { senderId: user.uid, senderName: user.displayName || user.email || "User", text: encryptedMessage, timestamp: serverTimestamp(), read: false, isEncrypted: true, deliveryStatus: "sent" });
@@ -2352,11 +1972,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
     else if (msg.deliveryStatus === "delivered") { label = "Delivered"; icon = <DoubleCheckIcon size={11} color="#ffffff" />; }
     else if (msg.deliveryStatus === "sending") { label = "Sending"; icon = <ClockIcon size={11} color="#ffffff" />; }
     else if (msg.deliveryStatus === "failed") { label = "Failed"; icon = <ErrorIcon size={11} color="#ffffff" />; }
-    return (
-      <span style={{ display: "inline-flex", alignItems: "center", gap: "3px", fontSize: "10px", color: "#ffffff", fontFamily: FONT_FAMILY, fontWeight: 500 }}>
-        {label}{icon}
-      </span>
-    );
+    return (<span style={{ display: "inline-flex", alignItems: "center", gap: "3px", fontSize: "10px", color: "#ffffff", fontFamily: FONT_FAMILY, fontWeight: 500 }}>{label}{icon}</span>);
   };
 
   const renderOnlinePanel = () => {
@@ -2369,19 +1985,13 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
           <span style={{ fontSize: "11px", color: BLUE, padding: "2px 8px", borderRadius: "4px", backgroundColor: WHITE, border: `1.5px solid ${WHITE}`, fontWeight: 700, letterSpacing: "0.5px" }}>{list.length}</span>
         </div>
         <div style={{ overflowY: "auto", flex: 1, minHeight: 0 }}>
-          {list.length === 0 ? (
-            <div style={{ padding: "30px 16px", textAlign: "center", color: "#999", fontSize: "13px", fontFamily: FONT_FAMILY }}>No users online</div>
-          ) : (
+          {list.length === 0 ? (<div style={{ padding: "30px 16px", textAlign: "center", color: "#999", fontSize: "13px", fontFamily: FONT_FAMILY }}>No users online</div>) : (
             list.map((u) => {
               const displayName = u.isAnonymous ? "Anonim" : u.displayName;
               return (
                 <div key={u.uid} style={{ padding: "12px 16px", borderBottom: "1px solid #f0f0f0", display: "flex", alignItems: "center", gap: "10px", fontFamily: FONT_FAMILY }}>
                   <div style={{ width: "36px", height: "36px", borderRadius: "8px", backgroundColor: BLUE, color: WHITE, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "14px", overflow: "hidden", flexShrink: 0 }}>
-                    {u.photoURL && !u.isAnonymous ? (
-                      <img src={u.photoURL} alt={u.displayName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                    ) : (
-                      <AgentIcon size={20} color={WHITE} />
-                    )}
+                    {u.photoURL && !u.isAnonymous ? (<img src={u.photoURL} alt={u.displayName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />) : (<AgentIcon size={20} color={WHITE} />)}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: "13px", fontWeight: 700, color: "#000", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginBottom: "3px" }}>{displayName}</div>
@@ -2421,9 +2031,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
         <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "8px 12px", backgroundColor: "#ffffff", border: "1px solid #ffffff", borderRadius: "8px" }}>
           <SearchIcon size={14} color={BLUE} />
           <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search chats or messages..." style={{ flex: 1, background: "transparent", border: "none", outline: "none", color: BLUE, fontSize: "12px", fontFamily: FONT_FAMILY, padding: 0, caretColor: BLUE, fontWeight: 600 }} />
-          {searchQuery && (
-            <button onClick={() => setSearchQuery("")} style={{ background: "transparent", border: "none", color: BLUE, cursor: "pointer", fontSize: "14px", padding: 0, lineHeight: 1, fontFamily: FONT_FAMILY, fontWeight: 700 }}>×</button>
-          )}
+          {searchQuery && (<button onClick={() => setSearchQuery("")} style={{ background: "transparent", border: "none", color: BLUE, cursor: "pointer", fontSize: "14px", padding: 0, lineHeight: 1, fontFamily: FONT_FAMILY, fontWeight: 700 }}>×</button>)}
         </div>
       </div>
     );
@@ -2471,12 +2079,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
   };
 
   if (checkingBan) {
-    return (
-      <div style={{ marginTop: "80px", paddingTop: "30px" }}>
-        <h3 style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1 }}>Live Chat Agent</h3>
-        <div style={{ padding: "20px", textAlign: "center", color: "#666", fontFamily: FONT_FAMILY }}>Checking account status...</div>
-      </div>
-    );
+    return (<div style={{ marginTop: "80px", paddingTop: "30px" }}><h3 style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1 }}>Live Chat Agent</h3><div style={{ padding: "20px", textAlign: "center", color: "#666", fontFamily: FONT_FAMILY }}>Checking account status...</div></div>);
   }
   if (!isMounted) return <div style={{ minHeight: "100px" }} />;
 
@@ -2487,9 +2090,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
         <div style={{ marginTop: "80px", paddingTop: "30px" }}>
           <h3 ref={liveChatTitleRef} data-tour="livechat-title" style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1, marginBottom: "20px" }}>Live Chat Agent</h3>
           <p style={{ fontSize: "15px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "10px" }}>Please login to use Live Chat Agent</p>
-          <Link href="/" style={{ textDecoration: "none" }}>
-            <button data-tour="login-button" style={{ padding: "8px 20px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "6px", fontSize: "14px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY }}>Login</button>
-          </Link>
+          <Link href="/" style={{ textDecoration: "none" }}><button data-tour="login-button" style={{ padding: "8px 20px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "6px", fontSize: "14px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY }}>Login</button></Link>
         </div>
       </>
     );
@@ -2516,9 +2117,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
             ))}
           </div>
         )}
-        {appealTickets.length === 0 && (
-          <div style={{ marginTop: "20px", padding: "30px", textAlign: "center", color: "#999", fontFamily: FONT_FAMILY }}>Klik tombol "Ajukan Banding" di atas untuk memulai proses banding.</div>
-        )}
+        {appealTickets.length === 0 && (<div style={{ marginTop: "20px", padding: "30px", textAlign: "center", color: "#999", fontFamily: FONT_FAMILY }}>Klik tombol "Ajukan Banding" di atas untuk memulai proses banding.</div>)}
       </div>
     );
   }
@@ -2614,62 +2213,25 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
               <span style={{ color: WHITE, letterSpacing: "0.3px" }}>Chat History</span>
               <span style={{ fontSize: "11px", color: BLUE, padding: "2px 8px", borderRadius: "4px", backgroundColor: WHITE, border: `1.5px solid ${WHITE}`, fontWeight: 800, letterSpacing: "0.5px" }}>{isAdmin ? tickets.length : tickets.filter((t) => t.userId === user.uid).length}</span>
             </div>
-
             {renderSearchBar()}
-
             <div style={{ overflowY: "auto", flex: 1, minHeight: 0 }}>
               {isAdmin ? (
                 <>
-                  {bannedUsersInWaiting.length > 0 && (
-                    <div>
-                      <div style={{ padding: "10px 16px", display: "flex", alignItems: "center", gap: "8px", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
-                        <StabiloBadge label={`Banned (${bannedUsersInWaiting.length})`} bg={WHITE} text={BLUE} border={WHITE} size="md" />
-                      </div>
-                      {bannedUsersInWaiting.map((ticket) => renderChatListItem(ticket))}
-                    </div>
-                  )}
-                  {waitingTickets.length > 0 && (
-                    <div>
-                      <div style={{ padding: "10px 16px", display: "flex", alignItems: "center", gap: "8px", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
-                        <StabiloBadge label={`Waiting (${waitingTickets.length})`} bg={STATUS_STYLES.waiting.bg} text={STATUS_STYLES.waiting.text} border={STATUS_STYLES.waiting.border} size="md" />
-                      </div>
-                      {waitingTickets.map((ticket) => renderChatListItem(ticket, { onExtraClick: () => takeTicket(ticket.id) }))}
-                    </div>
-                  )}
-                  {activeTickets.length > 0 && (
-                    <div>
-                      <div style={{ padding: "10px 16px", display: "flex", alignItems: "center", gap: "8px", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
-                        <StabiloBadge label={`Active (${activeTickets.length})`} bg={STATUS_STYLES.active.bg} text={STATUS_STYLES.active.text} border={STATUS_STYLES.active.border} size="md" />
-                      </div>
-                      {activeTickets.map((ticket) => renderChatListItem(ticket))}
-                    </div>
-                  )}
-                  {resolvedTickets.length > 0 && (
-                    <div>
-                      <div style={{ padding: "10px 16px", display: "flex", alignItems: "center", gap: "8px", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
-                        <StabiloBadge label={`Resolved (${resolvedTickets.length})`} bg={STATUS_STYLES.resolved.bg} text={STATUS_STYLES.resolved.text} border={STATUS_STYLES.resolved.border} size="md" />
-                      </div>
-                      {resolvedTickets.map((ticket) => renderChatListItem(ticket))}
-                    </div>
-                  )}
-                  {waitingTickets.length === 0 && activeTickets.length === 0 && resolvedTickets.length === 0 && bannedUsersInWaiting.length === 0 && (
-                    <div style={{ padding: "30px 16px", textAlign: "center", color: WHITE, fontSize: "13px" }}>{searchQuery ? "No results found" : "No incoming chats"}</div>
-                  )}
+                  {bannedUsersInWaiting.length > 0 && (<div><div style={{ padding: "10px 16px", display: "flex", alignItems: "center", gap: "8px", borderBottom: "1px solid rgba(255,255,255,0.1)" }}><StabiloBadge label={`Banned (${bannedUsersInWaiting.length})`} bg={WHITE} text={BLUE} border={WHITE} size="md" /></div>{bannedUsersInWaiting.map((ticket) => renderChatListItem(ticket))}</div>)}
+                  {waitingTickets.length > 0 && (<div><div style={{ padding: "10px 16px", display: "flex", alignItems: "center", gap: "8px", borderBottom: "1px solid rgba(255,255,255,0.1)" }}><StabiloBadge label={`Waiting (${waitingTickets.length})`} bg={STATUS_STYLES.waiting.bg} text={STATUS_STYLES.waiting.text} border={STATUS_STYLES.waiting.border} size="md" /></div>{waitingTickets.map((ticket) => renderChatListItem(ticket, { onExtraClick: () => takeTicket(ticket.id) }))}</div>)}
+                  {activeTickets.length > 0 && (<div><div style={{ padding: "10px 16px", display: "flex", alignItems: "center", gap: "8px", borderBottom: "1px solid rgba(255,255,255,0.1)" }}><StabiloBadge label={`Active (${activeTickets.length})`} bg={STATUS_STYLES.active.bg} text={STATUS_STYLES.active.text} border={STATUS_STYLES.active.border} size="md" /></div>{activeTickets.map((ticket) => renderChatListItem(ticket))}</div>)}
+                  {resolvedTickets.length > 0 && (<div><div style={{ padding: "10px 16px", display: "flex", alignItems: "center", gap: "8px", borderBottom: "1px solid rgba(255,255,255,0.1)" }}><StabiloBadge label={`Resolved (${resolvedTickets.length})`} bg={STATUS_STYLES.resolved.bg} text={STATUS_STYLES.resolved.text} border={STATUS_STYLES.resolved.border} size="md" /></div>{resolvedTickets.map((ticket) => renderChatListItem(ticket))}</div>)}
+                  {waitingTickets.length === 0 && activeTickets.length === 0 && resolvedTickets.length === 0 && bannedUsersInWaiting.length === 0 && (<div style={{ padding: "30px 16px", textAlign: "center", color: WHITE, fontSize: "13px" }}>{searchQuery ? "No results found" : "No incoming chats"}</div>)}
                 </>
               ) : (
                 <>
                   {filterTicketsBySearch(tickets.filter((t) => t.userId === user.uid)).map((ticket) => renderChatListItem(ticket))}
-                  {filterTicketsBySearch(tickets.filter((t) => t.userId === user.uid)).length === 0 && (
-                    <div style={{ padding: "30px 16px", textAlign: "center", color: WHITE, fontSize: "13px" }}>{searchQuery ? "No results found" : "No chats yet"}</div>
-                  )}
+                  {filterTicketsBySearch(tickets.filter((t) => t.userId === user.uid)).length === 0 && (<div style={{ padding: "30px 16px", textAlign: "center", color: WHITE, fontSize: "13px" }}>{searchQuery ? "No results found" : "No chats yet"}</div>)}
                 </>
               )}
-
               {isAdmin && appealTickets.length > 0 && (
                 <div style={{ marginTop: "20px" }}>
-                  <div style={{ padding: "10px 16px", display: "flex", alignItems: "center", gap: "8px", borderBottom: "1px solid rgba(255,255,255,0.1)", borderTop: "1px solid rgba(255,255,255,0.15)" }}>
-                    <StabiloBadge label={`Banding (${appealTickets.length})`} bg={WHITE} text={BLUE} border={WHITE} size="md" />
-                  </div>
+                  <div style={{ padding: "10px 16px", display: "flex", alignItems: "center", gap: "8px", borderBottom: "1px solid rgba(255,255,255,0.1)", borderTop: "1px solid rgba(255,255,255,0.15)" }}><StabiloBadge label={`Banding (${appealTickets.length})`} bg={WHITE} text={BLUE} border={WHITE} size="md" /></div>
                   {appealTickets.map((t) => (
                     <div key={t.id} onClick={() => onOpenAppealChat(t)} style={{ padding: "14px 16px", borderBottom: "1px solid rgba(255,255,255,0.08)", cursor: "pointer", backgroundColor: "transparent", borderLeft: "3px solid transparent" }}>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
@@ -2682,7 +2244,6 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
                 </div>
               )}
             </div>
-
             {!isAdmin && (
               <div style={{ padding: "10px 16px", borderTop: "1px solid rgba(255,255,255,0.1)", flexShrink: 0, backgroundColor: BLUE }}>
                 <button data-tour="start-chat-button" onClick={() => setShowStartChat(true)} style={{ width: "100%", padding: "10px", backgroundColor: WHITE, color: BLUE, border: `1.5px solid ${WHITE}`, borderRadius: "8px", fontSize: "13px", fontWeight: 800, cursor: "pointer", fontFamily: FONT_FAMILY, letterSpacing: "0.5px", textTransform: "uppercase" }}>+ New Chat</button>
@@ -2705,83 +2266,46 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
                     </div>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
-                    {isAdmin && selectedTicket.status !== "resolved" && selectedTicket.status !== "closed" && (
-                      <button onClick={() => resolveTicket(selectedTicket.id)} style={{ padding: "8px 16px", backgroundColor: WHITE, color: BLUE, border: `1.5px solid ${WHITE}`, borderRadius: "8px", fontSize: "12px", fontWeight: 800, cursor: "pointer", fontFamily: FONT_FAMILY, letterSpacing: "0.5px", textTransform: "uppercase" }}>Resolve</button>
-                    )}
+                    {isAdmin && selectedTicket.status !== "resolved" && selectedTicket.status !== "closed" && (<button onClick={() => resolveTicket(selectedTicket.id)} style={{ padding: "8px 16px", backgroundColor: WHITE, color: BLUE, border: `1.5px solid ${WHITE}`, borderRadius: "8px", fontSize: "12px", fontWeight: 800, cursor: "pointer", fontFamily: FONT_FAMILY, letterSpacing: "0.5px", textTransform: "uppercase" }}>Resolve</button>)}
                     {selectedTicket.status !== "closed" && <CloseRoomButton onConfirm={handleCloseRoom} />}
                   </div>
                 </div>
-
-                {showCloseConfirm && (
-                  <div style={{ padding: "10px 20px", backgroundColor: WHITE, borderBottom: `1.5px solid ${BLUE}`, display: "flex", alignItems: "center", gap: "10px", fontFamily: FONT_FAMILY, flexShrink: 0 }}>
-                    <span style={{ display: "inline-block", padding: "3px 9px", border: `1.5px solid ${BLUE}`, backgroundColor: WHITE, color: BLUE, fontSize: "10px", fontWeight: 800, letterSpacing: "0.5px", borderRadius: "4px", textTransform: "uppercase" }}>Peringatan</span>
-                    <span style={{ fontSize: "13px", color: BLUE, fontWeight: 600 }}>Room chat berhasil ditutup. Buat room baru untuk melanjutkan.</span>
-                  </div>
-                )}
-
-                {!isAdmin && isBanned && <BannedInfoBanner banReason={banReason} banMessage={banMessage || ""} onAppeal={createAppealTicket} hasAppeal={hasAppeal} />}
-
+                {showCloseConfirm && (<div style={{ padding: "10px 20px", backgroundColor: WHITE, borderBottom: `1.5px solid ${BLUE}`, display: "flex", alignItems: "center", gap: "10px", fontFamily: FONT_FAMILY, flexShrink: 0 }}><span style={{ display: "inline-block", padding: "3px 9px", border: `1.5px solid ${BLUE}`, backgroundColor: WHITE, color: BLUE, fontSize: "10px", fontWeight: 800, letterSpacing: "0.5px", borderRadius: "4px", textTransform: "uppercase" }}>Peringatan</span><span style={{ fontSize: "13px", color: BLUE, fontWeight: 600 }}>Room chat berhasil ditutup. Buat room baru untuk melanjutkan.</span></div>)}
+                {!isAdmin && isBanned && (<BannedInfoBanner banReason={banReason} banMessage={banMessage || ""} onAppeal={createAppealTicket} hasAppeal={hasAppeal} />)}
                 <div ref={chatMessagesContainerRef} className="chat-messages-container" style={{ flex: 1, overflowY: "auto", overflowX: "hidden", padding: "24px", display: "flex", flexDirection: "column", gap: "12px", minHeight: 0 }}>
-                  {messages.length === 0 ? (
-                    <div style={{ textAlign: "center", color: "#999", fontSize: "15px", padding: "30px 0", fontFamily: FONT_FAMILY }}>No messages yet</div>
-                  ) : (
+                  {messages.length === 0 ? (<div style={{ textAlign: "center", color: "#999", fontSize: "15px", padding: "30px 0", fontFamily: FONT_FAMILY }}>No messages yet</div>) : (
                     messages.map((msg, idx) => {
                       const isMine = msg.senderId === user.uid;
                       return (
                         <div key={msg.id || idx} style={{ alignSelf: isMine ? "flex-end" : "flex-start", maxWidth: "70%" }}>
                           <div style={{ padding: "12px 16px", borderRadius: "12px", backgroundColor: isMine ? BLUE : "#f4f4f5", color: isMine ? WHITE : BLACK, fontSize: "15px", fontFamily: FONT_FAMILY, wordBreak: "break-word", border: isMine ? "none" : "1px solid rgba(0,0,0,0.05)" }}>
                             {!isMine && <div style={{ fontSize: "12px", fontWeight: 700, color: BLUE, marginBottom: "5px" }}>{msg.senderName}</div>}
-                            {msg.replyTo && (
-                              <div style={{ padding: "6px 10px", backgroundColor: isMine ? "rgba(255,255,255,0.2)" : "rgba(13,60,252,0.1)", borderLeft: `3px solid ${isMine ? WHITE : BLUE}`, borderRadius: "4px", marginBottom: "6px", fontSize: "11px", color: isMine ? WHITE : BLUE, fontStyle: "italic", fontFamily: FONT_FAMILY }}>
-                                <strong>{msg.replyTo.senderName}:</strong> {msg.replyTo.text}
-                              </div>
-                            )}
+                            {msg.replyTo && (<div style={{ padding: "6px 10px", backgroundColor: isMine ? "rgba(255,255,255,0.2)" : "rgba(13,60,252,0.1)", borderLeft: `3px solid ${isMine ? WHITE : BLUE}`, borderRadius: "4px", marginBottom: "6px", fontSize: "11px", color: isMine ? WHITE : BLUE, fontStyle: "italic", fontFamily: FONT_FAMILY }}><strong>{msg.replyTo.senderName}:</strong> {msg.replyTo.text}</div>)}
                             <div>{msg.text}</div>
                             <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "6px", marginTop: "5px" }}>
                               {renderDeliveryStatus(msg, isMine)}
                               <span style={{ fontSize: "10px", color: isMine ? WHITE : "#999" }}>{formatTime(msg.timestamp)}</span>
                             </div>
                           </div>
-                          <button onClick={() => setReplyTo(msg)} style={{ background: "transparent", border: "none", color: BLUE, fontSize: "10px", cursor: "pointer", fontFamily: FONT_FAMILY, fontWeight: 700, marginTop: "2px", display: "flex", alignItems: "center", gap: "4px", alignSelf: isMine ? "flex-end" : "flex-start" }}>
-                            <ReplyIcon size={10} color={BLUE} />Reply
-                          </button>
+                          <button onClick={() => setReplyTo(msg)} style={{ background: "transparent", border: "none", color: BLUE, fontSize: "10px", cursor: "pointer", fontFamily: FONT_FAMILY, fontWeight: 700, marginTop: "2px", display: "flex", alignItems: "center", gap: "4px", alignSelf: isMine ? "flex-end" : "flex-start" }}><ReplyIcon size={10} color={BLUE} />Reply</button>
                         </div>
                       );
                     })
                   )}
-                  {typingText && selectedTicket.status !== "resolved" && (
-                    <div style={{ alignSelf: "flex-start", fontSize: "14px", color: "#666", fontStyle: "italic", padding: "5px 10px", fontFamily: FONT_FAMILY }}>{typingText}</div>
-                  )}
-
-                  {latestRollingMessage && (
-                    <div style={{ alignSelf: "flex-start", maxWidth: "100%", width: "100%", borderTop: `1px dashed ${BLUE}40`, paddingTop: "10px", marginTop: "6px", flexShrink: 0 }}>
-                      <RollingNewMessage key={rollingKey} senderName={latestRollingMessage.senderName} message={latestRollingMessage.message || latestRollingMessage.text} isFromAgent={latestRollingMessage.isFromAgent} />
-                    </div>
-                  )}
-
+                  {typingText && selectedTicket.status !== "resolved" && (<div style={{ alignSelf: "flex-start", fontSize: "14px", color: "#666", fontStyle: "italic", padding: "5px 10px", fontFamily: FONT_FAMILY }}>{typingText}</div>)}
+                  {latestRollingMessage && (<div style={{ alignSelf: "flex-start", maxWidth: "100%", width: "100%", borderTop: `1px dashed ${BLUE}40`, paddingTop: "10px", marginTop: "6px", flexShrink: 0 }}><RollingNewMessage key={rollingKey} senderName={latestRollingMessage.senderName} message={latestRollingMessage.message || latestRollingMessage.text} isFromAgent={latestRollingMessage.isFromAgent} /></div>)}
                   <div ref={messagesEndRef} />
                 </div>
-
                 {selectedTicket.status !== "resolved" && selectedTicket.status !== "closed" ? (
                   <>
-                    {replyTo && (
-                      <div style={{ padding: "8px 24px", backgroundColor: "rgba(13,60,252,0.06)", borderTop: `1px solid ${BLUE}20`, display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 }}>
-                        <ReplyIcon size={14} color={BLUE} />
-                        <div style={{ flex: 1, fontSize: "12px", color: BLUE, fontFamily: FONT_FAMILY, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                          <strong>{replyTo.senderName}:</strong> {replyTo.text}
-                        </div>
-                        <button onClick={() => setReplyTo(null)} style={{ background: "transparent", border: "none", color: BLUE, cursor: "pointer", fontSize: "16px", fontFamily: FONT_FAMILY, padding: 0, lineHeight: 1 }}>×</button>
-                      </div>
-                    )}
+                    {replyTo && (<div style={{ padding: "8px 24px", backgroundColor: "rgba(13,60,252,0.06)", borderTop: `1px solid ${BLUE}20`, display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 }}><ReplyIcon size={14} color={BLUE} /><div style={{ flex: 1, fontSize: "12px", color: BLUE, fontFamily: FONT_FAMILY, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}><strong>{replyTo.senderName}:</strong> {replyTo.text}</div><button onClick={() => setReplyTo(null)} style={{ background: "transparent", border: "none", color: BLUE, cursor: "pointer", fontSize: "16px", fontFamily: FONT_FAMILY, padding: 0, lineHeight: 1 }}>×</button></div>)}
                     <div style={{ padding: "16px 24px", borderTop: "1px solid rgba(0,0,0,0.06)", display: "flex", gap: "12px", backgroundColor: WHITE, flexShrink: 0 }}>
                       <input type="text" value={messageText} onChange={handleTyping} onKeyPress={(e) => { if (e.key === "Enter" && !e.shiftKey && messageText.trim()) { e.preventDefault(); sendMessage(); } }} placeholder={selectedTicket.status === "waiting" && !isAdmin ? "Waiting for agent..." : "Type a message..."} disabled={selectedTicket.status === "waiting" && !isAdmin} style={{ flex: 1, padding: "12px 16px", border: "1px solid rgba(0,0,0,0.1)", borderRadius: "10px", fontSize: "15px", outline: "none", fontFamily: FONT_FAMILY, backgroundColor: selectedTicket.status === "waiting" && !isAdmin ? "#f5f5f5" : WHITE }} />
                       <button onClick={sendMessage} disabled={(selectedTicket.status === "waiting" && !isAdmin) || !messageText.trim()} style={{ padding: "12px 24px", backgroundColor: (selectedTicket.status === "waiting" && !isAdmin) || !messageText.trim() ? "#ccc" : BLUE, color: WHITE, border: "none", borderRadius: "10px", cursor: (selectedTicket.status === "waiting" && !isAdmin) || !messageText.trim() ? "not-allowed" : "pointer", fontFamily: FONT_FAMILY, fontSize: "14px", fontWeight: 800, letterSpacing: "0.5px", textTransform: "uppercase" }}>Send</button>
                     </div>
                   </>
                 ) : (
-                  <div style={{ padding: "14px 24px", borderTop: "1px solid rgba(0,0,0,0.06)", backgroundColor: "#fafafa", textAlign: "center", fontFamily: FONT_FAMILY, fontSize: "13px", color: BLUE, flexShrink: 0, fontWeight: 700 }}>
-                    Room ini telah {selectedTicket.status === "closed" ? "ditutup" : "diselesaikan"}. Buat room baru untuk melanjutkan.
-                  </div>
+                  <div style={{ padding: "14px 24px", borderTop: "1px solid rgba(0,0,0,0.06)", backgroundColor: "#fafafa", textAlign: "center", fontFamily: FONT_FAMILY, fontSize: "13px", color: BLUE, flexShrink: 0, fontWeight: 700 }}>Room ini telah {selectedTicket.status === "closed" ? "ditutup" : "diselesaikan"}. Buat room baru untuk melanjutkan.</div>
                 )}
               </>
             ) : (
@@ -2906,11 +2430,7 @@ export default function HomePage(): React.JSX.Element {
   useEffect(() => {
     if (!db || !user || !isMounted) return;
     const q = query(collection(db, "note_invitations"), where("inviteeId", "==", user.uid), where("status", "==", "pending"));
-    const unsub = onSnapshot(q, (snapshot: any) => {
-      const list: NoteInvitation[] = [];
-      snapshot.forEach((docSnap: any) => { list.push({ id: docSnap.id, ...docSnap.data() } as NoteInvitation); });
-      setPendingInvites(list);
-    });
+    const unsub = onSnapshot(q, (snapshot: any) => { const list: NoteInvitation[] = []; snapshot.forEach((docSnap: any) => { list.push({ id: docSnap.id, ...docSnap.data() } as NoteInvitation); }); setPendingInvites(list); });
     return () => unsub();
   }, [db, user, isMounted]);
 
@@ -2959,40 +2479,31 @@ export default function HomePage(): React.JSX.Element {
     const counterEl = counterRef.current;
     const mainEl = mainPageRef.current;
     if (!preloaderEl || !textEl || !counterEl || !mainEl) return;
-
     setShowMain(true);
-
     gsap.set(textEl, { y: 100, opacity: 0 });
     gsap.set(counterEl, { opacity: 1, scale: 1, y: 0, xPercent: 0 });
     gsap.set(preloaderEl, { opacity: 1, scale: 1, xPercent: 0, display: "block" });
     gsap.set(mainEl, { xPercent: 100, opacity: 1, display: "flex" });
-
     const counterObj = { value: 1 };
     counterEl.textContent = "01";
     const tl = gsap.timeline();
-
     tl.to(textEl, { y: 0, opacity: 1, duration: 1.0, ease: "back.out(1.7)" })
       .to(textEl, { duration: 0.8 })
       .to(textEl, { opacity: 0, y: -20, scale: 0.9, duration: 0.5, ease: "power2.out", onComplete: () => { if (textEl) textEl.textContent = "Note"; } })
       .to(textEl, { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: "back.out(1.7)" })
       .to(textEl, { duration: 1.2 });
-
     tl.to(counterObj, { value: 100, duration: 6.5, ease: "power2.inOut", onUpdate: () => { if (counterEl) { const val = Math.round(counterObj.value); counterEl.textContent = String(val).padStart(2, "0"); } } }, 0);
-
     tl.to(textEl, { scale: 0.3, opacity: 0, duration: 0.8, ease: "power2.in" })
       .to(counterEl, { scale: 0.6, opacity: 0, duration: 0.8, ease: "power2.in" }, "-=0.8")
       .to(preloaderEl, { xPercent: -100, duration: 1.2, ease: "power3.inOut", onComplete: () => { if (preloaderEl) preloaderEl.style.display = "none"; } }, "-=0.2")
       .to(mainEl, { xPercent: 0, duration: 1.2, ease: "power3.inOut", onComplete: () => { if (killed) return; gsap.set(mainEl, { clearProps: "transform,willChange" }); setTimeout(() => ScrollTrigger.refresh(), 300); } }, "<");
-
     return () => { killed = true; tl.kill(); };
   }, [isMounted, loading]);
 
   useEffect(() => {
     if (!isMounted || !showMain) return;
     if (!noteJoinRef.current) return;
-    const ctx = gsap.context(() => {
-      gsap.fromTo(noteJoinRef.current, { opacity: 0, y: 60 }, { opacity: 1, y: 0, duration: 1.2, ease: "power3.out", scrollTrigger: { trigger: noteJoinRef.current, start: "top 85%", toggleActions: "play none none none", once: true } });
-    }, noteJoinRef);
+    const ctx = gsap.context(() => { gsap.fromTo(noteJoinRef.current, { opacity: 0, y: 60 }, { opacity: 1, y: 0, duration: 1.2, ease: "power3.out", scrollTrigger: { trigger: noteJoinRef.current, start: "top 85%", toggleActions: "play none none none", once: true } }); }, noteJoinRef);
     return () => ctx.revert();
   }, [isMounted, showMain]);
 
@@ -3045,14 +2556,7 @@ export default function HomePage(): React.JSX.Element {
   const getNotesByCategory = (categoryName: string) => { return submittedNotes.filter(note => note.category === categoryName); };
 
   if (!isMounted || loading) {
-    return (
-      <div style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999, fontFamily: FONT_FAMILY }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "40px", overflow: "hidden" }}>
-          <span style={{ fontSize: "100px", fontWeight: 400, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em" }}>Menuru</span>
-          <span style={{ fontSize: "50px", fontWeight: 600, color: BLACK, fontFamily: FONT_FAMILY, letterSpacing: "-0.02em", display: "inline-block" }}>Shop</span>
-        </div>
-      </div>
-    );
+    return (<div style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999, fontFamily: FONT_FAMILY }}><div style={{ display: "flex", alignItems: "center", gap: "40px", overflow: "hidden" }}><span style={{ fontSize: "100px", fontWeight: 400, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em" }}>Menuru</span><span style={{ fontSize: "50px", fontWeight: 600, color: BLACK, fontFamily: FONT_FAMILY, letterSpacing: "-0.02em", display: "inline-block" }}>Shop</span></div></div>);
   }
 
   return (
@@ -3097,9 +2601,7 @@ export default function HomePage(): React.JSX.Element {
           <RightNavbar user={user} auth={auth} db={db} locationText={locationText} onOpenDashboard={() => setShowDashboard(true)} />
           <CookieConsentPopup user={user} db={db} isMounted={isMounted} />
 
-          <div style={{ marginTop: "44px" }}>
-            <HeroMenuruTitle />
-          </div>
+          <div style={{ marginTop: "44px" }}><HeroMenuruTitle /></div>
 
           <div style={{ width: "100%", padding: "0 40px", maxWidth: "1600px", margin: "0 auto", marginTop: "40px", position: "relative", zIndex: 2 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "60px", flexWrap: "wrap" }}>
@@ -3155,37 +2657,21 @@ export default function HomePage(): React.JSX.Element {
                   <NorthEastArrow size={32} color={WHITE} />
                 </button>
               </div>
-
               <div style={{ width: "100%", backgroundColor: BLUE, borderRadius: "24px", padding: "24px 28px", display: "flex", alignItems: "center", gap: "16px", flexWrap: "wrap", minHeight: "70px", boxShadow: "0 8px 32px rgba(13,60,252,0.3)" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
-                  {registeredUsers.length === 0 && (
-                    <span style={{ fontSize: "35px", fontWeight: 700, color: WHITE, letterSpacing: "-0.02em", lineHeight: 1.1 }}>Belum ada yang bergabung</span>
-                  )}
+                  {registeredUsers.length === 0 && (<span style={{ fontSize: "35px", fontWeight: 700, color: WHITE, letterSpacing: "-0.02em", lineHeight: 1.1 }}>Belum ada yang bergabung</span>)}
                   {registeredUsers.map((n) => {
                     const isCurrentUser = user && n.userId === user.uid;
                     const userHasNote = hasSubmittedNote && isCurrentUser;
                     const displayName = n.isAnonymous ? "Anonim" : (n.userName || n.userEmail?.split("@")[0] || "User");
                     return (
                       <div key={n.id} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                        {isCurrentUser && (
-                          <>
-                            <span style={{ fontSize: "35px", fontWeight: 600, color: WHITE, letterSpacing: "-0.02em", lineHeight: 1.1 }}>from</span>
-                            <span style={{ fontSize: "35px", fontWeight: 700, color: WHITE, letterSpacing: "-0.02em", lineHeight: 1.1, whiteSpace: "nowrap" }}>{displayName}</span>
-                          </>
-                        )}
+                        {isCurrentUser && (<><span style={{ fontSize: "35px", fontWeight: 600, color: WHITE, letterSpacing: "-0.02em", lineHeight: 1.1 }}>from</span><span style={{ fontSize: "35px", fontWeight: 700, color: WHITE, letterSpacing: "-0.02em", lineHeight: 1.1, whiteSpace: "nowrap" }}>{displayName}</span></>)}
                         <div className="note-user-fp" onClick={() => setActiveNoteUser(activeNoteUser === n.id ? null : n.id)} style={{ width: "48px", height: "48px", borderRadius: "50%", overflow: "hidden", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, cursor: "pointer", transition: "transform 0.2s ease", border: isCurrentUser ? `3px solid ${WHITE}` : "none" }} onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.transform = "scale(1.15)"; }} onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.transform = "scale(1)"; }}>
-                          {n.userPhoto && !n.isAnonymous ? (
-                            <img src={n.userPhoto} alt="User" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} referrerPolicy="no-referrer" />
-                          ) : (
-                            <span style={{ fontSize: "20px", fontWeight: 800, color: BLUE }}>{displayName.charAt(0).toUpperCase()}</span>
-                          )}
+                          {n.userPhoto && !n.isAnonymous ? (<img src={n.userPhoto} alt="User" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} referrerPolicy="no-referrer" />) : (<span style={{ fontSize: "20px", fontWeight: 800, color: BLUE }}>{displayName.charAt(0).toUpperCase()}</span>)}
                         </div>
-                        {isCurrentUser && (
-                          <span style={{ fontSize: "35px", fontWeight: 700, color: WHITE, letterSpacing: "-0.02em", lineHeight: 1.1, whiteSpace: "nowrap" }}>{userHasNote ? "✓ Sudah bergabung" : "Belum bergabung"}</span>
-                        )}
-                        {!isCurrentUser && activeNoteUser === n.id && (
-                          <span className={`note-user-name-${n.id}`} style={{ fontSize: "35px", fontWeight: 700, color: WHITE, letterSpacing: "-0.02em", lineHeight: 1.1, whiteSpace: "nowrap" }}>{displayName}</span>
-                        )}
+                        {isCurrentUser && (<span style={{ fontSize: "35px", fontWeight: 700, color: WHITE, letterSpacing: "-0.02em", lineHeight: 1.1, whiteSpace: "nowrap" }}>{userHasNote ? "✓ Sudah bergabung" : "Belum bergabung"}</span>)}
+                        {!isCurrentUser && activeNoteUser === n.id && (<span className={`note-user-name-${n.id}`} style={{ fontSize: "35px", fontWeight: 700, color: WHITE, letterSpacing: "-0.02em", lineHeight: 1.1, whiteSpace: "nowrap" }}>{displayName}</span>)}
                       </div>
                     );
                   })}
@@ -3200,15 +2686,10 @@ export default function HomePage(): React.JSX.Element {
 
                 {pendingInvites.length > 0 && (
                   <div style={{ marginBottom: "40px", backgroundColor: BLUE, borderRadius: "16px", padding: "24px", display: "flex", flexDirection: "column", gap: "16px", maxWidth: "700px" }}>
-                    <div style={{ fontSize: "20px", fontWeight: 700, color: WHITE, display: "flex", alignItems: "center", gap: "10px" }}>
-                      <InviteIcon size={24} color={WHITE} />
-                      Undangan Masuk ({pendingInvites.length})
-                    </div>
+                    <div style={{ fontSize: "20px", fontWeight: 700, color: WHITE, display: "flex", alignItems: "center", gap: "10px" }}><InviteIcon size={24} color={WHITE} />Undangan Masuk ({pendingInvites.length})</div>
                     {pendingInvites.map((inv) => (
                       <div key={inv.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", backgroundColor: WHITE, padding: "12px 16px", borderRadius: "10px", flexWrap: "wrap", gap: "10px" }}>
-                        <div style={{ fontFamily: FONT_FAMILY, color: BLUE }}>
-                          <span style={{ fontWeight: 800 }}>{inv.inviterName}</span> mengundang Anda untuk berkolaborasi di Notes.
-                        </div>
+                        <div style={{ fontFamily: FONT_FAMILY, color: BLUE }}><span style={{ fontWeight: 800 }}>{inv.inviterName}</span> mengundang Anda untuk berkolaborasi di Notes.</div>
                         <div style={{ display: "flex", gap: "8px" }}>
                           <button onClick={() => handleAcceptInvite(inv.id)} style={{ padding: "6px 16px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "6px", fontWeight: 700, cursor: "pointer", fontFamily: FONT_FAMILY, fontSize: "12px" }}>ACC</button>
                           <button onClick={() => handleDeclineInvite(inv.id)} style={{ padding: "6px 16px", backgroundColor: "transparent", color: BLUE, border: `1.5px solid ${BLUE}`, borderRadius: "6px", fontWeight: 700, cursor: "pointer", fontFamily: FONT_FAMILY, fontSize: "12px" }}>Tolak</button>
@@ -3232,28 +2713,18 @@ export default function HomePage(): React.JSX.Element {
                       <span style={{ fontFamily: FONT_FAMILY, fontSize: "20px", fontWeight: 700, color: WHITE, letterSpacing: "-0.01em" }}>Daftar User ({filteredInviteUsers.length})</span>
                       <input type="text" value={inviteSearch} onChange={(e) => setInviteSearch(e.target.value)} placeholder="Cari user..." style={{ padding: "8px 14px", borderRadius: "8px", border: `1.5px solid ${WHITE}`, backgroundColor: WHITE, color: BLUE, fontFamily: FONT_FAMILY, fontSize: "13px", fontWeight: 600, outline: "none", minWidth: "200px" }} />
                     </div>
-
                     <div style={{ maxHeight: "300px", overflowY: "auto", display: "flex", flexDirection: "column", gap: "8px" }}>
-                      {filteredInviteUsers.length === 0 && (
-                        <div style={{ padding: "20px", textAlign: "center", fontFamily: FONT_FAMILY, fontSize: "14px", color: WHITE, opacity: 0.8 }}>Tidak ada user ditemukan</div>
-                      )}
+                      {filteredInviteUsers.length === 0 && (<div style={{ padding: "20px", textAlign: "center", fontFamily: FONT_FAMILY, fontSize: "14px", color: WHITE, opacity: 0.8 }}>Tidak ada user ditemukan</div>)}
                       {filteredInviteUsers.map((iu) => {
                         const isInvited = invitedUsers[iu.uid];
                         const displayName = iu.isAnonymous ? "Anonim" : iu.displayName;
                         return (
                           <div key={iu.uid} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "10px 14px", backgroundColor: WHITE, borderRadius: "10px" }}>
                             <div style={{ width: "40px", height: "40px", borderRadius: "50%", overflow: "hidden", backgroundColor: BLUE, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                              {iu.photoURL && !iu.isAnonymous ? (
-                                <img src={iu.photoURL} alt={iu.displayName} style={{ width: "100%", height: "100%", objectFit: "cover" }} referrerPolicy="no-referrer" />
-                              ) : (
-                                <span style={{ fontSize: "16px", fontWeight: 800, color: WHITE }}>{displayName.charAt(0).toUpperCase()}</span>
-                              )}
+                              {iu.photoURL && !iu.isAnonymous ? (<img src={iu.photoURL} alt={iu.displayName} style={{ width: "100%", height: "100%", objectFit: "cover" }} referrerPolicy="no-referrer" />) : (<span style={{ fontSize: "16px", fontWeight: 800, color: WHITE }}>{displayName.charAt(0).toUpperCase()}</span>)}
                             </div>
                             <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{ fontFamily: FONT_FAMILY, fontSize: "14px", fontWeight: 700, color: BLUE, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: "6px" }}>
-                                {displayName}
-                                {(iu.email === ADMIN_EMAIL || iu.email === OWNER_EMAIL) && (<VerifiedBadgeWhite size={16} />)}
-                              </div>
+                              <div style={{ fontFamily: FONT_FAMILY, fontSize: "14px", fontWeight: 700, color: BLUE, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: "6px" }}>{displayName}{(iu.email === ADMIN_EMAIL || iu.email === OWNER_EMAIL) && (<VerifiedBadgeWhite size={16} />)}</div>
                               <div style={{ fontFamily: FONT_FAMILY, fontSize: "11px", fontWeight: 500, color: BLUE, opacity: 0.75, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{iu.email}</div>
                             </div>
                             <button onClick={() => handleInviteUser(iu)} style={{ padding: "8px 16px", backgroundColor: isInvited ? BLACK : BLUE, color: WHITE, border: "none", borderRadius: "8px", fontFamily: FONT_FAMILY, fontSize: "12px", fontWeight: 800, letterSpacing: "0.5px", cursor: "pointer", textTransform: "uppercase", flexShrink: 0 }}>{isInvited ? "Invited" : "Invite"}</button>
@@ -3264,9 +2735,7 @@ export default function HomePage(): React.JSX.Element {
                   </div>
                 )}
 
-                {inviteToast && (
-                  <div style={{ marginBottom: "20px", padding: "12px 20px", backgroundColor: BLUE, color: WHITE, borderRadius: "10px", fontFamily: FONT_FAMILY, fontSize: "14px", fontWeight: 600, display: "inline-block" }}>{inviteToast}</div>
-                )}
+                {inviteToast && (<div style={{ marginBottom: "20px", padding: "12px 20px", backgroundColor: BLUE, color: WHITE, borderRadius: "10px", fontFamily: FONT_FAMILY, fontSize: "14px", fontWeight: 600, display: "inline-block" }}>{inviteToast}</div>)}
 
                 <div style={{ display: "flex", flexDirection: "column", gap: "24px", marginBottom: "50px" }}>
                   {NOTES_CATEGORIES.map((cat) => {
@@ -3281,37 +2750,24 @@ export default function HomePage(): React.JSX.Element {
                               const displayName = noteUser?.isAnonymous ? "Anonim" : (note.userName || "User");
                               return (
                                 <div key={note.id} style={{ backgroundColor: BLUE, borderRadius: "28px", padding: "24px 28px", display: "flex", flexDirection: "column", gap: "18px", boxShadow: `0 8px 32px ${BLUE}40`, maxWidth: "700px" }}>
-                                  {note.category && (
-                                    <div style={{ display: "inline-flex", alignSelf: "flex-start", alignItems: "center", gap: "8px", padding: "8px 22px", backgroundColor: WHITE, color: BLUE, borderRadius: "24px 4px 24px 24px", fontFamily: FONT_FAMILY, fontSize: "15px", fontWeight: 800, letterSpacing: "0.04em", textTransform: "uppercase", border: `2px solid ${WHITE}`, boxShadow: `0 4px 12px rgba(0,0,0,0.1)` }}>{note.category}</div>
-                                  )}
+                                  {note.category && (<div style={{ display: "inline-flex", alignSelf: "flex-start", alignItems: "center", gap: "8px", padding: "8px 22px", backgroundColor: WHITE, color: BLUE, borderRadius: "24px 4px 24px 24px", fontFamily: FONT_FAMILY, fontSize: "15px", fontWeight: 800, letterSpacing: "0.04em", textTransform: "uppercase", border: `2px solid ${WHITE}`, boxShadow: `0 4px 12px rgba(0,0,0,0.1)` }}>{note.category}</div>)}
                                   <div style={{ padding: "18px 24px", backgroundColor: WHITE, border: `2px solid ${WHITE}`, borderRadius: "6px 28px 28px 28px", boxShadow: `0 6px 20px rgba(0,0,0,0.12)`, display: "flex", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
                                     <span style={{ fontSize: "34px", fontFamily: FONT_FAMILY, lineHeight: "1.25", color: BLUE, fontWeight: 800, flex: 1, minWidth: 0, wordBreak: "break-word" }}>{note.title}</span>
                                   </div>
                                   {(note.descriptionHtml || note.description) && (
                                     <div style={{ padding: "20px 24px", backgroundColor: WHITE, border: `2px solid ${WHITE}`, borderRadius: "28px 6px 28px 28px", boxShadow: `0 6px 20px rgba(0,0,0,0.12)` }}>
-                                      {note.descriptionHtml ? (
-                                        <div className="note-description-html" dangerouslySetInnerHTML={{ __html: note.descriptionHtml }} style={{ fontSize: "17px", fontFamily: FONT_FAMILY, lineHeight: "1.7", color: BLACK, wordBreak: "break-word" }} />
-                                      ) : (
-                                        <div style={{ fontSize: "17px", fontFamily: FONT_FAMILY, lineHeight: "1.7", color: BLACK, whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{note.description}</div>
-                                      )}
+                                      {note.descriptionHtml ? (<div className="note-description-html" dangerouslySetInnerHTML={{ __html: note.descriptionHtml }} style={{ fontSize: "17px", fontFamily: FONT_FAMILY, lineHeight: "1.7", color: BLACK, wordBreak: "break-word" }} />) : (<div style={{ fontSize: "17px", fontFamily: FONT_FAMILY, lineHeight: "1.7", color: BLACK, whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{note.description}</div>)}
                                     </div>
                                   )}
                                   <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
-                                    <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "8px 20px", backgroundColor: WHITE, border: `2px solid ${WHITE}`, borderRadius: "20px 4px 20px 20px", fontSize: "14px", color: BLUE, fontWeight: 700, fontFamily: FONT_FAMILY, boxShadow: `0 4px 12px rgba(0,0,0,0.1)` }}>
-                                      {note.updatedAt ? new Date(note.updatedAt.toDate()).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }) : "Baru saja"}
-                                    </div>
-                                    <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "8px 20px", backgroundColor: WHITE, border: `2px solid ${WHITE}`, borderRadius: "4px 20px 20px 20px", fontSize: "14px", color: BLUE, fontWeight: 700, fontFamily: FONT_FAMILY, boxShadow: `0 4px 12px rgba(0,0,0,0.1)` }}>
-                                      oleh {displayName}
-                                      <VerifiedBadgeBlue size={22} />
-                                    </div>
+                                    <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "8px 20px", backgroundColor: WHITE, border: `2px solid ${WHITE}`, borderRadius: "20px 4px 20px 20px", fontSize: "14px", color: BLUE, fontWeight: 700, fontFamily: FONT_FAMILY, boxShadow: `0 4px 12px rgba(0,0,0,0.1)` }}>{note.updatedAt ? new Date(note.updatedAt.toDate()).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }) : "Baru saja"}</div>
+                                    <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "8px 20px", backgroundColor: WHITE, border: `2px solid ${WHITE}`, borderRadius: "4px 20px 20px 20px", fontSize: "14px", color: BLUE, fontWeight: 700, fontFamily: FONT_FAMILY, boxShadow: `0 4px 12px rgba(0,0,0,0.1)` }}>oleh {displayName}<VerifiedBadgeBlue size={22} /></div>
                                   </div>
                                 </div>
                               );
                             })}
                           </div>
-                        ) : (
-                          <span style={{ fontFamily: FONT_FAMILY, fontSize: "14px", fontWeight: 500, color: "#999", paddingLeft: "20px", fontStyle: "italic" }}>Belum ada catatan di kategori ini.</span>
-                        )}
+                        ) : (<span style={{ fontFamily: FONT_FAMILY, fontSize: "14px", fontWeight: 500, color: "#999", paddingLeft: "20px", fontStyle: "italic" }}>Belum ada catatan di kategori ini.</span>)}
                       </div>
                     );
                   })}
@@ -3322,19 +2778,13 @@ export default function HomePage(): React.JSX.Element {
 
           <div style={{ position: "relative", zIndex: 1, flex: "1 0 auto", backgroundColor: WHITE }}>
             <div style={{ padding: "0 40px", maxWidth: "1600px", margin: "0 auto", width: "100%" }}>
-              <LiveChatAgent
-                user={user} isAdmin={isAdmin} db={db} auth={auth}
-                onOpenAppealChat={(ticket: AppealTicket) => { setAdminAppealTicket(ticket); setShowAdminAppealSection(true); }}
-                onOpenBannedAppealChat={(ticket: AppealTicket) => { setBannedAppealTicket(ticket); setShowBannedAppealSection(true); }}
-              />
-
+              <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} onOpenAppealChat={(ticket: AppealTicket) => { setAdminAppealTicket(ticket); setShowAdminAppealSection(true); }} onOpenBannedAppealChat={(ticket: AppealTicket) => { setBannedAppealTicket(ticket); setShowBannedAppealSection(true); }} />
               {isAdmin && showAdminAppealSection && adminAppealTicket && (
                 <div style={{ marginTop: "30px", height: "600px" }}>
                   <div style={{ fontSize: "13px", fontWeight: 800, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "0.5px", textTransform: "uppercase", marginBottom: "12px" }}>Chat Ajukan Banding</div>
                   <AppealChatRoom user={user} isAdmin={true} db={db} appealTicket={adminAppealTicket} onClose={() => { setShowAdminAppealSection(false); setAdminAppealTicket(null); }} />
                 </div>
               )}
-
               {!isAdmin && showBannedAppealSection && bannedAppealTicket && (
                 <div style={{ marginTop: "30px", height: "600px" }}>
                   <div style={{ fontSize: "13px", fontWeight: 800, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "0.5px", textTransform: "uppercase", marginBottom: "12px" }}>Chat Ajukan Banding</div>
@@ -3342,7 +2792,6 @@ export default function HomePage(): React.JSX.Element {
                 </div>
               )}
             </div>
-
             <FooterSection />
           </div>
         </div>
@@ -3370,21 +2819,11 @@ export default function HomePage(): React.JSX.Element {
         .note-description-html u { text-decoration: underline; }
         .note-description-html ul { padding-left: 24px; margin: 8px 0; }
         .note-description-html li { margin-bottom: 4px; }
-
         .footer-gallery-row { gap: 12px !important; }
         .footer-gallery-item img { mix-blend-mode: screen !important; }
-        @media (max-width: 1024px) {
-          .footer-gallery-row { gap: 10px !important; }
-          .footer-gallery-item { height: clamp(140px, 24vw, 280px) !important; }
-        }
-        @media (max-width: 768px) {
-          .footer-gallery-row { gap: 8px !important; grid-template-columns: repeat(4, 1fr) !important; }
-          .footer-gallery-item { height: clamp(120px, 28vw, 200px) !important; }
-        }
-        @media (max-width: 480px) {
-          .footer-gallery-row { gap: 6px !important; grid-template-columns: repeat(3, 1fr) !important; }
-          .footer-gallery-item { height: clamp(100px, 30vw, 160px) !important; }
-        }
+        @media (max-width: 1024px) { .footer-gallery-row { gap: 10px !important; } .footer-gallery-item { height: clamp(140px, 24vw, 280px) !important; } }
+        @media (max-width: 768px) { .footer-gallery-row { gap: 8px !important; grid-template-columns: repeat(4, 1fr) !important; } .footer-gallery-item { height: clamp(120px, 28vw, 200px) !important; } }
+        @media (max-width: 480px) { .footer-gallery-row { gap: 6px !important; grid-template-columns: repeat(3, 1fr) !important; } .footer-gallery-item { height: clamp(100px, 30vw, 160px) !important; } }
       `}</style>
     </>
   );
