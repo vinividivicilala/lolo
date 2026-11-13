@@ -1553,7 +1553,7 @@ const FaridVerifiedPanel = ({
               <span
                 style={{
                   fontFamily: FONT_FAMILY,
-                  fontSize: "450px",
+                  fontSize: "150px",
                   fontWeight: 400,
                   color: WHITE,
                   letterSpacing: "-0.05em",
@@ -1580,7 +1580,7 @@ const FaridVerifiedPanel = ({
               <span
                 style={{
                   fontFamily: FONT_FAMILY,
-                  fontSize: "450px",
+                  fontSize: "150px",
                   fontWeight: 400,
                   color: WHITE,
                   letterSpacing: "-0.05em",
