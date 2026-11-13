@@ -898,183 +898,180 @@ interface ActiveLocation {
   lastSeenIso: string;
 }
 
-// ===== INSTAGRAM-STYLE VERIFY LOADING OVERLAY =====
-const FaridVerifyOverlay = ({
+// ===== YOUTUBE-STYLE VERIFIED ANIMATION PANEL =====
+// Panel biru kecil muncul tepat di bawah tombol putih, seukuran tombol.
+// Di dalamnya ada badge verified Instagram (circle spin -> check pop).
+const YoutubeVerifiedPanel = ({
   open,
+  anchorRect,
   onDone,
 }: {
   open: boolean;
+  anchorRect: DOMRect | null;
   onDone: () => void;
 }) => {
-  const curtainRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   const ringRef = useRef<SVGCircleElement>(null);
   const checkRef = useRef<SVGPathElement>(null);
   const badgeRef = useRef<HTMLDivElement>(null);
-  const textRef = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open || !anchorRect) return;
     setVisible(true);
-    const curtain = curtainRef.current;
+    const panel = panelRef.current;
     const ring = ringRef.current;
     const check = checkRef.current;
     const badge = badgeRef.current;
-    const textEl = textRef.current;
-    if (!curtain || !ring || !check || !badge || !textEl) return;
+    if (!panel || !ring || !check || !badge) return;
 
-    // Reset
-    gsap.set(curtain, { height: 0, opacity: 1 });
-    gsap.set(badge, { scale: 0.6, opacity: 0, rotate: -20 });
-    gsap.set(textEl, { opacity: 0, y: 20 });
-    gsap.set(check, { strokeDasharray: 100, strokeDashoffset: 100, opacity: 0 });
-    gsap.set(ring, { strokeDasharray: 300, strokeDashoffset: 300, opacity: 1 });
+    gsap.set(panel, {
+      opacity: 1,
+      height: 0,
+      y: 0,
+      scaleY: 0.4,
+      transformOrigin: "top center",
+    });
+    gsap.set(badge, { scale: 0.5, opacity: 0 });
+    gsap.set(check, { strokeDasharray: 60, strokeDashoffset: 60, opacity: 0 });
+    gsap.set(ring, { strokeDasharray: 200, strokeDashoffset: 200, opacity: 1 });
 
     const tl = gsap.timeline({
-      defaults: { ease: "power3.out" },
       onComplete: () => {
-        // Fade out then redirect
-        gsap.to(curtain, {
-          opacity: 0,
-          duration: 0.5,
-          ease: "power2.in",
-          onComplete: () => {
-            setVisible(false);
-            onDone();
-          },
-        });
+        onDone();
       },
     });
 
-    // 1) Curtain drops down from top with blue border
-    tl.to(curtain, { height: "100vh", duration: 0.6 });
+    // 1) Panel biru turun keluar seukuran tombol
+    tl.to(panel, {
+      height: anchorRect.height,
+      scaleY: 1,
+      duration: 0.35,
+      ease: "power3.out",
+    });
 
-    // 2) Show badge & text
-    tl.to(badge, { scale: 1, opacity: 1, rotate: 0, duration: 0.5, ease: "back.out(1.8)" }, "-=0.2");
-    tl.to(textEl, { opacity: 1, y: 0, duration: 0.5 }, "-=0.3");
+    // 2) Badge verified muncul
+    tl.to(badge, {
+      scale: 1,
+      opacity: 1,
+      duration: 0.35,
+      ease: "back.out(2)",
+    }, "-=0.1");
 
-    // 3) Spin ring (Instagram verify loading)
-    tl.to(ring, { strokeDashoffset: 0, duration: 1.1, ease: "power2.inOut" }, "-=0.2");
+    // 3) Ring spin (Instagram verified loading)
+    tl.to(ring, {
+      strokeDashoffset: 0,
+      duration: 0.9,
+      ease: "power2.inOut",
+    }, "-=0.2");
 
-    // 4) Pop checkmark
-    tl.to(check, { opacity: 1, strokeDashoffset: 0, duration: 0.5, ease: "power2.out" });
+    // 4) Check pop
+    tl.to(check, {
+      opacity: 1,
+      strokeDashoffset: 0,
+      duration: 0.4,
+      ease: "power2.out",
+    });
+
+    // 5) Tahan sebentar, lalu panel menyusut (turun ke bawah & hilang)
+    tl.to(badge, { scale: 0.85, duration: 0.25, ease: "power2.in" }, "+=0.15");
+    tl.to(panel, {
+      height: 0,
+      scaleY: 0.4,
+      opacity: 0,
+      duration: 0.4,
+      ease: "power3.in",
+    });
 
     return () => tl.kill();
-  }, [open, onDone]);
+  }, [open, anchorRect, onDone]);
 
-  if (!visible) return null;
+  if (!visible || !anchorRect) return null;
 
   return (
     <div
       style={{
         position: "fixed",
-        inset: 0,
-        zIndex: 9900,
+        top: anchorRect.top,
+        left: anchorRect.left,
+        width: anchorRect.width,
+        zIndex: 9800,
         pointerEvents: "none",
       }}
     >
-      {/* Curtain biru dari atas ke bawah dengan border bawah */}
       <div
-        ref={curtainRef}
+        ref={panelRef}
         style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
+          width: "100%",
           height: 0,
           backgroundColor: BLUE,
-          borderBottom: `4px solid ${WHITE}`,
-          boxShadow: `0 12px 40px rgba(13,60,252,0.55)`,
+          border: `2px solid ${WHITE}`,
+          borderRadius: "8px",
+          boxShadow: `0 10px 30px rgba(13,60,252,0.5)`,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          flexDirection: "column",
-          gap: "22px",
           overflow: "hidden",
-          fontFamily: FONT_FAMILY,
-          pointerEvents: "auto",
+          transformOrigin: "top center",
         }}
       >
-        {/* Badge verifikasi */}
         <div
           ref={badgeRef}
           style={{
+            width: "24px",
+            height: "24px",
             position: "relative",
-            width: "140px",
-            height: "140px",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
+            flexShrink: 0,
           }}
         >
-          {/* Outer pulse ring */}
-          <div
+          {/* Spinning ring */}
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
             style={{
               position: "absolute",
-              inset: 0,
-              borderRadius: "50%",
-              border: `3px solid rgba(255,255,255,0.25)`,
+              top: 0,
+              left: 0,
+              transform: "rotate(-90deg)",
             }}
-          />
-          <svg
-            width="140"
-            height="140"
-            viewBox="0 0 140 140"
-            style={{ display: "block", transform: "rotate(-90deg)" }}
           >
-            {/* Spinning progress ring */}
             <circle
               ref={ringRef}
-              cx="70"
-              cy="70"
-              r="62"
+              cx="12"
+              cy="12"
+              r="10"
               fill="none"
               stroke={WHITE}
-              strokeWidth="6"
+              strokeWidth="2"
               strokeLinecap="round"
             />
           </svg>
-          {/* Inner white circle with verified check */}
-          <div
-            style={{
-              position: "absolute",
-              inset: "18px",
-              borderRadius: "50%",
-              backgroundColor: WHITE,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
+          {/* Verified star badge Instagram */}
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 40 40"
+            xmlns="http://www.w3.org/2000/svg"
+            style={{ display: "block", position: "relative", zIndex: 2 }}
           >
-            <svg width="64" height="64" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-              <path
-                fill={BLUE}
-                d="M19.998 3.094 14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.03v-6.46h-6.419L25.358 0l-5.36 3.094Zm7.415 11.225 2.254 2.287-11.43 11.5-6.835-6.93 2.244-2.258 4.587 4.581 9.18-9.18Z"
-              />
-            </svg>
-          </div>
-        </div>
-
-        {/* Text */}
-        <div
-          ref={textRef}
-          style={{
-            color: WHITE,
-            fontFamily: FONT_FAMILY,
-            textAlign: "center",
-            padding: "0 20px",
-          }}
-        >
-          <div style={{ fontSize: "14px", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", opacity: 0.85, marginBottom: "8px" }}>
-            Verifying
-          </div>
-          <div style={{ fontSize: "36px", fontWeight: 800, letterSpacing: "-0.02em", display: "flex", alignItems: "center", gap: "10px", justifyContent: "center" }}>
-            Farid Ardiansyah
-            <VerifiedBadgeWhite size={30} />
-          </div>
-          <div style={{ fontSize: "15px", fontWeight: 500, opacity: 0.9, marginTop: "8px" }}>
-            Membuka profil developer…
-          </div>
+            <path
+              fill={WHITE}
+              d="M19.998 3.094 14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.03v-6.46h-6.419L25.358 0l-5.36 3.094Z"
+            />
+            <path
+              ref={checkRef}
+              d="M17 20L19 22L24 17"
+              stroke={BLUE}
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              fill="none"
+            />
+          </svg>
         </div>
       </div>
     </div>
@@ -1084,15 +1081,20 @@ const FaridVerifyOverlay = ({
 // ===== TOP BANNER =====
 const TopBanner = () => {
   const [showVerify, setShowVerify] = useState(false);
+  const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null);
+  const btnRef = useRef<HTMLButtonElement>(null);
 
   const handleClickFarid = (e: React.MouseEvent) => {
     e.preventDefault();
     if (showVerify) return;
+    if (btnRef.current) {
+      const rect = btnRef.current.getBoundingClientRect();
+      setAnchorRect(rect);
+    }
     setShowVerify(true);
   };
 
   const handleVerifyDone = () => {
-    // Buka link di tab baru setelah animasi selesai
     if (typeof window !== "undefined") {
       window.open(FARID_LINK, "_blank", "noopener,noreferrer");
     }
@@ -1134,6 +1136,7 @@ const TopBanner = () => {
         >
           Website this is build the develope{" "}
           <button
+            ref={btnRef}
             onClick={handleClickFarid}
             style={{
               color: BLUE,
@@ -1143,7 +1146,7 @@ const TopBanner = () => {
               alignItems: "center",
               gap: "6px",
               backgroundColor: WHITE,
-              padding: "2px 8px",
+              padding: "4px 12px",
               borderRadius: "6px",
               border: "none",
               cursor: "pointer",
@@ -1166,7 +1169,11 @@ const TopBanner = () => {
         </span>
       </div>
 
-      <FaridVerifyOverlay open={showVerify} onDone={handleVerifyDone} />
+      <YoutubeVerifiedPanel
+        open={showVerify}
+        anchorRect={anchorRect}
+        onDone={handleVerifyDone}
+      />
     </>
   );
 };
@@ -1310,8 +1317,7 @@ const FooterSection = () => {
       ref={containerRef}
       style={{
         width: "calc(100% - 40px)",
-        // FIX: margin bottom lebih besar agar tidak mentok layar bawah
-        margin: "100px auto 60px auto",
+        margin: "100px auto 40px auto",
         backgroundColor: BLUE,
         borderRadius: "32px",
         padding: "60px 40px 40px 40px",
@@ -6308,7 +6314,7 @@ export default function HomePage(): React.JSX.Element {
             )}
           </div>
 
-          <div style={{ position: "relative", zIndex: 1, flex: "1 0 auto", backgroundColor: WHITE, paddingBottom: "40px" }}>
+          <div style={{ position: "relative", zIndex: 1, flex: "1 0 auto", backgroundColor: WHITE, paddingBottom: "60px" }}>
             <div style={{ padding: "0 40px", maxWidth: "1600px", margin: "0 auto", width: "100%" }}>
               <LiveChatAgent
                 user={user} isAdmin={isAdmin} db={db} auth={auth}
