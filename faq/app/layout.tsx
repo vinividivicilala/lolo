@@ -75,7 +75,7 @@ export const metadata: Metadata = {
       'Platform digital kreatif untuk Note, Live Chat Agent, Shop, Calendar, dan Community. Brand from Love yourself.',
     images: [
       {
-        url: '/images/ai.jpg',
+        url: '/images/gfssa.jpg',
         width: 1200,
         height: 630,
         alt: 'Menuru Studio',
@@ -89,15 +89,15 @@ export const metadata: Metadata = {
     title: 'Menuru Studio | Official Website',
     description:
       'Platform digital kreatif untuk Note, Live Chat Agent, Shop, Calendar, dan Community.',
-    images: ['/images/dxzb.jpg'],
+    images: ['/images/gfssa.jpg'],
     creator: '@menuru',
   },
 
   // ===== ICONS =====
   icons: {
-    icon: '/images/dxzb.jpg',
-    apple: '/images/dxzb.jpg',
-    shortcut: '/images/dxzb.jpg',
+    icon: '/images/gfssa.jpg',
+    apple: '/images/gfssa.jpg',
+    shortcut: '/images/gfssa.jpg',
   },
 
   // ===== APP INFO =====
@@ -183,9 +183,9 @@ export default function RootLayout({
         <meta name="theme-color" content="#8be9fd" />
 
         {/* ===== Favicon ===== */}
-        <link rel="icon" href="/images/dxzb.jpg" type="image/jpeg" />
-        <link rel="apple-touch-icon" href="/images/dxzb.jpg" />
-        <link rel="shortcut icon" href="/images/dxzb.jpg" />
+        <link rel="icon" href="/images/gfssa.jpg" type="image/jpeg" />
+        <link rel="apple-touch-icon" href="/images/gfssa.jpg" />
+        <link rel="shortcut icon" href="/images/gfssa.jpg" />
 
         {/* ===== JSON-LD: WebSite (untuk Sitelinks Search Box) ===== */}
         <script
