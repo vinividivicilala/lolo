@@ -103,8 +103,6 @@ function resolveLocationName(): string {
   }
 }
 
-// ===== LOKASI DISIMPAN 1x — pakai setDoc dengan ID tetap =====
-// ID tetap: user_<uid> untuk login, guest_<sessionId> untuk anonim
 function getPresenceDocId(user: any): string {
   if (user?.uid) return `user_${user.uid}`;
   try {
@@ -126,8 +124,6 @@ async function saveUserLocation(user: any) {
     const displayName = user?.displayName || user?.email?.split("@")[0] || "Guest";
     const locName = resolveLocationName();
     const now = new Date().toISOString();
-
-    // setDoc dengan ID tetap = 1 dokumen per user, merge=true tidak buat dokumen baru
     await setDoc(
       doc(db, "user_locations", locationId),
       {
@@ -148,7 +144,6 @@ async function saveUserLocation(user: any) {
   }
 }
 
-// Heartbeat ringan: hanya update lastSeenIso + lastSeen (field saja)
 async function heartbeatLocation(user: any) {
   if (!db) return;
   try {
@@ -159,7 +154,6 @@ async function heartbeatLocation(user: any) {
       online: true,
     });
   } catch (e) {
-    // Dokumen mungkin belum ada (race) — panggil saveUserLocation sekali
     try { await saveUserLocation(user); } catch {}
   }
 }
@@ -904,62 +898,276 @@ interface ActiveLocation {
   lastSeenIso: string;
 }
 
-// ===== TOP BANNER =====
-const TopBanner = () => {
+// ===== INSTAGRAM-STYLE VERIFY LOADING OVERLAY =====
+const FaridVerifyOverlay = ({
+  open,
+  onDone,
+}: {
+  open: boolean;
+  onDone: () => void;
+}) => {
+  const curtainRef = useRef<HTMLDivElement>(null);
+  const ringRef = useRef<SVGCircleElement>(null);
+  const checkRef = useRef<SVGPathElement>(null);
+  const badgeRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    setVisible(true);
+    const curtain = curtainRef.current;
+    const ring = ringRef.current;
+    const check = checkRef.current;
+    const badge = badgeRef.current;
+    const textEl = textRef.current;
+    if (!curtain || !ring || !check || !badge || !textEl) return;
+
+    // Reset
+    gsap.set(curtain, { height: 0, opacity: 1 });
+    gsap.set(badge, { scale: 0.6, opacity: 0, rotate: -20 });
+    gsap.set(textEl, { opacity: 0, y: 20 });
+    gsap.set(check, { strokeDasharray: 100, strokeDashoffset: 100, opacity: 0 });
+    gsap.set(ring, { strokeDasharray: 300, strokeDashoffset: 300, opacity: 1 });
+
+    const tl = gsap.timeline({
+      defaults: { ease: "power3.out" },
+      onComplete: () => {
+        // Fade out then redirect
+        gsap.to(curtain, {
+          opacity: 0,
+          duration: 0.5,
+          ease: "power2.in",
+          onComplete: () => {
+            setVisible(false);
+            onDone();
+          },
+        });
+      },
+    });
+
+    // 1) Curtain drops down from top with blue border
+    tl.to(curtain, { height: "100vh", duration: 0.6 });
+
+    // 2) Show badge & text
+    tl.to(badge, { scale: 1, opacity: 1, rotate: 0, duration: 0.5, ease: "back.out(1.8)" }, "-=0.2");
+    tl.to(textEl, { opacity: 1, y: 0, duration: 0.5 }, "-=0.3");
+
+    // 3) Spin ring (Instagram verify loading)
+    tl.to(ring, { strokeDashoffset: 0, duration: 1.1, ease: "power2.inOut" }, "-=0.2");
+
+    // 4) Pop checkmark
+    tl.to(check, { opacity: 1, strokeDashoffset: 0, duration: 0.5, ease: "power2.out" });
+
+    return () => tl.kill();
+  }, [open, onDone]);
+
+  if (!visible) return null;
+
   return (
     <div
       style={{
         position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 9100,
-        height: "44px",
-        backgroundColor: BLUE,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "0 20px",
-        fontFamily: FONT_FAMILY,
+        inset: 0,
+        zIndex: 9900,
+        pointerEvents: "none",
       }}
     >
-      <span
+      {/* Curtain biru dari atas ke bawah dengan border bawah */}
+      <div
+        ref={curtainRef}
         style={{
-          color: WHITE,
-          fontSize: "14px",
-          fontWeight: 600,
-          letterSpacing: "0.02em",
-          textAlign: "center",
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 0,
+          backgroundColor: BLUE,
+          borderBottom: `4px solid ${WHITE}`,
+          boxShadow: `0 12px 40px rgba(13,60,252,0.55)`,
           display: "flex",
           alignItems: "center",
-          gap: "8px",
-          whiteSpace: "nowrap",
+          justifyContent: "center",
+          flexDirection: "column",
+          gap: "22px",
           overflow: "hidden",
-          textOverflow: "ellipsis",
+          fontFamily: FONT_FAMILY,
+          pointerEvents: "auto",
         }}
       >
-        Website this is build the develope{" "}
-        <a
-          href={FARID_LINK}
-          target="_blank"
-          rel="noopener noreferrer"
+        {/* Badge verifikasi */}
+        <div
+          ref={badgeRef}
           style={{
-            color: BLUE,
-            fontWeight: 800,
-            textDecoration: "none",
-            display: "inline-flex",
+            position: "relative",
+            width: "140px",
+            height: "140px",
+            display: "flex",
             alignItems: "center",
-            gap: "6px",
-            backgroundColor: WHITE,
-            padding: "2px 8px",
-            borderRadius: "6px",
+            justifyContent: "center",
           }}
         >
-          Farid Ardiansyah
-          <VerifiedBadgeBlue size={16} />
-        </a>
-      </span>
+          {/* Outer pulse ring */}
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              borderRadius: "50%",
+              border: `3px solid rgba(255,255,255,0.25)`,
+            }}
+          />
+          <svg
+            width="140"
+            height="140"
+            viewBox="0 0 140 140"
+            style={{ display: "block", transform: "rotate(-90deg)" }}
+          >
+            {/* Spinning progress ring */}
+            <circle
+              ref={ringRef}
+              cx="70"
+              cy="70"
+              r="62"
+              fill="none"
+              stroke={WHITE}
+              strokeWidth="6"
+              strokeLinecap="round"
+            />
+          </svg>
+          {/* Inner white circle with verified check */}
+          <div
+            style={{
+              position: "absolute",
+              inset: "18px",
+              borderRadius: "50%",
+              backgroundColor: WHITE,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <svg width="64" height="64" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+              <path
+                fill={BLUE}
+                d="M19.998 3.094 14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.03v-6.46h-6.419L25.358 0l-5.36 3.094Zm7.415 11.225 2.254 2.287-11.43 11.5-6.835-6.93 2.244-2.258 4.587 4.581 9.18-9.18Z"
+              />
+            </svg>
+          </div>
+        </div>
+
+        {/* Text */}
+        <div
+          ref={textRef}
+          style={{
+            color: WHITE,
+            fontFamily: FONT_FAMILY,
+            textAlign: "center",
+            padding: "0 20px",
+          }}
+        >
+          <div style={{ fontSize: "14px", fontWeight: 700, letterSpacing: "0.2em", textTransform: "uppercase", opacity: 0.85, marginBottom: "8px" }}>
+            Verifying
+          </div>
+          <div style={{ fontSize: "36px", fontWeight: 800, letterSpacing: "-0.02em", display: "flex", alignItems: "center", gap: "10px", justifyContent: "center" }}>
+            Farid Ardiansyah
+            <VerifiedBadgeWhite size={30} />
+          </div>
+          <div style={{ fontSize: "15px", fontWeight: 500, opacity: 0.9, marginTop: "8px" }}>
+            Membuka profil developer…
+          </div>
+        </div>
+      </div>
     </div>
+  );
+};
+
+// ===== TOP BANNER =====
+const TopBanner = () => {
+  const [showVerify, setShowVerify] = useState(false);
+
+  const handleClickFarid = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (showVerify) return;
+    setShowVerify(true);
+  };
+
+  const handleVerifyDone = () => {
+    // Buka link di tab baru setelah animasi selesai
+    if (typeof window !== "undefined") {
+      window.open(FARID_LINK, "_blank", "noopener,noreferrer");
+    }
+    setShowVerify(false);
+  };
+
+  return (
+    <>
+      <div
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 9100,
+          height: "44px",
+          backgroundColor: BLUE,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "0 20px",
+          fontFamily: FONT_FAMILY,
+        }}
+      >
+        <span
+          style={{
+            color: WHITE,
+            fontSize: "14px",
+            fontWeight: 600,
+            letterSpacing: "0.02em",
+            textAlign: "center",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
+          Website this is build the develope{" "}
+          <button
+            onClick={handleClickFarid}
+            style={{
+              color: BLUE,
+              fontWeight: 800,
+              textDecoration: "none",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
+              backgroundColor: WHITE,
+              padding: "2px 8px",
+              borderRadius: "6px",
+              border: "none",
+              cursor: "pointer",
+              fontFamily: FONT_FAMILY,
+              fontSize: "14px",
+              transition: "transform 0.2s ease, box-shadow 0.2s ease",
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.05)";
+              (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 4px 14px rgba(0,0,0,0.2)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.transform = "scale(1)";
+              (e.currentTarget as HTMLButtonElement).style.boxShadow = "none";
+            }}
+          >
+            Farid Ardiansyah
+            <VerifiedBadgeBlue size={16} />
+          </button>
+        </span>
+      </div>
+
+      <FaridVerifyOverlay open={showVerify} onDone={handleVerifyDone} />
+    </>
   );
 };
 
@@ -1062,7 +1270,6 @@ const FooterSection = () => {
     };
   }, []);
 
-  // Animasi muncul galeri footer (stagger, smooth)
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (!galleryRef.current) return;
@@ -1103,7 +1310,8 @@ const FooterSection = () => {
       ref={containerRef}
       style={{
         width: "calc(100% - 40px)",
-        margin: "100px auto 20px auto",
+        // FIX: margin bottom lebih besar agar tidak mentok layar bawah
+        margin: "100px auto 60px auto",
         backgroundColor: BLUE,
         borderRadius: "32px",
         padding: "60px 40px 40px 40px",
@@ -1264,11 +1472,6 @@ const FooterSection = () => {
         </a>
       </div>
 
-      {/* ===== GALERI GAMBAR DI ATAS TEKS MENURU BESAR =====
-          - Ukuran lebih besar (clamp lebih tinggi)
-          - Ada jarak antar foto (gap lebih besar)
-          - mixBlendMode screen: background putih foto hilang menyatu dengan biru footer
-      */}
       <div
         ref={galleryRef}
         className="footer-gallery-row"
@@ -5133,22 +5336,15 @@ export default function HomePage(): React.JSX.Element {
     return () => unsub();
   }, [db, user, isMounted]);
 
-  // ===== LOKASI: SIMPAN 1x DOKUMEN + HEARTBEAT FIELD =====
   useEffect(() => {
     if (!db || !isMounted) return;
-
-    // Simpan pertama kali (setDoc dengan ID tetap)
     saveUserLocation(user);
-    // Heartbeat ringan: hanya update field lastSeen/lastSeenIso, tidak buat dokumen baru
     const heartbeat = setInterval(() => heartbeatLocation(user), 15000);
-    // Re-save penuh saat user berubah (login/logout), hanya sekali per perubahan user
     if (heartbeatInitRef.current) {
       saveUserLocation(user);
     } else {
       heartbeatInitRef.current = true;
     }
-
-    // Snapshot hanya membaca, tidak menulis
     const q = query(
       collection(db, "user_locations"),
       orderBy("lastSeen", "desc"),
@@ -5172,7 +5368,6 @@ export default function HomePage(): React.JSX.Element {
       });
       setActiveLocations(list);
     });
-
     return () => {
       clearInterval(heartbeat);
       unsub();
@@ -6113,7 +6308,7 @@ export default function HomePage(): React.JSX.Element {
             )}
           </div>
 
-          <div style={{ position: "relative", zIndex: 1, flex: "1 0 auto", backgroundColor: WHITE }}>
+          <div style={{ position: "relative", zIndex: 1, flex: "1 0 auto", backgroundColor: WHITE, paddingBottom: "40px" }}>
             <div style={{ padding: "0 40px", maxWidth: "1600px", margin: "0 auto", width: "100%" }}>
               <LiveChatAgent
                 user={user} isAdmin={isAdmin} db={db} auth={auth}
