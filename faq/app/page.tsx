@@ -1742,7 +1742,7 @@ const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
         }}
       >
         <img
-          src="/images/nop.jpg"
+          src="/images/gfssa.jpg"
           alt="Menuru"
           style={{
             height: "60px", width: "auto", maxWidth: "none",
