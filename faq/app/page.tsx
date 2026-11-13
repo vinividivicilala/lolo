@@ -1086,7 +1086,6 @@ const FaridVerifiedPanel = ({
   const closeIconRef = useRef<HTMLDivElement>(null);
   const [isClosing, setIsClosing] = useState(false);
 
-  // Phase 1: loading check animation (1.8s)
   useEffect(() => {
     if (open) {
       setPhase("loading");
@@ -1098,7 +1097,6 @@ const FaridVerifiedPanel = ({
     }
   }, [open]);
 
-  // Phase 2: expand kecil -> full screen
   useEffect(() => {
     if (phase !== "expand" || !panelRef.current || !fullPageRef.current || !anchorRect)
       return;
@@ -1404,16 +1402,17 @@ const FaridVerifiedPanel = ({
               gap: "24px",
             }}
           >
+            {/* Kartu utama Farid — background putih, teks biru */}
             <div
               style={{
-                backgroundColor: "rgba(255,255,255,0.12)",
-                border: "1px solid rgba(255,255,255,0.25)",
+                backgroundColor: WHITE,
                 borderRadius: "24px",
                 padding: "32px",
                 display: "flex",
                 flexDirection: "column",
                 gap: "16px",
                 maxWidth: "900px",
+                boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
               }}
             >
               <h2
@@ -1421,7 +1420,7 @@ const FaridVerifiedPanel = ({
                   fontSize: "48px",
                   fontWeight: 800,
                   margin: 0,
-                  color: WHITE,
+                  color: BLUE,
                   letterSpacing: "-0.03em",
                   lineHeight: 1.1,
                 }}
@@ -1433,9 +1432,10 @@ const FaridVerifiedPanel = ({
                   fontSize: "16px",
                   fontWeight: 500,
                   margin: 0,
-                  color: "rgba(255,255,255,0.92)",
+                  color: BLUE,
                   lineHeight: 1.6,
                   maxWidth: "700px",
+                  opacity: 0.9,
                 }}
               >
                 Website ini dibangun dan dikembangkan oleh Farid Ardiansyah.
@@ -1452,8 +1452,8 @@ const FaridVerifiedPanel = ({
                     alignItems: "center",
                     gap: "8px",
                     padding: "12px 22px",
-                    backgroundColor: WHITE,
-                    color: BLUE,
+                    backgroundColor: BLUE,
+                    color: WHITE,
                     borderRadius: "10px",
                     textDecoration: "none",
                     fontSize: "14px",
@@ -1462,7 +1462,7 @@ const FaridVerifiedPanel = ({
                   }}
                 >
                   Kunjungi Portofolio
-                  <NorthEastArrow size={16} color={BLUE} />
+                  <NorthEastArrow size={16} color={WHITE} />
                 </a>
                 <a
                   href={`mailto:${OWNER_EMAIL}`}
@@ -1472,8 +1472,8 @@ const FaridVerifiedPanel = ({
                     gap: "8px",
                     padding: "12px 22px",
                     backgroundColor: "transparent",
-                    border: "2px solid rgba(255,255,255,0.6)",
-                    color: WHITE,
+                    border: `2px solid ${BLUE}`,
+                    color: BLUE,
                     borderRadius: "10px",
                     textDecoration: "none",
                     fontSize: "14px",
@@ -1486,6 +1486,7 @@ const FaridVerifiedPanel = ({
               </div>
             </div>
 
+            {/* Grid info — background putih, teks biru */}
             <div
               style={{
                 display: "grid",
@@ -1503,13 +1504,13 @@ const FaridVerifiedPanel = ({
                 <div
                   key={i}
                   style={{
-                    backgroundColor: "rgba(255,255,255,0.1)",
-                    border: "1px solid rgba(255,255,255,0.22)",
+                    backgroundColor: WHITE,
                     borderRadius: "16px",
                     padding: "18px 20px",
                     display: "flex",
                     flexDirection: "column",
                     gap: "6px",
+                    boxShadow: "0 6px 20px rgba(0,0,0,0.12)",
                   }}
                 >
                   <span
@@ -1518,7 +1519,8 @@ const FaridVerifiedPanel = ({
                       fontWeight: 800,
                       letterSpacing: "0.8px",
                       textTransform: "uppercase",
-                      color: "rgba(255,255,255,0.7)",
+                      color: BLUE,
+                      opacity: 0.6,
                     }}
                   >
                     {item.label}
@@ -1527,7 +1529,7 @@ const FaridVerifiedPanel = ({
                     style={{
                       fontSize: "16px",
                       fontWeight: 700,
-                      color: WHITE,
+                      color: BLUE,
                       wordBreak: "break-word",
                     }}
                   >
@@ -1537,30 +1539,58 @@ const FaridVerifiedPanel = ({
               ))}
             </div>
 
+            {/* Teks Menuru 450px putih */}
             <div
               style={{
                 marginTop: "auto",
-                paddingTop: "40px",
-                textAlign: "center",
-                overflow: "hidden",
+                paddingTop: "20px",
                 width: "100%",
+                overflow: "hidden",
+                textAlign: "left",
+                lineHeight: 0.85,
               }}
             >
               <span
                 style={{
                   fontFamily: FONT_FAMILY,
-                  fontSize: "clamp(120px, 22vw, 260px)",
+                  fontSize: "450px",
                   fontWeight: 400,
                   color: WHITE,
                   letterSpacing: "-0.05em",
-                  lineHeight: 0.8,
+                  lineHeight: 0.85,
                   display: "block",
                   userSelect: "none",
-                  opacity: 0.18,
                   whiteSpace: "nowrap",
                 }}
               >
                 Menuru
+              </span>
+            </div>
+
+            {/* Teks 2026 450px putih */}
+            <div
+              style={{
+                width: "100%",
+                overflow: "hidden",
+                textAlign: "left",
+                lineHeight: 0.85,
+                marginBottom: "20px",
+              }}
+            >
+              <span
+                style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: "450px",
+                  fontWeight: 400,
+                  color: WHITE,
+                  letterSpacing: "-0.05em",
+                  lineHeight: 0.85,
+                  display: "block",
+                  userSelect: "none",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                2026
               </span>
             </div>
           </div>
