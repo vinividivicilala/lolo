@@ -1080,157 +1080,492 @@ const FaridVerifiedPanel = ({
   anchorRect: DOMRect | null;
   onClose: () => void;
 }) => {
-  const [phase, setPhase] = useState<"loading" | "panel">("loading");
+  const [phase, setPhase] = useState<"loading" | "expand" | "fullpage">("loading");
   const panelRef = useRef<HTMLDivElement>(null);
+  const fullPageRef = useRef<HTMLDivElement>(null);
+  const closeIconRef = useRef<HTMLDivElement>(null);
+  const [isClosing, setIsClosing] = useState(false);
 
+  // Phase 1: loading check animation (1.8s)
   useEffect(() => {
     if (open) {
       setPhase("loading");
+      setIsClosing(false);
       const timer = setTimeout(() => {
-        setPhase("panel");
-      }, 1800); // Durasi animasi loading CSS (1.8s)
+        setPhase("expand");
+      }, 1800);
       return () => clearTimeout(timer);
     }
   }, [open]);
 
+  // Phase 2: expand kecil -> full screen
   useEffect(() => {
-    if (open && phase === "panel" && panelRef.current && anchorRect) {
-      gsap.fromTo(
-        panelRef.current,
-        { height: 0, opacity: 0, scaleY: 0.4 },
-        {
-          height: anchorRect.height,
-          opacity: 1,
-          scaleY: 1,
-          duration: 0.45,
-          ease: "power3.out",
-          transformOrigin: "top center",
-        }
-      );
-    }
-  }, [phase, open, anchorRect]);
+    if (phase !== "expand" || !panelRef.current || !fullPageRef.current || !anchorRect)
+      return;
 
-  if (!open || !anchorRect) return null;
+    const panel = panelRef.current;
+    const full = fullPageRef.current;
+
+    gsap.set(panel, {
+      position: "fixed",
+      top: anchorRect.top,
+      left: anchorRect.left,
+      width: anchorRect.width,
+      height: anchorRect.height,
+      borderRadius: "6px",
+      opacity: 1,
+      zIndex: 9800,
+    });
+    gsap.set(full, { opacity: 0, zIndex: 9799 });
+
+    const tl = gsap.timeline({
+      onComplete: () => {
+        setPhase("fullpage");
+      },
+    });
+
+    tl.to(panel, {
+      top: 0,
+      left: 0,
+      width: "100vw",
+      height: "100vh",
+      borderRadius: "0px",
+      duration: 0.7,
+      ease: "power4.inOut",
+    }).to(
+      full,
+      { opacity: 1, duration: 0.4, ease: "power2.out" },
+      "-=0.35"
+    );
+
+    return () => {
+      tl.kill();
+    };
+  }, [phase, anchorRect]);
+
+  const handleIconEnter = () => {
+    if (!closeIconRef.current || isClosing) return;
+    gsap.to(closeIconRef.current, {
+      rotation: 45,
+      scale: 1.2,
+      duration: 0.3,
+      ease: "power2.out",
+    });
+  };
+
+  const handleIconLeave = () => {
+    if (!closeIconRef.current || isClosing) return;
+    gsap.to(closeIconRef.current, {
+      rotation: 0,
+      scale: 1,
+      duration: 0.3,
+      ease: "power2.out",
+    });
+  };
+
+  const handleClose = () => {
+    if (isClosing || !fullPageRef.current) return;
+    setIsClosing(true);
+    if (closeIconRef.current) {
+      gsap.to(closeIconRef.current, {
+        rotation: 90,
+        scale: 0,
+        duration: 0.4,
+        ease: "back.in(1.7)",
+      });
+    }
+    gsap.to(fullPageRef.current, {
+      opacity: 0,
+      y: 40,
+      duration: 0.4,
+      ease: "power3.in",
+      onComplete: () => {
+        setIsClosing(false);
+        onClose();
+      },
+    });
+  };
+
+  if (!open) return null;
 
   return (
     <>
-      <div
-        onClick={onClose}
-        style={{
-          position: "fixed",
-          inset: 0,
-          zIndex: 9700,
-          background: "transparent",
-          pointerEvents: "auto",
-        }}
-      />
+      {(phase === "loading" || phase === "expand") && (
+        <div
+          onClick={handleClose}
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 9700,
+            background: "rgba(0,0,0,0.25)",
+            pointerEvents: "auto",
+          }}
+        />
+      )}
 
-      <div
-        style={{
-          position: "fixed",
-          top: anchorRect.top,
-          left: anchorRect.left,
-          width: anchorRect.width,
-          zIndex: 9800,
-          pointerEvents: "none",
-        }}
-      >
-        {phase === "loading" && (
-          <div
-            style={{
-              width: "100%",
-              height: anchorRect.height,
-              backgroundColor: BLUE,
-              border: `2px solid ${WHITE}`,
-              borderRadius: "6px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              boxShadow: "0 8px 24px rgba(13,60,252,0.55)",
-              pointerEvents: "auto",
-            }}
-          >
-            <div style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-               <svg width="24" height="24" viewBox="0 0 40 40" style={{ animation: 'verifiedPop 1.8s ease-in-out forwards' }}>
-                 <g style={{ transformOrigin: "center center" }}>
-                    <path
-                      fill={WHITE}
-                      d="M19.998 3.094 14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.03v-6.46h-6.419L25.358 0l-5.36 3.094Z"
-                    />
-                    <path
-                      d="M15 20L18 23L25 16"
-                      stroke={BLUE}
-                      strokeWidth="3.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      fill="none"
-                      style={{
-                        strokeDasharray: 100,
-                        strokeDashoffset: 100,
-                        animation: 'drawCheck 0.8s ease-out 0.8s forwards'
-                      }}
-                    />
-                 </g>
-               </svg>
-            </div>
-          </div>
-        )}
-
-        {phase === "panel" && (
-          <div
-            ref={panelRef}
-            style={{
-              width: "100%",
-              height: 0,
-              backgroundColor: BLUE,
-              border: `2px solid ${WHITE}`,
-              borderRadius: "6px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "6px",
-              boxShadow: "0 10px 30px rgba(13,60,252,0.55)",
-              overflow: "hidden",
-              transformOrigin: "top center",
-              pointerEvents: "auto",
-            }}
-          >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 40 40"
-              xmlns="http://www.w3.org/2000/svg"
-              style={{ display: "block", flexShrink: 0 }}
-            >
-              <path
-                fill={WHITE}
-                d="M19.998 3.094 14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.03v-6.46h-6.419L25.358 0l-5.36 3.094Z"
-              />
-              <path
-                d="M15 20L18 23L25 16"
-                stroke={BLUE}
-                strokeWidth="3.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                fill="none"
-              />
-            </svg>
-
-            <span
+      {(phase === "loading" || phase === "expand") && anchorRect && (
+        <div
+          ref={panelRef}
+          style={{
+            position: "fixed",
+            top: anchorRect.top,
+            left: anchorRect.left,
+            width: anchorRect.width,
+            height: anchorRect.height,
+            backgroundColor: BLUE,
+            border: `2px solid ${WHITE}`,
+            borderRadius: "6px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            boxShadow: "0 8px 24px rgba(13,60,252,0.55)",
+            zIndex: 9800,
+            pointerEvents: "auto",
+            overflow: "hidden",
+          }}
+        >
+          {phase === "loading" && (
+            <div
               style={{
-                fontFamily: FONT_FAMILY,
-                fontSize: "11px",
-                fontWeight: 800,
-                color: WHITE,
-                letterSpacing: "0.02em",
-                whiteSpace: "nowrap",
+                width: 24,
+                height: 24,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
               }}
             >
-              Verified
-            </span>
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 40 40"
+                style={{ animation: "verifiedPop 1.8s ease-in-out forwards" }}
+              >
+                <g style={{ transformOrigin: "center center" }}>
+                  <path
+                    fill={WHITE}
+                    d="M19.998 3.094 14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.03v-6.46h-6.419L25.358 0l-5.36 3.094Z"
+                  />
+                  <path
+                    d="M15 20L18 23L25 16"
+                    stroke={BLUE}
+                    strokeWidth="3.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    fill="none"
+                    style={{
+                      strokeDasharray: 100,
+                      strokeDashoffset: 100,
+                      animation: "drawCheck 0.8s ease-out 0.8s forwards",
+                    }}
+                  />
+                </g>
+              </svg>
+            </div>
+          )}
+
+          {phase === "expand" && (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "6px",
+              }}
+            >
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 40 40"
+                xmlns="http://www.w3.org/2000/svg"
+                style={{ display: "block", flexShrink: 0 }}
+              >
+                <path
+                  fill={WHITE}
+                  d="M19.998 3.094 14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.03v-6.46h-6.419L25.358 0l-5.36 3.094Z"
+                />
+                <path
+                  d="M15 20L18 23L25 16"
+                  stroke={BLUE}
+                  strokeWidth="3.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  fill="none"
+                />
+              </svg>
+              <span
+                style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: "11px",
+                  fontWeight: 800,
+                  color: WHITE,
+                  letterSpacing: "0.02em",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                Verified
+              </span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {(phase === "expand" || phase === "fullpage") && (
+        <div
+          ref={fullPageRef}
+          style={{
+            position: "fixed",
+            inset: 0,
+            width: "100vw",
+            height: "100vh",
+            backgroundColor: BLUE,
+            zIndex: 9799,
+            display: phase === "fullpage" ? "flex" : "none",
+            flexDirection: "column",
+            fontFamily: FONT_FAMILY,
+            color: WHITE,
+            overflow: "hidden",
+            opacity: 0,
+          }}
+        >
+          <div
+            style={{
+              padding: "24px 40px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              flexShrink: 0,
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+              <svg width="32" height="32" viewBox="0 0 40 40">
+                <path
+                  fill={WHITE}
+                  d="M19.998 3.094 14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.03v-6.46h-6.419L25.358 0l-5.36 3.094Z"
+                />
+                <path
+                  d="M15 20L18 23L25 16"
+                  stroke={BLUE}
+                  strokeWidth="3.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  fill="none"
+                />
+              </svg>
+              <span
+                style={{
+                  fontSize: "28px",
+                  fontWeight: 800,
+                  color: WHITE,
+                  letterSpacing: "-0.02em",
+                }}
+              >
+                Verified
+              </span>
+            </div>
+
+            <button
+              onClick={handleClose}
+              onMouseEnter={handleIconEnter}
+              onMouseLeave={handleIconLeave}
+              disabled={isClosing}
+              style={{
+                background: WHITE,
+                border: "none",
+                color: BLUE,
+                borderRadius: "50%",
+                width: "44px",
+                height: "44px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: isClosing ? "not-allowed" : "pointer",
+              }}
+            >
+              <div
+                ref={closeIconRef}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <PlusIcon size={26} color={BLUE} />
+              </div>
+            </button>
           </div>
-        )}
-      </div>
+
+          <div
+            style={{
+              flex: 1,
+              padding: "20px 40px",
+              display: "flex",
+              flexDirection: "column",
+              overflowY: "auto",
+              gap: "24px",
+            }}
+          >
+            <div
+              style={{
+                backgroundColor: "rgba(255,255,255,0.12)",
+                border: "1px solid rgba(255,255,255,0.25)",
+                borderRadius: "24px",
+                padding: "32px",
+                display: "flex",
+                flexDirection: "column",
+                gap: "16px",
+                maxWidth: "900px",
+              }}
+            >
+              <h2
+                style={{
+                  fontSize: "48px",
+                  fontWeight: 800,
+                  margin: 0,
+                  color: WHITE,
+                  letterSpacing: "-0.03em",
+                  lineHeight: 1.1,
+                }}
+              >
+                Farid Ardiansyah
+              </h2>
+              <p
+                style={{
+                  fontSize: "16px",
+                  fontWeight: 500,
+                  margin: 0,
+                  color: "rgba(255,255,255,0.92)",
+                  lineHeight: 1.6,
+                  maxWidth: "700px",
+                }}
+              >
+                Website ini dibangun dan dikembangkan oleh Farid Ardiansyah.
+                Verified developer & owner of Menuru. Semua fitur, sistem, dan
+                infrastruktur di platform ini dikelola secara langsung.
+              </p>
+              <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                <a
+                  href={FARID_LINK}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    padding: "12px 22px",
+                    backgroundColor: WHITE,
+                    color: BLUE,
+                    borderRadius: "10px",
+                    textDecoration: "none",
+                    fontSize: "14px",
+                    fontWeight: 800,
+                    letterSpacing: "0.02em",
+                  }}
+                >
+                  Kunjungi Portofolio
+                  <NorthEastArrow size={16} color={BLUE} />
+                </a>
+                <a
+                  href={`mailto:${OWNER_EMAIL}`}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    padding: "12px 22px",
+                    backgroundColor: "transparent",
+                    border: "2px solid rgba(255,255,255,0.6)",
+                    color: WHITE,
+                    borderRadius: "10px",
+                    textDecoration: "none",
+                    fontSize: "14px",
+                    fontWeight: 800,
+                    letterSpacing: "0.02em",
+                  }}
+                >
+                  Hubungi Email
+                </a>
+              </div>
+            </div>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+                gap: "16px",
+                maxWidth: "900px",
+              }}
+            >
+              {[
+                { label: "Nama", value: OWNER_NAME },
+                { label: "Email", value: OWNER_EMAIL },
+                { label: "Peran", value: "Founder & Developer" },
+                { label: "Status", value: "Verified" },
+              ].map((item, i) => (
+                <div
+                  key={i}
+                  style={{
+                    backgroundColor: "rgba(255,255,255,0.1)",
+                    border: "1px solid rgba(255,255,255,0.22)",
+                    borderRadius: "16px",
+                    padding: "18px 20px",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "6px",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: "11px",
+                      fontWeight: 800,
+                      letterSpacing: "0.8px",
+                      textTransform: "uppercase",
+                      color: "rgba(255,255,255,0.7)",
+                    }}
+                  >
+                    {item.label}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: "16px",
+                      fontWeight: 700,
+                      color: WHITE,
+                      wordBreak: "break-word",
+                    }}
+                  >
+                    {item.value}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <div
+              style={{
+                marginTop: "auto",
+                paddingTop: "40px",
+                textAlign: "center",
+                overflow: "hidden",
+                width: "100%",
+              }}
+            >
+              <span
+                style={{
+                  fontFamily: FONT_FAMILY,
+                  fontSize: "clamp(120px, 22vw, 260px)",
+                  fontWeight: 400,
+                  color: WHITE,
+                  letterSpacing: "-0.05em",
+                  lineHeight: 0.8,
+                  display: "block",
+                  userSelect: "none",
+                  opacity: 0.18,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                Menuru
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };
