@@ -1058,10 +1058,8 @@ const TwoFactorModal = ({ user, secret, onSuccess, onClose }: { user: any; secre
 };
 
 // ===== MENURU CENTER CARD (SELALU BG BIRU, TEKS PUTIH) =====
-// Card ini menampilkan konten Menuru Center seperti di dashboard:
-// - Jika verified=false: deskripsi + info Passkey & Google Authenticator
-// - Jika verified=true: status terverifikasi + metode
 const MenuruCenterCard = ({ verified, method, hasPasskey, twoFactorEnabled }: { verified: boolean; method?: "passkey" | "totp"; hasPasskey?: boolean; twoFactorEnabled?: boolean }) => {
+  const hasAnyMethod = !!(hasPasskey || twoFactorEnabled);
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -1080,7 +1078,6 @@ const MenuruCenterCard = ({ verified, method, hasPasskey, twoFactorEnabled }: { 
         marginTop: "32px",
       }}
     >
-      {/* Header */}
       <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
         <div style={{ width: "56px", height: "56px", borderRadius: "16px", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
           <ShieldLockIcon size={28} color={BLUE} />
@@ -1093,7 +1090,6 @@ const MenuruCenterCard = ({ verified, method, hasPasskey, twoFactorEnabled }: { 
 
       {verified ? (
         <>
-          {/* Status terverifikasi */}
           <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "6px 12px", backgroundColor: WHITE, borderRadius: "10px", alignSelf: "flex-start" }}>
             <span style={{ width: 8, height: 8, borderRadius: "50%", backgroundColor: GREEN }} />
             <span style={{ fontSize: "13px", fontWeight: 800, color: BLUE }}>
@@ -1106,38 +1102,54 @@ const MenuruCenterCard = ({ verified, method, hasPasskey, twoFactorEnabled }: { 
         </>
       ) : (
         <>
-          {/* Deskripsi utama */}
           <p style={{ fontSize: "14px", color: WHITE, opacity: 0.95, lineHeight: 1.6, margin: 0 }}>
             Verifikasi identitas Anda untuk melanjutkan ke dashboard. Menuru Security Center menyediakan perlindungan berlapis dengan <strong>Google Authenticator</strong> dan <strong>Passkey (WebAuthn)</strong>.
           </p>
 
-          {/* Deskripsi Passkey */}
-          {hasPasskey && (
-            <div style={{ backgroundColor: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.25)", borderRadius: "12px", padding: "14px 16px", display: "flex", flexDirection: "column", gap: "6px" }}>
+          {/* Deskripsi Passkey - selalu tampil */}
+          <div style={{ backgroundColor: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.25)", borderRadius: "12px", padding: "14px 16px", display: "flex", flexDirection: "column", gap: "6px" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                 <div style={{ width: "32px", height: "32px", borderRadius: "8px", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                   <KeyIcon size={18} color={BLUE} />
                 </div>
                 <span style={{ fontSize: "14px", fontWeight: 800, color: WHITE }}>Passkey (WebAuthn)</span>
               </div>
-              <p style={{ fontSize: "12px", color: WHITE, opacity: 0.9, lineHeight: 1.5, margin: 0 }}>
-                Login tanpa password dengan biometrik / PIN perangkat. Fingerprint, Face ID, Windows Hello, atau security key USB. Data kriptografi tersimpan di perangkat Anda, tidak pernah dikirim ke server.
-              </p>
+              <span style={{ fontSize: "10px", fontWeight: 800, color: hasPasskey ? GREEN : WHITE, opacity: hasPasskey ? 1 : 0.7, display: "flex", alignItems: "center", gap: "4px", whiteSpace: "nowrap" }}>
+                <span style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: hasPasskey ? GREEN : WHITE, opacity: hasPasskey ? 1 : 0.5 }} />
+                {hasPasskey ? "Aktif" : "Belum"}
+              </span>
             </div>
-          )}
+            <p style={{ fontSize: "12px", color: WHITE, opacity: 0.9, lineHeight: 1.5, margin: 0 }}>
+              Login tanpa password dengan biometrik / PIN perangkat. Fingerprint, Face ID, Windows Hello, atau security key USB. Data kriptografi tersimpan di perangkat Anda, tidak pernah dikirim ke server.
+            </p>
+          </div>
 
-          {/* Deskripsi Google Authenticator */}
-          {twoFactorEnabled && (
-            <div style={{ backgroundColor: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.25)", borderRadius: "12px", padding: "14px 16px", display: "flex", flexDirection: "column", gap: "6px" }}>
+          {/* Deskripsi Google Authenticator - selalu tampil */}
+          <div style={{ backgroundColor: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.25)", borderRadius: "12px", padding: "14px 16px", display: "flex", flexDirection: "column", gap: "6px" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                 <div style={{ width: "32px", height: "32px", borderRadius: "8px", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                   <ShieldLockIcon size={18} color={BLUE} />
                 </div>
                 <span style={{ fontSize: "14px", fontWeight: 800, color: WHITE }}>Google Authenticator</span>
               </div>
-              <p style={{ fontSize: "12px", color: WHITE, opacity: 0.9, lineHeight: 1.5, margin: 0 }}>
-                Kode OTP 6 digit berganti tiap 30 detik. Bekerja offline, tidak butuh internet. Standar TOTP (RFC 6238) dengan recovery codes sebagai backup. Setup 1x permanen sampai dinonaktifkan manual.
-              </p>
+              <span style={{ fontSize: "10px", fontWeight: 800, color: twoFactorEnabled ? GREEN : WHITE, opacity: twoFactorEnabled ? 1 : 0.7, display: "flex", alignItems: "center", gap: "4px", whiteSpace: "nowrap" }}>
+                <span style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: twoFactorEnabled ? GREEN : WHITE, opacity: twoFactorEnabled ? 1 : 0.5 }} />
+                {twoFactorEnabled ? "Aktif" : "Belum"}
+              </span>
+            </div>
+            <p style={{ fontSize: "12px", color: WHITE, opacity: 0.9, lineHeight: 1.5, margin: 0 }}>
+              Kode OTP 6 digit berganti tiap 30 detik. Bekerja offline, tidak butuh internet. Standar TOTP (RFC 6238) dengan recovery codes sebagai backup. Setup 1x permanen sampai dinonaktifkan manual.
+            </p>
+          </div>
+
+          {!hasAnyMethod && (
+            <div style={{ backgroundColor: WHITE, borderRadius: "10px", padding: "10px 14px", display: "flex", alignItems: "center", gap: "8px" }}>
+              <HelpIcon size={16} color={BLUE} />
+              <span style={{ fontSize: "12px", color: BLUE, fontWeight: 700, lineHeight: 1.4 }}>
+                Anda belum mengaktifkan metode keamanan apapun. Aktifkan di Dashboard → Security Center setelah login.
+              </span>
             </div>
           )}
         </>
@@ -1377,48 +1389,49 @@ export default function SignInPage() {
                     </motion.button>
                   </div>
 
-                  {/* ===== USER BELUM TERVERIFIKASI (passkey/2FA) ===== */}
-                  {!isNewPin && (hasPasskey || twoFactorEnabled) && !verifiedMethod && (
+                  {/* ===== USER BELUM TERVERIFIKASI ===== */}
+                  {/* Card Menuru Center SELALU muncul di bawah tombol verifikasi, dengan BG biru & teks putih */}
+                  {!isNewPin && !verifiedMethod && (
                     <>
-                      {/* Menuru Center Card - bg biru, teks putih, dengan deskripsi Passkey & Google Auth */}
                       <MenuruCenterCard
                         verified={false}
                         hasPasskey={hasPasskey}
                         twoFactorEnabled={twoFactorEnabled}
                       />
 
-                      {/* Tombol bantuan passkey/2FA */}
-                      <div style={{ width: "100%", maxWidth: "600px", display: "flex", flexDirection: "column", gap: "10px", marginTop: "16px" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "8px", color: BLUE, fontSize: "13px", fontWeight: 600 }}>
-                          <HelpIcon size={16} color={BLUE} />
-                          <span>Kesulitan login? Gunakan metode bantuan di bawah.</span>
+                      {/* Tombol bantuan passkey/2FA — hanya jika fitur tersedia */}
+                      {(hasPasskey || twoFactorEnabled) && (
+                        <div style={{ width: "100%", maxWidth: "600px", display: "flex", flexDirection: "column", gap: "10px", marginTop: "16px" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "8px", color: BLUE, fontSize: "13px", fontWeight: 600 }}>
+                            <HelpIcon size={16} color={BLUE} />
+                            <span>Kesulitan login? Gunakan metode bantuan di bawah.</span>
+                          </div>
+                          {hasPasskey && (
+                            <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={() => setShowPasskeyHelp(true)} disabled={passkeyBusy} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 18px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "12px", fontSize: "14px", fontWeight: 700, cursor: passkeyBusy ? "not-allowed" : "pointer", fontFamily: FONT_FAMILY }}>
+                              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                                <KeyIcon size={20} color={WHITE} />
+                                <span>Login dengan Passkey (Biometrik)</span>
+                              </div>
+                              <NorthEastArrow size={18} color={WHITE} />
+                            </motion.button>
+                          )}
+                          {twoFactorEnabled && (
+                            <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={() => setShowTwoFactorModal(true)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 18px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "12px", fontSize: "14px", fontWeight: 700, cursor: "pointer", fontFamily: FONT_FAMILY }}>
+                              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                                <ShieldLockIcon size={20} color={WHITE} />
+                                <span>Verifikasi dengan Google Authenticator</span>
+                              </div>
+                              <NorthEastArrow size={18} color={WHITE} />
+                            </motion.button>
+                          )}
                         </div>
-                        {hasPasskey && (
-                          <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={() => setShowPasskeyHelp(true)} disabled={passkeyBusy} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 18px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "12px", fontSize: "14px", fontWeight: 700, cursor: passkeyBusy ? "not-allowed" : "pointer", fontFamily: FONT_FAMILY }}>
-                            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                              <KeyIcon size={20} color={WHITE} />
-                              <span>Login dengan Passkey (Biometrik)</span>
-                            </div>
-                            <NorthEastArrow size={18} color={WHITE} />
-                          </motion.button>
-                        )}
-                        {twoFactorEnabled && (
-                          <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={() => setShowTwoFactorModal(true)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 18px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "12px", fontSize: "14px", fontWeight: 700, cursor: "pointer", fontFamily: FONT_FAMILY }}>
-                            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                              <ShieldLockIcon size={20} color={WHITE} />
-                              <span>Verifikasi dengan Google Authenticator</span>
-                            </div>
-                            <NorthEastArrow size={18} color={WHITE} />
-                          </motion.button>
-                        )}
-                      </div>
+                      )}
                     </>
                   )}
 
-                  {/* ===== USER SUDAH TERVERIFIKASI (passkey/2FA) ===== */}
+                  {/* ===== USER SUDAH TERVERIFIKASI ===== */}
                   {verifiedMethod && (
                     <div style={{ width: "100%", maxWidth: "600px", display: "flex", flexDirection: "column", gap: "16px", marginTop: "32px" }}>
-                      {/* Tombol Passkey & 2FA dalam container biru */}
                       <div style={{ width: "100%", backgroundColor: BLUE, borderRadius: "20px", padding: "20px", boxShadow: "0 12px 32px rgba(13,60,252,0.3)" }}>
                         <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
                           <div style={{ width: "36px", height: "36px", borderRadius: "10px", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -1457,7 +1470,6 @@ export default function SignInPage() {
                         </div>
                       </div>
 
-                      {/* Menuru Center Card - verifikasi berhasil */}
                       <MenuruCenterCard
                         verified={true}
                         method={verifiedMethod}
