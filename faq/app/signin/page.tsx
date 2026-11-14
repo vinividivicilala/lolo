@@ -556,7 +556,7 @@ function supportsWebAuthn(): boolean {
   return !!(window.PublicKeyCredential && navigator.credentials);
 }
 
-// ===== PIN INPUT (BG BIRU, TEKS PUTIH, NO GREEN, NO SKEW) =====
+// ===== PIN INPUT =====
 const PinInput = ({
   value, onChange, onComplete, isNew, confirmValue, onConfirmChange,
 }: {
@@ -726,7 +726,7 @@ const TermsAgreementBox = ({ agreed, onToggle }: { agreed: boolean; onToggle: ()
   );
 };
 
-// ===== TOP BANNER (biru, verified panel GSAP, SAMA PERSIS HALAMAN UTAMA) =====
+// ===== TOP BANNER =====
 const TopBanner = () => {
   const [showPanel, setShowPanel] = useState(false);
   const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null);
@@ -1057,44 +1057,25 @@ const TwoFactorModal = ({ user, secret, onSuccess, onClose }: { user: any; secre
   );
 };
 
-// ===== MENURU CENTER CARD =====
+// ===== MENURU CENTER CARD (BG BIRU, TEKS PUTIH) =====
 const MenuruCenterCard = ({ verified, method }: { verified: boolean; method?: "passkey" | "totp" }) => {
-  if (verified) {
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 20, scale: 0.95 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ type: "spring", stiffness: 200, damping: 22 }}
-        style={{ width: "100%", maxWidth: "600px", backgroundColor: WHITE, borderRadius: "24px", padding: "32px", border: `2px solid ${BLUE}`, boxShadow: "0 12px 32px rgba(13,60,252,0.15)", display: "flex", flexDirection: "column", gap: "16px", marginTop: "32px" }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-          <div style={{ width: "56px", height: "56px", borderRadius: "16px", backgroundColor: BLUE, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-            <ShieldLockIcon size={28} color={WHITE} />
-          </div>
-          <div>
-            <div style={{ fontSize: "22px", fontWeight: 800, color: BLUE, letterSpacing: "-0.02em" }}>Menuru Center</div>
-            <div style={{ fontSize: "13px", color: BLUE, opacity: 0.7, fontWeight: 600 }}>Security Center</div>
-          </div>
-        </div>
-        <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "6px 12px", backgroundColor: "#DCFCE7", borderRadius: "10px", alignSelf: "flex-start" }}>
-          <span style={{ width: 8, height: 8, borderRadius: "50%", backgroundColor: GREEN }} />
-          <span style={{ fontSize: "13px", fontWeight: 800, color: "#166534" }}>
-            Terverifikasi{method === "passkey" ? " via Passkey" : method === "totp" ? " via Google Authenticator" : ""}
-          </span>
-        </div>
-        <p style={{ fontSize: "14px", color: BLUE, opacity: 0.9, lineHeight: 1.6, margin: 0 }}>
-          Identitas Anda telah diverifikasi. Anda akan diarahkan ke dashboard dalam beberapa saat.
-        </p>
-      </motion.div>
-    );
-  }
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      style={{ width: "100%", maxWidth: "600px", backgroundColor: BLUE, borderRadius: "24px", padding: "28px", boxShadow: "0 12px 32px rgba(13,60,252,0.3)", display: "flex", flexDirection: "column", gap: "16px", marginTop: "32px" }}
+      style={{
+        width: "100%",
+        maxWidth: "600px",
+        backgroundColor: BLUE,
+        borderRadius: "24px",
+        padding: "28px",
+        boxShadow: "0 12px 32px rgba(13,60,252,0.3)",
+        display: "flex",
+        flexDirection: "column",
+        gap: "16px",
+        marginTop: "32px",
+      }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
         <div style={{ width: "56px", height: "56px", borderRadius: "16px", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -1102,12 +1083,27 @@ const MenuruCenterCard = ({ verified, method }: { verified: boolean; method?: "p
         </div>
         <div>
           <div style={{ fontSize: "22px", fontWeight: 800, color: WHITE, letterSpacing: "-0.02em" }}>Menuru Center</div>
-          <div style={{ fontSize: "13px", color: WHITE, opacity: 0.85, fontWeight: 600 }}>Security Verification</div>
+          <div style={{ fontSize: "13px", color: WHITE, opacity: 0.85, fontWeight: 600 }}>Security Center</div>
         </div>
       </div>
-      <p style={{ fontSize: "14px", color: WHITE, opacity: 0.95, lineHeight: 1.6, margin: 0 }}>
-        Verifikasi identitas Anda untuk melanjutkan ke dashboard. Gunakan salah satu metode di bawah jika Anda kesulitan login dengan PIN.
-      </p>
+
+      {verified ? (
+        <>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "6px 12px", backgroundColor: WHITE, borderRadius: "10px", alignSelf: "flex-start" }}>
+            <span style={{ width: 8, height: 8, borderRadius: "50%", backgroundColor: GREEN }} />
+            <span style={{ fontSize: "13px", fontWeight: 800, color: BLUE }}>
+              Terverifikasi{method === "passkey" ? " via Passkey" : method === "totp" ? " via Google Authenticator" : ""}
+            </span>
+          </div>
+          <p style={{ fontSize: "14px", color: WHITE, opacity: 0.95, lineHeight: 1.6, margin: 0 }}>
+            Identitas Anda telah diverifikasi. Anda akan diarahkan ke dashboard dalam beberapa saat.
+          </p>
+        </>
+      ) : (
+        <p style={{ fontSize: "14px", color: WHITE, opacity: 0.95, lineHeight: 1.6, margin: 0 }}>
+          Verifikasi identitas Anda untuk melanjutkan ke dashboard. Gunakan salah satu metode di bawah jika Anda kesulitan login dengan PIN.
+        </p>
+      )}
     </motion.div>
   );
 };
@@ -1343,10 +1339,11 @@ export default function SignInPage() {
                     </motion.button>
                   </div>
 
+                  {/* MENURU CENTER + TOMBOL PASSKEY/2FA — hanya jika belum verifikasi */}
                   {!isNewPin && (hasPasskey || twoFactorEnabled) && !verifiedMethod && (
                     <>
                       <MenuruCenterCard verified={false} />
-                      <div style={{ width: "100%", maxWidth: "600px", display: "flex", flexDirection: "column", gap: "10px", marginTop: "12px" }}>
+                      <div style={{ width: "100%", maxWidth: "600px", display: "flex", flexDirection: "column", gap: "10px", marginTop: "16px" }}>
                         <div style={{ display: "flex", alignItems: "center", gap: "8px", color: BLUE, fontSize: "13px", fontWeight: 600 }}>
                           <HelpIcon size={16} color={BLUE} />
                           <span>Kesulitan login? Gunakan metode bantuan di bawah.</span>
@@ -1373,6 +1370,7 @@ export default function SignInPage() {
                     </>
                   )}
 
+                  {/* MENURU CENTER — setelah verifikasi (bg biru, teks putih, konten sukses) */}
                   {verifiedMethod && <MenuruCenterCard verified={true} method={verifiedMethod} />}
 
                   {showPasskeyHelp && hasPasskey && !verifiedMethod && (
