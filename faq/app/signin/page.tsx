@@ -1057,7 +1057,7 @@ const TwoFactorModal = ({ user, secret, onSuccess, onClose }: { user: any; secre
   );
 };
 
-// ===== MENURU CENTER CARD (BG BIRU, TEKS PUTIH) =====
+// ===== MENURU CENTER CARD (SELALU BG BIRU, TEKS PUTIH) =====
 const MenuruCenterCard = ({ verified, method }: { verified: boolean; method?: "passkey" | "totp" }) => {
   return (
     <motion.div
@@ -1370,7 +1370,7 @@ export default function SignInPage() {
                     </>
                   )}
 
-                  {/* MENURU CENTER — setelah verifikasi (bg biru, teks putih, konten sukses) */}
+                  {/* MENURU CENTER — setelah verifikasi (bg biru, teks putih) */}
                   {verifiedMethod && <MenuruCenterCard verified={true} method={verifiedMethod} />}
 
                   {showPasskeyHelp && hasPasskey && !verifiedMethod && (
@@ -1501,41 +1501,13 @@ export default function SignInPage() {
       </AnimatePresence>
 
       <style jsx global>{`
-        html {
-          overflow: auto !important;
-          -ms-overflow-style: none !important;
-          scrollbar-width: none !important;
-          height: 100% !important;
-        }
-        html::-webkit-scrollbar {
-          display: none !important;
-          width: 0 !important;
-          height: 0 !important;
-        }
-        body {
-          overflow: auto !important;
-          -ms-overflow-style: none !important;
-          scrollbar-width: none !important;
-          margin: 0;
-          padding: 0;
-          background-color: #ffffff !important;
-          min-height: 100% !important;
-          height: auto !important;
-        }
-        body::-webkit-scrollbar {
-          display: none !important;
-          width: 0 !important;
-          height: 0 !important;
-        }
-        * {
-          background-color: transparent;
-        }
-        input::placeholder {
-          color: rgba(255, 255, 255, 0.75) !important;
-        }
-        .pin-box {
-          transition: box-shadow 0.2s ease;
-        }
+        html { overflow: auto !important; -ms-overflow-style: none !important; scrollbar-width: none !important; height: 100% !important; }
+        html::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
+        body { overflow: auto !important; -ms-overflow-style: none !important; scrollbar-width: none !important; margin: 0; padding: 0; background-color: #ffffff !important; min-height: 100% !important; height: auto !important; }
+        body::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
+        * { background-color: transparent; }
+        input::placeholder { color: rgba(255, 255, 255, 0.75) !important; }
+        .pin-box { transition: box-shadow 0.2s ease; }
         @keyframes verifiedPop {
           0% { transform: scale(0.3) rotate(-25deg); opacity: 0; }
           20% { transform: scale(1) rotate(0deg); opacity: 1; }
