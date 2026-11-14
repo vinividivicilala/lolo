@@ -14,7 +14,7 @@ import {
 import { auth } from "@/lib/firebase";
 import { apiRequest } from "@/lib/apiClient";
 import gsap from "gsap";
-import { getFirestore, doc, getDoc } from "firebase/firestore";
+import { getFirestore, doc, getDoc, updateDoc } from "firebase/firestore";
 
 // ===== FIRESTORE =====
 let _db: any = null;
@@ -32,6 +32,7 @@ const WHITE = "#FFFFFF";
 const BLACK = "#000000";
 const RED = "#DC2626";
 const GREEN = "#4ADE80";
+const TERMS_LAST_UPDATE = "14 November 2026";
 
 // ===== ICON =====
 const NorthEastArrow = ({ size = 24, color = "currentColor" }: { size?: number; color?: string }) => (
@@ -43,6 +44,12 @@ const NorthEastArrow = ({ size = 24, color = "currentColor" }: { size?: number; 
 const NorthWestArrow = ({ size = 24, color = "currentColor" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <path d="M17 17L7 7M7 17V7H17" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const ChevronDownIcon = ({ size = 18, color = "currentColor" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <path d="M6 9L12 15L18 9" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
@@ -147,6 +154,24 @@ const KeyIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?: stri
     <path d="M10.85 12.15L19 4" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     <path d="M18 5L20 7" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     <path d="M15 8L17 10" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const RecoveryCodeIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <rect x="3" y="6" width="18" height="12" rx="2" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M7 10H9" stroke={color} strokeWidth="2" strokeLinecap="round" />
+    <path d="M11 10H13" stroke={color} strokeWidth="2" strokeLinecap="round" />
+    <path d="M15 10H17" stroke={color} strokeWidth="2" strokeLinecap="round" />
+    <path d="M7 14H10" stroke={color} strokeWidth="2" strokeLinecap="round" />
+    <path d="M12 14H17" stroke={color} strokeWidth="2" strokeLinecap="round" />
+  </svg>
+);
+
+const UpdateIcon = ({ size = 20, color = "currentColor" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <path d="M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M21 3V9H15" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
@@ -556,6 +581,330 @@ function supportsWebAuthn(): boolean {
   return !!(window.PublicKeyCredential && navigator.credentials);
 }
 
+// ===== UPDATE PANEL (Kanan Persetujuan Layanan) =====
+const UpdatePanel = () => {
+  const [open, setOpen] = useState(false);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const chevronRef = useRef<HTMLDivElement>(null);
+  const [height, setHeight] = useState(0);
+
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!contentRef.current) return;
+    setHeight(contentRef.current.scrollHeight);
+  }, []);
+
+  useEffect(() => {
+    if (!panelRef.current || !contentRef.current) return;
+    const targetHeight = open ? contentRef.current.scrollHeight : 0;
+    gsap.to(panelRef.current, {
+      height: targetHeight,
+      duration: 0.5,
+      ease: open ? "power3.out" : "power3.in",
+    });
+    if (chevronRef.current) {
+      gsap.to(chevronRef.current, {
+        rotation: open ? 180 : 0,
+        duration: 0.4,
+        ease: "back.out(1.7)",
+      });
+    }
+  }, [open]);
+
+  const updates = [
+    { version: "v2.4.0", date: "14 Nov 2026", note: "Konten Passkey, Google Authenticator, dan Recovery Codes ditambahkan ke Persetujuan Layanan." },
+    { version: "v2.3.1", date: "08 Nov 2026", note: "Perbaikan minor pada flow verifikasi PIN dan Passkey." },
+    { version: "v2.3.0", date: "01 Nov 2026", note: "Integrasi Recovery Code untuk Google Authenticator." },
+    { version: "v2.2.0", date: "20 Okt 2026", note: "Menuru Center Card baru di halaman sign in." },
+  ];
+
+  return (
+    <div style={{ width: "100%", backgroundColor: WHITE, borderRadius: "16px", border: `2px solid ${BLUE}`, overflow: "hidden", fontFamily: FONT_FAMILY }}>
+      <button
+        onClick={() => setOpen((p) => !p)}
+        style={{
+          width: "100%",
+          padding: "16px 20px",
+          backgroundColor: BLUE,
+          border: "none",
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: "12px",
+          fontFamily: FONT_FAMILY,
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <UpdateIcon size={20} color={WHITE} />
+          <div style={{ textAlign: "left" }}>
+            <div style={{ fontSize: "14px", fontWeight: 800, color: WHITE, letterSpacing: "0.02em" }}>Update Terakhir</div>
+            <div style={{ fontSize: "12px", color: WHITE, opacity: 0.85, fontWeight: 600 }}>{TERMS_LAST_UPDATE}</div>
+          </div>
+        </div>
+        <div ref={chevronRef} style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "28px", height: "28px", borderRadius: "50%", backgroundColor: WHITE }}>
+          <ChevronDownIcon size={18} color={BLUE} />
+        </div>
+      </button>
+
+      <div ref={panelRef} style={{ height: 0, overflow: "hidden", backgroundColor: WHITE }}>
+        <div ref={contentRef} style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: "10px" }}>
+          <AnimatePresence>
+            {open && updates.map((u, i) => (
+              <motion.div
+                key={u.version}
+                initial={{ opacity: 0, x: -12 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -12 }}
+                transition={{ duration: 0.3, delay: i * 0.06 }}
+                style={{
+                  padding: "10px 12px",
+                  backgroundColor: "#F0F4FF",
+                  borderRadius: "10px",
+                  borderLeft: `3px solid ${BLUE}`,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "4px",
+                }}
+              >
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "8px" }}>
+                  <span style={{ fontSize: "12px", fontWeight: 800, color: BLUE }}>{u.version}</span>
+                  <span style={{ fontSize: "10px", fontWeight: 700, color: BLUE, opacity: 0.7 }}>{u.date}</span>
+                </div>
+                <p style={{ fontSize: "12px", color: BLUE, margin: 0, lineHeight: 1.5, opacity: 0.9 }}>{u.note}</p>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ===== TERMS =====
+const TermsAgreementBox = ({ agreed, onToggle }: { agreed: boolean; onToggle: () => void }) => {
+  const boxRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (boxRef.current) {
+      gsap.fromTo(boxRef.current, { opacity: 0, y: 30, scale: 0.98 }, { opacity: 1, y: 0, scale: 1, duration: 0.8, ease: "power3.out", delay: 0.3 });
+    }
+  }, []);
+
+  return (
+    <div ref={boxRef} style={{ width: "100%", backgroundColor: BLUE, borderRadius: "16px", padding: "32px 36px", marginBottom: "24px", fontFamily: FONT_FAMILY, color: WHITE }}>
+      <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(260px, 320px)", gap: "28px", alignItems: "flex-start" }}>
+        {/* KONTEN KIRI */}
+        <div style={{ minWidth: 0 }}>
+          <h3 style={{ fontSize: "24px", fontWeight: 700, color: WHITE, margin: "0 0 20px 0", letterSpacing: "-0.01em", fontFamily: FONT_FAMILY }}>Persetujuan Layanan</h3>
+          <div style={{ fontSize: "15px", lineHeight: 1.8, color: WHITE, fontFamily: FONT_FAMILY, marginBottom: "20px" }}>
+            <p style={{ margin: "0 0 14px 0", textIndent: "2em" }}>Dengan melakukan sign in ke akun Menuru, Anda menyatakan telah membaca, memahami, dan menyetujui seluruh Syarat &amp; Ketentuan yang berlaku. Persetujuan ini mencakup penggunaan layanan secara wajar, menjaga kerahasiaan akun, serta tidak menyalahgunakan fitur yang tersedia untuk aktivitas yang melanggar hukum.</p>
+
+            <div style={{ marginBottom: "14px" }}>
+              <div style={{ display: "flex", gap: "12px", marginBottom: "8px" }}>
+                <span style={{ fontWeight: 700, flexShrink: 0, minWidth: "40px" }}>I.</span>
+                <span><strong>Penggunaan Layanan.</strong> Anda setuju untuk menggunakan layanan Menuru hanya untuk tujuan yang sah dan sesuai dengan ketentuan yang berlaku. Segala bentuk penyalahgunaan akan dikenakan sanksi sesuai kebijakan yang berlaku.</span>
+              </div>
+            </div>
+
+            <div style={{ marginBottom: "14px" }}>
+              <div style={{ display: "flex", gap: "12px", marginBottom: "8px" }}>
+                <span style={{ fontWeight: 700, flexShrink: 0, minWidth: "40px" }}>II.</span>
+                <span><strong>Privasi &amp; Keamanan Data.</strong> Menuru berkomitmen melindungi data pribadi Anda sesuai dengan Kebijakan Privasi yang berlaku. Kami menggunakan enkripsi end-to-end untuk menjaga kerahasiaan percakapan dan tidak akan membagikan data Anda kepada pihak ketiga tanpa izin.</span>
+              </div>
+            </div>
+
+            <div style={{ marginBottom: "14px" }}>
+              <div style={{ display: "flex", gap: "12px", marginBottom: "8px" }}>
+                <span style={{ fontWeight: 700, flexShrink: 0, minWidth: "40px" }}>III.</span>
+                <span><strong>Tanggung Jawab Pengguna.</strong> Anda bertanggung jawab penuh atas kerahasiaan akun, PIN, Passkey, dan Recovery Code Anda. Segala aktivitas yang terjadi melalui akun Anda menjadi tanggung jawab Anda sepenuhnya.</span>
+              </div>
+            </div>
+
+            <div style={{ marginBottom: "14px" }}>
+              <div style={{ display: "flex", gap: "12px", marginBottom: "8px" }}>
+                <span style={{ fontWeight: 700, flexShrink: 0, minWidth: "40px" }}>IV.</span>
+                <span><strong>Passkey (WebAuthn).</strong> Dengan mengaktifkan Passkey, Anda menyetujui penyimpanan public key di server Menuru dan penggunaan biometrik / PIN perangkat untuk autentikasi. Private key tetap berada di perangkat Anda dan tidak pernah dikirim ke server. Menuru tidak bertanggung jawab atas kehilangan akses akibat perangkat rusak atau hilang tanpa backup Passkey di perangkat lain.</span>
+              </div>
+            </div>
+
+            <div style={{ marginBottom: "14px" }}>
+              <div style={{ display: "flex", gap: "12px", marginBottom: "8px" }}>
+                <span style={{ fontWeight: 700, flexShrink: 0, minWidth: "40px" }}>V.</span>
+                <span><strong>Google Authenticator (TOTP).</strong> Dengan mengaktifkan Google Authenticator, Anda menyetujui penyimpanan TOTP secret terenkripsi di server Menuru. Kode OTP 6 digit berlaku 30 detik dan berganti otomatis. Anda bertanggung jawab menjaga kerahasiaan secret dan tidak membagikannya kepada siapa pun. Setup bersifat permanen sampai dinonaktifkan manual melalui Security Center.</span>
+              </div>
+            </div>
+
+            <div style={{ marginBottom: "14px" }}>
+              <div style={{ display: "flex", gap: "12px", marginBottom: "8px" }}>
+                <span style={{ fontWeight: 700, flexShrink: 0, minWidth: "40px" }}>VI.</span>
+                <span><strong>Recovery Codes.</strong> Menuru menyediakan recovery codes sekali pakai sebagai cadangan jika Anda kehilangan akses ke perangkat Passkey atau aplikasi Google Authenticator. Simpan recovery codes di tempat aman (password manager atau cetak fisik). Setiap kode hanya dapat digunakan satu kali dan tidak dapat dipulihkan jika hilang. Menuru tidak bertanggung jawab atas kehilangan akun akibat kelalaian penyimpanan recovery codes.</span>
+              </div>
+            </div>
+
+            <p style={{ margin: "0", textIndent: "2em" }}>Apabila Anda tidak menyetujui ketentuan ini, mohon untuk tidak melanjutkan proses sign in. Dengan mencentang kotak di bawah, Anda secara sadar dan sukarela menyetujui seluruh ketentuan yang tercantum pada <Link href="/terms-of-services" style={{ color: WHITE, textDecoration: "underline", fontWeight: 600 }}>Syarat &amp; Ketentuan</Link> dan <Link href="/privacy-policy" style={{ color: WHITE, textDecoration: "underline", fontWeight: 600 }}>Kebijakan Privasi</Link>.</p>
+          </div>
+
+          <label style={{ display: "flex", alignItems: "flex-start", gap: "12px", cursor: "pointer", fontSize: "15px", fontWeight: 600, color: WHITE, fontFamily: FONT_FAMILY, lineHeight: 1.5 }}>
+            <input type="checkbox" checked={agreed} onChange={onToggle} style={{ width: "22px", height: "22px", marginTop: "2px", cursor: "pointer", accentColor: WHITE, flexShrink: 0 }} />
+            <span>Saya telah membaca dan menyetujui Syarat &amp; Ketentuan, Kebijakan Privasi, serta ketentuan Passkey, Google Authenticator, dan Recovery Codes Menuru.</span>
+          </label>
+        </div>
+
+        {/* PANEL KANAN - UPDATE */}
+        <div style={{ position: "sticky", top: "20px" }}>
+          <UpdatePanel />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ===== RECOVERY CODE PANEL =====
+const RecoveryCodePanel = ({
+  onClose,
+  onSubmit,
+  busy,
+  error,
+  codesCount,
+}: {
+  onClose: () => void;
+  onSubmit: (code: string) => void;
+  busy: boolean;
+  error: string;
+  codesCount: number;
+}) => {
+  const [input, setInput] = useState("");
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (panelRef.current) {
+      gsap.fromTo(panelRef.current, { opacity: 0, y: 20, scale: 0.98 }, { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: "power3.out" });
+    }
+  }, []);
+
+  const normalized = input.replace(/[^A-Za-z0-9]/g, "").toUpperCase();
+  const formatted = normalized.match(/.{1,4}/g)?.join("-") || "";
+
+  return (
+    <motion.div
+      ref={panelRef}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.4 }}
+      style={{
+        width: "100%",
+        maxWidth: "600px",
+        backgroundColor: BLUE,
+        borderRadius: "24px",
+        padding: "28px",
+        boxShadow: "0 12px 32px rgba(13,60,252,0.3)",
+        display: "flex",
+        flexDirection: "column",
+        gap: "16px",
+        marginTop: "24px",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+          <div style={{ width: "48px", height: "48px", borderRadius: "14px", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <RecoveryCodeIcon size={26} color={BLUE} />
+          </div>
+          <div>
+            <div style={{ fontSize: "20px", fontWeight: 800, color: WHITE, letterSpacing: "-0.02em" }}>Recovery Code</div>
+            <div style={{ fontSize: "12px", color: WHITE, opacity: 0.85, fontWeight: 600 }}>
+              {codesCount > 0 ? `${codesCount} kode tersedia` : "Belum ada recovery code"}
+            </div>
+          </div>
+        </div>
+        <button
+          onClick={onClose}
+          style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.3)", color: WHITE, borderRadius: "8px", padding: "6px 12px", fontSize: "12px", fontWeight: 800, cursor: "pointer", fontFamily: FONT_FAMILY }}
+        >
+          Tutup
+        </button>
+      </div>
+
+      <p style={{ fontSize: "13px", color: WHITE, opacity: 0.95, lineHeight: 1.6, margin: 0 }}>
+        Gunakan salah satu recovery code yang Anda simpan saat mengaktifkan Google Authenticator. Setiap kode hanya bisa dipakai <strong>satu kali</strong>.
+      </p>
+
+      {codesCount === 0 ? (
+        <div style={{ backgroundColor: WHITE, borderRadius: "12px", padding: "14px 16px", display: "flex", alignItems: "center", gap: "10px" }}>
+          <HelpIcon size={18} color={BLUE} />
+          <span style={{ fontSize: "12px", color: BLUE, fontWeight: 700, lineHeight: 1.5 }}>
+            Anda belum memiliki recovery code. Aktifkan Google Authenticator di Dashboard → Security Center untuk mendapatkan recovery codes.
+          </span>
+        </div>
+      ) : (
+        <>
+          <div>
+            <label style={{ display: "block", fontSize: "11px", fontWeight: 800, color: WHITE, opacity: 0.85, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "6px" }}>
+              Kode Recovery
+            </label>
+            <input
+              type="text"
+              value={formatted}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="XXXX-XXXX-XXXX-XXXX"
+              style={{
+                width: "100%",
+                padding: "14px 16px",
+                borderRadius: "12px",
+                border: "none",
+                fontSize: "18px",
+                fontFamily: "monospace",
+                outline: "none",
+                color: BLUE,
+                fontWeight: 800,
+                letterSpacing: "0.15em",
+                textAlign: "center",
+                backgroundColor: WHITE,
+                boxSizing: "border-box",
+              }}
+            />
+          </div>
+
+          {error && (
+            <div style={{ backgroundColor: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.3)", borderRadius: "8px", padding: "10px 14px", fontSize: "12px", fontWeight: 700, color: WHITE }}>
+              {error}
+            </div>
+          )}
+
+          <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+            <button
+              onClick={() => onSubmit(formatted)}
+              disabled={busy || !formatted.trim()}
+              style={{
+                flex: 1,
+                minWidth: "140px",
+                padding: "12px 18px",
+                backgroundColor: busy || !formatted.trim() ? "rgba(255,255,255,0.4)" : WHITE,
+                color: BLUE,
+                border: "none",
+                borderRadius: "10px",
+                fontSize: "14px",
+                fontWeight: 800,
+                cursor: busy || !formatted.trim() ? "not-allowed" : "pointer",
+                fontFamily: FONT_FAMILY,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px",
+              }}
+            >
+              {busy ? "Memverifikasi..." : "Verifikasi Kode"}
+              {!busy && formatted.trim() && <NorthEastArrow size={16} color={BLUE} />}
+            </button>
+          </div>
+        </>
+      )}
+    </motion.div>
+  );
+};
+
 // ===== PIN INPUT =====
 const PinInput = ({
   value, onChange, onComplete, isNew, confirmValue, onConfirmChange,
@@ -679,49 +1028,6 @@ const PinInput = ({
           <div>{renderBoxes(confirmValue, true)}</div>
         </div>
       )}
-    </div>
-  );
-};
-
-// ===== TERMS =====
-const TermsAgreementBox = ({ agreed, onToggle }: { agreed: boolean; onToggle: () => void }) => {
-  const boxRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (boxRef.current) {
-      gsap.fromTo(boxRef.current, { opacity: 0, y: 30, scale: 0.98 }, { opacity: 1, y: 0, scale: 1, duration: 0.8, ease: "power3.out", delay: 0.3 });
-    }
-  }, []);
-
-  return (
-    <div ref={boxRef} style={{ width: "100%", backgroundColor: BLUE, borderRadius: "16px", padding: "32px 36px", marginBottom: "24px", fontFamily: FONT_FAMILY, color: WHITE }}>
-      <h3 style={{ fontSize: "24px", fontWeight: 700, color: WHITE, margin: "0 0 20px 0", letterSpacing: "-0.01em", fontFamily: FONT_FAMILY }}>Persetujuan Layanan</h3>
-      <div style={{ fontSize: "15px", lineHeight: 1.8, color: WHITE, fontFamily: FONT_FAMILY, marginBottom: "20px" }}>
-        <p style={{ margin: "0 0 14px 0", textIndent: "2em" }}>Dengan melakukan sign in ke akun Menuru, Anda menyatakan telah membaca, memahami, dan menyetujui seluruh Syarat &amp; Ketentuan yang berlaku. Persetujuan ini mencakup penggunaan layanan secara wajar, menjaga kerahasiaan akun, serta tidak menyalahgunakan fitur yang tersedia untuk aktivitas yang melanggar hukum.</p>
-        <div style={{ marginBottom: "14px" }}>
-          <div style={{ display: "flex", gap: "12px", marginBottom: "8px" }}>
-            <span style={{ fontWeight: 700, flexShrink: 0, minWidth: "40px" }}>I.</span>
-            <span><strong>Penggunaan Layanan.</strong> Anda setuju untuk menggunakan layanan Menuru hanya untuk tujuan yang sah dan sesuai dengan ketentuan yang berlaku. Segala bentuk penyalahgunaan akan dikenakan sanksi sesuai kebijakan yang berlaku.</span>
-          </div>
-        </div>
-        <div style={{ marginBottom: "14px" }}>
-          <div style={{ display: "flex", gap: "12px", marginBottom: "8px" }}>
-            <span style={{ fontWeight: 700, flexShrink: 0, minWidth: "40px" }}>II.</span>
-            <span><strong>Privasi &amp; Keamanan Data.</strong> Menuru berkomitmen melindungi data pribadi Anda sesuai dengan Kebijakan Privasi yang berlaku. Kami menggunakan enkripsi end-to-end untuk menjaga kerahasiaan percakapan dan tidak akan membagikan data Anda kepada pihak ketiga tanpa izin.</span>
-          </div>
-        </div>
-        <div style={{ marginBottom: "14px" }}>
-          <div style={{ display: "flex", gap: "12px", marginBottom: "8px" }}>
-            <span style={{ fontWeight: 700, flexShrink: 0, minWidth: "40px" }}>III.</span>
-            <span><strong>Tanggung Jawab Pengguna.</strong> Anda bertanggung jawab penuh atas kerahasiaan akun dan PIN Anda. Segala aktivitas yang terjadi melalui akun Anda menjadi tanggung jawab Anda sepenuhnya.</span>
-          </div>
-        </div>
-        <p style={{ margin: "0", textIndent: "2em" }}>Apabila Anda tidak menyetujui ketentuan ini, mohon untuk tidak melanjutkan proses sign in. Dengan mencentang kotak di bawah, Anda secara sadar dan sukarela menyetujui seluruh ketentuan yang tercantum pada <Link href="/terms-of-services" style={{ color: WHITE, textDecoration: "underline", fontWeight: 600 }}>Syarat &amp; Ketentuan</Link> dan <Link href="/privacy-policy" style={{ color: WHITE, textDecoration: "underline", fontWeight: 600 }}>Kebijakan Privasi</Link>.</p>
-      </div>
-      <label style={{ display: "flex", alignItems: "flex-start", gap: "12px", cursor: "pointer", fontSize: "15px", fontWeight: 600, color: WHITE, fontFamily: FONT_FAMILY, lineHeight: 1.5 }}>
-        <input type="checkbox" checked={agreed} onChange={onToggle} style={{ width: "22px", height: "22px", marginTop: "2px", cursor: "pointer", accentColor: WHITE, flexShrink: 0 }} />
-        <span>Saya telah membaca dan menyetujui Syarat &amp; Ketentuan serta Kebijakan Privasi Menuru.</span>
-      </label>
     </div>
   );
 };
@@ -1046,7 +1352,7 @@ const TwoFactorModal = ({ user, secret, onSuccess, onClose }: { user: any; secre
             <div style={{ color: BLUE, fontWeight: 800, fontSize: "13px" }}>{countdown}s</div>
           </div>
         )}
-        <input type="text" value={token} onChange={(e) => setToken(e.target.value.replace(/[^\d\s]/g, "").slice(0, 6))} placeholder="123456" maxLength={6} inputMode="numeric" style={{ width: "100%", padding: "14px 16px", borderRadius: "12px", border: `2px solid ${BLUE}`, fontSize: "20px", fontFamily: FONT_FAMILY, outline: "none", color: BLUE, fontWeight: 600, letterSpacing: "0.2em", textAlign: "center", backgroundColor: WHITE, marginBottom: "12px" }} />
+        <input type="text" value={token} onChange={(e) => setToken(e.target.value.replace(/[^\d\s]/g, "").slice(0, 6))} placeholder="123456" maxLength={6} inputMode="numeric" style={{ width: "100%", padding: "14px 16px", borderRadius: "12px", border: `2px solid ${BLUE}`, fontSize: "20px", fontFamily: FONT_FAMILY, outline: "none", color: BLUE, fontWeight: 600, letterSpacing: "0.2em", textAlign: "center", backgroundColor: WHITE, marginBottom: "12px", boxSizing: "border-box" }} />
         {error && <div style={{ color: RED, fontSize: "13px", fontWeight: 600, marginBottom: "12px" }}>{error}</div>}
         <div style={{ display: "flex", gap: "10px" }}>
           <button onClick={handleVerify} disabled={busy || token.length !== 6} style={{ flex: 1, padding: "12px 18px", backgroundColor: busy || token.length !== 6 ? "#ccc" : BLUE, color: WHITE, border: "none", borderRadius: "10px", fontSize: "14px", fontWeight: 700, cursor: busy || token.length !== 6 ? "not-allowed" : "pointer", fontFamily: FONT_FAMILY }}>{busy ? "Memverifikasi..." : "Verifikasi"}</button>
@@ -1057,9 +1363,22 @@ const TwoFactorModal = ({ user, secret, onSuccess, onClose }: { user: any; secre
   );
 };
 
-// ===== MENURU CENTER CARD (SELALU BG BIRU, TEKS PUTIH) =====
-const MenuruCenterCard = ({ verified, method, hasPasskey, twoFactorEnabled }: { verified: boolean; method?: "passkey" | "totp"; hasPasskey?: boolean; twoFactorEnabled?: boolean }) => {
-  const hasAnyMethod = !!(hasPasskey || twoFactorEnabled);
+// ===== MENURU CENTER CARD =====
+const MenuruCenterCard = ({
+  verified,
+  method,
+  hasPasskey,
+  twoFactorEnabled,
+  recoveryCodesCount,
+  onOpenRecovery,
+}: {
+  verified: boolean;
+  method?: "passkey" | "totp" | "recovery";
+  hasPasskey?: boolean;
+  twoFactorEnabled?: boolean;
+  recoveryCodesCount?: number;
+  onOpenRecovery?: () => void;
+}) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -1093,7 +1412,8 @@ const MenuruCenterCard = ({ verified, method, hasPasskey, twoFactorEnabled }: { 
           <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "6px 12px", backgroundColor: WHITE, borderRadius: "10px", alignSelf: "flex-start" }}>
             <span style={{ width: 8, height: 8, borderRadius: "50%", backgroundColor: GREEN }} />
             <span style={{ fontSize: "13px", fontWeight: 800, color: BLUE }}>
-              Terverifikasi{method === "passkey" ? " via Passkey" : method === "totp" ? " via Google Authenticator" : ""}
+              Terverifikasi
+              {method === "passkey" ? " via Passkey" : method === "totp" ? " via Google Authenticator" : method === "recovery" ? " via Recovery Code" : ""}
             </span>
           </div>
           <p style={{ fontSize: "14px", color: WHITE, opacity: 0.95, lineHeight: 1.6, margin: 0 }}>
@@ -1103,10 +1423,10 @@ const MenuruCenterCard = ({ verified, method, hasPasskey, twoFactorEnabled }: { 
       ) : (
         <>
           <p style={{ fontSize: "14px", color: WHITE, opacity: 0.95, lineHeight: 1.6, margin: 0 }}>
-            Verifikasi identitas Anda untuk melanjutkan ke dashboard. Menuru Security Center menyediakan perlindungan berlapis dengan <strong>Google Authenticator</strong> dan <strong>Passkey (WebAuthn)</strong>.
+            Verifikasi identitas Anda untuk melanjutkan ke dashboard. Menuru Security Center menyediakan perlindungan berlapis dengan <strong>Google Authenticator</strong>, <strong>Passkey (WebAuthn)</strong>, dan <strong>Recovery Code</strong>.
           </p>
 
-          {/* Deskripsi Passkey - selalu tampil */}
+          {/* Passkey */}
           <div style={{ backgroundColor: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.25)", borderRadius: "12px", padding: "14px 16px", display: "flex", flexDirection: "column", gap: "6px" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
@@ -1121,11 +1441,11 @@ const MenuruCenterCard = ({ verified, method, hasPasskey, twoFactorEnabled }: { 
               </span>
             </div>
             <p style={{ fontSize: "12px", color: WHITE, opacity: 0.9, lineHeight: 1.5, margin: 0 }}>
-              Login tanpa password dengan biometrik / PIN perangkat. Fingerprint, Face ID, Windows Hello, atau security key USB. Data kriptografi tersimpan di perangkat Anda, tidak pernah dikirim ke server.
+              Login tanpa password dengan biometrik / PIN perangkat. Fingerprint, Face ID, Windows Hello, atau security key USB. Data kriptografi tersimpan di perangkat Anda.
             </p>
           </div>
 
-          {/* Deskripsi Google Authenticator - selalu tampil */}
+          {/* Google Authenticator */}
           <div style={{ backgroundColor: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.25)", borderRadius: "12px", padding: "14px 16px", display: "flex", flexDirection: "column", gap: "6px" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
@@ -1140,18 +1460,52 @@ const MenuruCenterCard = ({ verified, method, hasPasskey, twoFactorEnabled }: { 
               </span>
             </div>
             <p style={{ fontSize: "12px", color: WHITE, opacity: 0.9, lineHeight: 1.5, margin: 0 }}>
-              Kode OTP 6 digit berganti tiap 30 detik. Bekerja offline, tidak butuh internet. Standar TOTP (RFC 6238) dengan recovery codes sebagai backup. Setup 1x permanen sampai dinonaktifkan manual.
+              Kode OTP 6 digit berganti tiap 30 detik. Bekerja offline, standar TOTP (RFC 6238), dengan recovery codes sebagai backup.
             </p>
           </div>
 
-          {!hasAnyMethod && (
-            <div style={{ backgroundColor: WHITE, borderRadius: "10px", padding: "10px 14px", display: "flex", alignItems: "center", gap: "8px" }}>
-              <HelpIcon size={16} color={BLUE} />
-              <span style={{ fontSize: "12px", color: BLUE, fontWeight: 700, lineHeight: 1.4 }}>
-                Anda belum mengaktifkan metode keamanan apapun. Aktifkan di Dashboard → Security Center setelah login.
+          {/* Recovery Code */}
+          <div style={{ backgroundColor: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.25)", borderRadius: "12px", padding: "14px 16px", display: "flex", flexDirection: "column", gap: "6px" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <div style={{ width: "32px", height: "32px", borderRadius: "8px", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <RecoveryCodeIcon size={18} color={BLUE} />
+                </div>
+                <span style={{ fontSize: "14px", fontWeight: 800, color: WHITE }}>Recovery Code</span>
+              </div>
+              <span style={{ fontSize: "10px", fontWeight: 800, color: (recoveryCodesCount || 0) > 0 ? GREEN : WHITE, opacity: (recoveryCodesCount || 0) > 0 ? 1 : 0.7, display: "flex", alignItems: "center", gap: "4px", whiteSpace: "nowrap" }}>
+                <span style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: (recoveryCodesCount || 0) > 0 ? GREEN : WHITE, opacity: (recoveryCodesCount || 0) > 0 ? 1 : 0.5 }} />
+                {(recoveryCodesCount || 0) > 0 ? `${recoveryCodesCount} kode` : "Belum"}
               </span>
             </div>
-          )}
+            <p style={{ fontSize: "12px", color: WHITE, opacity: 0.9, lineHeight: 1.5, margin: 0 }}>
+              Kode cadangan sekali pakai untuk memulihkan akses jika Passkey / Google Authenticator tidak tersedia. Simpan di tempat aman.
+            </p>
+            {(recoveryCodesCount || 0) > 0 && onOpenRecovery && (
+              <button
+                onClick={onOpenRecovery}
+                style={{
+                  alignSelf: "flex-start",
+                  marginTop: "4px",
+                  padding: "8px 14px",
+                  backgroundColor: WHITE,
+                  color: BLUE,
+                  border: "none",
+                  borderRadius: "8px",
+                  fontSize: "12px",
+                  fontWeight: 800,
+                  cursor: "pointer",
+                  fontFamily: FONT_FAMILY,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                }}
+              >
+                Gunakan Recovery Code
+                <NorthEastArrow size={14} color={BLUE} />
+              </button>
+            )}
+          </div>
         </>
       )}
     </motion.div>
@@ -1180,11 +1534,15 @@ export default function SignInPage() {
   const [hasPasskey, setHasPasskey] = useState(false);
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const [twoFactorSecret, setTwoFactorSecret] = useState("");
+  const [recoveryCodes, setRecoveryCodes] = useState<string[]>([]);
   const [showTwoFactorModal, setShowTwoFactorModal] = useState(false);
   const [showPasskeyHelp, setShowPasskeyHelp] = useState(false);
+  const [showRecoveryPanel, setShowRecoveryPanel] = useState(false);
+  const [recoveryBusy, setRecoveryBusy] = useState(false);
+  const [recoveryError, setRecoveryError] = useState("");
   const [passkeyBusy, setPasskeyBusy] = useState(false);
   const [passkeyError, setPasskeyError] = useState("");
-  const [verifiedMethod, setVerifiedMethod] = useState<"passkey" | "totp" | null>(null);
+  const [verifiedMethod, setVerifiedMethod] = useState<"passkey" | "totp" | "recovery" | null>(null);
   const router = useRouter();
 
   useEffect(() => setIsMounted(true), []);
@@ -1216,6 +1574,7 @@ export default function SignInPage() {
                   setHasPasskey(Array.isArray(data.passkeys) && data.passkeys.length > 0);
                   setTwoFactorEnabled(data.twoFactorEnabled === true);
                   setTwoFactorSecret(data.totpSecret || "");
+                  setRecoveryCodes(Array.isArray(data.totpRecoveryCodes) ? data.totpRecoveryCodes : []);
                 }
               } catch (e) { console.error(e); }
             }
@@ -1230,13 +1589,14 @@ export default function SignInPage() {
         setTempUser(null);
         setShowTwoFactorModal(false);
         setShowPasskeyHelp(false);
+        setShowRecoveryPanel(false);
         setVerifiedMethod(null);
       }
     });
     return () => unsub();
   }, [showMain]);
 
-  const finishLogin = (method: "passkey" | "totp" | null) => {
+  const finishLogin = (method: "passkey" | "totp" | "recovery" | null) => {
     if (method) {
       setVerifiedMethod(method);
       setTimeout(() => {
@@ -1244,12 +1604,14 @@ export default function SignInPage() {
         setShowPinScreen(false);
         setShowTwoFactorModal(false);
         setShowPasskeyHelp(false);
+        setShowRecoveryPanel(false);
         router.push("/");
       }, 2400);
     } else {
       setUser(auth?.currentUser || null);
       setShowPinScreen(false);
       setShowTwoFactorModal(false);
+      setShowRecoveryPanel(false);
       router.push("/");
     }
   };
@@ -1308,6 +1670,41 @@ export default function SignInPage() {
       if (e?.name === "NotAllowedError" || msg.includes("not allowed")) setPasskeyError("Verifikasi passkey dibatalkan.");
       else setPasskeyError("Passkey gagal: " + (msg || "Unknown"));
     } finally { setPasskeyBusy(false); }
+  };
+
+  const handleRecoverySubmit = async (codeInput: string) => {
+    if (!tempUser) { setRecoveryError("Sesi tidak ditemukan."); return; }
+    const normalized = codeInput.replace(/[^A-Za-z0-9]/g, "").toUpperCase();
+    if (normalized.length < 8) { setRecoveryError("Format recovery code tidak valid."); return; }
+    const d = getDb();
+    if (!d) { setRecoveryError("Koneksi database gagal."); return; }
+    setRecoveryBusy(true); setRecoveryError("");
+    try {
+      const snap = await getDoc(doc(d, "users", tempUser.uid));
+      if (!snap.exists()) { setRecoveryError("Akun tidak ditemukan."); setRecoveryBusy(false); return; }
+      const data = snap.data();
+      const stored = Array.isArray(data.totpRecoveryCodes) ? (data.totpRecoveryCodes as string[]) : [];
+      if (stored.length === 0) { setRecoveryError("Tidak ada recovery code tersimpan."); setRecoveryBusy(false); return; }
+      const normalizedStored = stored.map((c) => c.replace(/[^A-Za-z0-9]/g, "").toUpperCase());
+      const idx = normalizedStored.indexOf(normalized);
+      if (idx === -1) { setRecoveryError("Recovery code tidak valid atau sudah dipakai."); setRecoveryBusy(false); return; }
+      // hapus kode yang sudah dipakai
+      const updated = [...stored];
+      updated.splice(idx, 1);
+      try {
+        await updateDoc(doc(d, "users", tempUser.uid), { totpRecoveryCodes: updated });
+      } catch (e) {
+        console.error("Gagal update recovery codes:", e);
+      }
+      setRecoveryCodes(updated);
+      setShowRecoveryPanel(false);
+      finishLogin("recovery");
+    } catch (e: any) {
+      console.error(e);
+      setRecoveryError("Gagal memverifikasi recovery code: " + (e?.message || "Unknown"));
+    } finally {
+      setRecoveryBusy(false);
+    }
   };
 
   const handleGoogleLogin = async () => {
@@ -1389,17 +1786,17 @@ export default function SignInPage() {
                     </motion.button>
                   </div>
 
-                  {/* ===== USER BELUM TERVERIFIKASI ===== */}
-                  {/* Card Menuru Center SELALU muncul di bawah tombol verifikasi, dengan BG biru & teks putih */}
+                  {/* USER BELUM VERIFIKASI */}
                   {!isNewPin && !verifiedMethod && (
                     <>
                       <MenuruCenterCard
                         verified={false}
                         hasPasskey={hasPasskey}
                         twoFactorEnabled={twoFactorEnabled}
+                        recoveryCodesCount={recoveryCodes.length}
+                        onOpenRecovery={() => { setShowRecoveryPanel(true); setRecoveryError(""); }}
                       />
 
-                      {/* Tombol bantuan passkey/2FA — hanya jika fitur tersedia */}
                       {(hasPasskey || twoFactorEnabled) && (
                         <div style={{ width: "100%", maxWidth: "600px", display: "flex", flexDirection: "column", gap: "10px", marginTop: "16px" }}>
                           <div style={{ display: "flex", alignItems: "center", gap: "8px", color: BLUE, fontSize: "13px", fontWeight: 600 }}>
@@ -1426,10 +1823,22 @@ export default function SignInPage() {
                           )}
                         </div>
                       )}
+
+                      <AnimatePresence>
+                        {showRecoveryPanel && (
+                          <RecoveryCodePanel
+                            onClose={() => { setShowRecoveryPanel(false); setRecoveryError(""); }}
+                            onSubmit={handleRecoverySubmit}
+                            busy={recoveryBusy}
+                            error={recoveryError}
+                            codesCount={recoveryCodes.length}
+                          />
+                        )}
+                      </AnimatePresence>
                     </>
                   )}
 
-                  {/* ===== USER SUDAH TERVERIFIKASI ===== */}
+                  {/* USER SUDAH VERIFIKASI */}
                   {verifiedMethod && (
                     <div style={{ width: "100%", maxWidth: "600px", display: "flex", flexDirection: "column", gap: "16px", marginTop: "32px" }}>
                       <div style={{ width: "100%", backgroundColor: BLUE, borderRadius: "20px", padding: "20px", boxShadow: "0 12px 32px rgba(13,60,252,0.3)" }}>
@@ -1439,7 +1848,7 @@ export default function SignInPage() {
                           </div>
                           <div>
                             <div style={{ fontSize: "14px", fontWeight: 800, color: WHITE }}>Metode Verifikasi</div>
-                            <div style={{ fontSize: "11px", color: WHITE, opacity: 0.75, fontWeight: 600 }}>Passkey & Google Authenticator</div>
+                            <div style={{ fontSize: "11px", color: WHITE, opacity: 0.75, fontWeight: 600 }}>Passkey, Google Authenticator & Recovery Code</div>
                           </div>
                         </div>
                         <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
@@ -1467,6 +1876,18 @@ export default function SignInPage() {
                               </span>
                             </div>
                           )}
+                          {recoveryCodes.length > 0 && (
+                            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", backgroundColor: "rgba(255,255,255,0.15)", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.25)" }}>
+                              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                                <RecoveryCodeIcon size={16} color={WHITE} />
+                                <span style={{ fontSize: "13px", fontWeight: 700, color: WHITE }}>Recovery Code</span>
+                              </div>
+                              <span style={{ fontSize: "11px", fontWeight: 800, color: GREEN, display: "flex", alignItems: "center", gap: "4px" }}>
+                                <span style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: GREEN }} />
+                                {recoveryCodes.length} tersisa
+                              </span>
+                            </div>
+                          )}
                         </div>
                       </div>
 
@@ -1475,6 +1896,7 @@ export default function SignInPage() {
                         method={verifiedMethod}
                         hasPasskey={hasPasskey}
                         twoFactorEnabled={twoFactorEnabled}
+                        recoveryCodesCount={recoveryCodes.length}
                       />
                     </div>
                   )}
@@ -1543,9 +1965,9 @@ export default function SignInPage() {
                   </div>
 
                   <form onSubmit={handleEmailLogin} style={{ width: "100%" }}>
-                    <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required style={{ width: "100%", padding: "16px 20px", border: "none", borderRadius: "12px", fontSize: "16px", marginBottom: "16px", outline: "none", fontFamily: FONT_FAMILY, backgroundColor: BLUE, color: WHITE }} />
+                    <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required style={{ width: "100%", padding: "16px 20px", border: "none", borderRadius: "12px", fontSize: "16px", marginBottom: "16px", outline: "none", fontFamily: FONT_FAMILY, backgroundColor: BLUE, color: WHITE, boxSizing: "border-box" }} />
                     <div style={{ position: "relative", marginBottom: "24px" }}>
-                      <input type={showPassword ? "text" : "password"} placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required style={{ width: "100%", padding: "16px 50px 16px 20px", border: "none", borderRadius: "12px", fontSize: "16px", outline: "none", fontFamily: FONT_FAMILY, backgroundColor: BLUE, color: WHITE }} />
+                      <input type={showPassword ? "text" : "password"} placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required style={{ width: "100%", padding: "16px 50px 16px 20px", border: "none", borderRadius: "12px", fontSize: "16px", outline: "none", fontFamily: FONT_FAMILY, backgroundColor: BLUE, color: WHITE, boxSizing: "border-box" }} />
                       <button type="button" onClick={() => setShowPassword(!showPassword)} style={{ position: "absolute", right: "14px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: WHITE }}>
                         <EyeIcon open={showPassword} color={WHITE} />
                       </button>
