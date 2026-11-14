@@ -14,9 +14,13 @@ import {
 import { auth } from "@/lib/firebase";
 import { apiRequest } from "@/lib/apiClient";
 import gsap from "gsap";
-import { getFirestore, doc, getDoc, updateDoc, serverTimestamp, setDoc } from "firebase/firestore";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+} from "firebase/firestore";
 
-// ===== FIREBASE FIRESTORE =====
+// ===== FIRESTORE =====
 let _db: any = null;
 function getDb() {
   try {
@@ -25,20 +29,17 @@ function getDb() {
   return _db;
 }
 
-// ===== FONT =====
+// ===== KONSTANTA =====
 const FONT_FAMILY = "'Plus Jakarta Sans'";
-
-// ===== WARNA =====
 const BLUE = "#0D3CFC";
 const WHITE = "#FFFFFF";
 const BLACK = "#000000";
-const LIME = "#E3FB96";
 const RED = "#DC2626";
 const GREEN = "#4ADE80";
 const SECURITY_ISSUER = "Menuru Security Center";
 const RP_NAME = "Menuru";
 
-// ===== SVG ICONS =====
+// ===== ICON =====
 const NorthEastArrow = ({ size = 24, color = "currentColor" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <path d="M7 17L17 7M17 7H8M17 7V16" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -182,28 +183,61 @@ const NavbarButton = ({
   const panelRef = useRef<HTMLDivElement>(null);
   const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const handleEnter = () => { if (closeTimeoutRef.current) { clearTimeout(closeTimeoutRef.current); closeTimeoutRef.current = null; } setOpen(true); };
-  const handleLeave = () => { if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current); closeTimeoutRef.current = setTimeout(() => setOpen(false), 250); };
+  const handleEnter = () => {
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
+      closeTimeoutRef.current = null;
+    }
+    setOpen(true);
+  };
 
-  useEffect(() => () => { if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current); }, []);
+  const handleLeave = () => {
+    if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+    closeTimeoutRef.current = setTimeout(() => setOpen(false), 250);
+  };
+
+  useEffect(() => () => {
+    if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+  }, []);
+
   useEffect(() => {
     if (!linesTopRef.current || !linesBottomRef.current) return;
-    if (open) { gsap.to(linesTopRef.current, { y: 2, duration: 0.35, ease: "power2.out" }); gsap.to(linesBottomRef.current, { y: -2, duration: 0.35, ease: "power2.out" }); }
-    else { gsap.to(linesTopRef.current, { y: 0, duration: 0.35, ease: "power2.out" }); gsap.to(linesBottomRef.current, { y: 0, duration: 0.35, ease: "power2.out" }); }
+    if (open) {
+      gsap.to(linesTopRef.current, { y: 2, duration: 0.35, ease: "power2.out" });
+      gsap.to(linesBottomRef.current, { y: -2, duration: 0.35, ease: "power2.out" });
+    } else {
+      gsap.to(linesTopRef.current, { y: 0, duration: 0.35, ease: "power2.out" });
+      gsap.to(linesBottomRef.current, { y: 0, duration: 0.35, ease: "power2.out" });
+    }
   }, [open]);
+
   useEffect(() => {
     if (!panelRef.current) return;
-    if (open) gsap.fromTo(panelRef.current, { opacity: 0, y: -20, scale: 0.96 }, { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: "power3.out" });
-    else gsap.to(panelRef.current, { opacity: 0, y: -20, scale: 0.96, duration: 0.25, ease: "power2.in" });
+    if (open) {
+      gsap.fromTo(panelRef.current, { opacity: 0, y: -20, scale: 0.96 }, { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: "power3.out" });
+    } else {
+      gsap.to(panelRef.current, { opacity: 0, y: -20, scale: 0.96, duration: 0.25, ease: "power2.in" });
+    }
   }, [open]);
 
   const strokeColor = open ? labelTextHoverColor : labelTextColor;
+
   return (
     <div style={{ position: "relative" }} onMouseEnter={handleEnter} onMouseLeave={handleLeave}>
-      <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 16px", backgroundColor: open ? buttonHoverColor : buttonColor, backdropFilter: "blur(20px)", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.18)", boxShadow: open ? "0 8px 24px rgba(0,0,0,0.35)" : `0 8px 24px ${buttonColor}55`, transition: "background-color 0.25s ease", cursor: "pointer", position: "relative", zIndex: 2 }}>
+      <div style={{
+        display: "flex", alignItems: "center", gap: "10px", padding: "10px 16px",
+        backgroundColor: open ? buttonHoverColor : buttonColor, backdropFilter: "blur(20px)",
+        borderRadius: "10px", border: "1px solid rgba(255,255,255,0.18)",
+        boxShadow: open ? "0 8px 24px rgba(0,0,0,0.35)" : `0 8px 24px ${buttonColor}55`,
+        transition: "background-color 0.25s ease", cursor: "pointer", position: "relative", zIndex: 2,
+      }}>
         <span style={{ color: open ? labelTextHoverColor : labelTextColor, fontSize: "14px", fontWeight: 600, letterSpacing: "0.02em", fontFamily: FONT_FAMILY, whiteSpace: "nowrap" }}>{label}</span>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "22px", height: "22px", backgroundColor: open ? iconButtonHoverColor : iconButtonColor, borderRadius: "6px" }}>
-          {iconComponent ? <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}><StriperIcon size={14} color={strokeColor} /></div> : (
+          {iconComponent ? (
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <StriperIcon size={14} color={strokeColor} />
+            </div>
+          ) : (
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{ display: "block" }}>
               <line ref={linesTopRef} x1="4" y1="7" x2="20" y2="7" stroke={strokeColor} strokeWidth="2.5" strokeLinecap="round" />
               <line ref={linesBottomRef} x1="4" y1="17" x2="20" y2="17" stroke={strokeColor} strokeWidth="2.5" strokeLinecap="round" />
@@ -211,17 +245,30 @@ const NavbarButton = ({
           )}
         </div>
       </div>
+
       {open && (
-        <div ref={panelRef} onMouseEnter={handleEnter} onMouseLeave={handleLeave} style={{ position: "absolute", top: "calc(100% + 10px)", left: "0px", width: `${bigPanelWidth}px`, minHeight: `${bigPanelHeight}px`, backgroundColor: panelColor, backdropFilter: "blur(24px)", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.2)", boxShadow: `0 8px 32px ${panelColor}55`, zIndex: 1, fontFamily: FONT_FAMILY, color: titleTextColor, padding: "22px 26px", display: "flex", gap: "20px", alignItems: "flex-start" }}>
+        <div ref={panelRef} onMouseEnter={handleEnter} onMouseLeave={handleLeave} style={{
+          position: "absolute", top: "calc(100% + 10px)", left: "0px", width: `${bigPanelWidth}px`,
+          minHeight: `${bigPanelHeight}px`, backgroundColor: panelColor, backdropFilter: "blur(24px)",
+          borderRadius: "10px", border: "1px solid rgba(255,255,255,0.2)",
+          boxShadow: `0 8px 32px ${panelColor}55`, zIndex: 1, fontFamily: FONT_FAMILY, color: titleTextColor,
+          padding: "22px 26px", display: "flex", gap: "20px", alignItems: "flex-start",
+        }}>
           <div style={{ flex: "1 1 0", minWidth: 0, display: "flex", flexDirection: "column", gap: "12px" }}>
             {isResources ? (
               <>
                 <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}><DocsIcon size={22} color={titleTextColor} /><span style={{ fontSize: "16px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>Docs</span></div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                    <DocsIcon size={22} color={titleTextColor} />
+                    <span style={{ fontSize: "16px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>Docs</span>
+                  </div>
                   <p style={{ fontSize: "12px", lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY, maxWidth: "340px" }}>Dokumentasi lengkap panduan produk, API, dan tutorial Menuru.</p>
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}><BrandIcon size={22} color={titleTextColor} /><span style={{ fontSize: "16px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>Brand</span></div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                    <BrandIcon size={22} color={titleTextColor} />
+                    <span style={{ fontSize: "16px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>Brand</span>
+                  </div>
                   <p style={{ fontSize: "12px", lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY, maxWidth: "340px" }}>Aset visual, logo, dan panduan identitas brand Menuru.</p>
                 </div>
               </>
@@ -265,7 +312,7 @@ const NavbarButton = ({
 
 // ===== LEFT NAVBAR =====
 const LeftNavbar = ({ shifted }: { shifted: boolean }) => (
-  <div style={{ position: "fixed", top: "20px", left: shifted ? "340px" : "60px", zIndex: 9000, display: "flex", alignItems: "center", gap: "8px", fontFamily: FONT_FAMILY, transition: "left 0.6s cubic-bezier(0.65, 0, 0.35, 1)", willChange: "left" }}>
+  <div style={{ position: "fixed", top: "64px", left: shifted ? "340px" : "60px", zIndex: 9000, display: "flex", alignItems: "center", gap: "8px", fontFamily: FONT_FAMILY, transition: "left 0.6s cubic-bezier(0.65, 0, 0.35, 1)", willChange: "left" }}>
     <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "12px", marginRight: "16px" }}>
       <img src="/images/nop.jpg" alt="Menuru" style={{ height: "60px", width: "auto", maxWidth: "none", objectFit: "contain", display: "block", flexShrink: 0, mixBlendMode: "multiply" }} />
       <span style={{ color: BLUE, fontSize: "60px", fontWeight: 700, letterSpacing: "-0.03em", fontFamily: FONT_FAMILY, lineHeight: 1, whiteSpace: "nowrap" }}>Menuru</span>
@@ -277,34 +324,36 @@ const LeftNavbar = ({ shifted }: { shifted: boolean }) => (
 );
 
 // ===== RIGHT NAVBAR =====
-const RightNavbar = ({ user, auth, db, onSayHeyToggle, sayHeyOpen, sayHeyUnreadCount, locationText }: any) => {
+const RightNavbar = ({ user, auth, onSayHeyToggle, sayHeyOpen, sayHeyUnreadCount, locationText }: any) => {
   const rollingRef = useRef<HTMLDivElement>(null);
   const [rollingIndex, setRollingIndex] = useState(0);
   const displayName = user?.displayName || user?.email?.split("@")[0] || "User";
   const photoURL = user?.photoURL || "";
 
-  useEffect(() => { if (!user) return; const interval = setInterval(() => setRollingIndex((p) => (p + 1) % 3), 3000); return () => clearInterval(interval); }, [user]);
+  useEffect(() => {
+    if (!user) return;
+    const interval = setInterval(() => setRollingIndex((p) => (p + 1) % 3), 3000);
+    return () => clearInterval(interval);
+  }, [user]);
+
   useEffect(() => {
     if (!user || !rollingRef.current) return;
     const el = rollingRef.current;
     gsap.killTweensOf(el);
     gsap.fromTo(el, { yPercent: 100, opacity: 0, rotateX: -90, transformOrigin: "50% 100%" }, { yPercent: 0, opacity: 1, rotateX: 0, duration: 0.6, ease: "back.out(1.7)" });
-    return () => { gsap.killTweensOf(el); };
+    return () => gsap.killTweensOf(el);
   }, [rollingIndex, user]);
 
   const handleLogout = async () => {
     if (!auth) return;
     try {
-      const d = getDb();
-      if (d && user) {
-        const { signOut } = await import("firebase/auth");
-        await signOut(auth);
-      }
+      const { signOut } = await import("firebase/auth");
+      await signOut(auth);
     } catch (e) { console.error(e); }
   };
 
   const SayHeyButton = () => (
-    <button onClick={onSayHeyToggle} style={{ position: "relative", display: "inline-flex", alignItems: "center", gap: "10px", padding: "10px 18px", backgroundColor: sayHeyOpen ? BLACK : LIME, borderRadius: "10px", border: `1px solid ${sayHeyOpen ? BLACK : LIME}`, boxShadow: sayHeyOpen ? "0 8px 24px rgba(0,0,0,0.35)" : "0 8px 24px rgba(227,251,150,0.45)", cursor: "pointer", transition: "all 0.2s ease" }} onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = "scale(1.05)"; }} onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = "scale(1)"; }}>
+    <button onClick={onSayHeyToggle} style={{ position: "relative", display: "inline-flex", alignItems: "center", gap: "10px", padding: "10px 18px", backgroundColor: sayHeyOpen ? BLACK : "#E3FB96", borderRadius: "10px", border: `1px solid ${sayHeyOpen ? BLACK : "#E3FB96"}`, boxShadow: sayHeyOpen ? "0 8px 24px rgba(0,0,0,0.35)" : "0 8px 24px rgba(227,251,150,0.45)", cursor: "pointer", transition: "all 0.2s ease" }}>
       <SayHeyIcon size={18} color={sayHeyOpen ? WHITE : BLACK} />
       <span style={{ color: sayHeyOpen ? WHITE : BLACK, fontSize: "14px", fontWeight: 700, letterSpacing: "0.02em", fontFamily: FONT_FAMILY, whiteSpace: "nowrap" }}>Say Hey</span>
       <NorthEastArrow size={16} color={sayHeyOpen ? WHITE : BLACK} />
@@ -316,7 +365,7 @@ const RightNavbar = ({ user, auth, db, onSayHeyToggle, sayHeyOpen, sayHeyUnreadC
 
   if (!user) {
     return (
-      <div style={{ position: "fixed", top: "20px", right: "24px", zIndex: 9000, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "10px", fontFamily: FONT_FAMILY }}>
+      <div style={{ position: "fixed", top: "64px", right: "24px", zIndex: 9000, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "10px", fontFamily: FONT_FAMILY }}>
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}><SayHeyButton /></div>
         {locationText && <div style={{ fontSize: "20px", fontWeight: 700, color: BLUE, letterSpacing: "-0.02em", fontFamily: FONT_FAMILY, whiteSpace: "nowrap", textAlign: "right" }}>{locationText}</div>}
       </div>
@@ -324,14 +373,35 @@ const RightNavbar = ({ user, auth, db, onSayHeyToggle, sayHeyOpen, sayHeyUnreadC
   }
 
   return (
-    <div style={{ position: "fixed", top: "20px", right: "24px", zIndex: 9000, fontFamily: FONT_FAMILY, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "10px" }}>
+    <div style={{ position: "fixed", top: "64px", right: "24px", zIndex: 9000, fontFamily: FONT_FAMILY, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "10px" }}>
       <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
         <SayHeyButton />
         <div style={{ position: "relative", height: "90px", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "flex-end", minWidth: "260px" }}>
           <div ref={rollingRef} style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "12px", width: "100%" }}>
-            {rollingIndex === 0 && (<><span style={{ color: BLUE, fontSize: "70px", fontWeight: 700, letterSpacing: "-0.03em", lineHeight: 1, whiteSpace: "nowrap", fontFamily: FONT_FAMILY }}>{displayName}</span><div style={{ width: "70px", height: "70px", borderRadius: "50%", overflow: "hidden", backgroundColor: BLUE, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{photoURL ? <img src={photoURL} alt={displayName} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} referrerPolicy="no-referrer" /> : <span style={{ fontSize: "30px", fontWeight: 800, color: WHITE }}>{displayName.charAt(0).toUpperCase()}</span>}</div></>)}
-            {rollingIndex === 1 && (<Link href="/dashboard" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "12px", whiteSpace: "nowrap" }}><span style={{ color: BLUE, fontSize: "70px", fontWeight: 700, letterSpacing: "-0.03em", lineHeight: 1, fontFamily: FONT_FAMILY }}>Dashboard</span><NorthEastArrow size={50} color={BLUE} /></Link>)}
-            {rollingIndex === 2 && (<button onClick={handleLogout} style={{ background: "transparent", border: "none", padding: 0, cursor: "pointer", display: "flex", alignItems: "center", gap: "12px", whiteSpace: "nowrap", fontFamily: FONT_FAMILY }}><span style={{ color: BLUE, fontSize: "70px", fontWeight: 700, letterSpacing: "-0.03em", lineHeight: 1 }}>Logout</span><svg width="50" height="50" viewBox="0 0 24 24" fill="none"><path d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9" stroke={BLUE} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /><path d="M16 17L21 12L16 7" stroke={BLUE} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /><path d="M21 12H9" stroke={BLUE} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg></button>)}
+            {rollingIndex === 0 && (
+              <>
+                <span style={{ color: BLUE, fontSize: "70px", fontWeight: 700, letterSpacing: "-0.03em", lineHeight: 1, whiteSpace: "nowrap", fontFamily: FONT_FAMILY }}>{displayName}</span>
+                <div style={{ width: "70px", height: "70px", borderRadius: "50%", overflow: "hidden", backgroundColor: BLUE, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  {photoURL ? <img src={photoURL} alt={displayName} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} referrerPolicy="no-referrer" /> : <span style={{ fontSize: "30px", fontWeight: 800, color: WHITE }}>{displayName.charAt(0).toUpperCase()}</span>}
+                </div>
+              </>
+            )}
+            {rollingIndex === 1 && (
+              <Link href="/dashboard" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "12px", whiteSpace: "nowrap" }}>
+                <span style={{ color: BLUE, fontSize: "70px", fontWeight: 700, letterSpacing: "-0.03em", lineHeight: 1, fontFamily: FONT_FAMILY }}>Dashboard</span>
+                <NorthEastArrow size={50} color={BLUE} />
+              </Link>
+            )}
+            {rollingIndex === 2 && (
+              <button onClick={handleLogout} style={{ background: "transparent", border: "none", padding: 0, cursor: "pointer", display: "flex", alignItems: "center", gap: "12px", whiteSpace: "nowrap", fontFamily: FONT_FAMILY }}>
+                <span style={{ color: BLUE, fontSize: "70px", fontWeight: 700, letterSpacing: "-0.03em", lineHeight: 1 }}>Logout</span>
+                <svg width="50" height="50" viewBox="0 0 24 24" fill="none">
+                  <path d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9" stroke={BLUE} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M16 17L21 12L16 7" stroke={BLUE} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M21 12H9" stroke={BLUE} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -345,29 +415,68 @@ const SayHeySection = ({ user, onClose }: { user: any; onClose: () => void }) =>
   const [messageText, setMessageText] = useState("");
   const [messages, setMessages] = useState<{ id: string; sender: string; text: string; time: string }[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  useEffect(() => { if (messagesEndRef.current) messagesEndRef.current.scrollIntoView({ behavior: "smooth" }); }, [messages]);
-  const handleSend = () => { if (!messageText.trim()) return; const now = new Date(); const timeStr = now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }); setMessages((p) => [...p, { id: Date.now().toString(), sender: user?.displayName || user?.email || "You", text: messageText.trim(), time: timeStr }]); setMessageText(""); };
+
+  useEffect(() => {
+    if (messagesEndRef.current) messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  const handleSend = () => {
+    if (!messageText.trim()) return;
+    const timeStr = new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+    setMessages((p) => [...p, { id: Date.now().toString(), sender: user?.displayName || user?.email || "You", text: messageText.trim(), time: timeStr }]);
+    setMessageText("");
+  };
 
   return (
     <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 30 }} transition={{ duration: 0.5 }} style={{ width: "100%", backgroundColor: BLUE, borderRadius: "20px", padding: "40px", fontFamily: FONT_FAMILY, color: WHITE, marginBottom: "40px", minHeight: "400px", position: "relative" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "24px", flexWrap: "wrap", gap: "16px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}><SayHeyIcon size={40} color={WHITE} /><div><h3 style={{ fontSize: "48px", fontWeight: 700, color: WHITE, margin: 0, letterSpacing: "-0.02em", fontFamily: FONT_FAMILY, lineHeight: 1.1 }}>Say Hey</h3><p style={{ fontSize: "16px", fontWeight: 500, color: WHITE, margin: 0, lineHeight: 1.5, opacity: 0.95, fontFamily: FONT_FAMILY }}>Real-time chat with our team. Your chat is private and encrypted.</p></div></div>
-        <button onClick={onClose} style={{ padding: "10px 20px", backgroundColor: WHITE, color: BLUE, border: `2px solid ${WHITE}`, borderRadius: "10px", fontSize: "14px", fontWeight: 800, cursor: "pointer", fontFamily: FONT_FAMILY, letterSpacing: "0.5px", textTransform: "uppercase", display: "flex", alignItems: "center", gap: "8px" }}>Close<NorthEastArrow size={20} color={BLUE} /></button>
+        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+          <SayHeyIcon size={40} color={WHITE} />
+          <div>
+            <h3 style={{ fontSize: "48px", fontWeight: 700, color: WHITE, margin: 0, letterSpacing: "-0.02em", fontFamily: FONT_FAMILY, lineHeight: 1.1 }}>Say Hey</h3>
+            <p style={{ fontSize: "16px", fontWeight: 500, color: WHITE, margin: 0, lineHeight: 1.5, opacity: 0.95, fontFamily: FONT_FAMILY }}>Real-time chat with our team. Your chat is private and encrypted.</p>
+          </div>
+        </div>
+        <button onClick={onClose} style={{ padding: "10px 20px", backgroundColor: WHITE, color: BLUE, border: `2px solid ${WHITE}`, borderRadius: "10px", fontSize: "14px", fontWeight: 800, cursor: "pointer", fontFamily: FONT_FAMILY, letterSpacing: "0.5px", textTransform: "uppercase", display: "flex", alignItems: "center", gap: "8px" }}>
+          Close
+          <NorthEastArrow size={20} color={BLUE} />
+        </button>
       </div>
+
       {!user ? (
         <div style={{ backgroundColor: "rgba(255,255,255,0.1)", borderRadius: "16px", padding: "40px", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: "16px" }}>
-          <SayHeyIcon size={64} color={WHITE} /><p style={{ fontSize: "18px", fontWeight: 500, color: WHITE, margin: 0, maxWidth: "600px", lineHeight: 1.5, fontFamily: FONT_FAMILY }}>Please sign in to your account to start a real-time conversation.</p>
-          <Link href="/signin" style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "10px", padding: "14px 28px", backgroundColor: WHITE, color: BLUE, borderRadius: "12px", fontSize: "16px", fontWeight: 800, fontFamily: FONT_FAMILY }}>Sign In to Continue<NorthEastArrow size={20} color={BLUE} /></Link>
+          <SayHeyIcon size={64} color={WHITE} />
+          <p style={{ fontSize: "18px", fontWeight: 500, color: WHITE, margin: 0, maxWidth: "600px", lineHeight: 1.5, fontFamily: FONT_FAMILY }}>Please sign in to your account to start a real-time conversation.</p>
+          <Link href="/signin" style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "10px", padding: "14px 28px", backgroundColor: WHITE, color: BLUE, borderRadius: "12px", fontSize: "16px", fontWeight: 800, fontFamily: FONT_FAMILY }}>
+            Sign In to Continue
+            <NorthEastArrow size={20} color={BLUE} />
+          </Link>
         </div>
       ) : (
         <div style={{ backgroundColor: WHITE, borderRadius: "16px", overflow: "hidden", display: "flex", flexDirection: "column", height: "400px" }}>
           <div style={{ flex: 1, overflowY: "auto", padding: "20px", display: "flex", flexDirection: "column", gap: "12px", backgroundColor: "#fafafa" }}>
-            {messages.length === 0 ? (<div style={{ textAlign: "center", color: "#999", fontSize: "14px", padding: "30px 0", fontFamily: FONT_FAMILY }}>No messages yet. Say hey! 👋</div>) : messages.map((msg) => { const isMine = msg.sender === (user?.displayName || user?.email || "You"); return (<div key={msg.id} style={{ alignSelf: isMine ? "flex-end" : "flex-start", maxWidth: "75%" }}><div style={{ padding: "10px 14px", borderRadius: "12px", backgroundColor: isMine ? BLUE : "#ffffff", color: isMine ? WHITE : BLACK, fontSize: "14px", fontFamily: FONT_FAMILY, wordBreak: "break-word", border: isMine ? "none" : "1px solid rgba(0,0,0,0.06)", boxShadow: isMine ? "none" : "0 2px 6px rgba(0,0,0,0.04)" }}>{!isMine && <div style={{ fontSize: "11px", fontWeight: 700, color: BLUE, marginBottom: "4px" }}>{msg.sender}</div>}<div>{msg.text}</div><div style={{ display: "flex", justifyContent: "flex-end", marginTop: "4px" }}><span style={{ fontSize: "10px", color: isMine ? "rgba(255,255,255,0.85)" : "#999" }}>{msg.time}</span></div></div></div>); })}
+            {messages.length === 0 ? (
+              <div style={{ textAlign: "center", color: "#999", fontSize: "14px", padding: "30px 0", fontFamily: FONT_FAMILY }}>No messages yet. Say hey! 👋</div>
+            ) : messages.map((msg) => {
+              const isMine = msg.sender === (user?.displayName || user?.email || "You");
+              return (
+                <div key={msg.id} style={{ alignSelf: isMine ? "flex-end" : "flex-start", maxWidth: "75%" }}>
+                  <div style={{ padding: "10px 14px", borderRadius: "12px", backgroundColor: isMine ? BLUE : "#ffffff", color: isMine ? WHITE : BLACK, fontSize: "14px", fontFamily: FONT_FAMILY, wordBreak: "break-word", border: isMine ? "none" : "1px solid rgba(0,0,0,0.06)" }}>
+                    {!isMine && <div style={{ fontSize: "11px", fontWeight: 700, color: BLUE, marginBottom: "4px" }}>{msg.sender}</div>}
+                    <div>{msg.text}</div>
+                    <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "4px" }}><span style={{ fontSize: "10px", color: isMine ? "rgba(255,255,255,0.85)" : "#999" }}>{msg.time}</span></div>
+                  </div>
+                </div>
+              );
+            })}
             <div ref={messagesEndRef} />
           </div>
           <div style={{ padding: "14px 20px", borderTop: "1px solid rgba(0,0,0,0.06)", display: "flex", gap: "10px", backgroundColor: WHITE, flexShrink: 0 }}>
             <input type="text" value={messageText} onChange={(e) => setMessageText(e.target.value)} onKeyPress={(e) => { if (e.key === "Enter" && !e.shiftKey && messageText.trim()) { e.preventDefault(); handleSend(); } }} placeholder="Type your message..." style={{ flex: 1, padding: "12px 16px", border: "none", borderRadius: "10px", fontSize: "14px", outline: "none", fontFamily: FONT_FAMILY, backgroundColor: BLUE, color: WHITE }} />
-            <button onClick={handleSend} disabled={!messageText.trim()} style={{ padding: "12px 24px", backgroundColor: messageText.trim() ? BLUE : "#ccc", color: WHITE, border: "none", borderRadius: "10px", cursor: messageText.trim() ? "pointer" : "not-allowed", fontFamily: FONT_FAMILY, fontSize: "13px", fontWeight: 800, letterSpacing: "0.5px", textTransform: "uppercase", display: "flex", alignItems: "center", gap: "8px" }}>Send{messageText.trim() && <NorthEastArrow size={18} color={WHITE} />}</button>
+            <button onClick={handleSend} disabled={!messageText.trim()} style={{ padding: "12px 24px", backgroundColor: messageText.trim() ? BLUE : "#ccc", color: WHITE, border: "none", borderRadius: "10px", cursor: messageText.trim() ? "pointer" : "not-allowed", fontFamily: FONT_FAMILY, fontSize: "13px", fontWeight: 800, letterSpacing: "0.5px", textTransform: "uppercase", display: "flex", alignItems: "center", gap: "8px" }}>
+              Send
+              {messageText.trim() && <NorthEastArrow size={18} color={WHITE} />}
+            </button>
           </div>
         </div>
       )}
@@ -375,37 +484,121 @@ const SayHeySection = ({ user, onClose }: { user: any; onClose: () => void }) =>
   );
 };
 
-// ===== TOTP HELPERS =====
+// ===== TOTP =====
 const BASE32 = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
-function base32Encode(bytes: Uint8Array): string { let bits = 0, value = 0, out = ""; for (let i = 0; i < bytes.length; i++) { value = (value << 8) | bytes[i]; bits += 8; while (bits >= 5) { out += BASE32[(value >>> (bits - 5)) & 31]; bits -= 5; } } if (bits > 0) out += BASE32[(value << (5 - bits)) & 31]; return out; }
-function base32Decode(input: string): Uint8Array { const c = input.replace(/=+$/g, "").toUpperCase(); const b: number[] = []; let bits = 0, value = 0; for (let i = 0; i < c.length; i++) { const idx = BASE32.indexOf(c[i]); if (idx === -1) continue; value = (value << 5) | idx; bits += 5; if (bits >= 8) { b.push((value >>> (bits - 8)) & 0xff); bits -= 8; } } return new Uint8Array(b); }
-function generateSecret(len = 20): string { const r = new Uint8Array(len); if (typeof window !== "undefined" && window.crypto) window.crypto.getRandomValues(r); else for (let i = 0; i < len; i++) r[i] = Math.floor(Math.random() * 256); return base32Encode(r); }
+
+function base32Encode(bytes: Uint8Array): string {
+  let bits = 0, value = 0, out = "";
+  for (let i = 0; i < bytes.length; i++) {
+    value = (value << 8) | bytes[i];
+    bits += 8;
+    while (bits >= 5) {
+      out += BASE32[(value >>> (bits - 5)) & 31];
+      bits -= 5;
+    }
+  }
+  if (bits > 0) out += BASE32[(value << (5 - bits)) & 31];
+  return out;
+}
+
+function base32Decode(input: string): Uint8Array {
+  const c = input.replace(/=+$/g, "").toUpperCase();
+  const b: number[] = [];
+  let bits = 0, value = 0;
+  for (let i = 0; i < c.length; i++) {
+    const idx = BASE32.indexOf(c[i]);
+    if (idx === -1) continue;
+    value = (value << 5) | idx;
+    bits += 5;
+    if (bits >= 8) {
+      b.push((value >>> (bits - 8)) & 0xff);
+      bits -= 8;
+    }
+  }
+  return new Uint8Array(b);
+}
+
+function generateSecret(len = 20): string {
+  const r = new Uint8Array(len);
+  if (typeof window !== "undefined" && window.crypto) window.crypto.getRandomValues(r);
+  else for (let i = 0; i < len; i++) r[i] = Math.floor(Math.random() * 256);
+  return base32Encode(r);
+}
+
 async function hotp(secret: string, counter: number, digits = 6): Promise<string> {
-  const key = base32Decode(secret); const cb = new Uint8Array(8); let temp = counter;
-  for (let i = 7; i >= 0; i--) { cb[i] = temp & 0xff; temp = Math.floor(temp / 256); }
-  if (typeof window === "undefined" || !window.crypto || !window.crypto.subtle) { let h = 0; for (let i = 0; i < key.length; i++) h = (h * 31 + key[i]) >>> 0; for (let i = 0; i < 8; i++) h = (h * 31 + cb[i]) >>> 0; return String(h % Math.pow(10, digits)).padStart(digits, "0"); }
+  const key = base32Decode(secret);
+  const cb = new Uint8Array(8);
+  let temp = counter;
+  for (let i = 7; i >= 0; i--) {
+    cb[i] = temp & 0xff;
+    temp = Math.floor(temp / 256);
+  }
+  if (typeof window === "undefined" || !window.crypto || !window.crypto.subtle) {
+    let h = 0;
+    for (let i = 0; i < key.length; i++) h = (h * 31 + key[i]) >>> 0;
+    for (let i = 0; i < 8; i++) h = (h * 31 + cb[i]) >>> 0;
+    return String(h % Math.pow(10, digits)).padStart(digits, "0");
+  }
   const ck = await window.crypto.subtle.importKey("raw", key, { name: "HMAC", hash: "SHA-1" }, false, ["sign"]);
   const sig = await window.crypto.subtle.sign("HMAC", ck, cb);
-  const h = new Uint8Array(sig); const off = h[h.length - 1] & 0x0f;
+  const h = new Uint8Array(sig);
+  const off = h[h.length - 1] & 0x0f;
   const code = ((h[off] & 0x7f) << 24) | ((h[off + 1] & 0xff) << 16) | ((h[off + 2] & 0xff) << 8) | (h[off + 3] & 0xff);
   return String(code % Math.pow(10, digits)).padStart(digits, "0");
 }
-async function totp(secret: string): Promise<string> { return hotp(secret, Math.floor(Math.floor(Date.now() / 1000) / 30), 6); }
-async function verifyTotp(secret: string, token: string, w = 1): Promise<boolean> { const c = token.replace(/\s+/g, ""); if (!/^\d{6}$/.test(c)) return false; const cnt = Math.floor(Math.floor(Date.now() / 1000) / 30); for (let i = -w; i <= w; i++) if ((await hotp(secret, cnt + i, 6)) === c) return true; return false; }
-function qrImageUrl(data: string, size = 240): string { return `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(data)}&margin=0`; }
-function buildOtpUri(secret: string, label: string, issuer: string): string { return `otpauth://totp/${encodeURIComponent(`${issuer}:${label}`)}?secret=${secret}&issuer=${encodeURIComponent(issuer)}&algorithm=SHA1&digits=6&period=30`; }
-function generateRecoveryCodes(n = 8): string[] { const arr: string[] = []; for (let i = 0; i < n; i++) { const r = new Uint8Array(5); if (typeof window !== "undefined" && window.crypto) window.crypto.getRandomValues(r); else for (let j = 0; j < 5; j++) r[j] = Math.floor(Math.random() * 256); let hex = ""; for (let j = 0; j < 5; j++) hex += r[j].toString(16).padStart(2, "0"); arr.push(hex.toUpperCase().match(/.{1,4}/g)?.join("-") || hex.toUpperCase()); } return arr; }
+
+async function totp(secret: string): Promise<string> {
+  return hotp(secret, Math.floor(Math.floor(Date.now() / 1000) / 30), 6);
+}
+
+async function verifyTotp(secret: string, token: string, w = 1): Promise<boolean> {
+  const c = token.replace(/\s+/g, "");
+  if (!/^\d{6}$/.test(c)) return false;
+  const cnt = Math.floor(Math.floor(Date.now() / 1000) / 30);
+  for (let i = -w; i <= w; i++) if ((await hotp(secret, cnt + i, 6)) === c) return true;
+  return false;
+}
 
 // ===== PASSKEY HELPERS =====
-function bufToB64Url(buf: ArrayBuffer): string { const b = new Uint8Array(buf); let s = ""; for (let i = 0; i < b.byteLength; i++) s += String.fromCharCode(b[i]); return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, ""); }
-function b64UrlToBuf(b64url: string): ArrayBuffer { const b = b64url.replace(/-/g, "+").replace(/_/g, "/"); const p = b.length % 4 === 0 ? "" : "=".repeat(4 - (b.length % 4)); const bin = atob(b + p); const bytes = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i); return bytes.buffer; }
-function randomChallenge(len = 32): Uint8Array { const c = new Uint8Array(len); if (typeof window !== "undefined" && window.crypto) window.crypto.getRandomValues(c); else for (let i = 0; i < len; i++) c[i] = Math.floor(Math.random() * 256); return c; }
-function supportsWebAuthn(): boolean { if (typeof window === "undefined") return false; return !!(window.PublicKeyCredential && navigator.credentials); }
+function bufToB64Url(buf: ArrayBuffer): string {
+  const b = new Uint8Array(buf);
+  let s = "";
+  for (let i = 0; i < b.byteLength; i++) s += String.fromCharCode(b[i]);
+  return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+}
 
-// ===== PIN INPUT (GSAP + FRAMER, NO EXTRA COLOR, TIPIS BIRU) =====
+function b64UrlToBuf(b64url: string): ArrayBuffer {
+  const b = b64url.replace(/-/g, "+").replace(/_/g, "/");
+  const p = b.length % 4 === 0 ? "" : "=".repeat(4 - (b.length % 4));
+  const bin = atob(b + p);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes.buffer;
+}
+
+function randomChallenge(len = 32): Uint8Array {
+  const c = new Uint8Array(len);
+  if (typeof window !== "undefined" && window.crypto) window.crypto.getRandomValues(c);
+  else for (let i = 0; i < len; i++) c[i] = Math.floor(Math.random() * 256);
+  return c;
+}
+
+function supportsWebAuthn(): boolean {
+  if (typeof window === "undefined") return false;
+  return !!(window.PublicKeyCredential && navigator.credentials);
+}
+
+// ===== PIN INPUT (BORDER BIRU, NO BG, NO GREEN, NO SKEW) =====
 const PinInput = ({
   value, onChange, onComplete, isNew, confirmValue, onConfirmChange,
-}: { value: string; onChange: (v: string) => void; onComplete?: () => void; isNew?: boolean; confirmValue?: string; onConfirmChange?: (v: string) => void; }) => {
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  onComplete?: () => void;
+  isNew?: boolean;
+  confirmValue?: string;
+  onConfirmChange?: (v: string) => void;
+}) => {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const confirmRefs = useRef<(HTMLInputElement | null)[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -414,37 +607,58 @@ const PinInput = ({
     if (!containerRef.current) return;
     const boxes = containerRef.current.querySelectorAll(".pin-box");
     if (!boxes.length) return;
-    gsap.fromTo(boxes, { y: 30, opacity: 0, scale: 0.8 }, { y: 0, opacity: 1, scale: 1, duration: 0.6, stagger: 0.06, ease: "back.out(1.7)" });
+    gsap.fromTo(boxes, { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, stagger: 0.06, ease: "power3.out" });
   }, []);
 
-  const handleChange = (index: number, val: string, isConfirm: boolean = false) => {
+  const handleChange = (index: number, val: string, isConfirm = false) => {
     const numericVal = val.replace(/\D/g, "");
     if (!numericVal) return;
     const current = isConfirm ? confirmValue || "" : value;
     const newVal = current.split("");
     newVal[index] = numericVal[numericVal.length - 1];
     const result = newVal.join("").slice(0, 6);
-    if (isConfirm) onConfirmChange?.(result);
-    else { onChange(result); if (result.length === 6 && onComplete) setTimeout(() => onComplete(), 200); }
-    if (index < 5 && numericVal) { const refs = isConfirm ? confirmRefs : inputRefs; setTimeout(() => refs.current[index + 1]?.focus(), 10); }
+    if (isConfirm) {
+      onConfirmChange?.(result);
+    } else {
+      onChange(result);
+      if (result.length === 6 && onComplete) setTimeout(() => onComplete(), 200);
+    }
+    if (index < 5 && numericVal) {
+      const refs = isConfirm ? confirmRefs : inputRefs;
+      setTimeout(() => refs.current[index + 1]?.focus(), 10);
+    }
   };
 
-  const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>, isConfirm: boolean = false) => {
+  const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>, isConfirm = false) => {
     const refs = isConfirm ? confirmRefs : inputRefs;
     if (e.key === "Backspace") {
       e.preventDefault();
       const current = isConfirm ? confirmValue || "" : value;
       const newVal = current.split("");
-      if (newVal[index]) { newVal[index] = ""; const r = newVal.join(""); if (isConfirm) onConfirmChange?.(r); else onChange(r); }
-      else if (index > 0) { refs.current[index - 1]?.focus(); const prev = current.split(""); prev[index - 1] = ""; const r = prev.join(""); if (isConfirm) onConfirmChange?.(r); else onChange(r); }
-    } else if (e.key === "ArrowLeft" && index > 0) refs.current[index - 1]?.focus();
-    else if (e.key === "ArrowRight" && index < 5) refs.current[index + 1]?.focus();
+      if (newVal[index]) {
+        newVal[index] = "";
+        const r = newVal.join("");
+        if (isConfirm) onConfirmChange?.(r);
+        else onChange(r);
+      } else if (index > 0) {
+        refs.current[index - 1]?.focus();
+        const prev = current.split("");
+        prev[index - 1] = "";
+        const r = prev.join("");
+        if (isConfirm) onConfirmChange?.(r);
+        else onChange(r);
+      }
+    } else if (e.key === "ArrowLeft" && index > 0) {
+      refs.current[index - 1]?.focus();
+    } else if (e.key === "ArrowRight" && index < 5) {
+      refs.current[index + 1]?.focus();
+    }
   };
 
   const renderBoxes = (val: string, isConfirm: boolean) => {
     const refs = isConfirm ? confirmRefs : inputRefs;
     return (
-      <div style={{ display: "flex", gap: "16px", justifyContent: "center", flexWrap: "wrap" }}>
+      <div style={{ display: "flex", gap: "14px", justifyContent: "center", flexWrap: "wrap" }}>
         {Array.from({ length: 6 }).map((_, i) => (
           <motion.input
             key={i}
@@ -457,25 +671,24 @@ const PinInput = ({
             onKeyDown={(e) => handleKeyDown(i, e, isConfirm)}
             onFocus={(e) => e.target.select()}
             className="pin-box"
-            whileFocus={{ scale: 1.08 }}
-            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            whileFocus={{ scale: 1.04 }}
+            transition={{ type: "spring", stiffness: 400, damping: 24 }}
             style={{
-              width: "90px",
-              height: "120px",
-              fontSize: "60px",
+              width: "84px",
+              height: "110px",
+              fontSize: "56px",
               fontWeight: 400,
               textAlign: "center",
               backgroundColor: "transparent",
               color: BLUE,
               border: `2px solid ${BLUE}`,
-              borderRadius: "16px",
+              borderRadius: "14px",
               outline: "none",
               fontFamily: FONT_FAMILY,
               caretColor: BLUE,
               padding: 0,
+              boxShadow: "none",
             }}
-            onFocusCapture={(e: any) => { e.currentTarget.style.boxShadow = `0 0 0 3px ${LIME}`; }}
-            onBlurCapture={(e: any) => { e.currentTarget.style.boxShadow = "none"; }}
           />
         ))}
       </div>
@@ -483,16 +696,17 @@ const PinInput = ({
   };
 
   return (
-    <div ref={containerRef} style={{ display: "flex", flexDirection: "column", gap: "30px", alignItems: "center", width: "100%" }}>
+    <div ref={containerRef} style={{ display: "flex", flexDirection: "column", gap: "28px", alignItems: "center", width: "100%" }}>
       <div style={{ width: "100%", textAlign: "center" }}>
-        <div style={{ display: "inline-block", color: BLUE, fontSize: "20px", fontWeight: 400, fontFamily: FONT_FAMILY, letterSpacing: "0.02em", marginBottom: "24px" }}>
+        <div style={{ display: "inline-block", color: BLUE, fontSize: "20px", fontWeight: 400, fontFamily: FONT_FAMILY, letterSpacing: "0.02em", marginBottom: "22px" }}>
           {isNew ? "Buat PIN 6 Digit" : "Masukkan PIN 6 Digit"}
         </div>
         <div>{renderBoxes(value, false)}</div>
       </div>
+
       {isNew && confirmValue !== undefined && onConfirmChange && (
         <div style={{ width: "100%", textAlign: "center" }}>
-          <div style={{ display: "inline-block", color: BLUE, fontSize: "20px", fontWeight: 400, fontFamily: FONT_FAMILY, letterSpacing: "0.02em", marginBottom: "24px" }}>
+          <div style={{ display: "inline-block", color: BLUE, fontSize: "20px", fontWeight: 400, fontFamily: FONT_FAMILY, letterSpacing: "0.02em", marginBottom: "22px" }}>
             Konfirmasi PIN
           </div>
           <div>{renderBoxes(confirmValue, true)}</div>
@@ -503,17 +717,38 @@ const PinInput = ({
 };
 
 // ===== TERMS =====
-const TermsAgreementBox = ({ agreed, onToggle }: { agreed: boolean; onToggle: () => void; }) => {
+const TermsAgreementBox = ({ agreed, onToggle }: { agreed: boolean; onToggle: () => void }) => {
   const boxRef = useRef<HTMLDivElement>(null);
-  useEffect(() => { if (boxRef.current) gsap.fromTo(boxRef.current, { opacity: 0, y: 30, scale: 0.98 }, { opacity: 1, y: 0, scale: 1, duration: 0.8, ease: "power3.out", delay: 0.3 }); }, []);
+
+  useEffect(() => {
+    if (boxRef.current) {
+      gsap.fromTo(boxRef.current, { opacity: 0, y: 30, scale: 0.98 }, { opacity: 1, y: 0, scale: 1, duration: 0.8, ease: "power3.out", delay: 0.3 });
+    }
+  }, []);
+
   return (
     <div ref={boxRef} style={{ width: "100%", backgroundColor: BLUE, borderRadius: "16px", padding: "32px 36px", marginBottom: "24px", fontFamily: FONT_FAMILY, color: WHITE }}>
       <h3 style={{ fontSize: "24px", fontWeight: 700, color: WHITE, margin: "0 0 20px 0", letterSpacing: "-0.01em", fontFamily: FONT_FAMILY }}>Persetujuan Layanan</h3>
       <div style={{ fontSize: "15px", lineHeight: 1.8, color: WHITE, fontFamily: FONT_FAMILY, marginBottom: "20px" }}>
         <p style={{ margin: "0 0 14px 0", textIndent: "2em" }}>Dengan melakukan sign in ke akun Menuru, Anda menyatakan telah membaca, memahami, dan menyetujui seluruh Syarat &amp; Ketentuan yang berlaku. Persetujuan ini mencakup penggunaan layanan secara wajar, menjaga kerahasiaan akun, serta tidak menyalahgunakan fitur yang tersedia untuk aktivitas yang melanggar hukum.</p>
-        <div style={{ marginBottom: "14px" }}><div style={{ display: "flex", gap: "12px", marginBottom: "8px" }}><span style={{ fontWeight: 700, flexShrink: 0, minWidth: "40px" }}>I.</span><span><strong>Penggunaan Layanan.</strong> Anda setuju untuk menggunakan layanan Menuru hanya untuk tujuan yang sah dan sesuai dengan ketentuan yang berlaku. Segala bentuk penyalahgunaan akan dikenakan sanksi sesuai kebijakan yang berlaku.</span></div></div>
-        <div style={{ marginBottom: "14px" }}><div style={{ display: "flex", gap: "12px", marginBottom: "8px" }}><span style={{ fontWeight: 700, flexShrink: 0, minWidth: "40px" }}>II.</span><span><strong>Privasi &amp; Keamanan Data.</strong> Menuru berkomitmen melindungi data pribadi Anda sesuai dengan Kebijakan Privasi yang berlaku. Kami menggunakan enkripsi end-to-end untuk menjaga kerahasiaan percakapan dan tidak akan membagikan data Anda kepada pihak ketiga tanpa izin.</span></div></div>
-        <div style={{ marginBottom: "14px" }}><div style={{ display: "flex", gap: "12px", marginBottom: "8px" }}><span style={{ fontWeight: 700, flexShrink: 0, minWidth: "40px" }}>III.</span><span><strong>Tanggung Jawab Pengguna.</strong> Anda bertanggung jawab penuh atas kerahasiaan akun dan PIN Anda. Segala aktivitas yang terjadi melalui akun Anda menjadi tanggung jawab Anda sepenuhnya.</span></div></div>
+        <div style={{ marginBottom: "14px" }}>
+          <div style={{ display: "flex", gap: "12px", marginBottom: "8px" }}>
+            <span style={{ fontWeight: 700, flexShrink: 0, minWidth: "40px" }}>I.</span>
+            <span><strong>Penggunaan Layanan.</strong> Anda setuju untuk menggunakan layanan Menuru hanya untuk tujuan yang sah dan sesuai dengan ketentuan yang berlaku. Segala bentuk penyalahgunaan akan dikenakan sanksi sesuai kebijakan yang berlaku.</span>
+          </div>
+        </div>
+        <div style={{ marginBottom: "14px" }}>
+          <div style={{ display: "flex", gap: "12px", marginBottom: "8px" }}>
+            <span style={{ fontWeight: 700, flexShrink: 0, minWidth: "40px" }}>II.</span>
+            <span><strong>Privasi &amp; Keamanan Data.</strong> Menuru berkomitmen melindungi data pribadi Anda sesuai dengan Kebijakan Privasi yang berlaku. Kami menggunakan enkripsi end-to-end untuk menjaga kerahasiaan percakapan dan tidak akan membagikan data Anda kepada pihak ketiga tanpa izin.</span>
+          </div>
+        </div>
+        <div style={{ marginBottom: "14px" }}>
+          <div style={{ display: "flex", gap: "12px", marginBottom: "8px" }}>
+            <span style={{ fontWeight: 700, flexShrink: 0, minWidth: "40px" }}>III.</span>
+            <span><strong>Tanggung Jawab Pengguna.</strong> Anda bertanggung jawab penuh atas kerahasiaan akun dan PIN Anda. Segala aktivitas yang terjadi melalui akun Anda menjadi tanggung jawab Anda sepenuhnya.</span>
+          </div>
+        </div>
         <p style={{ margin: "0", textIndent: "2em" }}>Apabila Anda tidak menyetujui ketentuan ini, mohon untuk tidak melanjutkan proses sign in. Dengan mencentang kotak di bawah, Anda secara sadar dan sukarela menyetujui seluruh ketentuan yang tercantum pada <Link href="/terms-of-services" style={{ color: WHITE, textDecoration: "underline", fontWeight: 600 }}>Syarat &amp; Ketentuan</Link> dan <Link href="/privacy-policy" style={{ color: WHITE, textDecoration: "underline", fontWeight: 600 }}>Kebijakan Privasi</Link>.</p>
       </div>
       <label style={{ display: "flex", alignItems: "flex-start", gap: "12px", cursor: "pointer", fontSize: "15px", fontWeight: 600, color: WHITE, fontFamily: FONT_FAMILY, lineHeight: 1.5 }}>
@@ -524,25 +759,132 @@ const TermsAgreementBox = ({ agreed, onToggle }: { agreed: boolean; onToggle: ()
   );
 };
 
-// ===== TOP BANNER (biru, seperti halaman utama) =====
-const TopBanner = ({ onFaridClick }: { onFaridClick: () => void }) => (
-  <div style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 9100, height: "44px", backgroundColor: BLUE, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 20px", fontFamily: FONT_FAMILY }}>
-    <span style={{ color: WHITE, fontSize: "14px", fontWeight: 600, letterSpacing: "0.02em", textAlign: "center", display: "flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-      Website this is build the develope{" "}
-      <button onClick={onFaridClick} style={{ color: BLUE, fontWeight: 800, display: "inline-flex", alignItems: "center", gap: "6px", backgroundColor: WHITE, padding: "2px 8px", borderRadius: "6px", border: "none", cursor: "pointer", fontFamily: FONT_FAMILY, fontSize: "14px", lineHeight: 1.4 }}>
-        Farid Ardiansyah
-        <svg width="16" height="16" viewBox="0 0 40 40">
-          <path fill={BLUE} d="M19.998 3.094 14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.03v-6.46h-6.419L25.358 0l-5.36 3.094Zm7.415 11.225 2.254 2.287-11.43 11.5-6.835-6.93 2.244-2.258 4.587 4.581 9.18-9.18Z" />
-        </svg>
-      </button>
-    </span>
-  </div>
-);
+// ===== TOP BANNER (biru, animasi verified panel) =====
+const TopBanner = () => {
+  const [showPanel, setShowPanel] = useState(false);
+  const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null);
+  const btnRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const fullPageRef = useRef<HTMLDivElement>(null);
+  const closeIconRef = useRef<HTMLDivElement>(null);
+  const [isClosing, setIsClosing] = useState(false);
+  const [phase, setPhase] = useState<"loading" | "expand" | "fullpage">("loading");
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (showPanel) { setShowPanel(false); return; }
+    if (btnRef.current) setAnchorRect(btnRef.current.getBoundingClientRect());
+    setShowPanel(true);
+  };
+
+  useEffect(() => {
+    if (showPanel) {
+      setPhase("loading");
+      setIsClosing(false);
+      const t = setTimeout(() => setPhase("expand"), 1800);
+      return () => clearTimeout(t);
+    }
+  }, [showPanel]);
+
+  useEffect(() => {
+    if (phase !== "expand" || !panelRef.current || !fullPageRef.current || !anchorRect) return;
+    const p = panelRef.current;
+    const f = fullPageRef.current;
+    gsap.set(p, { position: "fixed", top: anchorRect.top, left: anchorRect.left, width: anchorRect.width, height: anchorRect.height, borderRadius: "6px", opacity: 1, zIndex: 9800 });
+    gsap.set(f, { opacity: 0, zIndex: 9799 });
+    const tl = gsap.timeline({ onComplete: () => setPhase("fullpage") });
+    tl.to(p, { top: 0, left: 0, width: "100vw", height: "100vh", borderRadius: "0px", duration: 0.7, ease: "power4.inOut" })
+      .to(f, { opacity: 1, duration: 0.4, ease: "power2.out" }, "-=0.35");
+    return () => tl.kill();
+  }, [phase, anchorRect]);
+
+  const handleIconEnter = () => { if (closeIconRef.current && !isClosing) gsap.to(closeIconRef.current, { rotation: 45, scale: 1.2, duration: 0.3, ease: "power2.out" }); };
+  const handleIconLeave = () => { if (closeIconRef.current && !isClosing) gsap.to(closeIconRef.current, { rotation: 0, scale: 1, duration: 0.3, ease: "power2.out" }); };
+  const handleClose = () => {
+    if (isClosing || !fullPageRef.current) return;
+    setIsClosing(true);
+    if (closeIconRef.current) gsap.to(closeIconRef.current, { rotation: 90, scale: 0, duration: 0.4, ease: "back.in(1.7)" });
+    gsap.to(fullPageRef.current, { opacity: 0, y: 40, duration: 0.4, ease: "power3.in", onComplete: () => { setIsClosing(false); setShowPanel(false); } });
+  };
+
+  return (
+    <>
+      <div style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 9100, height: "44px", backgroundColor: BLUE, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 20px", fontFamily: FONT_FAMILY }}>
+        <span style={{ color: WHITE, fontSize: "14px", fontWeight: 600, letterSpacing: "0.02em", textAlign: "center", display: "flex", alignItems: "center", gap: "8px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+          Website this is build the develope{" "}
+          <button ref={btnRef} onClick={handleClick} style={{ color: BLUE, fontWeight: 800, display: "inline-flex", alignItems: "center", gap: "6px", backgroundColor: WHITE, padding: "2px 8px", borderRadius: "6px", border: "none", cursor: "pointer", fontFamily: FONT_FAMILY, fontSize: "14px", lineHeight: 1.4 }}>
+            Farid Ardiansyah
+            <svg width="16" height="16" viewBox="0 0 40 40">
+              <path fill={BLUE} d="M19.998 3.094 14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.03v-6.46h-6.419L25.358 0l-5.36 3.094Zm7.415 11.225 2.254 2.287-11.43 11.5-6.835-6.93 2.244-2.258 4.587 4.581 9.18-9.18Z" />
+            </svg>
+          </button>
+        </span>
+      </div>
+
+      {showPanel && (phase === "loading" || phase === "expand") && (
+        <div onClick={handleClose} style={{ position: "fixed", inset: 0, zIndex: 9700, background: "rgba(0,0,0,0.25)" }} />
+      )}
+
+      {showPanel && (phase === "loading" || phase === "expand") && anchorRect && (
+        <div ref={panelRef} style={{ position: "fixed", top: anchorRect.top, left: anchorRect.left, width: anchorRect.width, height: anchorRect.height, backgroundColor: BLUE, border: `2px solid ${WHITE}`, borderRadius: "6px", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 8px 24px rgba(13,60,252,0.55)", zIndex: 9800, overflow: "hidden" }}>
+          {phase === "loading" && (
+            <div style={{ width: 24, height: 24, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <svg width="24" height="24" viewBox="0 0 40 40" style={{ animation: "verifiedPop 1.8s ease-in-out forwards" }}>
+                <g style={{ transformOrigin: "center center" }}>
+                  <path fill={WHITE} d="M19.998 3.094 14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.03v-6.46h-6.419L25.358 0l-5.36 3.094Z" />
+                  <path d="M15 20L18 23L25 16" stroke={BLUE} strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none" style={{ strokeDasharray: 100, strokeDashoffset: 100, animation: "drawCheck 0.8s ease-out 0.8s forwards" }} />
+                </g>
+              </svg>
+            </div>
+          )}
+          {phase === "expand" && (
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
+              <svg width="18" height="18" viewBox="0 0 40 40">
+                <path fill={WHITE} d="M19.998 3.094 14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.03v-6.46h-6.419L25.358 0l-5.36 3.094Z" />
+                <path d="M15 20L18 23L25 16" stroke={BLUE} strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+              </svg>
+              <span style={{ fontFamily: FONT_FAMILY, fontSize: "11px", fontWeight: 800, color: WHITE, letterSpacing: "0.02em", whiteSpace: "nowrap" }}>Verified</span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {showPanel && (phase === "expand" || phase === "fullpage") && (
+        <div ref={fullPageRef} style={{ position: "fixed", inset: 0, width: "100vw", height: "100vh", backgroundColor: BLUE, zIndex: 9799, display: phase === "fullpage" ? "flex" : "none", flexDirection: "column", fontFamily: FONT_FAMILY, color: WHITE, overflow: "hidden", opacity: 0 }}>
+          <div style={{ padding: "24px 40px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+              <svg width="32" height="32" viewBox="0 0 40 40">
+                <path fill={WHITE} d="M19.998 3.094 14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.03v-6.46h-6.419L25.358 0l-5.36 3.094Z" />
+                <path d="M15 20L18 23L25 16" stroke={BLUE} strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+              </svg>
+              <span style={{ fontSize: "28px", fontWeight: 800, color: WHITE, letterSpacing: "-0.02em" }}>Verified</span>
+            </div>
+            <button onClick={handleClose} onMouseEnter={handleIconEnter} onMouseLeave={handleIconLeave} disabled={isClosing} style={{ background: WHITE, border: "none", color: BLUE, borderRadius: "50%", width: "44px", height: "44px", display: "flex", alignItems: "center", justifyContent: "center", cursor: isClosing ? "not-allowed" : "pointer" }}>
+              <div ref={closeIconRef} style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+                  <line x1="12" y1="5" x2="12" y2="19" stroke={BLUE} strokeWidth="2.5" strokeLinecap="round" />
+                  <line x1="5" y1="12" x2="19" y2="12" stroke={BLUE} strokeWidth="2.5" strokeLinecap="round" />
+                </svg>
+              </div>
+            </button>
+          </div>
+          <div style={{ flex: 1, padding: "20px 40px", display: "flex", flexDirection: "column", overflowY: "auto", gap: "24px" }}>
+            <div style={{ backgroundColor: WHITE, borderRadius: "24px", padding: "32px", display: "flex", flexDirection: "column", gap: "16px", maxWidth: "900px", boxShadow: "0 10px 30px rgba(0,0,0,0.15)" }}>
+              <h2 style={{ fontSize: "48px", fontWeight: 800, margin: 0, color: BLUE, letterSpacing: "-0.03em", lineHeight: 1.1 }}>Farid Ardiansyah</h2>
+              <p style={{ fontSize: "16px", fontWeight: 500, margin: 0, color: BLUE, lineHeight: 1.6, maxWidth: "700px", opacity: 0.9 }}>Website ini dibangun dan dikembangkan oleh Farid Ardiansyah. Verified developer & owner of Menuru. Semua fitur, sistem, dan infrastruktur di platform ini dikelola secara langsung.</p>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
 
 // ===== FOOTER CARD (biru, seperti halaman utama) =====
 const FooterCard = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLSpanElement>(null);
+
   useEffect(() => {
     if (!titleRef.current || !containerRef.current) return;
     const title = titleRef.current;
@@ -551,7 +893,10 @@ const FooterCard = () => {
     const spans = title.querySelectorAll("span");
     const ctx = gsap.context(() => {
       gsap.set(spans, { yPercent: 120, opacity: 0, rotationX: -90, transformOrigin: "50% 100%", force3D: true });
-      gsap.to(spans, { yPercent: 0, opacity: 1, rotationX: 0, duration: 1, stagger: 0.08, ease: "back.out(1.7)", scrollTrigger: { trigger: containerRef.current, start: "top 90%", end: "top 40%", scrub: 1, toggleActions: "play none none reverse", invalidateOnRefresh: true } });
+      gsap.to(spans, {
+        yPercent: 0, opacity: 1, rotationX: 0, duration: 1, stagger: 0.08, ease: "back.out(1.7)",
+        scrollTrigger: { trigger: containerRef.current, start: "top 90%", end: "top 40%", scrub: 1, toggleActions: "play none none reverse", invalidateOnRefresh: true },
+      });
     }, containerRef);
     return () => ctx.revert();
   }, []);
@@ -606,7 +951,9 @@ const FooterCard = () => {
       </div>
       <div style={{ position: "relative", zIndex: 1 }}>
         <span ref={titleRef} style={{ fontFamily: FONT_FAMILY, fontSize: "600px", fontWeight: 400, color: WHITE, letterSpacing: "-0.05em", lineHeight: "0.85", display: "block", textAlign: "left", whiteSpace: "nowrap", margin: 0, padding: 0, overflow: "visible", pointerEvents: "none" }}>Menuru</span>
-        <div style={{ width: "100%", display: "flex", justifyContent: "flex-start", marginTop: "10px" }}><span style={{ fontFamily: FONT_FAMILY, fontSize: "16px", fontWeight: 400, color: WHITE, letterSpacing: "0.01em", opacity: 0.85 }}>2024 - 2026 Menuru. All rights reserved.</span></div>
+        <div style={{ width: "100%", display: "flex", justifyContent: "flex-start", marginTop: "10px" }}>
+          <span style={{ fontFamily: FONT_FAMILY, fontSize: "16px", fontWeight: 400, color: WHITE, letterSpacing: "0.01em", opacity: 0.85 }}>2024 - 2026 Menuru. All rights reserved.</span>
+        </div>
       </div>
     </div>
   );
@@ -617,17 +964,26 @@ const Preloader = ({ onComplete }: { onComplete: () => void }) => {
   const preloaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
   const counterRef = useRef<HTMLSpanElement>(null);
+
   useEffect(() => {
     const p = preloaderRef.current, t = textRef.current, c = counterRef.current;
     if (!p || !t || !c) return;
     gsap.set(t, { y: 100, opacity: 0 });
     gsap.set(c, { opacity: 1, scale: 1, y: 0, xPercent: 0 });
-    const co = { value: 1 }; c.textContent = "01";
-    const tl = gsap.timeline({ onComplete: () => { gsap.to(p, { opacity: 0, duration: 0.6, onComplete }); } });
-    tl.to(t, { y: 0, opacity: 1, duration: 1.0, ease: "back.out(1.7)" }).to(t, { duration: 0.8 }).to(t, { opacity: 0, y: -20, scale: 0.9, duration: 0.5, ease: "power2.out", onComplete: () => { t.textContent = "Note"; } }).to(t, { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: "back.out(1.7)" }).to(t, { duration: 1.2 });
+    const co = { value: 1 };
+    c.textContent = "01";
+    const tl = gsap.timeline({ onComplete: () => gsap.to(p, { opacity: 0, duration: 0.6, onComplete }) });
+    tl.to(t, { y: 0, opacity: 1, duration: 1.0, ease: "back.out(1.7)" })
+      .to(t, { duration: 0.8 })
+      .to(t, { opacity: 0, y: -20, scale: 0.9, duration: 0.5, ease: "power2.out", onComplete: () => { t.textContent = "Note"; } })
+      .to(t, { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: "back.out(1.7)" })
+      .to(t, { duration: 1.2 });
     tl.to(co, { value: 100, duration: 6.5, ease: "power2.inOut", onUpdate: () => { c.textContent = String(Math.round(co.value)).padStart(2, "0"); } }, 0);
-    tl.to(t, { scale: 0.3, opacity: 0, duration: 0.8, ease: "power2.in" }).to(c, { scale: 0.6, opacity: 0, duration: 0.8, ease: "power2.in" }, "-=0.8").to(p, { opacity: 0, duration: 0.6 });
+    tl.to(t, { scale: 0.3, opacity: 0, duration: 0.8, ease: "power2.in" })
+      .to(c, { scale: 0.6, opacity: 0, duration: 0.8, ease: "power2.in" }, "-=0.8")
+      .to(p, { opacity: 0, duration: 0.6 });
   }, [onComplete]);
+
   return (
     <div ref={preloaderRef} style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", backgroundColor: WHITE, zIndex: 9999, fontFamily: FONT_FAMILY, overflow: "hidden" }}>
       <span ref={counterRef} style={{ position: "absolute", top: "10px", right: "40px", fontSize: "400px", fontWeight: 400, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.04em", lineHeight: 0.9, display: "inline-block", userSelect: "none", pointerEvents: "none" }}>01</span>
@@ -641,25 +997,21 @@ const Preloader = ({ onComplete }: { onComplete: () => void }) => {
   );
 };
 
-// ===== GOOGLE AUTHENTICATOR TAB (untuk login) =====
-const GoogleAuthenticatorVerifyStep = ({
-  user, secret, onSuccess,
-}: { user: any; secret: string; onSuccess: () => void; }) => {
+// ===== GOOGLE AUTHENTICATOR MODAL =====
+const TwoFactorModal = ({ user, secret, onSuccess, onClose }: { user: any; secret: string; onSuccess: () => void; onClose: () => void }) => {
   const [token, setToken] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [preview, setPreview] = useState("");
   const [countdown, setCountdown] = useState(30);
-  const cardRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (cardRef.current) gsap.fromTo(cardRef.current, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" });
-  }, []);
 
   useEffect(() => {
     if (!secret) return;
     let mounted = true;
-    const tick = async () => { try { const c = await totp(secret); if (mounted) setPreview(c); } catch {} setCountdown(30 - (Math.floor(Date.now() / 1000) % 30)); };
+    const tick = async () => {
+      try { const c = await totp(secret); if (mounted) setPreview(c); } catch {}
+      if (mounted) setCountdown(30 - (Math.floor(Date.now() / 1000) % 30));
+    };
     tick();
     const i = setInterval(tick, 1000);
     return () => { mounted = false; clearInterval(i); };
@@ -676,32 +1028,36 @@ const GoogleAuthenticatorVerifyStep = ({
   };
 
   return (
-    <motion.div ref={cardRef as any} initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-        <h2 style={{ fontSize: "120px", fontWeight: 400, color: BLUE, margin: 0, letterSpacing: "-0.04em", lineHeight: 0.85, fontFamily: FONT_FAMILY }}>2FA</h2>
-        <div style={{ width: "120px", height: "120px", backgroundColor: BLUE, borderRadius: "24px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-          <ShieldLockIcon size={70} color={WHITE} />
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.55)", zIndex: 9500, display: "flex", alignItems: "center", justifyContent: "center", padding: "20px" }}>
+      <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} style={{ backgroundColor: WHITE, borderRadius: "24px", padding: "32px", maxWidth: "480px", width: "100%", fontFamily: FONT_FAMILY }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <div style={{ width: "44px", height: "44px", backgroundColor: BLUE, borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <ShieldLockIcon size={24} color={WHITE} />
+            </div>
+            <h3 style={{ margin: 0, fontSize: "22px", fontWeight: 700, color: BLUE }}>Google Authenticator</h3>
+          </div>
+          <button onClick={onClose} style={{ background: "transparent", border: "none", cursor: "pointer", color: BLUE, fontSize: "22px", fontWeight: 700 }}>×</button>
         </div>
-      </div>
-      <p style={{ fontSize: "16px", color: "#666", margin: 0, fontFamily: FONT_FAMILY }}>Masukkan kode 6 digit dari Google Authenticator untuk <strong>{user?.email}</strong>.</p>
-
-      <div style={{ backgroundColor: BLUE, borderRadius: "20px", padding: "28px 32px", display: "flex", flexDirection: "column", gap: "16px" }}>
-        <div style={{ color: WHITE, fontFamily: FONT_FAMILY, fontSize: "15px", fontWeight: 400, lineHeight: 1.6 }}>
-          <strong style={{ fontWeight: 700 }}>Kenapa perlu verifikasi?</strong> Akun Anda dilindungi 2FA. Buka Google Authenticator di ponsel Anda untuk melihat kode terbaru.
+        <p style={{ fontSize: "14px", color: BLUE, opacity: 0.8, margin: "0 0 16px 0", lineHeight: 1.6 }}>
+          Masukkan kode 6 digit dari Google Authenticator untuk <strong>{user?.email}</strong>.
+        </p>
+        {preview && (
+          <div style={{ backgroundColor: "#F0F4FF", borderRadius: "12px", padding: "14px 16px", marginBottom: "16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div>
+              <div style={{ fontSize: "11px", color: BLUE, opacity: 0.6, fontWeight: 800, textTransform: "uppercase" }}>Kode saat ini (lokal)</div>
+              <div style={{ fontSize: "24px", fontWeight: 800, color: BLUE, letterSpacing: "0.15em" }}>{preview}</div>
+            </div>
+            <div style={{ color: BLUE, fontWeight: 800, fontSize: "13px" }}>{countdown}s</div>
+          </div>
+        )}
+        <input type="text" value={token} onChange={(e) => setToken(e.target.value.replace(/[^\d\s]/g, "").slice(0, 6))} placeholder="123456" maxLength={6} inputMode="numeric" style={{ width: "100%", padding: "14px 16px", borderRadius: "12px", border: `2px solid ${BLUE}`, fontSize: "20px", fontFamily: FONT_FAMILY, outline: "none", color: BLUE, fontWeight: 600, letterSpacing: "0.2em", textAlign: "center", backgroundColor: WHITE, marginBottom: "12px" }} />
+        {error && <div style={{ color: RED, fontSize: "13px", fontWeight: 600, marginBottom: "12px" }}>{error}</div>}
+        <div style={{ display: "flex", gap: "10px" }}>
+          <button onClick={handleVerify} disabled={busy || token.length !== 6} style={{ flex: 1, padding: "12px 18px", backgroundColor: busy || token.length !== 6 ? "#ccc" : BLUE, color: WHITE, border: "none", borderRadius: "10px", fontSize: "14px", fontWeight: 700, cursor: busy || token.length !== 6 ? "not-allowed" : "pointer", fontFamily: FONT_FAMILY }}>{busy ? "Memverifikasi..." : "Verifikasi"}</button>
+          <button onClick={onClose} style={{ padding: "12px 18px", backgroundColor: "transparent", color: BLUE, border: `2px solid ${BLUE}`, borderRadius: "10px", fontSize: "14px", fontWeight: 700, cursor: "pointer", fontFamily: FONT_FAMILY }}>Batal</button>
         </div>
-        {preview && <div style={{ backgroundColor: WHITE, borderRadius: "12px", padding: "14px 16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div><div style={{ fontSize: "11px", color: BLUE, opacity: 0.6, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em" }}>Kode saat ini (lokal)</div><div style={{ fontSize: "28px", fontWeight: 800, color: BLUE, letterSpacing: "0.15em" }}>{preview}</div></div>
-          <div style={{ color: BLUE, fontWeight: 800, fontSize: "14px" }}>{countdown}s</div>
-        </div>}
-      </div>
-
-      <input type="text" value={token} onChange={(e) => setToken(e.target.value.replace(/[^\d\s]/g, "").slice(0, 6))} placeholder="123456" maxLength={6} inputMode="numeric" style={{ width: "100%", padding: "16px 20px", borderRadius: "12px", border: `2px solid ${BLUE}`, fontSize: "20px", fontFamily: FONT_FAMILY, outline: "none", color: BLUE, fontWeight: 400, letterSpacing: "0.15em", textAlign: "center", backgroundColor: WHITE }} />
-      {error && <div style={{ color: RED, fontSize: "14px", fontWeight: 600, fontFamily: FONT_FAMILY }}>{error}</div>}
-
-      <motion.button whileHover={!busy && token.length === 6 ? { scale: 1.02, backgroundColor: BLACK } : {}} whileTap={!busy && token.length === 6 ? { scale: 0.98 } : {}} onClick={handleVerify} disabled={busy || token.length !== 6} style={{ width: "100%", padding: "16px 20px", backgroundColor: busy || token.length !== 6 ? "#ccc" : BLUE, color: WHITE, border: "none", borderRadius: "12px", fontSize: "18px", fontWeight: 600, cursor: busy || token.length !== 6 ? "not-allowed" : "pointer", fontFamily: FONT_FAMILY, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <span>{busy ? "Memverifikasi..." : "Verifikasi"}</span>
-        <NorthEastArrow size={32} color={WHITE} />
-      </motion.button>
+      </motion.div>
     </motion.div>
   );
 };
@@ -717,10 +1073,7 @@ export default function SignInPage() {
   const [user, setUser] = useState<any>(null);
   const [error, setError] = useState("");
   const [showMain, setShowMain] = useState(false);
-  const [navbarShifted, setNavbarShifted] = useState(false);
   const [sayHeyOpen, setSayHeyOpen] = useState(false);
-  const [sayHeyUnreadCount, setSayHeyUnreadCount] = useState(0);
-  const [locationText, setLocationText] = useState<string>("");
   const [showPinScreen, setShowPinScreen] = useState(false);
   const [pin, setPin] = useState("");
   const [pinConfirm, setPinConfirm] = useState("");
@@ -729,22 +1082,29 @@ export default function SignInPage() {
   const [tempUser, setTempUser] = useState<any>(null);
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [hasPasskey, setHasPasskey] = useState(false);
-  const [showPasskeyPrompt, setShowPasskeyPrompt] = useState(false);
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const [twoFactorSecret, setTwoFactorSecret] = useState("");
-  const [showTwoFactorStep, setShowTwoFactorStep] = useState(false);
+  const [showTwoFactorModal, setShowTwoFactorModal] = useState(false);
+  const [showPasskeyHelp, setShowPasskeyHelp] = useState(false);
   const [passkeyBusy, setPasskeyBusy] = useState(false);
   const [passkeyError, setPasskeyError] = useState("");
   const router = useRouter();
 
-  useEffect(() => { setIsMounted(true); }, []);
+  useEffect(() => setIsMounted(true), []);
   const handlePreloaderComplete = () => setShowMain(true);
-  useEffect(() => { if (!showMain) return; const check = () => setIsMobile(window.innerWidth < 768); check(); window.addEventListener("resize", check); return () => window.removeEventListener("resize", check); }, [showMain]);
+
+  useEffect(() => {
+    if (!showMain) return;
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, [showMain]);
 
   // AUTH LISTENER
   useEffect(() => {
     if (!showMain || !auth) return;
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+    const unsub = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         try {
           const idToken = await currentUser.getIdToken();
@@ -768,12 +1128,21 @@ export default function SignInPage() {
             setUser(null);
           }
         } catch (e) { console.error("Auth state error:", e); }
-      } else { setUser(null); setShowPinScreen(false); setTempUser(null); setShowTwoFactorStep(false); setShowPasskeyPrompt(false); }
+      } else {
+        setUser(null); setShowPinScreen(false); setTempUser(null);
+        setShowTwoFactorModal(false); setShowPasskeyHelp(false);
+      }
     });
-    return () => unsubscribe();
+    return () => unsub();
   }, [showMain]);
 
-  // PIN SUBMIT
+  const finishLogin = () => {
+    setUser(auth?.currentUser || null);
+    setShowPinScreen(false);
+    setShowTwoFactorModal(false);
+    router.push("/");
+  };
+
   const handlePinSubmit = async () => {
     if (!auth?.currentUser) { setPinError("Sesi tidak ditemukan."); return; }
     const idToken = await auth.currentUser.getIdToken();
@@ -783,20 +1152,16 @@ export default function SignInPage() {
       setPinError("");
       const result = await apiRequest("/auth/save-pin", { method: "POST", body: JSON.stringify({ idToken, pin }) });
       if (!result.success) { setPinError(result.error || "Gagal menyimpan PIN"); return; }
-      // Jika 2FA aktif, verifikasi dulu
-      if (twoFactorEnabled && twoFactorSecret) { setShowTwoFactorStep(true); return; }
-      setUser(auth.currentUser); setShowPinScreen(false); router.push("/");
+      finishLogin();
     } else {
       if (pin.length !== 6) { setPinError("PIN harus 6 digit"); return; }
       setPinError("");
       const result = await apiRequest("/auth/verify-pin", { method: "POST", body: JSON.stringify({ idToken, pin }) });
       if (!result.success) { setPinError(result.error || "PIN salah"); return; }
-      if (twoFactorEnabled && twoFactorSecret) { setShowTwoFactorStep(true); return; }
-      setUser(auth.currentUser); setShowPinScreen(false); router.push("/");
+      finishLogin();
     }
   };
 
-  // PASSKEY LOGIN
   const handlePasskeyLogin = async () => {
     if (!supportsWebAuthn()) { setPasskeyError("Browser tidak mendukung passkey."); return; }
     if (!tempUser) { setPasskeyError("Sesi tidak ditemukan."); return; }
@@ -811,7 +1176,7 @@ export default function SignInPage() {
           if (Array.isArray(pk)) credIds = pk.map((p: any) => p.credentialId);
         }
       }
-      if (credIds.length === 0) { setPasskeyError("Tidak ada passkey terdaftar untuk akun ini."); setPasskeyBusy(false); return; }
+      if (credIds.length === 0) { setPasskeyError("Tidak ada passkey terdaftar."); setPasskeyBusy(false); return; }
       const challenge = randomChallenge(32);
       const publicKey: PublicKeyCredentialRequestOptions = {
         challenge,
@@ -822,12 +1187,10 @@ export default function SignInPage() {
       };
       const assertion = (await navigator.credentials.get({ publicKey })) as PublicKeyCredential | null;
       if (!assertion) { setPasskeyError("Passkey dibatalkan."); setPasskeyBusy(false); return; }
-      // Verifikasi lokal: cocokkan credential ID
       const usedId = bufToB64Url(assertion.rawId);
       if (!credIds.includes(usedId)) { setPasskeyError("Passkey tidak dikenali."); setPasskeyBusy(false); return; }
-      setShowPasskeyPrompt(false);
-      if (twoFactorEnabled && twoFactorSecret) { setShowTwoFactorStep(true); return; }
-      setUser(tempUser); setShowPinScreen(false); router.push("/");
+      setShowPasskeyHelp(false);
+      finishLogin();
     } catch (e: any) {
       console.error(e);
       const msg = e?.message || "";
@@ -844,6 +1207,7 @@ export default function SignInPage() {
     catch (err: any) { setError(err.message || "Login Google gagal"); }
     finally { setLoading(false); }
   };
+
   const handleGitHubLogin = async () => {
     if (!auth) return;
     if (!agreeTerms) { setError("Anda harus menyetujui Syarat & Ketentuan terlebih dahulu."); return; }
@@ -852,6 +1216,7 @@ export default function SignInPage() {
     catch (err: any) { setError(err.message || "Login GitHub gagal"); }
     finally { setLoading(false); }
   };
+
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!auth) return;
@@ -859,73 +1224,102 @@ export default function SignInPage() {
     setLoading(true); setError("");
     try { await signInWithEmailAndPassword(auth, email, password); }
     catch (err: any) {
-      const map: Record<string, string> = { "auth/invalid-email": "Email tidak valid", "auth/user-not-found": "Akun tidak ditemukan", "auth/wrong-password": "Password salah", "auth/invalid-credential": "Email atau password salah" };
+      const map: Record<string, string> = {
+        "auth/invalid-email": "Email tidak valid",
+        "auth/user-not-found": "Akun tidak ditemukan",
+        "auth/wrong-password": "Password salah",
+        "auth/invalid-credential": "Email atau password salah",
+      };
       setError(map[err.code] || "Login gagal");
     } finally { setLoading(false); }
   };
 
   if (!isMounted || !showMain) return <Preloader onComplete={handlePreloaderComplete} />;
 
-  const twoFactorStepDone = () => {
-    setShowTwoFactorStep(false);
-    setUser(auth?.currentUser || null);
-    setShowPinScreen(false);
-    router.push("/");
-  };
-
   return (
     <div style={{ minHeight: "100vh", backgroundColor: "#ffffff", fontFamily: FONT_FAMILY, position: "relative", overflow: "hidden" }}>
-      <TopBanner onFaridClick={() => {}} />
+      <TopBanner />
+
       <div style={{ position: "fixed", top: "44px", left: 0, width: "200px", height: "120px", pointerEvents: "none", zIndex: 8500, backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)", maskImage: "linear-gradient(to right, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%)", WebkitMaskImage: "linear-gradient(to right, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%)" }} />
       <div style={{ position: "fixed", top: "44px", right: 0, width: "200px", height: "120px", pointerEvents: "none", zIndex: 8500, backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)", maskImage: "linear-gradient(to left, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%)", WebkitMaskImage: "linear-gradient(to left, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%)" }} />
 
       <div style={{ paddingTop: "44px" }}>
-        <LeftNavbar shifted={navbarShifted} />
-        <RightNavbar user={user} auth={auth} db={null} onSayHeyToggle={() => setSayHeyOpen((p) => !p)} sayHeyOpen={sayHeyOpen} sayHeyUnreadCount={sayHeyUnreadCount} locationText={locationText} />
+        <LeftNavbar shifted={false} />
+        <RightNavbar user={user} auth={auth} onSayHeyToggle={() => setSayHeyOpen((p) => !p)} sayHeyOpen={sayHeyOpen} sayHeyUnreadCount={0} locationText="" />
 
-        <div style={{ marginTop: "140px", padding: "0 40px 80px", width: "100%", maxWidth: "1400px", marginLeft: "auto", marginRight: "auto", display: "flex", flexDirection: isMobile ? "column" : "row", gap: isMobile ? "40px" : "80px", justifyContent: "center", minHeight: "calc(100vh - 260px)" }}>
+        <div style={{ marginTop: "160px", padding: "0 40px 80px", width: "100%", maxWidth: "1400px", marginLeft: "auto", marginRight: "auto", display: "flex", flexDirection: isMobile ? "column" : "row", gap: isMobile ? "40px" : "80px", justifyContent: "center", minHeight: "calc(100vh - 260px)" }}>
           <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6 }} style={{ flex: isMobile ? "1" : "0 0 55%", maxWidth: isMobile ? "100%" : "900px" }}>
             <AnimatePresence mode="wait">
-              {showTwoFactorStep ? (
-                <GoogleAuthenticatorVerifyStep key="2fa" user={tempUser} secret={twoFactorSecret} onSuccess={twoFactorStepDone} />
-              ) : showPinScreen ? (
+              {showPinScreen ? (
                 <motion.div key="pin" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -30 }} style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
-                  {/* PIN TITLE - biru tanpa tebal */}
                   <div style={{ display: "flex", alignItems: "center", gap: "24px", marginBottom: "30px", flexWrap: "wrap", justifyContent: "center" }}>
-                    <h2 style={{ fontSize: isMobile ? "80px" : "250px", fontWeight: 400, color: BLUE, margin: 0, fontFamily: FONT_FAMILY, letterSpacing: "-0.05em", lineHeight: 0.85, whiteSpace: "nowrap" }}>
-                      {isNewPin ? "PIN" : "PIN"}
-                    </h2>
+                    <h2 style={{ fontSize: isMobile ? "80px" : "250px", fontWeight: 400, color: BLUE, margin: 0, fontFamily: FONT_FAMILY, letterSpacing: "-0.05em", lineHeight: 0.85, whiteSpace: "nowrap" }}>PIN</h2>
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: isMobile ? "80px" : "180px", height: isMobile ? "80px" : "180px", backgroundColor: BLUE, borderRadius: "28px", flexShrink: 0 }}>
                       <NorthEastArrow size={isMobile ? 50 : 110} color={WHITE} />
                     </div>
                   </div>
 
-                  {/* PASSKEY PROMPT */}
-                  {hasPasskey && !isNewPin && (
-                    <div style={{ marginBottom: "24px", backgroundColor: BLUE, borderRadius: "16px", padding: "20px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px", flexWrap: "wrap", width: "100%", maxWidth: "700px" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                        <KeyIcon size={28} color={WHITE} />
-                        <div>
-                          <div style={{ color: WHITE, fontWeight: 700, fontSize: "15px", fontFamily: FONT_FAMILY }}>Login dengan Passkey</div>
-                          <div style={{ color: WHITE, fontSize: "12px", opacity: 0.85, fontFamily: FONT_FAMILY }}>Gunakan biometrik / PIN perangkat</div>
-                        </div>
-                      </div>
-                      <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={handlePasskeyLogin} disabled={passkeyBusy} style={{ padding: "12px 22px", backgroundColor: WHITE, color: BLUE, border: "none", borderRadius: "10px", fontSize: "13px", fontWeight: 800, cursor: passkeyBusy ? "not-allowed" : "pointer", fontFamily: FONT_FAMILY, display: "flex", alignItems: "center", gap: "8px", letterSpacing: "0.02em" }}>
-                        {passkeyBusy ? "Memproses..." : "Pakai Passkey"}
-                        <NorthEastArrow size={16} color={BLUE} />
-                      </motion.button>
-                    </div>
-                  )}
-                  {passkeyError && <div style={{ color: RED, fontSize: "14px", fontWeight: 600, marginBottom: "16px", fontFamily: FONT_FAMILY, textAlign: "center" }}>{passkeyError}</div>}
-
                   <PinInput value={pin} onChange={setPin} isNew={isNewPin} confirmValue={isNewPin ? pinConfirm : undefined} onConfirmChange={isNewPin ? setPinConfirm : undefined} onComplete={() => { if (!isNewPin && pin.length === 6) handlePinSubmit(); }} />
 
-                  {pinError && <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} style={{ color: BLUE, fontSize: "16px", marginTop: "20px", fontFamily: FONT_FAMILY, fontWeight: 600, textAlign: "center" }}>{pinError}</motion.div>}
+                  {pinError && (
+                    <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} style={{ color: BLUE, fontSize: "16px", marginTop: "20px", fontFamily: FONT_FAMILY, fontWeight: 600, textAlign: "center" }}>
+                      {pinError}
+                    </motion.div>
+                  )}
 
                   <div style={{ display: "flex", gap: "16px", marginTop: "40px" }}>
-                    <motion.button whileHover={{ scale: 1.05, backgroundColor: BLACK }} whileTap={{ scale: 0.95 }} onClick={() => { setPin(""); setPinConfirm(""); setPinError(""); }} style={{ padding: "14px 32px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "12px", fontSize: "16px", cursor: "pointer", fontFamily: FONT_FAMILY, fontWeight: 700, display: "flex", alignItems: "center", gap: "10px" }}>Reset<NorthEastArrow size={22} color={WHITE} /></motion.button>
-                    <motion.button whileHover={{ scale: 1.05, backgroundColor: BLACK }} whileTap={{ scale: 0.95 }} onClick={handlePinSubmit} style={{ padding: "14px 32px", backgroundColor: BLUE, color: "#fff", border: "none", borderRadius: "12px", fontSize: "16px", cursor: "pointer", fontFamily: FONT_FAMILY, fontWeight: 700, display: "flex", alignItems: "center", gap: "10px" }}>{isNewPin ? "Simpan PIN" : "Verifikasi"}<NorthEastArrow size={22} color={WHITE} /></motion.button>
+                    <motion.button whileHover={{ scale: 1.05, backgroundColor: BLACK }} whileTap={{ scale: 0.95 }} onClick={() => { setPin(""); setPinConfirm(""); setPinError(""); }} style={{ padding: "14px 32px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "12px", fontSize: "16px", cursor: "pointer", fontFamily: FONT_FAMILY, fontWeight: 700, display: "flex", alignItems: "center", gap: "10px" }}>
+                      Reset
+                      <NorthEastArrow size={22} color={WHITE} />
+                    </motion.button>
+                    <motion.button whileHover={{ scale: 1.05, backgroundColor: BLACK }} whileTap={{ scale: 0.95 }} onClick={handlePinSubmit} style={{ padding: "14px 32px", backgroundColor: BLUE, color: "#fff", border: "none", borderRadius: "12px", fontSize: "16px", cursor: "pointer", fontFamily: FONT_FAMILY, fontWeight: 700, display: "flex", alignItems: "center", gap: "10px" }}>
+                      {isNewPin ? "Simpan PIN" : "Verifikasi"}
+                      <NorthEastArrow size={22} color={WHITE} />
+                    </motion.button>
                   </div>
+
+                  {/* KESULITAN LOGIN - BANTUAN */}
+                  {!isNewPin && (hasPasskey || twoFactorEnabled) && (
+                    <div style={{ marginTop: "40px", paddingTop: "24px", borderTop: "1px solid #e8e8e8", width: "100%", maxWidth: "500px", display: "flex", flexDirection: "column", gap: "12px" }}>
+                      <div style={{ textAlign: "center", color: BLUE, fontSize: "13px", fontWeight: 600, opacity: 0.7, textTransform: "uppercase", letterSpacing: "0.1em" }}>
+                        Kesulitan Login? Bantuan
+                      </div>
+                      {hasPasskey && (
+                        <motion.button whileHover={{ scale: 1.02, backgroundColor: BLACK }} whileTap={{ scale: 0.98 }} onClick={() => setShowPasskeyHelp(true)} disabled={passkeyBusy} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 18px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "12px", fontSize: "14px", fontWeight: 700, cursor: passkeyBusy ? "not-allowed" : "pointer", fontFamily: FONT_FAMILY }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                            <KeyIcon size={20} color={WHITE} />
+                            <span>Login dengan Passkey (Biometrik)</span>
+                          </div>
+                          <NorthEastArrow size={18} color={WHITE} />
+                        </motion.button>
+                      )}
+                      {twoFactorEnabled && (
+                        <motion.button whileHover={{ scale: 1.02, backgroundColor: BLACK }} whileTap={{ scale: 0.98 }} onClick={() => setShowTwoFactorModal(true)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 18px", backgroundColor: "transparent", color: BLUE, border: `2px solid ${BLUE}`, borderRadius: "12px", fontSize: "14px", fontWeight: 700, cursor: "pointer", fontFamily: FONT_FAMILY }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                            <ShieldLockIcon size={20} color={BLUE} />
+                            <span>Verifikasi dengan Google Authenticator</span>
+                          </div>
+                          <NorthEastArrow size={18} color={BLUE} />
+                        </motion.button>
+                      )}
+                    </div>
+                  )}
+
+                  {showPasskeyHelp && hasPasskey && (
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ marginTop: "20px", padding: "16px 20px", backgroundColor: BLUE, borderRadius: "14px", color: WHITE, width: "100%", maxWidth: "500px", fontFamily: FONT_FAMILY }}>
+                      <div style={{ fontSize: "14px", fontWeight: 700, marginBottom: "6px" }}>Verifikasi Passkey</div>
+                      <div style={{ fontSize: "12px", opacity: 0.9, lineHeight: 1.5, marginBottom: "12px" }}>Gunakan biometrik / PIN perangkat untuk memverifikasi identitas Anda.</div>
+                      {passkeyError && <div style={{ color: "#FECACA", fontSize: "12px", fontWeight: 600, marginBottom: "8px" }}>{passkeyError}</div>}
+                      <div style={{ display: "flex", gap: "8px" }}>
+                        <button onClick={handlePasskeyLogin} disabled={passkeyBusy} style={{ flex: 1, padding: "10px 16px", backgroundColor: WHITE, color: BLUE, border: "none", borderRadius: "8px", fontSize: "13px", fontWeight: 800, cursor: passkeyBusy ? "not-allowed" : "pointer", fontFamily: FONT_FAMILY }}>
+                          {passkeyBusy ? "Memproses..." : "Verifikasi Sekarang"}
+                        </button>
+                        <button onClick={() => { setShowPasskeyHelp(false); setPasskeyError(""); }} style={{ padding: "10px 16px", backgroundColor: "transparent", color: WHITE, border: `1.5px solid ${WHITE}`, borderRadius: "8px", fontSize: "13px", fontWeight: 700, cursor: "pointer", fontFamily: FONT_FAMILY }}>
+                          Batal
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
                 </motion.div>
               ) : !user ? (
                 <motion.div key="signin" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
@@ -936,12 +1330,22 @@ export default function SignInPage() {
                     </div>
                   </div>
                   <p style={{ fontSize: "18px", color: "#666", marginBottom: "32px", fontFamily: FONT_FAMILY }}>Welcome back! Sign in to your account</p>
-                  {error && (<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ color: BLUE, fontSize: "15px", marginBottom: "16px", fontFamily: FONT_FAMILY }}>{error}</motion.div>)}
+
+                  {error && (
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ color: BLUE, fontSize: "15px", marginBottom: "16px", fontFamily: FONT_FAMILY }}>
+                      {error}
+                    </motion.div>
+                  )}
 
                   <div style={{ display: "flex", flexDirection: "column", gap: "16px", marginBottom: "32px" }}>
                     <motion.button whileHover={{ scale: 1.02, backgroundColor: BLACK }} whileTap={{ scale: 0.98 }} onClick={handleGoogleLogin} disabled={loading} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", padding: "14px 20px", border: "none", borderRadius: "12px", background: BLUE, cursor: loading ? "not-allowed" : "pointer", width: "100%", fontSize: "16px", color: WHITE, fontFamily: FONT_FAMILY, fontWeight: 600 }}>
                       <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                        <svg width="24" height="24" viewBox="0 0 24 24"><path fill="#ffffff" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" /><path fill="#ffffff" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" /><path fill="#ffffff" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" /><path fill="#ffffff" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" /></svg>
+                        <svg width="24" height="24" viewBox="0 0 24 24">
+                          <path fill="#ffffff" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                          <path fill="#ffffff" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                          <path fill="#ffffff" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                          <path fill="#ffffff" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                        </svg>
                         <span>Continue with Google</span>
                       </div>
                       <NorthEastArrow size={28} color={WHITE} />
@@ -949,25 +1353,42 @@ export default function SignInPage() {
 
                     <motion.button whileHover={{ scale: 1.02, backgroundColor: BLACK }} whileTap={{ scale: 0.98 }} onClick={handleGitHubLogin} disabled={loading} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", padding: "14px 20px", border: "none", borderRadius: "12px", background: BLUE, cursor: loading ? "not-allowed" : "pointer", width: "100%", fontSize: "16px", color: WHITE, fontFamily: FONT_FAMILY, fontWeight: 600 }}>
                       <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                        <svg width="24" height="24" viewBox="0 0 24 24"><path fill="#ffffff" d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z" /></svg>
+                        <svg width="24" height="24" viewBox="0 0 24 24">
+                          <path fill="#ffffff" d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z" />
+                        </svg>
                         <span>Continue with GitHub</span>
                       </div>
                       <NorthEastArrow size={28} color={WHITE} />
                     </motion.button>
                   </div>
 
-                  <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "24px" }}><div style={{ flex: 1, height: "1px", backgroundColor: "#e8e8e8" }} /><span style={{ color: "#999", fontSize: "14px", fontFamily: FONT_FAMILY }}>or</span><div style={{ flex: 1, height: "1px", backgroundColor: "#e8e8e8" }} /></div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "24px" }}>
+                    <div style={{ flex: 1, height: "1px", backgroundColor: "#e8e8e8" }} />
+                    <span style={{ color: "#999", fontSize: "14px", fontFamily: FONT_FAMILY }}>or</span>
+                    <div style={{ flex: 1, height: "1px", backgroundColor: "#e8e8e8" }} />
+                  </div>
 
                   <form onSubmit={handleEmailLogin} style={{ width: "100%" }}>
                     <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required style={{ width: "100%", padding: "16px 20px", border: "none", borderRadius: "12px", fontSize: "16px", marginBottom: "16px", outline: "none", fontFamily: FONT_FAMILY, backgroundColor: BLUE, color: WHITE }} />
                     <div style={{ position: "relative", marginBottom: "24px" }}>
                       <input type={showPassword ? "text" : "password"} placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required style={{ width: "100%", padding: "16px 50px 16px 20px", border: "none", borderRadius: "12px", fontSize: "16px", outline: "none", fontFamily: FONT_FAMILY, backgroundColor: BLUE, color: WHITE }} />
-                      <button type="button" onClick={() => setShowPassword(!showPassword)} style={{ position: "absolute", right: "14px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: WHITE }}><EyeIcon open={showPassword} color={WHITE} /></button>
+                      <button type="button" onClick={() => setShowPassword(!showPassword)} style={{ position: "absolute", right: "14px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: WHITE }}>
+                        <EyeIcon open={showPassword} color={WHITE} />
+                      </button>
                     </div>
 
                     <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "24px", gap: "12px", flexWrap: "wrap" }}>
-                      <button type="button" onClick={() => router.push("/forgot-password")} style={{ background: "none", border: "none", color: BLUE, fontSize: "15px", cursor: "pointer", textDecoration: "underline", fontFamily: FONT_FAMILY, display: "inline-flex", alignItems: "center", gap: "6px" }}><NorthWestArrow size={20} color={BLUE} />Lupa password?</button>
-                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}><span style={{ color: "#666", fontSize: "15px", fontFamily: FONT_FAMILY }}>Belum punya akun?</span><button type="button" onClick={() => router.push("/signup")} style={{ background: "none", border: "none", color: BLUE, fontSize: "15px", fontWeight: 500, cursor: "pointer", textDecoration: "underline", fontFamily: FONT_FAMILY, display: "inline-flex", alignItems: "center", gap: "6px" }}>Sign up<NorthEastArrow size={20} color={BLUE} /></button></div>
+                      <button type="button" onClick={() => router.push("/forgot-password")} style={{ background: "none", border: "none", color: BLUE, fontSize: "15px", cursor: "pointer", textDecoration: "underline", fontFamily: FONT_FAMILY, display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                        <NorthWestArrow size={20} color={BLUE} />
+                        Lupa password?
+                      </button>
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <span style={{ color: "#666", fontSize: "15px", fontFamily: FONT_FAMILY }}>Belum punya akun?</span>
+                        <button type="button" onClick={() => router.push("/signup")} style={{ background: "none", border: "none", color: BLUE, fontSize: "15px", fontWeight: 500, cursor: "pointer", textDecoration: "underline", fontFamily: FONT_FAMILY, display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                          Sign up
+                          <NorthEastArrow size={20} color={BLUE} />
+                        </button>
+                      </div>
                     </div>
 
                     <TermsAgreementBox agreed={agreeTerms} onToggle={() => setAgreeTerms(!agreeTerms)} />
@@ -979,7 +1400,11 @@ export default function SignInPage() {
                   </form>
 
                   <div style={{ textAlign: "center", marginTop: "30px", paddingTop: "20px", borderTop: "1px solid #f0f0f0" }}>
-                    <Link href="/pusat-bantuan" style={{ color: BLUE, fontSize: "15px", display: "inline-flex", alignItems: "center", gap: "6px", textDecoration: "none", fontFamily: FONT_FAMILY }}><HelpDeskIcon size={18} color={BLUE} /><span>Pusat Bantuan</span><NorthEastArrow size={20} color={BLUE} /></Link>
+                    <Link href="/pusat-bantuan" style={{ color: BLUE, fontSize: "15px", display: "inline-flex", alignItems: "center", gap: "6px", textDecoration: "none", fontFamily: FONT_FAMILY }}>
+                      <HelpDeskIcon size={18} color={BLUE} />
+                      <span>Pusat Bantuan</span>
+                      <NorthEastArrow size={20} color={BLUE} />
+                    </Link>
                   </div>
                 </motion.div>
               ) : null}
@@ -996,14 +1421,60 @@ export default function SignInPage() {
         <FooterCard />
       </div>
 
+      <AnimatePresence>
+        {showTwoFactorModal && twoFactorEnabled && (
+          <TwoFactorModal user={tempUser} secret={twoFactorSecret} onSuccess={() => { setShowTwoFactorModal(false); finishLogin(); }} onClose={() => setShowTwoFactorModal(false)} />
+        )}
+      </AnimatePresence>
+
       <style jsx global>{`
-        html { overflow: auto !important; -ms-overflow-style: none !important; scrollbar-width: none !important; height: 100% !important; }
-        html::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
-        body { overflow: auto !important; -ms-overflow-style: none !important; scrollbar-width: none !important; margin: 0; padding: 0; background-color: #ffffff !important; min-height: 100% !important; height: auto !important; }
-        body::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
-        * { background-color: transparent; }
-        input::placeholder { color: rgba(255, 255, 255, 0.75) !important; }
-        .pin-box { transition: box-shadow 0.2s ease; }
+        html {
+          overflow: auto !important;
+          -ms-overflow-style: none !important;
+          scrollbar-width: none !important;
+          height: 100% !important;
+        }
+        html::-webkit-scrollbar {
+          display: none !important;
+          width: 0 !important;
+          height: 0 !important;
+        }
+        body {
+          overflow: auto !important;
+          -ms-overflow-style: none !important;
+          scrollbar-width: none !important;
+          margin: 0;
+          padding: 0;
+          background-color: #ffffff !important;
+          min-height: 100% !important;
+          height: auto !important;
+        }
+        body::-webkit-scrollbar {
+          display: none !important;
+          width: 0 !important;
+          height: 0 !important;
+        }
+        * {
+          background-color: transparent;
+        }
+        input::placeholder {
+          color: rgba(255, 255, 255, 0.75) !important;
+        }
+        .pin-box {
+          transition: box-shadow 0.2s ease;
+        }
+        @keyframes verifiedPop {
+          0% { transform: scale(0.3) rotate(-25deg); opacity: 0; }
+          20% { transform: scale(1) rotate(0deg); opacity: 1; }
+          40% { transform: scale(1.12) rotate(0deg); }
+          60% { transform: scale(1) rotate(0deg); }
+          80% { transform: scale(1.18) rotate(0deg); }
+          100% { transform: scale(1) rotate(0deg); }
+        }
+        @keyframes drawCheck {
+          0% { stroke-dashoffset: 100; opacity: 0; }
+          100% { stroke-dashoffset: 0; opacity: 1; }
+        }
       `}</style>
     </div>
   );
