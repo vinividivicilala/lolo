@@ -14,11 +14,7 @@ import {
 import { auth } from "@/lib/firebase";
 import { apiRequest } from "@/lib/apiClient";
 import gsap from "gsap";
-import {
-  getFirestore,
-  doc,
-  getDoc,
-} from "firebase/firestore";
+import { getFirestore, doc, getDoc } from "firebase/firestore";
 
 // ===== FIRESTORE =====
 let _db: any = null;
@@ -37,7 +33,6 @@ const BLACK = "#000000";
 const RED = "#DC2626";
 const GREEN = "#4ADE80";
 const SECURITY_ISSUER = "Menuru Security Center";
-const RP_NAME = "Menuru";
 
 // ===== ICON =====
 const NorthEastArrow = ({ size = 24, color = "currentColor" }: { size?: number; color?: string }) => (
@@ -73,6 +68,14 @@ const HelpDeskIcon = ({ size = 24, color = BLUE }: { size?: number; color?: stri
     <path d="M3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12V15" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
     <path d="M5 15C5 13.8954 5.89543 13 7 13H8C9.10457 13 10 13.8954 10 15V17C10 18.1046 9.10457 19 8 19H7C5.89543 19 5 18.1046 5 17V15Z" stroke={color} strokeWidth="1.5" />
     <path d="M19 15C19 13.8954 18.1046 13 17 13H16C14.8954 13 14 13.8954 14 15V17C14 18.1046 14.8954 19 16 19H17C18.1046 19 19 18.1046 19 17V15Z" stroke={color} strokeWidth="1.5" />
+  </svg>
+);
+
+const HelpIcon = ({ size = 18, color = BLUE }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <circle cx="12" cy="12" r="10" stroke={color} strokeWidth="2" />
+    <path d="M9.09 9C9.3251 8.33167 9.78915 7.76811 10.4 7.40913C11.0108 7.05016 11.7289 6.91894 12.4272 7.03871C13.1255 7.15849 13.7588 7.52152 14.2151 8.06353C14.6713 8.60553 14.9211 9.29152 14.92 10C14.92 12 11.92 13 11.92 13" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <circle cx="12" cy="17" r="1" fill={color} />
   </svg>
 );
 
@@ -224,13 +227,7 @@ const NavbarButton = ({
 
   return (
     <div style={{ position: "relative" }} onMouseEnter={handleEnter} onMouseLeave={handleLeave}>
-      <div style={{
-        display: "flex", alignItems: "center", gap: "10px", padding: "10px 16px",
-        backgroundColor: open ? buttonHoverColor : buttonColor, backdropFilter: "blur(20px)",
-        borderRadius: "10px", border: "1px solid rgba(255,255,255,0.18)",
-        boxShadow: open ? "0 8px 24px rgba(0,0,0,0.35)" : `0 8px 24px ${buttonColor}55`,
-        transition: "background-color 0.25s ease", cursor: "pointer", position: "relative", zIndex: 2,
-      }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 16px", backgroundColor: open ? buttonHoverColor : buttonColor, backdropFilter: "blur(20px)", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.18)", boxShadow: open ? "0 8px 24px rgba(0,0,0,0.35)" : `0 8px 24px ${buttonColor}55`, transition: "background-color 0.25s ease", cursor: "pointer", position: "relative", zIndex: 2 }}>
         <span style={{ color: open ? labelTextHoverColor : labelTextColor, fontSize: "14px", fontWeight: 600, letterSpacing: "0.02em", fontFamily: FONT_FAMILY, whiteSpace: "nowrap" }}>{label}</span>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "22px", height: "22px", backgroundColor: open ? iconButtonHoverColor : iconButtonColor, borderRadius: "6px" }}>
           {iconComponent ? (
@@ -247,13 +244,7 @@ const NavbarButton = ({
       </div>
 
       {open && (
-        <div ref={panelRef} onMouseEnter={handleEnter} onMouseLeave={handleLeave} style={{
-          position: "absolute", top: "calc(100% + 10px)", left: "0px", width: `${bigPanelWidth}px`,
-          minHeight: `${bigPanelHeight}px`, backgroundColor: panelColor, backdropFilter: "blur(24px)",
-          borderRadius: "10px", border: "1px solid rgba(255,255,255,0.2)",
-          boxShadow: `0 8px 32px ${panelColor}55`, zIndex: 1, fontFamily: FONT_FAMILY, color: titleTextColor,
-          padding: "22px 26px", display: "flex", gap: "20px", alignItems: "flex-start",
-        }}>
+        <div ref={panelRef} onMouseEnter={handleEnter} onMouseLeave={handleLeave} style={{ position: "absolute", top: "calc(100% + 10px)", left: "0px", width: `${bigPanelWidth}px`, minHeight: `${bigPanelHeight}px`, backgroundColor: panelColor, backdropFilter: "blur(24px)", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.2)", boxShadow: `0 8px 32px ${panelColor}55`, zIndex: 1, fontFamily: FONT_FAMILY, color: titleTextColor, padding: "22px 26px", display: "flex", gap: "20px", alignItems: "flex-start" }}>
           <div style={{ flex: "1 1 0", minWidth: 0, display: "flex", flexDirection: "column", gap: "12px" }}>
             {isResources ? (
               <>
@@ -314,7 +305,7 @@ const NavbarButton = ({
 const LeftNavbar = ({ shifted }: { shifted: boolean }) => (
   <div style={{ position: "fixed", top: "64px", left: shifted ? "340px" : "60px", zIndex: 9000, display: "flex", alignItems: "center", gap: "8px", fontFamily: FONT_FAMILY, transition: "left 0.6s cubic-bezier(0.65, 0, 0.35, 1)", willChange: "left" }}>
     <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "12px", marginRight: "16px" }}>
-      <img src="/images/nop.jpg" alt="Menuru" style={{ height: "60px", width: "auto", maxWidth: "none", objectFit: "contain", display: "block", flexShrink: 0, mixBlendMode: "multiply" }} />
+      <img src="/images/gfssa.jpg" alt="Menuru" style={{ height: "60px", width: "auto", maxWidth: "none", objectFit: "contain", display: "block", flexShrink: 0, mixBlendMode: "multiply" }} />
       <span style={{ color: BLUE, fontSize: "60px", fontWeight: 700, letterSpacing: "-0.03em", fontFamily: FONT_FAMILY, lineHeight: 1, whiteSpace: "nowrap" }}>Menuru</span>
     </Link>
     <NavbarButton label="Teams" panelTitle="Trust" panelDescription="Keamanan dan privasi Anda adalah prioritas kami dengan enkripsi end-to-end." panelImage="/images/p0l.jpg" panelRightTitle="Why Trust Us" panelRightDescription="Sistem kami dipantau 24/7 untuk melindungi data Anda." iconType="trust" bigPanelWidth={850} bigPanelHeight={260} />
@@ -410,7 +401,7 @@ const RightNavbar = ({ user, auth, onSayHeyToggle, sayHeyOpen, sayHeyUnreadCount
   );
 };
 
-// ===== SAY HEY SECTION =====
+// ===== SAY HEY =====
 const SayHeySection = ({ user, onClose }: { user: any; onClose: () => void }) => {
   const [messageText, setMessageText] = useState("");
   const [messages, setMessages] = useState<{ id: string; sender: string; text: string; time: string }[]>([]);
@@ -442,7 +433,6 @@ const SayHeySection = ({ user, onClose }: { user: any; onClose: () => void }) =>
           <NorthEastArrow size={20} color={BLUE} />
         </button>
       </div>
-
       {!user ? (
         <div style={{ backgroundColor: "rgba(255,255,255,0.1)", borderRadius: "16px", padding: "40px", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: "16px" }}>
           <SayHeyIcon size={64} color={WHITE} />
@@ -484,7 +474,7 @@ const SayHeySection = ({ user, onClose }: { user: any; onClose: () => void }) =>
   );
 };
 
-// ===== TOTP =====
+// ===== TOTP HELPERS =====
 const BASE32 = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
 
 function base32Encode(bytes: Uint8Array): string {
@@ -516,13 +506,6 @@ function base32Decode(input: string): Uint8Array {
     }
   }
   return new Uint8Array(b);
-}
-
-function generateSecret(len = 20): string {
-  const r = new Uint8Array(len);
-  if (typeof window !== "undefined" && window.crypto) window.crypto.getRandomValues(r);
-  else for (let i = 0; i < len; i++) r[i] = Math.floor(Math.random() * 256);
-  return base32Encode(r);
 }
 
 async function hotp(secret: string, counter: number, digits = 6): Promise<string> {
@@ -588,7 +571,7 @@ function supportsWebAuthn(): boolean {
   return !!(window.PublicKeyCredential && navigator.credentials);
 }
 
-// ===== PIN INPUT (BORDER BIRU, NO BG, NO GREEN, NO SKEW) =====
+// ===== PIN INPUT (BG BIRU, TEKS PUTIH, GSAP + FRAMER NORMAL) =====
 const PinInput = ({
   value, onChange, onComplete, isNew, confirmValue, onConfirmChange,
 }: {
@@ -607,7 +590,7 @@ const PinInput = ({
     if (!containerRef.current) return;
     const boxes = containerRef.current.querySelectorAll(".pin-box");
     if (!boxes.length) return;
-    gsap.fromTo(boxes, { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, stagger: 0.06, ease: "power3.out" });
+    gsap.fromTo(boxes, { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, stagger: 0.06, ease: "power3.out" });
   }, []);
 
   const handleChange = (index: number, val: string, isConfirm = false) => {
@@ -671,23 +654,23 @@ const PinInput = ({
             onKeyDown={(e) => handleKeyDown(i, e, isConfirm)}
             onFocus={(e) => e.target.select()}
             className="pin-box"
-            whileFocus={{ scale: 1.04 }}
+            whileFocus={{ scale: 1.03 }}
             transition={{ type: "spring", stiffness: 400, damping: 24 }}
             style={{
               width: "84px",
-              height: "110px",
-              fontSize: "56px",
+              height: "108px",
+              fontSize: "54px",
               fontWeight: 400,
               textAlign: "center",
-              backgroundColor: "transparent",
-              color: BLUE,
-              border: `2px solid ${BLUE}`,
+              backgroundColor: BLUE,
+              color: WHITE,
+              border: "none",
               borderRadius: "14px",
               outline: "none",
               fontFamily: FONT_FAMILY,
-              caretColor: BLUE,
+              caretColor: WHITE,
               padding: 0,
-              boxShadow: "none",
+              boxShadow: "0 6px 20px rgba(13,60,252,0.25)",
             }}
           />
         ))}
@@ -759,7 +742,7 @@ const TermsAgreementBox = ({ agreed, onToggle }: { agreed: boolean; onToggle: ()
   );
 };
 
-// ===== TOP BANNER (biru, animasi verified panel) =====
+// ===== TOP BANNER (biru, verified panel GSAP, sama halaman utama) =====
 const TopBanner = () => {
   const [showPanel, setShowPanel] = useState(false);
   const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null);
@@ -880,7 +863,7 @@ const TopBanner = () => {
   );
 };
 
-// ===== FOOTER CARD (biru, seperti halaman utama) =====
+// ===== FOOTER CARD =====
 const FooterCard = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLSpanElement>(null);
@@ -997,7 +980,7 @@ const Preloader = ({ onComplete }: { onComplete: () => void }) => {
   );
 };
 
-// ===== GOOGLE AUTHENTICATOR MODAL =====
+// ===== TWO FACTOR MODAL =====
 const TwoFactorModal = ({ user, secret, onSuccess, onClose }: { user: any; secret: string; onSuccess: () => void; onClose: () => void }) => {
   const [token, setToken] = useState("");
   const [error, setError] = useState("");
@@ -1062,6 +1045,73 @@ const TwoFactorModal = ({ user, secret, onSuccess, onClose }: { user: any; secre
   );
 };
 
+// ===== MENURU CENTER CARD (dipakai sebelum & sesudah verifikasi) =====
+const MenuruCenterCard = ({ verified, method }: { verified: boolean; method?: "passkey" | "totp" }) => {
+  if (verified) {
+    // Style dashboard — card putih, teks biru
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ type: "spring", stiffness: 200, damping: 22 }}
+        style={{ width: "100%", maxWidth: "600px", backgroundColor: WHITE, borderRadius: "24px", padding: "32px", border: `2px solid ${BLUE}`, boxShadow: "0 12px 32px rgba(13,60,252,0.15)", display: "flex", flexDirection: "column", gap: "16px", marginTop: "32px" }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+          <div style={{ width: "56px", height: "56px", borderRadius: "16px", backgroundColor: BLUE, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <ShieldLockIcon size={28} color={WHITE} />
+          </div>
+          <div>
+            <div style={{ fontSize: "22px", fontWeight: 800, color: BLUE, letterSpacing: "-0.02em" }}>Menuru Center</div>
+            <div style={{ fontSize: "13px", color: BLUE, opacity: 0.7, fontWeight: 600 }}>Security Center</div>
+          </div>
+        </div>
+        <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "6px 12px", backgroundColor: "#DCFCE7", borderRadius: "10px", alignSelf: "flex-start" }}>
+          <span style={{ width: 8, height: 8, borderRadius: "50%", backgroundColor: GREEN }} />
+          <span style={{ fontSize: "13px", fontWeight: 800, color: "#166534" }}>
+            Terverifikasi{method === "passkey" ? " via Passkey" : method === "totp" ? " via Google Authenticator" : ""}
+          </span>
+        </div>
+        <p style={{ fontSize: "14px", color: BLUE, opacity: 0.9, lineHeight: 1.6, margin: 0 }}>
+          Identitas Anda telah diverifikasi. Anda akan diarahkan ke dashboard dalam beberapa saat. Jika tidak, klik tombol di bawah.
+        </p>
+        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginTop: "4px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "10px 14px", backgroundColor: "#F0F4FF", borderRadius: "10px" }}>
+            <KeyIcon size={18} color={BLUE} />
+            <span style={{ fontSize: "12px", fontWeight: 700, color: BLUE }}>{method === "passkey" ? "Passkey OK" : "Passkey tersedia"}</span>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "10px 14px", backgroundColor: "#F0F4FF", borderRadius: "10px" }}>
+            <ShieldLockIcon size={18} color={BLUE} />
+            <span style={{ fontSize: "12px", fontWeight: 700, color: BLUE }}>{method === "totp" ? "2FA OK" : "2FA tersedia"}</span>
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
+  // Sebelum verifikasi — card biru, teks putih
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      style={{ width: "100%", maxWidth: "600px", backgroundColor: BLUE, borderRadius: "24px", padding: "28px", boxShadow: "0 12px 32px rgba(13,60,252,0.3)", display: "flex", flexDirection: "column", gap: "16px", marginTop: "32px" }}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+        <div style={{ width: "56px", height: "56px", borderRadius: "16px", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <ShieldLockIcon size={28} color={BLUE} />
+        </div>
+        <div>
+          <div style={{ fontSize: "22px", fontWeight: 800, color: WHITE, letterSpacing: "-0.02em" }}>Menuru Center</div>
+          <div style={{ fontSize: "13px", color: WHITE, opacity: 0.85, fontWeight: 600 }}>Security Verification</div>
+        </div>
+      </div>
+      <p style={{ fontSize: "14px", color: WHITE, opacity: 0.95, lineHeight: 1.6, margin: 0 }}>
+        Verifikasi identitas Anda untuk melanjutkan ke dashboard. Gunakan salah satu metode di bawah jika Anda kesulitan login dengan PIN.
+      </p>
+    </motion.div>
+  );
+};
+
 // ===== MAIN SIGN IN PAGE =====
 export default function SignInPage() {
   const [isMounted, setIsMounted] = useState(false);
@@ -1088,6 +1138,7 @@ export default function SignInPage() {
   const [showPasskeyHelp, setShowPasskeyHelp] = useState(false);
   const [passkeyBusy, setPasskeyBusy] = useState(false);
   const [passkeyError, setPasskeyError] = useState("");
+  const [verifiedMethod, setVerifiedMethod] = useState<"passkey" | "totp" | null>(null);
   const router = useRouter();
 
   useEffect(() => setIsMounted(true), []);
@@ -1129,18 +1180,33 @@ export default function SignInPage() {
           }
         } catch (e) { console.error("Auth state error:", e); }
       } else {
-        setUser(null); setShowPinScreen(false); setTempUser(null);
-        setShowTwoFactorModal(false); setShowPasskeyHelp(false);
+        setUser(null);
+        setShowPinScreen(false);
+        setTempUser(null);
+        setShowTwoFactorModal(false);
+        setShowPasskeyHelp(false);
+        setVerifiedMethod(null);
       }
     });
     return () => unsub();
   }, [showMain]);
 
-  const finishLogin = () => {
-    setUser(auth?.currentUser || null);
-    setShowPinScreen(false);
-    setShowTwoFactorModal(false);
-    router.push("/");
+  const finishLogin = (method: "passkey" | "totp" | null) => {
+    if (method) {
+      setVerifiedMethod(method);
+      setTimeout(() => {
+        setUser(auth?.currentUser || null);
+        setShowPinScreen(false);
+        setShowTwoFactorModal(false);
+        setShowPasskeyHelp(false);
+        router.push("/");
+      }, 2400);
+    } else {
+      setUser(auth?.currentUser || null);
+      setShowPinScreen(false);
+      setShowTwoFactorModal(false);
+      router.push("/");
+    }
   };
 
   const handlePinSubmit = async () => {
@@ -1152,13 +1218,13 @@ export default function SignInPage() {
       setPinError("");
       const result = await apiRequest("/auth/save-pin", { method: "POST", body: JSON.stringify({ idToken, pin }) });
       if (!result.success) { setPinError(result.error || "Gagal menyimpan PIN"); return; }
-      finishLogin();
+      finishLogin(null);
     } else {
       if (pin.length !== 6) { setPinError("PIN harus 6 digit"); return; }
       setPinError("");
       const result = await apiRequest("/auth/verify-pin", { method: "POST", body: JSON.stringify({ idToken, pin }) });
       if (!result.success) { setPinError(result.error || "PIN salah"); return; }
-      finishLogin();
+      finishLogin(null);
     }
   };
 
@@ -1190,7 +1256,7 @@ export default function SignInPage() {
       const usedId = bufToB64Url(assertion.rawId);
       if (!credIds.includes(usedId)) { setPasskeyError("Passkey tidak dikenali."); setPasskeyBusy(false); return; }
       setShowPasskeyHelp(false);
-      finishLogin();
+      finishLogin("passkey");
     } catch (e: any) {
       console.error(e);
       const msg = e?.message || "";
@@ -1278,35 +1344,42 @@ export default function SignInPage() {
                     </motion.button>
                   </div>
 
-                  {/* KESULITAN LOGIN - BANTUAN */}
-                  {!isNewPin && (hasPasskey || twoFactorEnabled) && (
-                    <div style={{ marginTop: "40px", paddingTop: "24px", borderTop: "1px solid #e8e8e8", width: "100%", maxWidth: "500px", display: "flex", flexDirection: "column", gap: "12px" }}>
-                      <div style={{ textAlign: "center", color: BLUE, fontSize: "13px", fontWeight: 600, opacity: 0.7, textTransform: "uppercase", letterSpacing: "0.1em" }}>
-                        Kesulitan Login? Bantuan
+                  {/* MENURU CENTER CARD — sebelum verifikasi (biru, teks putih) */}
+                  {!isNewPin && (hasPasskey || twoFactorEnabled) && !verifiedMethod && (
+                    <>
+                      <MenuruCenterCard verified={false} />
+                      <div style={{ width: "100%", maxWidth: "600px", display: "flex", flexDirection: "column", gap: "10px", marginTop: "12px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px", color: BLUE, fontSize: "13px", fontWeight: 600 }}>
+                          <HelpIcon size={16} color={BLUE} />
+                          <span>Kesulitan login? Gunakan metode bantuan di bawah.</span>
+                        </div>
+                        {hasPasskey && (
+                          <motion.button whileHover={{ scale: 1.02, backgroundColor: BLACK }} whileTap={{ scale: 0.98 }} onClick={() => setShowPasskeyHelp(true)} disabled={passkeyBusy} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 18px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "12px", fontSize: "14px", fontWeight: 700, cursor: passkeyBusy ? "not-allowed" : "pointer", fontFamily: FONT_FAMILY }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                              <KeyIcon size={20} color={WHITE} />
+                              <span>Login dengan Passkey (Biometrik)</span>
+                            </div>
+                            <NorthEastArrow size={18} color={WHITE} />
+                          </motion.button>
+                        )}
+                        {twoFactorEnabled && (
+                          <motion.button whileHover={{ scale: 1.02, backgroundColor: BLACK }} whileTap={{ scale: 0.98 }} onClick={() => setShowTwoFactorModal(true)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 18px", backgroundColor: "transparent", color: BLUE, border: `2px solid ${BLUE}`, borderRadius: "12px", fontSize: "14px", fontWeight: 700, cursor: "pointer", fontFamily: FONT_FAMILY }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                              <ShieldLockIcon size={20} color={BLUE} />
+                              <span>Verifikasi dengan Google Authenticator</span>
+                            </div>
+                            <NorthEastArrow size={18} color={BLUE} />
+                          </motion.button>
+                        )}
                       </div>
-                      {hasPasskey && (
-                        <motion.button whileHover={{ scale: 1.02, backgroundColor: BLACK }} whileTap={{ scale: 0.98 }} onClick={() => setShowPasskeyHelp(true)} disabled={passkeyBusy} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 18px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "12px", fontSize: "14px", fontWeight: 700, cursor: passkeyBusy ? "not-allowed" : "pointer", fontFamily: FONT_FAMILY }}>
-                          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                            <KeyIcon size={20} color={WHITE} />
-                            <span>Login dengan Passkey (Biometrik)</span>
-                          </div>
-                          <NorthEastArrow size={18} color={WHITE} />
-                        </motion.button>
-                      )}
-                      {twoFactorEnabled && (
-                        <motion.button whileHover={{ scale: 1.02, backgroundColor: BLACK }} whileTap={{ scale: 0.98 }} onClick={() => setShowTwoFactorModal(true)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 18px", backgroundColor: "transparent", color: BLUE, border: `2px solid ${BLUE}`, borderRadius: "12px", fontSize: "14px", fontWeight: 700, cursor: "pointer", fontFamily: FONT_FAMILY }}>
-                          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                            <ShieldLockIcon size={20} color={BLUE} />
-                            <span>Verifikasi dengan Google Authenticator</span>
-                          </div>
-                          <NorthEastArrow size={18} color={BLUE} />
-                        </motion.button>
-                      )}
-                    </div>
+                    </>
                   )}
 
-                  {showPasskeyHelp && hasPasskey && (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ marginTop: "20px", padding: "16px 20px", backgroundColor: BLUE, borderRadius: "14px", color: WHITE, width: "100%", maxWidth: "500px", fontFamily: FONT_FAMILY }}>
+                  {/* MENURU CENTER CARD — setelah verifikasi (putih, teks biru, style dashboard) */}
+                  {verifiedMethod && <MenuruCenterCard verified={true} method={verifiedMethod} />}
+
+                  {showPasskeyHelp && hasPasskey && !verifiedMethod && (
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ marginTop: "20px", padding: "16px 20px", backgroundColor: BLUE, borderRadius: "14px", color: WHITE, width: "100%", maxWidth: "600px", fontFamily: FONT_FAMILY }}>
                       <div style={{ fontSize: "14px", fontWeight: 700, marginBottom: "6px" }}>Verifikasi Passkey</div>
                       <div style={{ fontSize: "12px", opacity: 0.9, lineHeight: 1.5, marginBottom: "12px" }}>Gunakan biometrik / PIN perangkat untuk memverifikasi identitas Anda.</div>
                       {passkeyError && <div style={{ color: "#FECACA", fontSize: "12px", fontWeight: 600, marginBottom: "8px" }}>{passkeyError}</div>}
@@ -1423,7 +1496,12 @@ export default function SignInPage() {
 
       <AnimatePresence>
         {showTwoFactorModal && twoFactorEnabled && (
-          <TwoFactorModal user={tempUser} secret={twoFactorSecret} onSuccess={() => { setShowTwoFactorModal(false); finishLogin(); }} onClose={() => setShowTwoFactorModal(false)} />
+          <TwoFactorModal
+            user={tempUser}
+            secret={twoFactorSecret}
+            onSuccess={() => { setShowTwoFactorModal(false); finishLogin("totp"); }}
+            onClose={() => setShowTwoFactorModal(false)}
+          />
         )}
       </AnimatePresence>
 
