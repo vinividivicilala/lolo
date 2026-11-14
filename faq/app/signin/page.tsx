@@ -1339,10 +1339,13 @@ export default function SignInPage() {
                     </motion.button>
                   </div>
 
-                  {/* MENURU CENTER + TOMBOL PASSKEY/2FA — hanya jika belum verifikasi */}
+                  {/* ===== USER BELUM TERVERIFIKASI (passkey/2FA) ===== */}
                   {!isNewPin && (hasPasskey || twoFactorEnabled) && !verifiedMethod && (
                     <>
+                      {/* Menuru Center Card - bg biru, teks putih */}
                       <MenuruCenterCard verified={false} />
+
+                      {/* Tombol bantuan passkey/2FA */}
                       <div style={{ width: "100%", maxWidth: "600px", display: "flex", flexDirection: "column", gap: "10px", marginTop: "16px" }}>
                         <div style={{ display: "flex", alignItems: "center", gap: "8px", color: BLUE, fontSize: "13px", fontWeight: 600 }}>
                           <HelpIcon size={16} color={BLUE} />
@@ -1370,8 +1373,52 @@ export default function SignInPage() {
                     </>
                   )}
 
-                  {/* MENURU CENTER — setelah verifikasi (bg biru, teks putih) */}
-                  {verifiedMethod && <MenuruCenterCard verified={true} method={verifiedMethod} />}
+                  {/* ===== USER SUDAH TERVERIFIKASI (passkey/2FA) ===== */}
+                  {verifiedMethod && (
+                    <div style={{ width: "100%", maxWidth: "600px", display: "flex", flexDirection: "column", gap: "16px", marginTop: "32px" }}>
+                      {/* Tombol Passkey & 2FA dalam container biru */}
+                      <div style={{ width: "100%", backgroundColor: BLUE, borderRadius: "20px", padding: "20px", boxShadow: "0 12px 32px rgba(13,60,252,0.3)" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
+                          <div style={{ width: "36px", height: "36px", borderRadius: "10px", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                            <ShieldLockIcon size={20} color={BLUE} />
+                          </div>
+                          <div>
+                            <div style={{ fontSize: "14px", fontWeight: 800, color: WHITE }}>Metode Verifikasi</div>
+                            <div style={{ fontSize: "11px", color: WHITE, opacity: 0.75, fontWeight: 600 }}>Passkey & Google Authenticator</div>
+                          </div>
+                        </div>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                          {hasPasskey && (
+                            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", backgroundColor: "rgba(255,255,255,0.15)", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.25)" }}>
+                              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                                <KeyIcon size={16} color={WHITE} />
+                                <span style={{ fontSize: "13px", fontWeight: 700, color: WHITE }}>Passkey (Biometrik)</span>
+                              </div>
+                              <span style={{ fontSize: "11px", fontWeight: 800, color: GREEN, display: "flex", alignItems: "center", gap: "4px" }}>
+                                <span style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: GREEN }} />
+                                Aktif
+                              </span>
+                            </div>
+                          )}
+                          {twoFactorEnabled && (
+                            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", backgroundColor: "rgba(255,255,255,0.15)", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.25)" }}>
+                              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                                <ShieldLockIcon size={16} color={WHITE} />
+                                <span style={{ fontSize: "13px", fontWeight: 700, color: WHITE }}>Google Authenticator</span>
+                              </div>
+                              <span style={{ fontSize: "11px", fontWeight: 800, color: GREEN, display: "flex", alignItems: "center", gap: "4px" }}>
+                                <span style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: GREEN }} />
+                                Aktif
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Menuru Center Card - verifikasi berhasil */}
+                      <MenuruCenterCard verified={true} method={verifiedMethod} />
+                    </div>
+                  )}
 
                   {showPasskeyHelp && hasPasskey && !verifiedMethod && (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ marginTop: "20px", padding: "16px 20px", backgroundColor: BLUE, borderRadius: "14px", color: WHITE, width: "100%", maxWidth: "600px", fontFamily: FONT_FAMILY }}>
