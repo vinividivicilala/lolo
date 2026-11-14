@@ -32,7 +32,6 @@ const WHITE = "#FFFFFF";
 const BLACK = "#000000";
 const RED = "#DC2626";
 const GREEN = "#4ADE80";
-const SECURITY_ISSUER = "Menuru Security Center";
 
 // ===== ICON =====
 const NorthEastArrow = ({ size = 24, color = "currentColor" }: { size?: number; color?: string }) => (
@@ -477,20 +476,6 @@ const SayHeySection = ({ user, onClose }: { user: any; onClose: () => void }) =>
 // ===== TOTP HELPERS =====
 const BASE32 = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
 
-function base32Encode(bytes: Uint8Array): string {
-  let bits = 0, value = 0, out = "";
-  for (let i = 0; i < bytes.length; i++) {
-    value = (value << 8) | bytes[i];
-    bits += 8;
-    while (bits >= 5) {
-      out += BASE32[(value >>> (bits - 5)) & 31];
-      bits -= 5;
-    }
-  }
-  if (bits > 0) out += BASE32[(value << (5 - bits)) & 31];
-  return out;
-}
-
 function base32Decode(input: string): Uint8Array {
   const c = input.replace(/=+$/g, "").toUpperCase();
   const b: number[] = [];
@@ -571,7 +556,7 @@ function supportsWebAuthn(): boolean {
   return !!(window.PublicKeyCredential && navigator.credentials);
 }
 
-// ===== PIN INPUT (BG BIRU, TEKS PUTIH, GSAP + FRAMER NORMAL) =====
+// ===== PIN INPUT (BG BIRU, TEKS PUTIH, NO GREEN, NO SKEW) =====
 const PinInput = ({
   value, onChange, onComplete, isNew, confirmValue, onConfirmChange,
 }: {
@@ -686,7 +671,6 @@ const PinInput = ({
         </div>
         <div>{renderBoxes(value, false)}</div>
       </div>
-
       {isNew && confirmValue !== undefined && onConfirmChange && (
         <div style={{ width: "100%", textAlign: "center" }}>
           <div style={{ display: "inline-block", color: BLUE, fontSize: "20px", fontWeight: 400, fontFamily: FONT_FAMILY, letterSpacing: "0.02em", marginBottom: "22px" }}>
@@ -742,7 +726,7 @@ const TermsAgreementBox = ({ agreed, onToggle }: { agreed: boolean; onToggle: ()
   );
 };
 
-// ===== TOP BANNER (biru, verified panel GSAP, sama halaman utama) =====
+// ===== TOP BANNER (biru, verified panel GSAP, SAMA PERSIS HALAMAN UTAMA) =====
 const TopBanner = () => {
   const [showPanel, setShowPanel] = useState(false);
   const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null);
@@ -855,6 +839,34 @@ const TopBanner = () => {
             <div style={{ backgroundColor: WHITE, borderRadius: "24px", padding: "32px", display: "flex", flexDirection: "column", gap: "16px", maxWidth: "900px", boxShadow: "0 10px 30px rgba(0,0,0,0.15)" }}>
               <h2 style={{ fontSize: "48px", fontWeight: 800, margin: 0, color: BLUE, letterSpacing: "-0.03em", lineHeight: 1.1 }}>Farid Ardiansyah</h2>
               <p style={{ fontSize: "16px", fontWeight: 500, margin: 0, color: BLUE, lineHeight: 1.6, maxWidth: "700px", opacity: 0.9 }}>Website ini dibangun dan dikembangkan oleh Farid Ardiansyah. Verified developer & owner of Menuru. Semua fitur, sistem, dan infrastruktur di platform ini dikelola secara langsung.</p>
+              <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                <a href="https://farid-ardiansyah.netlify.app/" target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "12px 22px", backgroundColor: BLUE, color: WHITE, borderRadius: "10px", textDecoration: "none", fontSize: "14px", fontWeight: 800, letterSpacing: "0.02em" }}>
+                  Kunjungi Portofolio
+                  <NorthEastArrow size={16} color={WHITE} />
+                </a>
+                <a href="mailto:faridardiansyah061@gmail.com" style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "12px 22px", backgroundColor: "transparent", border: `2px solid ${BLUE}`, color: BLUE, borderRadius: "10px", textDecoration: "none", fontSize: "14px", fontWeight: 800, letterSpacing: "0.02em" }}>
+                  Hubungi Email
+                </a>
+              </div>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "16px", maxWidth: "900px" }}>
+              {[
+                { label: "Nama", value: "Farid Ardiansyah" },
+                { label: "Email", value: "faridardiansyah061@gmail.com" },
+                { label: "Peran", value: "Founder & Developer" },
+                { label: "Status", value: "Verified" },
+              ].map((item, i) => (
+                <div key={i} style={{ backgroundColor: WHITE, borderRadius: "16px", padding: "18px 20px", display: "flex", flexDirection: "column", gap: "6px", boxShadow: "0 6px 20px rgba(0,0,0,0.12)" }}>
+                  <span style={{ fontSize: "11px", fontWeight: 800, letterSpacing: "0.8px", textTransform: "uppercase", color: BLUE, opacity: 0.6 }}>{item.label}</span>
+                  <span style={{ fontSize: "16px", fontWeight: 700, color: BLUE, wordBreak: "break-word" }}>{item.value}</span>
+                </div>
+              ))}
+            </div>
+            <div style={{ marginTop: "auto", paddingTop: "20px", width: "100%", overflow: "hidden", textAlign: "left", lineHeight: 0.85 }}>
+              <span style={{ fontFamily: FONT_FAMILY, fontSize: "450px", fontWeight: 400, color: WHITE, letterSpacing: "-0.05em", lineHeight: 0.85, display: "block", userSelect: "none", whiteSpace: "nowrap" }}>Menuru</span>
+            </div>
+            <div style={{ width: "100%", overflow: "hidden", textAlign: "left", lineHeight: 0.85, marginBottom: "20px" }}>
+              <span style={{ fontFamily: FONT_FAMILY, fontSize: "450px", fontWeight: 400, color: WHITE, letterSpacing: "-0.05em", lineHeight: 0.85, display: "block", userSelect: "none", whiteSpace: "nowrap" }}>2026</span>
             </div>
           </div>
         </div>
@@ -1045,10 +1057,9 @@ const TwoFactorModal = ({ user, secret, onSuccess, onClose }: { user: any; secre
   );
 };
 
-// ===== MENURU CENTER CARD (dipakai sebelum & sesudah verifikasi) =====
+// ===== MENURU CENTER CARD =====
 const MenuruCenterCard = ({ verified, method }: { verified: boolean; method?: "passkey" | "totp" }) => {
   if (verified) {
-    // Style dashboard — card putih, teks biru
     return (
       <motion.div
         initial={{ opacity: 0, y: 20, scale: 0.95 }}
@@ -1072,23 +1083,12 @@ const MenuruCenterCard = ({ verified, method }: { verified: boolean; method?: "p
           </span>
         </div>
         <p style={{ fontSize: "14px", color: BLUE, opacity: 0.9, lineHeight: 1.6, margin: 0 }}>
-          Identitas Anda telah diverifikasi. Anda akan diarahkan ke dashboard dalam beberapa saat. Jika tidak, klik tombol di bawah.
+          Identitas Anda telah diverifikasi. Anda akan diarahkan ke dashboard dalam beberapa saat.
         </p>
-        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginTop: "4px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "10px 14px", backgroundColor: "#F0F4FF", borderRadius: "10px" }}>
-            <KeyIcon size={18} color={BLUE} />
-            <span style={{ fontSize: "12px", fontWeight: 700, color: BLUE }}>{method === "passkey" ? "Passkey OK" : "Passkey tersedia"}</span>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "10px 14px", backgroundColor: "#F0F4FF", borderRadius: "10px" }}>
-            <ShieldLockIcon size={18} color={BLUE} />
-            <span style={{ fontSize: "12px", fontWeight: 700, color: BLUE }}>{method === "totp" ? "2FA OK" : "2FA tersedia"}</span>
-          </div>
-        </div>
       </motion.div>
     );
   }
 
-  // Sebelum verifikasi — card biru, teks putih
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -1152,7 +1152,6 @@ export default function SignInPage() {
     return () => window.removeEventListener("resize", check);
   }, [showMain]);
 
-  // AUTH LISTENER
   useEffect(() => {
     if (!showMain || !auth) return;
     const unsub = onAuthStateChanged(auth, async (currentUser) => {
@@ -1334,17 +1333,16 @@ export default function SignInPage() {
                   )}
 
                   <div style={{ display: "flex", gap: "16px", marginTop: "40px" }}>
-                    <motion.button whileHover={{ scale: 1.05, backgroundColor: BLACK }} whileTap={{ scale: 0.95 }} onClick={() => { setPin(""); setPinConfirm(""); setPinError(""); }} style={{ padding: "14px 32px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "12px", fontSize: "16px", cursor: "pointer", fontFamily: FONT_FAMILY, fontWeight: 700, display: "flex", alignItems: "center", gap: "10px" }}>
+                    <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => { setPin(""); setPinConfirm(""); setPinError(""); }} style={{ padding: "14px 32px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "12px", fontSize: "16px", cursor: "pointer", fontFamily: FONT_FAMILY, fontWeight: 700, display: "flex", alignItems: "center", gap: "10px" }}>
                       Reset
                       <NorthEastArrow size={22} color={WHITE} />
                     </motion.button>
-                    <motion.button whileHover={{ scale: 1.05, backgroundColor: BLACK }} whileTap={{ scale: 0.95 }} onClick={handlePinSubmit} style={{ padding: "14px 32px", backgroundColor: BLUE, color: "#fff", border: "none", borderRadius: "12px", fontSize: "16px", cursor: "pointer", fontFamily: FONT_FAMILY, fontWeight: 700, display: "flex", alignItems: "center", gap: "10px" }}>
+                    <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={handlePinSubmit} style={{ padding: "14px 32px", backgroundColor: BLUE, color: "#fff", border: "none", borderRadius: "12px", fontSize: "16px", cursor: "pointer", fontFamily: FONT_FAMILY, fontWeight: 700, display: "flex", alignItems: "center", gap: "10px" }}>
                       {isNewPin ? "Simpan PIN" : "Verifikasi"}
                       <NorthEastArrow size={22} color={WHITE} />
                     </motion.button>
                   </div>
 
-                  {/* MENURU CENTER CARD — sebelum verifikasi (biru, teks putih) */}
                   {!isNewPin && (hasPasskey || twoFactorEnabled) && !verifiedMethod && (
                     <>
                       <MenuruCenterCard verified={false} />
@@ -1354,7 +1352,7 @@ export default function SignInPage() {
                           <span>Kesulitan login? Gunakan metode bantuan di bawah.</span>
                         </div>
                         {hasPasskey && (
-                          <motion.button whileHover={{ scale: 1.02, backgroundColor: BLACK }} whileTap={{ scale: 0.98 }} onClick={() => setShowPasskeyHelp(true)} disabled={passkeyBusy} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 18px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "12px", fontSize: "14px", fontWeight: 700, cursor: passkeyBusy ? "not-allowed" : "pointer", fontFamily: FONT_FAMILY }}>
+                          <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={() => setShowPasskeyHelp(true)} disabled={passkeyBusy} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 18px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "12px", fontSize: "14px", fontWeight: 700, cursor: passkeyBusy ? "not-allowed" : "pointer", fontFamily: FONT_FAMILY }}>
                             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                               <KeyIcon size={20} color={WHITE} />
                               <span>Login dengan Passkey (Biometrik)</span>
@@ -1363,19 +1361,18 @@ export default function SignInPage() {
                           </motion.button>
                         )}
                         {twoFactorEnabled && (
-                          <motion.button whileHover={{ scale: 1.02, backgroundColor: BLACK }} whileTap={{ scale: 0.98 }} onClick={() => setShowTwoFactorModal(true)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 18px", backgroundColor: "transparent", color: BLUE, border: `2px solid ${BLUE}`, borderRadius: "12px", fontSize: "14px", fontWeight: 700, cursor: "pointer", fontFamily: FONT_FAMILY }}>
+                          <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={() => setShowTwoFactorModal(true)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 18px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "12px", fontSize: "14px", fontWeight: 700, cursor: "pointer", fontFamily: FONT_FAMILY }}>
                             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                              <ShieldLockIcon size={20} color={BLUE} />
+                              <ShieldLockIcon size={20} color={WHITE} />
                               <span>Verifikasi dengan Google Authenticator</span>
                             </div>
-                            <NorthEastArrow size={18} color={BLUE} />
+                            <NorthEastArrow size={18} color={WHITE} />
                           </motion.button>
                         )}
                       </div>
                     </>
                   )}
 
-                  {/* MENURU CENTER CARD — setelah verifikasi (putih, teks biru, style dashboard) */}
                   {verifiedMethod && <MenuruCenterCard verified={true} method={verifiedMethod} />}
 
                   {showPasskeyHelp && hasPasskey && !verifiedMethod && (
@@ -1411,7 +1408,7 @@ export default function SignInPage() {
                   )}
 
                   <div style={{ display: "flex", flexDirection: "column", gap: "16px", marginBottom: "32px" }}>
-                    <motion.button whileHover={{ scale: 1.02, backgroundColor: BLACK }} whileTap={{ scale: 0.98 }} onClick={handleGoogleLogin} disabled={loading} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", padding: "14px 20px", border: "none", borderRadius: "12px", background: BLUE, cursor: loading ? "not-allowed" : "pointer", width: "100%", fontSize: "16px", color: WHITE, fontFamily: FONT_FAMILY, fontWeight: 600 }}>
+                    <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={handleGoogleLogin} disabled={loading} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", padding: "14px 20px", border: "none", borderRadius: "12px", background: BLUE, cursor: loading ? "not-allowed" : "pointer", width: "100%", fontSize: "16px", color: WHITE, fontFamily: FONT_FAMILY, fontWeight: 600 }}>
                       <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                         <svg width="24" height="24" viewBox="0 0 24 24">
                           <path fill="#ffffff" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -1424,7 +1421,7 @@ export default function SignInPage() {
                       <NorthEastArrow size={28} color={WHITE} />
                     </motion.button>
 
-                    <motion.button whileHover={{ scale: 1.02, backgroundColor: BLACK }} whileTap={{ scale: 0.98 }} onClick={handleGitHubLogin} disabled={loading} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", padding: "14px 20px", border: "none", borderRadius: "12px", background: BLUE, cursor: loading ? "not-allowed" : "pointer", width: "100%", fontSize: "16px", color: WHITE, fontFamily: FONT_FAMILY, fontWeight: 600 }}>
+                    <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={handleGitHubLogin} disabled={loading} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", padding: "14px 20px", border: "none", borderRadius: "12px", background: BLUE, cursor: loading ? "not-allowed" : "pointer", width: "100%", fontSize: "16px", color: WHITE, fontFamily: FONT_FAMILY, fontWeight: 600 }}>
                       <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                         <svg width="24" height="24" viewBox="0 0 24 24">
                           <path fill="#ffffff" d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z" />
@@ -1466,7 +1463,7 @@ export default function SignInPage() {
 
                     <TermsAgreementBox agreed={agreeTerms} onToggle={() => setAgreeTerms(!agreeTerms)} />
 
-                    <motion.button type="submit" disabled={loading || !agreeTerms} whileHover={!loading && agreeTerms ? { scale: 1.02, backgroundColor: BLACK } : {}} whileTap={!loading && agreeTerms ? { scale: 0.98 } : {}} style={{ width: "100%", padding: "16px 20px", backgroundColor: loading || !agreeTerms ? "#ccc" : BLUE, color: "#fff", border: "none", borderRadius: "12px", fontSize: "18px", fontWeight: 600, cursor: loading || !agreeTerms ? "not-allowed" : "pointer", fontFamily: FONT_FAMILY, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <motion.button type="submit" disabled={loading || !agreeTerms} whileHover={!loading && agreeTerms ? { scale: 1.02 } : {}} whileTap={!loading && agreeTerms ? { scale: 0.98 } : {}} style={{ width: "100%", padding: "16px 20px", backgroundColor: loading || !agreeTerms ? "#ccc" : BLUE, color: "#fff", border: "none", borderRadius: "12px", fontSize: "18px", fontWeight: 600, cursor: loading || !agreeTerms ? "not-allowed" : "pointer", fontFamily: FONT_FAMILY, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                       <span>{loading ? "Signing In..." : "Sign In"}</span>
                       {!loading && agreeTerms && <NorthEastArrow size={32} color={WHITE} />}
                     </motion.button>
