@@ -362,9 +362,6 @@ const ShieldLockIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color
 const KeyIcon = ({ size = 24, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none"><circle cx="8" cy="15" r="4" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /><path d="M10.85 12.15L19 4" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /><path d="M18 5L20 7" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /><path d="M15 8L17 10" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
 );
-const InviteIcon = ({ size = 20, color = "currentColor" }: { size?: number; color?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none"><path d="M16 21V19C16 16.7909 14.2091 15 12 15H5C2.79086 15 1 16.7909 1 19V21" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /><circle cx="8.5" cy="7" r="4" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /><path d="M20 8V14" stroke={color} strokeWidth="2" strokeLinecap="round" /><path d="M23 11H17" stroke={color} strokeWidth="2" strokeLinecap="round" /></svg>
-);
 const WindowsIcon = ({ size = 20, color = "#ffffff" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none"><rect x="2" y="2" width="9" height="9" fill={color} /><rect x="13" y="2" width="9" height="9" fill={color} /><rect x="2" y="13" width="9" height="9" fill={color} /><rect x="13" y="13" width="9" height="9" fill={color} /></svg>
 );
@@ -834,8 +831,8 @@ const GoogleAuthenticatorTab = ({ user, db }: { user: any; db: any }) => {
   const copy = async (t: string) => { try { await navigator.clipboard.writeText(t); } catch {} };
 
   const inputStyle: React.CSSProperties = { width: "100%", padding: "14px 16px", borderRadius: "10px", border: `2px solid ${BLUE}40`, fontSize: "16px", fontFamily: FONT_FAMILY, outline: "none", color: BLUE, fontWeight: 600, letterSpacing: "0.15em", textAlign: "center", background: WHITE };
-  const primaryBtn: React.CSSProperties = { padding: "12px 22px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "10px", fontSize: "14px", fontWeight: 800, letterSpacing: "0.02em", cursor: "pointer", fontFamily: FONT_FAMILY, display: "inline-flex", alignItems: "center", gap: "8px" };
-  const ghostBtn: React.CSSProperties = { padding: "12px 22px", backgroundColor: "transparent", color: BLUE, border: `2px solid ${BLUE}`, borderRadius: "10px", fontSize: "14px", fontWeight: 800, letterSpacing: "0.02em", cursor: "pointer", fontFamily: FONT_FAMILY, display: "inline-flex", alignItems: "center", gap: "8px" };
+  const primaryBtn: React.CSSProperties = { padding: "12px 22px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "10px", fontSize: "14px", fontWeight: 800, cursor: "pointer", fontFamily: FONT_FAMILY, display: "inline-flex", alignItems: "center", gap: "8px" };
+  const ghostBtn: React.CSSProperties = { padding: "12px 22px", backgroundColor: "transparent", color: BLUE, border: `2px solid ${BLUE}`, borderRadius: "10px", fontSize: "14px", fontWeight: 800, cursor: "pointer", fontFamily: FONT_FAMILY, display: "inline-flex", alignItems: "center", gap: "8px" };
   const cardStyle: React.CSSProperties = { backgroundColor: "#F0F4FF", borderRadius: "20px", padding: "24px", display: "flex", flexDirection: "column", gap: "14px" };
 
   return (
@@ -1255,7 +1252,7 @@ const SecurityCenterPanel = ({ user, db, onBack }: { user: any; db: any; onBack:
   );
 };
 
-// ===== ACCOUNT STATUS PAGE (halaman terpisah di dalam dashboard) =====
+// ===== ACCOUNT STATUS PAGE =====
 const AccountStatusPage = ({ user, db, onBack, onOpenAppealChat }: { user: any; db: any; onBack: () => void; onOpenAppealChat: (reason: string, message: string) => void; }) => {
   const [banStatus, setBanStatus] = useState<AccountStatusInfo>({ isBanned: false, reason: "", message: "", canCreateTicket: true, canSendMessage: true });
   const [loading, setLoading] = useState(true);
@@ -1268,7 +1265,6 @@ const AccountStatusPage = ({ user, db, onBack, onOpenAppealChat }: { user: any; 
   const heroRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
 
-  // Listener real-time
   useEffect(() => {
     if (!user || !db) { setLoading(false); return; }
     let active = true;
@@ -1296,7 +1292,6 @@ const AccountStatusPage = ({ user, db, onBack, onOpenAppealChat }: { user: any; 
     return () => { active = false; unsubBot(); unsubUser(); };
   }, [user, db]);
 
-  // Appeal ticket listen
   useEffect(() => {
     if (!user || !db) return;
     const q = query(collection(db, "appeal_tickets"), where("userId", "==", user.uid), orderBy("createdAt", "desc"), limit(1));
@@ -1304,7 +1299,6 @@ const AccountStatusPage = ({ user, db, onBack, onOpenAppealChat }: { user: any; 
     return () => unsub();
   }, [user, db]);
 
-  // Admin UID
   useEffect(() => {
     if (!db) return;
     const q = query(collection(db, "users"), where("email", "==", ADMIN_EMAIL), limit(1));
@@ -1312,7 +1306,6 @@ const AccountStatusPage = ({ user, db, onBack, onOpenAppealChat }: { user: any; 
     return () => unsub();
   }, [db]);
 
-  // Animations
   useEffect(() => { if (heroRef.current) gsap.fromTo(heroRef.current, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }); }, []);
   useEffect(() => { if (cardRef.current) gsap.fromTo(cardRef.current, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out", delay: 0.2 }); }, []);
 
@@ -1323,9 +1316,8 @@ const AccountStatusPage = ({ user, db, onBack, onOpenAppealChat }: { user: any; 
     try {
       const existing = await getDoc(doc(db, "users", user.uid));
       if (existing.exists() && existing.data().botBlocked) {
-        // sudah banned, boleh kirim appeal
+        // user memang banned, boleh kirim appeal
       }
-      // Kirim sebagai "appeal message" di livechat_tickets (untuk dibaca admin)
       const ref = await addDoc(collection(db, "livechat_tickets"), {
         userId: user.uid,
         userName: user.displayName || user.email || "User",
@@ -1389,7 +1381,6 @@ const AccountStatusPage = ({ user, db, onBack, onOpenAppealChat }: { user: any; 
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
-      {/* Header */}
       <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
         <button onClick={onBack} style={{ background: "transparent", border: "none", color: BLUE, cursor: "pointer", display: "flex", alignItems: "center", padding: 0 }}><ChevronLeftIcon size={24} color={BLUE} /></button>
         <h2 style={{ fontSize: "26px", fontWeight: 800, margin: 0, color: BLUE }}>Detail Status Akun</h2>
@@ -1399,30 +1390,30 @@ const AccountStatusPage = ({ user, db, onBack, onOpenAppealChat }: { user: any; 
         <div style={{ padding: "40px", textAlign: "center", color: BLUE, fontWeight: 600 }}>Memeriksa status akun...</div>
       ) : (
         <>
-          {/* HERO BANNER */}
-          <div ref={heroRef} style={{ width: "100%", backgroundColor: BLUE, borderRadius: "24px", padding: "28px", display: "flex", flexDirection: "column", gap: "20px", boxShadow: "0 12px 32px rgba(13,60,252,0.3)", position: "relative", overflow: "hidden" }}>
+          {/* HERO BANNER - padding internal agar tidak mentok */}
+          <div ref={heroRef} style={{ width: "100%", backgroundColor: BLUE, borderRadius: "24px", padding: "24px 28px", display: "flex", flexDirection: "column", gap: "18px", boxShadow: "0 12px 32px rgba(13,60,252,0.3)", position: "relative", overflow: "hidden", boxSizing: "border-box" }}>
             <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "20px", flexWrap: "wrap", position: "relative", zIndex: 1 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-                <div style={{ width: "72px", height: "72px", borderRadius: "20px", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  {isBanned ? <ShieldBanIcon size={36} color={RED} /> : <ShieldCheckIcon size={36} color={GREEN} />}
+              <div style={{ display: "flex", alignItems: "center", gap: "16px", minWidth: 0 }}>
+                <div style={{ width: "64px", height: "64px", borderRadius: "18px", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  {isBanned ? <ShieldBanIcon size={32} color={RED} /> : <ShieldCheckIcon size={32} color={GREEN} />}
                 </div>
-                <div>
-                  <div style={{ fontSize: "28px", fontWeight: 800, color: WHITE, letterSpacing: "-0.02em" }}>Status Akun</div>
-                  <div style={{ fontSize: "14px", color: WHITE, opacity: 0.85, fontWeight: 600 }}>Menuru Account Status</div>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: "24px", fontWeight: 800, color: WHITE, letterSpacing: "-0.02em", lineHeight: 1.15 }}>Status Akun</div>
+                  <div style={{ fontSize: "13px", color: WHITE, opacity: 0.85, fontWeight: 600 }}>Menuru Account Status</div>
                 </div>
               </div>
-              <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "10px 16px", backgroundColor: WHITE, borderRadius: "12px" }}>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "8px 14px", backgroundColor: WHITE, borderRadius: "12px", flexShrink: 0 }}>
                 <span style={{ width: 10, height: 10, borderRadius: "50%", backgroundColor: isBanned ? RED : GREEN, animation: "statusPulse 1.4s ease-in-out infinite" }} />
-                <span style={{ fontSize: "12px", fontWeight: 800, color: BLUE, letterSpacing: "0.06em", textTransform: "uppercase" }}>{isBanned ? "BANNED" : "AKTIF / NORMAL"}</span>
+                <span style={{ fontSize: "11px", fontWeight: 800, color: BLUE, letterSpacing: "0.06em", textTransform: "uppercase" }}>{isBanned ? "BANNED" : "AKTIF / NORMAL"}</span>
               </div>
             </div>
-            <p style={{ fontSize: "15px", color: WHITE, opacity: 0.95, lineHeight: 1.6, margin: 0, position: "relative", zIndex: 1 }}>
+            <p style={{ fontSize: "14px", color: WHITE, opacity: 0.95, lineHeight: 1.6, margin: 0, position: "relative", zIndex: 1 }}>
               {isBanned
                 ? `Akun Anda saat ini dalam status BANNED. Alasan: ${banStatus.reason || "Suspicious Activity"}. Anda tidak dapat menggunakan fitur interaktif sampai banding disetujui admin.`
                 : "Akun Anda dalam status aktif dan normal. Semua fitur Menuru tersedia untuk Anda gunakan tanpa batasan."}
             </p>
             {isBanned && banStatus.message && (
-              <div style={{ backgroundColor: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.35)", borderRadius: "12px", padding: "14px 16px", position: "relative", zIndex: 1 }}>
+              <div style={{ backgroundColor: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.35)", borderRadius: "12px", padding: "12px 14px", position: "relative", zIndex: 1 }}>
                 <div style={{ fontSize: "11px", fontWeight: 800, color: WHITE, opacity: 0.8, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "4px" }}>Pesan dari sistem</div>
                 <div style={{ fontSize: "13px", color: WHITE, opacity: 0.95, lineHeight: 1.5, wordBreak: "break-word" }}>{banStatus.message}</div>
               </div>
@@ -1430,20 +1421,20 @@ const AccountStatusPage = ({ user, db, onBack, onOpenAppealChat }: { user: any; 
             <div style={{ position: "absolute", bottom: "-30px", right: "-30px", width: "180px", height: "180px", borderRadius: "50%", backgroundColor: WHITE, opacity: 0.05, pointerEvents: "none" }} />
           </div>
 
-          {/* FITUR TERSEDIA — BG BIRU, TEKS PUTIH */}
-          <div ref={cardRef} style={{ width: "100%", backgroundColor: BLUE, borderRadius: "24px", padding: "24px", display: "flex", flexDirection: "column", gap: "16px", boxShadow: "0 12px 32px rgba(13,60,252,0.3)" }}>
+          {/* FITUR TERSEDIA - BG BIRU, padding internal */}
+          <div ref={cardRef} style={{ width: "100%", backgroundColor: BLUE, borderRadius: "24px", padding: "24px 28px", display: "flex", flexDirection: "column", gap: "16px", boxShadow: "0 12px 32px rgba(13,60,252,0.3)", boxSizing: "border-box" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              <div style={{ width: "44px", height: "44px", borderRadius: "12px", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                {isBanned ? <XCircleIcon size={24} color={RED} /> : <CheckCircleIcon size={24} color={GREEN} />}
+              <div style={{ width: "42px", height: "42px", borderRadius: "12px", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                {isBanned ? <XCircleIcon size={22} color={RED} /> : <CheckCircleIcon size={22} color={GREEN} />}
               </div>
-              <div>
-                <div style={{ fontSize: "18px", fontWeight: 800, color: WHITE }}>{isBanned ? "Fitur yang Tidak Tersedia" : "Fitur yang Tersedia"}</div>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: "17px", fontWeight: 800, color: WHITE }}>{isBanned ? "Fitur yang Tidak Tersedia" : "Fitur yang Tersedia"}</div>
                 <div style={{ fontSize: "12px", color: WHITE, opacity: 0.85, fontWeight: 600 }}>{isBanned ? "Akun dalam status banned" : "Akun dalam status normal"}</div>
               </div>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
               {(isBanned ? bannedFeatures : normalFeatures).map((f, i) => (
-                <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: "12px", backgroundColor: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.25)", borderRadius: "12px", padding: "12px 14px" }}>
+                <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: "12px", backgroundColor: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.25)", borderRadius: "12px", padding: "12px 14px", boxSizing: "border-box" }}>
                   <div style={{ width: "24px", height: "24px", borderRadius: "50%", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: "1px" }}>
                     {isBanned ? <XCircleIcon size={16} color={RED} /> : <CheckCircleIcon size={16} color={GREEN} />}
                   </div>
@@ -1453,15 +1444,15 @@ const AccountStatusPage = ({ user, db, onBack, onOpenAppealChat }: { user: any; 
             </div>
           </div>
 
-          {/* AJUKAN BANDING */}
+          {/* AJUKAN BANDING - BG BIRU, padding internal */}
           {isBanned && (
-            <div style={{ width: "100%", backgroundColor: BLUE, borderRadius: "24px", padding: "24px", display: "flex", flexDirection: "column", gap: "16px", boxShadow: "0 12px 32px rgba(13,60,252,0.3)" }}>
+            <div style={{ width: "100%", backgroundColor: BLUE, borderRadius: "24px", padding: "24px 28px", display: "flex", flexDirection: "column", gap: "16px", boxShadow: "0 12px 32px rgba(13,60,252,0.3)", boxSizing: "border-box" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                <div style={{ width: "44px", height: "44px", borderRadius: "12px", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <ReplyIcon size={24} color={BLUE} />
+                <div style={{ width: "42px", height: "42px", borderRadius: "12px", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <ReplyIcon size={22} color={BLUE} />
                 </div>
-                <div>
-                  <div style={{ fontSize: "18px", fontWeight: 800, color: WHITE }}>Ajukan Banding ke Admin</div>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: "17px", fontWeight: 800, color: WHITE }}>Ajukan Banding ke Admin</div>
                   <div style={{ fontSize: "12px", color: WHITE, opacity: 0.85, fontWeight: 600 }}>Kirim pesan langsung ke admin</div>
                 </div>
               </div>
@@ -1526,7 +1517,7 @@ const AccountStatusPage = ({ user, db, onBack, onOpenAppealChat }: { user: any; 
   );
 };
 
-// ===== DASHBOARD OVERLAY =====
+// ===== DASHBOARD OVERLAY (PERBAIKAN: card biru tidak mentok kanan-kiri) =====
 const DashboardOverlay = ({ user, db, onClose, onOpenAppealChat }: { user: any; db: any; onClose: () => void; onOpenAppealChat: (reason: string, message: string) => void; }) => {
   const overlayRef = useRef<HTMLDivElement>(null);
   const closeIconRef = useRef<HTMLDivElement>(null);
@@ -1539,7 +1530,6 @@ const DashboardOverlay = ({ user, db, onClose, onOpenAppealChat }: { user: any; 
   const [passkeyCount, setPasskeyCount] = useState(0);
   const [quickBanStatus, setQuickBanStatus] = useState<AccountStatusInfo>({ isBanned: false, reason: "", message: "", canCreateTicket: true, canSendMessage: true });
 
-  // Real-time quick status
   useEffect(() => {
     if (!user || !db) return;
     let active = true;
@@ -1604,6 +1594,7 @@ const DashboardOverlay = ({ user, db, onClose, onOpenAppealChat }: { user: any; 
 
   return (
     <div ref={overlayRef} style={{ position: "fixed", top: 0, right: 0, bottom: 0, width: "100%", maxWidth: "600px", backgroundColor: WHITE, zIndex: 9998, display: "flex", flexDirection: "column", fontFamily: FONT_FAMILY, color: BLUE, boxShadow: "-10px 0 40px rgba(0,0,0,0.2)", overflow: "hidden" }}>
+      {/* Header bar */}
       <div style={{ padding: "24px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           {(activeTab === "settings" || activeTab === "security" || activeTab === "status") && (
@@ -1616,7 +1607,8 @@ const DashboardOverlay = ({ user, db, onClose, onOpenAppealChat }: { user: any; 
         </button>
       </div>
 
-      <div style={{ padding: "24px", flex: 1, overflowY: "auto", display: "flex", flexDirection: "column" }}>
+      {/* Content wrapper: padding kiri-kanan 24px, sehingga card BLUE tidak mentok layar */}
+      <div style={{ padding: "0 24px 24px 24px", flex: 1, overflowY: "auto", display: "flex", flexDirection: "column" }}>
         {activeTab === "security" ? (
           <SecurityCenterPanel user={user} db={db} onBack={() => setActiveTab("main")} />
         ) : activeTab === "status" ? (
@@ -1624,7 +1616,7 @@ const DashboardOverlay = ({ user, db, onClose, onOpenAppealChat }: { user: any; 
         ) : activeTab === "main" ? (
           <>
             {/* Profil */}
-            <div style={{ backgroundColor: BLUE, borderRadius: "24px", padding: "24px", marginBottom: "20px", display: "flex", flexDirection: "column", gap: "16px" }}>
+            <div style={{ backgroundColor: BLUE, borderRadius: "24px", padding: "24px", marginBottom: "20px", display: "flex", flexDirection: "column", gap: "16px", boxSizing: "border-box" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
                 <div style={{ width: "64px", height: "64px", borderRadius: "8px", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", flexShrink: 0 }}>
                   {user?.photoURL && !isAnonymous ? <img src={user.photoURL} alt="User" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <span style={{ fontSize: "28px", fontWeight: 800, color: BLUE }}>{displayName.charAt(0).toUpperCase()}</span>}
@@ -1637,22 +1629,22 @@ const DashboardOverlay = ({ user, db, onClose, onOpenAppealChat }: { user: any; 
               <p style={{ fontSize: "14px", lineHeight: 1.6, color: "rgba(255,255,255,0.9)", margin: 0 }}>Selamat datang di Dashboard Anda. Kelola pengaturan akun dan aktivitas Anda di sini.</p>
             </div>
 
-            {/* KARTU STATUS AKUN (klik untuk buka halaman) */}
+            {/* Kartu Status Akun (klik untuk buka halaman) */}
             <button
               onClick={() => setActiveTab("status")}
-              style={{ display: "flex", width: "100%", textAlign: "left", backgroundColor: BLUE, borderRadius: "20px", padding: "20px", marginBottom: "20px", border: "none", cursor: "pointer", fontFamily: FONT_FAMILY, color: WHITE, flexDirection: "column", gap: "12px", boxShadow: "0 12px 32px rgba(13,60,252,0.3)" }}
+              style={{ display: "flex", width: "100%", textAlign: "left", backgroundColor: BLUE, borderRadius: "20px", padding: "20px", marginBottom: "20px", border: "none", cursor: "pointer", fontFamily: FONT_FAMILY, color: WHITE, flexDirection: "column", gap: "12px", boxShadow: "0 12px 32px rgba(13,60,252,0.3)", boxSizing: "border-box" }}
             >
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", width: "100%" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: 0 }}>
                   <div style={{ width: "44px", height: "44px", borderRadius: "12px", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                     {quickBanStatus.isBanned ? <ShieldBanIcon size={24} color={RED} /> : <ShieldCheckIcon size={24} color={GREEN} />}
                   </div>
-                  <div style={{ textAlign: "left" }}>
+                  <div style={{ textAlign: "left", minWidth: 0 }}>
                     <div style={{ fontSize: "16px", fontWeight: 800, color: WHITE }}>Status Akun</div>
                     <div style={{ fontSize: "12px", color: WHITE, opacity: 0.85, fontWeight: 600 }}>Lihat detail status akun Anda</div>
                   </div>
                 </div>
-                <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "6px 12px", backgroundColor: WHITE, borderRadius: "10px" }}>
+                <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "6px 12px", backgroundColor: WHITE, borderRadius: "10px", flexShrink: 0 }}>
                   <span style={{ width: 8, height: 8, borderRadius: "50%", backgroundColor: quickBanStatus.isBanned ? RED : GREEN, animation: "statusPulse 1.4s ease-in-out infinite" }} />
                   <span style={{ fontSize: "11px", fontWeight: 800, color: BLUE, letterSpacing: "0.06em", textTransform: "uppercase" }}>{quickBanStatus.isBanned ? "BANNED" : "NORMAL"}</span>
                 </div>
@@ -1664,7 +1656,7 @@ const DashboardOverlay = ({ user, db, onClose, onOpenAppealChat }: { user: any; 
             </button>
 
             {/* Pengaturan Privasi */}
-            <div style={{ backgroundColor: BLUE, borderRadius: "24px", padding: "24px", marginBottom: "20px", display: "flex", flexDirection: "column", gap: "12px" }}>
+            <div style={{ backgroundColor: BLUE, borderRadius: "24px", padding: "24px", marginBottom: "20px", display: "flex", flexDirection: "column", gap: "12px", boxSizing: "border-box" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                 <div style={{ width: "40px", height: "40px", borderRadius: "12px", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center" }}><TrustIcon size={24} color={BLUE} /></div>
                 <h3 style={{ fontSize: "20px", fontWeight: 700, margin: 0, color: WHITE }}>Pengaturan Privasi</h3>
@@ -1674,7 +1666,7 @@ const DashboardOverlay = ({ user, db, onClose, onOpenAppealChat }: { user: any; 
             </div>
 
             {/* Security Center */}
-            <div style={{ backgroundColor: BLUE, borderRadius: "24px", padding: "24px", marginBottom: "24px", display: "flex", flexDirection: "column", gap: "12px" }}>
+            <div style={{ backgroundColor: BLUE, borderRadius: "24px", padding: "24px", marginBottom: "24px", display: "flex", flexDirection: "column", gap: "12px", boxSizing: "border-box" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                 <div style={{ width: "40px", height: "40px", borderRadius: "12px", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center" }}><ShieldLockIcon size={24} color={BLUE} /></div>
                 <h3 style={{ fontSize: "20px", fontWeight: 700, margin: 0, color: WHITE }}>Menuru Security Center</h3>
@@ -1699,7 +1691,7 @@ const DashboardOverlay = ({ user, db, onClose, onOpenAppealChat }: { user: any; 
           </>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "24px", flex: 1 }}>
-            <div style={{ backgroundColor: "#F0F4FF", borderRadius: "24px", padding: "24px", display: "flex", flexDirection: "column", gap: "16px" }}>
+            <div style={{ backgroundColor: "#F0F4FF", borderRadius: "24px", padding: "24px", display: "flex", flexDirection: "column", gap: "16px", boxSizing: "border-box" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
                 <div style={{ width: "64px", height: "64px", borderRadius: "8px", backgroundColor: BLUE, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", flexShrink: 0 }}>
                   {user?.photoURL && !isAnonymous ? <img src={user.photoURL} alt="User" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <span style={{ fontSize: "28px", fontWeight: 800, color: WHITE }}>{displayName.charAt(0).toUpperCase()}</span>}
@@ -1710,7 +1702,7 @@ const DashboardOverlay = ({ user, db, onClose, onOpenAppealChat }: { user: any; 
                 </div>
               </div>
             </div>
-            <div style={{ backgroundColor: "#F0F4FF", borderRadius: "24px", padding: "24px", display: "flex", flexDirection: "column", gap: "16px" }}>
+            <div style={{ backgroundColor: "#F0F4FF", borderRadius: "24px", padding: "24px", display: "flex", flexDirection: "column", gap: "16px", boxSizing: "border-box" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                 <div style={{ width: "40px", height: "40px", borderRadius: "12px", backgroundColor: BLUE, display: "flex", alignItems: "center", justifyContent: "center" }}><TrustIcon size={24} color={WHITE} /></div>
                 <h3 style={{ fontSize: "20px", fontWeight: 700, margin: 0, color: BLUE }}>Sembunyikan Nama (Anonim)</h3>
@@ -1720,7 +1712,7 @@ const DashboardOverlay = ({ user, db, onClose, onOpenAppealChat }: { user: any; 
                 {saving ? "Menyimpan..." : isAnonymous ? "Anonim Aktif" : "Aktifkan Anonim"}
               </button>
             </div>
-            <div style={{ marginTop: "auto", paddingTop: "40px", textAlign: "left", overflow: "hidden", marginLeft: "-24px" }}>
+            <div style={{ marginTop: "auto", paddingTop: "40px", textAlign: "left", overflow: "hidden" }}>
               <span style={{ fontFamily: FONT_FAMILY, fontSize: "250px", fontWeight: 400, color: BLUE, letterSpacing: "-0.05em", lineHeight: 0.9, display: "block", userSelect: "none", textTransform: "lowercase" }}>ru 2026</span>
             </div>
           </div>
@@ -1782,7 +1774,6 @@ const RightNavbar = ({ user, auth, db, onOpenDashboard }: { user: any; auth: any
 const OnboardingTour = ({ steps, onComplete, isActive, currentStep, setCurrentStep }: any) => {
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
   const [tooltipPos, setTooltipPos] = useState({ top: 0, left: 0 });
-  const [arrowPos, setArrowPos] = useState<"top" | "bottom" | "left" | "right">("bottom");
   const step = steps[currentStep];
   useEffect(() => {
     if (!isActive || !step) return;
@@ -1791,25 +1782,24 @@ const OnboardingTour = ({ steps, onComplete, isActive, currentStep, setCurrentSt
       if (el) {
         const rect = el.getBoundingClientRect();
         setTargetRect(rect);
-        const tw = 340, th = 200, as = 14, gap = 14;
+        const tw = 340, th = 200, gap = 14;
         let top = 0, left = 0;
-        let arrow: "top" | "bottom" | "left" | "right" = "bottom";
         let pos = step.position || "bottom";
         const sb = window.innerHeight - rect.bottom, sa = rect.top, sr = window.innerWidth - rect.right, sl = rect.left;
         if (pos === "bottom" && sb < th + gap) pos = sa > sb ? "top" : "bottom";
         if (pos === "top" && sa < th + gap) pos = sb > sa ? "bottom" : "top";
         if (pos === "right" && sr < tw + gap) pos = sl > sr ? "left" : "right";
         if (pos === "left" && sl < tw + gap) pos = sr > sl ? "right" : "left";
-        if (pos === "bottom") { top = rect.bottom + gap + as; left = rect.left + rect.width / 2 - tw / 2; arrow = "top"; }
-        else if (pos === "top") { top = rect.top - th - gap - as; left = rect.left + rect.width / 2 - tw / 2; arrow = "bottom"; }
-        else if (pos === "left") { top = rect.top + rect.height / 2 - th / 2; left = rect.left - tw - gap - as; arrow = "right"; }
-        else if (pos === "right") { top = rect.top + rect.height / 2 - th / 2; left = rect.right + gap + as; arrow = "left"; }
+        if (pos === "bottom") { top = rect.bottom + gap; left = rect.left + rect.width / 2 - tw / 2; }
+        else if (pos === "top") { top = rect.top - th - gap; left = rect.left + rect.width / 2 - tw / 2; }
+        else if (pos === "left") { top = rect.top + rect.height / 2 - th / 2; left = rect.left - tw - gap; }
+        else if (pos === "right") { top = rect.top + rect.height / 2 - th / 2; left = rect.right + gap; }
         const pad = 12;
         if (left < pad) left = pad;
         if (left + tw > window.innerWidth - pad) left = window.innerWidth - tw - pad;
         if (top < pad) top = pad;
         if (top + th > window.innerHeight - pad) top = window.innerHeight - th - pad;
-        setTooltipPos({ top, left }); setArrowPos(arrow);
+        setTooltipPos({ top, left });
       } else setTargetRect(null);
     };
     updateRect();
@@ -1906,7 +1896,7 @@ const BannedInfoBanner = ({ banReason, banMessage, onAppeal, hasAppeal }: { banR
   );
 };
 
-// ===== APPEAL CHAT =====
+// ===== APPEAL CHAT ROOM (untuk admin & user banned) =====
 const AppealChatRoom = ({ user, isAdmin, db, appealTicket, onClose }: any) => {
   const [messages, setMessages] = useState<AppealMessage[]>([]);
   const [messageText, setMessageText] = useState("");
@@ -2016,7 +2006,7 @@ const AppealChatRoom = ({ user, isAdmin, db, appealTicket, onClose }: any) => {
   );
 };
 
-// ===== LIVE CHAT AGENT (ringkas; sama seperti sebelumnya) =====
+// ===== LIVE CHAT AGENT (versi ringkas) =====
 const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBannedAppealChat }: any) => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
@@ -2505,22 +2495,24 @@ export default function HomePage(): React.JSX.Element {
             user={user}
             db={db}
             onClose={() => setShowDashboard(false)}
-            onOpenAppealChat={(reason, message) => {
+            onOpenAppealChat={async (reason, message) => {
+              if (!db || !user) return;
+              // Tutup dashboard dulu
               setShowDashboard(false);
-              // Cari appeal ticket user, jika tidak ada buat baru lewat BannedInfoBanner
-              setTimeout(async () => {
-                if (!db || !user) return;
-                const snap = await getDoc(doc(db, "users", user.uid));
-                if (snap.exists() && snap.data().botBlocked) {
-                  const ref = await addDoc(collection(db, "appeal_tickets"), { userId: user.uid, userName: user.displayName || user.email || "User", userEmail: user.email, userPhoto: user.photoURL || "", status: "waiting", topic: "Banding Banned", banReason: reason, banMessage: message, createdAt: serverTimestamp(), unreadCount: 0, typing: false, typingUserId: null, typingUserName: null });
-                  const init = `Saya mengajukan banding.\n\nAlasan: ${reason}`;
-                  await addDoc(collection(db, "appeal_tickets", ref.id, "messages"), { senderId: user.uid, senderName: user.displayName || user.email || "User", text: await encryptMessage(init), timestamp: serverTimestamp(), read: false, isEncrypted: true, deliveryStatus: "sent" });
-                  await updateDoc(ref, { lastMessage: init, lastMessageTime: serverTimestamp(), lastMessageSender: user.displayName || user.email || "User" });
-                  const t: AppealTicket = { id: ref.id, userId: user.uid, userName: user.displayName || user.email || "User", userEmail: user.email, status: "waiting", topic: "Banding Banned", banReason: reason, banMessage: message, createdAt: new Date(), unreadCount: 0, typing: false };
-                  setBannedAppealTicket(t);
-                  setShowBannedAppealSection(true);
-                }
-              }, 250);
+              // Buat ticket appeal lalu buka chat di halaman utama (di bawah LiveChatAgent)
+              try {
+                const ref = await addDoc(collection(db, "appeal_tickets"), { userId: user.uid, userName: user.displayName || user.email || "User", userEmail: user.email, userPhoto: user.photoURL || "", status: "waiting", topic: "Banding Banned", banReason: reason, banMessage: message, createdAt: serverTimestamp(), unreadCount: 0, typing: false, typingUserId: null, typingUserName: null });
+                const init = `Saya mengajukan banding.\n\nAlasan: ${reason}`;
+                await addDoc(collection(db, "appeal_tickets", ref.id, "messages"), { senderId: user.uid, senderName: user.displayName || user.email || "User", text: await encryptMessage(init), timestamp: serverTimestamp(), read: false, isEncrypted: true, deliveryStatus: "sent" });
+                await updateDoc(ref, { lastMessage: init, lastMessageTime: serverTimestamp(), lastMessageSender: user.displayName || user.email || "User" });
+                const t: AppealTicket = { id: ref.id, userId: user.uid, userName: user.displayName || user.email || "User", userEmail: user.email, status: "waiting", topic: "Banding Banned", banReason: reason, banMessage: message, createdAt: new Date(), unreadCount: 0, typing: false };
+                setBannedAppealTicket(t);
+                setShowBannedAppealSection(true);
+                setTimeout(() => {
+                  const el = document.getElementById("banned-appeal-section");
+                  if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                }, 300);
+              } catch (e) { console.error(e); }
             }}
           />
         )}
@@ -2535,7 +2527,12 @@ export default function HomePage(): React.JSX.Element {
             <div style={{ padding: "0 40px", maxWidth: "1600px", margin: "0 auto", width: "100%" }}>
               <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} onOpenAppealChat={(t: AppealTicket) => { setAdminAppealTicket(t); setShowAdminAppealSection(true); }} onOpenBannedAppealChat={(t: AppealTicket) => { setBannedAppealTicket(t); setShowBannedAppealSection(true); }} />
               {isAdmin && showAdminAppealSection && adminAppealTicket && <div style={{ marginTop: "30px", height: "600px" }}><div style={{ fontSize: "13px", fontWeight: 800, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "0.5px", textTransform: "uppercase", marginBottom: "12px" }}>Chat Ajukan Banding</div><AppealChatRoom user={user} isAdmin={true} db={db} appealTicket={adminAppealTicket} onClose={() => { setShowAdminAppealSection(false); setAdminAppealTicket(null); }} /></div>}
-              {!isAdmin && showBannedAppealSection && bannedAppealTicket && <div style={{ marginTop: "30px", height: "600px" }}><div style={{ fontSize: "13px", fontWeight: 800, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "0.5px", textTransform: "uppercase", marginBottom: "12px" }}>Chat Ajukan Banding</div><AppealChatRoom user={user} isAdmin={false} db={db} appealTicket={bannedAppealTicket} onClose={() => { setShowBannedAppealSection(false); setBannedAppealTicket(null); }} /></div>}
+              {!isAdmin && showBannedAppealSection && bannedAppealTicket && (
+                <div id="banned-appeal-section" style={{ marginTop: "30px", height: "600px" }}>
+                  <div style={{ fontSize: "13px", fontWeight: 800, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "0.5px", textTransform: "uppercase", marginBottom: "12px" }}>Chat Ajukan Banding</div>
+                  <AppealChatRoom user={user} isAdmin={false} db={db} appealTicket={bannedAppealTicket} onClose={() => { setShowBannedAppealSection(false); setBannedAppealTicket(null); }} />
+                </div>
+              )}
             </div>
             <FooterSection />
           </div>
