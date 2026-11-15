@@ -19,6 +19,7 @@ import {
   getDoc,
   setDoc,
   limit,
+  deleteDoc,
 } from "firebase/firestore";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -448,6 +449,471 @@ interface NoteEntry { id: string; userId: string; userName: string; userEmail: s
 interface InviteUser { uid: string; displayName: string; email: string; photoURL?: string; isAnonymous?: boolean; }
 interface NoteInvitation { id: string; noteId: string; noteTitle: string; inviterId: string; inviterName: string; inviterEmail: string; inviteeId: string; inviteeEmail: string; status: "pending" | "accepted" | "declined"; createdAt: any; }
 interface PasskeyRecord { id: string; credentialId: string; name: string; createdAt: number; transports?: string[]; }
+
+// ===== LIVE CHAT API LAYER =====
+// Kumpulan API untuk semua operasi Live Chat Agent & Appeal.
+// Konsisten return: { success: boolean; data?: any; error?: string }
+type ApiResult<T = any> = { success: boolean; data?: T; error?: string };
+
+const liveChatApi = {
+  // ---- ENCRYPTION WRAPPERS ----
+  async encrypt(text: string): Promise<string> {
+    return encryptMessage(text);
+  },
+  async decrypt(text: string): Promise<string> {
+    return decryptMessage(text);
+  },
+
+  // ---- PRESENCE ----
+  async setOnline(user: any): Promise<ApiResult> {
+    if (!db || !user) return { success: false, error: "No user/db" };
+    try {
+      await updateDoc(doc(db, "users", user.uid), {
+        online: true,
+        lastSeen: serverTimestamp(),
+        email: user.email || "",
+        displayName: user.displayName || user.email?.split("@")[0] || "User",
+        photoURL: user.photoURL || "",
+      });
+      return { success: true };
+    } catch (e: any) {
+      return { success: false, error: e?.message || "setOnline failed" };
+    }
+  },
+
+  async setOffline(user: any): Promise<ApiResult> {
+    if (!db || !user) return { success: false, error: "No user/db" };
+    try {
+      await updateDoc(doc(db, "users", user.uid), { online: false, lastSeen: serverTimestamp() });
+      return { success: true };
+    } catch (e: any) {
+      return { success: false, error: e?.message || "setOffline failed" };
+    }
+  },
+
+  // ---- BAN STATUS ----
+  async checkBan(userId: string): Promise<ApiResult> {
+    try {
+      const status = await checkBanStatus(userId);
+      return { success: true, data: status };
+    } catch (e: any) {
+      return { success: false, error: e?.message || "checkBan failed" };
+    }
+  },
+
+  async banUser(userId: string, userEmail: string, userName: string, reason: string, message: string): Promise<ApiResult> {
+    try {
+      await banUserPermanent(userId, userEmail, userName, reason, message);
+      return { success: true };
+    } catch (e: any) {
+      return { success: false, error: e?.message || "banUser failed" };
+    }
+  },
+
+  // ---- TICKETS ----
+  async createTicket(params: {
+    user: any;
+    topic: string;
+  }): Promise<ApiResult<{ ticketId: string }>> {
+    if (!db || !params.user || !params.topic) return { success: false, error: "Invalid params" };
+    try {
+      const user = params.user;
+      const ref = await addDoc(collection(db, "livechat_tickets"), {
+        userId: user.uid,
+        userName: user.displayName || user.email || "User",
+        userEmail: user.email,
+        userPhoto: user.photoURL || "",
+        status: "waiting",
+        topic: params.topic,
+        createdAt: serverTimestamp(),
+        unreadCount: 0,
+        typing: false,
+        typingUserId: null,
+        typingUserName: null,
+        isAnnouncement: false,
+        isBroadcast: false,
+      });
+      const initialText = `Hello, I would like to ask about: ${params.topic}`;
+      await addDoc(collection(db, "livechat_tickets", ref.id, "messages"), {
+        senderId: user.uid,
+        senderName: user.displayName || user.email || "User",
+        text: await encryptMessage(initialText),
+        timestamp: serverTimestamp(),
+        read: false,
+        isEncrypted: true,
+        isBotDetected: false,
+        deliveryStatus: "sent",
+      });
+      await updateDoc(ref, {
+        lastMessage: initialText,
+        lastMessageTime: serverTimestamp(),
+        lastMessageSender: user.displayName || user.email || "User",
+      });
+      return { success: true, data: { ticketId: ref.id } };
+    } catch (e: any) {
+      return { success: false, error: e?.message || "createTicket failed" };
+    }
+  },
+
+  async getTicket(ticketId: string): Promise<ApiResult<Ticket | null>> {
+    if (!db || !ticketId) return { success: false, error: "Invalid params" };
+    try {
+      const snap = await getDoc(doc(db, "livechat_tickets", ticketId));
+      if (!snap.exists()) return { success: true, data: null };
+      return { success: true, data: { id: snap.id, ...snap.data() } as Ticket };
+    } catch (e: any) {
+      return { success: false, error: e?.message || "getTicket failed" };
+    }
+  },
+
+  async takeTicket(ticketId: string, agent: any): Promise<ApiResult> {
+    if (!db || !ticketId || !agent) return { success: false, error: "Invalid params" };
+    try {
+      await updateDoc(doc(db, "livechat_tickets", ticketId), {
+        agentId: agent.uid,
+        agentName: AGENT_NAME,
+        status: "active",
+      });
+      return { success: true };
+    } catch (e: any) {
+      return { success: false, error: e?.message || "takeTicket failed" };
+    }
+  },
+
+  async resolveTicket(ticketId: string): Promise<ApiResult> {
+    if (!db || !ticketId) return { success: false, error: "Invalid params" };
+    try {
+      await updateDoc(doc(db, "livechat_tickets", ticketId), { status: "resolved" });
+      return { success: true };
+    } catch (e: any) {
+      return { success: false, error: e?.message || "resolveTicket failed" };
+    }
+  },
+
+  async closeTicket(ticketId: string): Promise<ApiResult> {
+    if (!db || !ticketId) return { success: false, error: "Invalid params" };
+    try {
+      await updateDoc(doc(db, "livechat_tickets", ticketId), { status: "closed" });
+      return { success: true };
+    } catch (e: any) {
+      return { success: false, error: e?.message || "closeTicket failed" };
+    }
+  },
+
+  async setTyping(ticketId: string, user: any, isTyping: boolean, isAdmin: boolean): Promise<ApiResult> {
+    if (!db || !ticketId || !user) return { success: false, error: "Invalid params" };
+    try {
+      await updateDoc(doc(db, "livechat_tickets", ticketId), {
+        typing: isTyping,
+        typingUserId: isTyping ? user.uid : null,
+        typingUserName: isTyping ? (isAdmin ? AGENT_NAME : user.displayName || user.email || "User") : null,
+      });
+      return { success: true };
+    } catch (e: any) {
+      return { success: false, error: e?.message || "setTyping failed" };
+    }
+  },
+
+  // ---- MESSAGES ----
+  async sendMessage(params: {
+    ticket: Ticket;
+    user: any;
+    text: string;
+    isAdmin: boolean;
+    replyTo?: ChatMessage | null;
+  }): Promise<ApiResult> {
+    const { ticket, user, text, isAdmin, replyTo } = params;
+    if (!db || !ticket || !user || !text.trim()) return { success: false, error: "Invalid params" };
+    try {
+      const ref = doc(db, "livechat_tickets", ticket.id);
+      await updateDoc(ref, { typing: false, typingUserId: null, typingUserName: null });
+      const senderName = isAdmin ? AGENT_NAME : user.displayName || user.email || "User";
+      const enc = await encryptMessage(text.trim());
+      await addDoc(collection(db, "livechat_tickets", ticket.id, "messages"), {
+        senderId: user.uid,
+        senderName,
+        text: enc,
+        timestamp: serverTimestamp(),
+        read: false,
+        isEncrypted: true,
+        isBotDetected: false,
+        deliveryStatus: "sent",
+        replyTo: replyTo
+          ? {
+              messageId: replyTo.id,
+              senderName: replyTo.senderName,
+              text: replyTo.text.length > 50 ? replyTo.text.substring(0, 50) + "..." : replyTo.text,
+            }
+          : null,
+      });
+      await updateDoc(ref, {
+        lastMessage: text.trim(),
+        lastMessageTime: serverTimestamp(),
+        lastMessageSender: senderName,
+        ...(ticket.status === "waiting" && { status: "active" }),
+        ...(isAdmin && {
+          agentId: user.uid,
+          agentName: AGENT_NAME,
+          status: ticket.status === "waiting" ? "active" : ticket.status,
+        }),
+      });
+      return { success: true };
+    } catch (e: any) {
+      return { success: false, error: e?.message || "sendMessage failed" };
+    }
+  },
+
+  async markAsRead(ticketId: string, messageId: string): Promise<ApiResult> {
+    if (!db || !ticketId || !messageId) return { success: false, error: "Invalid params" };
+    try {
+      await updateDoc(doc(db, "livechat_tickets", ticketId, "messages", messageId), {
+        read: true,
+        deliveryStatus: "read",
+      });
+      return { success: true };
+    } catch (e: any) {
+      return { success: false, error: e?.message || "markAsRead failed" };
+    }
+  },
+
+  // ---- APPEALS ----
+  async createAppealTicket(params: {
+    user: any;
+    banReason: string;
+    banMessage: string;
+  }): Promise<ApiResult<{ ticketId: string }>> {
+    if (!db || !params.user) return { success: false, error: "Invalid params" };
+    try {
+      const user = params.user;
+      const ref = await addDoc(collection(db, "appeal_tickets"), {
+        userId: user.uid,
+        userName: user.displayName || user.email || "User",
+        userEmail: user.email,
+        userPhoto: user.photoURL || "",
+        status: "waiting",
+        topic: "Banding Banned",
+        banReason: params.banReason,
+        banMessage: params.banMessage || "",
+        createdAt: serverTimestamp(),
+        unreadCount: 0,
+        typing: false,
+        typingUserId: null,
+        typingUserName: null,
+      });
+      const init = `Saya mengajukan banding.\n\nAlasan: ${params.banReason}`;
+      await addDoc(collection(db, "appeal_tickets", ref.id, "messages"), {
+        senderId: user.uid,
+        senderName: user.displayName || user.email || "User",
+        text: await encryptMessage(init),
+        timestamp: serverTimestamp(),
+        read: false,
+        isEncrypted: true,
+        deliveryStatus: "sent",
+      });
+      await updateDoc(ref, {
+        lastMessage: init,
+        lastMessageTime: serverTimestamp(),
+        lastMessageSender: user.displayName || user.email || "User",
+      });
+      return { success: true, data: { ticketId: ref.id } };
+    } catch (e: any) {
+      return { success: false, error: e?.message || "createAppealTicket failed" };
+    }
+  },
+
+  async sendAppealMessage(params: {
+    ticketId: string;
+    user: any;
+    text: string;
+    isAdmin: boolean;
+    replyTo?: AppealMessage | null;
+  }): Promise<ApiResult> {
+    const { ticketId, user, text, isAdmin, replyTo } = params;
+    if (!db || !ticketId || !user || !text.trim()) return { success: false, error: "Invalid params" };
+    try {
+      const ref = doc(db, "appeal_tickets", ticketId);
+      await updateDoc(ref, { typing: false, typingUserId: null, typingUserName: null });
+      const senderName = isAdmin ? AGENT_NAME : user.displayName || user.email || "User";
+      const enc = await encryptMessage(text.trim());
+      await addDoc(collection(db, "appeal_tickets", ticketId, "messages"), {
+        senderId: user.uid,
+        senderName,
+        text: enc,
+        timestamp: serverTimestamp(),
+        read: false,
+        isEncrypted: true,
+        deliveryStatus: "sent",
+        replyTo: replyTo
+          ? {
+              messageId: replyTo.id,
+              senderName: replyTo.senderName,
+              text: replyTo.text.length > 50 ? replyTo.text.substring(0, 50) + "..." : replyTo.text,
+            }
+          : null,
+      });
+      await updateDoc(ref, {
+        lastMessage: text.trim(),
+        lastMessageTime: serverTimestamp(),
+        lastMessageSender: senderName,
+        status: "active",
+        agentId: isAdmin ? user.uid : undefined,
+        agentName: isAdmin ? AGENT_NAME : undefined,
+      });
+      return { success: true };
+    } catch (e: any) {
+      return { success: false, error: e?.message || "sendAppealMessage failed" };
+    }
+  },
+
+  async setAppealTyping(ticketId: string, user: any, isTyping: boolean): Promise<ApiResult> {
+    if (!db || !ticketId || !user) return { success: false, error: "Invalid params" };
+    try {
+      const ref = doc(db, "appeal_tickets", ticketId);
+      if (isTyping) {
+        await updateDoc(ref, {
+          typing: true,
+          typingUserId: user.uid,
+          typingUserName: user.displayName || user.email || "User",
+        });
+      } else {
+        await updateDoc(ref, { typing: false, typingUserId: null, typingUserName: null });
+      }
+      return { success: true };
+    } catch (e: any) {
+      return { success: false, error: e?.message || "setAppealTyping failed" };
+    }
+  },
+
+  // ---- SUBSCRIPTIONS ----
+  subscribeTickets(params: {
+    user: any;
+    isAdmin: boolean;
+    callback: (tickets: Ticket[]) => void;
+  }): () => void {
+    if (!db || !params.user) return () => {};
+    const q = params.isAdmin
+      ? query(collection(db, "livechat_tickets"), orderBy("createdAt", "desc"))
+      : query(collection(db, "livechat_tickets"), where("userId", "==", params.user.uid), orderBy("createdAt", "desc"));
+    return onSnapshot(q, (s: any) => {
+      const list: Ticket[] = [];
+      s.forEach((d: any) => list.push({ id: d.id, ...d.data() } as Ticket));
+      params.callback(list);
+    });
+  },
+
+  subscribeMessages(params: {
+    ticketId: string;
+    callback: (messages: ChatMessage[]) => void;
+  }): () => void {
+    if (!db || !params.ticketId) return () => {};
+    const q = query(collection(db, "livechat_tickets", params.ticketId, "messages"), orderBy("timestamp", "asc"));
+    return onSnapshot(q, async (s: any) => {
+      const list: ChatMessage[] = [];
+      for (const d of s.docs) {
+        const data = d.data();
+        let text = data.text || "";
+        if (data.isEncrypted) {
+          try { text = await decryptMessage(text); } catch { text = "[Encrypted]"; }
+        }
+        list.push({ id: d.id, ...data, text } as ChatMessage);
+      }
+      params.callback(list);
+    });
+  },
+
+  subscribeTicketPreviews(params: {
+    ticketId: string;
+    callback: (previews: LastMessagePreview[], count: number) => void;
+  }): () => void {
+    if (!db || !params.ticketId) return () => {};
+    const q = query(collection(db, "livechat_tickets", params.ticketId, "messages"), orderBy("timestamp", "desc"), limit(3));
+    return onSnapshot(q, async (s: any) => {
+      const prevs: LastMessagePreview[] = [];
+      for (const d of s.docs) {
+        const data = d.data();
+        let text = data.text || "";
+        if (data.isEncrypted) {
+          try { text = await decryptMessage(text); } catch { text = "[Encrypted]"; }
+        }
+        prevs.push({
+          text,
+          senderName: data.senderName || "User",
+          timestamp: data.timestamp,
+          isFromAgent: data.senderName === AGENT_NAME,
+        });
+      }
+      params.callback(prevs, s.size);
+    });
+  },
+
+  subscribeAppealMessages(params: {
+    ticketId: string;
+    callback: (messages: AppealMessage[]) => void;
+  }): () => void {
+    if (!db || !params.ticketId) return () => {};
+    const q = query(collection(db, "appeal_tickets", params.ticketId, "messages"), orderBy("timestamp", "asc"));
+    return onSnapshot(q, async (s: any) => {
+      const list: AppealMessage[] = [];
+      for (const d of s.docs) {
+        const data = d.data();
+        let text = data.text || "";
+        if (data.isEncrypted) {
+          try { text = await decryptMessage(text); } catch { text = "[Encrypted]"; }
+        }
+        list.push({ id: d.id, ...data, text } as AppealMessage);
+      }
+      params.callback(list);
+    });
+  },
+
+  subscribeAppealTickets(params: {
+    user: any;
+    isAdmin: boolean;
+    callback: (tickets: AppealTicket[]) => void;
+  }): () => void {
+    if (!db || !params.user) return () => {};
+    const q = params.isAdmin
+      ? query(collection(db, "appeal_tickets"), orderBy("createdAt", "desc"))
+      : query(collection(db, "appeal_tickets"), where("userId", "==", params.user.uid), orderBy("createdAt", "desc"));
+    return onSnapshot(q, (s: any) => {
+      const list: AppealTicket[] = [];
+      s.forEach((d: any) => list.push({ id: d.id, ...d.data() } as AppealTicket));
+      params.callback(list);
+    });
+  },
+
+  subscribeOnlineUsers(callback: (users: OnlineUser[]) => void): () => void {
+    if (!db) return () => {};
+    const unsub = onSnapshot(query(collection(db, "users"), where("online", "==", true)), (s: any) => {
+      const users: OnlineUser[] = [];
+      s.forEach((d: any) => {
+        const data = d.data();
+        const item: OnlineUser = {
+          uid: d.id,
+          displayName: data.displayName || data.name || data.email || "User",
+          email: data.email || "",
+          photoURL: data.photoURL || "",
+          online: data.online || false,
+          lastSeen: data.lastSeen,
+          isAgent: data.email === ADMIN_EMAIL,
+          isAnonymous: data.isAnonymous === true,
+        };
+        if (!item.isAgent) users.push(item);
+      });
+      callback(users);
+    });
+    return unsub;
+  },
+
+  subscribeHasAppeal(userId: string, callback: (has: boolean) => void): () => void {
+    if (!db || !userId) return () => {};
+    const unsub = onSnapshot(
+      query(collection(db, "appeal_tickets"), where("userId", "==", userId), orderBy("createdAt", "desc"), limit(1)),
+      (s: any) => callback(!s.empty)
+    );
+    return unsub;
+  },
+};
 
 // ===== FARID VERIFIED PANEL =====
 const FaridVerifiedPanel = ({ open, anchorRect, onClose }: { open: boolean; anchorRect: DOMRect | null; onClose: () => void; }) => {
@@ -1715,24 +2181,19 @@ const AppealChatRoom = ({ user, isAdmin, db, appealTicket, onClose }: any) => {
   useEffect(() => { getCryptoKey().then(() => setEncryptionReady(true)).catch(() => setEncryptionReady(true)); }, []);
   useEffect(() => {
     if (!db || !appealTicket) return;
-    const q = query(collection(db, "appeal_tickets", appealTicket.id, "messages"), orderBy("timestamp", "asc"));
-    const unsub = onSnapshot(q, async (snap: any) => {
-      const list: AppealMessage[] = [];
-      for (const d of snap.docs) {
-        const data = d.data();
-        let text = data.text || "";
-        if (data.isEncrypted) { try { text = await decryptMessage(text); } catch { text = "[Encrypted]"; } }
-        list.push({ id: d.id, ...data, text } as AppealMessage);
-      }
-      setMessages(list);
-      requestAnimationFrame(() => { if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight; });
+    const unsub = liveChatApi.subscribeAppealMessages({
+      ticketId: appealTicket.id,
+      callback: (list) => {
+        setMessages(list);
+        requestAnimationFrame(() => { if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight; });
+      },
     });
     return () => unsub();
   }, [db, appealTicket]);
   useEffect(() => {
     if (!db || !appealTicket || !user) return;
     messages.filter((m) => m.senderId !== user.uid && !m.read).forEach(async (msg) => {
-      await updateDoc(doc(db, "appeal_tickets", appealTicket.id, "messages", msg.id), { read: true, deliveryStatus: "read" });
+      await liveChatApi.markAsRead(appealTicket.id, msg.id).catch(() => {});
     });
   }, [messages, appealTicket, db, user]);
   useEffect(() => {
@@ -1747,25 +2208,26 @@ const AppealChatRoom = ({ user, isAdmin, db, appealTicket, onClose }: any) => {
     const value = e.target.value;
     setMessageText(value);
     if (!appealTicket || !user || !db) return;
-    const ref = doc(db, "appeal_tickets", appealTicket.id);
-    if (value.length > 0) await updateDoc(ref, { typing: true, typingUserId: user.uid, typingUserName: user.displayName || user.email || "User" });
-    else await updateDoc(ref, { typing: false, typingUserId: null, typingUserName: null });
+    await liveChatApi.setAppealTyping(appealTicket.id, user, value.length > 0);
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-    typingTimeoutRef.current = setTimeout(async () => { await updateDoc(ref, { typing: false, typingUserId: null, typingUserName: null }); }, 2000);
+    typingTimeoutRef.current = setTimeout(async () => { await liveChatApi.setAppealTyping(appealTicket.id, user, false); }, 2000);
   };
 
   const sendMessage = async () => {
     if (!db || !appealTicket || !messageText.trim() || !user || !encryptionReady) return;
-    try {
-      const ticketRef = doc(db, "appeal_tickets", appealTicket.id);
-      await updateDoc(ticketRef, { typing: false, typingUserId: null, typingUserName: null });
-      const senderName = isAdmin ? AGENT_NAME : user.displayName || user.email || "User";
-      const enc = await encryptMessage(messageText.trim());
-      await addDoc(collection(db, "appeal_tickets", appealTicket.id, "messages"), { senderId: user.uid, senderName, text: enc, timestamp: serverTimestamp(), read: false, isEncrypted: true, deliveryStatus: "sent", replyTo: replyTo ? { messageId: replyTo.id, senderName: replyTo.senderName, text: replyTo.text.length > 50 ? replyTo.text.substring(0, 50) + "..." : replyTo.text } : null });
-      await updateDoc(ticketRef, { lastMessage: messageText.trim(), lastMessageTime: serverTimestamp(), lastMessageSender: senderName, status: "active", agentId: isAdmin ? user.uid : appealTicket.agentId, agentName: isAdmin ? AGENT_NAME : appealTicket.agentName });
+    const res = await liveChatApi.sendAppealMessage({
+      ticketId: appealTicket.id,
+      user,
+      text: messageText,
+      isAdmin,
+      replyTo,
+    });
+    if (res.success) {
       setMessageText(""); setReplyTo(null);
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-    } catch (e) { console.error(e); alert("An error occurred."); }
+    } else {
+      alert("An error occurred.");
+    }
   };
 
   const renderDeliveryStatus = (msg: AppealMessage, isMine: boolean) => {
@@ -1898,41 +2360,37 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
     if (!user || !isMounted) { setCheckingBan(false); return; }
     (async () => {
       setCheckingBan(true);
-      try {
-        const s = await checkBanStatus(user.uid);
+      const res = await liveChatApi.checkBan(user.uid);
+      if (res.success && res.data) {
+        const s = res.data;
         if (s.isBanned) { setIsBanned(true); setBanReason(s.reason); setCanCreateTicket(s.canCreateTicket); setCanSendMessage(s.canSendMessage); setBanMessage(`YOUR ACCOUNT HAS BEEN PERMANENTLY BANNED\n\nReason: ${s.reason}`); }
         else { setIsBanned(false); setBanReason(""); setCanCreateTicket(true); setCanSendMessage(true); setBanMessage(null); }
-      } catch (e) { console.error(e); } finally { setCheckingBan(false); }
+      }
+      setCheckingBan(false);
     })();
   }, [user, isMounted]);
 
   useEffect(() => {
     if (!db || !user || !isMounted) return;
-    const unsub = onSnapshot(query(collection(db, "appeal_tickets"), where("userId", "==", user.uid), orderBy("createdAt", "desc"), limit(1)), (s: any) => setHasAppeal(!s.empty));
+    const unsub = liveChatApi.subscribeHasAppeal(user.uid, (has) => setHasAppeal(has));
     return () => unsub();
   }, [db, user, isMounted]);
 
   useEffect(() => {
     if (!db || !user || !isMounted) return;
-    const q = isAdmin ? query(collection(db, "appeal_tickets"), orderBy("createdAt", "desc")) : query(collection(db, "appeal_tickets"), where("userId", "==", user.uid), orderBy("createdAt", "desc"));
-    const unsub = onSnapshot(q, (s: any) => { const list: AppealTicket[] = []; s.forEach((d: any) => list.push({ id: d.id, ...d.data() } as AppealTicket)); setAppealTickets(list); });
+    const unsub = liveChatApi.subscribeAppealTickets({ user, isAdmin, callback: setAppealTickets });
     return () => unsub();
   }, [db, user, isAdmin, isMounted]);
 
   useEffect(() => {
     if (!db || !isMounted) return;
-    const unsub = onSnapshot(query(collection(db, "users"), where("online", "==", true)), (s: any) => {
-      const users: OnlineUser[] = [];
-      s.forEach((d: any) => { const data = d.data(); const item: OnlineUser = { uid: d.id, displayName: data.displayName || data.name || data.email || "User", email: data.email || "", photoURL: data.photoURL || "", online: data.online || false, lastSeen: data.lastSeen, isAgent: data.email === ADMIN_EMAIL, isAnonymous: data.isAnonymous === true }; if (!item.isAgent) users.push(item); });
-      setOnlineUsers(users);
-    });
+    const unsub = liveChatApi.subscribeOnlineUsers(setOnlineUsers);
     return () => unsub();
   }, [db, isMounted]);
 
   useEffect(() => {
     if (!db || !user || !isMounted) return;
-    const q = isAdmin ? query(collection(db, "livechat_tickets"), orderBy("createdAt", "desc")) : query(collection(db, "livechat_tickets"), where("userId", "==", user.uid), orderBy("createdAt", "desc"));
-    const unsub = onSnapshot(q, (s: any) => { const list: Ticket[] = []; s.forEach((d: any) => list.push({ id: d.id, ...d.data() } as Ticket)); setTickets(list); setSelectedTicket((p) => p ? list.find((t) => t.id === p.id) || p : p); });
+    const unsub = liveChatApi.subscribeTickets({ user, isAdmin, callback: (list) => { setTickets(list); setSelectedTicket((p) => p ? list.find((t) => t.id === p.id) || p : p); } });
     return () => unsub();
   }, [db, user, isAdmin, isMounted]);
 
@@ -1940,12 +2398,12 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
     if (!db || !tickets.length || !isMounted) return;
     const unsubs: (() => void)[] = [];
     tickets.forEach((t) => {
-      const q = query(collection(db, "livechat_tickets", t.id, "messages"), orderBy("timestamp", "desc"), limit(3));
-      const u = onSnapshot(q, async (s: any) => {
-        setTicketMsgCounts((p) => ({ ...p, [t.id]: s.size }));
-        const prevs: LastMessagePreview[] = [];
-        for (const d of s.docs) { const data = d.data(); let text = data.text || ""; if (data.isEncrypted) { try { text = await decryptMessage(text); } catch { text = "[Encrypted]"; } } prevs.push({ text, senderName: data.senderName || "User", timestamp: data.timestamp, isFromAgent: data.senderName === AGENT_NAME }); }
-        setTicketPreviews((p) => ({ ...p, [t.id]: prevs }));
+      const u = liveChatApi.subscribeTicketPreviews({
+        ticketId: t.id,
+        callback: (prevs, count) => {
+          setTicketMsgCounts((p) => ({ ...p, [t.id]: count }));
+          setTicketPreviews((p) => ({ ...p, [t.id]: prevs }));
+        },
       });
       unsubs.push(u);
     });
@@ -1956,15 +2414,21 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
     if (!db || !selectedTicket || !isMounted) return;
     const tid = selectedTicket.id;
     if (cacheRef.current[tid]) { setMessages(cacheRef.current[tid]); prevLenRef.current = cacheRef.current[tid].length; }
-    const q = query(collection(db, "livechat_tickets", tid, "messages"), orderBy("timestamp", "asc"));
-    const unsub = onSnapshot(q, async (s: any) => {
-      const list: ChatMessage[] = [];
-      for (const d of s.docs) { const data = d.data(); let text = data.text || ""; if (data.isEncrypted) { try { text = await decryptMessage(text); } catch { text = "[Encrypted]"; } } list.push({ id: d.id, ...data, text } as ChatMessage); }
-      if (prevLenRef.current > 0 && list.length > prevLenRef.current) { const newest = list[list.length - 1]; if (newest) { setLatestRollingMessage({ text: newest.text, senderName: newest.senderName || "User", timestamp: newest.timestamp, isFromAgent: newest.senderName === AGENT_NAME }); setRollingKey((k) => k + 1); } }
-      prevLenRef.current = list.length;
-      cacheRef.current[tid] = list;
-      setMessages(list);
-      requestAnimationFrame(() => { if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight; });
+    const unsub = liveChatApi.subscribeMessages({
+      ticketId: tid,
+      callback: (list) => {
+        if (prevLenRef.current > 0 && list.length > prevLenRef.current) {
+          const newest = list[list.length - 1];
+          if (newest) {
+            setLatestRollingMessage({ text: newest.text, senderName: newest.senderName || "User", timestamp: newest.timestamp, isFromAgent: newest.senderName === AGENT_NAME });
+            setRollingKey((k) => k + 1);
+          }
+        }
+        prevLenRef.current = list.length;
+        cacheRef.current[tid] = list;
+        setMessages(list);
+        requestAnimationFrame(() => { if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight; });
+      },
     });
     return () => unsub();
   }, [db, selectedTicket, isMounted]);
@@ -1973,7 +2437,9 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
 
   useEffect(() => {
     if (!db || !selectedTicket || !user || !isAdmin || !isMounted) return;
-    messages.filter((m) => m.senderId !== user.uid && !m.read).forEach(async (msg) => { await updateDoc(doc(db, "livechat_tickets", selectedTicket.id, "messages", msg.id), { read: true, deliveryStatus: "read" }); });
+    messages.filter((m) => m.senderId !== user.uid && !m.read).forEach(async (msg) => {
+      await liveChatApi.markAsRead(selectedTicket.id, msg.id).catch(() => {});
+    });
   }, [messages, selectedTicket, db, user, isAdmin, isMounted]);
 
   const hasAuto = useRef(false);
@@ -1997,16 +2463,19 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
   const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const v = e.target.value; setMessageText(v);
     if (!selectedTicket || !user || !db || isBanned) return;
-    const ref = doc(db, "livechat_tickets", selectedTicket.id);
-    if (v.length > 0) await updateDoc(ref, { typing: true, typingUserId: user.uid, typingUserName: isAdmin ? AGENT_NAME : user.displayName || user.email || "User" });
-    else await updateDoc(ref, { typing: false, typingUserId: null, typingUserName: null });
+    await liveChatApi.setTyping(selectedTicket.id, user, v.length > 0, isAdmin);
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-    typingTimeoutRef.current = setTimeout(async () => { await updateDoc(ref, { typing: false, typingUserId: null, typingUserName: null }); }, 2000);
+    typingTimeoutRef.current = setTimeout(async () => { await liveChatApi.setTyping(selectedTicket.id, user, false, isAdmin); }, 2000);
   };
 
   const checkBanBefore = async (): Promise<boolean> => {
     if (!user) return true;
-    try { const s = await checkBanStatus(user.uid); if (s.isBanned) { setIsBanned(true); setBanReason(s.reason); setCanCreateTicket(s.canCreateTicket); setCanSendMessage(s.canSendMessage); setBanMessage(`YOUR ACCOUNT HAS BEEN PERMANENTLY BANNED\n\nReason: ${s.reason}`); return true; } return false; } catch { return false; }
+    const res = await liveChatApi.checkBan(user.uid);
+    if (res.success && res.data) {
+      const s = res.data;
+      if (s.isBanned) { setIsBanned(true); setBanReason(s.reason); setCanCreateTicket(s.canCreateTicket); setCanSendMessage(s.canSendMessage); setBanMessage(`YOUR ACCOUNT HAS BEEN PERMANENTLY BANNED\n\nReason: ${s.reason}`); return true; }
+    }
+    return false;
   };
 
   const startChat = async () => {
@@ -2014,13 +2483,12 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
     if (!canCreateTicket) { setBanMessage("YOU DO NOT HAVE PERMISSION TO CREATE A NEW TICKET"); return; }
     if (!encryptionReady) { alert("Encryption is being initialized."); return; }
     if (tickets.some((t) => t.userId === user.uid && (t.status === "waiting" || t.status === "active") && !t.isAnnouncement && !t.isBroadcast)) { alert("You still have an active chat."); return; }
-    try {
-      const ref = await addDoc(collection(db, "livechat_tickets"), { userId: user.uid, userName: user.displayName || user.email || "User", userEmail: user.email, userPhoto: user.photoURL || "", status: "waiting", topic: selectedTopic, createdAt: serverTimestamp(), unreadCount: 0, typing: false, typingUserId: null, typingUserName: null, isAnnouncement: false, isBroadcast: false });
-      const initial = `Hello, I would like to ask about: ${selectedTopic}`;
-      await addDoc(collection(db, "livechat_tickets", ref.id, "messages"), { senderId: user.uid, senderName: user.displayName || user.email || "User", text: await encryptMessage(initial), timestamp: serverTimestamp(), read: false, isEncrypted: true, isBotDetected: false, deliveryStatus: "sent" });
-      await updateDoc(ref, { lastMessage: initial, lastMessageTime: serverTimestamp(), lastMessageSender: user.displayName || user.email || "User" });
+    const res = await liveChatApi.createTicket({ user, topic: selectedTopic });
+    if (res.success) {
       setSelectedTopic(""); setShowStartChat(false); setBanMessage(null); hasAuto.current = false;
-    } catch (e) { console.error(e); alert("An error occurred."); }
+    } else {
+      alert("An error occurred.");
+    }
   };
 
   const sendMessage = async () => {
@@ -2029,37 +2497,41 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
       if (await checkBanBefore()) { setMessageText(""); return; }
       if (!canSendMessage) { setBanMessage("NO PERMISSION"); setMessageText(""); return; }
       const r = containsBannedContent(messageText);
-      if (r.isBanned) { await banUserPermanent(user.uid, user.email || "", user.displayName || "User", r.reason, messageText); setIsBanned(true); setBanReason(r.reason); setCanCreateTicket(false); setCanSendMessage(false); setBanMessage(`BANNED\n\nReason: ${r.reason}`); setMessageText(""); return; }
+      if (r.isBanned) {
+        await liveChatApi.banUser(user.uid, user.email || "", user.displayName || "User", r.reason, messageText);
+        setIsBanned(true); setBanReason(r.reason); setCanCreateTicket(false); setCanSendMessage(false); setBanMessage(`BANNED\n\nReason: ${r.reason}`); setMessageText(""); return;
+      }
     }
     if (!encryptionReady) { alert("Encryption init..."); return; }
     if (selectedTicket.status === "resolved" || selectedTicket.status === "closed") { alert("This chat is finished."); return; }
-    try {
-      const ref = doc(db, "livechat_tickets", selectedTicket.id);
-      await updateDoc(ref, { typing: false, typingUserId: null, typingUserName: null });
-      const senderName = isAdmin ? AGENT_NAME : user.displayName || user.email || "User";
-      await addDoc(collection(db, "livechat_tickets", selectedTicket.id, "messages"), { senderId: user.uid, senderName, text: await encryptMessage(messageText.trim()), timestamp: serverTimestamp(), read: false, isEncrypted: true, isBotDetected: false, deliveryStatus: "sent", replyTo: replyTo ? { messageId: replyTo.id, senderName: replyTo.senderName, text: replyTo.text.length > 50 ? replyTo.text.substring(0, 50) + "..." : replyTo.text } : null });
-      await updateDoc(ref, { lastMessage: messageText.trim(), lastMessageTime: serverTimestamp(), lastMessageSender: senderName, ...(selectedTicket.status === "waiting" && { status: "active" }), ...(isAdmin && { agentId: user.uid, agentName: AGENT_NAME, status: selectedTicket.status === "waiting" ? "active" : selectedTicket.status }) });
+    const res = await liveChatApi.sendMessage({ ticket: selectedTicket, user, text: messageText, isAdmin, replyTo });
+    if (res.success) {
       setMessageText(""); setBanMessage(null); setReplyTo(null);
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-    } catch (e) { console.error(e); alert("An error occurred."); }
+    } else {
+      alert("An error occurred.");
+    }
   };
 
-  const takeTicket = async (id: string) => { if (!db || !isAdmin || !user) return; try { await updateDoc(doc(db, "livechat_tickets", id), { agentId: user.uid, agentName: AGENT_NAME, status: "active" }); } catch {} };
-  const resolveTicket = async (id: string) => { if (!db || !isAdmin) return; try { await updateDoc(doc(db, "livechat_tickets", id), { status: "resolved" }); } catch {} };
-  const handleCloseRoom = async () => { if (!db || !selectedTicket) return; try { await updateDoc(doc(db, "livechat_tickets", selectedTicket.id), { status: "closed" }); setShowCloseConfirm(true); setTimeout(() => setShowCloseConfirm(false), 2200); } catch {} };
+  const takeTicket = async (id: string) => { if (!isAdmin || !user) return; await liveChatApi.takeTicket(id, user); };
+  const resolveTicket = async (id: string) => { if (!isAdmin) return; await liveChatApi.resolveTicket(id); };
+  const handleCloseRoom = async () => {
+    if (!selectedTicket) return;
+    const res = await liveChatApi.closeTicket(selectedTicket.id);
+    if (res.success) { setShowCloseConfirm(true); setTimeout(() => setShowCloseConfirm(false), 2200); }
+  };
 
   const createAppealTicket = async () => {
     if (!db || !user || !isBanned) return;
-    try {
-      const exist = appealTickets.find((t) => t.userId === user.uid && t.status !== "closed" && t.status !== "resolved");
-      if (exist) { onOpenBannedAppealChat(exist); return; }
-      const ref = await addDoc(collection(db, "appeal_tickets"), { userId: user.uid, userName: user.displayName || user.email || "User", userEmail: user.email, userPhoto: user.photoURL || "", status: "waiting", topic: "Banding Banned", banReason, banMessage: banMessage || "", createdAt: serverTimestamp(), unreadCount: 0, typing: false, typingUserId: null, typingUserName: null });
-      const init = `Saya mengajukan banding.\n\nAlasan: ${banReason}`;
-      await addDoc(collection(db, "appeal_tickets", ref.id, "messages"), { senderId: user.uid, senderName: user.displayName || user.email || "User", text: await encryptMessage(init), timestamp: serverTimestamp(), read: false, isEncrypted: true, deliveryStatus: "sent" });
-      await updateDoc(ref, { lastMessage: init, lastMessageTime: serverTimestamp(), lastMessageSender: user.displayName || user.email || "User" });
-      onOpenBannedAppealChat({ id: ref.id, userId: user.uid, userName: user.displayName || user.email || "User", userEmail: user.email, status: "waiting", topic: "Banding Banned", banReason, banMessage: banMessage || "", createdAt: new Date(), unreadCount: 0, typing: false });
+    const exist = appealTickets.find((t) => t.userId === user.uid && t.status !== "closed" && t.status !== "resolved");
+    if (exist) { onOpenBannedAppealChat(exist); return; }
+    const res = await liveChatApi.createAppealTicket({ user, banReason, banMessage: banMessage || "" });
+    if (res.success && res.data) {
+      onOpenBannedAppealChat({ id: res.data.ticketId, userId: user.uid, userName: user.displayName || user.email || "User", userEmail: user.email, status: "waiting", topic: "Banding Banned", banReason, banMessage: banMessage || "", createdAt: new Date(), unreadCount: 0, typing: false });
       setHasAppeal(true);
-    } catch (e) { console.error(e); alert("Gagal membuat tiket banding."); }
+    } else {
+      alert("Gagal membuat tiket banding.");
+    }
   };
 
   const renderDeliveryStatus = (msg: ChatMessage, isMine: boolean) => {
@@ -2285,7 +2757,10 @@ export default function HomePage(): React.JSX.Element {
     if (!auth || !isMounted) return;
     const unsub = onAuthStateChanged(auth, async (cu: any) => {
       setUser(cu); setLoading(false);
-      if (cu) { setIsAdmin(cu.email === ADMIN_EMAIL); try { await updateDoc(doc(db, "users", cu.uid), { online: true, lastSeen: serverTimestamp(), email: cu.email || "", displayName: cu.displayName || cu.email?.split("@")[0] || "User", photoURL: cu.photoURL || "" }); } catch (e) { console.error(e); } }
+      if (cu) {
+        setIsAdmin(cu.email === ADMIN_EMAIL);
+        await liveChatApi.setOnline(cu);
+      }
     });
     return () => unsub();
   }, [isMounted]);
