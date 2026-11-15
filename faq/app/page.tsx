@@ -19,7 +19,6 @@ import {
   getDoc,
   setDoc,
   limit,
-  deleteDoc,
 } from "firebase/firestore";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -450,471 +449,6 @@ interface InviteUser { uid: string; displayName: string; email: string; photoURL
 interface NoteInvitation { id: string; noteId: string; noteTitle: string; inviterId: string; inviterName: string; inviterEmail: string; inviteeId: string; inviteeEmail: string; status: "pending" | "accepted" | "declined"; createdAt: any; }
 interface PasskeyRecord { id: string; credentialId: string; name: string; createdAt: number; transports?: string[]; }
 
-// ===== LIVE CHAT API LAYER =====
-// Kumpulan API untuk semua operasi Live Chat Agent & Appeal.
-// Konsisten return: { success: boolean; data?: any; error?: string }
-type ApiResult<T = any> = { success: boolean; data?: T; error?: string };
-
-const liveChatApi = {
-  // ---- ENCRYPTION WRAPPERS ----
-  async encrypt(text: string): Promise<string> {
-    return encryptMessage(text);
-  },
-  async decrypt(text: string): Promise<string> {
-    return decryptMessage(text);
-  },
-
-  // ---- PRESENCE ----
-  async setOnline(user: any): Promise<ApiResult> {
-    if (!db || !user) return { success: false, error: "No user/db" };
-    try {
-      await updateDoc(doc(db, "users", user.uid), {
-        online: true,
-        lastSeen: serverTimestamp(),
-        email: user.email || "",
-        displayName: user.displayName || user.email?.split("@")[0] || "User",
-        photoURL: user.photoURL || "",
-      });
-      return { success: true };
-    } catch (e: any) {
-      return { success: false, error: e?.message || "setOnline failed" };
-    }
-  },
-
-  async setOffline(user: any): Promise<ApiResult> {
-    if (!db || !user) return { success: false, error: "No user/db" };
-    try {
-      await updateDoc(doc(db, "users", user.uid), { online: false, lastSeen: serverTimestamp() });
-      return { success: true };
-    } catch (e: any) {
-      return { success: false, error: e?.message || "setOffline failed" };
-    }
-  },
-
-  // ---- BAN STATUS ----
-  async checkBan(userId: string): Promise<ApiResult> {
-    try {
-      const status = await checkBanStatus(userId);
-      return { success: true, data: status };
-    } catch (e: any) {
-      return { success: false, error: e?.message || "checkBan failed" };
-    }
-  },
-
-  async banUser(userId: string, userEmail: string, userName: string, reason: string, message: string): Promise<ApiResult> {
-    try {
-      await banUserPermanent(userId, userEmail, userName, reason, message);
-      return { success: true };
-    } catch (e: any) {
-      return { success: false, error: e?.message || "banUser failed" };
-    }
-  },
-
-  // ---- TICKETS ----
-  async createTicket(params: {
-    user: any;
-    topic: string;
-  }): Promise<ApiResult<{ ticketId: string }>> {
-    if (!db || !params.user || !params.topic) return { success: false, error: "Invalid params" };
-    try {
-      const user = params.user;
-      const ref = await addDoc(collection(db, "livechat_tickets"), {
-        userId: user.uid,
-        userName: user.displayName || user.email || "User",
-        userEmail: user.email,
-        userPhoto: user.photoURL || "",
-        status: "waiting",
-        topic: params.topic,
-        createdAt: serverTimestamp(),
-        unreadCount: 0,
-        typing: false,
-        typingUserId: null,
-        typingUserName: null,
-        isAnnouncement: false,
-        isBroadcast: false,
-      });
-      const initialText = `Hello, I would like to ask about: ${params.topic}`;
-      await addDoc(collection(db, "livechat_tickets", ref.id, "messages"), {
-        senderId: user.uid,
-        senderName: user.displayName || user.email || "User",
-        text: await encryptMessage(initialText),
-        timestamp: serverTimestamp(),
-        read: false,
-        isEncrypted: true,
-        isBotDetected: false,
-        deliveryStatus: "sent",
-      });
-      await updateDoc(ref, {
-        lastMessage: initialText,
-        lastMessageTime: serverTimestamp(),
-        lastMessageSender: user.displayName || user.email || "User",
-      });
-      return { success: true, data: { ticketId: ref.id } };
-    } catch (e: any) {
-      return { success: false, error: e?.message || "createTicket failed" };
-    }
-  },
-
-  async getTicket(ticketId: string): Promise<ApiResult<Ticket | null>> {
-    if (!db || !ticketId) return { success: false, error: "Invalid params" };
-    try {
-      const snap = await getDoc(doc(db, "livechat_tickets", ticketId));
-      if (!snap.exists()) return { success: true, data: null };
-      return { success: true, data: { id: snap.id, ...snap.data() } as Ticket };
-    } catch (e: any) {
-      return { success: false, error: e?.message || "getTicket failed" };
-    }
-  },
-
-  async takeTicket(ticketId: string, agent: any): Promise<ApiResult> {
-    if (!db || !ticketId || !agent) return { success: false, error: "Invalid params" };
-    try {
-      await updateDoc(doc(db, "livechat_tickets", ticketId), {
-        agentId: agent.uid,
-        agentName: AGENT_NAME,
-        status: "active",
-      });
-      return { success: true };
-    } catch (e: any) {
-      return { success: false, error: e?.message || "takeTicket failed" };
-    }
-  },
-
-  async resolveTicket(ticketId: string): Promise<ApiResult> {
-    if (!db || !ticketId) return { success: false, error: "Invalid params" };
-    try {
-      await updateDoc(doc(db, "livechat_tickets", ticketId), { status: "resolved" });
-      return { success: true };
-    } catch (e: any) {
-      return { success: false, error: e?.message || "resolveTicket failed" };
-    }
-  },
-
-  async closeTicket(ticketId: string): Promise<ApiResult> {
-    if (!db || !ticketId) return { success: false, error: "Invalid params" };
-    try {
-      await updateDoc(doc(db, "livechat_tickets", ticketId), { status: "closed" });
-      return { success: true };
-    } catch (e: any) {
-      return { success: false, error: e?.message || "closeTicket failed" };
-    }
-  },
-
-  async setTyping(ticketId: string, user: any, isTyping: boolean, isAdmin: boolean): Promise<ApiResult> {
-    if (!db || !ticketId || !user) return { success: false, error: "Invalid params" };
-    try {
-      await updateDoc(doc(db, "livechat_tickets", ticketId), {
-        typing: isTyping,
-        typingUserId: isTyping ? user.uid : null,
-        typingUserName: isTyping ? (isAdmin ? AGENT_NAME : user.displayName || user.email || "User") : null,
-      });
-      return { success: true };
-    } catch (e: any) {
-      return { success: false, error: e?.message || "setTyping failed" };
-    }
-  },
-
-  // ---- MESSAGES ----
-  async sendMessage(params: {
-    ticket: Ticket;
-    user: any;
-    text: string;
-    isAdmin: boolean;
-    replyTo?: ChatMessage | null;
-  }): Promise<ApiResult> {
-    const { ticket, user, text, isAdmin, replyTo } = params;
-    if (!db || !ticket || !user || !text.trim()) return { success: false, error: "Invalid params" };
-    try {
-      const ref = doc(db, "livechat_tickets", ticket.id);
-      await updateDoc(ref, { typing: false, typingUserId: null, typingUserName: null });
-      const senderName = isAdmin ? AGENT_NAME : user.displayName || user.email || "User";
-      const enc = await encryptMessage(text.trim());
-      await addDoc(collection(db, "livechat_tickets", ticket.id, "messages"), {
-        senderId: user.uid,
-        senderName,
-        text: enc,
-        timestamp: serverTimestamp(),
-        read: false,
-        isEncrypted: true,
-        isBotDetected: false,
-        deliveryStatus: "sent",
-        replyTo: replyTo
-          ? {
-              messageId: replyTo.id,
-              senderName: replyTo.senderName,
-              text: replyTo.text.length > 50 ? replyTo.text.substring(0, 50) + "..." : replyTo.text,
-            }
-          : null,
-      });
-      await updateDoc(ref, {
-        lastMessage: text.trim(),
-        lastMessageTime: serverTimestamp(),
-        lastMessageSender: senderName,
-        ...(ticket.status === "waiting" && { status: "active" }),
-        ...(isAdmin && {
-          agentId: user.uid,
-          agentName: AGENT_NAME,
-          status: ticket.status === "waiting" ? "active" : ticket.status,
-        }),
-      });
-      return { success: true };
-    } catch (e: any) {
-      return { success: false, error: e?.message || "sendMessage failed" };
-    }
-  },
-
-  async markAsRead(ticketId: string, messageId: string): Promise<ApiResult> {
-    if (!db || !ticketId || !messageId) return { success: false, error: "Invalid params" };
-    try {
-      await updateDoc(doc(db, "livechat_tickets", ticketId, "messages", messageId), {
-        read: true,
-        deliveryStatus: "read",
-      });
-      return { success: true };
-    } catch (e: any) {
-      return { success: false, error: e?.message || "markAsRead failed" };
-    }
-  },
-
-  // ---- APPEALS ----
-  async createAppealTicket(params: {
-    user: any;
-    banReason: string;
-    banMessage: string;
-  }): Promise<ApiResult<{ ticketId: string }>> {
-    if (!db || !params.user) return { success: false, error: "Invalid params" };
-    try {
-      const user = params.user;
-      const ref = await addDoc(collection(db, "appeal_tickets"), {
-        userId: user.uid,
-        userName: user.displayName || user.email || "User",
-        userEmail: user.email,
-        userPhoto: user.photoURL || "",
-        status: "waiting",
-        topic: "Banding Banned",
-        banReason: params.banReason,
-        banMessage: params.banMessage || "",
-        createdAt: serverTimestamp(),
-        unreadCount: 0,
-        typing: false,
-        typingUserId: null,
-        typingUserName: null,
-      });
-      const init = `Saya mengajukan banding.\n\nAlasan: ${params.banReason}`;
-      await addDoc(collection(db, "appeal_tickets", ref.id, "messages"), {
-        senderId: user.uid,
-        senderName: user.displayName || user.email || "User",
-        text: await encryptMessage(init),
-        timestamp: serverTimestamp(),
-        read: false,
-        isEncrypted: true,
-        deliveryStatus: "sent",
-      });
-      await updateDoc(ref, {
-        lastMessage: init,
-        lastMessageTime: serverTimestamp(),
-        lastMessageSender: user.displayName || user.email || "User",
-      });
-      return { success: true, data: { ticketId: ref.id } };
-    } catch (e: any) {
-      return { success: false, error: e?.message || "createAppealTicket failed" };
-    }
-  },
-
-  async sendAppealMessage(params: {
-    ticketId: string;
-    user: any;
-    text: string;
-    isAdmin: boolean;
-    replyTo?: AppealMessage | null;
-  }): Promise<ApiResult> {
-    const { ticketId, user, text, isAdmin, replyTo } = params;
-    if (!db || !ticketId || !user || !text.trim()) return { success: false, error: "Invalid params" };
-    try {
-      const ref = doc(db, "appeal_tickets", ticketId);
-      await updateDoc(ref, { typing: false, typingUserId: null, typingUserName: null });
-      const senderName = isAdmin ? AGENT_NAME : user.displayName || user.email || "User";
-      const enc = await encryptMessage(text.trim());
-      await addDoc(collection(db, "appeal_tickets", ticketId, "messages"), {
-        senderId: user.uid,
-        senderName,
-        text: enc,
-        timestamp: serverTimestamp(),
-        read: false,
-        isEncrypted: true,
-        deliveryStatus: "sent",
-        replyTo: replyTo
-          ? {
-              messageId: replyTo.id,
-              senderName: replyTo.senderName,
-              text: replyTo.text.length > 50 ? replyTo.text.substring(0, 50) + "..." : replyTo.text,
-            }
-          : null,
-      });
-      await updateDoc(ref, {
-        lastMessage: text.trim(),
-        lastMessageTime: serverTimestamp(),
-        lastMessageSender: senderName,
-        status: "active",
-        agentId: isAdmin ? user.uid : undefined,
-        agentName: isAdmin ? AGENT_NAME : undefined,
-      });
-      return { success: true };
-    } catch (e: any) {
-      return { success: false, error: e?.message || "sendAppealMessage failed" };
-    }
-  },
-
-  async setAppealTyping(ticketId: string, user: any, isTyping: boolean): Promise<ApiResult> {
-    if (!db || !ticketId || !user) return { success: false, error: "Invalid params" };
-    try {
-      const ref = doc(db, "appeal_tickets", ticketId);
-      if (isTyping) {
-        await updateDoc(ref, {
-          typing: true,
-          typingUserId: user.uid,
-          typingUserName: user.displayName || user.email || "User",
-        });
-      } else {
-        await updateDoc(ref, { typing: false, typingUserId: null, typingUserName: null });
-      }
-      return { success: true };
-    } catch (e: any) {
-      return { success: false, error: e?.message || "setAppealTyping failed" };
-    }
-  },
-
-  // ---- SUBSCRIPTIONS ----
-  subscribeTickets(params: {
-    user: any;
-    isAdmin: boolean;
-    callback: (tickets: Ticket[]) => void;
-  }): () => void {
-    if (!db || !params.user) return () => {};
-    const q = params.isAdmin
-      ? query(collection(db, "livechat_tickets"), orderBy("createdAt", "desc"))
-      : query(collection(db, "livechat_tickets"), where("userId", "==", params.user.uid), orderBy("createdAt", "desc"));
-    return onSnapshot(q, (s: any) => {
-      const list: Ticket[] = [];
-      s.forEach((d: any) => list.push({ id: d.id, ...d.data() } as Ticket));
-      params.callback(list);
-    });
-  },
-
-  subscribeMessages(params: {
-    ticketId: string;
-    callback: (messages: ChatMessage[]) => void;
-  }): () => void {
-    if (!db || !params.ticketId) return () => {};
-    const q = query(collection(db, "livechat_tickets", params.ticketId, "messages"), orderBy("timestamp", "asc"));
-    return onSnapshot(q, async (s: any) => {
-      const list: ChatMessage[] = [];
-      for (const d of s.docs) {
-        const data = d.data();
-        let text = data.text || "";
-        if (data.isEncrypted) {
-          try { text = await decryptMessage(text); } catch { text = "[Encrypted]"; }
-        }
-        list.push({ id: d.id, ...data, text } as ChatMessage);
-      }
-      params.callback(list);
-    });
-  },
-
-  subscribeTicketPreviews(params: {
-    ticketId: string;
-    callback: (previews: LastMessagePreview[], count: number) => void;
-  }): () => void {
-    if (!db || !params.ticketId) return () => {};
-    const q = query(collection(db, "livechat_tickets", params.ticketId, "messages"), orderBy("timestamp", "desc"), limit(3));
-    return onSnapshot(q, async (s: any) => {
-      const prevs: LastMessagePreview[] = [];
-      for (const d of s.docs) {
-        const data = d.data();
-        let text = data.text || "";
-        if (data.isEncrypted) {
-          try { text = await decryptMessage(text); } catch { text = "[Encrypted]"; }
-        }
-        prevs.push({
-          text,
-          senderName: data.senderName || "User",
-          timestamp: data.timestamp,
-          isFromAgent: data.senderName === AGENT_NAME,
-        });
-      }
-      params.callback(prevs, s.size);
-    });
-  },
-
-  subscribeAppealMessages(params: {
-    ticketId: string;
-    callback: (messages: AppealMessage[]) => void;
-  }): () => void {
-    if (!db || !params.ticketId) return () => {};
-    const q = query(collection(db, "appeal_tickets", params.ticketId, "messages"), orderBy("timestamp", "asc"));
-    return onSnapshot(q, async (s: any) => {
-      const list: AppealMessage[] = [];
-      for (const d of s.docs) {
-        const data = d.data();
-        let text = data.text || "";
-        if (data.isEncrypted) {
-          try { text = await decryptMessage(text); } catch { text = "[Encrypted]"; }
-        }
-        list.push({ id: d.id, ...data, text } as AppealMessage);
-      }
-      params.callback(list);
-    });
-  },
-
-  subscribeAppealTickets(params: {
-    user: any;
-    isAdmin: boolean;
-    callback: (tickets: AppealTicket[]) => void;
-  }): () => void {
-    if (!db || !params.user) return () => {};
-    const q = params.isAdmin
-      ? query(collection(db, "appeal_tickets"), orderBy("createdAt", "desc"))
-      : query(collection(db, "appeal_tickets"), where("userId", "==", params.user.uid), orderBy("createdAt", "desc"));
-    return onSnapshot(q, (s: any) => {
-      const list: AppealTicket[] = [];
-      s.forEach((d: any) => list.push({ id: d.id, ...d.data() } as AppealTicket));
-      params.callback(list);
-    });
-  },
-
-  subscribeOnlineUsers(callback: (users: OnlineUser[]) => void): () => void {
-    if (!db) return () => {};
-    const unsub = onSnapshot(query(collection(db, "users"), where("online", "==", true)), (s: any) => {
-      const users: OnlineUser[] = [];
-      s.forEach((d: any) => {
-        const data = d.data();
-        const item: OnlineUser = {
-          uid: d.id,
-          displayName: data.displayName || data.name || data.email || "User",
-          email: data.email || "",
-          photoURL: data.photoURL || "",
-          online: data.online || false,
-          lastSeen: data.lastSeen,
-          isAgent: data.email === ADMIN_EMAIL,
-          isAnonymous: data.isAnonymous === true,
-        };
-        if (!item.isAgent) users.push(item);
-      });
-      callback(users);
-    });
-    return unsub;
-  },
-
-  subscribeHasAppeal(userId: string, callback: (has: boolean) => void): () => void {
-    if (!db || !userId) return () => {};
-    const unsub = onSnapshot(
-      query(collection(db, "appeal_tickets"), where("userId", "==", userId), orderBy("createdAt", "desc"), limit(1)),
-      (s: any) => callback(!s.empty)
-    );
-    return unsub;
-  },
-};
-
 // ===== FARID VERIFIED PANEL =====
 const FaridVerifiedPanel = ({ open, anchorRect, onClose }: { open: boolean; anchorRect: DOMRect | null; onClose: () => void; }) => {
   const [phase, setPhase] = useState<"loading" | "expand" | "fullpage">("loading");
@@ -1052,30 +586,6 @@ const TopBanner = () => {
       </div>
       <FaridVerifiedPanel open={showPanel} anchorRect={anchorRect} onClose={handleClose} />
     </>
-  );
-};
-
-// ===== HERO TITLE =====
-const HeroMenuruTitle = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const titleRef = useRef<HTMLHeadingElement>(null);
-  const [isMounted, setIsMounted] = useState(false);
-  useEffect(() => setIsMounted(true), []);
-  useEffect(() => {
-    if (!isMounted || !titleRef.current) return;
-    const title = titleRef.current;
-    const ctx = gsap.context(() => {
-      const split = new SplitText(title, { type: "chars", charsClass: "hero-menuru-char" });
-      gsap.set(split.chars, { opacity: 0, y: 220, rotationX: -90, scale: 0.4, transformOrigin: "50% 100%", force3D: true });
-      gsap.to(split.chars, { opacity: 1, y: 0, rotationX: 0, scale: 1, duration: 1.4, stagger: 0.09, ease: "back.out(1.8)", delay: 0.2 });
-      return () => split.revert();
-    }, containerRef);
-    return () => ctx.revert();
-  }, [isMounted]);
-  return (
-    <div ref={containerRef} style={{ width: "100%", paddingTop: "120px", paddingBottom: "20px", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", backgroundColor: WHITE }}>
-      <h1 ref={titleRef} style={{ fontFamily: FONT_FAMILY, fontSize: "600px", fontWeight: 400, color: BLUE, letterSpacing: "-0.05em", lineHeight: 0.85, margin: 0, textAlign: "center", userSelect: "none", whiteSpace: "nowrap", display: "inline-block", WebkitFontSmoothing: "antialiased", MozOsxFontSmoothing: "grayscale" }}>Menuru</h1>
-    </div>
   );
 };
 
@@ -2181,19 +1691,24 @@ const AppealChatRoom = ({ user, isAdmin, db, appealTicket, onClose }: any) => {
   useEffect(() => { getCryptoKey().then(() => setEncryptionReady(true)).catch(() => setEncryptionReady(true)); }, []);
   useEffect(() => {
     if (!db || !appealTicket) return;
-    const unsub = liveChatApi.subscribeAppealMessages({
-      ticketId: appealTicket.id,
-      callback: (list) => {
-        setMessages(list);
-        requestAnimationFrame(() => { if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight; });
-      },
+    const q = query(collection(db, "appeal_tickets", appealTicket.id, "messages"), orderBy("timestamp", "asc"));
+    const unsub = onSnapshot(q, async (snap: any) => {
+      const list: AppealMessage[] = [];
+      for (const d of snap.docs) {
+        const data = d.data();
+        let text = data.text || "";
+        if (data.isEncrypted) { try { text = await decryptMessage(text); } catch { text = "[Encrypted]"; } }
+        list.push({ id: d.id, ...data, text } as AppealMessage);
+      }
+      setMessages(list);
+      requestAnimationFrame(() => { if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight; });
     });
     return () => unsub();
   }, [db, appealTicket]);
   useEffect(() => {
     if (!db || !appealTicket || !user) return;
     messages.filter((m) => m.senderId !== user.uid && !m.read).forEach(async (msg) => {
-      await liveChatApi.markAsRead(appealTicket.id, msg.id).catch(() => {});
+      await updateDoc(doc(db, "appeal_tickets", appealTicket.id, "messages", msg.id), { read: true, deliveryStatus: "read" });
     });
   }, [messages, appealTicket, db, user]);
   useEffect(() => {
@@ -2208,26 +1723,25 @@ const AppealChatRoom = ({ user, isAdmin, db, appealTicket, onClose }: any) => {
     const value = e.target.value;
     setMessageText(value);
     if (!appealTicket || !user || !db) return;
-    await liveChatApi.setAppealTyping(appealTicket.id, user, value.length > 0);
+    const ref = doc(db, "appeal_tickets", appealTicket.id);
+    if (value.length > 0) await updateDoc(ref, { typing: true, typingUserId: user.uid, typingUserName: user.displayName || user.email || "User" });
+    else await updateDoc(ref, { typing: false, typingUserId: null, typingUserName: null });
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-    typingTimeoutRef.current = setTimeout(async () => { await liveChatApi.setAppealTyping(appealTicket.id, user, false); }, 2000);
+    typingTimeoutRef.current = setTimeout(async () => { await updateDoc(ref, { typing: false, typingUserId: null, typingUserName: null }); }, 2000);
   };
 
   const sendMessage = async () => {
     if (!db || !appealTicket || !messageText.trim() || !user || !encryptionReady) return;
-    const res = await liveChatApi.sendAppealMessage({
-      ticketId: appealTicket.id,
-      user,
-      text: messageText,
-      isAdmin,
-      replyTo,
-    });
-    if (res.success) {
+    try {
+      const ticketRef = doc(db, "appeal_tickets", appealTicket.id);
+      await updateDoc(ticketRef, { typing: false, typingUserId: null, typingUserName: null });
+      const senderName = isAdmin ? AGENT_NAME : user.displayName || user.email || "User";
+      const enc = await encryptMessage(messageText.trim());
+      await addDoc(collection(db, "appeal_tickets", appealTicket.id, "messages"), { senderId: user.uid, senderName, text: enc, timestamp: serverTimestamp(), read: false, isEncrypted: true, deliveryStatus: "sent", replyTo: replyTo ? { messageId: replyTo.id, senderName: replyTo.senderName, text: replyTo.text.length > 50 ? replyTo.text.substring(0, 50) + "..." : replyTo.text } : null });
+      await updateDoc(ticketRef, { lastMessage: messageText.trim(), lastMessageTime: serverTimestamp(), lastMessageSender: senderName, status: "active", agentId: isAdmin ? user.uid : appealTicket.agentId, agentName: isAdmin ? AGENT_NAME : appealTicket.agentName });
       setMessageText(""); setReplyTo(null);
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-    } else {
-      alert("An error occurred.");
-    }
+    } catch (e) { console.error(e); alert("An error occurred."); }
   };
 
   const renderDeliveryStatus = (msg: AppealMessage, isMine: boolean) => {
@@ -2360,37 +1874,41 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
     if (!user || !isMounted) { setCheckingBan(false); return; }
     (async () => {
       setCheckingBan(true);
-      const res = await liveChatApi.checkBan(user.uid);
-      if (res.success && res.data) {
-        const s = res.data;
+      try {
+        const s = await checkBanStatus(user.uid);
         if (s.isBanned) { setIsBanned(true); setBanReason(s.reason); setCanCreateTicket(s.canCreateTicket); setCanSendMessage(s.canSendMessage); setBanMessage(`YOUR ACCOUNT HAS BEEN PERMANENTLY BANNED\n\nReason: ${s.reason}`); }
         else { setIsBanned(false); setBanReason(""); setCanCreateTicket(true); setCanSendMessage(true); setBanMessage(null); }
-      }
-      setCheckingBan(false);
+      } catch (e) { console.error(e); } finally { setCheckingBan(false); }
     })();
   }, [user, isMounted]);
 
   useEffect(() => {
     if (!db || !user || !isMounted) return;
-    const unsub = liveChatApi.subscribeHasAppeal(user.uid, (has) => setHasAppeal(has));
+    const unsub = onSnapshot(query(collection(db, "appeal_tickets"), where("userId", "==", user.uid), orderBy("createdAt", "desc"), limit(1)), (s: any) => setHasAppeal(!s.empty));
     return () => unsub();
   }, [db, user, isMounted]);
 
   useEffect(() => {
     if (!db || !user || !isMounted) return;
-    const unsub = liveChatApi.subscribeAppealTickets({ user, isAdmin, callback: setAppealTickets });
+    const q = isAdmin ? query(collection(db, "appeal_tickets"), orderBy("createdAt", "desc")) : query(collection(db, "appeal_tickets"), where("userId", "==", user.uid), orderBy("createdAt", "desc"));
+    const unsub = onSnapshot(q, (s: any) => { const list: AppealTicket[] = []; s.forEach((d: any) => list.push({ id: d.id, ...d.data() } as AppealTicket)); setAppealTickets(list); });
     return () => unsub();
   }, [db, user, isAdmin, isMounted]);
 
   useEffect(() => {
     if (!db || !isMounted) return;
-    const unsub = liveChatApi.subscribeOnlineUsers(setOnlineUsers);
+    const unsub = onSnapshot(query(collection(db, "users"), where("online", "==", true)), (s: any) => {
+      const users: OnlineUser[] = [];
+      s.forEach((d: any) => { const data = d.data(); const item: OnlineUser = { uid: d.id, displayName: data.displayName || data.name || data.email || "User", email: data.email || "", photoURL: data.photoURL || "", online: data.online || false, lastSeen: data.lastSeen, isAgent: data.email === ADMIN_EMAIL, isAnonymous: data.isAnonymous === true }; if (!item.isAgent) users.push(item); });
+      setOnlineUsers(users);
+    });
     return () => unsub();
   }, [db, isMounted]);
 
   useEffect(() => {
     if (!db || !user || !isMounted) return;
-    const unsub = liveChatApi.subscribeTickets({ user, isAdmin, callback: (list) => { setTickets(list); setSelectedTicket((p) => p ? list.find((t) => t.id === p.id) || p : p); } });
+    const q = isAdmin ? query(collection(db, "livechat_tickets"), orderBy("createdAt", "desc")) : query(collection(db, "livechat_tickets"), where("userId", "==", user.uid), orderBy("createdAt", "desc"));
+    const unsub = onSnapshot(q, (s: any) => { const list: Ticket[] = []; s.forEach((d: any) => list.push({ id: d.id, ...d.data() } as Ticket)); setTickets(list); setSelectedTicket((p) => p ? list.find((t) => t.id === p.id) || p : p); });
     return () => unsub();
   }, [db, user, isAdmin, isMounted]);
 
@@ -2398,12 +1916,12 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
     if (!db || !tickets.length || !isMounted) return;
     const unsubs: (() => void)[] = [];
     tickets.forEach((t) => {
-      const u = liveChatApi.subscribeTicketPreviews({
-        ticketId: t.id,
-        callback: (prevs, count) => {
-          setTicketMsgCounts((p) => ({ ...p, [t.id]: count }));
-          setTicketPreviews((p) => ({ ...p, [t.id]: prevs }));
-        },
+      const q = query(collection(db, "livechat_tickets", t.id, "messages"), orderBy("timestamp", "desc"), limit(3));
+      const u = onSnapshot(q, async (s: any) => {
+        setTicketMsgCounts((p) => ({ ...p, [t.id]: s.size }));
+        const prevs: LastMessagePreview[] = [];
+        for (const d of s.docs) { const data = d.data(); let text = data.text || ""; if (data.isEncrypted) { try { text = await decryptMessage(text); } catch { text = "[Encrypted]"; } } prevs.push({ text, senderName: data.senderName || "User", timestamp: data.timestamp, isFromAgent: data.senderName === AGENT_NAME }); }
+        setTicketPreviews((p) => ({ ...p, [t.id]: prevs }));
       });
       unsubs.push(u);
     });
@@ -2414,21 +1932,15 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
     if (!db || !selectedTicket || !isMounted) return;
     const tid = selectedTicket.id;
     if (cacheRef.current[tid]) { setMessages(cacheRef.current[tid]); prevLenRef.current = cacheRef.current[tid].length; }
-    const unsub = liveChatApi.subscribeMessages({
-      ticketId: tid,
-      callback: (list) => {
-        if (prevLenRef.current > 0 && list.length > prevLenRef.current) {
-          const newest = list[list.length - 1];
-          if (newest) {
-            setLatestRollingMessage({ text: newest.text, senderName: newest.senderName || "User", timestamp: newest.timestamp, isFromAgent: newest.senderName === AGENT_NAME });
-            setRollingKey((k) => k + 1);
-          }
-        }
-        prevLenRef.current = list.length;
-        cacheRef.current[tid] = list;
-        setMessages(list);
-        requestAnimationFrame(() => { if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight; });
-      },
+    const q = query(collection(db, "livechat_tickets", tid, "messages"), orderBy("timestamp", "asc"));
+    const unsub = onSnapshot(q, async (s: any) => {
+      const list: ChatMessage[] = [];
+      for (const d of s.docs) { const data = d.data(); let text = data.text || ""; if (data.isEncrypted) { try { text = await decryptMessage(text); } catch { text = "[Encrypted]"; } } list.push({ id: d.id, ...data, text } as ChatMessage); }
+      if (prevLenRef.current > 0 && list.length > prevLenRef.current) { const newest = list[list.length - 1]; if (newest) { setLatestRollingMessage({ text: newest.text, senderName: newest.senderName || "User", timestamp: newest.timestamp, isFromAgent: newest.senderName === AGENT_NAME }); setRollingKey((k) => k + 1); } }
+      prevLenRef.current = list.length;
+      cacheRef.current[tid] = list;
+      setMessages(list);
+      requestAnimationFrame(() => { if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight; });
     });
     return () => unsub();
   }, [db, selectedTicket, isMounted]);
@@ -2437,9 +1949,7 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
 
   useEffect(() => {
     if (!db || !selectedTicket || !user || !isAdmin || !isMounted) return;
-    messages.filter((m) => m.senderId !== user.uid && !m.read).forEach(async (msg) => {
-      await liveChatApi.markAsRead(selectedTicket.id, msg.id).catch(() => {});
-    });
+    messages.filter((m) => m.senderId !== user.uid && !m.read).forEach(async (msg) => { await updateDoc(doc(db, "livechat_tickets", selectedTicket.id, "messages", msg.id), { read: true, deliveryStatus: "read" }); });
   }, [messages, selectedTicket, db, user, isAdmin, isMounted]);
 
   const hasAuto = useRef(false);
@@ -2463,19 +1973,16 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
   const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const v = e.target.value; setMessageText(v);
     if (!selectedTicket || !user || !db || isBanned) return;
-    await liveChatApi.setTyping(selectedTicket.id, user, v.length > 0, isAdmin);
+    const ref = doc(db, "livechat_tickets", selectedTicket.id);
+    if (v.length > 0) await updateDoc(ref, { typing: true, typingUserId: user.uid, typingUserName: isAdmin ? AGENT_NAME : user.displayName || user.email || "User" });
+    else await updateDoc(ref, { typing: false, typingUserId: null, typingUserName: null });
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-    typingTimeoutRef.current = setTimeout(async () => { await liveChatApi.setTyping(selectedTicket.id, user, false, isAdmin); }, 2000);
+    typingTimeoutRef.current = setTimeout(async () => { await updateDoc(ref, { typing: false, typingUserId: null, typingUserName: null }); }, 2000);
   };
 
   const checkBanBefore = async (): Promise<boolean> => {
     if (!user) return true;
-    const res = await liveChatApi.checkBan(user.uid);
-    if (res.success && res.data) {
-      const s = res.data;
-      if (s.isBanned) { setIsBanned(true); setBanReason(s.reason); setCanCreateTicket(s.canCreateTicket); setCanSendMessage(s.canSendMessage); setBanMessage(`YOUR ACCOUNT HAS BEEN PERMANENTLY BANNED\n\nReason: ${s.reason}`); return true; }
-    }
-    return false;
+    try { const s = await checkBanStatus(user.uid); if (s.isBanned) { setIsBanned(true); setBanReason(s.reason); setCanCreateTicket(s.canCreateTicket); setCanSendMessage(s.canSendMessage); setBanMessage(`YOUR ACCOUNT HAS BEEN PERMANENTLY BANNED\n\nReason: ${s.reason}`); return true; } return false; } catch { return false; }
   };
 
   const startChat = async () => {
@@ -2483,12 +1990,13 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
     if (!canCreateTicket) { setBanMessage("YOU DO NOT HAVE PERMISSION TO CREATE A NEW TICKET"); return; }
     if (!encryptionReady) { alert("Encryption is being initialized."); return; }
     if (tickets.some((t) => t.userId === user.uid && (t.status === "waiting" || t.status === "active") && !t.isAnnouncement && !t.isBroadcast)) { alert("You still have an active chat."); return; }
-    const res = await liveChatApi.createTicket({ user, topic: selectedTopic });
-    if (res.success) {
+    try {
+      const ref = await addDoc(collection(db, "livechat_tickets"), { userId: user.uid, userName: user.displayName || user.email || "User", userEmail: user.email, userPhoto: user.photoURL || "", status: "waiting", topic: selectedTopic, createdAt: serverTimestamp(), unreadCount: 0, typing: false, typingUserId: null, typingUserName: null, isAnnouncement: false, isBroadcast: false });
+      const initial = `Hello, I would like to ask about: ${selectedTopic}`;
+      await addDoc(collection(db, "livechat_tickets", ref.id, "messages"), { senderId: user.uid, senderName: user.displayName || user.email || "User", text: await encryptMessage(initial), timestamp: serverTimestamp(), read: false, isEncrypted: true, isBotDetected: false, deliveryStatus: "sent" });
+      await updateDoc(ref, { lastMessage: initial, lastMessageTime: serverTimestamp(), lastMessageSender: user.displayName || user.email || "User" });
       setSelectedTopic(""); setShowStartChat(false); setBanMessage(null); hasAuto.current = false;
-    } else {
-      alert("An error occurred.");
-    }
+    } catch (e) { console.error(e); alert("An error occurred."); }
   };
 
   const sendMessage = async () => {
@@ -2497,41 +2005,37 @@ const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBanned
       if (await checkBanBefore()) { setMessageText(""); return; }
       if (!canSendMessage) { setBanMessage("NO PERMISSION"); setMessageText(""); return; }
       const r = containsBannedContent(messageText);
-      if (r.isBanned) {
-        await liveChatApi.banUser(user.uid, user.email || "", user.displayName || "User", r.reason, messageText);
-        setIsBanned(true); setBanReason(r.reason); setCanCreateTicket(false); setCanSendMessage(false); setBanMessage(`BANNED\n\nReason: ${r.reason}`); setMessageText(""); return;
-      }
+      if (r.isBanned) { await banUserPermanent(user.uid, user.email || "", user.displayName || "User", r.reason, messageText); setIsBanned(true); setBanReason(r.reason); setCanCreateTicket(false); setCanSendMessage(false); setBanMessage(`BANNED\n\nReason: ${r.reason}`); setMessageText(""); return; }
     }
     if (!encryptionReady) { alert("Encryption init..."); return; }
     if (selectedTicket.status === "resolved" || selectedTicket.status === "closed") { alert("This chat is finished."); return; }
-    const res = await liveChatApi.sendMessage({ ticket: selectedTicket, user, text: messageText, isAdmin, replyTo });
-    if (res.success) {
+    try {
+      const ref = doc(db, "livechat_tickets", selectedTicket.id);
+      await updateDoc(ref, { typing: false, typingUserId: null, typingUserName: null });
+      const senderName = isAdmin ? AGENT_NAME : user.displayName || user.email || "User";
+      await addDoc(collection(db, "livechat_tickets", selectedTicket.id, "messages"), { senderId: user.uid, senderName, text: await encryptMessage(messageText.trim()), timestamp: serverTimestamp(), read: false, isEncrypted: true, isBotDetected: false, deliveryStatus: "sent", replyTo: replyTo ? { messageId: replyTo.id, senderName: replyTo.senderName, text: replyTo.text.length > 50 ? replyTo.text.substring(0, 50) + "..." : replyTo.text } : null });
+      await updateDoc(ref, { lastMessage: messageText.trim(), lastMessageTime: serverTimestamp(), lastMessageSender: senderName, ...(selectedTicket.status === "waiting" && { status: "active" }), ...(isAdmin && { agentId: user.uid, agentName: AGENT_NAME, status: selectedTicket.status === "waiting" ? "active" : selectedTicket.status }) });
       setMessageText(""); setBanMessage(null); setReplyTo(null);
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-    } else {
-      alert("An error occurred.");
-    }
+    } catch (e) { console.error(e); alert("An error occurred."); }
   };
 
-  const takeTicket = async (id: string) => { if (!isAdmin || !user) return; await liveChatApi.takeTicket(id, user); };
-  const resolveTicket = async (id: string) => { if (!isAdmin) return; await liveChatApi.resolveTicket(id); };
-  const handleCloseRoom = async () => {
-    if (!selectedTicket) return;
-    const res = await liveChatApi.closeTicket(selectedTicket.id);
-    if (res.success) { setShowCloseConfirm(true); setTimeout(() => setShowCloseConfirm(false), 2200); }
-  };
+  const takeTicket = async (id: string) => { if (!db || !isAdmin || !user) return; try { await updateDoc(doc(db, "livechat_tickets", id), { agentId: user.uid, agentName: AGENT_NAME, status: "active" }); } catch {} };
+  const resolveTicket = async (id: string) => { if (!db || !isAdmin) return; try { await updateDoc(doc(db, "livechat_tickets", id), { status: "resolved" }); } catch {} };
+  const handleCloseRoom = async () => { if (!db || !selectedTicket) return; try { await updateDoc(doc(db, "livechat_tickets", selectedTicket.id), { status: "closed" }); setShowCloseConfirm(true); setTimeout(() => setShowCloseConfirm(false), 2200); } catch {} };
 
   const createAppealTicket = async () => {
     if (!db || !user || !isBanned) return;
-    const exist = appealTickets.find((t) => t.userId === user.uid && t.status !== "closed" && t.status !== "resolved");
-    if (exist) { onOpenBannedAppealChat(exist); return; }
-    const res = await liveChatApi.createAppealTicket({ user, banReason, banMessage: banMessage || "" });
-    if (res.success && res.data) {
-      onOpenBannedAppealChat({ id: res.data.ticketId, userId: user.uid, userName: user.displayName || user.email || "User", userEmail: user.email, status: "waiting", topic: "Banding Banned", banReason, banMessage: banMessage || "", createdAt: new Date(), unreadCount: 0, typing: false });
+    try {
+      const exist = appealTickets.find((t) => t.userId === user.uid && t.status !== "closed" && t.status !== "resolved");
+      if (exist) { onOpenBannedAppealChat(exist); return; }
+      const ref = await addDoc(collection(db, "appeal_tickets"), { userId: user.uid, userName: user.displayName || user.email || "User", userEmail: user.email, userPhoto: user.photoURL || "", status: "waiting", topic: "Banding Banned", banReason, banMessage: banMessage || "", createdAt: serverTimestamp(), unreadCount: 0, typing: false, typingUserId: null, typingUserName: null });
+      const init = `Saya mengajukan banding.\n\nAlasan: ${banReason}`;
+      await addDoc(collection(db, "appeal_tickets", ref.id, "messages"), { senderId: user.uid, senderName: user.displayName || user.email || "User", text: await encryptMessage(init), timestamp: serverTimestamp(), read: false, isEncrypted: true, deliveryStatus: "sent" });
+      await updateDoc(ref, { lastMessage: init, lastMessageTime: serverTimestamp(), lastMessageSender: user.displayName || user.email || "User" });
+      onOpenBannedAppealChat({ id: ref.id, userId: user.uid, userName: user.displayName || user.email || "User", userEmail: user.email, status: "waiting", topic: "Banding Banned", banReason, banMessage: banMessage || "", createdAt: new Date(), unreadCount: 0, typing: false });
       setHasAppeal(true);
-    } else {
-      alert("Gagal membuat tiket banding.");
-    }
+    } catch (e) { console.error(e); alert("Gagal membuat tiket banding."); }
   };
 
   const renderDeliveryStatus = (msg: ChatMessage, isMine: boolean) => {
@@ -2725,18 +2229,6 @@ export default function HomePage(): React.JSX.Element {
   const [loading, setLoading] = useState(true);
   const [isMounted, setIsMounted] = useState(false);
   const [navbarShifted, setNavbarShifted] = useState(false);
-  const [noteHovered, setNoteHovered] = useState(false);
-  const [showNotesSection, setShowNotesSection] = useState(false);
-  const [submittedNotes, setSubmittedNotes] = useState<NoteEntry[]>([]);
-  const [inviteUsers, setInviteUsers] = useState<InviteUser[]>([]);
-  const [showInvitePanel, setShowInvitePanel] = useState(false);
-  const [inviteSearch, setInviteSearch] = useState("");
-  const [invitedUsers, setInvitedUsers] = useState<{ [k: string]: boolean }>({});
-  const [inviteToast, setInviteToast] = useState<string | null>(null);
-  const [registeredUsers, setRegisteredUsers] = useState<NoteEntry[]>([]);
-  const [hasSubmittedNote, setHasSubmittedNote] = useState(false);
-  const [activeNoteUser, setActiveNoteUser] = useState<string | null>(null);
-  const [pendingInvites, setPendingInvites] = useState<NoteInvitation[]>([]);
   const [adminAppealTicket, setAdminAppealTicket] = useState<AppealTicket | null>(null);
   const [showAdminAppealSection, setShowAdminAppealSection] = useState(false);
   const [bannedAppealTicket, setBannedAppealTicket] = useState<AppealTicket | null>(null);
@@ -2748,8 +2240,6 @@ export default function HomePage(): React.JSX.Element {
   const counterRef = useRef<HTMLSpanElement>(null);
   const mainPageRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const noteJoinRef = useRef<HTMLDivElement>(null);
-  const notesSectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => setIsMounted(true), []);
 
@@ -2757,59 +2247,10 @@ export default function HomePage(): React.JSX.Element {
     if (!auth || !isMounted) return;
     const unsub = onAuthStateChanged(auth, async (cu: any) => {
       setUser(cu); setLoading(false);
-      if (cu) {
-        setIsAdmin(cu.email === ADMIN_EMAIL);
-        await liveChatApi.setOnline(cu);
-      }
+      if (cu) { setIsAdmin(cu.email === ADMIN_EMAIL); try { await updateDoc(doc(db, "users", cu.uid), { online: true, lastSeen: serverTimestamp(), email: cu.email || "", displayName: cu.displayName || cu.email?.split("@")[0] || "User", photoURL: cu.photoURL || "" }); } catch (e) { console.error(e); } }
     });
     return () => unsub();
   }, [isMounted]);
-
-  useEffect(() => {
-    if (!db || !isMounted) return;
-    const unsub = onSnapshot(query(collection(db, "users"), orderBy("lastSeen", "desc"), limit(50)), (s: any) => {
-      const list: NoteEntry[] = [];
-      s.forEach((d: any) => { const data = d.data(); list.push({ id: d.id, userId: d.id, userName: data.displayName || data.name || data.email?.split("@")[0] || "User", userEmail: data.email || "", userPhoto: data.photoURL || "", text: data.text || "", category: data.category || "", createdAt: data.createdAt || data.lastSeen || null, isAnonymous: data.isAnonymous === true } as NoteEntry); });
-      setRegisteredUsers(list);
-    });
-    return () => unsub();
-  }, [db, isMounted]);
-
-  useEffect(() => {
-    if (!db || !isMounted) return;
-    const unsub = onSnapshot(query(collection(db, "users"), orderBy("lastSeen", "desc"), limit(200)), (s: any) => {
-      const list: InviteUser[] = [];
-      s.forEach((d: any) => { const data = d.data(); list.push({ uid: d.id, displayName: data.displayName || data.name || data.email?.split("@")[0] || "User", email: data.email || "", photoURL: data.photoURL || "", isAnonymous: data.isAnonymous === true }); });
-      setInviteUsers(list);
-    });
-    return () => unsub();
-  }, [db, isMounted]);
-
-  useEffect(() => {
-    if (!db || !user || !isMounted) return;
-    const unsub = onSnapshot(query(collection(db, "userNotes"), where("userId", "==", user.uid), limit(1)), (s: any) => setHasSubmittedNote(!s.empty));
-    return () => unsub();
-  }, [db, user, isMounted]);
-
-  useEffect(() => {
-    if (!db || !user || !isMounted) return;
-    const unsub = onSnapshot(query(collection(db, "userNotes"), where("userId", "==", user.uid), orderBy("updatedAt", "desc"), limit(50)), (s: any) => {
-      const list: NoteEntry[] = [];
-      s.forEach((d: any) => { const data = d.data(); list.push({ id: d.id, userId: data.userId, userName: data.userName || data.userEmail?.split("@")[0] || "User", userEmail: data.userEmail || "", userPhoto: data.userPhoto || "", title: data.title || "Tanpa Judul", description: data.description || "", descriptionHtml: data.descriptionHtml || "", category: data.category || "Lainnya", link: data.link || "", labelColor: data.labelColor || "", createdAt: data.createdAt, updatedAt: data.updatedAt } as NoteEntry); });
-      setSubmittedNotes(list);
-    });
-    return () => unsub();
-  }, [db, user, isMounted]);
-
-  useEffect(() => {
-    if (!db || !user || !isMounted) return;
-    const unsub = onSnapshot(query(collection(db, "note_invitations"), where("inviteeId", "==", user.uid), where("status", "==", "pending")), (s: any) => {
-      const list: NoteInvitation[] = [];
-      s.forEach((d: any) => list.push({ id: d.id, ...d.data() } as NoteInvitation));
-      setPendingInvites(list);
-    });
-    return () => unsub();
-  }, [db, user, isMounted]);
 
   useEffect(() => {
     if (!isMounted || loading) return;
@@ -2828,29 +2269,6 @@ export default function HomePage(): React.JSX.Element {
     tl.to(tx, { scale: 0.3, opacity: 0, duration: 0.8, ease: "power2.in" }).to(ct, { scale: 0.6, opacity: 0, duration: 0.8, ease: "power2.in" }, "-=0.8").to(pre, { xPercent: -100, duration: 1.2, ease: "power3.inOut", onComplete: () => { if (pre) pre.style.display = "none"; } }, "-=0.2").to(mn, { xPercent: 0, duration: 1.2, ease: "power3.inOut", onComplete: () => { if (killed) return; gsap.set(mn, { clearProps: "transform,willChange" }); setTimeout(() => ScrollTrigger.refresh(), 300); } }, "<");
     return () => { killed = true; tl.kill(); };
   }, [isMounted, loading]);
-
-  useEffect(() => { if (!isMounted || !showMain || !noteJoinRef.current) return; const ctx = gsap.context(() => { gsap.fromTo(noteJoinRef.current, { opacity: 0, y: 60 }, { opacity: 1, y: 0, duration: 1.2, ease: "power3.out", scrollTrigger: { trigger: noteJoinRef.current, start: "top 85%", toggleActions: "play none none none", once: true } }); }, noteJoinRef); return () => ctx.revert(); }, [isMounted, showMain]);
-
-  useEffect(() => { if (!isMounted || !showMain) return; const items = document.querySelectorAll(".note-user-fp"); if (!items.length) return; gsap.fromTo(items, { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.6, stagger: 0.08, ease: "back.out(1.7)" }); }, [isMounted, showMain, registeredUsers]);
-
-  useEffect(() => { if (!activeNoteUser) return; const el = document.querySelector(`.note-user-name-${activeNoteUser}`); if (el) gsap.fromTo(el, { opacity: 0, x: -30, scale: 0.8 }, { opacity: 1, x: 0, scale: 1, duration: 0.5, ease: "back.out(1.7)" }); }, [activeNoteUser]);
-  useEffect(() => { if (!showNotesSection || !notesSectionRef.current) return; gsap.fromTo(notesSectionRef.current, { opacity: 0, y: 80 }, { opacity: 1, y: 0, duration: 1, ease: "power3.out" }); }, [showNotesSection]);
-
-  const handleInvite = async (iu: InviteUser) => {
-    if (!user) { setInviteToast("Silakan sign in terlebih dahulu"); setTimeout(() => setInviteToast(null), 2500); return; }
-    try {
-      await addDoc(collection(db, "note_invitations"), { inviterId: user.uid, inviterName: user.displayName || user.email?.split("@")[0] || "User", inviterEmail: user.email || "", inviteeId: iu.uid, inviteeEmail: iu.email || "", status: "pending", createdAt: serverTimestamp() });
-      setInvitedUsers((p) => ({ ...p, [iu.uid]: true }));
-      setInviteToast(`Undangan terkirim ke ${iu.isAnonymous ? "Anonim" : iu.displayName}`);
-      setTimeout(() => setInviteToast(null), 2500);
-    } catch { setInviteToast("Gagal mengirim undangan."); setTimeout(() => setInviteToast(null), 2500); }
-  };
-
-  const handleAccept = async (id: string) => { try { await updateDoc(doc(db, "note_invitations", id), { status: "accepted" }); setPendingInvites((p) => p.filter((i) => i.id !== id)); setInviteToast("Undangan diterima!"); setTimeout(() => setInviteToast(null), 2500); } catch {} };
-  const handleDecline = async (id: string) => { try { await updateDoc(doc(db, "note_invitations", id), { status: "declined" }); setPendingInvites((p) => p.filter((i) => i.id !== id)); setInviteToast("Undangan ditolak."); setTimeout(() => setInviteToast(null), 2500); } catch {} };
-
-  const filteredInvite = inviteUsers.filter((u) => { if (user && u.uid === user.uid) return false; const q = inviteSearch.trim().toLowerCase(); if (!q) return true; return u.displayName.toLowerCase().includes(q) || u.email.toLowerCase().includes(q); });
-  const getByCat = (cat: string) => submittedNotes.filter((n) => n.category === cat);
 
   if (!isMounted || loading) {
     return (
@@ -2898,129 +2316,7 @@ export default function HomePage(): React.JSX.Element {
           <div style={{ position: "fixed", top: "44px", right: 0, width: "200px", height: "120px", pointerEvents: "none", zIndex: 8500, backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)", maskImage: "linear-gradient(to left, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%)", WebkitMaskImage: "linear-gradient(to left, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%)" }} />
           <LeftNavbar shifted={navbarShifted} />
           <RightNavbar user={user} auth={auth} db={db} onOpenDashboard={() => setShowDashboard(true)} />
-          <div style={{ marginTop: "44px" }}><HeroMenuruTitle /></div>
-          <div style={{ width: "100%", padding: "0 40px", maxWidth: "1600px", margin: "0 auto", marginTop: "40px", position: "relative", zIndex: 2 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "60px", flexWrap: "wrap" }}>
-              <div style={{ flexShrink: 0, textAlign: "left" }}>
-                <div style={{ fontFamily: FONT_FAMILY, fontSize: "90px", fontWeight: 700, color: BLUE, letterSpacing: "-0.04em", lineHeight: 1.05, whiteSpace: "nowrap" }}>Brand Identities</div>
-                <div style={{ fontFamily: FONT_FAMILY, fontSize: "90px", fontWeight: 700, color: BLUE, letterSpacing: "-0.04em", lineHeight: 1.05, whiteSpace: "nowrap" }}>&amp; Campaigns</div>
-              </div>
-              <div style={{ flex: "1 1 0", minWidth: "300px", display: "flex", flexDirection: "column", alignItems: "flex-start", textAlign: "left", paddingTop: "20px" }}>
-                <div style={{ fontFamily: FONT_FAMILY, fontSize: "25px", fontWeight: 600, color: BLACK, letterSpacing: "-0.01em", lineHeight: 1.35, maxWidth: "700px" }}>Menuru Studio is a non-profit brand born from the founder&apos;s vision to assist the public at no cost</div>
-                <div style={{ fontFamily: FONT_FAMILY, fontSize: "25px", fontWeight: 600, color: BLACK, letterSpacing: "-0.01em", lineHeight: 1.35, maxWidth: "700px", marginTop: "4px" }}>Since our brand was established, we have helped people find exceptional solutions for their activities and created memorable features</div>
-              </div>
-            </div>
-          </div>
-          <div style={{ padding: "0 40px", maxWidth: "1600px", margin: "0 auto", width: "100%", position: "relative", zIndex: 2, marginTop: "80px" }}>
-            <h2 style={{ fontFamily: FONT_FAMILY, fontSize: "80px", fontWeight: 700, color: BLUE, letterSpacing: "-0.03em", lineHeight: 1.1, margin: 0, marginBottom: "30px", textAlign: "left" }}>Features</h2>
-            <div style={{ width: "100%", position: "relative", zIndex: 2, marginBottom: "40px" }}>
-              <div style={{ display: "flex", alignItems: "center", width: "100%", flexWrap: "wrap" }}>
-                <div style={{ display: "flex", alignItems: "baseline", gap: "140px" }}>
-                  <span style={{ fontFamily: FONT_FAMILY, fontSize: "90px", fontWeight: 700, color: BLUE, letterSpacing: "-0.04em", lineHeight: 1 }}>01</span>
-                  <span style={{ fontFamily: FONT_FAMILY, fontSize: "90px", fontWeight: 700, color: BLACK, letterSpacing: "-0.04em", lineHeight: 1 }}>Notes</span>
-                </div>
-                <div style={{ marginLeft: "auto", marginRight: "360px", display: "flex", flexDirection: "column", alignItems: "flex-start", gap: "8px", marginTop: "-45px" }}>
-                  <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", padding: "6px 16px", backgroundColor: BLUE, color: WHITE, borderRadius: "4px", fontSize: "16px", fontWeight: 800, letterSpacing: "0.8px", textTransform: "uppercase", fontFamily: FONT_FAMILY, lineHeight: 1.3, whiteSpace: "nowrap" }}>Trust</span>
-                  <p style={{ fontFamily: FONT_FAMILY, fontSize: "18px", fontWeight: 600, color: BLUE, letterSpacing: "-0.01em", lineHeight: 1.4, margin: 0, maxWidth: "420px", textAlign: "left" }}>Notes for the next era of technology system</p>
-                </div>
-              </div>
-              <div style={{ position: "absolute", right: "40px", top: "0", display: "flex", alignItems: "center", justifyContent: "center", width: "120px", height: "120px", backgroundColor: BLUE, borderRadius: "20px", flexShrink: 0 }}>
-                <svg width="64" height="64" viewBox="0 0 24 24" fill="none"><path d="M7 17L17 7M17 7H8M17 7V16" stroke={WHITE} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-              </div>
-            </div>
-            <div style={{ position: "relative", width: "100%", height: "420px", marginBottom: "60px", zIndex: 1 }} onMouseEnter={() => setNoteHovered(true)} onMouseLeave={() => setNoteHovered(false)}>
-              <div style={{ position: "absolute", top: "0px", left: "260px", right: "360px", height: "420px", backgroundColor: BLUE, borderRadius: "24px", border: `2px solid ${BLUE}`, overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <img src="/images/plj.JPG" alt="Note" style={{ maxWidth: "95%", maxHeight: "95%", width: "auto", height: "auto", objectFit: "contain", mixBlendMode: "screen", display: "block", opacity: noteHovered ? 0.35 : 1, transition: "opacity 0.4s ease", pointerEvents: "none", userSelect: "none" }} />
-                <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", display: "flex", alignItems: "center", overflow: "hidden", pointerEvents: "none", opacity: noteHovered ? 1 : 0, transition: "opacity 0.4s ease" }}>
-                  <div style={{ display: "inline-flex", whiteSpace: "nowrap", animation: noteHovered ? "comingsoon-marquee 8s linear infinite" : "none", fontFamily: FONT_FAMILY, fontSize: "140px", fontWeight: 800, color: WHITE, letterSpacing: "-0.04em", textTransform: "uppercase", lineHeight: 1 }}>
-                    <span style={{ paddingRight: "80px" }}>Comingsoon</span><span style={{ paddingRight: "80px" }}>Comingsoon</span><span style={{ paddingRight: "80px" }}>Comingsoon</span><span style={{ paddingRight: "80px" }}>Comingsoon</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div ref={noteJoinRef} style={{ width: "100%", marginTop: "0px", marginBottom: "60px", paddingLeft: "260px", paddingRight: "360px", fontFamily: FONT_FAMILY, position: "relative" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "24px", marginBottom: "24px", flexWrap: "wrap" }}>
-                <h3 style={{ fontFamily: FONT_FAMILY, fontSize: "35px", fontWeight: 700, color: BLUE, letterSpacing: "-0.02em", lineHeight: 1.1, margin: 0 }}>Bergabung bersama kami di fitur Note</h3>
-                <button onClick={() => setShowNotesSection(true)} style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "8px 18px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "10px", fontFamily: FONT_FAMILY, fontSize: "35px", fontWeight: 700, letterSpacing: "-0.02em", lineHeight: 1.1, cursor: "pointer", transition: "background-color 0.25s ease" }} onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = BLACK; }} onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = BLUE; }}><span>Bergabung</span><NorthEastArrow size={32} color={WHITE} /></button>
-              </div>
-              <div style={{ width: "100%", backgroundColor: BLUE, borderRadius: "24px", padding: "24px 28px", display: "flex", alignItems: "center", gap: "16px", flexWrap: "wrap", minHeight: "70px", boxShadow: "0 8px 32px rgba(13,60,252,0.3)" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
-                  {registeredUsers.length === 0 && <span style={{ fontSize: "35px", fontWeight: 700, color: WHITE, letterSpacing: "-0.02em", lineHeight: 1.1 }}>Belum ada yang bergabung</span>}
-                  {registeredUsers.map((n) => {
-                    const isMe = user && n.userId === user.uid;
-                    const hasN = hasSubmittedNote && isMe;
-                    const dn = n.isAnonymous ? "Anonim" : n.userName || n.userEmail?.split("@")[0] || "User";
-                    return (
-                      <div key={n.id} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                        {isMe && <><span style={{ fontSize: "35px", fontWeight: 600, color: WHITE, letterSpacing: "-0.02em", lineHeight: 1.1 }}>from</span><span style={{ fontSize: "35px", fontWeight: 700, color: WHITE, letterSpacing: "-0.02em", lineHeight: 1.1, whiteSpace: "nowrap" }}>{dn}</span></>}
-                        <div className="note-user-fp" onClick={() => setActiveNoteUser(activeNoteUser === n.id ? null : n.id)} style={{ width: "48px", height: "48px", borderRadius: "50%", overflow: "hidden", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, cursor: "pointer", transition: "transform 0.2s ease", border: isMe ? `3px solid ${WHITE}` : "none" }} onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.transform = "scale(1.15)"; }} onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.transform = "scale(1)"; }}>
-                          {n.userPhoto && !n.isAnonymous ? <img src={n.userPhoto} alt="User" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} referrerPolicy="no-referrer" /> : <span style={{ fontSize: "20px", fontWeight: 800, color: BLUE }}>{dn.charAt(0).toUpperCase()}</span>}
-                        </div>
-                        {isMe && <span style={{ fontSize: "35px", fontWeight: 700, color: WHITE, letterSpacing: "-0.02em", lineHeight: 1.1, whiteSpace: "nowrap" }}>{hasN ? "✓ Sudah bergabung" : "Belum bergabung"}</span>}
-                        {!isMe && activeNoteUser === n.id && <span className={`note-user-name-${n.id}`} style={{ fontSize: "35px", fontWeight: 700, color: WHITE, letterSpacing: "-0.02em", lineHeight: 1.1, whiteSpace: "nowrap" }}>{dn}</span>}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-            {showNotesSection && (
-              <div ref={notesSectionRef} id="notes-invite" style={{ width: "100%", marginTop: "60px", marginBottom: "60px", fontFamily: FONT_FAMILY }}>
-                <h2 style={{ fontFamily: FONT_FAMILY, fontSize: "150px", fontWeight: 700, color: BLUE, letterSpacing: "-0.04em", lineHeight: 1, margin: 0, marginBottom: "20px", textAlign: "left" }}>Notes</h2>
-                <p style={{ fontFamily: FONT_FAMILY, fontSize: "20px", fontWeight: 500, color: BLACK, letterSpacing: "-0.01em", lineHeight: 1.6, margin: 0, marginBottom: "40px", maxWidth: "800px", textAlign: "left" }}>Temukan catatan-catatan menarik dari komunitas Menuru. Semua catatan dikategorikan untuk memudahkan Anda menjelajahi topik yang Anda minati.</p>
-                {pendingInvites.length > 0 && <div style={{ marginBottom: "40px", backgroundColor: BLUE, borderRadius: "16px", padding: "24px", display: "flex", flexDirection: "column", gap: "16px", maxWidth: "700px" }}><div style={{ fontSize: "20px", fontWeight: 700, color: WHITE, display: "flex", alignItems: "center", gap: "10px" }}><InviteIcon size={24} color={WHITE} />Undangan Masuk ({pendingInvites.length})</div>{pendingInvites.map((inv) => <div key={inv.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", backgroundColor: WHITE, padding: "12px 16px", borderRadius: "10px", flexWrap: "wrap", gap: "10px" }}><div style={{ fontFamily: FONT_FAMILY, color: BLUE }}><span style={{ fontWeight: 800 }}>{inv.inviterName}</span> mengundang Anda untuk berkolaborasi di Notes.</div><div style={{ display: "flex", gap: "8px" }}><button onClick={() => handleAccept(inv.id)} style={{ padding: "6px 16px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "6px", fontWeight: 700, cursor: "pointer", fontFamily: FONT_FAMILY, fontSize: "12px" }}>ACC</button><button onClick={() => handleDecline(inv.id)} style={{ padding: "6px 16px", backgroundColor: "transparent", color: BLUE, border: `1.5px solid ${BLUE}`, borderRadius: "6px", fontWeight: 700, cursor: "pointer", fontFamily: FONT_FAMILY, fontSize: "12px" }}>Tolak</button></div></div>)}</div>}
-                <div style={{ marginBottom: "40px", display: "flex", alignItems: "center", gap: "16px", flexWrap: "wrap" }}>
-                  <button onClick={() => setShowInvitePanel((p) => !p)} style={{ display: "inline-flex", alignItems: "center", gap: "10px", padding: "12px 24px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "10px", fontFamily: FONT_FAMILY, fontSize: "18px", fontWeight: 700, letterSpacing: "-0.01em", cursor: "pointer", transition: "background-color 0.25s ease" }} onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = BLACK; }} onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = BLUE; }}><InviteIcon size={22} color={WHITE} /><span>{showInvitePanel ? "Tutup Undangan" : "Undang Orang Lain"}</span></button>
-                  <span style={{ fontFamily: FONT_FAMILY, fontSize: "15px", fontWeight: 500, color: BLUE, letterSpacing: "-0.01em" }}>Pilih user dari Firebase untuk diundang ke Notes Menuru</span>
-                </div>
-                {showInvitePanel && <div style={{ marginBottom: "40px", backgroundColor: BLUE, borderRadius: "16px", padding: "24px", display: "flex", flexDirection: "column", gap: "16px", maxWidth: "700px" }}>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "12px" }}><span style={{ fontFamily: FONT_FAMILY, fontSize: "20px", fontWeight: 700, color: WHITE, letterSpacing: "-0.01em" }}>Daftar User ({filteredInvite.length})</span><input type="text" value={inviteSearch} onChange={(e) => setInviteSearch(e.target.value)} placeholder="Cari user..." style={{ padding: "8px 14px", borderRadius: "8px", border: `1.5px solid ${WHITE}`, backgroundColor: WHITE, color: BLUE, fontFamily: FONT_FAMILY, fontSize: "13px", fontWeight: 600, outline: "none", minWidth: "200px" }} /></div>
-                  <div style={{ maxHeight: "300px", overflowY: "auto", display: "flex", flexDirection: "column", gap: "8px" }}>
-                    {filteredInvite.length === 0 && <div style={{ padding: "20px", textAlign: "center", fontFamily: FONT_FAMILY, fontSize: "14px", color: WHITE, opacity: 0.8 }}>Tidak ada user ditemukan</div>}
-                    {filteredInvite.map((iu) => {
-                      const isInvited = invitedUsers[iu.uid];
-                      const dn = iu.isAnonymous ? "Anonim" : iu.displayName;
-                      return (
-                        <div key={iu.uid} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "10px 14px", backgroundColor: WHITE, borderRadius: "10px" }}>
-                          <div style={{ width: "40px", height: "40px", borderRadius: "50%", overflow: "hidden", backgroundColor: BLUE, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{iu.photoURL && !iu.isAnonymous ? <img src={iu.photoURL} alt={iu.displayName} style={{ width: "100%", height: "100%", objectFit: "cover" }} referrerPolicy="no-referrer" /> : <span style={{ fontSize: "16px", fontWeight: 800, color: WHITE }}>{dn.charAt(0).toUpperCase()}</span>}</div>
-                          <div style={{ flex: 1, minWidth: 0 }}><div style={{ fontFamily: FONT_FAMILY, fontSize: "14px", fontWeight: 700, color: BLUE, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: "6px" }}>{dn}{(iu.email === ADMIN_EMAIL || iu.email === OWNER_EMAIL) && <VerifiedBadgeWhite size={16} />}</div><div style={{ fontFamily: FONT_FAMILY, fontSize: "11px", fontWeight: 500, color: BLUE, opacity: 0.75, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{iu.email}</div></div>
-                          <button onClick={() => handleInvite(iu)} style={{ padding: "8px 16px", backgroundColor: isInvited ? BLACK : BLUE, color: WHITE, border: "none", borderRadius: "8px", fontFamily: FONT_FAMILY, fontSize: "12px", fontWeight: 800, letterSpacing: "0.5px", cursor: "pointer", textTransform: "uppercase", flexShrink: 0 }}>{isInvited ? "Invited" : "Invite"}</button>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>}
-                {inviteToast && <div style={{ marginBottom: "20px", padding: "12px 20px", backgroundColor: BLUE, color: WHITE, borderRadius: "10px", fontFamily: FONT_FAMILY, fontSize: "14px", fontWeight: 600, display: "inline-block" }}>{inviteToast}</div>}
-                <div style={{ display: "flex", flexDirection: "column", gap: "24px", marginBottom: "50px" }}>
-                  {NOTES_CATEGORIES.map((cat) => {
-                    const notes = getByCat(cat);
-                    return (
-                      <div key={cat} style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                        <span style={{ fontFamily: FONT_FAMILY, fontSize: "32px", fontWeight: 700, color: BLUE, letterSpacing: "-0.02em", lineHeight: 1.2, cursor: "default" }}>{cat}</span>
-                        {notes.length > 0 ? <div style={{ display: "flex", flexDirection: "column", gap: "8px", paddingLeft: "20px" }}>
-                          {notes.map((note) => {
-                            const nu = registeredUsers.find((r) => r.userId === note.userId);
-                            const dn = nu?.isAnonymous ? "Anonim" : note.userName || "User";
-                            return (
-                              <div key={note.id} style={{ backgroundColor: BLUE, borderRadius: "28px", padding: "24px 28px", display: "flex", flexDirection: "column", gap: "18px", boxShadow: `0 8px 32px ${BLUE}40`, maxWidth: "700px" }}>
-                                {note.category && <div style={{ display: "inline-flex", alignSelf: "flex-start", alignItems: "center", gap: "8px", padding: "8px 22px", backgroundColor: WHITE, color: BLUE, borderRadius: "24px 4px 24px 24px", fontFamily: FONT_FAMILY, fontSize: "15px", fontWeight: 800, letterSpacing: "0.04em", textTransform: "uppercase", border: `2px solid ${WHITE}`, boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>{note.category}</div>}
-                                <div style={{ padding: "18px 24px", backgroundColor: WHITE, border: `2px solid ${WHITE}`, borderRadius: "6px 28px 28px 28px", boxShadow: "0 6px 20px rgba(0,0,0,0.12)", display: "flex", alignItems: "center", flexWrap: "wrap", gap: "12px" }}><span style={{ fontSize: "34px", fontFamily: FONT_FAMILY, lineHeight: "1.25", color: BLUE, fontWeight: 800, flex: 1, minWidth: 0, wordBreak: "break-word" }}>{note.title}</span></div>
-                                {(note.descriptionHtml || note.description) && <div style={{ padding: "20px 24px", backgroundColor: WHITE, border: `2px solid ${WHITE}`, borderRadius: "28px 6px 28px 28px", boxShadow: "0 6px 20px rgba(0,0,0,0.12)" }}>{note.descriptionHtml ? <div className="note-description-html" dangerouslySetInnerHTML={{ __html: note.descriptionHtml }} style={{ fontSize: "17px", fontFamily: FONT_FAMILY, lineHeight: "1.7", color: BLACK, wordBreak: "break-word" }} /> : <div style={{ fontSize: "17px", fontFamily: FONT_FAMILY, lineHeight: "1.7", color: BLACK, whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{note.description}</div>}</div>}
-                                <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
-                                  <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "8px 20px", backgroundColor: WHITE, border: `2px solid ${WHITE}`, borderRadius: "20px 4px 20px 20px", fontSize: "14px", color: BLUE, fontWeight: 700, fontFamily: FONT_FAMILY, boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>{note.updatedAt ? new Date(note.updatedAt.toDate()).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }) : "Baru saja"}</div>
-                                  <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "8px 20px", backgroundColor: WHITE, border: `2px solid ${WHITE}`, borderRadius: "4px 20px 20px 20px", fontSize: "14px", color: BLUE, fontWeight: 700, fontFamily: FONT_FAMILY, boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>oleh {dn}<VerifiedBadgeBlue size={22} /></div>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div> : <span style={{ fontFamily: FONT_FAMILY, fontSize: "14px", fontWeight: 500, color: "#999", paddingLeft: "20px", fontStyle: "italic" }}>Belum ada catatan di kategori ini.</span>}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-          </div>
+          <div style={{ marginTop: "44px" }}><div style={{ paddingTop: "120px" }} /></div>
           <div style={{ position: "relative", zIndex: 1, flex: "1 0 auto", backgroundColor: WHITE }}>
             <div style={{ padding: "0 40px", maxWidth: "1600px", margin: "0 auto", width: "100%" }}>
               <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} onOpenAppealChat={(t: AppealTicket) => { setAdminAppealTicket(t); setShowAdminAppealSection(true); }} onOpenBannedAppealChat={(t: AppealTicket) => { setBannedAppealTicket(t); setShowBannedAppealSection(true); }} />
@@ -3037,21 +2333,13 @@ export default function HomePage(): React.JSX.Element {
         body { overflow: auto !important; -ms-overflow-style: none !important; scrollbar-width: none !important; margin: 0; padding: 0; background-color: #ffffff !important; min-height: 100% !important; height: auto !important; }
         body::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
         * { background-color: transparent; }
-        .menuru-char { display: inline-block; will-change: transform, opacity; }
         .split-char-livechat { display: inline-block; will-change: transform, opacity, filter; }
-        .hero-menuru-char { display: inline-block; will-change: transform, opacity; color: #0d3cfc !important; transform-origin: 50% 100%; }
         .footer-menuru-char { display: inline-block; will-change: transform, opacity; color: #ffffff !important; transform-origin: 50% 100%; }
         .chat-messages-container::-webkit-scrollbar, .chat-list-container::-webkit-scrollbar, .chat-list-container > div::-webkit-scrollbar, .online-panel-container::-webkit-scrollbar, .online-panel-container > div::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
         .chat-messages-container, .chat-list-container, .chat-list-container > div, .online-panel-container, .online-panel-container > div { scrollbar-width: none !important; -ms-overflow-style: none !important; }
-        @keyframes comingsoon-marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
         @keyframes blinking-dot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(0.75); } }
         @keyframes verifiedPop { 0% { transform: scale(0.3) rotate(-25deg); opacity: 0; } 20% { transform: scale(1) rotate(0deg); opacity: 1; } 40% { transform: scale(1.12) rotate(0deg); } 60% { transform: scale(1) rotate(0deg); } 80% { transform: scale(1.18) rotate(0deg); } 100% { transform: scale(1) rotate(0deg); } }
         @keyframes drawCheck { 0% { stroke-dashoffset: 100; opacity: 0; } 100% { stroke-dashoffset: 0; opacity: 1; } }
-        .note-description-html b, .note-description-html strong { font-weight: 700; }
-        .note-description-html i, .note-description-html em { font-style: italic; }
-        .note-description-html u { text-decoration: underline; }
-        .note-description-html ul { padding-left: 24px; margin: 8px 0; }
-        .note-description-html li { margin-bottom: 4px; }
         .footer-gallery-row { gap: 12px !important; }
         .footer-gallery-item img { mix-blend-mode: screen !important; }
         @media (max-width: 1024px) { .footer-gallery-row { gap: 10px !important; } .footer-gallery-item { height: clamp(140px, 24vw, 280px) !important; } }
