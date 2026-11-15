@@ -1342,8 +1342,207 @@ const SecurityCenterPanel = ({ user, db, onBack }: { user: any; db: any; onBack:
   );
 };
 
+// ===== ACCOUNT STATUS PANEL (Real-time Banned Status) =====
+const AccountStatusPanel = ({ user, db, onOpenAppeal }: { user: any; db: any; onOpenAppeal: (reason: string, message: string) => void; }) => {
+  const [banStatus, setBanStatus] = useState<{ isBanned: boolean; reason: string; message: string; canCreateTicket: boolean; canSendMessage: boolean }>({ isBanned: false, reason: "", message: "", canCreateTicket: true, canSendMessage: true });
+  const [loading, setLoading] = useState(true);
+  const [hasAppeal, setHasAppeal] = useState(false);
+  const [busyAppeal, setBusyAppeal] = useState(false);
+  const pulseRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  // Real-time listener: bot_blocks + users
+  useEffect(() => {
+    if (!user || !db) { setLoading(false); return; }
+    let active = true;
+    setLoading(true);
+
+    const unsubBot = onSnapshot(doc(db, "bot_blocks", user.uid), (snap) => {
+      if (!active) return;
+      if (snap.exists()) {
+        const d = snap.data();
+        if (d.isBlocked === true) {
+          setBanStatus({ isBanned: true, reason: d.blockedReason || "Suspicious Activity", message: d.blockedMessage || "", canCreateTicket: d.canCreateTicket !== false, canSendMessage: d.canSendMessage !== false });
+          setLoading(false);
+          return;
+        }
+      }
+      setBanStatus((prev) => ({ ...prev, isBanned: false, reason: "", message: "", canCreateTicket: true, canSendMessage: true }));
+      setLoading(false);
+    }, (err) => { console.error(err); setLoading(false); });
+
+    const unsubUser = onSnapshot(doc(db, "users", user.uid), (snap) => {
+      if (!active) return;
+      if (snap.exists()) {
+        const u = snap.data();
+        if (u.botBlocked === true) {
+          setBanStatus({ isBanned: true, reason: u.botBlockedReason || "Blocked by system", message: u.botBlockedMessage || "", canCreateTicket: u.canCreateTicket !== false, canSendMessage: u.canSendMessage !== false });
+        }
+      }
+    }, (err) => console.error(err));
+
+    return () => { active = false; unsubBot(); unsubUser(); };
+  }, [user, db]);
+
+  // Listen appeal tickets
+  useEffect(() => {
+    if (!user || !db) return;
+    const q = query(collection(db, "appeal_tickets"), where("userId", "==", user.uid), orderBy("createdAt", "desc"), limit(1));
+    const unsub = onSnapshot(q, (s: any) => setHasAppeal(!s.empty), (err) => console.error(err));
+    return () => unsub();
+  }, [user, db]);
+
+  // Pulse animation on status
+  useEffect(() => {
+    if (!pulseRef.current) return;
+    gsap.killTweensOf(pulseRef.current);
+    gsap.fromTo(pulseRef.current, { scale: 0.6, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.6, ease: "back.out(2)" });
+  }, [banStatus.isBanned]);
+
+  useEffect(() => {
+    if (cardRef.current) gsap.fromTo(cardRef.current, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" });
+  }, []);
+
+  const handleAppeal = async () => {
+    if (!user || !db || busyAppeal) return;
+    setBusyAppeal(true);
+    try { onOpenAppeal(banStatus.reason, banStatus.message); }
+    finally { setBusyAppeal(false); }
+  };
+
+  const isBanned = banStatus.isBanned;
+
+  const normalFeatures = [
+    "Akses penuh ke Live Chat Agent",
+    "Membuat tiket dukungan baru",
+    "Mengirim & menerima pesan",
+    "Bergabung di komunitas Notes",
+    "Mengelola Passkey & Google Authenticator",
+    "Mengubah pengaturan privasi & anonim",
+    "Mengajukan banding (jika diperlukan)",
+  ];
+  const bannedFeatures = [
+    "Membuat tiket dukungan baru",
+    "Mengirim pesan di Live Chat",
+    "Bergabung di komunitas Notes",
+    "Mengakses fitur interaktif",
+    "Hanya dapat melihat status akun",
+    "Dapat mengajukan banding ke admin",
+  ];
+
+  const statusColor = isBanned ? RED : GREEN;
+  const statusLabel = loading ? "Memeriksa..." : isBanned ? "BANNED" : "AKTIF / NORMAL";
+  const statusBg = isBanned ? "#FEF2F2" : "#F0FDF4";
+  const statusBorder = isBanned ? "#FCA5A5" : "#86EFAC";
+
+  return (
+    <div ref={cardRef} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+      {/* Header Card - Judul + Icon Real-time */}
+      <div style={{ backgroundColor: BLUE, borderRadius: "24px", padding: "24px", display: "flex", flexDirection: "column", gap: "16px", boxShadow: "0 12px 32px rgba(13,60,252,0.3)" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+            <div ref={pulseRef} style={{ width: "56px", height: "56px", borderRadius: "16px", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              {isBanned ? <ShieldBanIcon size={28} color={RED} /> : <TrustIcon size={28} color={GREEN} />}
+            </div>
+            <div>
+              <div style={{ fontSize: "22px", fontWeight: 800, color: WHITE, letterSpacing: "-0.02em" }}>Status Akun</div>
+              <div style={{ fontSize: "13px", color: WHITE, opacity: 0.85, fontWeight: 600 }}>Real-time · Menuru Security</div>
+            </div>
+          </div>
+          {/* Indicator real-time */}
+          <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "8px 14px", backgroundColor: WHITE, borderRadius: "10px" }}>
+            <span style={{ width: 10, height: 10, borderRadius: "50%", backgroundColor: statusColor, animation: "statusPulse 1.4s ease-in-out infinite" }} />
+            <span style={{ fontSize: "12px", fontWeight: 800, color: BLUE, letterSpacing: "0.06em", textTransform: "uppercase" }}>{statusLabel}</span>
+          </div>
+        </div>
+
+        {/* Deskripsi */}
+        <p style={{ fontSize: "14px", color: WHITE, opacity: 0.95, lineHeight: 1.6, margin: 0 }}>
+          {loading
+            ? "Sedang memeriksa status akun Anda dari server..."
+            : isBanned
+              ? `Akun Anda saat ini dalam status BANNED. Alasan: ${banStatus.reason || "Suspicious Activity"}. Anda tidak dapat menggunakan fitur interaktif sampai banding disetujui admin.`
+              : "Akun Anda dalam status aktif dan normal. Semua fitur Menuru tersedia untuk Anda gunakan."}
+        </p>
+
+        {/* Banned message box */}
+        {isBanned && banStatus.message && (
+          <div style={{ backgroundColor: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.35)", borderRadius: "10px", padding: "12px 14px" }}>
+            <div style={{ fontSize: "11px", fontWeight: 800, color: WHITE, opacity: 0.8, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "4px" }}>Pesan dari sistem</div>
+            <div style={{ fontSize: "13px", color: WHITE, opacity: 0.95, lineHeight: 1.5, wordBreak: "break-word" }}>{banStatus.message}</div>
+          </div>
+        )}
+      </div>
+
+      {/* Fitur Tersedia */}
+      <div style={{ backgroundColor: statusBg, border: `2px solid ${statusBorder}`, borderRadius: "20px", padding: "20px", display: "flex", flexDirection: "column", gap: "14px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          {isBanned ? <ShieldBanIcon size={22} color={RED} /> : <TrustIcon size={22} color={GREEN} />}
+          <span style={{ fontSize: "16px", fontWeight: 800, color: isBanned ? RED : "#166534" }}>
+            {isBanned ? "Fitur yang Tidak Tersedia" : "Fitur yang Tersedia"}
+          </span>
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+          {(isBanned ? bannedFeatures : normalFeatures).map((f, i) => (
+            <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
+              <div style={{ width: "20px", height: "20px", borderRadius: "50%", backgroundColor: isBanned ? RED : GREEN, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: "1px" }}>
+                {isBanned ? (
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M6 6L18 18M18 6L6 18" stroke="#fff" strokeWidth="3" strokeLinecap="round" /></svg>
+                ) : (
+                  <CheckIcon size={12} color="#fff" />
+                )}
+              </div>
+              <span style={{ fontSize: "13px", color: isBanned ? "#7F1D1D" : "#166534", lineHeight: 1.5, fontWeight: 600 }}>{f}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Aksi: Ajukan Banding (jika banned) */}
+      {isBanned && (
+        <div style={{ backgroundColor: WHITE, border: `2px solid ${BLUE}`, borderRadius: "20px", padding: "20px", display: "flex", flexDirection: "column", gap: "12px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <div style={{ width: "36px", height: "36px", borderRadius: "10px", backgroundColor: BLUE, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <ReplyIcon size={18} color={WHITE} />
+            </div>
+            <div>
+              <div style={{ fontSize: "15px", fontWeight: 800, color: BLUE }}>Ajukan Banding</div>
+              <div style={{ fontSize: "11px", color: BLUE, opacity: 0.7, fontWeight: 600 }}>Kirim permohonan ke admin untuk peninjauan</div>
+            </div>
+          </div>
+          <p style={{ margin: 0, fontSize: "13px", color: BLUE, lineHeight: 1.6, opacity: 0.9 }}>
+            Jika Anda merasa akun ini diblokir secara keliru, Anda dapat mengajukan banding. Admin akan meninjau kasus Anda secara manual.
+          </p>
+          {hasAppeal ? (
+            <div style={{ backgroundColor: "#F0F4FF", borderRadius: "10px", padding: "12px 14px", display: "flex", alignItems: "center", gap: "10px" }}>
+              <span style={{ width: 8, height: 8, borderRadius: "50%", backgroundColor: GREEN, animation: "statusPulse 1.4s ease-in-out infinite" }} />
+              <span style={{ fontSize: "12px", color: BLUE, fontWeight: 700 }}>Banding Anda sedang diproses oleh admin.</span>
+            </div>
+          ) : (
+            <button
+              onClick={handleAppeal}
+              disabled={busyAppeal}
+              style={{ alignSelf: "flex-start", padding: "12px 22px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "10px", fontSize: "14px", fontWeight: 800, cursor: busyAppeal ? "not-allowed" : "pointer", fontFamily: FONT_FAMILY, display: "inline-flex", alignItems: "center", gap: "8px" }}
+            >
+              {busyAppeal ? "Membuka..." : "Kirim Pengajuan Banding"}
+              <NorthEastArrow size={16} color={WHITE} />
+            </button>
+          )}
+        </div>
+      )}
+
+      <style jsx>{`
+        @keyframes statusPulse {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.4; transform: scale(1.35); }
+        }
+      `}</style>
+    </div>
+  );
+};
+
 // ===== DASHBOARD OVERLAY =====
-const DashboardOverlay = ({ user, db, onClose }: { user: any; db: any; onClose: () => void; }) => {
+const DashboardOverlay = ({ user, db, onClose, onOpenAppeal }: { user: any; db: any; onClose: () => void; onOpenAppeal: (reason: string, message: string) => void; }) => {
   const overlayRef = useRef<HTMLDivElement>(null);
   const closeIconRef = useRef<HTMLDivElement>(null);
   const [isClosing, setIsClosing] = useState(false);
@@ -1415,6 +1614,7 @@ const DashboardOverlay = ({ user, db, onClose }: { user: any; db: any; onClose: 
           <SecurityCenterPanel user={user} db={db} onBack={() => setActiveTab("main")} />
         ) : activeTab === "main" ? (
           <>
+            {/* Profil */}
             <div style={{ backgroundColor: BLUE, borderRadius: "24px", padding: "24px", marginBottom: "24px", display: "flex", flexDirection: "column", gap: "16px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
                 <div style={{ width: "64px", height: "64px", borderRadius: "8px", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", flexShrink: 0 }}>
@@ -1428,6 +1628,12 @@ const DashboardOverlay = ({ user, db, onClose }: { user: any; db: any; onClose: 
               <p style={{ fontSize: "14px", lineHeight: 1.6, color: "rgba(255,255,255,0.9)", margin: 0 }}>Selamat datang di Dashboard Anda. Kelola pengaturan akun dan aktivitas Anda di sini.</p>
             </div>
 
+            {/* STATUS AKUN (REAL-TIME) */}
+            <div style={{ marginBottom: "24px" }}>
+              <AccountStatusPanel user={user} db={db} onOpenAppeal={onOpenAppeal} />
+            </div>
+
+            {/* Pengaturan Privasi */}
             <div style={{ backgroundColor: BLUE, borderRadius: "24px", padding: "24px", marginBottom: "24px", display: "flex", flexDirection: "column", gap: "12px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                 <div style={{ width: "40px", height: "40px", borderRadius: "12px", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center" }}><TrustIcon size={24} color={BLUE} /></div>
@@ -1437,6 +1643,7 @@ const DashboardOverlay = ({ user, db, onClose }: { user: any; db: any; onClose: 
               <button onClick={() => setActiveTab("settings")} style={{ alignSelf: "flex-start", padding: "10px 20px", backgroundColor: WHITE, color: BLUE, border: "none", borderRadius: "10px", fontSize: "14px", fontWeight: 700, cursor: "pointer", marginTop: "8px" }}>Buka Pengaturan</button>
             </div>
 
+            {/* Security Center */}
             <div style={{ backgroundColor: BLUE, borderRadius: "24px", padding: "24px", marginBottom: "24px", display: "flex", flexDirection: "column", gap: "12px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                 <div style={{ width: "40px", height: "40px", borderRadius: "12px", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center" }}><ShieldLockIcon size={24} color={BLUE} /></div>
@@ -1796,7 +2003,7 @@ const AppealChatRoom = ({ user, isAdmin, db, appealTicket, onClose }: any) => {
   );
 };
 
-// ===== LIVE CHAT AGENT =====
+// ===== LIVE CHAT AGENT (tidak berubah) =====
 const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBannedAppealChat }: any) => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
@@ -2234,6 +2441,7 @@ export default function HomePage(): React.JSX.Element {
   const [bannedAppealTicket, setBannedAppealTicket] = useState<AppealTicket | null>(null);
   const [showBannedAppealSection, setShowBannedAppealSection] = useState(false);
   const [showDashboard, setShowDashboard] = useState(false);
+  const [dashboardAppealPrefill, setDashboardAppealPrefill] = useState<{ reason: string; message: string } | null>(null);
 
   const preloaderRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLSpanElement>(null);
@@ -2309,7 +2517,22 @@ export default function HomePage(): React.JSX.Element {
             </div>
           </div>
         </div>
-        {showDashboard && <DashboardOverlay user={user} db={db} onClose={() => setShowDashboard(false)} />}
+        {showDashboard && (
+          <DashboardOverlay
+            user={user}
+            db={db}
+            onClose={() => { setShowDashboard(false); setDashboardAppealPrefill(null); }}
+            onOpenAppeal={(reason, message) => {
+              setDashboardAppealPrefill({ reason, message });
+              setShowDashboard(false);
+              setTimeout(() => {
+                // Trigger create appeal via banned banner in LiveChatAgent
+                const bannerBtn = document.querySelector('[data-appeal-trigger="true"]') as HTMLButtonElement | null;
+                if (bannerBtn) bannerBtn.click();
+              }, 300);
+            }}
+          />
+        )}
         <div ref={mainPageRef} style={{ position: "relative", width: "100%", minHeight: "100vh", backgroundColor: WHITE, margin: 0, padding: 0, fontFamily: FONT_FAMILY, overflow: "visible", display: "flex", flexDirection: "column", willChange: "transform" }}>
           <TopBanner />
           <div style={{ position: "fixed", top: "44px", left: 0, width: "200px", height: "120px", pointerEvents: "none", zIndex: 8500, backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)", maskImage: "linear-gradient(to right, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%)", WebkitMaskImage: "linear-gradient(to right, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%)" }} />
