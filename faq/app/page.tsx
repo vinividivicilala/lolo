@@ -725,7 +725,7 @@ return (
 </div>
 );
 };
-// ===== GOOGLE AUTHENTICATOR TAB =====
+// ===== GOOGLE AUTH TAB =====
 const GoogleAuthenticatorTab = ({ user, db }: { user: any; db: any }) => {
 const [step, setStep] = useState<"loading" | "intro" | "install" | "setup" | "verify" | "success" | "active" | "disable">("loading");
 const [secret, setSecret] = useState<string>("");
@@ -2444,7 +2444,6 @@ return (
 ) : <div style={{ padding: "14px 24px", borderTop: "1px solid rgba(0,0,0,0.06)", backgroundColor: "#fafafa", textAlign: "center", fontFamily: FONT_FAMILY, fontSize: "13px", color: BLUE, flexShrink: 0, fontWeight: 700 }}>Room ini telah {selectedTicket.status === "closed" ? "ditutup" : "diselesaikan"}.</div>}
 </>
 ) : <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", color: "#999", fontSize: "15px", fontFamily: FONT_FAMILY }}>Select a chat from the list on the left</div>}
-</div>
 </div>
 </div>
 </div>
