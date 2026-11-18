@@ -628,7 +628,6 @@ Farid Ardiansyah
 </>
 );
 };
-
 // ===== FOOTER =====
 const FooterSection = () => {
 const containerRef = useRef<HTMLDivElement>(null);
@@ -738,7 +737,6 @@ return (
 </div>
 );
 };
-
 // ===== NAVBAR BUTTON =====
 const NavbarButton = ({ label, panelTitle, panelDescription, panelImage, panelRightTitle, panelRightDescription, iconType, bigPanelWidth = 850, bigPanelHeight = 260, buttonColor = BLUE, buttonHoverColor = "#000000", panelColor = BLUE, iconButtonColor = "#000000", iconButtonHoverColor = BLUE, panelBoxColor = "rgba(255,255,255,0.12)", panelBoxBorder = "rgba(255,255,255,0.25)", labelTextColor = "#ffffff", labelTextHoverColor = "#ffffff", titleTextColor = "#ffffff", descriptionTextColor = "rgba(255,255,255,0.9)", iconComponent = null, isResources = false }: any) => {
 const [open, setOpen] = useState(false);
@@ -822,7 +820,6 @@ return (
 </div>
 );
 };
-
 // ===== GOOGLE AUTH TAB =====
 const GoogleAuthenticatorTab = ({ user, db }: { user: any; db: any }) => {
 const [step, setStep] = useState<"loading" | "intro" | "install" | "setup" | "verify" | "success" | "active" | "disable">("loading");
@@ -1090,7 +1087,6 @@ Google Authenticator menambahkan lapisan keamanan ekstra dengan kode 6 digit yan
 </div>
 );
 };
-
 // ===== PASSKEY TAB =====
 const PasskeyTab = ({ user, db }: { user: any; db: any }) => {
 const [step, setStep] = useState<"loading" | "intro" | "register" | "done">("loading");
@@ -1271,7 +1267,6 @@ Credential ID: {registeredCredential.slice(0, 40)}...
 </div>
 );
 };
-
 // ===== SECURITY CENTER =====
 const SecurityCenterPanel = ({ user, db, onBack }: { user: any; db: any; onBack: () => void }) => {
 const [tab, setTab] = useState<"totp" | "passkey">("totp");
@@ -1295,7 +1290,6 @@ Passkey
 </div>
 );
 };
-
 // ===== INLINE APPEAL CHAT (ticket chat: tanpa auto-kirim, status real-time, typing bubble, presence) =====
 const InlineAppealChat = ({ user, db, appealTicket, onClose }: { user: any; db: any; appealTicket: AppealTicket; onClose?: () => void; }) => {
 const [messages, setMessages] = useState<AppealMessage[]>([]);
@@ -1692,7 +1686,6 @@ Buka Chat Banding
 </div>
 );
 };
-
 // ===== DASHBOARD OVERLAY =====
 const DashboardOverlay = ({ user, db, onClose, onOpenAppealChat }: { user: any; db: any; onClose: () => void; onOpenAppealChat: (reason: string, message: string) => void; }) => {
 const overlayRef = useRef<HTMLDivElement>(null);
@@ -1885,7 +1878,6 @@ Passkey: {passkeyCount} terdaftar
 </div>
 );
 };
-
 // ===== RIGHT NAVBAR =====
 const RightNavbar = ({ user, auth, db, onOpenDashboard }: { user: any; auth: any; db: any; onOpenDashboard: () => void; }) => {
 const displayName = user?.displayName || user?.email?.split("@")[0] || "User";
@@ -1927,7 +1919,6 @@ return (
 </div>
 );
 };
-
 // ===== ONBOARDING TOUR =====
 const OnboardingTour = ({ steps, onComplete, isActive, currentStep, setCurrentStep }: any) => {
 const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
@@ -1995,7 +1986,6 @@ return (
 </>
 );
 };
-
 // ===== ROLLING NEW MESSAGE =====
 const RollingNewMessage = ({ senderName, message }: { senderName: string; message: string; isFromAgent: boolean }) => {
 const containerRef = useRef<HTMLDivElement>(null);
@@ -2023,7 +2013,6 @@ return (
 </div>
 );
 };
-
 // ===== CLOSE ROOM BUTTON =====
 const CloseRoomButton = ({ onConfirm, disabled }: { onConfirm: () => void; disabled?: boolean }) => {
 const btnRef = useRef<HTMLButtonElement>(null);
@@ -2038,7 +2027,6 @@ return (
 </button>
 );
 };
-
 // ===== BANNED BANNER =====
 const BannedInfoBanner = ({ banReason, banMessage, onAppeal, hasAppeal, appealStatus }: { banReason: string; banMessage: string; onAppeal: () => void; hasAppeal: boolean; appealStatus?: string }) => {
 const ref = useRef<HTMLDivElement>(null);
@@ -2065,7 +2053,6 @@ return (
 </div>
 );
 };
-
 // ===== APPEAL CHAT ROOM (untuk admin & user banned di halaman utama) =====
 const AppealChatRoom = ({ user, isAdmin, db, appealTicket, onClose }: any) => {
 const [messages, setMessages] = useState<AppealMessage[]>([]);
@@ -2205,7 +2192,6 @@ Ticket chat ini telah {status === "resolved" ? "SELESAI" : "DITOLAK"}.
 </div>
 );
 };
-
 // ===== LIVE CHAT AGENT =====
 const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBannedAppealChat }: any) => {
 const [tickets, setTickets] = useState<Ticket[]>([]);
@@ -2574,7 +2560,6 @@ return (
 </>
 );
 };
-
 // ===== MAIN PAGE =====
 export default function HomePage(): React.JSX.Element {
 const [showMain, setShowMain] = useState(false);
