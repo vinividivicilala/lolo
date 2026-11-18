@@ -372,6 +372,39 @@ const ArrowRightIcon = ({ size = 16, color = "currentColor" }: { size?: number; 
 const ChatIcon = ({ size = 18, color = "currentColor" }: { size?: number; color?: string }) => (
 <svg width={size} height={size} viewBox="0 0 24 24" fill="none"><path d="M21 11.5C21 16.1944 16.9706 20 12 20C10.8452 20 9.74371 19.7964 8.73507 19.4276L4 21L5.45177 16.7441C4.53668 15.3762 4 13.7581 4 12C4 7.30558 8.02944 3.5 12 3.5C16.9706 3.5 21 7.30558 21 11.5Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
 );
+
+// ===== NEW INSTAGRAM STYLE VERIFIED BADGE WITH GSAP ANIMATION =====
+const InstaVerifiedBadge = ({ size = 18, animate = true }: { size?: number; animate?: boolean }) => {
+const badgeRef = useRef<HTMLSpanElement>(null);
+useEffect(() => {
+if (animate && badgeRef.current) {
+const tl = gsap.timeline();
+tl.fromTo(badgeRef.current, 
+{ scale: 0, rotation: -180, opacity: 0 }, 
+{ scale: 1, rotation: 0, opacity: 1, duration: 0.8, ease: "back.out(1.7)" }
+);
+tl.to(badgeRef.current, 
+{ boxShadow: "0 0 10px rgba(13, 60, 252, 0.6)", duration: 0.3, yoyo: true, repeat: 1 }
+);
+}
+}, [animate]);
+
+return (
+<span ref={badgeRef} style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center", marginLeft: "6px", verticalAlign: "middle" }}>
+<svg width={size} height={size} viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" style={{ display: "block", filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.1))" }}>
+<defs>
+<linearGradient id="instaGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+<stop offset="0%" stopColor="#0D3CFC" />
+<stop offset="100%" stopColor="#00E3AA" />
+</linearGradient>
+</defs>
+<path fill="url(#instaGrad)" d="M19.998 3.094 14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.03v-6.46h-6.419L25.358 0l-5.36 3.094Zm7.415 11.225 2.254 2.287-11.43 11.5-6.835-6.93 2.244-2.258 4.587 4.581 9.18-9.18Z" />
+<path d="M15 20L18 23L25 16" stroke="#FFFFFF" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+</svg>
+</span>
+);
+};
+
 const VerifiedBadgeWhite = ({ size = 16 }: { size?: number }) => (
 <span style={{ position: "relative", display: "inline-block", marginLeft: "4px", verticalAlign: "middle" }}>
 <svg width={size} height={size} viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" style={{ display: "inline-block", verticalAlign: "middle" }}>
@@ -1277,10 +1310,16 @@ const [messageText, setMessageText] = useState("");
 const [replyTo, setReplyTo] = useState<AppealMessage | null>(null);
 const [encryptionReady, setEncryptionReady] = useState(false);
 const [typingUserName, setTypingUserName] = useState<string | null>(null);
+const [isAdmin, setIsAdmin] = useState(false);
 const messagesEndRef = useRef<HTMLDivElement>(null);
 const chatRef = useRef<HTMLDivElement>(null);
 const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-useEffect(() => { getCryptoKey().then(() => setEncryptionReady(true)).catch(() => setEncryptionReady(true)); }, []);
+
+useEffect(() => { 
+    getCryptoKey().then(() => setEncryptionReady(true)).catch(() => setEncryptionReady(true)); 
+    if (user?.email === ADMIN_EMAIL) setIsAdmin(true);
+}, [user]);
+
 useEffect(() => {
 if (!db || !appealTicket) return;
 const q = query(collection(db, "appeal_tickets", appealTicket.id, "messages"), orderBy("timestamp", "asc"));
@@ -1292,30 +1331,34 @@ requestAnimationFrame(() => { if (chatRef.current) chatRef.current.scrollTop = c
 });
 return () => unsub();
 }, [db, appealTicket]);
+
 useEffect(() => {
 if (!db || !appealTicket || !user) return;
 messages.filter((m) => m.senderId !== user.uid && !m.read).forEach(async (msg) => { await updateDoc(doc(db, "appeal_tickets", appealTicket.id, "messages", msg.id), { read: true, deliveryStatus: "read" }); });
 }, [messages, appealTicket, db, user]);
+
 useEffect(() => {
 if (!db || !appealTicket) return;
 const unsub = onSnapshot(doc(db, "appeal_tickets", appealTicket.id), (snap: any) => { if (snap.exists()) { const d = snap.data(); setTypingUserName(d.typing && d.typingUserId !== user?.uid ? (d.typingUserName || null) : null); } });
 return () => unsub();
 }, [db, appealTicket, user]);
+
 const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
 const value = e.target.value; setMessageText(value);
 if (!appealTicket || !user || !db) return;
 const ref = doc(db, "appeal_tickets", appealTicket.id);
-if (value.length > 0) await updateDoc(ref, { typing: true, typingUserId: user.uid, typingUserName: user.displayName || user.email || "User" });
+if (value.length > 0) await updateDoc(ref, { typing: true, typingUserId: user.uid, typingUserName: isAdmin ? AGENT_NAME : (user.displayName || user.email || "User") });
 else await updateDoc(ref, { typing: false, typingUserId: null, typingUserName: null });
 if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
 typingTimeoutRef.current = setTimeout(async () => { await updateDoc(ref, { typing: false, typingUserId: null, typingUserName: null }); }, 2000);
 };
+
 const sendMessage = async () => {
 if (!db || !appealTicket || !messageText.trim() || !user || !encryptionReady) return;
 try {
 const ticketRef = doc(db, "appeal_tickets", appealTicket.id);
 await updateDoc(ticketRef, { typing: false, typingUserId: null, typingUserName: null });
-const senderName = user.displayName || user.email || "User";
+const senderName = isAdmin ? AGENT_NAME : (user.displayName || user.email || "User");
 const enc = await encryptMessage(messageText.trim());
 await addDoc(collection(db, "appeal_tickets", appealTicket.id, "messages"), { senderId: user.uid, senderName, text: enc, timestamp: serverTimestamp(), read: false, isEncrypted: true, deliveryStatus: "sent", replyTo: replyTo ? { messageId: replyTo.id, senderName: replyTo.senderName, text: replyTo.text.length > 50 ? replyTo.text.substring(0, 50) + "..." : replyTo.text } : null });
 await updateDoc(ticketRef, { lastMessage: messageText.trim(), lastMessageTime: serverTimestamp(), lastMessageSender: senderName, status: "active" });
@@ -1323,6 +1366,21 @@ setMessageText(""); setReplyTo(null);
 if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
 } catch (e) { console.error(e); alert("An error occurred."); }
 };
+
+const handleAction = async (action: string) => {
+    if (!db || !appealTicket) return;
+    const statusMap: any = { "Selesai": "resolved", "Tolak": "closed", "Banding": "active" };
+    const newStatus = statusMap[action] || "active";
+    try {
+        await updateDoc(doc(db, "appeal_tickets", appealTicket.id), { status: newStatus });
+        // Optional: Send system message
+        const sysMsg = `Admin mengubah status banding menjadi: ${action}`;
+        await addDoc(collection(db, "appeal_tickets", appealTicket.id, "messages"), { 
+            senderId: "system", senderName: "System", text: sysMsg, timestamp: serverTimestamp(), read: true, isEncrypted: false 
+        });
+    } catch (e) { console.error(e); }
+};
+
 const renderDeliveryStatus = (msg: AppealMessage, isMine: boolean) => {
 if (!isMine) return null;
 let label = "Sent"; let icon = <CheckIcon size={11} color="#ffffff" />;
@@ -1333,13 +1391,27 @@ else if (msg.deliveryStatus === "failed") { label = "Failed"; icon = <ErrorIcon 
 return (<span style={{ display: "inline-flex", alignItems: "center", gap: "3px", fontSize: "10px", color: "#ffffff", fontFamily: FONT_FAMILY, fontWeight: 500 }}>{label}{icon}</span>);
 };
 const formatTime = (t: any) => { if (!t) return ""; const d = t.toDate ? t.toDate() : new Date(t); return d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }); };
+
 return (
 <div style={{ display: "flex", flexDirection: "column", height: "100%", backgroundColor: WHITE, borderRadius: "12px", overflow: "hidden", border: `2px solid ${BLUE}` }}>
 <div style={{ padding: "16px 20px", backgroundColor: BLUE, display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0 }}>
 <div>
-<div style={{ fontWeight: 700, fontSize: "17px", color: WHITE, fontFamily: FONT_FAMILY, marginBottom: "4px" }}>Chat Banding dengan Admin</div>
+<div style={{ fontWeight: 700, fontSize: "17px", color: WHITE, fontFamily: FONT_FAMILY, marginBottom: "4px", display: "flex", alignItems: "center", gap: "8px" }}>
+    {isAdmin ? `Banding: ${appealTicket.userName}` : (
+        <>
+            Chat Banding dengan Admin
+            <InstaVerifiedBadge size={16} animate={true} />
+        </>
+    )}
+</div>
 <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
 <StabiloBadge label="Banding" bg={WHITE} text={BLUE} border={WHITE} size="sm" />
+{!isAdmin && (
+    <div style={{ display: "flex", alignItems: "center", gap: "6px", backgroundColor: "rgba(255,255,255,0.15)", padding: "2px 8px", borderRadius: "12px" }}>
+        <span style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: GREEN, animation: "statusPulse 1.4s ease-in-out infinite" }} />
+        <span style={{ fontSize: "11px", color: WHITE, fontWeight: 600 }}>Online</span>
+    </div>
+)}
 {typingUserName && <span style={{ fontSize: "12px", color: WHITE, fontStyle: "italic", fontWeight: 700 }}>{typingUserName} is typing...</span>}
 </div>
 </div>
@@ -1351,10 +1423,15 @@ return (
 <div ref={chatRef} className="chat-messages-container" style={{ flex: 1, overflowY: "auto", padding: "20px", display: "flex", flexDirection: "column", gap: "12px", minHeight: "280px", maxHeight: "420px" }}>
 {messages.length === 0 ? <div style={{ textAlign: "center", color: "#999", fontSize: "14px", padding: "30px 0", fontFamily: FONT_FAMILY }}>Belum ada pesan.</div> : messages.map((msg, idx) => {
 const isMine = msg.senderId === user?.uid;
+const isSystem = msg.senderId === "system";
+if (isSystem) return <div key={msg.id} style={{ textAlign: "center", fontSize: "11px", color: BLUE, opacity: 0.7, margin: "10px 0" }}>{msg.text}</div>;
 return (
 <div key={msg.id || idx} style={{ alignSelf: isMine ? "flex-end" : "flex-start", maxWidth: "75%" }}>
 <div style={{ padding: "12px 16px", borderRadius: "12px", backgroundColor: isMine ? BLUE : "#f4f4f5", color: isMine ? WHITE : BLACK, fontSize: "14px", fontFamily: FONT_FAMILY, wordBreak: "break-word", border: isMine ? "none" : "1px solid rgba(0,0,0,0.05)" }}>
-{!isMine && <div style={{ fontSize: "12px", fontWeight: 700, color: BLUE, marginBottom: "4px" }}>{msg.senderName}</div>}
+{!isMine && <div style={{ fontSize: "12px", fontWeight: 700, color: BLUE, marginBottom: "4px", display: "flex", alignItems: "center" }}>
+    {msg.senderName}
+    {msg.senderName === AGENT_NAME && <InstaVerifiedBadge size={14} animate={false} />}
+</div>}
 {msg.replyTo && <div style={{ padding: "6px 10px", backgroundColor: isMine ? "rgba(255,255,255,0.2)" : "rgba(13,60,252,0.1)", borderLeft: `3px solid ${isMine ? WHITE : BLUE}`, borderRadius: "4px", marginBottom: "6px", fontSize: "11px", color: isMine ? WHITE : BLUE, fontStyle: "italic", fontFamily: FONT_FAMILY }}><strong>{msg.replyTo.senderName}:</strong> {msg.replyTo.text}</div>}
 <div>{msg.text}</div>
 <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "6px", marginTop: "5px" }}>{renderDeliveryStatus(msg, isMine)}<span style={{ fontSize: "10px", color: isMine ? WHITE : "#999" }}>{formatTime(msg.timestamp)}</span></div>
@@ -1366,6 +1443,16 @@ return (
 <div ref={messagesEndRef} />
 </div>
 {replyTo && <div style={{ padding: "8px 20px", backgroundColor: "rgba(13,60,252,0.06)", borderTop: `1px solid ${BLUE}20`, display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 }}><ReplyIcon size={14} color={BLUE} /><div style={{ flex: 1, fontSize: "12px", color: BLUE, fontFamily: FONT_FAMILY, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}><strong>{replyTo.senderName}:</strong> {replyTo.text}</div><button onClick={() => setReplyTo(null)} style={{ background: "transparent", border: "none", color: BLUE, cursor: "pointer", fontSize: "16px", fontFamily: FONT_FAMILY, padding: 0, lineHeight: 1 }}>×</button></div>}
+
+{/* ADMIN ACTION BUTTONS */}
+{isAdmin && (
+    <div style={{ padding: "10px 20px", backgroundColor: "#FAFBFF", borderTop: `1px solid ${BLUE}20`, display: "flex", gap: "10px", justifyContent: "center", flexShrink: 0 }}>
+        <button onClick={() => handleAction("Selesai")} style={{ flex: 1, padding: "8px", backgroundColor: GREEN, color: WHITE, border: "none", borderRadius: "8px", fontSize: "12px", fontWeight: 800, cursor: "pointer", fontFamily: FONT_FAMILY }}>Selesai</button>
+        <button onClick={() => handleAction("Tolak")} style={{ flex: 1, padding: "8px", backgroundColor: RED, color: WHITE, border: "none", borderRadius: "8px", fontSize: "12px", fontWeight: 800, cursor: "pointer", fontFamily: FONT_FAMILY }}>Tolak</button>
+        <button onClick={() => handleAction("Banding")} style={{ flex: 1, padding: "8px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "8px", fontSize: "12px", fontWeight: 800, cursor: "pointer", fontFamily: FONT_FAMILY }}>Banding</button>
+    </div>
+)}
+
 <div style={{ padding: "14px 20px", borderTop: `1px solid ${BLUE}20`, display: "flex", gap: "10px", backgroundColor: WHITE, flexShrink: 0 }}>
 <input type="text" value={messageText} onChange={handleTyping} onKeyPress={(e) => { if (e.key === "Enter" && !e.shiftKey && messageText.trim()) { e.preventDefault(); sendMessage(); } }} placeholder="Tulis pesan banding..." style={{ flex: 1, padding: "12px 16px", border: `1px solid ${BLUE}40`, borderRadius: "10px", fontSize: "14px", outline: "none", fontFamily: FONT_FAMILY, backgroundColor: WHITE, color: BLUE }} />
 <button onClick={sendMessage} disabled={!messageText.trim()} style={{ padding: "12px 24px", backgroundColor: messageText.trim() ? BLUE : "#ccc", color: WHITE, border: "none", borderRadius: "10px", cursor: messageText.trim() ? "pointer" : "not-allowed", fontFamily: FONT_FAMILY, fontSize: "13px", fontWeight: 800, letterSpacing: "0.5px", textTransform: "uppercase" }}>Kirim</button>
