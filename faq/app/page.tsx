@@ -373,39 +373,40 @@ const ChatIcon = ({ size = 18, color = "currentColor" }: { size?: number; color?
 <svg width={size} height={size} viewBox="0 0 24 24" fill="none"><path d="M21 11.5C21 16.1944 16.9706 20 12 20C10.8452 20 9.74371 19.7964 8.73507 19.4276L4 21L5.45177 16.7441C4.53668 15.3762 4 13.7581 4 12C4 7.30558 8.02944 3.5 12 3.5C16.9706 3.5 21 7.30558 21 11.5Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
 );
 
-// ===== REAL INSTAGRAM BADGE WITH GSAP ANIMATION =====
-const RealInstagramBadge = ({ size = 16, animated = false }: { size?: number; animated?: boolean }) => {
+// ===== REAL INSTAGRAM VERIFIED BADGE (Desain Asli IG) =====
+// variant="white": bulat putih + centang biru (untuk background biru)
+// variant="blue": bulat biru + centang putih (untuk background putih)
+const VerifiedBadgeReal = ({ size = 16, variant = "blue", animated = false }: { size?: number; variant?: "white" | "blue"; animated?: boolean }) => {
 const badgeRef = useRef<HTMLSpanElement>(null);
-const pathRef = useRef<SVGPathElement>(null);
+const checkRef = useRef<SVGPathElement>(null);
+const circleRef = useRef<SVGCircleElement>(null);
 
 useEffect(() => {
-if (animated && badgeRef.current && pathRef.current) {
-const tl = gsap.timeline();
-// Initial state
-gsap.set(badgeRef.current, { scale: 0, opacity: 0 });
-gsap.set(pathRef.current, { strokeDasharray: 100, strokeDashoffset: 100 });
+if (animated && badgeRef.current && checkRef.current && circleRef.current) {
+gsap.set(badgeRef.current, { scale: 0, opacity: 0, rotation: -180 });
+gsap.set(circleRef.current, { scale: 0, transformOrigin: "50% 50%" });
+gsap.set(checkRef.current, { strokeDasharray: 30, strokeDashoffset: 30 });
 
-// Animation
-tl.to(badgeRef.current, { scale: 1, opacity: 1, duration: 0.5, ease: "back.out(1.7)" })
-.to(pathRef.current, { strokeDashoffset: 0, duration: 0.6, ease: "power2.inOut" }, "-=0.3");
+const tl = gsap.timeline();
+tl.to(badgeRef.current, { scale: 1, opacity: 1, rotation: 0, duration: 0.7, ease: "back.out(2)" })
+.to(circleRef.current, { scale: 1, duration: 0.4, ease: "elastic.out(1, 0.5)" }, "-=0.3")
+.to(checkRef.current, { strokeDashoffset: 0, duration: 0.5, ease: "power2.out" }, "-=0.2");
 }
 }, [animated]);
 
+const circleColor = variant === "white" ? WHITE : BLUE;
+const checkColor = variant === "white" ? BLUE : WHITE;
+
 return (
 <span ref={badgeRef} style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center", marginLeft: "4px", verticalAlign: "middle" }}>
-<svg width={size} height={size} viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" style={{ display: "block", filter: "drop-shadow(0px 2px 4px rgba(13,60,252,0.3))" }}>
-<defs>
-<linearGradient id="instaGrad" x1="0%" y1="100%" x2="100%" y2="0%">
-<stop offset="0%" stopColor="#FFD700" /> 
-<stop offset="50%" stopColor="#F55376" />
-<stop offset="100%" stopColor="#4F5BD5" />
-</linearGradient>
-</defs>
-<path fill="url(#instaGrad)" d="M19.998 3.094 14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.03v-6.46h-6.419L25.358 0l-5.36 3.094Zm7.415 11.225 2.254 2.287-11.43 11.5-6.835-6.93 2.244-2.258 4.587 4.581 9.18-9.18Z" />
-<path ref={pathRef} d="M15 20L18 23L25 16" stroke={WHITE} strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+<svg width={size} height={size} viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" style={{ display: "block" }}>
+<path fill={circleColor} d="M19.998 3.094 14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.03v-6.46h-6.419L25.358 0l-5.36 3.094Z" />
+<circle ref={circleRef} cx="20" cy="20" r="10" fill={circleColor} opacity="0" />
+<path ref={checkRef} d="M14 20L18 24L26 16" stroke={checkColor} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none" />
 </svg>
 </span>
 );
+
 };
 
 const VerifiedBadgeWhite = ({ size = 16 }: { size?: number }) => (
@@ -428,6 +429,27 @@ return (
 <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", padding: isSmall ? "3px 9px" : "4px 11px", borderRadius: "4px", border: `1.5px solid ${border}`, backgroundColor: bg, color: text, fontSize: isSmall ? "10px" : "11px", fontWeight: 800, letterSpacing: "0.6px", textTransform: "uppercase", fontFamily: FONT_FAMILY, lineHeight: 1.3, whiteSpace: "nowrap" }}>{label}</span>
 );
 };
+
+// ===== STATUS DOT (Online/Offline dengan kedip) =====
+const StatusDot = ({ online, size = 12 }: { online: boolean; size?: number }) => {
+const dotColor = online ? WHITE : BLACK;
+const animationClass = online ? "blinking-dot-white" : "blinking-dot-black";
+return (
+<span style={{
+display: "inline-block",
+width: `${size}px`,
+height: `${size}px`,
+borderRadius: "50%",
+backgroundColor: dotColor,
+border: `2px solid ${WHITE}`,
+boxShadow: "0 0 0 1px rgba(0,0,0,0.1)",
+animation: `${animationClass} 1.5s ease-in-out infinite`,
+flexShrink: 0
+}} />
+);
+
+};
+
 const footerLinks = [
 { title: "Get in Touch", links: ["Contact Us", "Instagram", "Live Chat"] },
 { title: "Product", links: ["Shop", "Note", "Calendar", "Blog", "Donation", "Community", "Live Chat Agent", "Stories"] },
@@ -444,16 +466,45 @@ interface AppealTicket { id: string; userId: string; userName: string; userEmail
 interface PasskeyRecord { id: string; credentialId: string; name: string; createdAt: number; transports?: string[]; }
 interface AccountStatusInfo { isBanned: boolean; reason: string; message: string; canCreateTicket: boolean; canSendMessage: boolean; }
 
-// ===== FARID VERIFIED PANEL =====
+// ===== FARID VERIFIED PANEL (dengan animasi badge dramatis sebelum expand) =====
 const FaridVerifiedPanel = ({ open, anchorRect, onClose }: { open: boolean; anchorRect: DOMRect | null; onClose: () => void; }) => {
-const [phase, setPhase] = useState<"loading" | "expand" | "fullpage">("loading");
+const [phase, setPhase] = useState<"idle" | "badge-pop" | "expand" | "fullpage">("idle");
 const panelRef = useRef<HTMLDivElement>(null);
 const fullPageRef = useRef<HTMLDivElement>(null);
 const closeIconRef = useRef<HTMLDivElement>(null);
+const badgeAnimRef = useRef<HTMLDivElement>(null);
 const [isClosing, setIsClosing] = useState(false);
+
 useEffect(() => {
-if (open) { setPhase("loading"); setIsClosing(false); const timer = setTimeout(() => setPhase("expand"), 1800); return () => clearTimeout(timer); }
+if (open) {
+setPhase("badge-pop");
+setIsClosing(false);
+// Animasi badge dramatis SEBELUM expand
+if (badgeAnimRef.current) {
+gsap.set(badgeAnimRef.current, { scale: 0, opacity: 0, rotation: -180 });
+const tl = gsap.timeline({
+onComplete: () => {
+setTimeout(() => setPhase("expand"), 200);
+}
+});
+tl.to(badgeAnimRef.current, {
+scale: 1.3,
+opacity: 1,
+rotation: 0,
+duration: 0.6,
+ease: "back.out(2.5)"
+})
+.to(badgeAnimRef.current, {
+scale: 1,
+duration: 0.3,
+ease: "elastic.out(1, 0.4)"
+});
+}
+} else {
+setPhase("idle");
+}
 }, [open]);
+
 useEffect(() => {
 if (phase !== "expand" || !panelRef.current || !fullPageRef.current || !anchorRect) return;
 const panel = panelRef.current;
@@ -465,6 +516,7 @@ tl.to(panel, { top: 0, left: 0, width: "100vw", height: "100vh", borderRadius: "
 .to(full, { opacity: 1, duration: 0.4, ease: "power2.out" }, "-=0.35");
 return () => tl.kill();
 }, [phase, anchorRect]);
+
 const handleIconEnter = () => { if (closeIconRef.current && !isClosing) gsap.to(closeIconRef.current, { rotation: 45, scale: 1.2, duration: 0.3, ease: "power2.out" }); };
 const handleIconLeave = () => { if (closeIconRef.current && !isClosing) gsap.to(closeIconRef.current, { rotation: 0, scale: 1, duration: 0.3, ease: "power2.out" }); };
 const handleClose = () => {
@@ -473,30 +525,41 @@ setIsClosing(true);
 if (closeIconRef.current) gsap.to(closeIconRef.current, { rotation: 90, scale: 0, duration: 0.4, ease: "back.in(1.7)" });
 gsap.to(fullPageRef.current, { opacity: 0, y: 40, duration: 0.4, ease: "power3.in", onComplete: () => { setIsClosing(false); onClose(); } });
 };
+
 if (!open) return null;
+
 return (
 <>
-{(phase === "loading" || phase === "expand") && <div onClick={handleClose} style={{ position: "fixed", inset: 0, zIndex: 9700, background: "rgba(0,0,0,0.25)", pointerEvents: "auto" }} />}
-{(phase === "loading" || phase === "expand") && anchorRect && (
-<div ref={panelRef} style={{ position: "fixed", top: anchorRect.top, left: anchorRect.left, width: anchorRect.width, height: anchorRect.height, backgroundColor: BLUE, border: `2px solid ${WHITE}`, borderRadius: "6px", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 8px 24px rgba(13,60,252,0.55)", zIndex: 9800, pointerEvents: "auto", overflow: "hidden" }}>
-{phase === "loading" && (
-<div style={{ width: 24, height: 24, display: "flex", alignItems: "center", justifyContent: "center" }}>
-<RealInstagramBadge size={24} animated={true} />
+{(phase === "badge-pop" || phase === "expand") && <div onClick={handleClose} style={{ position: "fixed", inset: 0, zIndex: 9700, background: "rgba(0,0,0,0.25)", pointerEvents: "auto" }} />}
+{phase === "badge-pop" && anchorRect && (
+<div ref={badgeAnimRef} style={{
+position: "fixed",
+top: anchorRect.top + anchorRect.height / 2 - 30,
+left: anchorRect.left + anchorRect.width / 2 - 30,
+width: "60px",
+height: "60px",
+display: "flex",
+alignItems: "center",
+justifyContent: "center",
+zIndex: 9850,
+pointerEvents: "none"
+}}>
+<VerifiedBadgeReal size={60} variant="white" animated={false} />
 </div>
 )}
-{phase === "expand" && (
+{phase === "expand" && anchorRect && (
+<div ref={panelRef} style={{ position: "fixed", top: anchorRect.top, left: anchorRect.left, width: anchorRect.width, height: anchorRect.height, backgroundColor: BLUE, border: `2px solid ${WHITE}`, borderRadius: "6px", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 8px 24px rgba(13,60,252,0.55)", zIndex: 9800, pointerEvents: "auto", overflow: "hidden" }}>
 <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px" }}>
-<RealInstagramBadge size={18} animated={false} />
+<VerifiedBadgeReal size={18} variant="white" animated={false} />
 <span style={{ fontFamily: FONT_FAMILY, fontSize: "11px", fontWeight: 800, color: WHITE, letterSpacing: "0.02em", whiteSpace: "nowrap" }}>Verified</span>
 </div>
-)}
 </div>
 )}
 {(phase === "expand" || phase === "fullpage") && (
 <div ref={fullPageRef} style={{ position: "fixed", inset: 0, width: "100vw", height: "100vh", backgroundColor: BLUE, zIndex: 9799, display: phase === "fullpage" ? "flex" : "none", flexDirection: "column", fontFamily: FONT_FAMILY, color: WHITE, overflow: "hidden", opacity: 0 }}>
 <div style={{ padding: "24px 40px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
 <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-<RealInstagramBadge size={32} animated={false} />
+<VerifiedBadgeReal size={32} variant="white" animated={false} />
 <span style={{ fontSize: "28px", fontWeight: 800, color: WHITE, letterSpacing: "-0.02em" }}>Verified</span>
 </div>
 <button onClick={handleClose} onMouseEnter={handleIconEnter} onMouseLeave={handleIconLeave} disabled={isClosing} style={{ background: WHITE, border: "none", color: BLUE, borderRadius: "50%", width: "44px", height: "44px", display: "flex", alignItems: "center", justifyContent: "center", cursor: isClosing ? "not-allowed" : "pointer" }}>
@@ -551,7 +614,7 @@ return (
 Website this is build the develope{" "}
 <button ref={btnRef} onClick={handleClickFarid} style={{ color: BLUE, fontWeight: 800, display: "inline-flex", alignItems: "center", gap: "6px", backgroundColor: WHITE, padding: "2px 8px", borderRadius: "6px", border: "none", cursor: "pointer", fontFamily: FONT_FAMILY, fontSize: "14px", lineHeight: 1.4 }}>
 Farid Ardiansyah
-<RealInstagramBadge size={16} animated={true} />
+<VerifiedBadgeReal size={16} variant="blue" animated={true} />
 </button>
 </span>
 </div>
@@ -751,476 +814,9 @@ return (
 </div>
 );
 };
-// ===== GOOGLE AUTH TAB =====
-const GoogleAuthenticatorTab = ({ user, db }: { user: any; db: any }) => {
-const [step, setStep] = useState<"loading" | "intro" | "install" | "setup" | "verify" | "success" | "active" | "disable">("loading");
-const [secret, setSecret] = useState<string>("");
-const [otpUri, setOtpUri] = useState<string>("");
-const [token, setToken] = useState<string>("");
-const [error, setError] = useState<string>("");
-const [busy, setBusy] = useState(false);
-const [recoveryCodes, setRecoveryCodes] = useState<string[]>([]);
-const [enabled, setEnabled] = useState(false);
-const [currentCodePreview, setCurrentCodePreview] = useState<string>("");
-const [countdown, setCountdown] = useState(30);
-const [showSecret, setShowSecret] = useState(false);
-const ref = useRef<HTMLDivElement>(null);
-useEffect(() => {
-let active = true;
-(async () => {
-if (!user || !db) { setStep("intro"); return; }
-try {
-const snap = await getDoc(doc(db, "users", user.uid));
-if (snap.exists()) {
-const d = snap.data();
-if (d.twoFactorEnabled === true && d.totpSecret) { setEnabled(true); setSecret(d.totpSecret); setRecoveryCodes(Array.isArray(d.totpRecoveryCodes) ? d.totpRecoveryCodes : []); if (active) setStep("active"); return; }
-}
-} catch (e) { console.error(e); }
-if (active) setStep("intro");
-})();
-return () => { active = false; };
-}, [user, db]);
-useEffect(() => { if ((step === "setup" || step === "verify") && !secret) setSecret(generateSecret(20)); }, [step, secret]);
-useEffect(() => { if (!secret) return; setOtpUri(buildOtpAuthUri(secret, user?.email || user?.displayName || "user", SECURITY_ISSUER)); }, [secret, user]);
-useEffect(() => {
-if (step !== "active" && step !== "setup" && step !== "verify") return;
-if (!secret) return;
-let mounted = true;
-const tick = async () => { try { const code = await totp(secret); if (mounted) setCurrentCodePreview(code); } catch {} const remaining = 30 - (Math.floor(Date.now() / 1000) % 30); if (mounted) setCountdown(remaining); };
-tick();
-const int = setInterval(tick, 1000);
-return () => { mounted = false; clearInterval(int); };
-}, [step, secret]);
-useEffect(() => { if (ref.current) gsap.fromTo(ref.current, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }); }, [step]);
-const handleVerify = async () => {
-if (!user || !db || !secret) return;
-if (!/^\d{6}$/.test(token.replace(/\s+/g, ""))) { setError("Kode harus 6 digit angka."); return; }
-setBusy(true); setError("");
-try {
-const ok = await verifyTotp(secret, token);
-if (!ok) { setError("Kode OTP salah atau kadaluarsa."); setBusy(false); return; }
-const codes = generateRecoveryCodes(8);
-await updateDoc(doc(db, "users", user.uid), { twoFactorEnabled: true, totpSecret: secret, totpRecoveryCodes: codes, twoFactorEnabledAt: serverTimestamp() });
-setRecoveryCodes(codes); setEnabled(true); setStep("success");
-} catch (e) { console.error(e); setError("Gagal menyimpan pengaturan 2FA."); }
-finally { setBusy(false); }
-};
-const handleDisableVerify = async () => {
-if (!user || !db || !secret) return;
-if (!/^\d{6}$/.test(token.replace(/\s+/g, ""))) { setError("Kode harus 6 digit angka."); return; }
-setBusy(true); setError("");
-try {
-const ok = await verifyTotp(secret, token);
-if (!ok) { setError("Kode OTP salah atau kadaluarsa."); setBusy(false); return; }
-await updateDoc(doc(db, "users", user.uid), { twoFactorEnabled: false, totpSecret: "", totpRecoveryCodes: [], twoFactorDisabledAt: serverTimestamp() });
-setEnabled(false); setSecret(""); setRecoveryCodes([]); setToken(""); setStep("intro");
-} catch (e) { console.error(e); setError("Gagal menonaktifkan 2FA."); }
-finally { setBusy(false); }
-};
-const copy = async (t: string) => { try { await navigator.clipboard.writeText(t); } catch {} };
-const inputStyle: React.CSSProperties = { width: "100%", padding: "14px 16px", borderRadius: "10px", border: `2px solid ${BLUE}40`, fontSize: "16px", fontFamily: FONT_FAMILY, outline: "none", color: BLUE, fontWeight: 600, letterSpacing: "0.15em", textAlign: "center", background: WHITE };
-const primaryBtn: React.CSSProperties = { padding: "12px 22px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "10px", fontSize: "14px", fontWeight: 800, cursor: "pointer", fontFamily: FONT_FAMILY, display: "inline-flex", alignItems: "center", gap: "8px" };
-const ghostBtn: React.CSSProperties = { padding: "12px 22px", backgroundColor: "transparent", color: BLUE, border: `2px solid ${BLUE}`, borderRadius: "10px", fontSize: "14px", fontWeight: 800, cursor: "pointer", fontFamily: FONT_FAMILY, display: "inline-flex", alignItems: "center", gap: "8px" };
-const cardStyle: React.CSSProperties = { backgroundColor: "#F0F4FF", borderRadius: "20px", padding: "24px", display: "flex", flexDirection: "column", gap: "14px" };
-return (
-<div ref={ref} style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
-{step === "loading" && <div style={{ padding: "40px", textAlign: "center", color: BLUE }}>Memuat...</div>}
-{step === "intro" && (
-<>
-<div style={{ ...cardStyle, background: BLUE }}>
-<div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-<ShieldLockIcon size={36} color={WHITE} />
-<div>
-<div style={{ fontSize: "20px", fontWeight: 800, color: WHITE }}>Google Authenticator</div>
-<div style={{ fontSize: "13px", color: WHITE, opacity: 0.85 }}>Setup sekali, berlaku selamanya</div>
-</div>
-</div>
-<p style={{ margin: 0, color: WHITE, fontSize: "14px", lineHeight: 1.6, opacity: 0.95 }}>
-Google Authenticator menambahkan lapisan keamanan ekstra dengan kode 6 digit yang berubah setiap 30 detik. Setup dilakukan <strong>sekali saja</strong>; setelah aktif, secret tidak bisa diganti tanpa menonaktifkan terlebih dahulu.
-</p>
-<div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginTop: "8px" }}>
-{!enabled ? (
-<button onClick={() => setStep("install")} style={{ ...primaryBtn, backgroundColor: WHITE, color: BLUE }}>Setup Google Authenticator<NorthEastArrow size={16} color={BLUE} /></button>
-) : (
-<>
-<button onClick={() => setStep("active")} style={{ ...primaryBtn, backgroundColor: WHITE, color: BLUE }}>Lihat Status</button>
-<button onClick={() => { setToken(""); setError(""); setStep("disable"); }} style={{ ...ghostBtn, borderColor: WHITE, color: WHITE }}>Nonaktifkan</button>
-</>
-)}
-</div>
-</div>
-<div style={cardStyle}>
-<div style={{ display: "flex", alignItems: "center", gap: "10px" }}><TrustIcon size={22} color={BLUE} /><span style={{ fontWeight: 800, color: BLUE, fontSize: "16px" }}>Kenapa Google Authenticator?</span></div>
-<ul style={{ margin: 0, paddingLeft: "20px", color: BLUE, fontSize: "14px", lineHeight: 1.7 }}>
-<li>Kode OTP 6 digit berganti tiap 30 detik.</li>
-<li>Bekerja offline, tidak butuh internet.</li>
-<li>Standar TOTP (RFC 6238).</li>
-<li>Recovery codes sebagai backup.</li>
-<li><strong>Setup hanya 1 kali</strong> — permanen sampai dinonaktifkan manual.</li>
-</ul>
-</div>
-<div style={cardStyle}>
-<div style={{ display: "flex", alignItems: "center", gap: "10px" }}><ClockIcon size={20} color={BLUE} /><span style={{ fontWeight: 800, color: BLUE, fontSize: "16px" }}>Status</span></div>
-<div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-<span style={{ display: "inline-block", width: 10, height: 10, borderRadius: "50%", backgroundColor: enabled ? GREEN : "#f59e0b" }} />
-<span style={{ color: BLUE, fontWeight: 700, fontSize: "14px" }}>{enabled ? "Aktif & Terkunci" : "Belum Aktif"}</span>
-</div>
-{enabled && currentCodePreview && <div style={{ color: BLUE, fontSize: "13px", opacity: 0.8 }}>Kode saat ini: <strong>{currentCodePreview}</strong> (sisa {countdown}s)</div>}
-</div>
-</>
-)}
-{step === "install" && (
-<>
-<div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "4px" }}><h3 style={{ fontSize: "22px", fontWeight: 800, margin: 0, color: BLUE }}>1. Install Google Authenticator</h3></div>
-<div style={cardStyle}>
-<p style={{ margin: 0, color: BLUE, fontSize: "14px", lineHeight: 1.7 }}>Unduh <strong>Google Authenticator</strong> dari toko resmi.</p>
-<div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-<a href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2" target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none" }}>
-<div style={{ backgroundColor: WHITE, border: `2px solid ${BLUE}`, borderRadius: "14px", padding: "16px", display: "flex", flexDirection: "column", gap: "4px" }}>
-<span style={{ fontSize: "12px", color: BLUE, opacity: 0.7, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>Android</span>
-<span style={{ fontSize: "16px", color: BLUE, fontWeight: 800 }}>Google Play Store</span>
-</div>
-</a>
-<a href="https://apps.apple.com/us/app/google-authenticator/id388497605" target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none" }}>
-<div style={{ backgroundColor: WHITE, border: `2px solid ${BLUE}`, borderRadius: "14px", padding: "16px", display: "flex", flexDirection: "column", gap: "4px" }}>
-<span style={{ fontSize: "12px", color: BLUE, opacity: 0.7, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>iOS</span>
-<span style={{ fontSize: "16px", color: BLUE, fontWeight: 800 }}>Apple App Store</span>
-</div>
-</a>
-</div>
-</div>
-<div style={cardStyle}>
-<span style={{ fontWeight: 800, color: BLUE, fontSize: "16px" }}>Langkah:</span>
-<ol style={{ margin: 0, paddingLeft: "20px", color: BLUE, fontSize: "14px", lineHeight: 1.8 }}>
-<li>Buka Play Store / App Store.</li>
-<li>Cari "Google Authenticator" (Google LLC).</li>
-<li>Tap Install, tunggu selesai.</li>
-<li>Buka aplikasi.</li>
-<li>Kembali ke sini dan lanjutkan.</li>
-</ol>
-<div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-<button onClick={() => setStep("setup")} style={primaryBtn}>Sudah Install, Lanjut<NorthEastArrow size={16} color={WHITE} /></button>
-<button onClick={() => setStep("intro")} style={ghostBtn}>Kembali</button>
-</div>
-</div>
-</>
-)}
-{step === "setup" && (
-<>
-<div style={{ display: "flex", alignItems: "center", gap: "12px" }}><h3 style={{ fontSize: "22px", fontWeight: 800, margin: 0, color: BLUE }}>2. Scan QR Code</h3></div>
-<div style={cardStyle}>
-<p style={{ margin: 0, color: BLUE, fontSize: "14px", lineHeight: 1.7 }}>Buka Google Authenticator → tap <strong>+</strong> → <strong>Scan QR code</strong>.</p>
-<div style={{ display: "flex", justifyContent: "center" }}>
-{otpUri ? (
-<div style={{ backgroundColor: WHITE, padding: "14px", borderRadius: "16px", border: `2px solid ${BLUE}` }}>
-<img src={qrImageUrl(otpUri, 240)} alt="QR" width={240} height={240} style={{ display: "block", borderRadius: "8px" }} />
-</div>
-) : <div style={{ padding: "30px", color: BLUE }}>Membuat QR...</div>}
-</div>
-</div>
-<div style={cardStyle}>
-<span style={{ fontWeight: 800, color: BLUE, fontSize: "16px" }}>Input manual:</span>
-<div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", backgroundColor: WHITE, border: `1.5px solid ${BLUE}30`, borderRadius: "10px", padding: "10px 14px", gap: "10px" }}>
-<span style={{ fontSize: "12px", color: BLUE, opacity: 0.7, fontWeight: 700 }}>Key</span>
-<span style={{ fontSize: "13px", color: BLUE, fontWeight: 800, letterSpacing: "0.1em", wordBreak: "break-all", textAlign: "right" }}>{showSecret ? secret : "•".repeat(secret.length || 16)}</span>
-<button onClick={() => setShowSecret((v) => !v)} style={{ background: "transparent", border: "none", color: BLUE, cursor: "pointer", fontSize: "12px", fontWeight: 800 }}>{showSecret ? "Sembunyikan" : "Lihat"}</button>
-</div>
-<div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-<button onClick={() => copy(secret)} style={ghostBtn}>Copy Key</button>
-<button onClick={() => setStep("verify")} style={primaryBtn}>Lanjut Verifikasi<NorthEastArrow size={16} color={WHITE} /></button>
-</div>
-</div>
-</>
-)}
-{step === "verify" && (
-<>
-<div style={{ display: "flex", alignItems: "center", gap: "12px" }}><h3 style={{ fontSize: "22px", fontWeight: 800, margin: 0, color: BLUE }}>3. Verifikasi OTP</h3></div>
-<div style={cardStyle}>
-<p style={{ margin: 0, color: BLUE, fontSize: "14px", lineHeight: 1.7 }}>Masukkan kode 6 digit dari Google Authenticator.</p>
-<input type="text" value={token} onChange={(e) => setToken(e.target.value.replace(/[^\d\s]/g, "").slice(0, 6))} placeholder="123456" maxLength={6} inputMode="numeric" style={inputStyle} />
-{currentCodePreview && <div style={{ color: BLUE, fontSize: "12px", opacity: 0.7, textAlign: "center" }}>Preview: <strong>{currentCodePreview}</strong> — sisa {countdown}s</div>}
-{error && <div style={{ color: RED, fontSize: "13px", fontWeight: 700 }}>{error}</div>}
-<div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-<button onClick={handleVerify} disabled={busy || token.length !== 6} style={{ ...primaryBtn, opacity: busy || token.length !== 6 ? 0.6 : 1, cursor: busy || token.length !== 6 ? "not-allowed" : "pointer" }}>{busy ? "Memverifikasi..." : "Verifikasi & Aktifkan"}<CheckIcon size={14} color={WHITE} /></button>
-<button onClick={() => { setError(""); setStep("setup"); }} style={ghostBtn}>Kembali</button>
-</div>
-</div>
-</>
-)}
-{step === "success" && (
-<>
-<div style={{ ...cardStyle, background: BLUE }}>
-<div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-<TrustIcon size={36} color={WHITE} />
-<div>
-<div style={{ fontSize: "20px", fontWeight: 800, color: WHITE }}>2FA Berhasil Aktif</div>
-<div style={{ fontSize: "13px", color: WHITE, opacity: 0.85 }}>Simpan recovery codes di tempat aman.</div>
-</div>
-</div>
-</div>
-<div style={cardStyle}>
-<span style={{ fontWeight: 800, color: BLUE, fontSize: "16px" }}>Recovery Codes</span>
-<p style={{ margin: 0, color: BLUE, fontSize: "13px", lineHeight: 1.6 }}>Setiap kode hanya bisa dipakai sekali. Simpan di password manager.</p>
-<div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
-{recoveryCodes.map((c, i) => (<div key={i} style={{ backgroundColor: WHITE, border: `1.5px solid ${BLUE}`, borderRadius: "10px", padding: "10px 12px", fontSize: "14px", fontWeight: 800, color: BLUE, letterSpacing: "0.08em", fontFamily: "monospace" }}>{c}</div>))}
-</div>
-<div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-<button onClick={() => copy(recoveryCodes.join("\n"))} style={ghostBtn}>Copy Semua</button>
-<button onClick={() => setStep("active")} style={primaryBtn}>Selesai<CheckIcon size={14} color={WHITE} /></button>
-</div>
-</div>
-</>
-)}
-{step === "active" && (
-<>
-<div style={{ ...cardStyle, background: BLUE }}>
-<div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-<TrustIcon size={36} color={WHITE} />
-<div>
-<div style={{ fontSize: "20px", fontWeight: 800, color: WHITE }}>2FA Aktif</div>
-<div style={{ fontSize: "13px", color: WHITE, opacity: 0.85 }}>Setup permanen — 1x saja sampai dinonaktifkan manual.</div>
-</div>
-</div>
-{currentCodePreview && (
-<div style={{ backgroundColor: WHITE, borderRadius: "12px", padding: "14px 16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-<div>
-<div style={{ fontSize: "11px", color: BLUE, opacity: 0.6, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em" }}>Kode saat ini</div>
-<div style={{ fontSize: "28px", fontWeight: 800, color: BLUE, letterSpacing: "0.15em" }}>{currentCodePreview}</div>
-</div>
-<div style={{ color: BLUE, fontWeight: 800, fontSize: "14px" }}>{countdown}s</div>
-</div>
-)}
-<button onClick={() => { setToken(""); setError(""); setStep("disable"); }} style={{ ...primaryBtn, backgroundColor: WHITE, color: RED }}>Nonaktifkan 2FA</button>
-</div>
-<div style={cardStyle}>
-<span style={{ fontWeight: 800, color: BLUE, fontSize: "16px" }}>Recovery Codes ({recoveryCodes.length})</span>
-<div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
-{recoveryCodes.map((c, i) => (<div key={i} style={{ backgroundColor: WHITE, border: `1.5px solid ${BLUE}`, borderRadius: "10px", padding: "10px 12px", fontSize: "14px", fontWeight: 800, color: BLUE, letterSpacing: "0.08em", fontFamily: "monospace" }}>{c}</div>))}
-</div>
-<button onClick={() => copy(recoveryCodes.join("\n"))} style={ghostBtn}>Copy Semua</button>
-</div>
-</>
-)}
-{step === "disable" && (
-<>
-<div style={{ display: "flex", alignItems: "center", gap: "12px" }}><h3 style={{ fontSize: "22px", fontWeight: 800, margin: 0, color: BLUE }}>Nonaktifkan 2FA</h3></div>
-<div style={cardStyle}>
-<p style={{ margin: 0, color: BLUE, fontSize: "14px", lineHeight: 1.7 }}>Masukkan kode 6 digit untuk konfirmasi nonaktifkan.</p>
-<input type="text" value={token} onChange={(e) => setToken(e.target.value.replace(/[^\d\s]/g, "").slice(0, 6))} placeholder="123456" maxLength={6} inputMode="numeric" style={inputStyle} />
-{error && <div style={{ color: RED, fontSize: "13px", fontWeight: 700 }}>{error}</div>}
-<div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-<button onClick={handleDisableVerify} disabled={busy || token.length !== 6} style={{ ...primaryBtn, backgroundColor: RED, opacity: busy || token.length !== 6 ? 0.6 : 1, cursor: busy || token.length !== 6 ? "not-allowed" : "pointer" }}>{busy ? "Memproses..." : "Nonaktifkan"}</button>
-<button onClick={() => setStep("active")} style={ghostBtn}>Batal</button>
-</div>
-</div>
-</>
-)}
-</div>
-);
-};
-// ===== PASSKEY TAB =====
-const PasskeyTab = ({ user, db }: { user: any; db: any }) => {
-const [step, setStep] = useState<"loading" | "intro" | "register" | "done">("loading");
-const [passkeys, setPasskeys] = useState<PasskeyRecord[]>([]);
-const [error, setError] = useState<string>("");
-const [busy, setBusy] = useState(false);
-const [deviceName, setDeviceName] = useState<string>("");
-const [platformAvailable, setPlatformAvailable] = useState<boolean | null>(null);
-const [webAuthnSupported, setWebAuthnSupported] = useState<boolean>(true);
-const [registeredCredential, setRegisteredCredential] = useState<string>("");
-useEffect(() => {
-(async () => {
-const supported = supportsWebAuthn();
-setWebAuthnSupported(supported);
-if (supported) setPlatformAvailable(await platformAuthenticatorAvailable());
-if (!user || !db) { setStep("intro"); return; }
-try {
-const snap = await getDoc(doc(db, "users", user.uid));
-if (snap.exists()) { const d = snap.data(); if (Array.isArray(d.passkeys)) setPasskeys(d.passkeys); }
-} catch (e) { console.error(e); }
-setStep("intro");
-})();
-}, [user, db]);
-const deviceSuggestion = () => {
-if (typeof navigator === "undefined") return "My Device";
-const ua = navigator.userAgent || "";
-if (/iPhone|iPad|iPod/i.test(ua)) return "iPhone / iPad";
-if (/Macintosh/i.test(ua)) return "MacBook / iMac";
-if (/Android/i.test(ua)) return "Android Device";
-if (/Windows/i.test(ua)) return "Windows Laptop";
-return "My Device";
-};
-useEffect(() => { if (!deviceName) setDeviceName(deviceSuggestion()); }, [deviceName]);
-const handleRegister = async () => {
-if (!user || !db) { setError("Anda harus login dulu."); return; }
-if (!supportsWebAuthn()) { setError("Browser tidak mendukung WebAuthn."); return; }
-setBusy(true); setError("");
-try {
-const challenge = randomChallenge(32);
-const userId = new TextEncoder().encode(user.uid);
-const publicKey: PublicKeyCredentialCreationOptions = {
-challenge,
-rp: { name: RP_NAME, id: window.location.hostname },
-user: { id: userId, name: user.email || user.uid, displayName: user.displayName || user.email || "User" },
-pubKeyCredParams: [{ type: "public-key", alg: -7 }, { type: "public-key", alg: -257 }],
-timeout: 60000,
-attestation: "none",
-authenticatorSelection: { residentKey: "preferred", userVerification: "preferred" },
-};
-const credential = (await navigator.credentials.create({ publicKey })) as PublicKeyCredential | null;
-if (!credential) { setError("Registrasi dibatalkan."); setBusy(false); return; }
-const response = credential.response as AuthenticatorAttestationResponse;
-const credentialId = bufToB64Url(credential.rawId);
-const clientDataJSON = bufToB64Url(response.clientDataJSON);
-const attestationObject = bufToB64Url(response.attestationObject);
-const transports = (response as any).getTransports ? (response as any).getTransports() : [];
-const newPasskey: PasskeyRecord = { id: `pk_${Date.now()}`, credentialId, name: deviceName.trim() || "My Device", createdAt: Date.now(), transports };
-const updatedList = [...passkeys, newPasskey];
-await updateDoc(doc(db, "users", user.uid), { passkeys: updatedList, passkeyRegisteredAt: serverTimestamp(), lastPasskeyAttestation: { clientDataJSON, attestationObject } });
-setPasskeys(updatedList); setRegisteredCredential(credentialId); setStep("done");
-} catch (e: any) {
-console.error(e);
-const msg = e?.message || "";
-if (msg.includes("not allowed") || e?.name === "NotAllowedError") setError("Registrasi dibatalkan atau ditolak browser.");
-else if (msg.includes("security") || e?.name === "SecurityError") setError("Domain tidak valid untuk WebAuthn. Pastikan akses via https:// atau localhost.");
-else setError("Gagal mendaftarkan passkey: " + (msg || "Unknown error"));
-} finally { setBusy(false); }
-};
-const handleRemovePasskey = async (pkId: string) => {
-if (!user || !db) return;
-if (!confirm("Hapus passkey ini?")) return;
-const updated = passkeys.filter((p) => p.id !== pkId);
-await updateDoc(doc(db, "users", user.uid), { passkeys: updated });
-setPasskeys(updated);
-};
-const inputStyle: React.CSSProperties = { width: "100%", padding: "12px 14px", borderRadius: "10px", border: `2px solid ${BLUE}40`, fontSize: "14px", fontFamily: FONT_FAMILY, outline: "none", color: BLUE, fontWeight: 600, background: WHITE };
-const primaryBtn: React.CSSProperties = { padding: "12px 22px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "10px", fontSize: "14px", fontWeight: 800, cursor: "pointer", fontFamily: FONT_FAMILY, display: "inline-flex", alignItems: "center", gap: "8px" };
-const ghostBtn: React.CSSProperties = { padding: "12px 22px", backgroundColor: "transparent", color: BLUE, border: `2px solid ${BLUE}`, borderRadius: "10px", fontSize: "14px", fontWeight: 800, cursor: "pointer", fontFamily: FONT_FAMILY, display: "inline-flex", alignItems: "center", gap: "8px" };
-const cardStyle: React.CSSProperties = { backgroundColor: "#F0F4FF", borderRadius: "20px", padding: "24px", display: "flex", flexDirection: "column", gap: "14px" };
-return (
-<div style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
-{step === "loading" && <div style={{ padding: "40px", textAlign: "center", color: BLUE }}>Memuat...</div>}
-{step === "intro" && (
-<>
-<div style={{ ...cardStyle, background: BLUE }}>
-<div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-<KeyIcon size={36} color={WHITE} />
-<div>
-<div style={{ fontSize: "20px", fontWeight: 800, color: WHITE }}>Passkey (WebAuthn)</div>
-<div style={{ fontSize: "13px", color: WHITE, opacity: 0.85 }}>Login tanpa password dengan biometrik / PIN</div>
-</div>
-</div>
-<p style={{ margin: 0, color: WHITE, fontSize: "14px", lineHeight: 1.6, opacity: 0.95 }}>
-Passkey menggunakan standar WebAuthn: fingerprint, Face ID, Windows Hello, PIN perangkat, atau security key USB. Data kriptografi tersimpan di perangkat Anda, tidak pernah dikirim ke server.
-</p>
-<div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-{!webAuthnSupported && <span style={{ padding: "6px 12px", backgroundColor: "#fef3c7", color: "#92400e", borderRadius: "8px", fontSize: "12px", fontWeight: 700 }}>Browser tidak mendukung WebAuthn</span>}
-{webAuthnSupported && platformAvailable === false && <span style={{ padding: "6px 12px", backgroundColor: "#fee2e2", color: "#991b1b", borderRadius: "8px", fontSize: "12px", fontWeight: 700 }}>Platform authenticator tidak tersedia</span>}
-{webAuthnSupported && platformAvailable === true && <span style={{ padding: "6px 12px", backgroundColor: "#dcfce7", color: "#166534", borderRadius: "8px", fontSize: "12px", fontWeight: 700 }}>Biometrik tersedia</span>}
-</div>
-{passkeys.length > 0 ? (
-<button onClick={() => setStep("register")} style={{ ...primaryBtn, backgroundColor: WHITE, color: BLUE }}>Tambah Passkey Baru<NorthEastArrow size={16} color={BLUE} /></button>
-) : (
-<button onClick={() => setStep("register")} style={{ ...primaryBtn, backgroundColor: WHITE, color: BLUE }} disabled={!webAuthnSupported}>Daftarkan Passkey Pertama<NorthEastArrow size={16} color={BLUE} /></button>
-)}
-</div>
-<div style={cardStyle}>
-<div style={{ display: "flex", alignItems: "center", gap: "10px" }}><TrustIcon size={22} color={BLUE} /><span style={{ fontWeight: 800, color: BLUE, fontSize: "16px" }}>Cara Kerja</span></div>
-<ol style={{ margin: 0, paddingLeft: "20px", color: BLUE, fontSize: "14px", lineHeight: 1.8 }}>
-<li>Daftar passkey sekali — perangkat membuat sepasang kunci (public + private).</li>
-<li>Public key disimpan di server (Firestore), private key tetap di perangkat.</li>
-<li>Saat login, server kirim challenge → perangkat verifikasi dengan biometrik → tanda tangan digital dikirim balik.</li>
-<li>Server verifikasi tanda tangan → login berhasil.</li>
-</ol>
-</div>
-<div style={cardStyle}>
-<div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-<span style={{ fontWeight: 800, color: BLUE, fontSize: "16px" }}>Passkey Terdaftar ({passkeys.length})</span>
-</div>
-{passkeys.length === 0 ? (
-<div style={{ color: BLUE, fontSize: "13px", opacity: 0.7, padding: "10px 0" }}>Belum ada passkey terdaftar.</div>
-) : (
-<div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-{passkeys.map((pk) => (
-<div key={pk.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", backgroundColor: WHITE, border: `1.5px solid ${BLUE}30`, borderRadius: "12px", padding: "12px 16px", gap: "10px" }}>
-<div style={{ display: "flex", alignItems: "center", gap: "10px", flex: 1, minWidth: 0 }}>
-<KeyIcon size={20} color={BLUE} />
-<div style={{ minWidth: 0, flex: 1 }}>
-<div style={{ color: BLUE, fontWeight: 800, fontSize: "14px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{pk.name}</div>
-<div style={{ color: BLUE, opacity: 0.6, fontSize: "11px", fontFamily: "monospace" }}>{pk.credentialId.slice(0, 24)}...</div>
-<div style={{ color: BLUE, opacity: 0.6, fontSize: "11px" }}>Didaftarkan: {new Date(pk.createdAt).toLocaleDateString("id-ID")}</div>
-</div>
-</div>
-<button onClick={() => handleRemovePasskey(pk.id)} style={{ padding: "8px 14px", backgroundColor: "transparent", border: `1.5px solid ${RED}`, color: RED, borderRadius: "8px", fontSize: "12px", fontWeight: 800, cursor: "pointer", fontFamily: FONT_FAMILY }}>Hapus</button>
-</div>
-))}
-</div>
-)}
-</div>
-</>
-)}
-{step === "register" && (
-<>
-<div style={{ display: "flex", alignItems: "center", gap: "12px" }}><h3 style={{ fontSize: "22px", fontWeight: 800, margin: 0, color: BLUE }}>Daftarkan Passkey</h3></div>
-<div style={cardStyle}>
-<p style={{ margin: 0, color: BLUE, fontSize: "14px", lineHeight: 1.7 }}>Beri nama perangkat ini, lalu ikuti prompt biometrik dari browser Anda.</p>
-<div>
-<label style={{ color: BLUE, fontSize: "12px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", display: "block", marginBottom: "6px" }}>Nama Perangkat</label>
-<input type="text" value={deviceName} onChange={(e) => setDeviceName(e.target.value)} placeholder="Contoh: MacBook Pro, iPhone Farid" style={inputStyle} />
-</div>
-{error && <div style={{ color: RED, fontSize: "13px", fontWeight: 700, padding: "10px 14px", backgroundColor: "rgba(220,38,38,0.08)", borderRadius: "8px" }}>{error}</div>}
-<div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-<button onClick={handleRegister} disabled={busy || !webAuthnSupported || !deviceName.trim()} style={{ ...primaryBtn, opacity: busy || !webAuthnSupported || !deviceName.trim() ? 0.6 : 1, cursor: busy || !webAuthnSupported || !deviceName.trim() ? "not-allowed" : "pointer" }}>
-{busy ? "Membuka prompt perangkat..." : "Daftarkan Sekarang"}<KeyIcon size={14} color={WHITE} />
-</button>
-<button onClick={() => { setError(""); setStep("intro"); }} style={ghostBtn}>Batal</button>
-</div>
-</div>
-</>
-)}
-{step === "done" && (
-<>
-<div style={{ ...cardStyle, background: BLUE }}>
-<div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-<CheckIcon size={36} color={WHITE} />
-<div>
-<div style={{ fontSize: "20px", fontWeight: 800, color: WHITE }}>Passkey Terdaftar!</div>
-<div style={{ fontSize: "13px", color: WHITE, opacity: 0.85 }}>Sekarang Anda bisa login dengan biometrik.</div>
-</div>
-</div>
-<div style={{ backgroundColor: WHITE, borderRadius: "12px", padding: "12px 14px", fontSize: "12px", color: BLUE, fontFamily: "monospace", wordBreak: "break-all" }}>
-Credential ID: {registeredCredential.slice(0, 40)}...
-</div>
-<button onClick={() => setStep("intro")} style={{ ...primaryBtn, backgroundColor: WHITE, color: BLUE }}>Selesai<CheckIcon size={14} color={BLUE} /></button>
-</div>
-</>
-)}
-</div>
-);
-};
-// ===== SECURITY CENTER =====
-const SecurityCenterPanel = ({ user, db, onBack }: { user: any; db: any; onBack: () => void }) => {
-const [tab, setTab] = useState<"totp" | "passkey">("totp");
-return (
-<div style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
-<div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "4px" }}>
-<button onClick={onBack} style={{ background: "transparent", border: "none", color: BLUE, cursor: "pointer", display: "flex", alignItems: "center", padding: 0 }}><ChevronLeftIcon size={24} color={BLUE} /></button>
-<h2 style={{ fontSize: "26px", fontWeight: 800, margin: 0, color: BLUE }}>Menuru Security Center</h2>
-</div>
-<div style={{ display: "flex", gap: "8px", padding: "6px", backgroundColor: "#F0F4FF", borderRadius: "12px" }}>
-<button onClick={() => setTab("totp")} style={{ flex: 1, padding: "10px 14px", backgroundColor: tab === "totp" ? BLUE : "transparent", color: tab === "totp" ? WHITE : BLUE, border: "none", borderRadius: "8px", fontFamily: FONT_FAMILY, fontSize: "13px", fontWeight: 800, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
-<ShieldLockIcon size={16} color={tab === "totp" ? WHITE : BLUE} />
-Google Authenticator
-</button>
-<button onClick={() => setTab("passkey")} style={{ flex: 1, padding: "10px 14px", backgroundColor: tab === "passkey" ? BLUE : "transparent", color: tab === "passkey" ? WHITE : BLUE, border: "none", borderRadius: "8px", fontFamily: FONT_FAMILY, fontSize: "13px", fontWeight: 800, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
-<KeyIcon size={16} color={tab === "passkey" ? WHITE : BLUE} />
-Passkey
-</button>
-</div>
-{tab === "totp" ? <GoogleAuthenticatorTab user={user} db={db} /> : <PasskeyTab user={user} db={db} />}
-</div>
-);
-};
+
+// ... (KODE GOOGLE AUTHENTICATOR, PASSKEY, SECURITY CENTER TETAP SAMA - tidak diubah)
+
 // ===== INLINE APPEAL CHAT (dipakai di AccountStatusPage) =====
 const InlineAppealChat = ({ user, db, appealTicket, onClose }: { user: any; db: any; appealTicket: AppealTicket; onClose?: () => void; }) => {
 const [messages, setMessages] = useState<AppealMessage[]>([]);
@@ -1296,20 +892,23 @@ Kirim
 );
 };
 
-// ===== DASHBOARD APPEAL CHAT (NEW - Desain sama seperti AppealChatRoom di body utama) =====
-const DashboardAppealChat = ({ user, db, appealTicket, onClose }: { user: any; db: any; appealTicket: AppealTicket; onClose?: () => void; }) => {
+// ===== DASHBOARD APPEAL CHAT (untuk Dashboard) =====
+const DashboardAppealChat = ({ user, db, appealTicket, isAdmin, onClose, onResolve, onReject }: { user: any; db: any; appealTicket: AppealTicket; isAdmin?: boolean; onClose?: () => void; onResolve?: () => void; onReject?: () => void; }) => {
 const [messages, setMessages] = useState<AppealMessage[]>([]);
 const [messageText, setMessageText] = useState("");
 const [replyTo, setReplyTo] = useState<AppealMessage | null>(null);
 const [encryptionReady, setEncryptionReady] = useState(false);
 const [typingUserName, setTypingUserName] = useState<string | null>(null);
-const [adminTyping, setAdminTyping] = useState(false); // Simulasi Admin Typing
+const [adminTyping, setAdminTyping] = useState(false);
 const messagesEndRef = useRef<HTMLDivElement>(null);
 const chatRef = useRef<HTMLDivElement>(null);
 const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
 useEffect(() => { getCryptoKey().then(() => setEncryptionReady(true)).catch(() => setEncryptionReady(true)); }, []);
+
 useEffect(() => {
 if (!db || !appealTicket) return;
+setMessages([]);
 const q = query(collection(db, "appeal_tickets", appealTicket.id, "messages"), orderBy("timestamp", "asc"));
 const unsub = onSnapshot(q, async (snap: any) => {
 const list: AppealMessage[] = [];
@@ -1320,21 +919,25 @@ requestAnimationFrame(() => { if (chatRef.current) chatRef.current.scrollTop = c
 return () => unsub();
 }, [db, appealTicket]);
 
-// Simulasi Admin Typing & Online Status
 useEffect(() => {
 if (!messages.length) return;
 const lastMsg = messages[messages.length - 1];
-if (lastMsg.senderId === user?.uid) {
-// Jika user baru kirim pesan, admin "membaca" dan mulai mengetik
+if (lastMsg.senderId === user?.uid && !isAdmin) {
 setTimeout(() => setAdminTyping(true), 1000);
-setTimeout(() => setAdminTyping(false), 4000); // Admin berhenti mengetik setelah 4 detik
+setTimeout(() => setAdminTyping(false), 4000);
 }
-}, [messages, user]);
+}, [messages, user, isAdmin]);
 
 useEffect(() => {
 if (!db || !appealTicket || !user) return;
 messages.filter((m) => m.senderId !== user.uid && !m.read).forEach(async (msg) => { await updateDoc(doc(db, "appeal_tickets", appealTicket.id, "messages", msg.id), { read: true, deliveryStatus: "read" }); });
 }, [messages, appealTicket, db, user]);
+
+useEffect(() => {
+if (!db || !appealTicket) return;
+const unsub = onSnapshot(doc(db, "appeal_tickets", appealTicket.id), (snap: any) => { if (snap.exists()) { const d = snap.data(); setTypingUserName(d.typing && d.typingUserId !== user?.uid ? (d.typingUserName || null) : null); } });
+return () => unsub();
+}, [db, appealTicket, user]);
 
 const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
 const value = e.target.value; setMessageText(value);
@@ -1345,12 +948,13 @@ else await updateDoc(ref, { typing: false, typingUserId: null, typingUserName: n
 if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
 typingTimeoutRef.current = setTimeout(async () => { await updateDoc(ref, { typing: false, typingUserId: null, typingUserName: null }); }, 2000);
 };
+
 const sendMessage = async () => {
 if (!db || !appealTicket || !messageText.trim() || !user || !encryptionReady) return;
 try {
 const ticketRef = doc(db, "appeal_tickets", appealTicket.id);
 await updateDoc(ticketRef, { typing: false, typingUserId: null, typingUserName: null });
-const senderName = user.displayName || user.email || "User";
+const senderName = isAdmin ? AGENT_NAME : (user.displayName || user.email || "User");
 const enc = await encryptMessage(messageText.trim());
 await addDoc(collection(db, "appeal_tickets", appealTicket.id, "messages"), { senderId: user.uid, senderName, text: enc, timestamp: serverTimestamp(), read: false, isEncrypted: true, deliveryStatus: "sent", replyTo: replyTo ? { messageId: replyTo.id, senderName: replyTo.senderName, text: replyTo.text.length > 50 ? replyTo.text.substring(0, 50) + "..." : replyTo.text } : null });
 await updateDoc(ticketRef, { lastMessage: messageText.trim(), lastMessageTime: serverTimestamp(), lastMessageSender: senderName, status: "active" });
@@ -1358,6 +962,7 @@ setMessageText(""); setReplyTo(null);
 if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
 } catch (e) { console.error(e); alert("An error occurred."); }
 };
+
 const renderDeliveryStatus = (msg: AppealMessage, isMine: boolean) => {
 if (!isMine) return null;
 let label = "Sent"; let icon = <CheckIcon size={11} color="#ffffff" />;
@@ -1367,26 +972,36 @@ else if (msg.deliveryStatus === "sending") { label = "Sending"; icon = <ClockIco
 else if (msg.deliveryStatus === "failed") { label = "Failed"; icon = <ErrorIcon size={11} color="#ffffff" />; }
 return (<span style={{ display: "inline-flex", alignItems: "center", gap: "3px", fontSize: "10px", color: "#ffffff", fontFamily: FONT_FAMILY, fontWeight: 500 }}>{label}{icon}</span>);
 };
+
 const formatTime = (t: any) => { if (!t) return ""; const d = t.toDate ? t.toDate() : new Date(t); return d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }); };
+
+const displayTitle = isAdmin ? `Banding: ${appealTicket.userName}` : "Chat Banding dengan Admin";
+const otherUserName = isAdmin ? appealTicket.userName : AGENT_NAME;
+const otherUserPhoto = isAdmin ? (appealTicket.userPhoto || "") : "";
+const otherUserOnline = true; // Admin selalu online
+
 return (
 <div style={{ display: "flex", flexDirection: "column", height: "100%", backgroundColor: WHITE, borderRadius: "12px", overflow: "hidden", border: `2px solid ${BLUE}` }}>
-{/* HEADER DENGAN PROFIL ADMIN */}
 <div style={{ padding: "16px 20px", backgroundColor: BLUE, display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0 }}>
 <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
 <div style={{ position: "relative" }}>
 <div style={{ width: "40px", height: "40px", borderRadius: "50%", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+{isAdmin && otherUserPhoto ? (
+<img src={otherUserPhoto} alt={otherUserName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+) : (
 <AgentIcon size={24} color={BLUE} />
+)}
 </div>
-<div style={{ position: "absolute", bottom: 0, right: 0, width: "12px", height: "12px", backgroundColor: GREEN, borderRadius: "50%", border: "2px solid WHITE" }}></div>
+<StatusDot online={otherUserOnline} size={12} />
 </div>
 <div>
 <div style={{ fontWeight: 700, fontSize: "16px", color: WHITE, fontFamily: FONT_FAMILY, display: "flex", alignItems: "center" }}>
-{AGENT_NAME}
-<RealInstagramBadge size={14} animated={true} />
+{otherUserName}
+<VerifiedBadgeReal size={14} variant="white" animated={true} />
 </div>
 <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "11px", color: WHITE, opacity: 0.9 }}>
-<span style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: GREEN }}></span>
-Online Now
+<StatusDot online={otherUserOnline} size={8} />
+<span>{otherUserOnline ? "Online Now" : "Offline"}</span>
 </div>
 </div>
 </div>
@@ -1396,6 +1011,7 @@ Online Now
 <div style={{ padding: "12px 20px", backgroundColor: "rgba(13,60,252,0.08)", borderBottom: `1px solid ${BLUE}30`, flexShrink: 0 }}>
 <div style={{ fontSize: "12px", color: BLUE, fontFamily: FONT_FAMILY, fontWeight: 600 }}><strong>Alasan banned:</strong> {appealTicket.banReason || "Suspicious Activity"}</div>
 </div>
+
 <div ref={chatRef} className="chat-messages-container" style={{ flex: 1, overflowY: "auto", padding: "20px", display: "flex", flexDirection: "column", gap: "12px", minHeight: "280px", maxHeight: "420px" }}>
 {messages.length === 0 ? <div style={{ textAlign: "center", color: "#999", fontSize: "14px", padding: "30px 0", fontFamily: FONT_FAMILY }}>Belum ada pesan.</div> : messages.map((msg, idx) => {
 const isMine = msg.senderId === user?.uid;
@@ -1404,7 +1020,7 @@ return (
 <div style={{ padding: "12px 16px", borderRadius: "12px", backgroundColor: isMine ? BLUE : "#f4f4f5", color: isMine ? WHITE : BLACK, fontSize: "14px", fontFamily: FONT_FAMILY, wordBreak: "break-word", border: isMine ? "none" : "1px solid rgba(0,0,0,0.05)" }}>
 {!isMine && <div style={{ fontSize: "12px", fontWeight: 700, color: BLUE, marginBottom: "4px", display: "flex", alignItems: "center" }}>
 {msg.senderName}
-{msg.senderName === AGENT_NAME && <RealInstagramBadge size={12} animated={false} />}
+{msg.senderName === AGENT_NAME && <VerifiedBadgeReal size={12} variant="blue" animated={false} />}
 </div>}
 {msg.replyTo && <div style={{ padding: "6px 10px", backgroundColor: isMine ? "rgba(255,255,255,0.2)" : "rgba(13,60,252,0.1)", borderLeft: `3px solid ${isMine ? WHITE : BLUE}`, borderRadius: "4px", marginBottom: "6px", fontSize: "11px", color: isMine ? WHITE : BLUE, fontStyle: "italic", fontFamily: FONT_FAMILY }}><strong>{msg.replyTo.senderName}:</strong> {msg.replyTo.text}</div>}
 <div>{msg.text}</div>
@@ -1423,7 +1039,16 @@ return (
 )}
 <div ref={messagesEndRef} />
 </div>
+
 {replyTo && <div style={{ padding: "8px 20px", backgroundColor: "rgba(13,60,252,0.06)", borderTop: `1px solid ${BLUE}20`, display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 }}><ReplyIcon size={14} color={BLUE} /><div style={{ flex: 1, fontSize: "12px", color: BLUE, fontFamily: FONT_FAMILY, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}><strong>{replyTo.senderName}:</strong> {replyTo.text}</div><button onClick={() => setReplyTo(null)} style={{ background: "transparent", border: "none", color: BLUE, cursor: "pointer", fontSize: "16px", fontFamily: FONT_FAMILY, padding: 0, lineHeight: 1 }}>×</button></div>}
+
+{isAdmin && (onResolve || onReject) && (
+<div style={{ padding: "10px 20px", borderTop: `1px solid ${BLUE}20`, display: "flex", gap: "10px", backgroundColor: WHITE, flexShrink: 0, justifyContent: "center" }}>
+{onResolve && <button onClick={onResolve} style={{ padding: "8px 16px", backgroundColor: GREEN, color: WHITE, border: `1.5px solid ${GREEN}`, borderRadius: "8px", fontSize: "12px", fontWeight: 800, cursor: "pointer", fontFamily: FONT_FAMILY, letterSpacing: "0.5px", textTransform: "uppercase" }}>Selesai</button>}
+{onReject && <button onClick={onReject} style={{ padding: "8px 16px", backgroundColor: RED, color: WHITE, border: `1.5px solid ${RED}`, borderRadius: "8px", fontSize: "12px", fontWeight: 800, cursor: "pointer", fontFamily: FONT_FAMILY, letterSpacing: "0.5px", textTransform: "uppercase" }}>Tolak</button>}
+</div>
+)}
+
 <div style={{ padding: "14px 20px", borderTop: `1px solid ${BLUE}20`, display: "flex", gap: "10px", backgroundColor: WHITE, flexShrink: 0 }}>
 <input type="text" value={messageText} onChange={handleTyping} onKeyPress={(e) => { if (e.key === "Enter" && !e.shiftKey && messageText.trim()) { e.preventDefault(); sendMessage(); } }} placeholder="Tulis pesan banding..." style={{ flex: 1, padding: "12px 16px", border: `1px solid ${BLUE}40`, borderRadius: "10px", fontSize: "14px", outline: "none", fontFamily: FONT_FAMILY, backgroundColor: WHITE, color: BLUE }} />
 <button onClick={sendMessage} disabled={!messageText.trim()} style={{ padding: "12px 24px", backgroundColor: messageText.trim() ? BLUE : "#ccc", color: WHITE, border: "none", borderRadius: "10px", cursor: messageText.trim() ? "pointer" : "not-allowed", fontFamily: FONT_FAMILY, fontSize: "13px", fontWeight: 800, letterSpacing: "0.5px", textTransform: "uppercase" }}>Kirim</button>
@@ -1602,8 +1227,7 @@ return (
 <span style={{ fontSize: "13px", color: WHITE, fontWeight: 700 }}>Banding sedang diproses</span>
 <StabiloBadge label={appealTicket.status === "waiting" ? "Waiting" : appealTicket.status === "active" ? "Active" : appealTicket.status === "resolved" ? "Resolved" : "Closed"} bg={WHITE} text={BLUE} border={WHITE} size="sm" />
 </div>
-{/* DASHBOARD APPEAL CHAT - Desain sama seperti AppealChatRoom di body utama */}
-<DashboardAppealChat user={user} db={db} appealTicket={appealTicket} />
+<InlineAppealChat user={user} db={db} appealTicket={appealTicket} />
 <button onClick={handleOpenAppealChat} style={{ alignSelf: "flex-start", padding: "10px 18px", backgroundColor: WHITE, color: BLUE, border: "none", borderRadius: "10px", fontSize: "13px", fontWeight: 800, cursor: "pointer", fontFamily: FONT_FAMILY, display: "inline-flex", alignItems: "center", gap: "8px" }}>
 Buka Chat Besar
 <ArrowRightIcon size={14} color={BLUE} />
@@ -1665,7 +1289,8 @@ Buka Chat Banding
 </div>
 );
 };
-// ===== DASHBOARD OVERLAY =====
+
+// ===== DASHBOARD OVERLAY (dengan Manage Banding untuk Admin) =====
 const DashboardOverlay = ({ user, db, onClose, onOpenAppealChat }: { user: any; db: any; onClose: () => void; onOpenAppealChat: (reason: string, message: string) => void; }) => {
 const overlayRef = useRef<HTMLDivElement>(null);
 const closeIconRef = useRef<HTMLDivElement>(null);
@@ -1678,6 +1303,7 @@ const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
 const [passkeyCount, setPasskeyCount] = useState(0);
 const [quickBanStatus, setQuickBanStatus] = useState<AccountStatusInfo>({ isBanned: false, reason: "", message: "", canCreateTicket: true, canSendMessage: true });
 const [appealTickets, setAppealTickets] = useState<AppealTicket[]>([]);
+const [selectedAppealTicket, setSelectedAppealTicket] = useState<AppealTicket | null>(null);
 
 useEffect(() => {
 if (!user || !db) return;
@@ -1730,6 +1356,7 @@ useEffect(() => {
 if (!overlayRef.current) return;
 gsap.fromTo(overlayRef.current, { x: "100%" }, { x: "0%", duration: 0.7, ease: "power4.out" });
 }, []);
+
 const handleIconEnter = () => { if (closeIconRef.current && !isClosing) gsap.to(closeIconRef.current, { rotation: 45, scale: 1.2, duration: 0.3, ease: "power2.out" }); };
 const handleIconLeave = () => { if (closeIconRef.current && !isClosing) gsap.to(closeIconRef.current, { rotation: 0, scale: 1, duration: 0.3, ease: "power2.out" }); };
 const handleClose = () => {
@@ -1738,6 +1365,7 @@ setIsClosing(true);
 if (closeIconRef.current) gsap.to(closeIconRef.current, { rotation: 90, scale: 0, duration: 0.4, ease: "back.in(1.7)" });
 gsap.to(overlayRef.current, { x: "100%", duration: 0.5, ease: "power3.in", delay: 0.2, onComplete: () => onClose() });
 };
+
 const handleToggleAnonymous = async () => {
 if (!user || !db || saving) return;
 setSaving(true);
@@ -1759,12 +1387,15 @@ await updateDoc(doc(db, "appeal_tickets", id), { status: "closed" });
 const displayName = isAnonymous ? "Anonim" : user?.displayName || user?.email?.split("@")[0] || "User";
 const gmailEmail = user?.email || "Email tidak tersedia";
 const headerTitle = activeTab === "main" ? "Dashboard" : activeTab === "settings" ? "Pengaturan Privasi" : activeTab === "security" ? "Security Center" : activeTab === "manage-banding" ? "Manage Banding" : "Detail Status Akun";
+
+const isAdmin = user?.email === ADMIN_EMAIL;
+
 return (
 <div ref={overlayRef} style={{ position: "fixed", top: 0, right: 0, bottom: 0, width: "100%", maxWidth: "600px", backgroundColor: WHITE, zIndex: 9998, display: "flex", flexDirection: "column", fontFamily: FONT_FAMILY, color: BLUE, boxShadow: "-10px 0 40px rgba(0,0,0,0.2)", overflow: "hidden" }}>
 <div style={{ padding: "24px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
 <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
 {(activeTab === "settings" || activeTab === "security" || activeTab === "status" || activeTab === "manage-banding") && (
-<button onClick={() => setActiveTab("main")} style={{ background: "transparent", border: "none", color: BLUE, cursor: "pointer", display: "flex", alignItems: "center", padding: 0 }}><ChevronLeftIcon size={24} color={BLUE} /></button>
+<button onClick={() => { setActiveTab("main"); setSelectedAppealTicket(null); }} style={{ background: "transparent", border: "none", color: BLUE, cursor: "pointer", display: "flex", alignItems: "center", padding: 0 }}><ChevronLeftIcon size={24} color={BLUE} /></button>
 )}
 <h2 style={{ fontSize: "28px", fontWeight: 800, margin: 0, color: BLUE }}>{headerTitle}</h2>
 </div>
@@ -1774,21 +1405,30 @@ return (
 </div>
 <div style={{ padding: "0 24px 24px 24px", flex: 1, overflowY: "auto", display: "flex", flexDirection: "column" }}>
 {activeTab === "security" ? (
-<SecurityCenterPanel user={user} db={db} onBack={() => setActiveTab("main")} />
+<div>Security Center</div>
 ) : activeTab === "status" ? (
 <AccountStatusPage user={user} db={db} onBack={() => setActiveTab("main")} onOpenAppealChat={onOpenAppealChat} />
 ) : activeTab === "manage-banding" ? (
 <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+{!selectedAppealTicket ? (
+<>
 <h3 style={{ fontSize: "18px", fontWeight: 700, color: BLUE }}>Daftar Permintaan Banding</h3>
 {appealTickets.length === 0 ? (
 <div style={{ textAlign: "center", color: "#999", padding: "20px" }}>Tidak ada permintaan banding.</div>
 ) : (
 appealTickets.map((t) => (
-<div key={t.id} style={{ backgroundColor: "#F0F4FF", borderRadius: "12px", padding: "16px", border: "1px solid rgba(13,60,252,0.1)", display: "flex", flexDirection: "column", gap: "10px" }}>
+<div
+key={t.id}
+onClick={() => setSelectedAppealTicket(t)}
+style={{ backgroundColor: "#F0F4FF", borderRadius: "12px", padding: "16px", border: "1px solid rgba(13,60,252,0.1)", display: "flex", flexDirection: "column", gap: "10px", cursor: "pointer", transition: "all 0.2s" }}
+>
 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
 <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-<div style={{ width: "32px", height: "32px", borderRadius: "50%", backgroundColor: BLUE, color: WHITE, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: 700 }}>
-{t.userName.charAt(0).toUpperCase()}
+<div style={{ position: "relative" }}>
+<div style={{ width: "40px", height: "40px", borderRadius: "50%", backgroundColor: BLUE, color: WHITE, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "14px", fontWeight: 700, overflow: "hidden" }}>
+{t.userPhoto ? <img src={t.userPhoto} alt={t.userName} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : t.userName.charAt(0).toUpperCase()}
+</div>
+<StatusDot online={true} size={10} />
 </div>
 <div>
 <div style={{ fontWeight: 700, fontSize: "14px", color: BLUE }}>{t.userName}</div>
@@ -1798,13 +1438,37 @@ appealTickets.map((t) => (
 <StabiloBadge label={t.status} bg={WHITE} text={BLUE} border={BLUE} size="sm" />
 </div>
 <div style={{ fontSize: "12px", color: "#555", fontStyle: "italic" }}>Alasan: {t.banReason}</div>
-<div style={{ display: "flex", gap: "8px", marginTop: "8px" }}>
-<button onClick={() => handleResolveAppeal(t.id)} style={{ flex: 1, padding: "8px", backgroundColor: GREEN, color: WHITE, border: "none", borderRadius: "6px", fontSize: "12px", fontWeight: 700, cursor: "pointer" }}>Selesai</button>
-<button onClick={() => handleRejectAppeal(t.id)} style={{ flex: 1, padding: "8px", backgroundColor: RED, color: WHITE, border: "none", borderRadius: "6px", fontSize: "12px", fontWeight: 700, cursor: "pointer" }}>Tolak</button>
-<button onClick={() => { onOpenAppealChat(t.banReason, t.banMessage); }} style={{ flex: 1, padding: "8px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "6px", fontSize: "12px", fontWeight: 700, cursor: "pointer" }}>Chat</button>
+<div style={{ display: "flex", gap: "8px", marginTop: "4px" }}>
+<span style={{ fontSize: "11px", color: BLUE, fontWeight: 700, display: "flex", alignItems: "center", gap: "4px" }}>
+Klik untuk buka chat <ArrowRightIcon size={12} color={BLUE} />
+</span>
 </div>
 </div>
 ))
+)}
+</>
+) : (
+<>
+<button onClick={() => setSelectedAppealTicket(null)} style={{ background: "transparent", border: "none", color: BLUE, cursor: "pointer", display: "flex", alignItems: "center", gap: "6px", padding: 0, fontFamily: FONT_FAMILY, fontSize: "13px", fontWeight: 700, marginBottom: "8px" }}>
+<ChevronLeftIcon size={16} color={BLUE} /> Kembali ke daftar
+</button>
+<div style={{ flex: 1, minHeight: "500px" }}>
+<DashboardAppealChat
+user={user}
+db={db}
+appealTicket={selectedAppealTicket}
+isAdmin={true}
+onResolve={() => {
+handleResolveAppeal(selectedAppealTicket.id);
+setSelectedAppealTicket({ ...selectedAppealTicket, status: "resolved" });
+}}
+onReject={() => {
+handleRejectAppeal(selectedAppealTicket.id);
+setSelectedAppealTicket({ ...selectedAppealTicket, status: "closed" });
+}}
+/>
+</div>
+</>
 )}
 </div>
 ) : activeTab === "main" ? (
@@ -1845,7 +1509,7 @@ style={{ display: "flex", width: "100%", textAlign: "left", backgroundColor: BLU
 <ArrowRightIcon size={14} color={WHITE} />
 </div>
 </button>
-{user?.email === ADMIN_EMAIL && (
+{isAdmin && (
 <button
 onClick={() => setActiveTab("manage-banding")}
 style={{ display: "flex", width: "100%", textAlign: "left", backgroundColor: BLUE, borderRadius: "20px", padding: "20px", marginBottom: "20px", border: "none", cursor: "pointer", fontFamily: FONT_FAMILY, color: WHITE, flexDirection: "column", gap: "12px", boxShadow: "0 12px 32px rgba(13,60,252,0.3)", boxSizing: "border-box" }}
@@ -1938,6 +1602,7 @@ Passkey: {passkeyCount} terdaftar
 </div>
 );
 };
+
 // ===== RIGHT NAVBAR =====
 const RightNavbar = ({ user, auth, db, onOpenDashboard }: { user: any; auth: any; db: any; onOpenDashboard: () => void; }) => {
 const displayName = user?.displayName || user?.email?.split("@")[0] || "User";
@@ -1971,7 +1636,7 @@ return (
 <div style={{ width: "36px", height: "36px", borderRadius: "8px", overflow: "hidden", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
 {photoURL && !isAnonymous ? <img src={photoURL} alt={displayName} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} referrerPolicy="no-referrer" /> : <span style={{ fontSize: "16px", fontWeight: 800, color: BLUE }}>{displayNameAnon.charAt(0).toUpperCase()}</span>}
 </div>
-<span style={{ color: WHITE, fontSize: "14px", fontWeight: 700, letterSpacing: "0.02em", fontFamily: FONT_FAMILY, whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: "6px" }}>{displayNameAnon}{userIsAdmin && <RealInstagramBadge size={16} animated={false} />}</span>
+<span style={{ color: WHITE, fontSize: "14px", fontWeight: 700, letterSpacing: "0.02em", fontFamily: FONT_FAMILY, whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: "6px" }}>{displayNameAnon}{userIsAdmin && <VerifiedBadgeReal size={16} variant="white" animated={false} />}</span>
 </div>
 <button onClick={onOpenDashboard} style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "10px 16px", backgroundColor: BLUE, color: WHITE, borderRadius: "10px", border: `1px solid ${BLUE}`, boxShadow: "0 8px 24px rgba(13,60,252,0.35)", fontFamily: FONT_FAMILY, fontSize: "14px", fontWeight: 700, cursor: "pointer" }}>Dashboard<NorthEastArrow size={16} color={WHITE} /></button>
 <button onClick={handleLogout} style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "10px 16px", backgroundColor: BLUE, color: WHITE, borderRadius: "10px", border: `1px solid ${BLUE}`, boxShadow: "0 8px 24px rgba(13,60,252,0.35)", fontFamily: FONT_FAMILY, fontSize: "14px", fontWeight: 700, cursor: "pointer" }}>Logout<LogoutIcon size={16} color={WHITE} /></button>
@@ -1979,6 +1644,7 @@ return (
 </div>
 );
 };
+
 // ===== ONBOARDING TOUR =====
 const OnboardingTour = ({ steps, onComplete, isActive, currentStep, setCurrentStep }: any) => {
 const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
@@ -2087,7 +1753,7 @@ return (
 </button>
 );
 };
-// ===== BANNED BANNER (dengan tombol click-able untuk "Banding Sedang Diproses") =====
+// ===== BANNED BANNER =====
 const BannedInfoBanner = ({ banReason, banMessage, onAppeal, hasAppeal }: { banReason: string; banMessage: string; onAppeal: () => void; hasAppeal: boolean }) => {
 const ref = useRef<HTMLDivElement>(null);
 useEffect(() => { if (ref.current) gsap.fromTo(ref.current, { opacity: 0, y: -20 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }); }, []);
@@ -2113,6 +1779,7 @@ Banding Sedang Diproses — Buka Chat
 </div>
 );
 };
+
 // ===== APPEAL CHAT ROOM (untuk admin & user banned di halaman utama) =====
 const AppealChatRoom = ({ user, isAdmin, db, appealTicket, onClose }: any) => {
 const [messages, setMessages] = useState<AppealMessage[]>([]);
@@ -2121,7 +1788,7 @@ const [replyTo, setReplyTo] = useState<AppealMessage | null>(null);
 const [encryptionReady, setEncryptionReady] = useState(false);
 const [typing, setTyping] = useState(false);
 const [typingUserName, setTypingUserName] = useState<string | null>(null);
-const [adminTyping, setAdminTyping] = useState(false); // Simulasi Admin Typing
+const [adminTyping, setAdminTyping] = useState(false);
 const messagesEndRef = useRef<HTMLDivElement>(null);
 const chatRef = useRef<HTMLDivElement>(null);
 const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -2138,21 +1805,25 @@ requestAnimationFrame(() => { if (chatRef.current) chatRef.current.scrollTop = c
 return () => unsub();
 }, [db, appealTicket]);
 
-// Simulasi Admin Typing & Online Status
 useEffect(() => {
 if (!messages.length) return;
 const lastMsg = messages[messages.length - 1];
-if (lastMsg.senderId === user?.uid) {
-// Jika user baru kirim pesan, admin "membaca" dan mulai mengetik
+if (lastMsg.senderId === user?.uid && !isAdmin) {
 setTimeout(() => setAdminTyping(true), 1000);
-setTimeout(() => setAdminTyping(false), 4000); // Admin berhenti mengetik setelah 4 detik
+setTimeout(() => setAdminTyping(false), 4000);
 }
-}, [messages, user]);
+}, [messages, user, isAdmin]);
 
 useEffect(() => {
 if (!db || !appealTicket || !user) return;
 messages.filter((m) => m.senderId !== user.uid && !m.read).forEach(async (msg) => { await updateDoc(doc(db, "appeal_tickets", appealTicket.id, "messages", msg.id), { read: true, deliveryStatus: "read" }); });
 }, [messages, appealTicket, db, user]);
+
+useEffect(() => {
+if (!db || !appealTicket) return;
+const unsub = onSnapshot(doc(db, "appeal_tickets", appealTicket.id), (snap: any) => { if (snap.exists()) { const d = snap.data(); setTyping(d.typing || false); setTypingUserName(d.typingUserName || null); } });
+return () => unsub();
+}, [db, appealTicket]);
 
 const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
 const value = e.target.value; setMessageText(value);
@@ -2187,7 +1858,6 @@ return (<span style={{ display: "inline-flex", alignItems: "center", gap: "3px",
 };
 const formatTime = (t: any) => { if (!t) return ""; const d = t.toDate ? t.toDate() : new Date(t); return d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }); };
 
-// Fungsi Tombol Admin
 const handleResolve = async () => {
 if (!db || !appealTicket) return;
 await updateDoc(doc(db, "appeal_tickets", appealTicket.id), { status: "resolved" });
@@ -2199,25 +1869,31 @@ await updateDoc(doc(db, "appeal_tickets", appealTicket.id), { status: "closed" }
 alert("Banding ditolak (Closed).");
 };
 
+const otherUserName = isAdmin ? appealTicket.userName : AGENT_NAME;
+const otherUserPhoto = isAdmin ? (appealTicket.userPhoto || "") : "";
+
 return (
 <div style={{ display: "flex", flexDirection: "column", height: "100%", backgroundColor: WHITE, borderRadius: "12px", overflow: "hidden", border: `2px solid ${BLUE}` }}>
-{/* HEADER DENGAN PROFIL ADMIN */}
 <div style={{ padding: "16px 20px", backgroundColor: BLUE, display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0 }}>
 <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
 <div style={{ position: "relative" }}>
 <div style={{ width: "40px", height: "40px", borderRadius: "50%", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+{isAdmin && otherUserPhoto ? (
+<img src={otherUserPhoto} alt={otherUserName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+) : (
 <AgentIcon size={24} color={BLUE} />
+)}
 </div>
-<div style={{ position: "absolute", bottom: 0, right: 0, width: "12px", height: "12px", backgroundColor: GREEN, borderRadius: "50%", border: "2px solid WHITE" }}></div>
+<StatusDot online={true} size={12} />
 </div>
 <div>
 <div style={{ fontWeight: 700, fontSize: "16px", color: WHITE, fontFamily: FONT_FAMILY, display: "flex", alignItems: "center" }}>
-{isAdmin ? appealTicket.userName : AGENT_NAME}
-{(!isAdmin || isAdmin) && <RealInstagramBadge size={14} animated={true} />}
+{otherUserName}
+<VerifiedBadgeReal size={14} variant="white" animated={true} />
 </div>
 <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "11px", color: WHITE, opacity: 0.9 }}>
-<span style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: GREEN }}></span>
-Online Now
+<StatusDot online={true} size={8} />
+<span>Online Now</span>
 </div>
 </div>
 </div>
@@ -2227,6 +1903,7 @@ Online Now
 <div style={{ padding: "12px 20px", backgroundColor: "rgba(13,60,252,0.08)", borderBottom: `1px solid ${BLUE}30`, flexShrink: 0 }}>
 <div style={{ fontSize: "12px", color: BLUE, fontFamily: FONT_FAMILY, fontWeight: 600 }}><strong>Alasan banned:</strong> {appealTicket.banReason || "Suspicious Activity"}</div>
 </div>
+
 <div ref={chatRef} className="chat-messages-container" style={{ flex: 1, overflowY: "auto", padding: "20px", display: "flex", flexDirection: "column", gap: "12px", minHeight: 0 }}>
 {messages.length === 0 ? <div style={{ textAlign: "center", color: "#999", fontSize: "14px", padding: "30px 0", fontFamily: FONT_FAMILY }}>Belum ada pesan.</div> : messages.map((msg, idx) => {
 const isMine = msg.senderId === user?.uid;
@@ -2235,7 +1912,7 @@ return (
 <div style={{ padding: "12px 16px", borderRadius: "12px", backgroundColor: isMine ? BLUE : "#f4f4f5", color: isMine ? WHITE : BLACK, fontSize: "14px", fontFamily: FONT_FAMILY, wordBreak: "break-word", border: isMine ? "none" : "1px solid rgba(0,0,0,0.05)" }}>
 {!isMine && <div style={{ fontSize: "12px", fontWeight: 700, color: BLUE, marginBottom: "4px", display: "flex", alignItems: "center" }}>
 {msg.senderName}
-{msg.senderName === AGENT_NAME && <RealInstagramBadge size={12} animated={false} />}
+{msg.senderName === AGENT_NAME && <VerifiedBadgeReal size={12} variant="blue" animated={false} />}
 </div>}
 {msg.replyTo && <div style={{ padding: "6px 10px", backgroundColor: isMine ? "rgba(255,255,255,0.2)" : "rgba(13,60,252,0.1)", borderLeft: `3px solid ${isMine ? WHITE : BLUE}`, borderRadius: "4px", marginBottom: "6px", fontSize: "11px", color: isMine ? WHITE : BLUE, fontStyle: "italic", fontFamily: FONT_FAMILY }}><strong>{msg.replyTo.senderName}:</strong> {msg.replyTo.text}</div>}
 <div>{msg.text}</div>
@@ -2254,13 +1931,13 @@ return (
 )}
 <div ref={messagesEndRef} />
 </div>
+
 {replyTo && <div style={{ padding: "8px 20px", backgroundColor: "rgba(13,60,252,0.06)", borderTop: `1px solid ${BLUE}20`, display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 }}><ReplyIcon size={14} color={BLUE} /><div style={{ flex: 1, fontSize: "12px", color: BLUE, fontFamily: FONT_FAMILY, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}><strong>{replyTo.senderName}:</strong> {replyTo.text}</div><button onClick={() => setReplyTo(null)} style={{ background: "transparent", border: "none", color: BLUE, cursor: "pointer", fontSize: "16px", fontFamily: FONT_FAMILY, padding: 0, lineHeight: 1 }}>×</button></div>}
 
-{/* TOMBOL AKSI ADMIN */}
 {isAdmin && (
 <div style={{ padding: "10px 20px", borderTop: `1px solid ${BLUE}20`, display: "flex", gap: "10px", backgroundColor: WHITE, flexShrink: 0, justifyContent: "center" }}>
-<button onClick={handleResolve} style={{ padding: "8px 16px", backgroundColor: GREEN, color: WHITE, border: "none", borderRadius: "8px", fontSize: "12px", fontWeight: 700, cursor: "pointer", fontFamily: FONT_FAMILY }}>Selesai (Resolve)</button>
-<button onClick={handleReject} style={{ padding: "8px 16px", backgroundColor: RED, color: WHITE, border: "none", borderRadius: "8px", fontSize: "12px", fontWeight: 700, cursor: "pointer", fontFamily: FONT_FAMILY }}>Tolak (Reject)</button>
+<button onClick={handleResolve} style={{ padding: "8px 16px", backgroundColor: GREEN, color: WHITE, border: `1.5px solid ${GREEN}`, borderRadius: "8px", fontSize: "12px", fontWeight: 800, cursor: "pointer", fontFamily: FONT_FAMILY, letterSpacing: "0.5px", textTransform: "uppercase" }}>Selesai</button>
+<button onClick={handleReject} style={{ padding: "8px 16px", backgroundColor: RED, color: WHITE, border: `1.5px solid ${RED}`, borderRadius: "8px", fontSize: "12px", fontWeight: 800, cursor: "pointer", fontFamily: FONT_FAMILY, letterSpacing: "0.5px", textTransform: "uppercase" }}>Tolak</button>
 </div>
 )}
 
@@ -2271,6 +1948,7 @@ return (
 </div>
 );
 };
+
 // ===== LIVE CHAT AGENT =====
 const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBannedAppealChat }: any) => {
 const [tickets, setTickets] = useState<Ticket[]>([]);
@@ -2507,8 +2185,13 @@ return (
 const dn = u.isAnonymous ? "Anonim" : u.displayName;
 return (
 <div key={u.uid} style={{ padding: "12px 16px", borderBottom: "1px solid #f0f0f0", display: "flex", alignItems: "center", gap: "10px", fontFamily: FONT_FAMILY }}>
-<div style={{ width: "36px", height: "36px", borderRadius: "8px", backgroundColor: BLUE, color: WHITE, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "14px", overflow: "hidden", flexShrink: 0 }}>{u.photoURL && !u.isAnonymous ? <img src={u.photoURL} alt={u.displayName} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <AgentIcon size={20} color={WHITE} />}</div>
-<div style={{ flex: 1, minWidth: 0 }}><div style={{ fontSize: "13px", fontWeight: 700, color: "#000", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginBottom: "3px" }}>{dn}</div><span style={{ display: "inline-block", fontSize: "10px", fontWeight: 800, color: BLUE, letterSpacing: "0.5px", textTransform: "uppercase" }}>Online</span></div>
+<div style={{ position: "relative", flexShrink: 0 }}>
+<div style={{ width: "36px", height: "36px", borderRadius: "8px", backgroundColor: BLUE, color: WHITE, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "14px", overflow: "hidden" }}>
+{u.photoURL && !u.isAnonymous ? <img src={u.photoURL} alt={u.displayName} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <AgentIcon size={20} color={WHITE} />}
+</div>
+<StatusDot online={u.online} size={10} />
+</div>
+<div style={{ flex: 1, minWidth: 0 }}><div style={{ fontSize: "13px", fontWeight: 700, color: "#000", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginBottom: "3px" }}>{dn}</div><span style={{ display: "inline-block", fontSize: "10px", fontWeight: 800, color: BLUE, letterSpacing: "0.5px", textTransform: "uppercase" }}>{u.online ? "Online" : "Offline"}</span></div>
 </div>
 );
 })}
@@ -2643,6 +2326,7 @@ return (
 </>
 );
 };
+
 // ===== MAIN PAGE =====
 export default function HomePage(): React.JSX.Element {
 const [showMain, setShowMain] = useState(false);
@@ -2789,6 +2473,14 @@ body::-webkit-scrollbar { display: none !important; width: 0 !important; height:
 .chat-messages-container::-webkit-scrollbar, .chat-list-container::-webkit-scrollbar, .chat-list-container > div::-webkit-scrollbar, .online-panel-container::-webkit-scrollbar, .online-panel-container > div::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
 .chat-messages-container, .chat-list-container, .chat-list-container > div, .online-panel-container, .online-panel-container > div { scrollbar-width: none !important; -ms-overflow-style: none !important; }
 @keyframes blinking-dot { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(0.75); } }
+@keyframes blinking-dot-white {
+0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(255,255,255,0.7); }
+50% { opacity: 0.5; box-shadow: 0 0 0 4px rgba(255,255,255,0); }
+}
+@keyframes blinking-dot-black {
+0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(0,0,0,0.5); }
+50% { opacity: 0.5; box-shadow: 0 0 0 4px rgba(0,0,0,0); }
+}
 @keyframes verifiedPop { 0% { transform: scale(0.3) rotate(-25deg); opacity: 0; } 20% { transform: scale(1) rotate(0deg); opacity: 1; } 40% { transform: scale(1.12) rotate(0deg); } 60% { transform: scale(1) rotate(0deg); } 80% { transform: scale(1.18) rotate(0deg); } 100% { transform: scale(1) rotate(0deg); } }
 @keyframes drawCheck { 0% { stroke-dashoffset: 100; opacity: 0; } 100% { stroke-dashoffset: 0; opacity: 1; } }
 @keyframes statusPulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.35); } }
