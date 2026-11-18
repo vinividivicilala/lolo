@@ -1670,13 +1670,15 @@ const DashboardOverlay = ({ user, db, onClose, onOpenAppealChat }: { user: any; 
 const overlayRef = useRef<HTMLDivElement>(null);
 const closeIconRef = useRef<HTMLDivElement>(null);
 const [isClosing, setIsClosing] = useState(false);
-const [activeTab, setActiveTab] = useState<"main" | "settings" | "security" | "status">("main");
+const [activeTab, setActiveTab] = useState<"main" | "settings" | "security" | "status" | "manage-banding">("main");
 const [isAnonymous, setIsAnonymous] = useState(false);
 const [saving, setSaving] = useState(false);
 const [loading, setLoading] = useState(true);
 const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
 const [passkeyCount, setPasskeyCount] = useState(0);
 const [quickBanStatus, setQuickBanStatus] = useState<AccountStatusInfo>({ isBanned: false, reason: "", message: "", canCreateTicket: true, canSendMessage: true });
+const [appealTickets, setAppealTickets] = useState<AppealTicket[]>([]);
+
 useEffect(() => {
 if (!user || !db) return;
 let active = true;
@@ -1698,6 +1700,7 @@ setQuickBanStatus({ isBanned: true, reason: u.botBlockedReason || "Blocked by sy
 });
 return () => { active = false; unsubBot(); unsubUser(); };
 }, [user, db]);
+
 useEffect(() => {
 if (!user || !db) { setLoading(false); return; }
 getDoc(doc(db, "users", user.uid)).then((snap) => {
@@ -1710,6 +1713,19 @@ setPasskeyCount(Array.isArray(d.passkeys) ? d.passkeys.length : 0);
 setLoading(false);
 }).catch((err) => { console.error(err); setLoading(false); });
 }, [user, db, activeTab]);
+
+// Fetch Appeal Tickets for Admin
+useEffect(() => {
+if (!user || !db || user.email !== ADMIN_EMAIL) return;
+const q = query(collection(db, "appeal_tickets"), orderBy("createdAt", "desc"));
+const unsub = onSnapshot(q, (s: any) => {
+const list: AppealTicket[] = [];
+s.forEach((d: any) => list.push({ id: d.id, ...d.data() } as AppealTicket));
+setAppealTickets(list);
+});
+return () => unsub();
+}, [user, db]);
+
 useEffect(() => {
 if (!overlayRef.current) return;
 gsap.fromTo(overlayRef.current, { x: "100%" }, { x: "0%", duration: 0.7, ease: "power4.out" });
@@ -1730,14 +1746,24 @@ try { await updateDoc(doc(db, "users", user.uid), { isAnonymous: nv }); setIsAno
 catch { alert("Gagal menyimpan pengaturan."); }
 finally { setSaving(false); }
 };
+
+const handleResolveAppeal = async (id: string) => {
+if (!db) return;
+await updateDoc(doc(db, "appeal_tickets", id), { status: "resolved" });
+};
+const handleRejectAppeal = async (id: string) => {
+if (!db) return;
+await updateDoc(doc(db, "appeal_tickets", id), { status: "closed" });
+};
+
 const displayName = isAnonymous ? "Anonim" : user?.displayName || user?.email?.split("@")[0] || "User";
 const gmailEmail = user?.email || "Email tidak tersedia";
-const headerTitle = activeTab === "main" ? "Dashboard" : activeTab === "settings" ? "Pengaturan Privasi" : activeTab === "security" ? "Security Center" : "Detail Status Akun";
+const headerTitle = activeTab === "main" ? "Dashboard" : activeTab === "settings" ? "Pengaturan Privasi" : activeTab === "security" ? "Security Center" : activeTab === "manage-banding" ? "Manage Banding" : "Detail Status Akun";
 return (
 <div ref={overlayRef} style={{ position: "fixed", top: 0, right: 0, bottom: 0, width: "100%", maxWidth: "600px", backgroundColor: WHITE, zIndex: 9998, display: "flex", flexDirection: "column", fontFamily: FONT_FAMILY, color: BLUE, boxShadow: "-10px 0 40px rgba(0,0,0,0.2)", overflow: "hidden" }}>
 <div style={{ padding: "24px", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
 <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-{(activeTab === "settings" || activeTab === "security" || activeTab === "status") && (
+{(activeTab === "settings" || activeTab === "security" || activeTab === "status" || activeTab === "manage-banding") && (
 <button onClick={() => setActiveTab("main")} style={{ background: "transparent", border: "none", color: BLUE, cursor: "pointer", display: "flex", alignItems: "center", padding: 0 }}><ChevronLeftIcon size={24} color={BLUE} /></button>
 )}
 <h2 style={{ fontSize: "28px", fontWeight: 800, margin: 0, color: BLUE }}>{headerTitle}</h2>
@@ -1751,6 +1777,36 @@ return (
 <SecurityCenterPanel user={user} db={db} onBack={() => setActiveTab("main")} />
 ) : activeTab === "status" ? (
 <AccountStatusPage user={user} db={db} onBack={() => setActiveTab("main")} onOpenAppealChat={onOpenAppealChat} />
+) : activeTab === "manage-banding" ? (
+<div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+<h3 style={{ fontSize: "18px", fontWeight: 700, color: BLUE }}>Daftar Permintaan Banding</h3>
+{appealTickets.length === 0 ? (
+<div style={{ textAlign: "center", color: "#999", padding: "20px" }}>Tidak ada permintaan banding.</div>
+) : (
+appealTickets.map((t) => (
+<div key={t.id} style={{ backgroundColor: "#F0F4FF", borderRadius: "12px", padding: "16px", border: "1px solid rgba(13,60,252,0.1)", display: "flex", flexDirection: "column", gap: "10px" }}>
+<div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+<div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+<div style={{ width: "32px", height: "32px", borderRadius: "50%", backgroundColor: BLUE, color: WHITE, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: 700 }}>
+{t.userName.charAt(0).toUpperCase()}
+</div>
+<div>
+<div style={{ fontWeight: 700, fontSize: "14px", color: BLUE }}>{t.userName}</div>
+<div style={{ fontSize: "11px", color: "#666" }}>{t.userEmail}</div>
+</div>
+</div>
+<StabiloBadge label={t.status} bg={WHITE} text={BLUE} border={BLUE} size="sm" />
+</div>
+<div style={{ fontSize: "12px", color: "#555", fontStyle: "italic" }}>Alasan: {t.banReason}</div>
+<div style={{ display: "flex", gap: "8px", marginTop: "8px" }}>
+<button onClick={() => handleResolveAppeal(t.id)} style={{ flex: 1, padding: "8px", backgroundColor: GREEN, color: WHITE, border: "none", borderRadius: "6px", fontSize: "12px", fontWeight: 700, cursor: "pointer" }}>Selesai</button>
+<button onClick={() => handleRejectAppeal(t.id)} style={{ flex: 1, padding: "8px", backgroundColor: RED, color: WHITE, border: "none", borderRadius: "6px", fontSize: "12px", fontWeight: 700, cursor: "pointer" }}>Tolak</button>
+<button onClick={() => { onOpenAppealChat(t.banReason, t.banMessage); }} style={{ flex: 1, padding: "8px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "6px", fontSize: "12px", fontWeight: 700, cursor: "pointer" }}>Chat</button>
+</div>
+</div>
+))
+)}
+</div>
 ) : activeTab === "main" ? (
 <>
 <div style={{ backgroundColor: BLUE, borderRadius: "24px", padding: "24px", marginBottom: "20px", display: "flex", flexDirection: "column", gap: "16px", boxSizing: "border-box" }}>
@@ -1789,6 +1845,31 @@ style={{ display: "flex", width: "100%", textAlign: "left", backgroundColor: BLU
 <ArrowRightIcon size={14} color={WHITE} />
 </div>
 </button>
+{user?.email === ADMIN_EMAIL && (
+<button
+onClick={() => setActiveTab("manage-banding")}
+style={{ display: "flex", width: "100%", textAlign: "left", backgroundColor: BLUE, borderRadius: "20px", padding: "20px", marginBottom: "20px", border: "none", cursor: "pointer", fontFamily: FONT_FAMILY, color: WHITE, flexDirection: "column", gap: "12px", boxShadow: "0 12px 32px rgba(13,60,252,0.3)", boxSizing: "border-box" }}
+>
+<div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", width: "100%" }}>
+<div style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: 0 }}>
+<div style={{ width: "44px", height: "44px", borderRadius: "12px", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+<ChatIcon size={24} color={BLUE} />
+</div>
+<div style={{ textAlign: "left", minWidth: 0 }}>
+<div style={{ fontSize: "16px", fontWeight: 800, color: WHITE }}>Manage Banding</div>
+<div style={{ fontSize: "12px", color: WHITE, opacity: 0.85, fontWeight: 600 }}>Kelola permintaan banding user</div>
+</div>
+</div>
+<div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "6px 12px", backgroundColor: WHITE, borderRadius: "10px", flexShrink: 0 }}>
+<span style={{ fontSize: "11px", fontWeight: 800, color: BLUE, letterSpacing: "0.06em", textTransform: "uppercase" }}>{appealTickets.length} New</span>
+</div>
+</div>
+<div style={{ display: "flex", alignItems: "center", gap: "6px", color: WHITE, fontSize: "12px", fontWeight: 700, opacity: 0.9 }}>
+<span>Klik untuk kelola</span>
+<ArrowRightIcon size={14} color={WHITE} />
+</div>
+</button>
+)}
 <div style={{ backgroundColor: BLUE, borderRadius: "24px", padding: "24px", marginBottom: "20px", display: "flex", flexDirection: "column", gap: "12px", boxSizing: "border-box" }}>
 <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
 <div style={{ width: "40px", height: "40px", borderRadius: "12px", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center" }}><TrustIcon size={24} color={BLUE} /></div>
