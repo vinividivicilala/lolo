@@ -18,6 +18,7 @@ orderBy,
 getDoc,
 setDoc,
 limit,
+deleteDoc,
 } from "firebase/firestore";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -1686,6 +1687,7 @@ Buka Chat Banding
 </div>
 );
 };
+
 // ===== DASHBOARD OVERLAY =====
 const DashboardOverlay = ({ user, db, onClose, onOpenAppealChat }: { user: any; db: any; onClose: () => void; onOpenAppealChat: (reason: string, message: string) => void; }) => {
 const overlayRef = useRef<HTMLDivElement>(null);
@@ -1865,6 +1867,7 @@ Passkey: {passkeyCount} terdaftar
 </div>
 <div style={{ marginTop: "auto", paddingTop: "40px", textAlign: "left", overflow: "hidden" }}>
 <span style={{ fontFamily: FONT_FAMILY, fontSize: "250px", fontWeight: 400, color: BLUE, letterSpacing: "-0.05em", lineHeight: 0.9, display: "block", userSelect: "none", textTransform: "lowercase" }}>ru 2026</span>
+</div>
 </div>
 </div>
 )}
@@ -2053,6 +2056,7 @@ return (
 </div>
 );
 };
+
 // ===== APPEAL CHAT ROOM (untuk admin & user banned di halaman utama) =====
 const AppealChatRoom = ({ user, isAdmin, db, appealTicket, onClose }: any) => {
 const [messages, setMessages] = useState<AppealMessage[]>([]);
@@ -2150,7 +2154,8 @@ return (
 </div>
 <div style={{ padding: "12px 20px", backgroundColor: "rgba(13,60,252,0.08)", borderBottom: `1px solid ${BLUE}30`, flexShrink: 0, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
 <div style={{ fontSize: "12px", color: BLUE, fontFamily: FONT_FAMILY, fontWeight: 600 }}><strong>Alasan banned:</strong> {appealTicket.banReason || "Suspicious Activity"}</div>
-<StabiloBadge label={meta.label} bg={meta.bg} text={meta.text} border={meta.border} size="sm" />
+{/* Badge di dalam header biru: BG Putih, Teks Biru */}
+<StabiloBadge label={meta.label} bg={WHITE} text={BLUE} border={WHITE} size="sm" />
 </div>
 <div ref={chatRef} className="chat-messages-container" style={{ flex: 1, overflowY: "auto", padding: "20px", display: "flex", flexDirection: "column", gap: "12px", minHeight: 0 }}>
 {messages.length === 0 ? <div style={{ textAlign: "center", color: "#999", fontSize: "14px", padding: "30px 0", fontFamily: FONT_FAMILY }}>Belum ada pesan pada ticket ini.</div> : messages.map((msg, idx) => {
@@ -2192,6 +2197,7 @@ Ticket chat ini telah {status === "resolved" ? "SELESAI" : "DITOLAK"}.
 </div>
 );
 };
+
 // ===== LIVE CHAT AGENT =====
 const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBannedAppealChat }: any) => {
 const [tickets, setTickets] = useState<Ticket[]>([]);
@@ -2337,7 +2343,16 @@ if (!ut.length) return;
 const act = ut.find((t) => t.status === "waiting" || t.status === "active") || ut[0];
 setSelectedTicket(act); hasAuto.current = true;
 }, [tickets, user, isAdmin, selectedTicket, isMounted]);
-const generateTicketId = useCallback((createdAt: any): string => { if (!createdAt) return "#TICKET-0000"; const d = createdAt.toDate ? createdAt.toDate() : new Date(createdAt); return `#TICKET-${String(d.getFullYear()).slice(-2)}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}${String(d.getHours()).padStart(2, "0")}${String(d.getMinutes()).padStart(2, "0")}`; }, []);
+const generateTicketId = useCallback((createdAt: any): string => { 
+if (!createdAt) return "#TICKET-0000"; 
+const d = createdAt.toDate ? createdAt.toDate() : new Date(createdAt); 
+const yy = String(d.getFullYear()).slice(-2);
+const mm = String(d.getMonth() + 1).padStart(2, "0");
+const dd = String(d.getDate()).padStart(2, "0");
+const hh = String(d.getHours()).padStart(2, "0");
+const min = String(d.getMinutes()).padStart(2, "0");
+return `#TICKET-${yy}${mm}${dd}-${hh}${min}`; 
+}, []);
 const formatTime = useCallback((t: any) => { if (!t) return ""; const d = t.toDate ? t.toDate() : new Date(t); return d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }); }, []);
 const getTyping = (t: Ticket | null) => t?.typing ? `${t.typingUserName || "Someone"} is typing...` : null;
 const filter = useCallback((list: Ticket[]) => {
@@ -2560,6 +2575,7 @@ return (
 </>
 );
 };
+
 // ===== MAIN PAGE =====
 export default function HomePage(): React.JSX.Element {
 const [showMain, setShowMain] = useState(false);
