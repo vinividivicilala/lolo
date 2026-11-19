@@ -139,7 +139,6 @@ await updateDoc(doc(db, "users", userId), { botBlocked: true, botBlockedAt: serv
 await addDoc(collection(db, "bot_violations_log"), { userId, userEmail, userName, violation: { type: "BANNED", reason, timestamp: now, message, confidence: 100 }, timestamp: serverTimestamp(), resolved: false, isBan: true });
 } catch (error) { console.error("Error banning user:", error); }
 }
-// ===== FUNGSI UNBAN USER (untuk tombol Terima) =====
 async function unbanUser(userId: string) {
 if (!db) return;
 try {
@@ -279,7 +278,6 @@ const FARID_LINK = "https://farid-ardiansyah.netlify.app/";
 const SECURITY_ISSUER = "Menuru Security Center";
 const RP_NAME = "Menuru";
 const FOOTER_GALLERY_IMAGES = ["/images/a1.JPG","/images/a2.JPG","/images/a3.JPG","/images/a4.JPG","/images/a5.JPG","/images/a6.JPG","/images/a71.JPG"];
-// ===== STATUS STYLES (dengan warna baru untuk banding) =====
 const STATUS_STYLES: any = {
 waiting: { label: "Waiting", bg: LIME, text: BLACK, border: LIME },
 active: { label: "Active", bg: RED, text: WHITE, border: RED },
@@ -390,7 +388,7 @@ const ChatIcon = ({ size = 18, color = "currentColor" }: { size?: number; color?
 <svg width={size} height={size} viewBox="0 0 24 24" fill="none"><path d="M21 11.5C21 16.1944 16.9706 20 12 20C10.8452 20 9.74371 19.7964 8.73507 19.4276L4 21L5.45177 16.7441C4.53668 15.3762 4 13.7581 4 12C4 7.30558 8.02944 3.5 12 3.5C16.9706 3.5 21 7.30558 21 11.5Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
 );
 
-// ===== VERIFIED SEAL: 1 CENTANG, TIDAK TEBAL, ANIMASI GAYA GOOGLE PLAY =====
+// ===== VERIFIED SEAL =====
 const VERIFIED_SEAL_PATH = "M19.998 3.094 14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.03v-6.46h-6.419L25.358 0l-5.36 3.094Z";
 const VERIFIED_CHECK_PATH = "M13.6 20.4L17.9 24.7L26.4 15.9";
 
@@ -427,10 +425,8 @@ return (
 );
 };
 
-// ===== ALIAS: RealInstagramBadge = VerifiedSeal (backward compatibility) =====
 const RealInstagramBadge = VerifiedSeal;
 
-// ===== META STATUS BANDING (waiting = hijau stabilo, active = merah stabilo) =====
 const appealStatusMeta = (status?: string) => {
 if (status === "resolved") return { label: "SELESAI", bg: BLACK, text: WHITE, border: BLACK };
 if (status === "closed") return { label: "DITOLAK", bg: BLUE, text: WHITE, border: BLUE };
@@ -438,7 +434,7 @@ if (status === "active") return { label: "ACTIVE", bg: RED, text: WHITE, border:
 return { label: "WAITING", bg: LIME, text: BLACK, border: LIME };
 };
 
-// ===== BUBBLE TYPING REAL-TIME (nama user / admin) =====
+// ===== BUBBLE TYPING REAL-TIME (nama user / admin) - KOMPONEN KUNCI =====
 const TypingBubble = ({ name }: { name: string }) => {
 const ref = useRef<HTMLDivElement>(null);
 useEffect(() => {
@@ -458,7 +454,7 @@ return (
 );
 };
 
-// ===== STATUS ONLINE / OFFLINE ADMIN (titik kedap-kedip, TANPA BORDER) =====
+// ===== STATUS ONLINE / OFFLINE ADMIN =====
 const AdminPresenceStatus = ({ light = true }: { light?: boolean }) => {
 const [online, setOnline] = useState<boolean | null>(null);
 useEffect(() => {
@@ -477,10 +473,8 @@ return (
 );
 };
 
-// ===== PESAN SISTEM DI CHAT BANDING =====
 const AppealSystemNote = ({ status }: { status: string }) => {
 const isResolved = status === "resolved";
-const isAccepted = status === "resolved";
 return (
 <div style={{ alignSelf: "center", maxWidth: "92%", textAlign: "center", backgroundColor: isResolved ? BLACK : BLUE, color: WHITE, border: `1.5px solid ${isResolved ? BLACK : BLUE}`, borderRadius: 10, padding: "10px 18px", fontSize: 13, fontWeight: 700, fontFamily: FONT_FAMILY, lineHeight: 1.5 }}>
 {isResolved ? "Banding telah DITERIMA & SELESAI diproses oleh admin." : "Banding telah DITOLAK oleh admin."}
@@ -516,6 +510,7 @@ interface AppealMessage { id: string; senderId: string; senderName: string; text
 interface AppealTicket { id: string; userId: string; userName: string; userEmail: string; userPhoto?: string; agentId?: string; agentName?: string; status: "waiting" | "active" | "resolved" | "closed"; topic: string; banReason: string; banMessage: string; createdAt: any; lastMessage?: string; lastMessageTime?: any; lastMessageSender?: string; unreadCount: number; typing: boolean; typingUserId?: string | null; typingUserName?: string | null; }
 interface PasskeyRecord { id: string; credentialId: string; name: string; createdAt: number; transports?: string[]; }
 interface AccountStatusInfo { isBanned: boolean; reason: string; message: string; canCreateTicket: boolean; canSendMessage: boolean; }
+
 // ===== FARID VERIFIED PANEL =====
 const FaridVerifiedPanel = ({ open, anchorRect, onClose }: { open: boolean; anchorRect: DOMRect | null; onClose: () => void; }) => {
 const [phase, setPhase] = useState<"loading" | "expand" | "fullpage">("loading");
@@ -604,6 +599,7 @@ return (
 </>
 );
 };
+
 // ===== TOP BANNER =====
 const TopBanner = () => {
 const [showPanel, setShowPanel] = useState(false);
@@ -1310,15 +1306,36 @@ Passkey
 );
 };
 
-// ===== INLINE APPEAL CHAT (dengan typing bubble real-time + presence) =====
+// ===== HOOK KUNCI: Subscribe typing status real-time dari Firestore =====
+const useRealtimeTyping = (db: any, ticketId: string | undefined, currentUserId: string | undefined) => {
+const [typingName, setTypingName] = useState<string | null>(null);
+useEffect(() => {
+if (!db || !ticketId) { setTypingName(null); return; }
+const unsub = onSnapshot(doc(db, "appeal_tickets", ticketId), (snap: any) => {
+if (!snap.exists()) { setTypingName(null); return; }
+const d = snap.data();
+// Tampilkan typing hanya jika user LAIN yang sedang mengetik
+if (d.typing && d.typingUserId && d.typingUserId !== currentUserId) {
+setTypingName(d.typingUserName || "Someone");
+} else {
+setTypingName(null);
+}
+});
+return () => unsub();
+}, [db, ticketId, currentUserId]);
+return typingName;
+};
+
+// ===== INLINE APPEAL CHAT (dengan typing real-time) =====
 const InlineAppealChat = ({ user, db, appealTicket, onClose }: { user: any; db: any; appealTicket: AppealTicket; onClose?: () => void; }) => {
 const [messages, setMessages] = useState<AppealMessage[]>([]);
 const [messageText, setMessageText] = useState("");
 const [encryptionReady, setEncryptionReady] = useState(false);
-const [typingName, setTypingName] = useState<string | null>(null);
 const [status, setStatus] = useState<string>(appealTicket.status);
 const chatRef = useRef<HTMLDivElement>(null);
 const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+// TYPING REAL-TIME dari Firestore
+const typingName = useRealtimeTyping(db, appealTicket?.id, user?.uid);
 useEffect(() => { getCryptoKey().then(() => setEncryptionReady(true)).catch(() => setEncryptionReady(true)); }, []);
 useEffect(() => {
 if (!db || !appealTicket) return;
@@ -1336,10 +1353,9 @@ const unsub = onSnapshot(doc(db, "appeal_tickets", appealTicket.id), (snap: any)
 if (!snap.exists()) return;
 const d = snap.data();
 setStatus(d.status || "waiting");
-setTypingName(d.typing && d.typingUserId !== user?.uid ? (d.typingUserName || null) : null);
 });
 return () => unsub();
-}, [db, appealTicket, user]);
+}, [db, appealTicket]);
 const finished = status === "resolved" || status === "closed";
 const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
 const v = e.target.value; setMessageText(v);
@@ -1752,17 +1768,18 @@ Buka Chat Banding
 );
 };
 
-// ===== DASHBOARD APPEAL CHAT (untuk admin di dashboard manage-banding) =====
+// ===== DASHBOARD APPEAL CHAT (untuk admin di dashboard manage-banding) - DENGAN TYPING REAL-TIME =====
 const DashboardAppealChat = ({ user, db, appealTicket, onClose, isAdmin, onAccept, onReject, onResolve }: { user: any; db: any; appealTicket: AppealTicket; onClose?: () => void; isAdmin?: boolean; onAccept?: () => void; onReject?: () => void; onResolve?: () => void; }) => {
 const [messages, setMessages] = useState<AppealMessage[]>([]);
 const [messageText, setMessageText] = useState("");
 const [replyTo, setReplyTo] = useState<AppealMessage | null>(null);
 const [encryptionReady, setEncryptionReady] = useState(false);
-const [typingName, setTypingName] = useState<string | null>(null);
 const [status, setStatus] = useState<string>(appealTicket.status);
 const messagesEndRef = useRef<HTMLDivElement>(null);
 const chatRef = useRef<HTMLDivElement>(null);
 const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+// TYPING REAL-TIME dari Firestore
+const typingName = useRealtimeTyping(db, appealTicket?.id, user?.uid);
 useEffect(() => { getCryptoKey().then(() => setEncryptionReady(true)).catch(() => setEncryptionReady(true)); }, []);
 useEffect(() => {
 if (!db || !appealTicket) return;
@@ -1780,10 +1797,9 @@ const unsub = onSnapshot(doc(db, "appeal_tickets", appealTicket.id), (snap: any)
 if (!snap.exists()) return;
 const d = snap.data();
 setStatus(d.status || "waiting");
-setTypingName(d.typing && d.typingUserId !== user?.uid ? (d.typingUserName || null) : null);
 });
 return () => unsub();
-}, [db, appealTicket, user]);
+}, [db, appealTicket]);
 useEffect(() => {
 if (!db || !appealTicket || !user) return;
 messages.filter((m) => m.senderId !== user.uid && m.senderId !== "system" && !m.read).forEach(async (msg) => { await updateDoc(doc(db, "appeal_tickets", appealTicket.id, "messages", msg.id), { read: true, deliveryStatus: "read" }); });
@@ -1885,7 +1901,7 @@ Ticket chat ini telah {status === "resolved" ? "DITERIMA & SELESAI" : "DITOLAK"}
 );
 };
 
-// ===== DASHBOARD OVERLAY (dengan tab Manage Banding untuk admin) =====
+// ===== DASHBOARD OVERLAY =====
 const DashboardOverlay = ({ user, db, onClose, onOpenAppealChat }: { user: any; db: any; onClose: () => void; onOpenAppealChat: (reason: string, message: string) => void; }) => {
 const overlayRef = useRef<HTMLDivElement>(null);
 const closeIconRef = useRef<HTMLDivElement>(null);
@@ -1935,7 +1951,6 @@ setLoading(false);
 }).catch((err) => { console.error(err); setLoading(false); });
 }, [user, db, activeTab]);
 
-// Fetch Appeal Tickets for Admin
 useEffect(() => {
 if (!user || !db || user.email !== ADMIN_EMAIL) return;
 const q = query(collection(db, "appeal_tickets"), orderBy("createdAt", "desc"));
@@ -1968,7 +1983,6 @@ catch { alert("Gagal menyimpan pengaturan."); }
 finally { setSaving(false); }
 };
 
-// Fungsi Terima Banding (Unban user + set resolved)
 const handleAcceptAppeal = async (ticket: AppealTicket) => {
 if (!db) return;
 if (!confirm(`Terima banding dari ${ticket.userName}? User akan di-unban otomatis.`)) return;
@@ -2390,7 +2404,7 @@ return (
 );
 };
 
-// ===== BANNED BANNER (dengan tombol berubah sesuai status) =====
+// ===== BANNED BANNER =====
 const BannedInfoBanner = ({ banReason, banMessage, onAppeal, hasAppeal, appealStatus }: { banReason: string; banMessage: string; onAppeal: () => void; hasAppeal: boolean; appealStatus?: string }) => {
 const ref = useRef<HTMLDivElement>(null);
 useEffect(() => { if (ref.current) gsap.fromTo(ref.current, { opacity: 0, y: -20 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }); }, []);
@@ -2411,7 +2425,7 @@ return (
 <span style={{ fontSize: 13, color: WHITE, fontWeight: 700, fontFamily: FONT_FAMILY }}>
 {appealStatus === "resolved" ? "Banding telah diterima & selesai" : appealStatus === "closed" ? "Banding telah ditolak" : "Banding sedang diproses"}
 </span>
-<StabiloBadge label={meta.label} bg={WHITE} text={BLUE} border={WHITE} size="sm" />
+<StabiloBadge label={meta.label} bg={meta.bg} text={meta.text} border={meta.border} size="sm" />
 </div>
 )}
 <button onClick={onAppeal} style={{ alignSelf: "flex-start", padding: "10px 18px", backgroundColor: WHITE, color: BLUE, border: `1.5px solid ${WHITE}`, borderRadius: "8px", fontSize: "13px", fontWeight: 800, cursor: "pointer", fontFamily: FONT_FAMILY, letterSpacing: "0.5px", textTransform: "uppercase", display: "inline-flex", alignItems: "center", gap: "8px" }}>
@@ -2422,17 +2436,18 @@ return (
 );
 };
 
-// ===== APPEAL CHAT ROOM (untuk admin & user banned di halaman utama) - DENGAN TOMBOL TERIMA/TOLAK/SELESAI =====
+// ===== APPEAL CHAT ROOM (BODY UTAMA) - DENGAN TYPING REAL-TIME + TOMBOL TERIMA/TOLAK/SELESAI =====
 const AppealChatRoom = ({ user, isAdmin, db, appealTicket, onClose }: any) => {
 const [messages, setMessages] = useState<AppealMessage[]>([]);
 const [messageText, setMessageText] = useState("");
 const [replyTo, setReplyTo] = useState<AppealMessage | null>(null);
 const [encryptionReady, setEncryptionReady] = useState(false);
-const [typingName, setTypingName] = useState<string | null>(null);
 const [status, setStatus] = useState<string>(appealTicket?.status || "waiting");
 const messagesEndRef = useRef<HTMLDivElement>(null);
 const chatRef = useRef<HTMLDivElement>(null);
 const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+// TYPING REAL-TIME dari Firestore
+const typingName = useRealtimeTyping(db, appealTicket?.id, user?.uid);
 useEffect(() => { getCryptoKey().then(() => setEncryptionReady(true)).catch(() => setEncryptionReady(true)); }, []);
 useEffect(() => {
 if (!db || !appealTicket) return;
@@ -2450,10 +2465,9 @@ const unsub = onSnapshot(doc(db, "appeal_tickets", appealTicket.id), (snap: any)
 if (!snap.exists()) return;
 const d = snap.data();
 setStatus(d.status || "waiting");
-setTypingName(d.typing && d.typingUserId !== user?.uid ? (d.typingUserName || null) : null);
 });
 return () => unsub();
-}, [db, appealTicket, user]);
+}, [db, appealTicket]);
 useEffect(() => {
 if (!db || !appealTicket || !user) return;
 messages.filter((m) => m.senderId !== user.uid && m.senderId !== "system" && !m.read).forEach(async (msg) => { await updateDoc(doc(db, "appeal_tickets", appealTicket.id, "messages", msg.id), { read: true, deliveryStatus: "read" }); });
@@ -2858,18 +2872,11 @@ const takeTicket = async (id: string) => { if (!db || !isAdmin || !user) return;
 const resolveTicket = async (id: string) => { if (!db || !isAdmin) return; try { await updateDoc(doc(db, "livechat_tickets", id), { status: "resolved" }); } catch {} };
 const handleCloseRoom = async () => { if (!db || !selectedTicket) return; try { await updateDoc(doc(db, "livechat_tickets", selectedTicket.id), { status: "closed" }); setShowCloseConfirm(true); setTimeout(() => setShowCloseConfirm(false), 2200); } catch {} };
 
-// PERBAIKAN: createAppealTicket - buat ticket baru jika ticket lama sudah closed/resolved
 const createAppealTicket = async () => {
 if (!db || !user || !isBanned) return;
 try {
-// Cari ticket aktif (belum closed/resolved)
 const exist = appealTickets.find((t) => t.userId === user.uid && t.status !== "closed" && t.status !== "resolved");
-if (exist) { 
-// Masih ada ticket aktif, buka ticket itu
-onOpenBannedAppealChat(exist); 
-return; 
-}
-// Tidak ada ticket aktif, buat ticket baru (tanpa auto-kirim pesan)
+if (exist) { onOpenBannedAppealChat(exist); return; }
 const ref = await addDoc(collection(db, "appeal_tickets"), { userId: user.uid, userName: user.displayName || user.email || "User", userEmail: user.email, userPhoto: user.photoURL || "", status: "waiting", topic: "Banding Banned", banReason, banMessage: banMessage || "", createdAt: serverTimestamp(), unreadCount: 0, typing: false, typingUserId: null, typingUserName: null });
 onOpenBannedAppealChat({ id: ref.id, userId: user.uid, userName: user.displayName || user.email || "User", userEmail: user.email, userPhoto: user.photoURL || "", status: "waiting", topic: "Banding Banned", banReason, banMessage: banMessage || "", createdAt: new Date(), unreadCount: 0, typing: false } as AppealTicket);
 setHasAppeal(true);
@@ -3031,6 +3038,7 @@ return (
 </>
 );
 };
+
 // ===== MAIN PAGE =====
 export default function HomePage(): React.JSX.Element {
 const [showMain, setShowMain] = useState(false);
@@ -3121,7 +3129,6 @@ let t: AppealTicket;
 if (!snap.empty) {
 const d = snap.docs[0];
 const existing = d.data();
-// Jika ticket terakhir sudah closed/resolved, buat ticket baru
 if (existing.status === "closed" || existing.status === "resolved") {
 const ref = await addDoc(collection(db, "appeal_tickets"), { userId: user.uid, userName: user.displayName || user.email || "User", userEmail: user.email, userPhoto: user.photoURL || "", status: "waiting", topic: "Banding Banned", banReason: reason, banMessage: message, createdAt: serverTimestamp(), unreadCount: 0, typing: false, typingUserId: null, typingUserName: null });
 t = { id: ref.id, userId: user.uid, userName: user.displayName || user.email || "User", userEmail: user.email, userPhoto: user.photoURL || "", status: "waiting", topic: "Banding Banned", banReason: reason, banMessage: message, createdAt: new Date(), unreadCount: 0, typing: false } as AppealTicket;
