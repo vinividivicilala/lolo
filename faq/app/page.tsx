@@ -273,32 +273,11 @@ const LIME = "#E3FB96";
 const GREEN = "#4ADE80";
 const MINT = "#00E3AA";
 const RED = "#DC2626";
-const ORANGE = "#FB923C";
-const PURPLE = "#A78BFA";
-const PINK = "#F472B6";
-const YELLOW = "#FDE047";
-const CYAN = "#22D3EE";
 const STORE_LINK = "https://apps.microsoft.com/detail/9nv1fg4b6xvn?hl=id-ID&gl=ID";
 const FARID_LINK = "https://farid-ardiansyah.netlify.app/";
 const SECURITY_ISSUER = "Menuru Security Center";
 const RP_NAME = "Menuru";
 const FOOTER_GALLERY_IMAGES = ["/images/a1.JPG","/images/a2.JPG","/images/a3.JPG","/images/a4.JPG","/images/a5.JPG","/images/a6.JPG","/images/a71.JPG"];
-
-// ===== TOPIC STABILO COLORS (10+ topics dengan warna berbeda) =====
-const TOPIC_STABILO_COLORS: { [key: string]: { bg: string; text: string; border: string } } = {
-"Product Inquiry": { bg: LIME, text: BLACK, border: LIME },
-"Technical Support": { bg: CYAN, text: BLACK, border: CYAN },
-"Account Issues": { bg: ORANGE, text: BLACK, border: ORANGE },
-"Donation": { bg: PINK, text: BLACK, border: PINK },
-"Partnership": { bg: PURPLE, text: WHITE, border: PURPLE },
-"Bug Report": { bg: RED, text: WHITE, border: RED },
-"Feature Request": { bg: YELLOW, text: BLACK, border: YELLOW },
-"Payment Issue": { bg: MINT, text: BLACK, border: MINT },
-"General Question": { bg: "#C4B5FD", text: BLACK, border: "#C4B5FD" },
-"Feedback": { bg: "#FCA5A5", text: BLACK, border: "#FCA5A5" },
-"Other": { bg: WHITE, text: BLUE, border: BLUE },
-};
-
 const STATUS_STYLES: any = {
 waiting: { label: "Waiting", bg: LIME, text: BLACK, border: LIME },
 active: { label: "Active", bg: RED, text: WHITE, border: RED },
@@ -311,14 +290,8 @@ const TOPIC_STYLES: any = {
 "Account Issues": { bg: WHITE, text: BLUE, border: BLUE },
 "Donation": { bg: WHITE, text: BLUE, border: BLUE },
 "Partnership": { bg: WHITE, text: BLUE, border: BLUE },
-"Bug Report": { bg: WHITE, text: BLUE, border: BLUE },
-"Feature Request": { bg: WHITE, text: BLUE, border: BLUE },
-"Payment Issue": { bg: WHITE, text: BLUE, border: BLUE },
-"General Question": { bg: WHITE, text: BLUE, border: BLUE },
-"Feedback": { bg: WHITE, text: BLUE, border: BLUE },
 "Other": { bg: WHITE, text: BLUE, border: BLUE },
 };
-
 // ===== ICONS =====
 const NorthEastArrow = ({ size = 20, color = "currentColor" }: { size?: number; color?: string }) => (
 <svg width={size} height={size} viewBox="0 0 24 24" fill="none"><path d="M7 17L17 7M17 7H8M17 7V16" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
@@ -414,6 +387,20 @@ const ArrowRightIcon = ({ size = 16, color = "currentColor" }: { size?: number; 
 const ChatIcon = ({ size = 18, color = "currentColor" }: { size?: number; color?: string }) => (
 <svg width={size} height={size} viewBox="0 0 24 24" fill="none"><path d="M21 11.5C21 16.1944 16.9706 20 12 20C10.8452 20 9.74371 19.7964 8.73507 19.4276L4 21L5.45177 16.7441C4.53668 15.3762 4 13.7581 4 12C4 7.30558 8.02944 3.5 12 3.5C16.9706 3.5 21 7.30558 21 11.5Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
 );
+// ===== ICON TOGGLE CHATBOT MODE =====
+const ToggleLayoutIcon = ({ size = 18, color = "currentColor" }: { size?: number; color?: string }) => (
+<svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+<rect x="3" y="3" width="7" height="18" rx="1.5" stroke={color} strokeWidth="2" />
+<rect x="14" y="3" width="7" height="18" rx="1.5" stroke={color} strokeWidth="2" />
+</svg>
+);
+const ToggleChatbotIcon = ({ size = 18, color = "currentColor" }: { size?: number; color?: string }) => (
+<svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+<rect x="6" y="3" width="12" height="18" rx="2" stroke={color} strokeWidth="2" />
+<circle cx="12" cy="18" r="1" fill={color} />
+<path d="M9 7H15M9 10H13" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
+</svg>
+);
 
 // ===== VERIFIED SEAL =====
 const VERIFIED_SEAL_PATH = "M19.998 3.094 14.638 0l-2.972 5.15H5.432v6.354L0 14.64 3.094 20 0 25.359l5.432 3.137v5.905h5.975L14.638 40l5.36-3.094L25.358 40l3.232-5.6h6.162v-6.01L40 25.359 36.905 20 40 14.641l-5.248-3.03v-6.46h-6.419L25.358 0l-5.36 3.094Z";
@@ -461,7 +448,6 @@ if (status === "active") return { label: "ACTIVE", bg: RED, text: WHITE, border:
 return { label: "WAITING", bg: LIME, text: BLACK, border: LIME };
 };
 
-// ===== BUBBLE TYPING REAL-TIME =====
 const TypingBubble = ({ name }: { name: string }) => {
 const ref = useRef<HTMLDivElement>(null);
 useEffect(() => {
@@ -481,7 +467,6 @@ return (
 );
 };
 
-// ===== STATUS ONLINE / OFFLINE ADMIN =====
 const AdminPresenceStatus = ({ light = true }: { light?: boolean }) => {
 const [online, setOnline] = useState<boolean | null>(null);
 useEffect(() => {
@@ -528,7 +513,7 @@ const footerLinks = [
 { title: "Attention", links: ["Privacy Policy", "Terms & Conditions", "About Us", "Terms of Use", "Cookies Policy", "Help Center"] },
 ];
 // ===== INTERFACES =====
-interface Ticket { id: string; userId: string; userName: string; userEmail: string; userPhoto?: string; agentId?: string; agentName?: string; status: "waiting" | "active" | "resolved" | "closed"; topic: string; createdAt: any; lastMessage?: string; lastMessageTime?: any; lastMessageSender?: string; unreadCount: number; typing: boolean; typingUserId?: string | null; typingUserName?: string | null; isAnnouncement?: boolean; isBroadcast?: boolean; isBanned?: boolean; banReason?: string; banMessage?: string; ticketNumber?: string; }
+interface Ticket { id: string; userId: string; userName: string; userEmail: string; userPhoto?: string; agentId?: string; agentName?: string; status: "waiting" | "active" | "resolved" | "closed"; topic: string; createdAt: any; lastMessage?: string; lastMessageTime?: any; lastMessageSender?: string; unreadCount: number; typing: boolean; typingUserId?: string | null; typingUserName?: string | null; isAnnouncement?: boolean; isBroadcast?: boolean; isBanned?: boolean; banReason?: string; banMessage?: string; }
 interface ChatMessage { id: string; senderId: string; senderName: string; text: string; timestamp: any; read: boolean; isEncrypted?: boolean; isBotDetected?: boolean; deliveryStatus?: "sending" | "sent" | "delivered" | "read" | "failed"; replyTo?: { messageId: string; senderName: string; text: string } | null; }
 interface OnlineUser { uid: string; displayName: string; email: string; photoURL?: string; online: boolean; lastSeen?: any; isAgent?: boolean; isAnonymous?: boolean; }
 interface LastMessagePreview { text: string; senderName: string; timestamp: any; isFromAgent: boolean; }
@@ -537,234 +522,6 @@ interface AppealMessage { id: string; senderId: string; senderName: string; text
 interface AppealTicket { id: string; userId: string; userName: string; userEmail: string; userPhoto?: string; agentId?: string; agentName?: string; status: "waiting" | "active" | "resolved" | "closed"; topic: string; banReason: string; banMessage: string; createdAt: any; lastMessage?: string; lastMessageTime?: any; lastMessageSender?: string; unreadCount: number; typing: boolean; typingUserId?: string | null; typingUserName?: string | null; }
 interface PasskeyRecord { id: string; credentialId: string; name: string; createdAt: number; transports?: string[]; }
 interface AccountStatusInfo { isBanned: boolean; reason: string; message: string; canCreateTicket: boolean; canSendMessage: boolean; }
-
-// ===== HELPER: Generate Random Ticket Number =====
-const generateRandomTicketNumber = (): string => {
-const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-let result = "TKT-";
-for (let i = 0; i < 8; i++) {
-result += chars.charAt(Math.floor(Math.random() * chars.length));
-}
-return result;
-};
-
-// ===== LINE CONNECTOR (GSAP Animated) =====
-const LineConnector = ({ fromId, toId }: { fromId: string; toId: string }) => {
-const lineRef = useRef<SVGPathElement>(null);
-const [path, setPath] = useState<string>("");
-useEffect(() => {
-const updatePath = () => {
-const fromEl = document.getElementById(fromId);
-const toEl = document.getElementById(toId);
-if (!fromEl || !toEl || !lineRef.current) return;
-const fromRect = fromEl.getBoundingClientRect();
-const toRect = toEl.getBoundingClientRect();
-const x1 = fromRect.right;
-const y1 = fromRect.top + fromRect.height / 2;
-const x2 = toRect.left;
-const y2 = toRect.top + toRect.height / 2;
-const midX = (x1 + x2) / 2;
-setPath(`M ${x1} ${y1} C ${midX} ${y1}, ${midX} ${y2}, ${x2} ${y2}`);
-};
-updatePath();
-const interval = setInterval(updatePath, 100);
-window.addEventListener("resize", updatePath);
-window.addEventListener("scroll", updatePath, true);
-return () => {
-clearInterval(interval);
-window.removeEventListener("resize", updatePath);
-window.removeEventListener("scroll", updatePath, true);
-};
-}, [fromId, toId]);
-
-useEffect(() => {
-if (lineRef.current && path) {
-const length = lineRef.current.getTotalLength();
-gsap.fromTo(lineRef.current, 
-{ strokeDasharray: length, strokeDashoffset: length, opacity: 0 },
-{ strokeDashoffset: 0, opacity: 1, duration: 0.8, ease: "power2.out" }
-);
-}
-}, [path]);
-
-if (!path) return null;
-return (
-<svg style={{ position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh", pointerEvents: "none", zIndex: 9000 }}>
-<path ref={lineRef} d={path} stroke={BLUE} strokeWidth="2" fill="none" strokeDasharray="6 4" opacity="0.6" />
-</svg>
-);
-};
-
-// ===== TIMELINE MESSAGE (dengan line animasi GSAP) =====
-const TimelineMessage = ({ children, isMine, isNew }: { children: React.ReactNode; isMine: boolean; isNew?: boolean }) => {
-const lineRef = useRef<HTMLDivElement>(null);
-const dotRef = useRef<HTMLDivElement>(null);
-const contentRef = useRef<HTMLDivElement>(null);
-useEffect(() => {
-if (lineRef.current && dotRef.current && contentRef.current) {
-gsap.fromTo(lineRef.current, 
-{ scaleY: 0, transformOrigin: "top center" },
-{ scaleY: 1, duration: 0.5, ease: "power2.out" }
-);
-gsap.fromTo(dotRef.current,
-{ scale: 0 },
-{ scale: 1, duration: 0.3, ease: "back.out(2)", delay: 0.2 }
-);
-gsap.fromTo(contentRef.current,
-{ opacity: 0, x: isMine ? 20 : -20 },
-{ opacity: 1, x: 0, duration: 0.4, ease: "power2.out", delay: 0.3 }
-);
-}
-}, [isMine]);
-return (
-<div style={{ display: "flex", flexDirection: "column", position: "relative", paddingLeft: isMine ? 0 : 30, paddingRight: isMine ? 30 : 0 }}>
-<div ref={lineRef} style={{ 
-position: "absolute", 
-left: isMine ? "auto" : 14, 
-right: isMine ? 14 : "auto",
-top: 0, 
-bottom: 0, 
-width: 2, 
-backgroundColor: `${BLUE}30`,
-zIndex: 0
-}} />
-<div ref={dotRef} style={{
-position: "absolute",
-left: isMine ? "auto" : 10,
-right: isMine ? 10 : "auto",
-top: 12,
-width: 10,
-height: 10,
-borderRadius: "50%",
-backgroundColor: isMine ? BLUE : LIME,
-border: `2px solid ${WHITE}`,
-zIndex: 1,
-boxShadow: "0 0 0 3px rgba(13,60,252,0.2)"
-}} />
-<div ref={contentRef} style={{ position: "relative", zIndex: 2 }}>
-{children}
-</div>
-</div>
-);
-};
-
-// ===== TOPIC CARD (Stabilo Design) =====
-const TopicCard = ({ topic, onClick, isSelected }: { topic: string; onClick: () => void; isSelected: boolean }) => {
-const cardRef = useRef<HTMLDivElement>(null);
-const colors = TOPIC_STABILO_COLORS[topic] || TOPIC_STABILO_COLORS["Other"];
-const handleEnter = () => {
-if (cardRef.current) {
-gsap.to(cardRef.current, { scale: 1.05, duration: 0.2, ease: "power2.out" });
-}
-};
-const handleLeave = () => {
-if (cardRef.current) {
-gsap.to(cardRef.current, { scale: 1, duration: 0.2, ease: "power2.out" });
-}
-};
-return (
-<div
-ref={cardRef}
-onClick={onClick}
-onMouseEnter={handleEnter}
-onMouseLeave={handleLeave}
-style={{
-padding: "12px 16px",
-backgroundColor: colors.bg,
-color: colors.text,
-border: `2px solid ${isSelected ? BLUE : colors.border}`,
-borderRadius: "10px",
-cursor: "pointer",
-fontFamily: FONT_FAMILY,
-fontSize: "13px",
-fontWeight: 700,
-display: "flex",
-alignItems: "center",
-gap: "8px",
-boxShadow: isSelected ? `0 4px 12px ${colors.bg}80` : "none",
-transition: "all 0.2s ease"
-}}
->
-<span style={{ width: 8, height: 8, borderRadius: "50%", backgroundColor: isSelected ? BLUE : colors.text, opacity: 0.6 }} />
-{topic}
-</div>
-);
-};
-
-// ===== CHATBOT CARD (floating di kanan bawah) =====
-const ChatbotCard = ({ user, ticketNumber, topic, onClose }: { user: any; ticketNumber: string; topic: string; onClose: () => void }) => {
-const cardRef = useRef<HTMLDivElement>(null);
-const userName = user?.displayName || user?.email?.split("@")[0] || "User";
-const topicColors = TOPIC_STABILO_COLORS[topic] || TOPIC_STABILO_COLORS["Other"];
-useEffect(() => {
-if (cardRef.current) {
-gsap.fromTo(cardRef.current,
-{ y: 100, opacity: 0, scale: 0.8 },
-{ y: 0, opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.7)" }
-);
-}
-}, []);
-return (
-<div
-ref={cardRef}
-style={{
-position: "fixed",
-bottom: 24,
-right: 24,
-width: 320,
-backgroundColor: WHITE,
-borderRadius: 16,
-boxShadow: "0 10px 40px rgba(0,0,0,0.15)",
-zIndex: 9500,
-overflow: "hidden",
-border: `2px solid ${BLUE}`
-}}
->
-<div style={{
-padding: "14px 16px",
-backgroundColor: BLUE,
-color: WHITE,
-display: "flex",
-justifyContent: "space-between",
-alignItems: "center"
-}}>
-<div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-<AgentIcon size={20} color={WHITE} />
-<div>
-<div style={{ fontSize: 13, fontWeight: 800 }}>Live Chat Agent</div>
-<div style={{ fontSize: 10, opacity: 0.85 }}>{ticketNumber}</div>
-</div>
-</div>
-<button onClick={onClose} style={{ background: "transparent", border: "none", color: WHITE, cursor: "pointer", fontSize: 18 }}>×</button>
-</div>
-<div style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: 10 }}>
-<div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-<div style={{ width: 32, height: 32, borderRadius: "50%", backgroundColor: BLUE, color: WHITE, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 13 }}>
-{userName.charAt(0).toUpperCase()}
-</div>
-<div>
-<div style={{ fontSize: 12, fontWeight: 700, color: BLUE }}>{userName}</div>
-<div style={{ fontSize: 10, color: "#666" }}>User</div>
-</div>
-</div>
-<div style={{
-padding: "8px 12px",
-backgroundColor: topicColors.bg,
-color: topicColors.text,
-border: `1.5px solid ${topicColors.border}`,
-borderRadius: 8,
-fontSize: 11,
-fontWeight: 700
-}}>
-Topic: {topic}
-</div>
-<div style={{ fontSize: 11, color: "#666", lineHeight: 1.5 }}>
-Chat room telah dibuat. Silakan lanjutkan percakapan di panel utama.
-</div>
-</div>
-</div>
-);
-};
 
 // ===== FARID VERIFIED PANEL =====
 const FaridVerifiedPanel = ({ open, anchorRect, onClose }: { open: boolean; anchorRect: DOMRect | null; onClose: () => void; }) => {
@@ -898,7 +655,6 @@ Farid Ardiansyah
 </>
 );
 };
-
 // ===== FOOTER =====
 const FooterSection = () => {
 const containerRef = useRef<HTMLDivElement>(null);
@@ -1008,7 +764,6 @@ return (
 </div>
 );
 };
-
 // ===== NAVBAR BUTTON =====
 const NavbarButton = ({ label, panelTitle, panelDescription, panelImage, panelRightTitle, panelRightDescription, iconType, bigPanelWidth = 850, bigPanelHeight = 260, buttonColor = BLUE, buttonHoverColor = "#000000", panelColor = BLUE, iconButtonColor = "#000000", iconButtonHoverColor = BLUE, panelBoxColor = "rgba(255,255,255,0.12)", panelBoxBorder = "rgba(255,255,255,0.25)", labelTextColor = "#ffffff", labelTextHoverColor = "#ffffff", titleTextColor = "#ffffff", descriptionTextColor = "rgba(255,255,255,0.9)", iconComponent = null, isResources = false }: any) => {
 const [open, setOpen] = useState(false);
@@ -1092,7 +847,6 @@ return (
 </div>
 );
 };
-
 // ===== GOOGLE AUTH TAB =====
 const GoogleAuthenticatorTab = ({ user, db }: { user: any; db: any }) => {
 const [step, setStep] = useState<"loading" | "intro" | "install" | "setup" | "verify" | "success" | "active" | "disable">("loading");
@@ -1360,7 +1114,6 @@ Google Authenticator menambahkan lapisan keamanan ekstra dengan kode 6 digit yan
 </div>
 );
 };
-
 // ===== PASSKEY TAB =====
 const PasskeyTab = ({ user, db }: { user: any; db: any }) => {
 const [step, setStep] = useState<"loading" | "intro" | "register" | "done">("loading");
@@ -1541,7 +1294,6 @@ Credential ID: {registeredCredential.slice(0, 40)}...
 </div>
 );
 };
-
 // ===== SECURITY CENTER =====
 const SecurityCenterPanel = ({ user, db, onBack }: { user: any; db: any; onBack: () => void }) => {
 const [tab, setTab] = useState<"totp" | "passkey">("totp");
@@ -1574,7 +1326,7 @@ const [encryptionReady, setEncryptionReady] = useState(false);
 const [status, setStatus] = useState<string>(appealTicket.status);
 const chatRef = useRef<HTMLDivElement>(null);
 const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-const typingName = useRealtimeTyping(db, appealTicket?.id, user?.uid);
+const [typingName, setTypingName] = useState<string | null>(null);
 useEffect(() => { getCryptoKey().then(() => setEncryptionReady(true)).catch(() => setEncryptionReady(true)); }, []);
 useEffect(() => {
 if (!db || !appealTicket) return;
@@ -1592,9 +1344,10 @@ const unsub = onSnapshot(doc(db, "appeal_tickets", appealTicket.id), (snap: any)
 if (!snap.exists()) return;
 const d = snap.data();
 setStatus(d.status || "waiting");
+setTypingName(d.typing && d.typingUserId !== user?.uid ? (d.typingUserName || null) : null);
 });
 return () => unsub();
-}, [db, appealTicket]);
+}, [db, appealTicket, user]);
 const finished = status === "resolved" || status === "closed";
 const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
 const v = e.target.value; setMessageText(v);
@@ -1635,15 +1388,13 @@ return (
 if (msg.senderId === "system") return (<div key={msg.id || idx} style={{ alignSelf: "center", maxWidth: "92%", textAlign: "center", backgroundColor: "#f4f4f5", border: `1px solid ${BLUE}30`, borderRadius: 10, padding: "8px 14px", fontSize: 12, fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY }}>{msg.text}</div>);
 const isMine = msg.senderId === user?.uid;
 return (
-<TimelineMessage key={msg.id || idx} isMine={isMine}>
-<div style={{ maxWidth: "80%" }}>
+<div key={msg.id || idx} style={{ alignSelf: isMine ? "flex-end" : "flex-start", maxWidth: "80%" }}>
 <div style={{ padding: "8px 12px", borderRadius: "10px", backgroundColor: isMine ? BLUE : "#ffffff", color: isMine ? WHITE : BLACK, fontSize: "13px", fontFamily: FONT_FAMILY, wordBreak: "break-word", border: isMine ? "none" : "1px solid rgba(0,0,0,0.06)" }}>
 {!isMine && <div style={{ fontSize: "10px", fontWeight: 800, color: BLUE, marginBottom: "3px", display: "flex", alignItems: "center" }}>{msg.senderName}{msg.senderName === AGENT_NAME && <VerifiedSeal size={11} variant="blue-on-white" />}</div>}
 <div>{msg.text}</div>
 <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "3px" }}><span style={{ fontSize: "9px", opacity: 0.75 }}>{fmt(msg.timestamp)}</span></div>
 </div>
 </div>
-</TimelineMessage>
 );
 })}
 {typingName && <TypingBubble name={typingName} />}
@@ -1665,26 +1416,7 @@ Ticket chat ini telah {status === "resolved" ? "DITERIMA & SELESAI" : "DITOLAK"}
 );
 };
 
-// ===== HOOK: Real-time Typing =====
-const useRealtimeTyping = (db: any, ticketId: string | undefined, currentUserId: string | undefined) => {
-const [typingName, setTypingName] = useState<string | null>(null);
-useEffect(() => {
-if (!db || !ticketId) { setTypingName(null); return; }
-const unsub = onSnapshot(doc(db, "appeal_tickets", ticketId), (snap: any) => {
-if (!snap.exists()) { setTypingName(null); return; }
-const d = snap.data();
-if (d.typing && d.typingUserId && d.typingUserId !== currentUserId) {
-setTypingName(d.typingUserName || "Someone");
-} else {
-setTypingName(null);
-}
-});
-return () => unsub();
-}, [db, ticketId, currentUserId]);
-return typingName;
-};
-
-// ===== APPEAL TICKET HISTORY =====
+// ===== RIWAYAT PESAN BANDING PER AKUN USER =====
 const AppealTicketHistory = ({ user, db }: { user: any; db: any }) => {
 const [tickets, setTickets] = useState<AppealTicket[]>([]);
 const [openId, setOpenId] = useState<string | null>(null);
@@ -2034,11 +1766,11 @@ const [messages, setMessages] = useState<AppealMessage[]>([]);
 const [messageText, setMessageText] = useState("");
 const [replyTo, setReplyTo] = useState<AppealMessage | null>(null);
 const [encryptionReady, setEncryptionReady] = useState(false);
+const [typingName, setTypingName] = useState<string | null>(null);
 const [status, setStatus] = useState<string>(appealTicket.status);
 const messagesEndRef = useRef<HTMLDivElement>(null);
 const chatRef = useRef<HTMLDivElement>(null);
 const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-const typingName = useRealtimeTyping(db, appealTicket?.id, user?.uid);
 useEffect(() => { getCryptoKey().then(() => setEncryptionReady(true)).catch(() => setEncryptionReady(true)); }, []);
 useEffect(() => {
 if (!db || !appealTicket) return;
@@ -2056,9 +1788,10 @@ const unsub = onSnapshot(doc(db, "appeal_tickets", appealTicket.id), (snap: any)
 if (!snap.exists()) return;
 const d = snap.data();
 setStatus(d.status || "waiting");
+setTypingName(d.typing && d.typingUserId !== user?.uid ? (d.typingUserName || null) : null);
 });
 return () => unsub();
-}, [db, appealTicket]);
+}, [db, appealTicket, user]);
 useEffect(() => {
 if (!db || !appealTicket || !user) return;
 messages.filter((m) => m.senderId !== user.uid && m.senderId !== "system" && !m.read).forEach(async (msg) => { await updateDoc(doc(db, "appeal_tickets", appealTicket.id, "messages", msg.id), { read: true, deliveryStatus: "read" }); });
@@ -2123,8 +1856,7 @@ return (
 if (msg.senderId === "system") return (<div key={msg.id || idx} style={{ alignSelf: "center", maxWidth: "92%", textAlign: "center", backgroundColor: "#f4f4f5", border: `1px solid ${BLUE}30`, borderRadius: 10, padding: "8px 16px", fontSize: 12, fontWeight: 800, color: BLUE, fontFamily: FONT_FAMILY }}>{msg.text}</div>);
 const isMine = msg.senderId === user?.uid;
 return (
-<TimelineMessage key={msg.id || idx} isMine={isMine}>
-<div style={{ maxWidth: "75%" }}>
+<div key={msg.id || idx} style={{ alignSelf: isMine ? "flex-end" : "flex-start", maxWidth: "75%" }}>
 <div style={{ padding: "12px 16px", borderRadius: "12px", backgroundColor: isMine ? BLUE : "#f4f4f5", color: isMine ? WHITE : BLACK, fontSize: "14px", fontFamily: FONT_FAMILY, wordBreak: "break-word", border: isMine ? "none" : "1px solid rgba(0,0,0,0.05)" }}>
 {!isMine && <div style={{ fontSize: "12px", fontWeight: 700, color: BLUE, marginBottom: "4px", display: "flex", alignItems: "center" }}>{msg.senderName}{msg.senderName === AGENT_NAME && <VerifiedSeal size={12} variant="blue-on-white" />}</div>}
 {msg.replyTo && <div style={{ padding: "6px 10px", backgroundColor: isMine ? "rgba(255,255,255,0.2)" : "rgba(13,60,252,0.1)", borderLeft: `3px solid ${isMine ? WHITE : BLUE}`, borderRadius: "4px", marginBottom: "6px", fontSize: "11px", color: isMine ? WHITE : BLUE, fontStyle: "italic", fontFamily: FONT_FAMILY }}><strong>{msg.replyTo.senderName}:</strong> {msg.replyTo.text}</div>}
@@ -2133,7 +1865,6 @@ return (
 </div>
 {!finished && <button onClick={() => setReplyTo(msg)} style={{ background: "transparent", border: "none", color: BLUE, fontSize: "10px", cursor: "pointer", fontFamily: FONT_FAMILY, fontWeight: 700, marginTop: "2px", display: "flex", alignItems: "center", gap: "4px" }}><ReplyIcon size={10} color={BLUE} />Reply</button>}
 </div>
-</TimelineMessage>
 );
 })}
 {typingName && <TypingBubble name={typingName} />}
@@ -2556,7 +2287,6 @@ return (
 </div>
 );
 };
-
 // ===== ONBOARDING TOUR =====
 const OnboardingTour = ({ steps, onComplete, isActive, currentStep, setCurrentStep }: any) => {
 const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
@@ -2624,7 +2354,6 @@ return (
 </>
 );
 };
-
 // ===== ROLLING NEW MESSAGE =====
 const RollingNewMessage = ({ senderName, message }: { senderName: string; message: string; isFromAgent: boolean }) => {
 const containerRef = useRef<HTMLDivElement>(null);
@@ -2652,7 +2381,6 @@ return (
 </div>
 );
 };
-
 // ===== CLOSE ROOM BUTTON =====
 const CloseRoomButton = ({ onConfirm, disabled }: { onConfirm: () => void; disabled?: boolean }) => {
 const btnRef = useRef<HTMLButtonElement>(null);
@@ -2689,7 +2417,7 @@ return (
 <span style={{ fontSize: 13, color: WHITE, fontWeight: 700, fontFamily: FONT_FAMILY }}>
 {appealStatus === "resolved" ? "Banding telah diterima & selesai" : appealStatus === "closed" ? "Banding telah ditolak" : "Banding sedang diproses"}
 </span>
-<StabiloBadge label={meta.label} bg={meta.bg} text={meta.text} border={meta.border} size="sm" />
+<StabiloBadge label={meta.label} bg={WHITE} text={BLUE} border={WHITE} size="sm" />
 </div>
 )}
 <button onClick={onAppeal} style={{ alignSelf: "flex-start", padding: "10px 18px", backgroundColor: WHITE, color: BLUE, border: `1.5px solid ${WHITE}`, borderRadius: "8px", fontSize: "13px", fontWeight: 800, cursor: "pointer", fontFamily: FONT_FAMILY, letterSpacing: "0.5px", textTransform: "uppercase", display: "inline-flex", alignItems: "center", gap: "8px" }}>
@@ -2700,17 +2428,17 @@ return (
 );
 };
 
-// ===== APPEAL CHAT ROOM =====
+// ===== APPEAL CHAT ROOM (BODY UTAMA) =====
 const AppealChatRoom = ({ user, isAdmin, db, appealTicket, onClose }: any) => {
 const [messages, setMessages] = useState<AppealMessage[]>([]);
 const [messageText, setMessageText] = useState("");
 const [replyTo, setReplyTo] = useState<AppealMessage | null>(null);
 const [encryptionReady, setEncryptionReady] = useState(false);
+const [typingName, setTypingName] = useState<string | null>(null);
 const [status, setStatus] = useState<string>(appealTicket?.status || "waiting");
 const messagesEndRef = useRef<HTMLDivElement>(null);
 const chatRef = useRef<HTMLDivElement>(null);
 const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-const typingName = useRealtimeTyping(db, appealTicket?.id, user?.uid);
 useEffect(() => { getCryptoKey().then(() => setEncryptionReady(true)).catch(() => setEncryptionReady(true)); }, []);
 useEffect(() => {
 if (!db || !appealTicket) return;
@@ -2728,9 +2456,10 @@ const unsub = onSnapshot(doc(db, "appeal_tickets", appealTicket.id), (snap: any)
 if (!snap.exists()) return;
 const d = snap.data();
 setStatus(d.status || "waiting");
+setTypingName(d.typing && d.typingUserId !== user?.uid ? (d.typingUserName || null) : null);
 });
 return () => unsub();
-}, [db, appealTicket]);
+}, [db, appealTicket, user]);
 useEffect(() => {
 if (!db || !appealTicket || !user) return;
 messages.filter((m) => m.senderId !== user.uid && m.senderId !== "system" && !m.read).forEach(async (msg) => { await updateDoc(doc(db, "appeal_tickets", appealTicket.id, "messages", msg.id), { read: true, deliveryStatus: "read" }); });
@@ -2884,8 +2613,7 @@ return (
 if (msg.senderId === "system") return (<div key={msg.id || idx} style={{ alignSelf: "center", maxWidth: "92%", textAlign: "center", backgroundColor: "#f4f4f5", border: `1px solid ${BLUE}30`, borderRadius: 10, padding: "8px 16px", fontSize: 12, fontWeight: 800, color: BLUE, fontFamily: FONT_FAMILY }}>{msg.text}</div>);
 const isMine = msg.senderId === user?.uid;
 return (
-<TimelineMessage key={msg.id || idx} isMine={isMine}>
-<div style={{ maxWidth: "75%" }}>
+<div key={msg.id || idx} style={{ alignSelf: isMine ? "flex-end" : "flex-start", maxWidth: "75%" }}>
 <div style={{ padding: "12px 16px", borderRadius: "12px", backgroundColor: isMine ? BLUE : "#f4f4f5", color: isMine ? WHITE : BLACK, fontSize: "14px", fontFamily: FONT_FAMILY, wordBreak: "break-word", border: isMine ? "none" : "1px solid rgba(0,0,0,0.05)" }}>
 {!isMine && <div style={{ fontSize: "12px", fontWeight: 700, color: BLUE, marginBottom: "4px", display: "flex", alignItems: "center" }}>{msg.senderName}{msg.senderName === AGENT_NAME && <VerifiedSeal size={12} variant="blue-on-white" />}</div>}
 {msg.replyTo && <div style={{ padding: "6px 10px", backgroundColor: isMine ? "rgba(255,255,255,0.2)" : "rgba(13,60,252,0.1)", borderLeft: `3px solid ${isMine ? WHITE : BLUE}`, borderRadius: "4px", marginBottom: "6px", fontSize: "11px", color: isMine ? WHITE : BLUE, fontStyle: "italic", fontFamily: FONT_FAMILY }}><strong>{msg.replyTo.senderName}:</strong> {msg.replyTo.text}</div>}
@@ -2894,7 +2622,6 @@ return (
 </div>
 {!finished && <button onClick={() => setReplyTo(msg)} style={{ background: "transparent", border: "none", color: BLUE, fontSize: "10px", cursor: "pointer", fontFamily: FONT_FAMILY, fontWeight: 700, marginTop: "2px", display: "flex", alignItems: "center", gap: "4px" }}><ReplyIcon size={10} color={BLUE} />Reply</button>}
 </div>
-</TimelineMessage>
 );
 })}
 {typingName && <TypingBubble name={typingName} />}
@@ -2923,7 +2650,7 @@ Ticket chat ini telah {status === "resolved" ? "DITERIMA & SELESAI" : "DITOLAK"}
 );
 };
 
-// ===== LIVE CHAT AGENT (DENGAN PERBAIKAN) =====
+// ===== LIVE CHAT AGENT - DENGAN TOGGLE CHATBOT MODE =====
 const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBannedAppealChat }: any) => {
 const [tickets, setTickets] = useState<Ticket[]>([]);
 const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
@@ -2951,30 +2678,14 @@ const [rollingKey, setRollingKey] = useState(0);
 const [showTour, setShowTour] = useState(false);
 const [tourStep, setTourStep] = useState(0);
 const [showCloseConfirm, setShowCloseConfirm] = useState(false);
-const [showChatbotCard, setShowChatbotCard] = useState(false);
-const [currentTicketNumber, setCurrentTicketNumber] = useState<string>("");
+// ===== STATE BARU: CHATBOT MODE TOGGLE =====
+const [chatbotMode, setChatbotMode] = useState(false);
 const messagesEndRef = useRef<HTMLDivElement>(null);
 const chatRef = useRef<HTMLDivElement>(null);
 const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 const liveChatTitleRef = useRef<HTMLHeadingElement>(null);
 const prevLenRef = useRef<number>(0);
 const cacheRef = useRef<{ [k: string]: ChatMessage[] }>({});
-
-// TYPING REAL-TIME untuk Live Chat
-const [typingUserName, setTypingUserName] = useState<string | null>(null);
-useEffect(() => {
-if (!db || !selectedTicket) return;
-const unsub = onSnapshot(doc(db, "livechat_tickets", selectedTicket.id), (snap: any) => {
-if (!snap.exists()) return;
-const d = snap.data();
-if (d.typing && d.typingUserId !== user?.uid) {
-setTypingUserName(d.typingUserName || null);
-} else {
-setTypingUserName(null);
-}
-});
-return () => unsub();
-}, [db, selectedTicket, user]);
 
 useEffect(() => {
 if (typeof window === "undefined" || !tickets.length) return;
@@ -2984,22 +2695,7 @@ if (!tid) return;
 const t = tickets.find((x) => x.id === tid);
 if (t) { setSelectedTicket(t); window.history.replaceState({}, "", "/live-chat-agent"); }
 }, [tickets]);
-
-// ===== 10+ TOPIC DENGAN WARNA STABILO =====
-const topics = [
-"Product Inquiry",
-"Technical Support", 
-"Account Issues", 
-"Donation", 
-"Partnership",
-"Bug Report",
-"Feature Request",
-"Payment Issue",
-"General Question",
-"Feedback",
-"Other"
-];
-
+const topics = ["Product Inquiry", "Technical Support", "Account Issues", "Donation", "Partnership", "Other"];
 const tourSteps: TourStep[] = [
 { target: "login-button", title: "Login First", content: "Login untuk mulai chat dengan agent.", position: "bottom", isLoginStep: true },
 { target: "livechat-title", title: "Live Chat Agent", content: "Bagian live chat dengan tim support.", position: "bottom" },
@@ -3132,42 +2828,17 @@ if (!user) return true;
 try { const s = await checkBanStatus(user.uid); if (s.isBanned) { setIsBanned(true); setBanReason(s.reason); setCanCreateTicket(s.canCreateTicket); setCanSendMessage(s.canSendMessage); setBanMessage(`YOUR ACCOUNT HAS BEEN PERMANENTLY BANNED
 Reason: ${s.reason}`); return true; } return false; } catch { return false; }
 };
-
-// ===== PERBAIKAN: START CHAT dengan random ticket number + chatbot card =====
 const startChat = async () => {
 if (!db || !user || !selectedTopic || await checkBanBefore()) { setShowStartChat(false); return; }
 if (!canCreateTicket) { setBanMessage("YOU DO NOT HAVE PERMISSION TO CREATE A NEW TICKET"); return; }
 if (!encryptionReady) { alert("Encryption is being initialized."); return; }
 if (tickets.some((t) => t.userId === user.uid && (t.status === "waiting" || t.status === "active") && !t.isAnnouncement && !t.isBroadcast)) { alert("You still have an active chat."); return; }
 try {
-const ticketNumber = generateRandomTicketNumber();
-const ref = await addDoc(collection(db, "livechat_tickets"), { 
-userId: user.uid, 
-userName: user.displayName || user.email || "User", 
-userEmail: user.email, 
-userPhoto: user.photoURL || "", 
-status: "waiting", 
-topic: selectedTopic, 
-ticketNumber: ticketNumber,
-createdAt: serverTimestamp(), 
-unreadCount: 0, 
-typing: false, 
-typingUserId: null, 
-typingUserName: null, 
-isAnnouncement: false, 
-isBroadcast: false 
-});
+const ref = await addDoc(collection(db, "livechat_tickets"), { userId: user.uid, userName: user.displayName || user.email || "User", userEmail: user.email, userPhoto: user.photoURL || "", status: "waiting", topic: selectedTopic, createdAt: serverTimestamp(), unreadCount: 0, typing: false, typingUserId: null, typingUserName: null, isAnnouncement: false, isBroadcast: false });
 const initial = `Hello, I would like to ask about: ${selectedTopic}`;
 await addDoc(collection(db, "livechat_tickets", ref.id, "messages"), { senderId: user.uid, senderName: user.displayName || user.email || "User", text: await encryptMessage(initial), timestamp: serverTimestamp(), read: false, isEncrypted: true, isBotDetected: false, deliveryStatus: "sent" });
 await updateDoc(ref, { lastMessage: initial, lastMessageTime: serverTimestamp(), lastMessageSender: user.displayName || user.email || "User" });
-setCurrentTicketNumber(ticketNumber);
-setSelectedTopic(""); 
-setShowStartChat(false); 
-setBanMessage(null); 
-hasAuto.current = false;
-// Tampilkan chatbot card di kanan bawah
-setShowChatbotCard(true);
-setTimeout(() => setShowChatbotCard(false), 5000);
+setSelectedTopic(""); setShowStartChat(false); setBanMessage(null); hasAuto.current = false;
 } catch (e) { console.error(e); alert("An error occurred."); }
 };
 const sendMessage = async () => {
@@ -3251,59 +2922,106 @@ const renderSearchBar = () => (
 </div>
 );
 
-// ===== PERBAIKAN: renderListItem dengan STABILO CARD DESIGN =====
-const renderListItem = (ticket: Ticket, opts?: { onExtraClick?: () => void }) => {
-const isAct = selectedTicket?.id === ticket.id;
-const ss = STATUS_STYLES[ticket.status] || STATUS_STYLES.active;
-const topicColors = TOPIC_STABILO_COLORS[ticket.topic] || TOPIC_STABILO_COLORS["Other"];
-const userName = ticket.userName || "User";
-const ticketNumber = ticket.ticketNumber || generateTicketId(ticket.createdAt);
+// ===== RENDER CHATBOT MODE (VERTICAL LAYOUT) =====
+const renderChatbotMode = () => {
+if (!selectedTicket) {
 return (
-<div 
-id={`list-item-${ticket.id}`}
-key={ticket.id} 
-onClick={() => { setSelectedTicket(ticket); opts?.onExtraClick?.(); }} 
-style={{ 
-padding: "12px 14px", 
-borderLeft: isAct ? `4px solid ${topicColors.bg}` : `4px solid transparent`, 
-backgroundColor: isAct ? `${topicColors.bg}30` : "transparent", 
-cursor: "pointer", 
-borderBottom: "1px solid rgba(255,255,255,0.08)",
-transition: "all 0.2s ease"
-}}>
-<div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px", gap: "8px", flexWrap: "wrap" }}>
-<div style={{ display: "flex", alignItems: "center", gap: "8px", minWidth: 0, flex: "1 1 auto" }}>
-<div style={{ 
-width: "32px", 
-height: "32px", 
-borderRadius: "50%", 
-backgroundColor: topicColors.bg, 
-color: topicColors.text,
-display: "flex", 
-alignItems: "center", 
-justifyContent: "center", 
-fontWeight: 800, 
-fontSize: "13px",
-flexShrink: 0,
-border: `2px solid ${WHITE}`
-}}>
-{userName.charAt(0).toUpperCase()}
-</div>
-<div style={{ minWidth: 0 }}>
-<div style={{ fontWeight: 700, fontSize: "13px", color: WHITE, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{userName}</div>
-<div style={{ fontSize: "10px", color: "rgba(255,255,255,0.7)", fontFamily: "monospace" }}>{ticketNumber}</div>
+<div style={{ display: "flex", flexDirection: "column", height: "700px", width: "420px", backgroundColor: WHITE, borderRadius: "16px", border: `2px solid ${BLUE}`, overflow: "hidden", boxShadow: "0 12px 40px rgba(13,60,252,0.15)" }}>
+<div style={{ padding: "16px 20px", backgroundColor: BLUE, display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
+<div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+<AgentIcon size={22} color={WHITE} />
+<div>
+<div style={{ fontWeight: 700, fontSize: 15, color: WHITE, fontFamily: FONT_FAMILY }}>Live Chat Agent</div>
+<div style={{ fontSize: 11, color: "rgba(255,255,255,0.8)", fontFamily: FONT_FAMILY }}>Pilih chat untuk mulai</div>
 </div>
 </div>
-<div style={{ display: "flex", alignItems: "center", gap: "6px", flexShrink: 0 }}>
-{ticket.isBanned && <StabiloBadge label="BANNED" bg={WHITE} text={BLUE} border={WHITE} size="sm" />}
+<button onClick={() => setChatbotMode(false)} title="Kembali ke Live Chat Agent" style={{ background: "rgba(255,255,255,0.15)", border: `1px solid rgba(255,255,255,0.3)`, color: WHITE, borderRadius: "8px", padding: "6px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+<ToggleLayoutIcon size={16} color={WHITE} />
+</button>
+</div>
+<div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "30px 20px", backgroundColor: "#FAFBFF" }}>
+<div style={{ width: 60, height: 60, borderRadius: "50%", backgroundColor: BLUE, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
+<ChatIcon size={30} color={WHITE} />
+</div>
+<div style={{ fontSize: 15, fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, textAlign: "center", marginBottom: 8 }}>Belum ada chat dipilih</div>
+<div style={{ fontSize: 12, color: "#666", fontFamily: FONT_FAMILY, textAlign: "center", lineHeight: 1.5 }}>
+{isAdmin ? "Klik salah satu user dari daftar banding atau chat di sidebar untuk mulai chat" : "Klik 'Start Live Chat' atau pilih chat dari riwayat untuk mulai"}
+</div>
+</div>
+</div>
+);
+}
+
+const typingText = getTyping(selectedTicket);
+const ss = STATUS_STYLES[selectedTicket.status] || STATUS_STYLES.active;
+const ts = TOPIC_STYLES[selectedTicket.topic] || TOPIC_STYLES["Other"];
+
+return (
+<div style={{ display: "flex", flexDirection: "column", height: "700px", width: "420px", backgroundColor: WHITE, borderRadius: "16px", border: `2px solid ${BLUE}`, overflow: "hidden", boxShadow: "0 12px 40px rgba(13,60,252,0.15)" }}>
+{/* HEADER CHATBOT */}
+<div style={{ padding: "14px 16px", backgroundColor: BLUE, display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0, gap: 10 }}>
+<div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0, flex: 1 }}>
+<div style={{ width: 38, height: 38, borderRadius: "50%", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", flexShrink: 0 }}>
+{selectedTicket.userPhoto ? <img src={selectedTicket.userPhoto} alt={selectedTicket.userName} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <span style={{ fontSize: 15, fontWeight: 800, color: BLUE }}>{selectedTicket.userName?.charAt(0).toUpperCase()}</span>}
+</div>
+<div style={{ minWidth: 0, flex: 1 }}>
+<div style={{ fontWeight: 700, fontSize: 14, color: WHITE, fontFamily: FONT_FAMILY, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{selectedTicket.userName}</div>
+<div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
 <StabiloBadge label={ss.label} bg={ss.bg} text={ss.text} border={ss.border} size="sm" />
+<span style={{ fontSize: 9, color: "rgba(255,255,255,0.75)", fontWeight: 700 }}>{generateTicketId(selectedTicket.createdAt)}</span>
 </div>
 </div>
-<div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "8px", flexWrap: "wrap" }}>
-<StabiloBadge label={ticket.topic} bg={topicColors.bg} text={topicColors.text} border={topicColors.border} size="sm" />
-<span style={{ fontSize: "10px", color: "rgba(255,255,255,0.75)", fontWeight: 700 }}>{ticketMsgCounts[ticket.id] || 0} msgs</span>
 </div>
-{renderTicketPreview(ticket.id)}
+<div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+{isAdmin && selectedTicket.status !== "resolved" && selectedTicket.status !== "closed" && (
+<button onClick={() => resolveTicket(selectedTicket.id)} title="Resolve" style={{ padding: "6px", backgroundColor: "rgba(255,255,255,0.15)", color: WHITE, border: `1px solid rgba(255,255,255,0.3)`, borderRadius: "6px", fontSize: "10px", fontWeight: 800, cursor: "pointer", fontFamily: FONT_FAMILY }}>
+<CheckIcon size={12} color={WHITE} />
+</button>
+)}
+<button onClick={() => setChatbotMode(false)} title="Kembali ke Live Chat Agent" style={{ padding: "6px", backgroundColor: "rgba(255,255,255,0.15)", border: `1px solid rgba(255,255,255,0.3)`, borderRadius: "6px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+<ToggleLayoutIcon size={14} color={WHITE} />
+</button>
+{selectedTicket.status !== "closed" && <CloseRoomButton onConfirm={handleCloseRoom} />}
+</div>
+</div>
+
+{showCloseConfirm && <div style={{ padding: "8px 16px", backgroundColor: WHITE, borderBottom: `1.5px solid ${BLUE}`, display: "flex", alignItems: "center", gap: "8px", fontFamily: FONT_FAMILY, flexShrink: 0 }}><span style={{ display: "inline-block", padding: "2px 8px", border: `1.5px solid ${BLUE}`, backgroundColor: WHITE, color: BLUE, fontSize: "9px", fontWeight: 800, borderRadius: "4px", textTransform: "uppercase" }}>Peringatan</span><span style={{ fontSize: "11px", color: BLUE, fontWeight: 600 }}>Room ditutup.</span></div>}
+
+{!isAdmin && isBanned && <BannedInfoBanner banReason={banReason} banMessage={banMessage || ""} onAppeal={createAppealTicket} hasAppeal={hasAppeal} appealStatus={appealTickets.find((t) => t.userId === user.uid)?.status} />}
+
+{/* MESSAGES AREA */}
+<div ref={chatRef} className="chat-messages-container" style={{ flex: 1, overflowY: "auto", padding: "16px", display: "flex", flexDirection: "column", gap: "10px", minHeight: 0, backgroundColor: "#FAFBFF" }}>
+{messages.length === 0 ? <div style={{ textAlign: "center", color: "#999", fontSize: "13px", padding: "30px 0", fontFamily: FONT_FAMILY }}>No messages yet</div> : messages.map((msg, idx) => {
+const isMine = msg.senderId === user.uid;
+return (
+<div key={msg.id || idx} style={{ alignSelf: isMine ? "flex-end" : "flex-start", maxWidth: "85%" }}>
+<div style={{ padding: "10px 14px", borderRadius: "12px", backgroundColor: isMine ? BLUE : "#ffffff", color: isMine ? WHITE : BLACK, fontSize: "13px", fontFamily: FONT_FAMILY, wordBreak: "break-word", border: isMine ? "none" : "1px solid rgba(0,0,0,0.08)", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
+{!isMine && <div style={{ fontSize: "11px", fontWeight: 700, color: BLUE, marginBottom: "4px" }}>{msg.senderName}</div>}
+{msg.replyTo && <div style={{ padding: "5px 8px", backgroundColor: isMine ? "rgba(255,255,255,0.2)" : "rgba(13,60,252,0.1)", borderLeft: `3px solid ${isMine ? WHITE : BLUE}`, borderRadius: "4px", marginBottom: "5px", fontSize: "10px", color: isMine ? WHITE : BLUE, fontStyle: "italic", fontFamily: FONT_FAMILY }}><strong>{msg.replyTo.senderName}:</strong> {msg.replyTo.text}</div>}
+<div>{msg.text}</div>
+<div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "5px", marginTop: "4px" }}>{renderDeliveryStatus(msg, isMine)}<span style={{ fontSize: "9px", color: isMine ? WHITE : "#999" }}>{formatTime(msg.timestamp)}</span></div>
+</div>
+<button onClick={() => setReplyTo(msg)} style={{ background: "transparent", border: "none", color: BLUE, fontSize: "9px", cursor: "pointer", fontFamily: FONT_FAMILY, fontWeight: 700, marginTop: "2px", display: "flex", alignItems: "center", gap: "3px", alignSelf: isMine ? "flex-end" : "flex-start" }}><ReplyIcon size={9} color={BLUE} />Reply</button>
+</div>
+);
+})}
+{typingText && selectedTicket.status !== "resolved" && <div style={{ alignSelf: "flex-start", fontSize: "12px", color: "#666", fontStyle: "italic", padding: "4px 8px", fontFamily: FONT_FAMILY }}>{typingText}</div>}
+{latestRollingMessage && <div style={{ alignSelf: "flex-start", maxWidth: "100%", width: "100%", borderTop: `1px dashed ${BLUE}40`, paddingTop: "8px", marginTop: "4px" }}><RollingNewMessage key={rollingKey} senderName={latestRollingMessage.senderName} message={latestRollingMessage.text} isFromAgent={latestRollingMessage.isFromAgent} /></div>}
+<div ref={messagesEndRef} />
+</div>
+
+{/* INPUT AREA */}
+{selectedTicket.status !== "resolved" && selectedTicket.status !== "closed" ? (
+<>
+{replyTo && <div style={{ padding: "6px 16px", backgroundColor: "rgba(13,60,252,0.06)", borderTop: `1px solid ${BLUE}20`, display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}><ReplyIcon size={12} color={BLUE} /><div style={{ flex: 1, fontSize: "11px", color: BLUE, fontFamily: FONT_FAMILY, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}><strong>{replyTo.senderName}:</strong> {replyTo.text}</div><button onClick={() => setReplyTo(null)} style={{ background: "transparent", border: "none", color: BLUE, cursor: "pointer", fontSize: "14px", fontFamily: FONT_FAMILY, padding: 0, lineHeight: 1 }}>×</button></div>}
+<div style={{ padding: "12px 14px", borderTop: "1px solid rgba(0,0,0,0.08)", display: "flex", gap: "8px", backgroundColor: WHITE, flexShrink: 0 }}>
+<input type="text" value={messageText} onChange={handleTyping} onKeyPress={(e) => { if (e.key === "Enter" && !e.shiftKey && messageText.trim()) { e.preventDefault(); sendMessage(); } }} placeholder={selectedTicket.status === "waiting" && !isAdmin ? "Waiting for agent..." : "Type a message..."} disabled={selectedTicket.status === "waiting" && !isAdmin} style={{ flex: 1, padding: "10px 12px", border: "1px solid rgba(0,0,0,0.1)", borderRadius: "20px", fontSize: "13px", outline: "none", fontFamily: FONT_FAMILY, backgroundColor: selectedTicket.status === "waiting" && !isAdmin ? "#f5f5f5" : WHITE }} />
+<button onClick={sendMessage} disabled={(selectedTicket.status === "waiting" && !isAdmin) || !messageText.trim()} style={{ padding: "10px 14px", backgroundColor: (selectedTicket.status === "waiting" && !isAdmin) || !messageText.trim() ? "#ccc" : BLUE, color: WHITE, border: "none", borderRadius: "50%", cursor: (selectedTicket.status === "waiting" && !isAdmin) || !messageText.trim() ? "not-allowed" : "pointer", fontFamily: FONT_FAMILY, display: "flex", alignItems: "center", justifyContent: "center" }}>
+<SendIcon size={14} color={WHITE} />
+</button>
+</div>
+</>
+) : <div style={{ padding: "12px 16px", borderTop: "1px solid rgba(0,0,0,0.06)", backgroundColor: "#fafafa", textAlign: "center", fontFamily: FONT_FAMILY, fontSize: "12px", color: BLUE, flexShrink: 0, fontWeight: 700 }}>Room ini telah {selectedTicket.status === "closed" ? "ditutup" : "diselesaikan"}.</div>}
 </div>
 );
 };
@@ -3313,82 +3031,111 @@ if (!isMounted) return <div style={{ minHeight: "100px" }} />;
 if (!user) return (<><OnboardingTour steps={tourSteps} onComplete={completeTour} isActive={showTour} currentStep={tourStep} setCurrentStep={setTourStep} /><div style={{ marginTop: "80px", paddingTop: "30px" }}><h3 ref={liveChatTitleRef} data-tour="livechat-title" style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1, marginBottom: "20px" }}>Live Chat Agent</h3><p style={{ fontSize: "15px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "10px" }}>Please login to use Live Chat Agent</p><Link href="/" style={{ textDecoration: "none" }}><button data-tour="login-button" style={{ padding: "8px 20px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "6px", fontSize: "14px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY }}>Login</button></Link></div></>);
 if (!isAdmin && isBanned) return (<div style={{ marginTop: "80px", paddingTop: "30px" }}><h3 style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1, marginBottom: "20px" }}>Live Chat Agent</h3><BannedInfoBanner banReason={banReason} banMessage={banMessage || ""} onAppeal={createAppealTicket} hasAppeal={hasAppeal} appealStatus={appealTickets.find((t) => t.userId === user.uid)?.status} /></div>);
 const userTickets = tickets.filter((t) => t.userId === user.uid);
-
-// ===== PERBAIKAN: Start Chat dengan TOPIC CARDS (stabilo) =====
 if (!isAdmin && userTickets.length === 0 && !showStartChat) return (<><OnboardingTour steps={tourSteps} onComplete={completeTour} isActive={showTour} currentStep={tourStep} setCurrentStep={setTourStep} /><div style={{ marginTop: "80px", paddingTop: "30px" }}><h3 ref={liveChatTitleRef} data-tour="livechat-title" style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1, marginBottom: "20px" }}>Live Chat Agent</h3><p style={{ fontSize: "15px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "16px" }}>Need help? Chat directly with our agent.</p><button data-tour="start-chat-button" onClick={() => setShowStartChat(true)} style={{ padding: "10px 24px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "8px", fontSize: "15px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY }}>Start Live Chat</button></div></>);
-
-// ===== PERBAIKAN: Topic selection dengan STABILO CARDS =====
-if (!isAdmin && showStartChat) return (
-<div style={{ marginTop: "80px", paddingTop: "30px" }}>
-<h3 style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1, marginBottom: "20px" }}>Live Chat Agent</h3>
-<div style={{ maxWidth: "800px" }}>
-<div style={{ fontSize: "16px", marginBottom: "16px", fontFamily: FONT_FAMILY, fontWeight: 800, color: BLUE }}>Pilih topik masalah Anda:</div>
-<div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: "10px", marginBottom: "20px" }}>
-{topics.map((t) => (
-<TopicCard 
-key={t} 
-topic={t} 
-isSelected={selectedTopic === t}
-onClick={() => setSelectedTopic(t)} 
-/>
-))}
-</div>
-{selectedTopic && (
-<div style={{ padding: "12px 16px", backgroundColor: `${TOPIC_STABILO_COLORS[selectedTopic]?.bg || WHITE}40`, border: `2px solid ${TOPIC_STABILO_COLORS[selectedTopic]?.border || BLUE}`, borderRadius: "10px", marginBottom: "16px", display: "flex", alignItems: "center", gap: "10px" }}>
-<CheckCircleIcon size={18} color={BLUE} />
-<span style={{ fontSize: "13px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY }}>
-Topik terpilih: <strong>{selectedTopic}</strong>
-</span>
-</div>
-)}
-<div style={{ display: "flex", gap: "10px" }}>
-<button 
-onClick={startChat} 
-disabled={!selectedTopic} 
-style={{ 
-padding: "10px 24px", 
-backgroundColor: selectedTopic ? BLUE : "#ccc", 
-color: WHITE, 
-border: "none", 
-borderRadius: "8px", 
-fontSize: "14px", 
-fontWeight: 700, 
-cursor: selectedTopic ? "pointer" : "not-allowed", 
-fontFamily: FONT_FAMILY 
-}}>
-Mulai Chat
-</button>
-<button 
-onClick={() => { setShowStartChat(false); setSelectedTopic(""); }} 
-style={{ 
-padding: "10px 24px", 
-backgroundColor: "transparent", 
-color: BLUE, 
-border: `2px solid ${BLUE}`, 
-borderRadius: "8px", 
-fontSize: "14px", 
-fontWeight: 700, 
-cursor: "pointer", 
-fontFamily: FONT_FAMILY 
-}}>
-Batal
-</button>
-</div>
-</div>
-</div>
-);
-
+if (!isAdmin && showStartChat) return (<div style={{ marginTop: "80px", paddingTop: "30px" }}><h3 style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1, marginBottom: "20px" }}>Live Chat Agent</h3><div style={{ maxWidth: "400px" }}><div style={{ fontSize: "15px", marginBottom: "10px", fontFamily: FONT_FAMILY, fontWeight: 700, color: BLUE }}>Select your issue topic:</div><select value={selectedTopic} onChange={(e) => setSelectedTopic(e.target.value)} style={{ width: "100%", padding: "10px 14px", border: `2px solid ${BLUE}`, borderRadius: "8px", fontSize: "15px", fontFamily: FONT_FAMILY, outline: "none", backgroundColor: WHITE, marginBottom: "14px", color: BLUE, fontWeight: 600 }}><option value="">-- Select topic --</option>{topics.map((t) => <option key={t} value={t}>{t}</option>)}</select><div style={{ display: "flex", gap: "10px" }}><button onClick={startChat} disabled={!selectedTopic} style={{ padding: "8px 20px", backgroundColor: selectedTopic ? BLUE : "#ccc", color: WHITE, border: "none", borderRadius: "8px", fontSize: "14px", fontWeight: 600, cursor: selectedTopic ? "pointer" : "not-allowed", fontFamily: FONT_FAMILY }}>Start Chat</button><button onClick={() => setShowStartChat(false)} style={{ padding: "8px 20px", backgroundColor: "transparent", color: "#666", border: "1px solid #ccc", borderRadius: "8px", fontSize: "14px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY }}>Cancel</button></div></div></div>);
 const waiting = filter(tickets.filter((t) => t.status === "waiting"));
 const active = filter(tickets.filter((t) => t.status === "active"));
 const resolved = filter(tickets.filter((t) => t.status === "resolved" || t.status === "closed"));
 const typingText = selectedTicket ? getTyping(selectedTicket) : null;
 const bannedInWaiting = waiting.filter((t) => t.isBanned);
+const renderListItem = (ticket: Ticket, opts?: { onExtraClick?: () => void }) => {
+const isAct = selectedTicket?.id === ticket.id;
+const ss = STATUS_STYLES[ticket.status] || STATUS_STYLES.active;
+const ts = TOPIC_STYLES[ticket.topic] || TOPIC_STYLES["Other"];
+return (
+<div key={ticket.id} onClick={() => { setSelectedTicket(ticket); opts?.onExtraClick?.(); }} style={{ padding: "14px 16px", borderLeft: isAct ? `3px solid ${WHITE}` : "3px solid transparent", backgroundColor: isAct ? "rgba(255,255,255,0.14)" : "transparent", cursor: "pointer", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+<div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px", gap: "8px", flexWrap: "wrap" }}>
+<div style={{ fontWeight: 700, fontSize: "14px", color: WHITE, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: "1 1 auto" }}>{ticket.userName}</div>
+<div style={{ display: "flex", alignItems: "center", gap: "6px", flexShrink: 0 }}>{ticket.isBanned && <StabiloBadge label="BANNED" bg={WHITE} text={BLUE} border={WHITE} size="sm" />}<StabiloBadge label={ss.label} bg={ss.bg} text={ss.text} border={ss.border} size="sm" /></div>
+</div>
+<div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "8px", flexWrap: "wrap" }}><StabiloBadge label={ticket.topic} bg={ts.bg} text={ts.text} border={ts.border} size="sm" /><span style={{ fontSize: "10px", color: "rgba(255,255,255,0.75)", fontWeight: 700 }}>{ticketMsgCounts[ticket.id] || 0} msgs</span></div>
+{renderTicketPreview(ticket.id)}
+<div style={{ marginTop: "6px" }}><span style={{ fontSize: "9px", color: "rgba(255,255,255,0.65)", fontWeight: 700 }}>{generateTicketId(ticket.createdAt)}</span></div>
+</div>
+);
+};
 
+// ===== JIKA CHATBOT MODE AKTIF, RENDER LAYOUT CHATBOT =====
+if (chatbotMode) {
 return (
 <>
 <OnboardingTour steps={tourSteps} onComplete={completeTour} isActive={showTour} currentStep={tourStep} setCurrentStep={setTourStep} />
 <div style={{ marginTop: "80px", paddingTop: "30px" }}>
-<div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "20px" }}><h3 ref={liveChatTitleRef} data-tour="livechat-title" style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1 }}>Live Chat Agent</h3></div>
+<div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+<h3 ref={liveChatTitleRef} data-tour="livechat-title" style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1 }}>Live Chat Agent</h3>
+<div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+<span style={{ fontSize: "12px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, padding: "6px 12px", backgroundColor: LIME, borderRadius: "6px", border: `1.5px solid ${LIME}` }}>CHATBOT MODE</span>
+<button 
+onClick={() => setChatbotMode(false)} 
+style={{ padding: "8px 16px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "8px", fontSize: "12px", fontWeight: 700, cursor: "pointer", fontFamily: FONT_FAMILY, display: "inline-flex", alignItems: "center", gap: "6px" }}
+title="Kembali ke Live Chat Agent"
+>
+<ToggleLayoutIcon size={14} color={WHITE} />
+Live Chat
+</button>
+</div>
+</div>
+{/* CHATBOT LAYOUT: SINGLE PANEL VERTICAL */}
+<div style={{ display: "flex", gap: "16px", alignItems: "flex-start" }}>
+{renderChatbotMode()}
+{/* SIDEBAR MINI untuk list chat di chatbot mode */}
+<div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "12px" }}>
+<div style={{ backgroundColor: BLUE, borderRadius: "12px", padding: "14px 16px", color: WHITE, fontFamily: FONT_FAMILY }}>
+<div style={{ fontSize: "13px", fontWeight: 700, marginBottom: "8px" }}>Quick Access</div>
+<div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+{!isAdmin && <button data-tour="start-chat-button" onClick={() => setShowStartChat(true)} style={{ padding: "6px 12px", backgroundColor: WHITE, color: BLUE, border: "none", borderRadius: "6px", fontSize: "11px", fontWeight: 800, cursor: "pointer", fontFamily: FONT_FAMILY, textTransform: "uppercase" }}>+ New Chat</button>}
+{isAdmin && appealTickets.length > 0 && <span style={{ padding: "6px 12px", backgroundColor: WHITE, color: BLUE, borderRadius: "6px", fontSize: "11px", fontWeight: 800, fontFamily: FONT_FAMILY }}>{appealTickets.length} Banding</span>}
+</div>
+</div>
+{/* List chat mini */}
+<div style={{ backgroundColor: WHITE, borderRadius: "12px", border: "1px solid rgba(0,0,0,0.08)", overflow: "hidden", maxHeight: "580px", display: "flex", flexDirection: "column" }}>
+<div style={{ padding: "12px 14px", backgroundColor: BLUE, color: WHITE, fontWeight: 700, fontSize: "13px", fontFamily: FONT_FAMILY, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+<span>Chat List</span>
+<span style={{ fontSize: "10px", color: BLUE, padding: "2px 8px", borderRadius: "4px", backgroundColor: WHITE, fontWeight: 800 }}>{isAdmin ? tickets.length : userTickets.length}</span>
+</div>
+{renderSearchBar()}
+<div style={{ overflowY: "auto", flex: 1, minHeight: 0 }}>
+{isAdmin ? (
+<>
+{bannedInWaiting.length > 0 && <div>{bannedInWaiting.map((t) => renderListItem(t))}</div>}
+{waiting.length > 0 && <div>{waiting.map((t) => renderListItem(t, { onExtraClick: () => takeTicket(t.id) }))}</div>}
+{active.length > 0 && <div>{active.map((t) => renderListItem(t))}</div>}
+{resolved.length > 0 && <div>{resolved.map((t) => renderListItem(t))}</div>}
+{!waiting.length && !active.length && !resolved.length && !bannedInWaiting.length && <div style={{ padding: "20px 14px", textAlign: "center", color: WHITE, fontSize: "12px", backgroundColor: BLUE }}>{searchQuery ? "No results" : "No incoming chats"}</div>}
+</>
+) : (
+<>
+{filter(tickets.filter((t) => t.userId === user.uid)).map((t) => renderListItem(t))}
+{!filter(tickets.filter((t) => t.userId === user.uid)).length && <div style={{ padding: "20px 14px", textAlign: "center", color: WHITE, fontSize: "12px", backgroundColor: BLUE }}>{searchQuery ? "No results" : "No chats yet"}</div>}
+</>
+)}
+{isAdmin && appealTickets.length > 0 && <div style={{ marginTop: "10px" }}><div style={{ padding: "8px 14px", display: "flex", alignItems: "center", gap: "6px", borderBottom: "1px solid rgba(255,255,255,0.1)", borderTop: "1px solid rgba(255,255,255,0.15)", backgroundColor: BLUE }}><StabiloBadge label={`Banding (${appealTickets.length})`} bg={WHITE} text={BLUE} border={WHITE} size="md" /></div>{appealTickets.map((t) => <div key={t.id} onClick={() => onOpenAppealChat(t)} style={{ padding: "12px 14px", borderBottom: "1px solid rgba(255,255,255,0.08)", backgroundColor: BLUE, cursor: "pointer" }}><div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}><span style={{ fontSize: "13px", fontWeight: 700, color: WHITE }}>{t.userName}</span>{(() => { const m = appealStatusMeta(t.status); return <StabiloBadge label={m.label} bg={WHITE} text={BLUE} border={WHITE} size="sm" />; })()}</div><div style={{ fontSize: "10px", color: "rgba(255,255,255,0.75)", fontFamily: FONT_FAMILY }}>{t.banReason || "Banding"}</div></div>)}</div>}
+</div>
+</div>
+</div>
+</div>
+</div>
+</>
+);
+}
+
+// ===== LAYOUT DEFAULT: LIVE CHAT AGENT (LEBAR) =====
+return (
+<>
+<OnboardingTour steps={tourSteps} onComplete={completeTour} isActive={showTour} currentStep={tourStep} setCurrentStep={setTourStep} />
+<div style={{ marginTop: "80px", paddingTop: "30px" }}>
+<div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "20px" }}>
+<h3 ref={liveChatTitleRef} data-tour="livechat-title" style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1 }}>Live Chat Agent</h3>
+{/* TOMBOL TOGGLE CHATBOT MODE */}
+<button 
+onClick={() => setChatbotMode(true)} 
+style={{ padding: "10px 18px", backgroundColor: BLUE, color: WHITE, border: `2px solid ${BLUE}`, borderRadius: "10px", fontSize: "13px", fontWeight: 800, cursor: "pointer", fontFamily: FONT_FAMILY, display: "inline-flex", alignItems: "center", gap: "8px", boxShadow: "0 6px 20px rgba(13,60,252,0.3)" }}
+title="Ubah ke tampilan Chatbot"
+>
+<ToggleChatbotIcon size={16} color={WHITE} />
+Chatbot Mode
+</button>
+</div>
 <div style={{ display: "flex", gap: "16px", height: "700px", width: "100%", overflow: "hidden", borderRadius: "12px" }}>
 {renderOnlinePanel()}
 <div data-tour="chat-list" className="chat-list-container" style={{ width: "360px", backgroundColor: BLUE, borderRadius: "12px", overflow: "hidden", flexShrink: 0, height: "700px", color: WHITE, fontFamily: FONT_FAMILY, display: "flex", flexDirection: "column" }}>
@@ -3413,69 +3160,42 @@ return (
 </div>
 {!isAdmin && <div style={{ padding: "10px 16px", borderTop: "1px solid rgba(255,255,255,0.1)", flexShrink: 0, backgroundColor: BLUE }}><button data-tour="start-chat-button" onClick={() => setShowStartChat(true)} style={{ width: "100%", padding: "10px", backgroundColor: WHITE, color: BLUE, border: `1.5px solid ${WHITE}`, borderRadius: "8px", fontSize: "13px", fontWeight: 800, cursor: "pointer", fontFamily: FONT_FAMILY, textTransform: "uppercase" }}>+ New Chat</button></div>}
 </div>
-
-{/* ===== PERBAIKAN: ROOM CHAT dengan LINE CONNECTOR & TIMELINE ===== */}
-<div 
-id="room-chat-container"
-style={{ flex: 1, backgroundColor: WHITE, borderRadius: "12px", border: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", overflow: "hidden", height: "700px", minWidth: 0, position: "relative" }}>
+<div style={{ flex: 1, backgroundColor: WHITE, borderRadius: "12px", border: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", overflow: "hidden", height: "700px", minWidth: 0 }}>
 {selectedTicket ? (
 <>
-<div 
-id={`room-header-${selectedTicket.id}`}
-style={{ padding: "16px 20px", backgroundColor: BLUE, display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0, gap: "12px" }}>
+<div style={{ padding: "16px 20px", backgroundColor: BLUE, display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0, gap: "12px" }}>
 <div style={{ minWidth: 0, flex: 1 }}>
-<div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "6px" }}>
-<div style={{ 
-width: "36px", 
-height: "36px", 
-borderRadius: "50%", 
-backgroundColor: WHITE, 
-color: BLUE,
-display: "flex", 
-alignItems: "center", 
-justifyContent: "center", 
-fontWeight: 800, 
-fontSize: "14px",
-flexShrink: 0
-}}>
-{selectedTicket.userName.charAt(0).toUpperCase()}
-</div>
-<div style={{ fontWeight: 700, fontSize: "17px", color: WHITE, fontFamily: FONT_FAMILY }}>{selectedTicket.userName}</div>
-{isAdmin && <VerifiedSeal size={16} variant="white-on-blue" />}
-</div>
+<div style={{ fontWeight: 700, fontSize: "17px", color: WHITE, fontFamily: FONT_FAMILY, marginBottom: "6px" }}>{selectedTicket.userName}</div>
 <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
 <StabiloBadge label={(STATUS_STYLES[selectedTicket.status] || STATUS_STYLES.active).label} bg={(STATUS_STYLES[selectedTicket.status] || STATUS_STYLES.active).bg} text={(STATUS_STYLES[selectedTicket.status] || STATUS_STYLES.active).text} border={(STATUS_STYLES[selectedTicket.status] || STATUS_STYLES.active).border} size="sm" />
-<StabiloBadge label={selectedTicket.topic} bg={(TOPIC_STABILO_COLORS[selectedTicket.topic] || TOPIC_STABILO_COLORS["Other"]).bg} text={(TOPIC_STABILO_COLORS[selectedTicket.topic] || TOPIC_STABILO_COLORS["Other"]).text} border={(TOPIC_STABILO_COLORS[selectedTicket.topic] || TOPIC_STABILO_COLORS["Other"]).border} size="sm" />
+<StabiloBadge label={selectedTicket.topic} bg={(TOPIC_STYLES[selectedTicket.topic] || TOPIC_STYLES["Other"]).bg} text={(TOPIC_STYLES[selectedTicket.topic] || TOPIC_STYLES["Other"]).text} border={(TOPIC_STYLES[selectedTicket.topic] || TOPIC_STYLES["Other"]).border} size="sm" />
 {selectedTicket.typing && selectedTicket.status !== "resolved" && <span style={{ fontSize: "12px", color: WHITE, fontStyle: "italic", fontWeight: 700 }}>{selectedTicket.typingUserName} is typing...</span>}
-<span style={{ fontSize: "10px", color: "rgba(255,255,255,0.75)", fontWeight: 700, fontFamily: "monospace" }}>{selectedTicket.ticketNumber || generateTicketId(selectedTicket.createdAt)}</span>
+<span style={{ fontSize: "10px", color: "rgba(255,255,255,0.75)", fontWeight: 700 }}>{generateTicketId(selectedTicket.createdAt)}</span>
 </div>
 </div>
 <div style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
-<AdminPresenceStatus />
 {isAdmin && selectedTicket.status !== "resolved" && selectedTicket.status !== "closed" && <button onClick={() => resolveTicket(selectedTicket.id)} style={{ padding: "8px 16px", backgroundColor: WHITE, color: BLUE, border: `1.5px solid ${WHITE}`, borderRadius: "8px", fontSize: "12px", fontWeight: 800, cursor: "pointer", fontFamily: FONT_FAMILY, textTransform: "uppercase" }}>Resolve</button>}
 {selectedTicket.status !== "closed" && <CloseRoomButton onConfirm={handleCloseRoom} />}
 </div>
 </div>
 {showCloseConfirm && <div style={{ padding: "10px 20px", backgroundColor: WHITE, borderBottom: `1.5px solid ${BLUE}`, display: "flex", alignItems: "center", gap: "10px", fontFamily: FONT_FAMILY, flexShrink: 0 }}><span style={{ display: "inline-block", padding: "3px 9px", border: `1.5px solid ${BLUE}`, backgroundColor: WHITE, color: BLUE, fontSize: "10px", fontWeight: 800, borderRadius: "4px", textTransform: "uppercase" }}>Peringatan</span><span style={{ fontSize: "13px", color: BLUE, fontWeight: 600 }}>Room ditutup. Buat room baru untuk melanjutkan.</span></div>}
 {!isAdmin && isBanned && <BannedInfoBanner banReason={banReason} banMessage={banMessage || ""} onAppeal={createAppealTicket} hasAppeal={hasAppeal} appealStatus={appealTickets.find((t) => t.userId === user.uid)?.status} />}
-<div ref={chatRef} className="chat-messages-container" style={{ flex: 1, overflowY: "auto", padding: "24px", display: "flex", flexDirection: "column", gap: "16px", minHeight: 0 }}>
+<div ref={chatRef} className="chat-messages-container" style={{ flex: 1, overflowY: "auto", padding: "24px", display: "flex", flexDirection: "column", gap: "12px", minHeight: 0 }}>
 {messages.length === 0 ? <div style={{ textAlign: "center", color: "#999", fontSize: "15px", padding: "30px 0", fontFamily: FONT_FAMILY }}>No messages yet</div> : messages.map((msg, idx) => {
 const isMine = msg.senderId === user.uid;
 return (
-<TimelineMessage key={msg.id || idx} isMine={isMine}>
-<div style={{ maxWidth: "70%" }}>
+<div key={msg.id || idx} style={{ alignSelf: isMine ? "flex-end" : "flex-start", maxWidth: "70%" }}>
 <div style={{ padding: "12px 16px", borderRadius: "12px", backgroundColor: isMine ? BLUE : "#f4f4f5", color: isMine ? WHITE : BLACK, fontSize: "15px", fontFamily: FONT_FAMILY, wordBreak: "break-word", border: isMine ? "none" : "1px solid rgba(0,0,0,0.05)" }}>
-{!isMine && <div style={{ fontSize: "12px", fontWeight: 700, color: BLUE, marginBottom: "5px", display: "flex", alignItems: "center", gap: "4px" }}>{msg.senderName}{msg.senderName === AGENT_NAME && <VerifiedSeal size={12} variant="blue-on-white" />}</div>}
+{!isMine && <div style={{ fontSize: "12px", fontWeight: 700, color: BLUE, marginBottom: "5px" }}>{msg.senderName}</div>}
 {msg.replyTo && <div style={{ padding: "6px 10px", backgroundColor: isMine ? "rgba(255,255,255,0.2)" : "rgba(13,60,252,0.1)", borderLeft: `3px solid ${isMine ? WHITE : BLUE}`, borderRadius: "4px", marginBottom: "6px", fontSize: "11px", color: isMine ? WHITE : BLUE, fontStyle: "italic", fontFamily: FONT_FAMILY }}><strong>{msg.replyTo.senderName}:</strong> {msg.replyTo.text}</div>}
 <div>{msg.text}</div>
 <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "6px", marginTop: "5px" }}>{renderDeliveryStatus(msg, isMine)}<span style={{ fontSize: "10px", color: isMine ? WHITE : "#999" }}>{formatTime(msg.timestamp)}</span></div>
 </div>
 <button onClick={() => setReplyTo(msg)} style={{ background: "transparent", border: "none", color: BLUE, fontSize: "10px", cursor: "pointer", fontFamily: FONT_FAMILY, fontWeight: 700, marginTop: "2px", display: "flex", alignItems: "center", gap: "4px", alignSelf: isMine ? "flex-end" : "flex-start" }}><ReplyIcon size={10} color={BLUE} />Reply</button>
 </div>
-</TimelineMessage>
 );
 })}
-{typingUserName && <TypingBubble name={typingUserName} />}
+{typingText && selectedTicket.status !== "resolved" && <div style={{ alignSelf: "flex-start", fontSize: "14px", color: "#666", fontStyle: "italic", padding: "5px 10px", fontFamily: FONT_FAMILY }}>{typingText}</div>}
 {latestRollingMessage && <div style={{ alignSelf: "flex-start", maxWidth: "100%", width: "100%", borderTop: `1px dashed ${BLUE}40`, paddingTop: "10px", marginTop: "6px" }}><RollingNewMessage key={rollingKey} senderName={latestRollingMessage.senderName} message={latestRollingMessage.text} isFromAgent={latestRollingMessage.isFromAgent} /></div>}
 <div ref={messagesEndRef} />
 </div>
@@ -3493,24 +3213,6 @@ return (
 </div>
 </div>
 </div>
-
-{/* ===== CHATBOT CARD (floating di kanan bawah) ===== */}
-{showChatbotCard && currentTicketNumber && (
-<ChatbotCard 
-user={user}
-ticketNumber={currentTicketNumber}
-topic={selectedTopic || "General"}
-onClose={() => setShowChatbotCard(false)}
-/>
-)}
-
-{/* ===== LINE CONNECTOR (saat ada selected ticket) ===== */}
-{selectedTicket && (
-<LineConnector 
-fromId={`list-item-${selectedTicket.id}`} 
-toId={`room-header-${selectedTicket.id}`} 
-/>
-)}
 </>
 );
 };
