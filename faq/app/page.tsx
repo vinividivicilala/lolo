@@ -750,92 +750,6 @@ return (
 </div>
 );
 };
-
-// ===== NAVBAR CONTAINER (Dengan Animasi Scroll GSAP) =====
-const NavContainer = ({ shifted, user, auth, db, onOpenDashboard }: { shifted: boolean; user: any; auth: any; db: any; onOpenDashboard: () => void; }) => {
-const navRef = useRef<HTMLDivElement>(null);
-const [isScrolled, setIsScrolled] = useState(false);
-
-useEffect(() => {
-const handleScroll = () => {
-const scrolled = window.scrollY > 50;
-if (scrolled !== isScrolled) {
-setIsScrolled(scrolled);
-if (navRef.current) {
-if (scrolled) {
-// Scroll Down: Maju ke tengah, jadi card melengkung
-gsap.to(navRef.current, {
-y: 10, // Sedikit turun agar terlihat floating
-scale: 0.95, // Mengecil sedikit
-borderRadius: "50px", // Jadi pill/card
-backgroundColor: "rgba(255, 255, 255, 0.9)", // Putih transparan
-backdropFilter: "blur(10px)",
-boxShadow: "0 10px 30px rgba(13, 60, 252, 0.15)",
-width: "90%", // Melebar sedikit tapi tidak full
-maxWidth: "1200px",
-duration: 0.4,
-ease: "power2.out"
-});
-} else {
-// Scroll Up: Kembali ke tempat semula
-gsap.to(navRef.current, {
-y: 0,
-scale: 1,
-borderRadius: "0px",
-backgroundColor: "transparent",
-backdropFilter: "none",
-boxShadow: "none",
-width: "100%",
-maxWidth: "none",
-duration: 0.4,
-ease: "power2.out"
-});
-}
-}
-}
-};
-window.addEventListener("scroll", handleScroll);
-return () => window.removeEventListener("scroll", handleScroll);
-}, [isScrolled]);
-
-return (
-<div 
-ref={navRef}
-style={{ 
-position: "fixed", 
-top: "64px", 
-left: shifted ? "340px" : "60px", 
-zIndex: 9000, 
-display: "flex", 
-alignItems: "center", 
-gap: "20px", 
-fontFamily: FONT_FAMILY, 
-transition: "left 0.6s cubic-bezier(0.65, 0, 0.35, 1)", 
-willChange: "transform, left, width, border-radius, background-color",
-padding: "10px 20px",
-}}
->
-<LeftNavbar shifted={shifted} />
-<RightNavbar user={user} auth={auth} db={db} onOpenDashboard={onOpenDashboard} />
-</div>
-);
-};
-
-// ===== LEFT NAVBAR (Bagian Logo & Menu) =====
-const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
-return (
-<div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-<Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "12px", marginRight: "16px" }}>
-<img src="/images/gfssa.jpg" alt="Menuru" style={{ height: "60px", width: "auto", maxWidth: "none", objectFit: "contain", display: "block", flexShrink: 0, mixBlendMode: "multiply" }} />
-<span style={{ color: BLUE, fontSize: "60px", fontWeight: 700, letterSpacing: "-0.03em", fontFamily: FONT_FAMILY, lineHeight: 1, whiteSpace: "nowrap" }}>Menuru</span>
-</Link>
-<NavbarButton label="Teams" panelTitle="Trust" panelDescription="Your security and privacy are our top priorities with end-to-end encryption." panelImage="/images/p0l.jpg" panelRightTitle="Why Trust Us" panelRightDescription="Our systems are monitored 24/7 to protect your data." iconType="trust" bigPanelWidth={850} bigPanelHeight={260} />
-<NavbarButton label="Individual" panelTitle="Careers" panelDescription="Join our team and build a meaningful career in a supportive environment." panelImage="/images/xxz.jpg" panelRightTitle="Life at Menuru" panelRightDescription="A collaborative, flexible work culture with plenty of opportunities to grow together." iconType="career" bigPanelWidth={850} bigPanelHeight={260} />
-<NavbarButton label="Resources" panelTitle="Docs & Brand" panelDescription="Access complete documentation and Menuru brand assets in one place." panelImage="/images/p0l.jpg" panelRightTitle="Docs & Brand" panelRightDescription="Guides, visual assets, and official Menuru brand references." iconType="resources" iconComponent={<StriperIcon size={22} color="#ffffff" />} bigPanelWidth={850} bigPanelHeight={340} buttonColor={BLUE} buttonHoverColor={BLUE} panelColor="#000000" iconButtonColor="#000000" iconButtonHoverColor="#000000" panelBoxColor="rgba(255,255,255,0.12)" panelBoxBorder="rgba(255,255,255,0.25)" labelTextColor="#ffffff" labelTextHoverColor="#ffffff" titleTextColor="#ffffff" descriptionTextColor="rgba(255,255,255,0.92)" isResources={true} />
-</div>
-);
-};
-
 // ===== NAVBAR BUTTON =====
 const NavbarButton = ({ label, panelTitle, panelDescription, panelImage, panelRightTitle, panelRightDescription, iconType, bigPanelWidth = 850, bigPanelHeight = 260, buttonColor = BLUE, buttonHoverColor = "#000000", panelColor = BLUE, iconButtonColor = "#000000", iconButtonHoverColor = BLUE, panelBoxColor = "rgba(255,255,255,0.12)", panelBoxBorder = "rgba(255,255,255,0.25)", labelTextColor = "#ffffff", labelTextHoverColor = "#ffffff", titleTextColor = "#ffffff", descriptionTextColor = "rgba(255,255,255,0.9)", iconComponent = null, isResources = false }: any) => {
 const [open, setOpen] = useState(false);
@@ -903,6 +817,95 @@ return (
 </div>
 </div>
 )}
+</div>
+);
+};
+const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
+return (
+<div style={{ position: "fixed", top: "64px", left: shifted ? "340px" : "60px", zIndex: 9000, display: "flex", alignItems: "center", gap: "8px", fontFamily: FONT_FAMILY, transition: "left 0.6s cubic-bezier(0.65, 0, 0.35, 1)", willChange: "left" }}>
+<Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "12px", marginRight: "16px" }}>
+<img src="/images/gfssa.jpg" alt="Menuru" style={{ height: "60px", width: "auto", maxWidth: "none", objectFit: "contain", display: "block", flexShrink: 0, mixBlendMode: "multiply" }} />
+<span style={{ color: BLUE, fontSize: "60px", fontWeight: 700, letterSpacing: "-0.03em", fontFamily: FONT_FAMILY, lineHeight: 1, whiteSpace: "nowrap" }}>Menuru</span>
+</Link>
+<NavbarButton label="Teams" panelTitle="Trust" panelDescription="Your security and privacy are our top priorities with end-to-end encryption." panelImage="/images/p0l.jpg" panelRightTitle="Why Trust Us" panelRightDescription="Our systems are monitored 24/7 to protect your data." iconType="trust" bigPanelWidth={850} bigPanelHeight={260} />
+<NavbarButton label="Individual" panelTitle="Careers" panelDescription="Join our team and build a meaningful career in a supportive environment." panelImage="/images/xxz.jpg" panelRightTitle="Life at Menuru" panelRightDescription="A collaborative, flexible work culture with plenty of opportunities to grow together." iconType="career" bigPanelWidth={850} bigPanelHeight={260} />
+<NavbarButton label="Resources" panelTitle="Docs & Brand" panelDescription="Access complete documentation and Menuru brand assets in one place." panelImage="/images/p0l.jpg" panelRightTitle="Docs & Brand" panelRightDescription="Guides, visual assets, and official Menuru brand references." iconType="resources" iconComponent={<StriperIcon size={22} color="#ffffff" />} bigPanelWidth={850} bigPanelHeight={340} buttonColor={BLUE} buttonHoverColor={BLUE} panelColor="#000000" iconButtonColor="#000000" iconButtonHoverColor="#000000" panelBoxColor="rgba(255,255,255,0.12)" panelBoxBorder="rgba(255,255,255,0.25)" labelTextColor="#ffffff" labelTextHoverColor="#ffffff" titleTextColor="#ffffff" descriptionTextColor="rgba(255,255,255,0.92)" isResources={true} />
+</div>
+);
+};
+
+// ===== RIGHT NAVBAR (DENGAN ANIMASI SCROLL KE TENGAH) =====
+const RightNavbar = ({ user, auth, db, onOpenDashboard }: { user: any; auth: any; db: any; onOpenDashboard: () => void; }) => {
+const displayName = user?.displayName || user?.email?.split("@")[0] || "User";
+const photoURL = user?.photoURL || "";
+const userIsAdmin = user?.email === ADMIN_EMAIL;
+const [isAnonymous, setIsAnonymous] = useState(false);
+const navRef = useRef<HTMLDivElement>(null);
+
+useEffect(() => {
+if (!navRef.current) return;
+
+const handleScroll = () => {
+const scrollY = window.scrollY;
+const threshold = 100; // Mulai animasi setelah scroll 100px
+
+if (scrollY > threshold) {
+// Animasi ke tengah
+gsap.to(navRef.current, {
+x: "-50%",
+left: "50%",
+right: "auto",
+duration: 0.5,
+ease: "power3.out"
+});
+} else {
+// Kembali ke kanan
+gsap.to(navRef.current, {
+x: 0,
+left: "auto",
+right: "24px",
+duration: 0.5,
+ease: "power3.out"
+});
+}
+};
+
+window.addEventListener("scroll", handleScroll);
+return () => window.removeEventListener("scroll", handleScroll);
+}, []);
+
+useEffect(() => {
+if (!user || !db) return;
+getDoc(doc(db, "users", user.uid)).then((snap) => { if (snap.exists()) setIsAnonymous(snap.data().isAnonymous === true); }).catch(() => {});
+}, [user, db]);
+const displayNameAnon = isAnonymous ? "Anonim" : displayName;
+const handleLogout = async () => {
+if (!auth) return;
+try { if (db && user) await updateDoc(doc(db, "users", user.uid), { online: false, lastSeen: serverTimestamp() }); await signOut(auth); }
+catch (e) { console.error(e); }
+};
+if (!user) {
+return (
+<div ref={navRef} style={{ position: "fixed", top: "64px", right: "24px", zIndex: 9000, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "10px", fontFamily: FONT_FAMILY }}>
+<Link href="/signin" style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "10px", padding: "10px 18px 10px 16px", backgroundColor: BLUE, borderRadius: "10px", border: `1px solid ${BLUE}`, boxShadow: "0 8px 24px rgba(13,60,252,0.35)", cursor: "pointer" }}>
+<PeopleIcon size={20} color="#ffffff" />
+<span style={{ color: "#ffffff", fontSize: "14px", fontWeight: 700, letterSpacing: "0.02em", fontFamily: FONT_FAMILY, whiteSpace: "nowrap" }}>Sign In</span>
+</Link>
+</div>
+);
+}
+return (
+<div ref={navRef} style={{ position: "fixed", top: "64px", right: "24px", zIndex: 9000, fontFamily: FONT_FAMILY, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "10px" }}>
+<div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+<div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 16px", backgroundColor: BLUE, borderRadius: "10px", border: `1px solid ${BLUE}`, boxShadow: "0 8px 24px rgba(13,60,252,0.35)" }}>
+<div style={{ width: "36px", height: "36px", borderRadius: "8px", overflow: "hidden", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+{photoURL && !isAnonymous ? <img src={photoURL} alt={displayName} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} referrerPolicy="no-referrer" /> : <span style={{ fontSize: "16px", fontWeight: 800, color: BLUE }}>{displayNameAnon.charAt(0).toUpperCase()}</span>}
+</div>
+<span style={{ color: WHITE, fontSize: "14px", fontWeight: 700, letterSpacing: "0.02em", fontFamily: FONT_FAMILY, whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: "6px" }}>{displayNameAnon}{userIsAdmin && <VerifiedBadgeWhite size={18} />}</span>
+</div>
+<button onClick={onOpenDashboard} style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "10px 16px", backgroundColor: BLUE, color: WHITE, borderRadius: "10px", border: `1px solid ${BLUE}`, boxShadow: "0 8px 24px rgba(13,60,252,0.35)", fontFamily: FONT_FAMILY, fontSize: "14px", fontWeight: 700, cursor: "pointer" }}>Dashboard<NorthEastArrow size={16} color={WHITE} /></button>
+<button onClick={handleLogout} style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "10px 16px", backgroundColor: BLUE, color: WHITE, borderRadius: "10px", border: `1px solid ${BLUE}`, boxShadow: "0 8px 24px rgba(13,60,252,0.35)", fontFamily: FONT_FAMILY, fontSize: "14px", fontWeight: 700, cursor: "pointer" }}>Logout<LogoutIcon size={16} color={WHITE} /></button>
+</div>
 </div>
 );
 };
@@ -1378,36 +1381,15 @@ Passkey
 );
 };
 
-// ===== HOOK KUNCI: Subscribe typing status real-time dari Firestore =====
-const useRealtimeTyping = (db: any, ticketId: string | undefined, currentUserId: string | undefined) => {
-const [typingName, setTypingName] = useState<string | null>(null);
-useEffect(() => {
-if (!db || !ticketId) { setTypingName(null); return; }
-const unsub = onSnapshot(doc(db, "appeal_tickets", ticketId), (snap: any) => {
-if (!snap.exists()) { setTypingName(null); return; }
-const d = snap.data();
-// Tampilkan typing hanya jika user LAIN yang sedang mengetik
-if (d.typing && d.typingUserId && d.typingUserId !== currentUserId) {
-setTypingName(d.typingUserName || "Someone");
-} else {
-setTypingName(null);
-}
-});
-return () => unsub();
-}, [db, ticketId, currentUserId]);
-return typingName;
-};
-
-// ===== INLINE APPEAL CHAT (dengan typing bubble real-time) =====
+// ===== INLINE APPEAL CHAT =====
 const InlineAppealChat = ({ user, db, appealTicket, onClose }: { user: any; db: any; appealTicket: AppealTicket; onClose?: () => void; }) => {
 const [messages, setMessages] = useState<AppealMessage[]>([]);
 const [messageText, setMessageText] = useState("");
 const [encryptionReady, setEncryptionReady] = useState(false);
+const [typingName, setTypingName] = useState<string | null>(null);
 const [status, setStatus] = useState<string>(appealTicket.status);
 const chatRef = useRef<HTMLDivElement>(null);
 const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-// TYPING REAL-TIME dari Firestore
-const typingName = useRealtimeTyping(db, appealTicket?.id, user?.uid);
 useEffect(() => { getCryptoKey().then(() => setEncryptionReady(true)).catch(() => setEncryptionReady(true)); }, []);
 useEffect(() => {
 if (!db || !appealTicket) return;
@@ -1425,9 +1407,10 @@ const unsub = onSnapshot(doc(db, "appeal_tickets", appealTicket.id), (snap: any)
 if (!snap.exists()) return;
 const d = snap.data();
 setStatus(d.status || "waiting");
+setTypingName(d.typing && d.typingUserId !== user?.uid ? (d.typingUserName || null) : null);
 });
 return () => unsub();
-}, [db, appealTicket]);
+}, [db, appealTicket, user]);
 const finished = status === "resolved" || status === "closed";
 const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
 const v = e.target.value; setMessageText(v);
@@ -1846,12 +1829,11 @@ const [messages, setMessages] = useState<AppealMessage[]>([]);
 const [messageText, setMessageText] = useState("");
 const [replyTo, setReplyTo] = useState<AppealMessage | null>(null);
 const [encryptionReady, setEncryptionReady] = useState(false);
+const [typingName, setTypingName] = useState<string | null>(null);
 const [status, setStatus] = useState<string>(appealTicket.status);
 const messagesEndRef = useRef<HTMLDivElement>(null);
 const chatRef = useRef<HTMLDivElement>(null);
 const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-// TYPING REAL-TIME dari Firestore
-const typingName = useRealtimeTyping(db, appealTicket?.id, user?.uid);
 useEffect(() => { getCryptoKey().then(() => setEncryptionReady(true)).catch(() => setEncryptionReady(true)); }, []);
 useEffect(() => {
 if (!db || !appealTicket) return;
@@ -1869,9 +1851,10 @@ const unsub = onSnapshot(doc(db, "appeal_tickets", appealTicket.id), (snap: any)
 if (!snap.exists()) return;
 const d = snap.data();
 setStatus(d.status || "waiting");
+setTypingName(d.typing && d.typingUserId !== user?.uid ? (d.typingUserName || null) : null);
 });
 return () => unsub();
-}, [db, appealTicket]);
+}, [db, appealTicket, user]);
 useEffect(() => {
 if (!db || !appealTicket || !user) return;
 messages.filter((m) => m.senderId !== user.uid && m.senderId !== "system" && !m.read).forEach(async (msg) => { await updateDoc(doc(db, "appeal_tickets", appealTicket.id, "messages", msg.id), { read: true, deliveryStatus: "read" }); });
@@ -1966,7 +1949,7 @@ return (
 </div>
 ) : (
 <div style={{ padding: "14px 20px", borderTop: `1px solid ${BLUE}20`, backgroundColor: status === "resolved" ? "rgba(0,0,0,0.04)" : "rgba(13,60,252,0.05)", textAlign: "center", fontFamily: FONT_FAMILY, fontSize: 13, color: status === "resolved" ? BLACK : BLUE, fontWeight: 800, flexShrink: 0 }}>
-Ticket chat ini telah {status === "resolved" ? "DITERIMA & SELESAI" : "DITOLAK"}.
+Ticket chat ini telah {status === "resolved" ? "DITERIMA & SELESAI" : "DITOLAK"}. Anda dapat mengajukan banding baru.
 </div>
 )}
 </div>
@@ -2056,7 +2039,7 @@ catch { alert("Gagal menyimpan pengaturan."); }
 finally { setSaving(false); }
 };
 
-// Fungsi Terima Banding (Unban user)
+// Fungsi Terima Banding (Unban user + set resolved)
 const handleAcceptAppeal = async (ticket: AppealTicket) => {
 if (!db) return;
 if (!confirm(`Terima banding dari ${ticket.userName}? User akan di-unban otomatis.`)) return;
@@ -2328,45 +2311,6 @@ Passkey: {passkeyCount} terdaftar
 );
 };
 
-// ===== RIGHT NAVBAR =====
-const RightNavbar = ({ user, auth, db, onOpenDashboard }: { user: any; auth: any; db: any; onOpenDashboard: () => void; }) => {
-const displayName = user?.displayName || user?.email?.split("@")[0] || "User";
-const photoURL = user?.photoURL || "";
-const userIsAdmin = user?.email === ADMIN_EMAIL;
-const [isAnonymous, setIsAnonymous] = useState(false);
-useEffect(() => {
-if (!user || !db) return;
-getDoc(doc(db, "users", user.uid)).then((snap) => { if (snap.exists()) setIsAnonymous(snap.data().isAnonymous === true); }).catch(() => {});
-}, [user, db]);
-const displayNameAnon = isAnonymous ? "Anonim" : displayName;
-const handleLogout = async () => {
-if (!auth) return;
-try { if (db && user) await updateDoc(doc(db, "users", user.uid), { online: false, lastSeen: serverTimestamp() }); await signOut(auth); }
-catch (e) { console.error(e); }
-};
-if (!user) {
-return (
-<div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-<Link href="/signin" style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "10px", padding: "10px 18px 10px 16px", backgroundColor: BLUE, borderRadius: "10px", border: `1px solid ${BLUE}`, boxShadow: "0 8px 24px rgba(13,60,252,0.35)", cursor: "pointer" }}>
-<PeopleIcon size={20} color="#ffffff" />
-<span style={{ color: "#ffffff", fontSize: "14px", fontWeight: 700, letterSpacing: "0.02em", fontFamily: FONT_FAMILY, whiteSpace: "nowrap" }}>Sign In</span>
-</Link>
-</div>
-);
-}
-return (
-<div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-<div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 16px", backgroundColor: BLUE, borderRadius: "10px", border: `1px solid ${BLUE}`, boxShadow: "0 8px 24px rgba(13,60,252,0.35)" }}>
-<div style={{ width: "36px", height: "36px", borderRadius: "8px", overflow: "hidden", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-{photoURL && !isAnonymous ? <img src={photoURL} alt={displayName} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} referrerPolicy="no-referrer" /> : <span style={{ fontSize: "16px", fontWeight: 800, color: BLUE }}>{displayNameAnon.charAt(0).toUpperCase()}</span>}
-</div>
-<span style={{ color: WHITE, fontSize: "14px", fontWeight: 700, letterSpacing: "0.02em", fontFamily: FONT_FAMILY, whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: "6px" }}>{displayNameAnon}{userIsAdmin && <VerifiedBadgeWhite size={18} />}</span>
-</div>
-<button onClick={onOpenDashboard} style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "10px 16px", backgroundColor: BLUE, color: WHITE, borderRadius: "10px", border: `1px solid ${BLUE}`, boxShadow: "0 8px 24px rgba(13,60,252,0.35)", fontFamily: FONT_FAMILY, fontSize: "14px", fontWeight: 700, cursor: "pointer" }}>Dashboard<NorthEastArrow size={16} color={WHITE} /></button>
-<button onClick={handleLogout} style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "10px 16px", backgroundColor: BLUE, color: WHITE, borderRadius: "10px", border: `1px solid ${BLUE}`, boxShadow: "0 8px 24px rgba(13,60,252,0.35)", fontFamily: FONT_FAMILY, fontSize: "14px", fontWeight: 700, cursor: "pointer" }}>Logout<LogoutIcon size={16} color={WHITE} /></button>
-</div>
-);
-};
 // ===== ONBOARDING TOUR =====
 const OnboardingTour = ({ steps, onComplete, isActive, currentStep, setCurrentStep }: any) => {
 const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
@@ -2508,18 +2452,21 @@ return (
 );
 };
 
-// ===== APPEAL CHAT ROOM (BODY UTAMA) - DENGAN TYPING REAL-TIME + TOMBOL TERIMA/TOLAK/SELESAI =====
+// ===== APPEAL CHAT ROOM (BODY UTAMA) =====
 const AppealChatRoom = ({ user, isAdmin, db, appealTicket, onClose }: any) => {
 const [messages, setMessages] = useState<AppealMessage[]>([]);
 const [messageText, setMessageText] = useState("");
 const [replyTo, setReplyTo] = useState<AppealMessage | null>(null);
 const [encryptionReady, setEncryptionReady] = useState(false);
+const [typingName, setTypingName] = useState<string | null>(null);
 const [status, setStatus] = useState<string>(appealTicket?.status || "waiting");
 const messagesEndRef = useRef<HTMLDivElement>(null);
 const chatRef = useRef<HTMLDivElement>(null);
 const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 // TYPING REAL-TIME dari Firestore
-const typingName = useRealtimeTyping(db, appealTicket?.id, user?.uid);
+const typingNameFromHook = useRealtimeTyping(db, appealTicket?.id, user?.uid);
+useEffect(() => { setTypingName(typingNameFromHook); }, [typingNameFromHook]);
+
 useEffect(() => { getCryptoKey().then(() => setEncryptionReady(true)).catch(() => setEncryptionReady(true)); }, []);
 useEffect(() => {
 if (!db || !appealTicket) return;
@@ -2729,6 +2676,26 @@ Ticket chat ini telah {status === "resolved" ? "DITERIMA & SELESAI" : "DITOLAK"}
 )}
 </div>
 );
+};
+
+// ===== HOOK KUNCI: Subscribe typing status real-time dari Firestore =====
+const useRealtimeTyping = (db: any, ticketId: string | undefined, currentUserId: string | undefined) => {
+const [typingName, setTypingName] = useState<string | null>(null);
+useEffect(() => {
+if (!db || !ticketId) { setTypingName(null); return; }
+const unsub = onSnapshot(doc(db, "appeal_tickets", ticketId), (snap: any) => {
+if (!snap.exists()) { setTypingName(null); return; }
+const d = snap.data();
+// Tampilkan typing hanya jika user LAIN yang sedang mengetik
+if (d.typing && d.typingUserId && d.typingUserId !== currentUserId) {
+setTypingName(d.typingUserName || "Someone");
+} else {
+setTypingName(null);
+}
+});
+return () => unsub();
+}, [db, ticketId, currentUserId]);
+return typingName;
 };
 
 // ===== LIVE CHAT AGENT =====
@@ -2954,7 +2921,6 @@ onOpenBannedAppealChat({ id: ref.id, userId: user.uid, userName: user.displayNam
 setHasAppeal(true);
 } catch (e) { console.error(e); alert("Gagal membuat ticket banding."); }
 };
-
 const renderDeliveryStatus = (msg: ChatMessage, isMine: boolean) => {
 if (!isMine) return null;
 let label = "Sent"; let icon = <CheckIcon size={11} color="#ffffff" />;
@@ -3201,13 +3167,16 @@ let t: AppealTicket;
 if (!snap.empty) {
 const d = snap.docs[0];
 const existing = d.data();
+// Jika ticket terakhir sudah closed/resolved, buat ticket baru
 if (existing.status === "closed" || existing.status === "resolved") {
 const ref = await addDoc(collection(db, "appeal_tickets"), { userId: user.uid, userName: user.displayName || user.email || "User", userEmail: user.email, userPhoto: user.photoURL || "", status: "waiting", topic: "Banding Banned", banReason: reason, banMessage: message, createdAt: serverTimestamp(), unreadCount: 0, typing: false, typingUserId: null, typingUserName: null });
 t = { id: ref.id, userId: user.uid, userName: user.displayName || user.email || "User", userEmail: user.email, userPhoto: user.photoURL || "", status: "waiting", topic: "Banding Banned", banReason: reason, banMessage: message, createdAt: new Date(), unreadCount: 0, typing: false } as AppealTicket;
 } else {
+// Buka ticket aktif
 t = { id: d.id, ...existing } as AppealTicket;
 }
 } else {
+// Belum ada ticket, buat baru
 const ref = await addDoc(collection(db, "appeal_tickets"), { userId: user.uid, userName: user.displayName || user.email || "User", userEmail: user.email, userPhoto: user.photoURL || "", status: "waiting", topic: "Banding Banned", banReason: reason, banMessage: message, createdAt: serverTimestamp(), unreadCount: 0, typing: false, typingUserId: null, typingUserName: null });
 t = { id: ref.id, userId: user.uid, userName: user.displayName || user.email || "User", userEmail: user.email, userPhoto: user.photoURL || "", status: "waiting", topic: "Banding Banned", banReason: reason, banMessage: message, createdAt: new Date(), unreadCount: 0, typing: false } as AppealTicket;
 }
@@ -3220,8 +3189,10 @@ setTimeout(() => { const el = document.getElementById("banned-appeal-section"); 
 )}
 <div ref={mainPageRef} style={{ position: "relative", width: "100%", minHeight: "100vh", backgroundColor: WHITE, margin: 0, padding: 0, fontFamily: FONT_FAMILY, overflow: "visible", display: "flex", flexDirection: "column", willChange: "transform" }}>
 <TopBanner />
-{/* Navbar Container dengan Animasi Scroll */}
-<NavContainer shifted={navbarShifted} user={user} auth={auth} db={db} onOpenDashboard={() => setShowDashboard(true)} />
+<div style={{ position: "fixed", top: "44px", left: 0, width: "200px", height: "120px", pointerEvents: "none", zIndex: 8500, backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)", maskImage: "linear-gradient(to right, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%)", WebkitMaskImage: "linear-gradient(to right, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%)" }} />
+<div style={{ position: "fixed", top: "44px", right: 0, width: "200px", height: "120px", pointerEvents: "none", zIndex: 8500, backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)", maskImage: "linear-gradient(to left, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%)", WebkitMaskImage: "linear-gradient(to left, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%)" }} />
+<LeftNavbar shifted={navbarShifted} />
+<RightNavbar user={user} auth={auth} db={db} onOpenDashboard={() => setShowDashboard(true)} />
 <div style={{ marginTop: "44px" }}><div style={{ paddingTop: "120px" }} /></div>
 <div style={{ position: "relative", zIndex: 1, flex: "1 0 auto", backgroundColor: WHITE }}>
 <div style={{ padding: "0 40px", maxWidth: "1600px", margin: "0 auto", width: "100%" }}>
