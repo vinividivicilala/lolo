@@ -750,6 +750,92 @@ return (
 </div>
 );
 };
+
+// ===== NAVBAR CONTAINER (Dengan Animasi Scroll GSAP) =====
+const NavContainer = ({ shifted, user, auth, db, onOpenDashboard }: { shifted: boolean; user: any; auth: any; db: any; onOpenDashboard: () => void; }) => {
+const navRef = useRef<HTMLDivElement>(null);
+const [isScrolled, setIsScrolled] = useState(false);
+
+useEffect(() => {
+const handleScroll = () => {
+const scrolled = window.scrollY > 50;
+if (scrolled !== isScrolled) {
+setIsScrolled(scrolled);
+if (navRef.current) {
+if (scrolled) {
+// Scroll Down: Maju ke tengah, jadi card melengkung
+gsap.to(navRef.current, {
+y: 10, // Sedikit turun agar terlihat floating
+scale: 0.95, // Mengecil sedikit
+borderRadius: "50px", // Jadi pill/card
+backgroundColor: "rgba(255, 255, 255, 0.9)", // Putih transparan
+backdropFilter: "blur(10px)",
+boxShadow: "0 10px 30px rgba(13, 60, 252, 0.15)",
+width: "90%", // Melebar sedikit tapi tidak full
+maxWidth: "1200px",
+duration: 0.4,
+ease: "power2.out"
+});
+} else {
+// Scroll Up: Kembali ke tempat semula
+gsap.to(navRef.current, {
+y: 0,
+scale: 1,
+borderRadius: "0px",
+backgroundColor: "transparent",
+backdropFilter: "none",
+boxShadow: "none",
+width: "100%",
+maxWidth: "none",
+duration: 0.4,
+ease: "power2.out"
+});
+}
+}
+}
+};
+window.addEventListener("scroll", handleScroll);
+return () => window.removeEventListener("scroll", handleScroll);
+}, [isScrolled]);
+
+return (
+<div 
+ref={navRef}
+style={{ 
+position: "fixed", 
+top: "64px", 
+left: shifted ? "340px" : "60px", 
+zIndex: 9000, 
+display: "flex", 
+alignItems: "center", 
+gap: "20px", 
+fontFamily: FONT_FAMILY, 
+transition: "left 0.6s cubic-bezier(0.65, 0, 0.35, 1)", 
+willChange: "transform, left, width, border-radius, background-color",
+padding: "10px 20px",
+}}
+>
+<LeftNavbar shifted={shifted} />
+<RightNavbar user={user} auth={auth} db={db} onOpenDashboard={onOpenDashboard} />
+</div>
+);
+};
+
+// ===== LEFT NAVBAR (Bagian Logo & Menu) =====
+const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
+return (
+<div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+<Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "12px", marginRight: "16px" }}>
+<img src="/images/gfssa.jpg" alt="Menuru" style={{ height: "60px", width: "auto", maxWidth: "none", objectFit: "contain", display: "block", flexShrink: 0, mixBlendMode: "multiply" }} />
+<span style={{ color: BLUE, fontSize: "60px", fontWeight: 700, letterSpacing: "-0.03em", fontFamily: FONT_FAMILY, lineHeight: 1, whiteSpace: "nowrap" }}>Menuru</span>
+</Link>
+<NavbarButton label="Teams" panelTitle="Trust" panelDescription="Your security and privacy are our top priorities with end-to-end encryption." panelImage="/images/p0l.jpg" panelRightTitle="Why Trust Us" panelRightDescription="Our systems are monitored 24/7 to protect your data." iconType="trust" bigPanelWidth={850} bigPanelHeight={260} />
+<NavbarButton label="Individual" panelTitle="Careers" panelDescription="Join our team and build a meaningful career in a supportive environment." panelImage="/images/xxz.jpg" panelRightTitle="Life at Menuru" panelRightDescription="A collaborative, flexible work culture with plenty of opportunities to grow together." iconType="career" bigPanelWidth={850} bigPanelHeight={260} />
+<NavbarButton label="Resources" panelTitle="Docs & Brand" panelDescription="Access complete documentation and Menuru brand assets in one place." panelImage="/images/p0l.jpg" panelRightTitle="Docs & Brand" panelRightDescription="Guides, visual assets, and official Menuru brand references." iconType="resources" iconComponent={<StriperIcon size={22} color="#ffffff" />} bigPanelWidth={850} bigPanelHeight={340} buttonColor={BLUE} buttonHoverColor={BLUE} panelColor="#000000" iconButtonColor="#000000" iconButtonHoverColor="#000000" panelBoxColor="rgba(255,255,255,0.12)" panelBoxBorder="rgba(255,255,255,0.25)" labelTextColor="#ffffff" labelTextHoverColor="#ffffff" titleTextColor="#ffffff" descriptionTextColor="rgba(255,255,255,0.92)" isResources={true} />
+</div>
+);
+};
+
 // ===== NAVBAR BUTTON =====
 const NavbarButton = ({ label, panelTitle, panelDescription, panelImage, panelRightTitle, panelRightDescription, iconType, bigPanelWidth = 850, bigPanelHeight = 260, buttonColor = BLUE, buttonHoverColor = "#000000", panelColor = BLUE, iconButtonColor = "#000000", iconButtonHoverColor = BLUE, panelBoxColor = "rgba(255,255,255,0.12)", panelBoxBorder = "rgba(255,255,255,0.25)", labelTextColor = "#ffffff", labelTextHoverColor = "#ffffff", titleTextColor = "#ffffff", descriptionTextColor = "rgba(255,255,255,0.9)", iconComponent = null, isResources = false }: any) => {
 const [open, setOpen] = useState(false);
@@ -817,57 +903,6 @@ return (
 </div>
 </div>
 )}
-</div>
-);
-};
-
-// ===== LEFT NAVBAR (DENGAN ANIMASI SCROLL GSAP) =====
-const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
-const navRef = useRef<HTMLDivElement>(null);
-
-useEffect(() => {
-if (!navRef.current) return;
-
-// Inisialisasi animasi GSAP ScrollTrigger
-const ctx = gsap.context(() => {
-gsap.fromTo(navRef.current, 
-{ 
-x: 0, // Posisi awal kiri
-borderRadius: "0px",
-padding: "0px",
-backgroundColor: "transparent",
-boxShadow: "none",
-backdropFilter: "none"
-},
-{
-scrollTrigger: {
-trigger: "body",
-start: "top top",
-end: "bottom bottom",
-scrub: 1, // Animasi halus mengikuti scroll
-},
-x: "20vw", // Bergerak ke tengah (20% dari lebar viewport)
-borderRadius: "24px", // Menjadi card melengkung
-padding: "12px", // Memberi jarak dalam card
-backgroundColor: "rgba(255, 255, 255, 0.85)", // Putih transparan
-boxShadow: "0 10px 30px rgba(13, 60, 252, 0.15)", // Bayangan lembut biru
-backdropFilter: "blur(12px)", // Efek kaca buram
-ease: "power2.out"
-});
-}, navRef);
-
-return () => ctx.revert();
-}, []);
-
-return (
-<div ref={navRef} style={{ position: "fixed", top: "64px", left: shifted ? "340px" : "60px", zIndex: 9000, display: "flex", alignItems: "center", gap: "8px", fontFamily: FONT_FAMILY, transition: "left 0.6s cubic-bezier(0.65, 0, 0.35, 1)", willChange: "transform, background-color, border-radius, box-shadow" }}>
-<Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "12px", marginRight: "16px" }}>
-<img src="/images/gfssa.jpg" alt="Menuru" style={{ height: "60px", width: "auto", maxWidth: "none", objectFit: "contain", display: "block", flexShrink: 0, mixBlendMode: "multiply" }} />
-<span style={{ color: BLUE, fontSize: "60px", fontWeight: 700, letterSpacing: "-0.03em", fontFamily: FONT_FAMILY, lineHeight: 1, whiteSpace: "nowrap" }}>Menuru</span>
-</Link>
-<NavbarButton label="Teams" panelTitle="Trust" panelDescription="Your security and privacy are our top priorities with end-to-end encryption." panelImage="/images/p0l.jpg" panelRightTitle="Why Trust Us" panelRightDescription="Our systems are monitored 24/7 to protect your data." iconType="trust" bigPanelWidth={850} bigPanelHeight={260} />
-<NavbarButton label="Individual" panelTitle="Careers" panelDescription="Join our team and build a meaningful career in a supportive environment." panelImage="/images/xxz.jpg" panelRightTitle="Life at Menuru" panelRightDescription="A collaborative, flexible work culture with plenty of opportunities to grow together." iconType="career" bigPanelWidth={850} bigPanelHeight={260} />
-<NavbarButton label="Resources" panelTitle="Docs & Brand" panelDescription="Access complete documentation and Menuru brand assets in one place." panelImage="/images/p0l.jpg" panelRightTitle="Docs & Brand" panelRightDescription="Guides, visual assets, and official Menuru brand references." iconType="resources" iconComponent={<StriperIcon size={22} color="#ffffff" />} bigPanelWidth={850} bigPanelHeight={340} buttonColor={BLUE} buttonHoverColor={BLUE} panelColor="#000000" iconButtonColor="#000000" iconButtonHoverColor="#000000" panelBoxColor="rgba(255,255,255,0.12)" panelBoxBorder="rgba(255,255,255,0.25)" labelTextColor="#ffffff" labelTextHoverColor="#ffffff" titleTextColor="#ffffff" descriptionTextColor="rgba(255,255,255,0.92)" isResources={true} />
 </div>
 );
 };
@@ -1343,15 +1378,36 @@ Passkey
 );
 };
 
-// ===== INLINE APPEAL CHAT =====
+// ===== HOOK KUNCI: Subscribe typing status real-time dari Firestore =====
+const useRealtimeTyping = (db: any, ticketId: string | undefined, currentUserId: string | undefined) => {
+const [typingName, setTypingName] = useState<string | null>(null);
+useEffect(() => {
+if (!db || !ticketId) { setTypingName(null); return; }
+const unsub = onSnapshot(doc(db, "appeal_tickets", ticketId), (snap: any) => {
+if (!snap.exists()) { setTypingName(null); return; }
+const d = snap.data();
+// Tampilkan typing hanya jika user LAIN yang sedang mengetik
+if (d.typing && d.typingUserId && d.typingUserId !== currentUserId) {
+setTypingName(d.typingUserName || "Someone");
+} else {
+setTypingName(null);
+}
+});
+return () => unsub();
+}, [db, ticketId, currentUserId]);
+return typingName;
+};
+
+// ===== INLINE APPEAL CHAT (dengan typing bubble real-time) =====
 const InlineAppealChat = ({ user, db, appealTicket, onClose }: { user: any; db: any; appealTicket: AppealTicket; onClose?: () => void; }) => {
 const [messages, setMessages] = useState<AppealMessage[]>([]);
 const [messageText, setMessageText] = useState("");
 const [encryptionReady, setEncryptionReady] = useState(false);
-const [typingName, setTypingName] = useState<string | null>(null);
 const [status, setStatus] = useState<string>(appealTicket.status);
 const chatRef = useRef<HTMLDivElement>(null);
 const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+// TYPING REAL-TIME dari Firestore
+const typingName = useRealtimeTyping(db, appealTicket?.id, user?.uid);
 useEffect(() => { getCryptoKey().then(() => setEncryptionReady(true)).catch(() => setEncryptionReady(true)); }, []);
 useEffect(() => {
 if (!db || !appealTicket) return;
@@ -1369,10 +1425,9 @@ const unsub = onSnapshot(doc(db, "appeal_tickets", appealTicket.id), (snap: any)
 if (!snap.exists()) return;
 const d = snap.data();
 setStatus(d.status || "waiting");
-setTypingName(d.typing && d.typingUserId !== user?.uid ? (d.typingUserName || null) : null);
 });
 return () => unsub();
-}, [db, appealTicket, user]);
+}, [db, appealTicket]);
 const finished = status === "resolved" || status === "closed";
 const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
 const v = e.target.value; setMessageText(v);
@@ -1434,139 +1489,6 @@ return (
 </div>
 ) : (
 <div style={{ padding: "12px 14px", backgroundColor: status === "resolved" ? "rgba(0,0,0,0.04)" : "rgba(13,60,252,0.05)", textAlign: "center", fontSize: 12, fontWeight: 800, color: status === "resolved" ? BLACK : BLUE, fontFamily: FONT_FAMILY }}>
-Ticket chat ini telah {status === "resolved" ? "SELESAI" : "DITOLAK"}. Anda dapat mengajukan banding baru.
-</div>
-)}
-</div>
-);
-};
-
-// ===== DASHBOARD APPEAL CHAT (untuk admin di dashboard manage-banding) =====
-const DashboardAppealChat = ({ user, db, appealTicket, onClose, isAdmin, onAccept, onReject, onResolve }: { user: any; db: any; appealTicket: AppealTicket; onClose?: () => void; isAdmin?: boolean; onAccept?: () => void; onReject?: () => void; onResolve?: () => void; }) => {
-const [messages, setMessages] = useState<AppealMessage[]>([]);
-const [messageText, setMessageText] = useState("");
-const [replyTo, setReplyTo] = useState<AppealMessage | null>(null);
-const [encryptionReady, setEncryptionReady] = useState(false);
-const [typingName, setTypingName] = useState<string | null>(null);
-const [status, setStatus] = useState<string>(appealTicket.status);
-const messagesEndRef = useRef<HTMLDivElement>(null);
-const chatRef = useRef<HTMLDivElement>(null);
-const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-useEffect(() => { getCryptoKey().then(() => setEncryptionReady(true)).catch(() => setEncryptionReady(true)); }, []);
-useEffect(() => {
-if (!db || !appealTicket) return;
-const unsub = onSnapshot(query(collection(db, "appeal_tickets", appealTicket.id, "messages"), orderBy("timestamp", "asc")), async (snap: any) => {
-const list: AppealMessage[] = [];
-for (const d of snap.docs) { const data = d.data(); let text = data.text || ""; if (data.isEncrypted) { try { text = await decryptMessage(text); } catch { text = "[Encrypted]"; } } list.push({ id: d.id, ...data, text } as AppealMessage); }
-setMessages(list);
-requestAnimationFrame(() => { if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight; });
-});
-return () => unsub();
-}, [db, appealTicket]);
-useEffect(() => {
-if (!db || !appealTicket) return;
-const unsub = onSnapshot(doc(db, "appeal_tickets", appealTicket.id), (snap: any) => {
-if (!snap.exists()) return;
-const d = snap.data();
-setStatus(d.status || "waiting");
-setTypingName(d.typing && d.typingUserId !== user?.uid ? (d.typingUserName || null) : null);
-});
-return () => unsub();
-}, [db, appealTicket, user]);
-useEffect(() => {
-if (!db || !appealTicket || !user) return;
-messages.filter((m) => m.senderId !== user.uid && m.senderId !== "system" && !m.read).forEach(async (msg) => { await updateDoc(doc(db, "appeal_tickets", appealTicket.id, "messages", msg.id), { read: true, deliveryStatus: "read" }); });
-}, [messages, appealTicket, db, user]);
-const finished = status === "resolved" || status === "closed";
-const meta = appealStatusMeta(status);
-const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
-const value = e.target.value; setMessageText(value);
-if (!appealTicket || !user || !db || finished) return;
-const ref = doc(db, "appeal_tickets", appealTicket.id);
-const nm = isAdmin ? AGENT_NAME : (user.displayName || user.email || "User");
-await updateDoc(ref, value.length ? { typing: true, typingUserId: user.uid, typingUserName: nm } : { typing: false, typingUserId: null, typingUserName: null });
-if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-typingTimeoutRef.current = setTimeout(async () => { await updateDoc(ref, { typing: false, typingUserId: null, typingUserName: null }); }, 2000);
-};
-const sendMessage = async () => {
-if (!db || !appealTicket || !messageText.trim() || !user || !encryptionReady || finished) return;
-try {
-const ticketRef = doc(db, "appeal_tickets", appealTicket.id);
-await updateDoc(ticketRef, { typing: false, typingUserId: null, typingUserName: null });
-const senderName = isAdmin ? AGENT_NAME : user.displayName || user.email || "User";
-const enc = await encryptMessage(messageText.trim());
-await addDoc(collection(db, "appeal_tickets", appealTicket.id, "messages"), { senderId: user.uid, senderName, text: enc, timestamp: serverTimestamp(), read: false, isEncrypted: true, deliveryStatus: "sent", replyTo: replyTo ? { messageId: replyTo.id, senderName: replyTo.senderName, text: replyTo.text.length > 50 ? replyTo.text.substring(0, 50) + "..." : replyTo.text } : null });
-await updateDoc(ticketRef, { lastMessage: messageText.trim(), lastMessageTime: serverTimestamp(), lastMessageSender: senderName, ...(status === "waiting" ? { status: "active" } : {}), ...(isAdmin ? { agentId: user.uid, agentName: AGENT_NAME } : {}) });
-setMessageText(""); setReplyTo(null);
-if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-} catch (e) { console.error(e); alert("An error occurred."); }
-};
-const renderDeliveryStatus = (msg: AppealMessage, isMine: boolean) => {
-if (!isMine) return null;
-let label = "Sent"; let icon = <CheckIcon size={11} color="#ffffff" />;
-if (msg.read) { label = "Read"; icon = <DoubleCheckIcon size={11} color="#ffffff" />; }
-else if (msg.deliveryStatus === "delivered") { label = "Delivered"; icon = <DoubleCheckIcon size={11} color="#ffffff" />; }
-else if (msg.deliveryStatus === "sending") { label = "Sending"; icon = <ClockIcon size={11} color="#ffffff" />; }
-else if (msg.deliveryStatus === "failed") { label = "Failed"; icon = <ErrorIcon size={11} color="#ffffff" />; }
-return (<span style={{ display: "inline-flex", alignItems: "center", gap: "3px", fontSize: "10px", color: "#ffffff", fontFamily: FONT_FAMILY, fontWeight: 500 }}>{label}{icon}</span>);
-};
-const formatTime = (t: any) => { if (!t) return ""; const d = t.toDate ? t.toDate() : new Date(t); return d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }); };
-return (
-<div style={{ display: "flex", flexDirection: "column", height: "100%", backgroundColor: WHITE, borderRadius: "12px", overflow: "hidden", border: `2px solid ${BLUE}` }}>
-<div style={{ padding: "16px 20px", backgroundColor: BLUE, display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0, gap: 12 }}>
-<div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
-<div style={{ width: 40, height: 40, borderRadius: "50%", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", flexShrink: 0 }}>
-{isAdmin ? (appealTicket.userPhoto ? <img src={appealTicket.userPhoto} alt={appealTicket.userName} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <span style={{ fontSize: 16, fontWeight: 800, color: BLUE }}>{appealTicket.userName?.charAt(0).toUpperCase()}</span>) : <AgentIcon size={24} color={BLUE} />}
-</div>
-<div style={{ minWidth: 0 }}>
-<div style={{ fontWeight: 700, fontSize: 16, color: WHITE, fontFamily: FONT_FAMILY, display: "flex", alignItems: "center" }}>
-{isAdmin ? appealTicket.userName : AGENT_NAME}
-{!isAdmin && <VerifiedSeal size={14} variant="white-on-blue" />}
-</div>
-<AdminPresenceStatus />
-</div>
-</div>
-{onClose && <button onClick={onClose} style={{ background: "transparent", border: `1.5px solid ${WHITE}`, color: WHITE, borderRadius: "8px", padding: "6px 14px", fontSize: "12px", fontWeight: 700, cursor: "pointer", fontFamily: FONT_FAMILY, flexShrink: 0 }}>Tutup</button>}
-</div>
-<div style={{ padding: "12px 20px", backgroundColor: "rgba(13,60,252,0.08)", borderBottom: `1px solid ${BLUE}30`, flexShrink: 0, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
-<div style={{ fontSize: "12px", color: BLUE, fontFamily: FONT_FAMILY, fontWeight: 600 }}><strong>Alasan banned:</strong> {appealTicket.banReason || "Suspicious Activity"}</div>
-<StabiloBadge label={meta.label} bg={WHITE} text={BLUE} border={WHITE} size="sm" />
-</div>
-<div ref={chatRef} className="chat-messages-container" style={{ flex: 1, overflowY: "auto", padding: "20px", display: "flex", flexDirection: "column", gap: "12px", minHeight: 0 }}>
-{messages.length === 0 ? <div style={{ textAlign: "center", color: "#999", fontSize: "14px", padding: "30px 0", fontFamily: FONT_FAMILY }}>Belum ada pesan pada ticket ini.</div> : messages.map((msg, idx) => {
-if (msg.senderId === "system") return (<div key={msg.id || idx} style={{ alignSelf: "center", maxWidth: "92%", textAlign: "center", backgroundColor: "#f4f4f5", border: `1px solid ${BLUE}30`, borderRadius: 10, padding: "8px 16px", fontSize: 12, fontWeight: 800, color: BLUE, fontFamily: FONT_FAMILY }}>{msg.text}</div>);
-const isMine = msg.senderId === user?.uid;
-return (
-<div key={msg.id || idx} style={{ alignSelf: isMine ? "flex-end" : "flex-start", maxWidth: "75%" }}>
-<div style={{ padding: "12px 16px", borderRadius: "12px", backgroundColor: isMine ? BLUE : "#f4f4f5", color: isMine ? WHITE : BLACK, fontSize: "14px", fontFamily: FONT_FAMILY, wordBreak: "break-word", border: isMine ? "none" : "1px solid rgba(0,0,0,0.05)" }}>
-{!isMine && <div style={{ fontSize: "12px", fontWeight: 700, color: BLUE, marginBottom: "4px", display: "flex", alignItems: "center" }}>{msg.senderName}{msg.senderName === AGENT_NAME && <VerifiedSeal size={12} variant="blue-on-white" />}</div>}
-{msg.replyTo && <div style={{ padding: "6px 10px", backgroundColor: isMine ? "rgba(255,255,255,0.2)" : "rgba(13,60,252,0.1)", borderLeft: `3px solid ${isMine ? WHITE : BLUE}`, borderRadius: "4px", marginBottom: "6px", fontSize: "11px", color: isMine ? WHITE : BLUE, fontStyle: "italic", fontFamily: FONT_FAMILY }}><strong>{msg.replyTo.senderName}:</strong> {msg.replyTo.text}</div>}
-<div>{msg.text}</div>
-<div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "6px", marginTop: "5px" }}>{renderDeliveryStatus(msg, isMine)}<span style={{ fontSize: "10px", color: isMine ? WHITE : "#999" }}>{formatTime(msg.timestamp)}</span></div>
-</div>
-{!finished && <button onClick={() => setReplyTo(msg)} style={{ background: "transparent", border: "none", color: BLUE, fontSize: "10px", cursor: "pointer", fontFamily: FONT_FAMILY, fontWeight: 700, marginTop: "2px", display: "flex", alignItems: "center", gap: "4px" }}><ReplyIcon size={10} color={BLUE} />Reply</button>}
-</div>
-);
-})}
-{typingName && <TypingBubble name={typingName} />}
-{finished && <AppealSystemNote status={status} />}
-<div ref={messagesEndRef} />
-</div>
-{replyTo && !finished && <div style={{ padding: "8px 20px", backgroundColor: "rgba(13,60,252,0.06)", borderTop: `1px solid ${BLUE}20`, display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 }}><ReplyIcon size={14} color={BLUE} /><div style={{ flex: 1, fontSize: "12px", color: BLUE, fontFamily: FONT_FAMILY, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}><strong>{replyTo.senderName}:</strong> {replyTo.text}</div><button onClick={() => setReplyTo(null)} style={{ background: "transparent", border: "none", color: BLUE, cursor: "pointer", fontSize: "16px", fontFamily: FONT_FAMILY, padding: 0, lineHeight: 1 }}>×</button></div>}
-{isAdmin && !finished && (
-<div style={{ padding: "10px 20px", borderTop: `1px solid ${BLUE}20`, display: "flex", gap: 10, backgroundColor: WHITE, flexShrink: 0, justifyContent: "center", flexWrap: "wrap" }}>
-<button onClick={onAccept} style={{ padding: "8px 16px", backgroundColor: LIME, color: BLACK, border: `1.5px solid ${LIME}`, borderRadius: 8, fontSize: 12, fontWeight: 800, cursor: "pointer", fontFamily: FONT_FAMILY, textTransform: "uppercase", letterSpacing: "0.5px", display: "inline-flex", alignItems: "center", gap: 6 }}><CheckCircleIcon size={12} color={BLACK} />Terima</button>
-<button onClick={onReject} style={{ padding: "8px 16px", backgroundColor: BLUE, color: WHITE, border: `1.5px solid ${BLUE}`, borderRadius: 8, fontSize: 12, fontWeight: 800, cursor: "pointer", fontFamily: FONT_FAMILY, textTransform: "uppercase", letterSpacing: "0.5px", display: "inline-flex", alignItems: "center", gap: 6 }}><XCircleIcon size={12} color={WHITE} />Tolak</button>
-<button onClick={onResolve} style={{ padding: "8px 16px", backgroundColor: BLACK, color: WHITE, border: `1.5px solid ${BLACK}`, borderRadius: 8, fontSize: 12, fontWeight: 800, cursor: "pointer", fontFamily: FONT_FAMILY, textTransform: "uppercase", letterSpacing: "0.5px", display: "inline-flex", alignItems: "center", gap: 6 }}><CheckIcon size={12} color={WHITE} />Selesai</button>
-</div>
-)}
-{!finished ? (
-<div style={{ padding: "14px 20px", borderTop: `1px solid ${BLUE}20`, display: "flex", gap: "10px", backgroundColor: WHITE, flexShrink: 0 }}>
-<input type="text" value={messageText} onChange={handleTyping} onKeyPress={(e) => { if (e.key === "Enter" && !e.shiftKey && messageText.trim()) { e.preventDefault(); sendMessage(); } }} placeholder="Tulis pesan banding..." style={{ flex: 1, padding: "12px 16px", border: `1px solid ${BLUE}40`, borderRadius: "10px", fontSize: "14px", outline: "none", fontFamily: FONT_FAMILY, backgroundColor: WHITE, color: BLUE }} />
-<button onClick={sendMessage} disabled={!messageText.trim()} style={{ padding: "12px 24px", backgroundColor: messageText.trim() ? BLUE : "#ccc", color: WHITE, border: "none", borderRadius: "10px", cursor: messageText.trim() ? "pointer" : "not-allowed", fontFamily: FONT_FAMILY, fontSize: "13px", fontWeight: 800, letterSpacing: "0.5px", textTransform: "uppercase" }}>Kirim</button>
-</div>
-) : (
-<div style={{ padding: "14px 20px", borderTop: `1px solid ${BLUE}20`, backgroundColor: status === "resolved" ? "rgba(0,0,0,0.04)" : "rgba(13,60,252,0.05)", textAlign: "center", fontFamily: FONT_FAMILY, fontSize: 13, color: status === "resolved" ? BLACK : BLUE, fontWeight: 800, flexShrink: 0 }}>
 Ticket chat ini telah {status === "resolved" ? "DITERIMA & SELESAI" : "DITOLAK"}. Anda dapat mengajukan banding baru.
 </div>
 )}
@@ -1918,6 +1840,139 @@ Buka Chat Banding
 );
 };
 
+// ===== DASHBOARD APPEAL CHAT (untuk admin di dashboard manage-banding) =====
+const DashboardAppealChat = ({ user, db, appealTicket, onClose, isAdmin, onAccept, onReject, onResolve }: { user: any; db: any; appealTicket: AppealTicket; onClose?: () => void; isAdmin?: boolean; onAccept?: () => void; onReject?: () => void; onResolve?: () => void; }) => {
+const [messages, setMessages] = useState<AppealMessage[]>([]);
+const [messageText, setMessageText] = useState("");
+const [replyTo, setReplyTo] = useState<AppealMessage | null>(null);
+const [encryptionReady, setEncryptionReady] = useState(false);
+const [status, setStatus] = useState<string>(appealTicket.status);
+const messagesEndRef = useRef<HTMLDivElement>(null);
+const chatRef = useRef<HTMLDivElement>(null);
+const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+// TYPING REAL-TIME dari Firestore
+const typingName = useRealtimeTyping(db, appealTicket?.id, user?.uid);
+useEffect(() => { getCryptoKey().then(() => setEncryptionReady(true)).catch(() => setEncryptionReady(true)); }, []);
+useEffect(() => {
+if (!db || !appealTicket) return;
+const unsub = onSnapshot(query(collection(db, "appeal_tickets", appealTicket.id, "messages"), orderBy("timestamp", "asc")), async (snap: any) => {
+const list: AppealMessage[] = [];
+for (const d of snap.docs) { const data = d.data(); let text = data.text || ""; if (data.isEncrypted) { try { text = await decryptMessage(text); } catch { text = "[Encrypted]"; } } list.push({ id: d.id, ...data, text } as AppealMessage); }
+setMessages(list);
+requestAnimationFrame(() => { if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight; });
+});
+return () => unsub();
+}, [db, appealTicket]);
+useEffect(() => {
+if (!db || !appealTicket) return;
+const unsub = onSnapshot(doc(db, "appeal_tickets", appealTicket.id), (snap: any) => {
+if (!snap.exists()) return;
+const d = snap.data();
+setStatus(d.status || "waiting");
+});
+return () => unsub();
+}, [db, appealTicket]);
+useEffect(() => {
+if (!db || !appealTicket || !user) return;
+messages.filter((m) => m.senderId !== user.uid && m.senderId !== "system" && !m.read).forEach(async (msg) => { await updateDoc(doc(db, "appeal_tickets", appealTicket.id, "messages", msg.id), { read: true, deliveryStatus: "read" }); });
+}, [messages, appealTicket, db, user]);
+const finished = status === "resolved" || status === "closed";
+const meta = appealStatusMeta(status);
+const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
+const value = e.target.value; setMessageText(value);
+if (!appealTicket || !user || !db || finished) return;
+const ref = doc(db, "appeal_tickets", appealTicket.id);
+const nm = isAdmin ? AGENT_NAME : (user.displayName || user.email || "User");
+await updateDoc(ref, value.length ? { typing: true, typingUserId: user.uid, typingUserName: nm } : { typing: false, typingUserId: null, typingUserName: null });
+if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+typingTimeoutRef.current = setTimeout(async () => { await updateDoc(ref, { typing: false, typingUserId: null, typingUserName: null }); }, 2000);
+};
+const sendMessage = async () => {
+if (!db || !appealTicket || !messageText.trim() || !user || !encryptionReady || finished) return;
+try {
+const ticketRef = doc(db, "appeal_tickets", appealTicket.id);
+await updateDoc(ticketRef, { typing: false, typingUserId: null, typingUserName: null });
+const senderName = isAdmin ? AGENT_NAME : user.displayName || user.email || "User";
+const enc = await encryptMessage(messageText.trim());
+await addDoc(collection(db, "appeal_tickets", appealTicket.id, "messages"), { senderId: user.uid, senderName, text: enc, timestamp: serverTimestamp(), read: false, isEncrypted: true, deliveryStatus: "sent", replyTo: replyTo ? { messageId: replyTo.id, senderName: replyTo.senderName, text: replyTo.text.length > 50 ? replyTo.text.substring(0, 50) + "..." : replyTo.text } : null });
+await updateDoc(ticketRef, { lastMessage: messageText.trim(), lastMessageTime: serverTimestamp(), lastMessageSender: senderName, ...(status === "waiting" ? { status: "active" } : {}), ...(isAdmin ? { agentId: user.uid, agentName: AGENT_NAME } : {}) });
+setMessageText(""); setReplyTo(null);
+if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+} catch (e) { console.error(e); alert("An error occurred."); }
+};
+const renderDeliveryStatus = (msg: AppealMessage, isMine: boolean) => {
+if (!isMine) return null;
+let label = "Sent"; let icon = <CheckIcon size={11} color="#ffffff" />;
+if (msg.read) { label = "Read"; icon = <DoubleCheckIcon size={11} color="#ffffff" />; }
+else if (msg.deliveryStatus === "delivered") { label = "Delivered"; icon = <DoubleCheckIcon size={11} color="#ffffff" />; }
+else if (msg.deliveryStatus === "sending") { label = "Sending"; icon = <ClockIcon size={11} color="#ffffff" />; }
+else if (msg.deliveryStatus === "failed") { label = "Failed"; icon = <ErrorIcon size={11} color="#ffffff" />; }
+return (<span style={{ display: "inline-flex", alignItems: "center", gap: "3px", fontSize: "10px", color: "#ffffff", fontFamily: FONT_FAMILY, fontWeight: 500 }}>{label}{icon}</span>);
+};
+const formatTime = (t: any) => { if (!t) return ""; const d = t.toDate ? t.toDate() : new Date(t); return d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }); };
+return (
+<div style={{ display: "flex", flexDirection: "column", height: "100%", backgroundColor: WHITE, borderRadius: "12px", overflow: "hidden", border: `2px solid ${BLUE}` }}>
+<div style={{ padding: "16px 20px", backgroundColor: BLUE, display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0, gap: 12 }}>
+<div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
+<div style={{ width: 40, height: 40, borderRadius: "50%", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", flexShrink: 0 }}>
+{isAdmin ? (appealTicket.userPhoto ? <img src={appealTicket.userPhoto} alt={appealTicket.userName} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <span style={{ fontSize: 16, fontWeight: 800, color: BLUE }}>{appealTicket.userName?.charAt(0).toUpperCase()}</span>) : <AgentIcon size={24} color={BLUE} />}
+</div>
+<div style={{ minWidth: 0 }}>
+<div style={{ fontWeight: 700, fontSize: 16, color: WHITE, fontFamily: FONT_FAMILY, display: "flex", alignItems: "center" }}>
+{isAdmin ? appealTicket.userName : AGENT_NAME}
+{!isAdmin && <VerifiedSeal size={14} variant="white-on-blue" />}
+</div>
+<AdminPresenceStatus />
+</div>
+</div>
+{onClose && <button onClick={onClose} style={{ background: "transparent", border: `1.5px solid ${WHITE}`, color: WHITE, borderRadius: "8px", padding: "6px 14px", fontSize: "12px", fontWeight: 700, cursor: "pointer", fontFamily: FONT_FAMILY, flexShrink: 0 }}>Tutup</button>}
+</div>
+<div style={{ padding: "12px 20px", backgroundColor: "rgba(13,60,252,0.08)", borderBottom: `1px solid ${BLUE}30`, flexShrink: 0, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
+<div style={{ fontSize: "12px", color: BLUE, fontFamily: FONT_FAMILY, fontWeight: 600 }}><strong>Alasan banned:</strong> {appealTicket.banReason || "Suspicious Activity"}</div>
+<StabiloBadge label={meta.label} bg={WHITE} text={BLUE} border={WHITE} size="sm" />
+</div>
+<div ref={chatRef} className="chat-messages-container" style={{ flex: 1, overflowY: "auto", padding: "20px", display: "flex", flexDirection: "column", gap: "12px", minHeight: 280, maxHeight: 420 }}>
+{messages.length === 0 ? <div style={{ textAlign: "center", color: "#999", fontSize: "14px", padding: "30px 0", fontFamily: FONT_FAMILY }}>Belum ada pesan pada ticket ini.</div> : messages.map((msg, idx) => {
+if (msg.senderId === "system") return (<div key={msg.id || idx} style={{ alignSelf: "center", maxWidth: "92%", textAlign: "center", backgroundColor: "#f4f4f5", border: `1px solid ${BLUE}30`, borderRadius: 10, padding: "8px 16px", fontSize: 12, fontWeight: 800, color: BLUE, fontFamily: FONT_FAMILY }}>{msg.text}</div>);
+const isMine = msg.senderId === user?.uid;
+return (
+<div key={msg.id || idx} style={{ alignSelf: isMine ? "flex-end" : "flex-start", maxWidth: "75%" }}>
+<div style={{ padding: "12px 16px", borderRadius: "12px", backgroundColor: isMine ? BLUE : "#f4f4f5", color: isMine ? WHITE : BLACK, fontSize: "14px", fontFamily: FONT_FAMILY, wordBreak: "break-word", border: isMine ? "none" : "1px solid rgba(0,0,0,0.05)" }}>
+{!isMine && <div style={{ fontSize: "12px", fontWeight: 700, color: BLUE, marginBottom: "4px", display: "flex", alignItems: "center" }}>{msg.senderName}{msg.senderName === AGENT_NAME && <VerifiedSeal size={12} variant="blue-on-white" />}</div>}
+{msg.replyTo && <div style={{ padding: "6px 10px", backgroundColor: isMine ? "rgba(255,255,255,0.2)" : "rgba(13,60,252,0.1)", borderLeft: `3px solid ${isMine ? WHITE : BLUE}`, borderRadius: "4px", marginBottom: "6px", fontSize: "11px", color: isMine ? WHITE : BLUE, fontStyle: "italic", fontFamily: FONT_FAMILY }}><strong>{msg.replyTo.senderName}:</strong> {msg.replyTo.text}</div>}
+<div>{msg.text}</div>
+<div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "6px", marginTop: "5px" }}>{renderDeliveryStatus(msg, isMine)}<span style={{ fontSize: "10px", color: isMine ? WHITE : "#999" }}>{formatTime(msg.timestamp)}</span></div>
+</div>
+{!finished && <button onClick={() => setReplyTo(msg)} style={{ background: "transparent", border: "none", color: BLUE, fontSize: "10px", cursor: "pointer", fontFamily: FONT_FAMILY, fontWeight: 700, marginTop: "2px", display: "flex", alignItems: "center", gap: "4px" }}><ReplyIcon size={10} color={BLUE} />Reply</button>}
+</div>
+);
+})}
+{typingName && <TypingBubble name={typingName} />}
+{finished && <AppealSystemNote status={status} />}
+<div ref={messagesEndRef} />
+</div>
+{replyTo && !finished && <div style={{ padding: "8px 20px", backgroundColor: "rgba(13,60,252,0.06)", borderTop: `1px solid ${BLUE}20`, display: "flex", alignItems: "center", gap: "10px", flexShrink: 0 }}><ReplyIcon size={14} color={BLUE} /><div style={{ flex: 1, fontSize: "12px", color: BLUE, fontFamily: FONT_FAMILY, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}><strong>{replyTo.senderName}:</strong> {replyTo.text}</div><button onClick={() => setReplyTo(null)} style={{ background: "transparent", border: "none", color: BLUE, cursor: "pointer", fontSize: "16px", fontFamily: FONT_FAMILY, padding: 0, lineHeight: 1 }}>×</button></div>}
+{isAdmin && !finished && (
+<div style={{ padding: "10px 20px", borderTop: `1px solid ${BLUE}20`, display: "flex", gap: 10, backgroundColor: WHITE, flexShrink: 0, justifyContent: "center", flexWrap: "wrap" }}>
+<button onClick={onAccept} style={{ padding: "8px 16px", backgroundColor: LIME, color: BLACK, border: `1.5px solid ${LIME}`, borderRadius: 8, fontSize: 12, fontWeight: 800, cursor: "pointer", fontFamily: FONT_FAMILY, textTransform: "uppercase", letterSpacing: "0.5px", display: "inline-flex", alignItems: "center", gap: 6 }}><CheckCircleIcon size={12} color={BLACK} />Terima</button>
+<button onClick={onReject} style={{ padding: "8px 16px", backgroundColor: BLUE, color: WHITE, border: `1.5px solid ${BLUE}`, borderRadius: 8, fontSize: 12, fontWeight: 800, cursor: "pointer", fontFamily: FONT_FAMILY, textTransform: "uppercase", letterSpacing: "0.5px", display: "inline-flex", alignItems: "center", gap: 6 }}><XCircleIcon size={12} color={WHITE} />Tolak</button>
+<button onClick={onResolve} style={{ padding: "8px 16px", backgroundColor: BLACK, color: WHITE, border: `1.5px solid ${BLACK}`, borderRadius: 8, fontSize: 12, fontWeight: 800, cursor: "pointer", fontFamily: FONT_FAMILY, textTransform: "uppercase", letterSpacing: "0.5px", display: "inline-flex", alignItems: "center", gap: 6 }}><CheckIcon size={12} color={WHITE} />Selesai</button>
+</div>
+)}
+{!finished ? (
+<div style={{ padding: "14px 20px", borderTop: `1px solid ${BLUE}20`, display: "flex", gap: "10px", backgroundColor: WHITE, flexShrink: 0 }}>
+<input type="text" value={messageText} onChange={handleTyping} onKeyPress={(e) => { if (e.key === "Enter" && !e.shiftKey && messageText.trim()) { e.preventDefault(); sendMessage(); } }} placeholder="Tulis pesan banding..." style={{ flex: 1, padding: "12px 16px", border: `1px solid ${BLUE}40`, borderRadius: "10px", fontSize: "14px", outline: "none", fontFamily: FONT_FAMILY, backgroundColor: WHITE, color: BLUE }} />
+<button onClick={sendMessage} disabled={!messageText.trim()} style={{ padding: "12px 24px", backgroundColor: messageText.trim() ? BLUE : "#ccc", color: WHITE, border: "none", borderRadius: "10px", cursor: messageText.trim() ? "pointer" : "not-allowed", fontFamily: FONT_FAMILY, fontSize: "13px", fontWeight: 800, letterSpacing: "0.5px", textTransform: "uppercase" }}>Kirim</button>
+</div>
+) : (
+<div style={{ padding: "14px 20px", borderTop: `1px solid ${BLUE}20`, backgroundColor: status === "resolved" ? "rgba(0,0,0,0.04)" : "rgba(13,60,252,0.05)", textAlign: "center", fontFamily: FONT_FAMILY, fontSize: 13, color: status === "resolved" ? BLACK : BLUE, fontWeight: 800, flexShrink: 0 }}>
+Ticket chat ini telah {status === "resolved" ? "DITERIMA & SELESAI" : "DITOLAK"}.
+</div>
+)}
+</div>
+);
+};
+
 // ===== DASHBOARD OVERLAY =====
 const DashboardOverlay = ({ user, db, onClose, onOpenAppealChat }: { user: any; db: any; onClose: () => void; onOpenAppealChat: (reason: string, message: string) => void; }) => {
 const overlayRef = useRef<HTMLDivElement>(null);
@@ -2001,7 +2056,7 @@ catch { alert("Gagal menyimpan pengaturan."); }
 finally { setSaving(false); }
 };
 
-// Fungsi untuk terima banding (unban user)
+// Fungsi Terima Banding (Unban user)
 const handleAcceptAppeal = async (ticket: AppealTicket) => {
 if (!db) return;
 if (!confirm(`Terima banding dari ${ticket.userName}? User akan di-unban otomatis.`)) return;
@@ -2039,11 +2094,33 @@ alert("Gagal memproses penerimaan banding.");
 
 const handleResolveAppeal = async (id: string) => {
 if (!db) return;
-await updateDoc(doc(db, "appeal_tickets", id), { status: "resolved" });
+if (!confirm("Tandai ticket sebagai SELESAI?")) return;
+const ticketRef = doc(db, "appeal_tickets", id);
+await addDoc(collection(db, "appeal_tickets", id, "messages"), { 
+senderId: "system", 
+senderName: "Sistem", 
+text: `Banding telah SELESAI diproses oleh ${AGENT_NAME}.`, 
+timestamp: serverTimestamp(), 
+read: false, 
+isEncrypted: false, 
+deliveryStatus: "sent" 
+});
+await updateDoc(ticketRef, { status: "resolved", decision: "SELESAI", decidedAt: serverTimestamp(), decidedBy: AGENT_NAME });
 };
 const handleRejectAppeal = async (id: string) => {
 if (!db) return;
-await updateDoc(doc(db, "appeal_tickets", id), { status: "closed" });
+if (!confirm("TOLAK banding ini?")) return;
+const ticketRef = doc(db, "appeal_tickets", id);
+await addDoc(collection(db, "appeal_tickets", id, "messages"), { 
+senderId: "system", 
+senderName: "Sistem", 
+text: `Banding telah DITOLAK oleh ${AGENT_NAME}.`, 
+timestamp: serverTimestamp(), 
+read: false, 
+isEncrypted: false, 
+deliveryStatus: "sent" 
+});
+await updateDoc(ticketRef, { status: "closed", decision: "DITOLAK", decidedAt: serverTimestamp(), decidedBy: AGENT_NAME });
 };
 
 const displayName = isAnonymous ? "Anonim" : user?.displayName || user?.email?.split("@")[0] || "User";
@@ -2269,7 +2346,7 @@ catch (e) { console.error(e); }
 };
 if (!user) {
 return (
-<div style={{ position: "fixed", top: "64px", right: "24px", zIndex: 9000, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "10px", fontFamily: FONT_FAMILY }}>
+<div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
 <Link href="/signin" style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "10px", padding: "10px 18px 10px 16px", backgroundColor: BLUE, borderRadius: "10px", border: `1px solid ${BLUE}`, boxShadow: "0 8px 24px rgba(13,60,252,0.35)", cursor: "pointer" }}>
 <PeopleIcon size={20} color="#ffffff" />
 <span style={{ color: "#ffffff", fontSize: "14px", fontWeight: 700, letterSpacing: "0.02em", fontFamily: FONT_FAMILY, whiteSpace: "nowrap" }}>Sign In</span>
@@ -2278,7 +2355,6 @@ return (
 );
 }
 return (
-<div style={{ position: "fixed", top: "64px", right: "24px", zIndex: 9000, fontFamily: FONT_FAMILY, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "10px" }}>
 <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
 <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px 16px", backgroundColor: BLUE, borderRadius: "10px", border: `1px solid ${BLUE}`, boxShadow: "0 8px 24px rgba(13,60,252,0.35)" }}>
 <div style={{ width: "36px", height: "36px", borderRadius: "8px", overflow: "hidden", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -2288,7 +2364,6 @@ return (
 </div>
 <button onClick={onOpenDashboard} style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "10px 16px", backgroundColor: BLUE, color: WHITE, borderRadius: "10px", border: `1px solid ${BLUE}`, boxShadow: "0 8px 24px rgba(13,60,252,0.35)", fontFamily: FONT_FAMILY, fontSize: "14px", fontWeight: 700, cursor: "pointer" }}>Dashboard<NorthEastArrow size={16} color={WHITE} /></button>
 <button onClick={handleLogout} style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "10px 16px", backgroundColor: BLUE, color: WHITE, borderRadius: "10px", border: `1px solid ${BLUE}`, boxShadow: "0 8px 24px rgba(13,60,252,0.35)", fontFamily: FONT_FAMILY, fontSize: "14px", fontWeight: 700, cursor: "pointer" }}>Logout<LogoutIcon size={16} color={WHITE} /></button>
-</div>
 </div>
 );
 };
@@ -2420,7 +2495,7 @@ return (
 {hasAppeal && (
 <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
 <span style={{ fontSize: 13, color: WHITE, fontWeight: 700, fontFamily: FONT_FAMILY }}>
-{appealStatus === "resolved" ? "Banding telah selesai" : appealStatus === "closed" ? "Banding telah ditolak" : "Banding sedang diproses"}
+{appealStatus === "resolved" ? "Banding telah diterima & selesai" : appealStatus === "closed" ? "Banding telah ditolak" : "Banding sedang diproses"}
 </span>
 <StabiloBadge label={meta.label} bg={meta.bg} text={meta.text} border={meta.border} size="sm" />
 </div>
@@ -2433,17 +2508,18 @@ return (
 );
 };
 
-// ===== APPEAL CHAT ROOM =====
+// ===== APPEAL CHAT ROOM (BODY UTAMA) - DENGAN TYPING REAL-TIME + TOMBOL TERIMA/TOLAK/SELESAI =====
 const AppealChatRoom = ({ user, isAdmin, db, appealTicket, onClose }: any) => {
 const [messages, setMessages] = useState<AppealMessage[]>([]);
 const [messageText, setMessageText] = useState("");
 const [replyTo, setReplyTo] = useState<AppealMessage | null>(null);
 const [encryptionReady, setEncryptionReady] = useState(false);
-const [typingName, setTypingName] = useState<string | null>(null);
 const [status, setStatus] = useState<string>(appealTicket?.status || "waiting");
 const messagesEndRef = useRef<HTMLDivElement>(null);
 const chatRef = useRef<HTMLDivElement>(null);
 const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+// TYPING REAL-TIME dari Firestore
+const typingName = useRealtimeTyping(db, appealTicket?.id, user?.uid);
 useEffect(() => { getCryptoKey().then(() => setEncryptionReady(true)).catch(() => setEncryptionReady(true)); }, []);
 useEffect(() => {
 if (!db || !appealTicket) return;
@@ -2461,10 +2537,9 @@ const unsub = onSnapshot(doc(db, "appeal_tickets", appealTicket.id), (snap: any)
 if (!snap.exists()) return;
 const d = snap.data();
 setStatus(d.status || "waiting");
-setTypingName(d.typing && d.typingUserId !== user?.uid ? (d.typingUserName || null) : null);
 });
 return () => unsub();
-}, [db, appealTicket, user]);
+}, [db, appealTicket]);
 useEffect(() => {
 if (!db || !appealTicket || !user) return;
 messages.filter((m) => m.senderId !== user.uid && m.senderId !== "system" && !m.read).forEach(async (msg) => { await updateDoc(doc(db, "appeal_tickets", appealTicket.id, "messages", msg.id), { read: true, deliveryStatus: "read" }); });
@@ -2649,7 +2724,7 @@ return (
 </div>
 ) : (
 <div style={{ padding: "14px 20px", borderTop: `1px solid ${BLUE}20`, backgroundColor: status === "resolved" ? "rgba(0,0,0,0.04)" : "rgba(13,60,252,0.05)", textAlign: "center", fontFamily: FONT_FAMILY, fontSize: 13, color: status === "resolved" ? BLACK : BLUE, fontWeight: 800, flexShrink: 0 }}>
-Ticket chat ini telah {status === "resolved" ? "DITERIMA & SELESAI" : "DITOLAK"}. Anda dapat mengajukan banding baru.
+Ticket chat ini telah {status === "resolved" ? "DITERIMA & SELESAI" : "DITOLAK"}.
 </div>
 )}
 </div>
@@ -3145,10 +3220,8 @@ setTimeout(() => { const el = document.getElementById("banned-appeal-section"); 
 )}
 <div ref={mainPageRef} style={{ position: "relative", width: "100%", minHeight: "100vh", backgroundColor: WHITE, margin: 0, padding: 0, fontFamily: FONT_FAMILY, overflow: "visible", display: "flex", flexDirection: "column", willChange: "transform" }}>
 <TopBanner />
-<div style={{ position: "fixed", top: "44px", left: 0, width: "200px", height: "120px", pointerEvents: "none", zIndex: 8500, backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)", maskImage: "linear-gradient(to right, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%)", WebkitMaskImage: "linear-gradient(to right, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%)" }} />
-<div style={{ position: "fixed", top: "44px", right: 0, width: "200px", height: "120px", pointerEvents: "none", zIndex: 8500, backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)", maskImage: "linear-gradient(to left, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%)", WebkitMaskImage: "linear-gradient(to left, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%)" }} />
-<LeftNavbar shifted={navbarShifted} />
-<RightNavbar user={user} auth={auth} db={db} onOpenDashboard={() => setShowDashboard(true)} />
+{/* Navbar Container dengan Animasi Scroll */}
+<NavContainer shifted={navbarShifted} user={user} auth={auth} db={db} onOpenDashboard={() => setShowDashboard(true)} />
 <div style={{ marginTop: "44px" }}><div style={{ paddingTop: "120px" }} /></div>
 <div style={{ position: "relative", zIndex: 1, flex: "1 0 auto", backgroundColor: WHITE }}>
 <div style={{ padding: "0 40px", maxWidth: "1600px", margin: "0 auto", width: "100%" }}>
