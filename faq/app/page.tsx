@@ -290,6 +290,11 @@ const TOPIC_STYLES: any = {
 "Account Issues": { bg: WHITE, text: BLUE, border: BLUE },
 "Donation": { bg: WHITE, text: BLUE, border: BLUE },
 "Partnership": { bg: WHITE, text: BLUE, border: BLUE },
+"Billing & Payment": { bg: WHITE, text: BLUE, border: BLUE },
+"Feature Request": { bg: WHITE, text: BLUE, border: BLUE },
+"Bug Report": { bg: WHITE, text: BLUE, border: BLUE },
+"General Question": { bg: WHITE, text: BLUE, border: BLUE },
+"Feedback & Suggestion": { bg: WHITE, text: BLUE, border: BLUE },
 "Other": { bg: WHITE, text: BLUE, border: BLUE },
 };
 // ===== ICONS =====
@@ -387,7 +392,6 @@ const ArrowRightIcon = ({ size = 16, color = "currentColor" }: { size?: number; 
 const ChatIcon = ({ size = 18, color = "currentColor" }: { size?: number; color?: string }) => (
 <svg width={size} height={size} viewBox="0 0 24 24" fill="none"><path d="M21 11.5C21 16.1944 16.9706 20 12 20C10.8452 20 9.74371 19.7964 8.73507 19.4276L4 21L5.45177 16.7441C4.53668 15.3762 4 13.7581 4 12C4 7.30558 8.02944 3.5 12 3.5C16.9706 3.5 21 7.30558 21 11.5Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
 );
-// ===== ICON TOGGLE CHATBOT MODE =====
 const ToggleLayoutIcon = ({ size = 18, color = "currentColor" }: { size?: number; color?: string }) => (
 <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
 <rect x="3" y="3" width="7" height="18" rx="1.5" stroke={color} strokeWidth="2" />
@@ -448,6 +452,7 @@ if (status === "active") return { label: "ACTIVE", bg: RED, text: WHITE, border:
 return { label: "WAITING", bg: LIME, text: BLACK, border: LIME };
 };
 
+// ===== BUBBLE TYPING REAL-TIME =====
 const TypingBubble = ({ name }: { name: string }) => {
 const ref = useRef<HTMLDivElement>(null);
 useEffect(() => {
@@ -467,6 +472,30 @@ return (
 );
 };
 
+// ===== STATUS ONLINE/OFFLINE REAL-TIME (untuk user tertentu) =====
+const UserPresenceStatus = ({ userId, light = true }: { userId?: string; light?: boolean }) => {
+const [online, setOnline] = useState<boolean | null>(null);
+useEffect(() => {
+if (!db || !userId) { setOnline(null); return; }
+const unsub = onSnapshot(doc(db, "users", userId), (snap: any) => {
+if (snap.exists()) {
+setOnline(snap.data().online === true);
+} else {
+setOnline(false);
+}
+}, () => setOnline(false));
+return () => unsub();
+}, [userId]);
+if (online === null) return null;
+return (
+<div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 700, fontFamily: FONT_FAMILY, color: light ? WHITE : BLUE }}>
+<span style={{ width: 8, height: 8, borderRadius: "50%", border: "none", display: "inline-block", backgroundColor: online ? WHITE : BLACK, animation: "blinking-dot 1.4s ease-in-out infinite" }} />
+{online ? "Online" : "Offline"}
+</div>
+);
+};
+
+// ===== STATUS ONLINE/OFFLINE ADMIN =====
 const AdminPresenceStatus = ({ light = true }: { light?: boolean }) => {
 const [online, setOnline] = useState<boolean | null>(null);
 useEffect(() => {
@@ -483,6 +512,44 @@ return (
 {online ? "Admin Online" : "Admin Offline"}
 </div>
 );
+};
+
+// ===== HOOK: Subscribe typing status real-time =====
+const useRealtimeTyping = (db: any, ticketId: string | undefined, currentUserId: string | undefined) => {
+const [typingName, setTypingName] = useState<string | null>(null);
+useEffect(() => {
+if (!db || !ticketId) { setTypingName(null); return; }
+const unsub = onSnapshot(doc(db, "appeal_tickets", ticketId), (snap: any) => {
+if (!snap.exists()) { setTypingName(null); return; }
+const d = snap.data();
+if (d.typing && d.typingUserId && d.typingUserId !== currentUserId) {
+setTypingName(d.typingUserName || "Someone");
+} else {
+setTypingName(null);
+}
+});
+return () => unsub();
+}, [db, ticketId, currentUserId]);
+return typingName;
+};
+
+// ===== HOOK: Subscribe typing status real-time untuk livechat =====
+const useRealtimeTypingLivechat = (db: any, ticketId: string | undefined, currentUserId: string | undefined) => {
+const [typingName, setTypingName] = useState<string | null>(null);
+useEffect(() => {
+if (!db || !ticketId) { setTypingName(null); return; }
+const unsub = onSnapshot(doc(db, "livechat_tickets", ticketId), (snap: any) => {
+if (!snap.exists()) { setTypingName(null); return; }
+const d = snap.data();
+if (d.typing && d.typingUserId && d.typingUserId !== currentUserId) {
+setTypingName(d.typingUserName || "Someone");
+} else {
+setTypingName(null);
+}
+});
+return () => unsub();
+}, [db, ticketId, currentUserId]);
+return typingName;
 };
 
 const AppealSystemNote = ({ status }: { status: string }) => {
@@ -522,6 +589,19 @@ interface AppealMessage { id: string; senderId: string; senderName: string; text
 interface AppealTicket { id: string; userId: string; userName: string; userEmail: string; userPhoto?: string; agentId?: string; agentName?: string; status: "waiting" | "active" | "resolved" | "closed"; topic: string; banReason: string; banMessage: string; createdAt: any; lastMessage?: string; lastMessageTime?: any; lastMessageSender?: string; unreadCount: number; typing: boolean; typingUserId?: string | null; typingUserName?: string | null; }
 interface PasskeyRecord { id: string; credentialId: string; name: string; createdAt: number; transports?: string[]; }
 interface AccountStatusInfo { isBanned: boolean; reason: string; message: string; canCreateTicket: boolean; canSendMessage: boolean; }
+
+// ===== FUNGSI GENERATE RANDOM TICKET ID =====
+const generateRandomTicketId = (createdAt: any): string => {
+if (!createdAt) return "#TICKET-000000-0000";
+const d = createdAt.toDate ? createdAt.toDate() : new Date(createdAt);
+const yy = String(d.getFullYear()).slice(-2);
+const mm = String(d.getMonth() + 1).padStart(2, "0");
+const dd = String(d.getDate()).padStart(2, "0");
+const hh = String(d.getHours()).padStart(2, "0");
+const min = String(d.getMinutes()).padStart(2, "0");
+const random = String(Math.floor(Math.random() * 10000)).padStart(4, "0");
+return `#TICKET-${yy}${mm}${dd}-${hh}${min}-${random}`;
+};
 
 // ===== FARID VERIFIED PANEL =====
 const FaridVerifiedPanel = ({ open, anchorRect, onClose }: { open: boolean; anchorRect: DOMRect | null; onClose: () => void; }) => {
@@ -1326,7 +1406,7 @@ const [encryptionReady, setEncryptionReady] = useState(false);
 const [status, setStatus] = useState<string>(appealTicket.status);
 const chatRef = useRef<HTMLDivElement>(null);
 const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-const [typingName, setTypingName] = useState<string | null>(null);
+const typingName = useRealtimeTyping(db, appealTicket?.id, user?.uid);
 useEffect(() => { getCryptoKey().then(() => setEncryptionReady(true)).catch(() => setEncryptionReady(true)); }, []);
 useEffect(() => {
 if (!db || !appealTicket) return;
@@ -1344,10 +1424,9 @@ const unsub = onSnapshot(doc(db, "appeal_tickets", appealTicket.id), (snap: any)
 if (!snap.exists()) return;
 const d = snap.data();
 setStatus(d.status || "waiting");
-setTypingName(d.typing && d.typingUserId !== user?.uid ? (d.typingUserName || null) : null);
 });
 return () => unsub();
-}, [db, appealTicket, user]);
+}, [db, appealTicket]);
 const finished = status === "resolved" || status === "closed";
 const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
 const v = e.target.value; setMessageText(v);
@@ -1842,7 +1921,7 @@ return (
 {isAdmin ? appealTicket.userName : AGENT_NAME}
 {!isAdmin && <VerifiedSeal size={14} variant="white-on-blue" />}
 </div>
-<AdminPresenceStatus />
+{isAdmin ? <AdminPresenceStatus /> : <UserPresenceStatus userId={user?.uid} />}
 </div>
 </div>
 {onClose && <button onClick={onClose} style={{ background: "transparent", border: `1.5px solid ${WHITE}`, color: WHITE, borderRadius: "8px", padding: "6px 14px", fontSize: "12px", fontWeight: 700, cursor: "pointer", fontFamily: FONT_FAMILY, flexShrink: 0 }}>Tutup</button>}
@@ -2417,7 +2496,7 @@ return (
 <span style={{ fontSize: 13, color: WHITE, fontWeight: 700, fontFamily: FONT_FAMILY }}>
 {appealStatus === "resolved" ? "Banding telah diterima & selesai" : appealStatus === "closed" ? "Banding telah ditolak" : "Banding sedang diproses"}
 </span>
-<StabiloBadge label={meta.label} bg={WHITE} text={BLUE} border={WHITE} size="sm" />
+<StabiloBadge label={meta.label} bg={meta.bg} text={meta.text} border={meta.border} size="sm" />
 </div>
 )}
 <button onClick={onAppeal} style={{ alignSelf: "flex-start", padding: "10px 18px", backgroundColor: WHITE, color: BLUE, border: `1.5px solid ${WHITE}`, borderRadius: "8px", fontSize: "13px", fontWeight: 800, cursor: "pointer", fontFamily: FONT_FAMILY, letterSpacing: "0.5px", textTransform: "uppercase", display: "inline-flex", alignItems: "center", gap: "8px" }}>
@@ -2599,7 +2678,10 @@ return (
 {isAdmin ? appealTicket.userName : AGENT_NAME}
 {!isAdmin && <VerifiedSeal size={14} variant="white-on-blue" />}
 </div>
-<AdminPresenceStatus />
+<div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+{isAdmin ? <AdminPresenceStatus /> : <UserPresenceStatus userId={appealTicket?.userId} />}
+{typingName && <span style={{ fontSize: 10, color: WHITE, fontStyle: "italic", fontWeight: 700, fontFamily: FONT_FAMILY }}>{typingName} sedang mengetik...</span>}
+</div>
 </div>
 </div>
 <button onClick={onClose} style={{ background: "transparent", border: `1.5px solid ${WHITE}`, color: WHITE, borderRadius: "8px", padding: "6px 14px", fontSize: "12px", fontWeight: 700, cursor: "pointer", fontFamily: FONT_FAMILY, flexShrink: 0 }}>Tutup</button>
@@ -2650,7 +2732,7 @@ Ticket chat ini telah {status === "resolved" ? "DITERIMA & SELESAI" : "DITOLAK"}
 );
 };
 
-// ===== LIVE CHAT AGENT - DENGAN TOGGLE CHATBOT MODE =====
+// ===== LIVE CHAT AGENT - DENGAN CHATBOT MODE =====
 const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBannedAppealChat }: any) => {
 const [tickets, setTickets] = useState<Ticket[]>([]);
 const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
@@ -2678,7 +2760,7 @@ const [rollingKey, setRollingKey] = useState(0);
 const [showTour, setShowTour] = useState(false);
 const [tourStep, setTourStep] = useState(0);
 const [showCloseConfirm, setShowCloseConfirm] = useState(false);
-// ===== STATE BARU: CHATBOT MODE TOGGLE =====
+// ===== STATE CHATBOT MODE =====
 const [chatbotMode, setChatbotMode] = useState(false);
 const messagesEndRef = useRef<HTMLDivElement>(null);
 const chatRef = useRef<HTMLDivElement>(null);
@@ -2686,6 +2768,9 @@ const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 const liveChatTitleRef = useRef<HTMLHeadingElement>(null);
 const prevLenRef = useRef<number>(0);
 const cacheRef = useRef<{ [k: string]: ChatMessage[] }>({});
+
+// TYPING REAL-TIME untuk livechat
+const livechatTypingName = useRealtimeTypingLivechat(db, selectedTicket?.id, user?.uid);
 
 useEffect(() => {
 if (typeof window === "undefined" || !tickets.length) return;
@@ -2695,7 +2780,8 @@ if (!tid) return;
 const t = tickets.find((x) => x.id === tid);
 if (t) { setSelectedTicket(t); window.history.replaceState({}, "", "/live-chat-agent"); }
 }, [tickets]);
-const topics = ["Product Inquiry", "Technical Support", "Account Issues", "Donation", "Partnership", "Other"];
+// ===== TOPIC LEBIH BANYAK =====
+const topics = ["Product Inquiry", "Technical Support", "Account Issues", "Donation", "Partnership", "Billing & Payment", "Feature Request", "Bug Report", "General Question", "Feedback & Suggestion", "Other"];
 const tourSteps: TourStep[] = [
 { target: "login-button", title: "Login First", content: "Login untuk mulai chat dengan agent.", position: "bottom", isLoginStep: true },
 { target: "livechat-title", title: "Live Chat Agent", content: "Bagian live chat dengan tim support.", position: "bottom" },
@@ -2798,22 +2884,12 @@ if (!ut.length) return;
 const act = ut.find((t) => t.status === "waiting" || t.status === "active") || ut[0];
 setSelectedTicket(act); hasAuto.current = true;
 }, [tickets, user, isAdmin, selectedTicket, isMounted]);
-const generateTicketId = useCallback((createdAt: any): string => { 
-if (!createdAt) return "#TICKET-0000"; 
-const d = createdAt.toDate ? createdAt.toDate() : new Date(createdAt); 
-const yy = String(d.getFullYear()).slice(-2);
-const mm = String(d.getMonth() + 1).padStart(2, "0");
-const dd = String(d.getDate()).padStart(2, "0");
-const hh = String(d.getHours()).padStart(2, "0");
-const min = String(d.getMinutes()).padStart(2, "0");
-return `#TICKET-${yy}${mm}${dd}-${hh}${min}`; 
-}, []);
 const formatTime = useCallback((t: any) => { if (!t) return ""; const d = t.toDate ? t.toDate() : new Date(t); return d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }); }, []);
 const getTyping = (t: Ticket | null) => t?.typing ? `${t.typingUserName || "Someone"} is typing...` : null;
 const filter = useCallback((list: Ticket[]) => {
 const q = searchQuery.trim().toLowerCase(); if (!q) return list;
-return list.filter((t) => t.userName?.toLowerCase().includes(q) || t.userEmail?.toLowerCase().includes(q) || t.topic?.toLowerCase().includes(q) || generateTicketId(t.createdAt).toLowerCase().includes(q) || (ticketPreviews[t.id] || []).some((p) => p.text?.toLowerCase().includes(q)));
-}, [searchQuery, ticketPreviews, generateTicketId]);
+return list.filter((t) => t.userName?.toLowerCase().includes(q) || t.userEmail?.toLowerCase().includes(q) || t.topic?.toLowerCase().includes(q) || generateRandomTicketId(t.createdAt).toLowerCase().includes(q) || (ticketPreviews[t.id] || []).some((p) => p.text?.toLowerCase().includes(q)));
+}, [searchQuery, ticketPreviews]);
 const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
 const v = e.target.value; setMessageText(v);
 if (!selectedTicket || !user || !db || isBanned) return;
@@ -2838,7 +2914,15 @@ const ref = await addDoc(collection(db, "livechat_tickets"), { userId: user.uid,
 const initial = `Hello, I would like to ask about: ${selectedTopic}`;
 await addDoc(collection(db, "livechat_tickets", ref.id, "messages"), { senderId: user.uid, senderName: user.displayName || user.email || "User", text: await encryptMessage(initial), timestamp: serverTimestamp(), read: false, isEncrypted: true, isBotDetected: false, deliveryStatus: "sent" });
 await updateDoc(ref, { lastMessage: initial, lastMessageTime: serverTimestamp(), lastMessageSender: user.displayName || user.email || "User" });
-setSelectedTopic(""); setShowStartChat(false); setBanMessage(null); hasAuto.current = false;
+setSelectedTopic(""); 
+setShowStartChat(false); 
+setBanMessage(null); 
+hasAuto.current = false;
+// Jika chatbot mode aktif, tetap di chatbot mode
+if (chatbotMode) {
+const newTicket = { id: ref.id, userId: user.uid, userName: user.displayName || user.email || "User", userEmail: user.email, userPhoto: user.photoURL || "", status: "waiting", topic: selectedTopic, createdAt: new Date(), unreadCount: 0, typing: false } as Ticket;
+setSelectedTicket(newTicket);
+}
 } catch (e) { console.error(e); alert("An error occurred."); }
 };
 const sendMessage = async () => {
@@ -2922,7 +3006,7 @@ const renderSearchBar = () => (
 </div>
 );
 
-// ===== RENDER CHATBOT MODE (VERTICAL LAYOUT) =====
+// ===== RENDER CHATBOT MODE =====
 const renderChatbotMode = () => {
 if (!selectedTicket) {
 return (
@@ -2945,30 +3029,32 @@ return (
 </div>
 <div style={{ fontSize: 15, fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, textAlign: "center", marginBottom: 8 }}>Belum ada chat dipilih</div>
 <div style={{ fontSize: 12, color: "#666", fontFamily: FONT_FAMILY, textAlign: "center", lineHeight: 1.5 }}>
-{isAdmin ? "Klik salah satu user dari daftar banding atau chat di sidebar untuk mulai chat" : "Klik 'Start Live Chat' atau pilih chat dari riwayat untuk mulai"}
+{isAdmin ? "Klik salah satu user dari daftar di sidebar untuk mulai chat" : "Klik 'Start Live Chat' atau pilih chat dari riwayat untuk mulai"}
 </div>
 </div>
 </div>
 );
 }
 
-const typingText = getTyping(selectedTicket);
 const ss = STATUS_STYLES[selectedTicket.status] || STATUS_STYLES.active;
 const ts = TOPIC_STYLES[selectedTicket.topic] || TOPIC_STYLES["Other"];
 
 return (
 <div style={{ display: "flex", flexDirection: "column", height: "700px", width: "420px", backgroundColor: WHITE, borderRadius: "16px", border: `2px solid ${BLUE}`, overflow: "hidden", boxShadow: "0 12px 40px rgba(13,60,252,0.15)" }}>
-{/* HEADER CHATBOT */}
+{/* HEADER CHATBOT - dengan nama, verified, status online, typing */}
 <div style={{ padding: "14px 16px", backgroundColor: BLUE, display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0, gap: 10 }}>
 <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0, flex: 1 }}>
 <div style={{ width: 38, height: 38, borderRadius: "50%", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", flexShrink: 0 }}>
 {selectedTicket.userPhoto ? <img src={selectedTicket.userPhoto} alt={selectedTicket.userName} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <span style={{ fontSize: 15, fontWeight: 800, color: BLUE }}>{selectedTicket.userName?.charAt(0).toUpperCase()}</span>}
 </div>
 <div style={{ minWidth: 0, flex: 1 }}>
-<div style={{ fontWeight: 700, fontSize: 14, color: WHITE, fontFamily: FONT_FAMILY, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{selectedTicket.userName}</div>
+<div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+<span style={{ fontWeight: 700, fontSize: 14, color: WHITE, fontFamily: FONT_FAMILY, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{selectedTicket.userName}</span>
+<VerifiedSeal size={12} variant="white-on-blue" />
+</div>
 <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-<StabiloBadge label={ss.label} bg={ss.bg} text={ss.text} border={ss.border} size="sm" />
-<span style={{ fontSize: 9, color: "rgba(255,255,255,0.75)", fontWeight: 700 }}>{generateTicketId(selectedTicket.createdAt)}</span>
+<UserPresenceStatus userId={selectedTicket.userId} />
+{livechatTypingName && <span style={{ fontSize: 9, color: "rgba(255,255,255,0.9)", fontStyle: "italic", fontWeight: 700, fontFamily: FONT_FAMILY }}>• {livechatTypingName} mengetik...</span>}
 </div>
 </div>
 </div>
@@ -2996,7 +3082,7 @@ const isMine = msg.senderId === user.uid;
 return (
 <div key={msg.id || idx} style={{ alignSelf: isMine ? "flex-end" : "flex-start", maxWidth: "85%" }}>
 <div style={{ padding: "10px 14px", borderRadius: "12px", backgroundColor: isMine ? BLUE : "#ffffff", color: isMine ? WHITE : BLACK, fontSize: "13px", fontFamily: FONT_FAMILY, wordBreak: "break-word", border: isMine ? "none" : "1px solid rgba(0,0,0,0.08)", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
-{!isMine && <div style={{ fontSize: "11px", fontWeight: 700, color: BLUE, marginBottom: "4px" }}>{msg.senderName}</div>}
+{!isMine && <div style={{ fontSize: "11px", fontWeight: 700, color: BLUE, marginBottom: "4px", display: "flex", alignItems: "center", gap: 4 }}>{msg.senderName}<VerifiedSeal size={10} variant="blue-on-white" /></div>}
 {msg.replyTo && <div style={{ padding: "5px 8px", backgroundColor: isMine ? "rgba(255,255,255,0.2)" : "rgba(13,60,252,0.1)", borderLeft: `3px solid ${isMine ? WHITE : BLUE}`, borderRadius: "4px", marginBottom: "5px", fontSize: "10px", color: isMine ? WHITE : BLUE, fontStyle: "italic", fontFamily: FONT_FAMILY }}><strong>{msg.replyTo.senderName}:</strong> {msg.replyTo.text}</div>}
 <div>{msg.text}</div>
 <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "5px", marginTop: "4px" }}>{renderDeliveryStatus(msg, isMine)}<span style={{ fontSize: "9px", color: isMine ? WHITE : "#999" }}>{formatTime(msg.timestamp)}</span></div>
@@ -3005,7 +3091,7 @@ return (
 </div>
 );
 })}
-{typingText && selectedTicket.status !== "resolved" && <div style={{ alignSelf: "flex-start", fontSize: "12px", color: "#666", fontStyle: "italic", padding: "4px 8px", fontFamily: FONT_FAMILY }}>{typingText}</div>}
+{livechatTypingName && <TypingBubble name={livechatTypingName} />}
 {latestRollingMessage && <div style={{ alignSelf: "flex-start", maxWidth: "100%", width: "100%", borderTop: `1px dashed ${BLUE}40`, paddingTop: "8px", marginTop: "4px" }}><RollingNewMessage key={rollingKey} senderName={latestRollingMessage.senderName} message={latestRollingMessage.text} isFromAgent={latestRollingMessage.isFromAgent} /></div>}
 <div ref={messagesEndRef} />
 </div>
@@ -3015,7 +3101,7 @@ return (
 <>
 {replyTo && <div style={{ padding: "6px 16px", backgroundColor: "rgba(13,60,252,0.06)", borderTop: `1px solid ${BLUE}20`, display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}><ReplyIcon size={12} color={BLUE} /><div style={{ flex: 1, fontSize: "11px", color: BLUE, fontFamily: FONT_FAMILY, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}><strong>{replyTo.senderName}:</strong> {replyTo.text}</div><button onClick={() => setReplyTo(null)} style={{ background: "transparent", border: "none", color: BLUE, cursor: "pointer", fontSize: "14px", fontFamily: FONT_FAMILY, padding: 0, lineHeight: 1 }}>×</button></div>}
 <div style={{ padding: "12px 14px", borderTop: "1px solid rgba(0,0,0,0.08)", display: "flex", gap: "8px", backgroundColor: WHITE, flexShrink: 0 }}>
-<input type="text" value={messageText} onChange={handleTyping} onKeyPress={(e) => { if (e.key === "Enter" && !e.shiftKey && messageText.trim()) { e.preventDefault(); sendMessage(); } }} placeholder={selectedTicket.status === "waiting" && !isAdmin ? "Waiting for agent..." : "Type a message..."} disabled={selectedTicket.status === "waiting" && !isAdmin} style={{ flex: 1, padding: "10px 12px", border: "1px solid rgba(0,0,0,0.1)", borderRadius: "20px", fontSize: "13px", outline: "none", fontFamily: FONT_FAMILY, backgroundColor: selectedTicket.status === "waiting" && !isAdmin ? "#f5f5f5" : WHITE }} />
+<input type="text" value={messageText} onChange={handleTyping} onKeyPress={(e) => { if (e.key === "Enter" && !e.shiftKey && messageText.trim()) { e.preventDefault(); sendMessage(); } }} placeholder={selectedTicket.status === "waiting" && !isAdmin ? "Waiting for agent..." : "Type a message..."} disabled={selectedTicket.status === "waiting" && !isAdmin} style={{ flex: 1, padding: "10px 12px", border: "1px solid rgba(0,0,0,0.1)", borderRadius: "20px", fontSize: "13px", outline: "none", fontFamily: FONT_FAMILY, backgroundColor: selectedTicket.status === "waiting" && !isAdmin ? "#f5f5f5" : WHITE, color: BLUE }} />
 <button onClick={sendMessage} disabled={(selectedTicket.status === "waiting" && !isAdmin) || !messageText.trim()} style={{ padding: "10px 14px", backgroundColor: (selectedTicket.status === "waiting" && !isAdmin) || !messageText.trim() ? "#ccc" : BLUE, color: WHITE, border: "none", borderRadius: "50%", cursor: (selectedTicket.status === "waiting" && !isAdmin) || !messageText.trim() ? "not-allowed" : "pointer", fontFamily: FONT_FAMILY, display: "flex", alignItems: "center", justifyContent: "center" }}>
 <SendIcon size={14} color={WHITE} />
 </button>
@@ -3050,12 +3136,12 @@ return (
 </div>
 <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "8px", flexWrap: "wrap" }}><StabiloBadge label={ticket.topic} bg={ts.bg} text={ts.text} border={ts.border} size="sm" /><span style={{ fontSize: "10px", color: "rgba(255,255,255,0.75)", fontWeight: 700 }}>{ticketMsgCounts[ticket.id] || 0} msgs</span></div>
 {renderTicketPreview(ticket.id)}
-<div style={{ marginTop: "6px" }}><span style={{ fontSize: "9px", color: "rgba(255,255,255,0.65)", fontWeight: 700 }}>{generateTicketId(ticket.createdAt)}</span></div>
+<div style={{ marginTop: "6px" }}><span style={{ fontSize: "9px", color: "rgba(255,255,255,0.65)", fontWeight: 700 }}>{generateRandomTicketId(ticket.createdAt)}</span></div>
 </div>
 );
 };
 
-// ===== JIKA CHATBOT MODE AKTIF, RENDER LAYOUT CHATBOT =====
+// ===== JIKA CHATBOT MODE AKTIF =====
 if (chatbotMode) {
 return (
 <>
@@ -3075,10 +3161,9 @@ Live Chat
 </button>
 </div>
 </div>
-{/* CHATBOT LAYOUT: SINGLE PANEL VERTICAL */}
 <div style={{ display: "flex", gap: "16px", alignItems: "flex-start" }}>
 {renderChatbotMode()}
-{/* SIDEBAR MINI untuk list chat di chatbot mode */}
+{/* SIDEBAR MINI untuk chatbot mode */}
 <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "12px" }}>
 <div style={{ backgroundColor: BLUE, borderRadius: "12px", padding: "14px 16px", color: WHITE, fontFamily: FONT_FAMILY }}>
 <div style={{ fontSize: "13px", fontWeight: 700, marginBottom: "8px" }}>Quick Access</div>
@@ -3087,29 +3172,28 @@ Live Chat
 {isAdmin && appealTickets.length > 0 && <span style={{ padding: "6px 12px", backgroundColor: WHITE, color: BLUE, borderRadius: "6px", fontSize: "11px", fontWeight: 800, fontFamily: FONT_FAMILY }}>{appealTickets.length} Banding</span>}
 </div>
 </div>
-{/* List chat mini */}
 <div style={{ backgroundColor: WHITE, borderRadius: "12px", border: "1px solid rgba(0,0,0,0.08)", overflow: "hidden", maxHeight: "580px", display: "flex", flexDirection: "column" }}>
 <div style={{ padding: "12px 14px", backgroundColor: BLUE, color: WHITE, fontWeight: 700, fontSize: "13px", fontFamily: FONT_FAMILY, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
 <span>Chat List</span>
 <span style={{ fontSize: "10px", color: BLUE, padding: "2px 8px", borderRadius: "4px", backgroundColor: WHITE, fontWeight: 800 }}>{isAdmin ? tickets.length : userTickets.length}</span>
 </div>
 {renderSearchBar()}
-<div style={{ overflowY: "auto", flex: 1, minHeight: 0 }}>
+<div style={{ overflowY: "auto", flex: 1, minHeight: 0, backgroundColor: BLUE }}>
 {isAdmin ? (
 <>
 {bannedInWaiting.length > 0 && <div>{bannedInWaiting.map((t) => renderListItem(t))}</div>}
 {waiting.length > 0 && <div>{waiting.map((t) => renderListItem(t, { onExtraClick: () => takeTicket(t.id) }))}</div>}
 {active.length > 0 && <div>{active.map((t) => renderListItem(t))}</div>}
 {resolved.length > 0 && <div>{resolved.map((t) => renderListItem(t))}</div>}
-{!waiting.length && !active.length && !resolved.length && !bannedInWaiting.length && <div style={{ padding: "20px 14px", textAlign: "center", color: WHITE, fontSize: "12px", backgroundColor: BLUE }}>{searchQuery ? "No results" : "No incoming chats"}</div>}
+{!waiting.length && !active.length && !resolved.length && !bannedInWaiting.length && <div style={{ padding: "20px 14px", textAlign: "center", color: WHITE, fontSize: "12px" }}>{searchQuery ? "No results" : "No incoming chats"}</div>}
 </>
 ) : (
 <>
 {filter(tickets.filter((t) => t.userId === user.uid)).map((t) => renderListItem(t))}
-{!filter(tickets.filter((t) => t.userId === user.uid)).length && <div style={{ padding: "20px 14px", textAlign: "center", color: WHITE, fontSize: "12px", backgroundColor: BLUE }}>{searchQuery ? "No results" : "No chats yet"}</div>}
+{!filter(tickets.filter((t) => t.userId === user.uid)).length && <div style={{ padding: "20px 14px", textAlign: "center", color: WHITE, fontSize: "12px" }}>{searchQuery ? "No results" : "No chats yet"}</div>}
 </>
 )}
-{isAdmin && appealTickets.length > 0 && <div style={{ marginTop: "10px" }}><div style={{ padding: "8px 14px", display: "flex", alignItems: "center", gap: "6px", borderBottom: "1px solid rgba(255,255,255,0.1)", borderTop: "1px solid rgba(255,255,255,0.15)", backgroundColor: BLUE }}><StabiloBadge label={`Banding (${appealTickets.length})`} bg={WHITE} text={BLUE} border={WHITE} size="md" /></div>{appealTickets.map((t) => <div key={t.id} onClick={() => onOpenAppealChat(t)} style={{ padding: "12px 14px", borderBottom: "1px solid rgba(255,255,255,0.08)", backgroundColor: BLUE, cursor: "pointer" }}><div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}><span style={{ fontSize: "13px", fontWeight: 700, color: WHITE }}>{t.userName}</span>{(() => { const m = appealStatusMeta(t.status); return <StabiloBadge label={m.label} bg={WHITE} text={BLUE} border={WHITE} size="sm" />; })()}</div><div style={{ fontSize: "10px", color: "rgba(255,255,255,0.75)", fontFamily: FONT_FAMILY }}>{t.banReason || "Banding"}</div></div>)}</div>}
+{isAdmin && appealTickets.length > 0 && <div style={{ marginTop: "10px" }}><div style={{ padding: "8px 14px", display: "flex", alignItems: "center", gap: "6px", borderBottom: "1px solid rgba(255,255,255,0.1)", borderTop: "1px solid rgba(255,255,255,0.15)" }}><StabiloBadge label={`Banding (${appealTickets.length})`} bg={WHITE} text={BLUE} border={WHITE} size="md" /></div>{appealTickets.map((t) => <div key={t.id} onClick={() => onOpenAppealChat(t)} style={{ padding: "12px 14px", borderBottom: "1px solid rgba(255,255,255,0.08)", cursor: "pointer" }}><div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}><span style={{ fontSize: "13px", fontWeight: 700, color: WHITE }}>{t.userName}</span>{(() => { const m = appealStatusMeta(t.status); return <StabiloBadge label={m.label} bg={m.bg} text={m.text} border={m.border} size="sm" />; })()}</div><div style={{ fontSize: "10px", color: "rgba(255,255,255,0.75)", fontFamily: FONT_FAMILY }}>{t.banReason || "Banding"}</div></div>)}</div>}
 </div>
 </div>
 </div>
@@ -3126,7 +3210,6 @@ return (
 <div style={{ marginTop: "80px", paddingTop: "30px" }}>
 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "20px" }}>
 <h3 ref={liveChatTitleRef} data-tour="livechat-title" style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1 }}>Live Chat Agent</h3>
-{/* TOMBOL TOGGLE CHATBOT MODE */}
 <button 
 onClick={() => setChatbotMode(true)} 
 style={{ padding: "10px 18px", backgroundColor: BLUE, color: WHITE, border: `2px solid ${BLUE}`, borderRadius: "10px", fontSize: "13px", fontWeight: 800, cursor: "pointer", fontFamily: FONT_FAMILY, display: "inline-flex", alignItems: "center", gap: "8px", boxShadow: "0 6px 20px rgba(13,60,252,0.3)" }}
@@ -3163,14 +3246,19 @@ Chatbot Mode
 <div style={{ flex: 1, backgroundColor: WHITE, borderRadius: "12px", border: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", overflow: "hidden", height: "700px", minWidth: 0 }}>
 {selectedTicket ? (
 <>
+{/* HEADER CHAT ROOM - dengan nama, verified, status online, typing */}
 <div style={{ padding: "16px 20px", backgroundColor: BLUE, display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0, gap: "12px" }}>
 <div style={{ minWidth: 0, flex: 1 }}>
-<div style={{ fontWeight: 700, fontSize: "17px", color: WHITE, fontFamily: FONT_FAMILY, marginBottom: "6px" }}>{selectedTicket.userName}</div>
+<div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: "4px" }}>
+<span style={{ fontWeight: 700, fontSize: "17px", color: WHITE, fontFamily: FONT_FAMILY }}>{selectedTicket.userName}</span>
+<VerifiedSeal size={14} variant="white-on-blue" />
+</div>
 <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
 <StabiloBadge label={(STATUS_STYLES[selectedTicket.status] || STATUS_STYLES.active).label} bg={(STATUS_STYLES[selectedTicket.status] || STATUS_STYLES.active).bg} text={(STATUS_STYLES[selectedTicket.status] || STATUS_STYLES.active).text} border={(STATUS_STYLES[selectedTicket.status] || STATUS_STYLES.active).border} size="sm" />
 <StabiloBadge label={selectedTicket.topic} bg={(TOPIC_STYLES[selectedTicket.topic] || TOPIC_STYLES["Other"]).bg} text={(TOPIC_STYLES[selectedTicket.topic] || TOPIC_STYLES["Other"]).text} border={(TOPIC_STYLES[selectedTicket.topic] || TOPIC_STYLES["Other"]).border} size="sm" />
-{selectedTicket.typing && selectedTicket.status !== "resolved" && <span style={{ fontSize: "12px", color: WHITE, fontStyle: "italic", fontWeight: 700 }}>{selectedTicket.typingUserName} is typing...</span>}
-<span style={{ fontSize: "10px", color: "rgba(255,255,255,0.75)", fontWeight: 700 }}>{generateTicketId(selectedTicket.createdAt)}</span>
+<UserPresenceStatus userId={selectedTicket.userId} />
+{livechatTypingName && <span style={{ fontSize: "11px", color: WHITE, fontStyle: "italic", fontWeight: 700 }}>{livechatTypingName} sedang mengetik...</span>}
+<span style={{ fontSize: "10px", color: "rgba(255,255,255,0.75)", fontWeight: 700 }}>{generateRandomTicketId(selectedTicket.createdAt)}</span>
 </div>
 </div>
 <div style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
@@ -3186,7 +3274,7 @@ const isMine = msg.senderId === user.uid;
 return (
 <div key={msg.id || idx} style={{ alignSelf: isMine ? "flex-end" : "flex-start", maxWidth: "70%" }}>
 <div style={{ padding: "12px 16px", borderRadius: "12px", backgroundColor: isMine ? BLUE : "#f4f4f5", color: isMine ? WHITE : BLACK, fontSize: "15px", fontFamily: FONT_FAMILY, wordBreak: "break-word", border: isMine ? "none" : "1px solid rgba(0,0,0,0.05)" }}>
-{!isMine && <div style={{ fontSize: "12px", fontWeight: 700, color: BLUE, marginBottom: "5px" }}>{msg.senderName}</div>}
+{!isMine && <div style={{ fontSize: "12px", fontWeight: 700, color: BLUE, marginBottom: "5px", display: "flex", alignItems: "center", gap: 4 }}>{msg.senderName}<VerifiedSeal size={10} variant="blue-on-white" /></div>}
 {msg.replyTo && <div style={{ padding: "6px 10px", backgroundColor: isMine ? "rgba(255,255,255,0.2)" : "rgba(13,60,252,0.1)", borderLeft: `3px solid ${isMine ? WHITE : BLUE}`, borderRadius: "4px", marginBottom: "6px", fontSize: "11px", color: isMine ? WHITE : BLUE, fontStyle: "italic", fontFamily: FONT_FAMILY }}><strong>{msg.replyTo.senderName}:</strong> {msg.replyTo.text}</div>}
 <div>{msg.text}</div>
 <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "6px", marginTop: "5px" }}>{renderDeliveryStatus(msg, isMine)}<span style={{ fontSize: "10px", color: isMine ? WHITE : "#999" }}>{formatTime(msg.timestamp)}</span></div>
@@ -3195,7 +3283,7 @@ return (
 </div>
 );
 })}
-{typingText && selectedTicket.status !== "resolved" && <div style={{ alignSelf: "flex-start", fontSize: "14px", color: "#666", fontStyle: "italic", padding: "5px 10px", fontFamily: FONT_FAMILY }}>{typingText}</div>}
+{livechatTypingName && <TypingBubble name={livechatTypingName} />}
 {latestRollingMessage && <div style={{ alignSelf: "flex-start", maxWidth: "100%", width: "100%", borderTop: `1px dashed ${BLUE}40`, paddingTop: "10px", marginTop: "6px" }}><RollingNewMessage key={rollingKey} senderName={latestRollingMessage.senderName} message={latestRollingMessage.text} isFromAgent={latestRollingMessage.isFromAgent} /></div>}
 <div ref={messagesEndRef} />
 </div>
