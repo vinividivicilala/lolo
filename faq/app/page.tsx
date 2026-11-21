@@ -472,7 +472,7 @@ return (
 );
 };
 
-// ===== STATUS ONLINE/OFFLINE REAL-TIME (untuk user tertentu) =====
+// ===== USER PRESENCE STATUS (REAL-TIME) =====
 const UserPresenceStatus = ({ userId, light = true }: { userId?: string; light?: boolean }) => {
 const [online, setOnline] = useState<boolean | null>(null);
 useEffect(() => {
@@ -489,13 +489,13 @@ return () => unsub();
 if (online === null) return null;
 return (
 <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 700, fontFamily: FONT_FAMILY, color: light ? WHITE : BLUE }}>
-<span style={{ width: 8, height: 8, borderRadius: "50%", border: "none", display: "inline-block", backgroundColor: online ? WHITE : BLACK, animation: "blinking-dot 1.4s ease-in-out infinite" }} />
+<span style={{ width: 8, height: 8, borderRadius: "50%", border: "none", display: "inline-block", backgroundColor: online ? GREEN : "#9ca3af", animation: "blinking-dot 1.4s ease-in-out infinite" }} />
 {online ? "Online" : "Offline"}
 </div>
 );
 };
 
-// ===== STATUS ONLINE/OFFLINE ADMIN =====
+// ===== ADMIN PRESENCE STATUS =====
 const AdminPresenceStatus = ({ light = true }: { light?: boolean }) => {
 const [online, setOnline] = useState<boolean | null>(null);
 useEffect(() => {
@@ -514,12 +514,12 @@ return (
 );
 };
 
-// ===== HOOK: Subscribe typing status real-time =====
-const useRealtimeTyping = (db: any, ticketId: string | undefined, currentUserId: string | undefined) => {
+// ===== HOOK: Subscribe typing status real-time untuk livechat =====
+const useRealtimeTypingLivechat = (db: any, ticketId: string | undefined, currentUserId: string | undefined) => {
 const [typingName, setTypingName] = useState<string | null>(null);
 useEffect(() => {
 if (!db || !ticketId) { setTypingName(null); return; }
-const unsub = onSnapshot(doc(db, "appeal_tickets", ticketId), (snap: any) => {
+const unsub = onSnapshot(doc(db, "livechat_tickets", ticketId), (snap: any) => {
 if (!snap.exists()) { setTypingName(null); return; }
 const d = snap.data();
 if (d.typing && d.typingUserId && d.typingUserId !== currentUserId) {
@@ -533,12 +533,12 @@ return () => unsub();
 return typingName;
 };
 
-// ===== HOOK: Subscribe typing status real-time untuk livechat =====
-const useRealtimeTypingLivechat = (db: any, ticketId: string | undefined, currentUserId: string | undefined) => {
+// ===== HOOK: Subscribe typing status real-time untuk appeal =====
+const useRealtimeTypingAppeal = (db: any, ticketId: string | undefined, currentUserId: string | undefined) => {
 const [typingName, setTypingName] = useState<string | null>(null);
 useEffect(() => {
 if (!db || !ticketId) { setTypingName(null); return; }
-const unsub = onSnapshot(doc(db, "livechat_tickets", ticketId), (snap: any) => {
+const unsub = onSnapshot(doc(db, "appeal_tickets", ticketId), (snap: any) => {
 if (!snap.exists()) { setTypingName(null); return; }
 const d = snap.data();
 if (d.typing && d.typingUserId && d.typingUserId !== currentUserId) {
@@ -590,7 +590,7 @@ interface AppealTicket { id: string; userId: string; userName: string; userEmail
 interface PasskeyRecord { id: string; credentialId: string; name: string; createdAt: number; transports?: string[]; }
 interface AccountStatusInfo { isBanned: boolean; reason: string; message: string; canCreateTicket: boolean; canSendMessage: boolean; }
 
-// ===== FUNGSI GENERATE RANDOM TICKET ID =====
+// ===== GENERATE RANDOM TICKET ID =====
 const generateRandomTicketId = (createdAt: any): string => {
 if (!createdAt) return "#TICKET-000000-0000";
 const d = createdAt.toDate ? createdAt.toDate() : new Date(createdAt);
@@ -735,6 +735,7 @@ Farid Ardiansyah
 </>
 );
 };
+
 // ===== FOOTER =====
 const FooterSection = () => {
 const containerRef = useRef<HTMLDivElement>(null);
@@ -844,6 +845,7 @@ return (
 </div>
 );
 };
+
 // ===== NAVBAR BUTTON =====
 const NavbarButton = ({ label, panelTitle, panelDescription, panelImage, panelRightTitle, panelRightDescription, iconType, bigPanelWidth = 850, bigPanelHeight = 260, buttonColor = BLUE, buttonHoverColor = "#000000", panelColor = BLUE, iconButtonColor = "#000000", iconButtonHoverColor = BLUE, panelBoxColor = "rgba(255,255,255,0.12)", panelBoxBorder = "rgba(255,255,255,0.25)", labelTextColor = "#ffffff", labelTextHoverColor = "#ffffff", titleTextColor = "#ffffff", descriptionTextColor = "rgba(255,255,255,0.9)", iconComponent = null, isResources = false }: any) => {
 const [open, setOpen] = useState(false);
@@ -914,6 +916,7 @@ return (
 </div>
 );
 };
+
 const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
 return (
 <div style={{ position: "fixed", top: "64px", left: shifted ? "340px" : "60px", zIndex: 9000, display: "flex", alignItems: "center", gap: "8px", fontFamily: FONT_FAMILY, transition: "left 0.6s cubic-bezier(0.65, 0, 0.35, 1)", willChange: "left" }}>
@@ -927,6 +930,7 @@ return (
 </div>
 );
 };
+
 // ===== GOOGLE AUTH TAB =====
 const GoogleAuthenticatorTab = ({ user, db }: { user: any; db: any }) => {
 const [step, setStep] = useState<"loading" | "intro" | "install" | "setup" | "verify" | "success" | "active" | "disable">("loading");
@@ -1194,6 +1198,7 @@ Google Authenticator menambahkan lapisan keamanan ekstra dengan kode 6 digit yan
 </div>
 );
 };
+
 // ===== PASSKEY TAB =====
 const PasskeyTab = ({ user, db }: { user: any; db: any }) => {
 const [step, setStep] = useState<"loading" | "intro" | "register" | "done">("loading");
@@ -1374,6 +1379,7 @@ Credential ID: {registeredCredential.slice(0, 40)}...
 </div>
 );
 };
+
 // ===== SECURITY CENTER =====
 const SecurityCenterPanel = ({ user, db, onBack }: { user: any; db: any; onBack: () => void }) => {
 const [tab, setTab] = useState<"totp" | "passkey">("totp");
@@ -1406,7 +1412,7 @@ const [encryptionReady, setEncryptionReady] = useState(false);
 const [status, setStatus] = useState<string>(appealTicket.status);
 const chatRef = useRef<HTMLDivElement>(null);
 const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-const typingName = useRealtimeTyping(db, appealTicket?.id, user?.uid);
+const typingName = useRealtimeTypingAppeal(db, appealTicket?.id, user?.uid);
 useEffect(() => { getCryptoKey().then(() => setEncryptionReady(true)).catch(() => setEncryptionReady(true)); }, []);
 useEffect(() => {
 if (!db || !appealTicket) return;
@@ -1495,7 +1501,7 @@ Ticket chat ini telah {status === "resolved" ? "DITERIMA & SELESAI" : "DITOLAK"}
 );
 };
 
-// ===== RIWAYAT PESAN BANDING PER AKUN USER =====
+// ===== RIWAYAT PESAN BANDING =====
 const AppealTicketHistory = ({ user, db }: { user: any; db: any }) => {
 const [tickets, setTickets] = useState<AppealTicket[]>([]);
 const [openId, setOpenId] = useState<string | null>(null);
@@ -1845,11 +1851,11 @@ const [messages, setMessages] = useState<AppealMessage[]>([]);
 const [messageText, setMessageText] = useState("");
 const [replyTo, setReplyTo] = useState<AppealMessage | null>(null);
 const [encryptionReady, setEncryptionReady] = useState(false);
-const [typingName, setTypingName] = useState<string | null>(null);
 const [status, setStatus] = useState<string>(appealTicket.status);
 const messagesEndRef = useRef<HTMLDivElement>(null);
 const chatRef = useRef<HTMLDivElement>(null);
 const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+const typingName = useRealtimeTypingAppeal(db, appealTicket?.id, user?.uid);
 useEffect(() => { getCryptoKey().then(() => setEncryptionReady(true)).catch(() => setEncryptionReady(true)); }, []);
 useEffect(() => {
 if (!db || !appealTicket) return;
@@ -1867,10 +1873,9 @@ const unsub = onSnapshot(doc(db, "appeal_tickets", appealTicket.id), (snap: any)
 if (!snap.exists()) return;
 const d = snap.data();
 setStatus(d.status || "waiting");
-setTypingName(d.typing && d.typingUserId !== user?.uid ? (d.typingUserName || null) : null);
 });
 return () => unsub();
-}, [db, appealTicket, user]);
+}, [db, appealTicket]);
 useEffect(() => {
 if (!db || !appealTicket || !user) return;
 messages.filter((m) => m.senderId !== user.uid && m.senderId !== "system" && !m.read).forEach(async (msg) => { await updateDoc(doc(db, "appeal_tickets", appealTicket.id, "messages", msg.id), { read: true, deliveryStatus: "read" }); });
@@ -2366,6 +2371,7 @@ return (
 </div>
 );
 };
+
 // ===== ONBOARDING TOUR =====
 const OnboardingTour = ({ steps, onComplete, isActive, currentStep, setCurrentStep }: any) => {
 const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
@@ -2433,6 +2439,7 @@ return (
 </>
 );
 };
+
 // ===== ROLLING NEW MESSAGE =====
 const RollingNewMessage = ({ senderName, message }: { senderName: string; message: string; isFromAgent: boolean }) => {
 const containerRef = useRef<HTMLDivElement>(null);
@@ -2460,6 +2467,7 @@ return (
 </div>
 );
 };
+
 // ===== CLOSE ROOM BUTTON =====
 const CloseRoomButton = ({ onConfirm, disabled }: { onConfirm: () => void; disabled?: boolean }) => {
 const btnRef = useRef<HTMLButtonElement>(null);
@@ -2496,7 +2504,7 @@ return (
 <span style={{ fontSize: 13, color: WHITE, fontWeight: 700, fontFamily: FONT_FAMILY }}>
 {appealStatus === "resolved" ? "Banding telah diterima & selesai" : appealStatus === "closed" ? "Banding telah ditolak" : "Banding sedang diproses"}
 </span>
-<StabiloBadge label={meta.label} bg={meta.bg} text={meta.text} border={meta.border} size="sm" />
+<StabiloBadge label={meta.label} bg={WHITE} text={BLUE} border={WHITE} size="sm" />
 </div>
 )}
 <button onClick={onAppeal} style={{ alignSelf: "flex-start", padding: "10px 18px", backgroundColor: WHITE, color: BLUE, border: `1.5px solid ${WHITE}`, borderRadius: "8px", fontSize: "13px", fontWeight: 800, cursor: "pointer", fontFamily: FONT_FAMILY, letterSpacing: "0.5px", textTransform: "uppercase", display: "inline-flex", alignItems: "center", gap: "8px" }}>
@@ -2513,11 +2521,11 @@ const [messages, setMessages] = useState<AppealMessage[]>([]);
 const [messageText, setMessageText] = useState("");
 const [replyTo, setReplyTo] = useState<AppealMessage | null>(null);
 const [encryptionReady, setEncryptionReady] = useState(false);
-const [typingName, setTypingName] = useState<string | null>(null);
 const [status, setStatus] = useState<string>(appealTicket?.status || "waiting");
 const messagesEndRef = useRef<HTMLDivElement>(null);
 const chatRef = useRef<HTMLDivElement>(null);
 const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+const typingName = useRealtimeTypingAppeal(db, appealTicket?.id, user?.uid);
 useEffect(() => { getCryptoKey().then(() => setEncryptionReady(true)).catch(() => setEncryptionReady(true)); }, []);
 useEffect(() => {
 if (!db || !appealTicket) return;
@@ -2535,10 +2543,9 @@ const unsub = onSnapshot(doc(db, "appeal_tickets", appealTicket.id), (snap: any)
 if (!snap.exists()) return;
 const d = snap.data();
 setStatus(d.status || "waiting");
-setTypingName(d.typing && d.typingUserId !== user?.uid ? (d.typingUserName || null) : null);
 });
 return () => unsub();
-}, [db, appealTicket, user]);
+}, [db, appealTicket]);
 useEffect(() => {
 if (!db || !appealTicket || !user) return;
 messages.filter((m) => m.senderId !== user.uid && m.senderId !== "system" && !m.read).forEach(async (msg) => { await updateDoc(doc(db, "appeal_tickets", appealTicket.id, "messages", msg.id), { read: true, deliveryStatus: "read" }); });
@@ -2732,7 +2739,7 @@ Ticket chat ini telah {status === "resolved" ? "DITERIMA & SELESAI" : "DITOLAK"}
 );
 };
 
-// ===== LIVE CHAT AGENT - DENGAN CHATBOT MODE =====
+// ===== LIVE CHAT AGENT - DENGAN CHATBOT MODE SINGLE PAGE =====
 const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBannedAppealChat }: any) => {
 const [tickets, setTickets] = useState<Ticket[]>([]);
 const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
@@ -2780,7 +2787,7 @@ if (!tid) return;
 const t = tickets.find((x) => x.id === tid);
 if (t) { setSelectedTicket(t); window.history.replaceState({}, "", "/live-chat-agent"); }
 }, [tickets]);
-// ===== TOPIC LEBIH BANYAK =====
+// ===== 11 TOPIC =====
 const topics = ["Product Inquiry", "Technical Support", "Account Issues", "Donation", "Partnership", "Billing & Payment", "Feature Request", "Bug Report", "General Question", "Feedback & Suggestion", "Other"];
 const tourSteps: TourStep[] = [
 { target: "login-button", title: "Login First", content: "Login untuk mulai chat dengan agent.", position: "bottom", isLoginStep: true },
@@ -2918,7 +2925,7 @@ setSelectedTopic("");
 setShowStartChat(false); 
 setBanMessage(null); 
 hasAuto.current = false;
-// Jika chatbot mode aktif, tetap di chatbot mode
+// Jika chatbot mode aktif, tetap di chatbot mode dan auto-select ticket baru
 if (chatbotMode) {
 const newTicket = { id: ref.id, userId: user.uid, userName: user.displayName || user.email || "User", userEmail: user.email, userPhoto: user.photoURL || "", status: "waiting", topic: selectedTopic, createdAt: new Date(), unreadCount: 0, typing: false } as Ticket;
 setSelectedTicket(newTicket);
@@ -3006,54 +3013,179 @@ const renderSearchBar = () => (
 </div>
 );
 
-// ===== RENDER CHATBOT MODE =====
+// ===== RENDER CHATBOT MODE - SINGLE PAGE LAYOUT =====
 const renderChatbotMode = () => {
-if (!selectedTicket) {
+// STATE 1: Belum login
+if (!user) {
 return (
-<div style={{ display: "flex", flexDirection: "column", height: "700px", width: "420px", backgroundColor: WHITE, borderRadius: "16px", border: `2px solid ${BLUE}`, overflow: "hidden", boxShadow: "0 12px 40px rgba(13,60,252,0.15)" }}>
-<div style={{ padding: "16px 20px", backgroundColor: BLUE, display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
+<div style={{ display: "flex", flexDirection: "column", height: "700px", width: "420px", backgroundColor: WHITE, borderRadius: "20px", border: `2px solid ${BLUE}`, overflow: "hidden", boxShadow: "0 20px 60px rgba(13,60,252,0.2)" }}>
+{/* HEADER */}
+<div style={{ padding: "20px", backgroundColor: BLUE, display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-<AgentIcon size={22} color={WHITE} />
+<div style={{ width: 40, height: 40, borderRadius: "50%", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center" }}>
+<AgentIcon size={24} color={BLUE} />
+</div>
 <div>
-<div style={{ fontWeight: 700, fontSize: 15, color: WHITE, fontFamily: FONT_FAMILY }}>Live Chat Agent</div>
-<div style={{ fontSize: 11, color: "rgba(255,255,255,0.8)", fontFamily: FONT_FAMILY }}>Pilih chat untuk mulai</div>
+<div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+<span style={{ fontWeight: 800, fontSize: 16, color: WHITE, fontFamily: FONT_FAMILY }}>{AGENT_NAME}</span>
+<VerifiedSeal size={16} variant="white-on-blue" />
+</div>
+<div style={{ fontSize: 11, color: "rgba(255,255,255,0.85)", fontFamily: FONT_FAMILY }}>Customer Support</div>
 </div>
 </div>
-<button onClick={() => setChatbotMode(false)} title="Kembali ke Live Chat Agent" style={{ background: "rgba(255,255,255,0.15)", border: `1px solid rgba(255,255,255,0.3)`, color: WHITE, borderRadius: "8px", padding: "6px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+<button onClick={() => setChatbotMode(false)} title="Kembali ke Live Chat Agent" style={{ background: "rgba(255,255,255,0.15)", border: `1px solid rgba(255,255,255,0.3)`, color: WHITE, borderRadius: "8px", padding: "6px 8px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
 <ToggleLayoutIcon size={16} color={WHITE} />
 </button>
 </div>
-<div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "30px 20px", backgroundColor: "#FAFBFF" }}>
-<div style={{ width: 60, height: 60, borderRadius: "50%", backgroundColor: BLUE, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
-<ChatIcon size={30} color={WHITE} />
+{/* WELCOME CONTENT */}
+<div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 30px", backgroundColor: "#FAFBFF", textAlign: "center" }}>
+<div style={{ width: 80, height: 80, borderRadius: "50%", backgroundColor: BLUE, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20, boxShadow: "0 8px 24px rgba(13,60,252,0.3)" }}>
+<ChatIcon size={40} color={WHITE} />
 </div>
-<div style={{ fontSize: 15, fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, textAlign: "center", marginBottom: 8 }}>Belum ada chat dipilih</div>
-<div style={{ fontSize: 12, color: "#666", fontFamily: FONT_FAMILY, textAlign: "center", lineHeight: 1.5 }}>
-{isAdmin ? "Klik salah satu user dari daftar di sidebar untuk mulai chat" : "Klik 'Start Live Chat' atau pilih chat dari riwayat untuk mulai"}
+<h2 style={{ fontSize: 24, fontWeight: 800, color: BLUE, fontFamily: FONT_FAMILY, margin: 0, marginBottom: 12, letterSpacing: "-0.02em" }}>Selamat Datang di Live Chat</h2>
+<p style={{ fontSize: 14, color: "#555", fontFamily: FONT_FAMILY, lineHeight: 1.6, margin: 0, marginBottom: 24, maxWidth: 320 }}>
+Hubungi tim support kami untuk mendapatkan bantuan. Login terlebih dahulu untuk memulai percakapan.
+</p>
+<Link href="/signin" style={{ textDecoration: "none" }}>
+<button data-tour="login-button" style={{ padding: "12px 28px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "10px", fontSize: "14px", fontWeight: 700, cursor: "pointer", fontFamily: FONT_FAMILY, display: "inline-flex", alignItems: "center", gap: "8px", boxShadow: "0 6px 20px rgba(13,60,252,0.3)" }}>
+<PeopleIcon size={16} color={WHITE} />
+Login untuk Chat
+</button>
+</Link>
+</div>
+</div>
+);
+}
+
+// STATE 2: Belum ada chat dipilih / belum ada chat
+if (!selectedTicket) {
+return (
+<div style={{ display: "flex", flexDirection: "column", height: "700px", width: "420px", backgroundColor: WHITE, borderRadius: "20px", border: `2px solid ${BLUE}`, overflow: "hidden", boxShadow: "0 20px 60px rgba(13,60,252,0.2)" }}>
+{/* HEADER */}
+<div style={{ padding: "16px 20px", backgroundColor: BLUE, display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
+<div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+<div style={{ width: 38, height: 38, borderRadius: "50%", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center" }}>
+<AgentIcon size={22} color={BLUE} />
+</div>
+<div>
+<div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+<span style={{ fontWeight: 800, fontSize: 15, color: WHITE, fontFamily: FONT_FAMILY }}>{AGENT_NAME}</span>
+<VerifiedSeal size={14} variant="white-on-blue" />
+</div>
+<AdminPresenceStatus />
+</div>
+</div>
+<button onClick={() => setChatbotMode(false)} title="Kembali ke Live Chat Agent" style={{ background: "rgba(255,255,255,0.15)", border: `1px solid rgba(255,255,255,0.3)`, color: WHITE, borderRadius: "8px", padding: "6px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+<ToggleLayoutIcon size={14} color={WHITE} />
+</button>
+</div>
+{/* CONTENT - NEW CHAT + LIST */}
+<div style={{ flex: 1, overflowY: "auto", backgroundColor: "#FAFBFF", padding: "16px" }}>
+{!isAdmin && !showStartChat && (
+<button 
+data-tour="start-chat-button" 
+onClick={() => setShowStartChat(true)} 
+style={{ width: "100%", padding: "14px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "12px", fontSize: "14px", fontWeight: 800, cursor: "pointer", fontFamily: FONT_FAMILY, display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", marginBottom: "16px", boxShadow: "0 6px 20px rgba(13,60,252,0.3)" }}
+>
+<PlusIcon size={16} color={WHITE} />
+New Chat
+</button>
+)}
+{showStartChat && !isAdmin && (
+<div style={{ backgroundColor: WHITE, borderRadius: "12px", padding: "16px", marginBottom: "16px", border: `1.5px solid ${BLUE}30` }}>
+<div style={{ fontSize: "13px", marginBottom: "10px", fontFamily: FONT_FAMILY, fontWeight: 700, color: BLUE }}>Pilih topik:</div>
+<select value={selectedTopic} onChange={(e) => setSelectedTopic(e.target.value)} style={{ width: "100%", padding: "10px 12px", border: `2px solid ${BLUE}`, borderRadius: "8px", fontSize: "13px", fontFamily: FONT_FAMILY, outline: "none", backgroundColor: WHITE, marginBottom: "12px", color: BLUE, fontWeight: 600 }}>
+<option value="">-- Select topic --</option>
+{topics.map((t) => <option key={t} value={t}>{t}</option>)}
+</select>
+<div style={{ display: "flex", gap: "8px" }}>
+<button onClick={startChat} disabled={!selectedTopic} style={{ flex: 1, padding: "10px", backgroundColor: selectedTopic ? BLUE : "#ccc", color: WHITE, border: "none", borderRadius: "8px", fontSize: "13px", fontWeight: 700, cursor: selectedTopic ? "pointer" : "not-allowed", fontFamily: FONT_FAMILY }}>Mulai Chat</button>
+<button onClick={() => setShowStartChat(false)} style={{ padding: "10px 14px", backgroundColor: "transparent", color: "#666", border: `1px solid #ccc`, borderRadius: "8px", fontSize: "13px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY }}>Batal</button>
+</div>
+</div>
+)}
+{/* LIST CHAT */}
+<div style={{ backgroundColor: WHITE, borderRadius: "12px", border: "1px solid rgba(0,0,0,0.08)", overflow: "hidden" }}>
+<div style={{ padding: "12px 14px", backgroundColor: BLUE, color: WHITE, fontWeight: 700, fontSize: "13px", fontFamily: FONT_FAMILY, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+<span>Chat History</span>
+<span style={{ fontSize: "10px", color: BLUE, padding: "2px 8px", borderRadius: "4px", backgroundColor: WHITE, fontWeight: 800 }}>{isAdmin ? tickets.length : tickets.filter((t: Ticket) => t.userId === user.uid).length}</span>
+</div>
+<div style={{ padding: "8px" }}>
+{renderSearchBar()}
+</div>
+<div style={{ maxHeight: "380px", overflowY: "auto" }}>
+{isAdmin ? (
+<>
+{filter(tickets).map((t: Ticket) => {
+const ss = STATUS_STYLES[t.status] || STATUS_STYLES.active;
+return (
+<div key={t.id} onClick={() => { setSelectedTicket(t); if (isAdmin) takeTicket(t.id); }} style={{ padding: "12px 14px", borderBottom: "1px solid rgba(0,0,0,0.05)", cursor: "pointer", backgroundColor: selectedTicket?.id === t.id ? "rgba(13,60,252,0.08)" : "transparent" }}>
+<div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px", gap: "6px" }}>
+<div style={{ fontWeight: 700, fontSize: "13px", color: BLUE, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>{t.userName}</div>
+<StabiloBadge label={ss.label} bg={ss.bg} text={ss.text} border={ss.border} size="sm" />
+</div>
+<div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px", flexWrap: "wrap" }}>
+<StabiloBadge label={t.topic} bg={WHITE} text={BLUE} border={BLUE} size="sm" />
+<span style={{ fontSize: "9px", color: "rgba(0,0,0,0.5)", fontWeight: 700 }}>{generateRandomTicketId(t.createdAt)}</span>
+</div>
+{renderTicketPreview(t.id)}
+</div>
+);
+})}
+{filter(tickets).length === 0 && <div style={{ padding: "20px 14px", textAlign: "center", color: "#999", fontSize: "12px" }}>{searchQuery ? "No results" : "No incoming chats"}</div>}
+</>
+) : (
+<>
+{filter(tickets.filter((t: Ticket) => t.userId === user.uid)).map((t: Ticket) => {
+const ss = STATUS_STYLES[t.status] || STATUS_STYLES.active;
+return (
+<div key={t.id} onClick={() => setSelectedTicket(t)} style={{ padding: "12px 14px", borderBottom: "1px solid rgba(0,0,0,0.05)", cursor: "pointer", backgroundColor: selectedTicket?.id === t.id ? "rgba(13,60,252,0.08)" : "transparent" }}>
+<div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px", gap: "6px" }}>
+<div style={{ fontWeight: 700, fontSize: "13px", color: BLUE, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>{t.topic}</div>
+<StabiloBadge label={ss.label} bg={ss.bg} text={ss.text} border={ss.border} size="sm" />
+</div>
+<div style={{ fontSize: "10px", color: "rgba(0,0,0,0.5)", fontWeight: 700, marginBottom: "4px" }}>{generateRandomTicketId(t.createdAt)}</div>
+{renderTicketPreview(t.id)}
+</div>
+);
+})}
+{filter(tickets.filter((t: Ticket) => t.userId === user.uid)).length === 0 && <div style={{ padding: "20px 14px", textAlign: "center", color: "#999", fontSize: "12px" }}>{searchQuery ? "No results" : "No chats yet"}</div>}
+</>
+)}
+</div>
 </div>
 </div>
 </div>
 );
 }
 
+// STATE 3: Chat aktif - tampilkan room chat
 const ss = STATUS_STYLES[selectedTicket.status] || STATUS_STYLES.active;
 const ts = TOPIC_STYLES[selectedTicket.topic] || TOPIC_STYLES["Other"];
+// PERBAIKAN: Untuk user biasa, tampilkan nama admin di room chat (bukan nama sendiri)
+const displayUserName = isAdmin ? selectedTicket.userName : AGENT_NAME;
+const displayUserPhoto = isAdmin ? selectedTicket.userPhoto : "";
+const showVerified = !isAdmin; // Verified badge hanya muncul untuk admin (user biasa lihat admin)
 
 return (
-<div style={{ display: "flex", flexDirection: "column", height: "700px", width: "420px", backgroundColor: WHITE, borderRadius: "16px", border: `2px solid ${BLUE}`, overflow: "hidden", boxShadow: "0 12px 40px rgba(13,60,252,0.15)" }}>
-{/* HEADER CHATBOT - dengan nama, verified, status online, typing */}
+<div style={{ display: "flex", flexDirection: "column", height: "700px", width: "420px", backgroundColor: WHITE, borderRadius: "20px", border: `2px solid ${BLUE}`, overflow: "hidden", boxShadow: "0 20px 60px rgba(13,60,252,0.2)" }}>
+{/* HEADER - dengan nama admin, verified, status online, typing */}
 <div style={{ padding: "14px 16px", backgroundColor: BLUE, display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0, gap: 10 }}>
 <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0, flex: 1 }}>
 <div style={{ width: 38, height: 38, borderRadius: "50%", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", flexShrink: 0 }}>
-{selectedTicket.userPhoto ? <img src={selectedTicket.userPhoto} alt={selectedTicket.userName} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <span style={{ fontSize: 15, fontWeight: 800, color: BLUE }}>{selectedTicket.userName?.charAt(0).toUpperCase()}</span>}
+{isAdmin ? (
+displayUserPhoto ? <img src={displayUserPhoto} alt={displayUserName} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <span style={{ fontSize: 15, fontWeight: 800, color: BLUE }}>{displayUserName?.charAt(0).toUpperCase()}</span>
+) : (
+<AgentIcon size={22} color={BLUE} />
+)}
 </div>
 <div style={{ minWidth: 0, flex: 1 }}>
 <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-<span style={{ fontWeight: 700, fontSize: 14, color: WHITE, fontFamily: FONT_FAMILY, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{selectedTicket.userName}</span>
-<VerifiedSeal size={12} variant="white-on-blue" />
+<span style={{ fontWeight: 700, fontSize: 14, color: WHITE, fontFamily: FONT_FAMILY, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{displayUserName}</span>
+{showVerified && <VerifiedSeal size={12} variant="white-on-blue" />}
 </div>
 <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-<UserPresenceStatus userId={selectedTicket.userId} />
+{isAdmin ? <UserPresenceStatus userId={selectedTicket.userId} /> : <AdminPresenceStatus />}
 {livechatTypingName && <span style={{ fontSize: 9, color: "rgba(255,255,255,0.9)", fontStyle: "italic", fontWeight: 700, fontFamily: FONT_FAMILY }}>• {livechatTypingName} mengetik...</span>}
 </div>
 </div>
@@ -3064,6 +3196,9 @@ return (
 <CheckIcon size={12} color={WHITE} />
 </button>
 )}
+<button onClick={() => setSelectedTicket(null)} title="Kembali ke list" style={{ padding: "6px", backgroundColor: "rgba(255,255,255,0.15)", border: `1px solid rgba(255,255,255,0.3)`, borderRadius: "6px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+<ChevronLeftIcon size={14} color={WHITE} />
+</button>
 <button onClick={() => setChatbotMode(false)} title="Kembali ke Live Chat Agent" style={{ padding: "6px", backgroundColor: "rgba(255,255,255,0.15)", border: `1px solid rgba(255,255,255,0.3)`, borderRadius: "6px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
 <ToggleLayoutIcon size={14} color={WHITE} />
 </button>
@@ -3114,11 +3249,42 @@ return (
 
 if (checkingBan) return (<div style={{ marginTop: "80px", paddingTop: "30px" }}><h3 style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1 }}>Live Chat Agent</h3><div style={{ padding: "20px", textAlign: "center", color: "#666", fontFamily: FONT_FAMILY }}>Checking account status...</div></div>);
 if (!isMounted) return <div style={{ minHeight: "100px" }} />;
-if (!user) return (<><OnboardingTour steps={tourSteps} onComplete={completeTour} isActive={showTour} currentStep={tourStep} setCurrentStep={setTourStep} /><div style={{ marginTop: "80px", paddingTop: "30px" }}><h3 ref={liveChatTitleRef} data-tour="livechat-title" style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1, marginBottom: "20px" }}>Live Chat Agent</h3><p style={{ fontSize: "15px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "10px" }}>Please login to use Live Chat Agent</p><Link href="/" style={{ textDecoration: "none" }}><button data-tour="login-button" style={{ padding: "8px 20px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "6px", fontSize: "14px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY }}>Login</button></Link></div></>);
-if (!isAdmin && isBanned) return (<div style={{ marginTop: "80px", paddingTop: "30px" }}><h3 style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1, marginBottom: "20px" }}>Live Chat Agent</h3><BannedInfoBanner banReason={banReason} banMessage={banMessage || ""} onAppeal={createAppealTicket} hasAppeal={hasAppeal} appealStatus={appealTickets.find((t) => t.userId === user.uid)?.status} /></div>);
+if (!user && !chatbotMode) return (<><OnboardingTour steps={tourSteps} onComplete={completeTour} isActive={showTour} currentStep={tourStep} setCurrentStep={setTourStep} /><div style={{ marginTop: "80px", paddingTop: "30px" }}><h3 ref={liveChatTitleRef} data-tour="livechat-title" style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1, marginBottom: "20px" }}>Live Chat Agent</h3><p style={{ fontSize: "15px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "10px" }}>Please login to use Live Chat Agent</p><Link href="/" style={{ textDecoration: "none" }}><button data-tour="login-button" style={{ padding: "8px 20px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "6px", fontSize: "14px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY }}>Login</button></Link></div></>);
+if (!isAdmin && isBanned && !chatbotMode) return (<div style={{ marginTop: "80px", paddingTop: "30px" }}><h3 style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1, marginBottom: "20px" }}>Live Chat Agent</h3><BannedInfoBanner banReason={banReason} banMessage={banMessage || ""} onAppeal={createAppealTicket} hasAppeal={hasAppeal} appealStatus={appealTickets.find((t) => t.userId === user.uid)?.status} /></div>);
 const userTickets = tickets.filter((t) => t.userId === user.uid);
-if (!isAdmin && userTickets.length === 0 && !showStartChat) return (<><OnboardingTour steps={tourSteps} onComplete={completeTour} isActive={showTour} currentStep={tourStep} setCurrentStep={setTourStep} /><div style={{ marginTop: "80px", paddingTop: "30px" }}><h3 ref={liveChatTitleRef} data-tour="livechat-title" style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1, marginBottom: "20px" }}>Live Chat Agent</h3><p style={{ fontSize: "15px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "16px" }}>Need help? Chat directly with our agent.</p><button data-tour="start-chat-button" onClick={() => setShowStartChat(true)} style={{ padding: "10px 24px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "8px", fontSize: "15px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY }}>Start Live Chat</button></div></>);
-if (!isAdmin && showStartChat) return (<div style={{ marginTop: "80px", paddingTop: "30px" }}><h3 style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1, marginBottom: "20px" }}>Live Chat Agent</h3><div style={{ maxWidth: "400px" }}><div style={{ fontSize: "15px", marginBottom: "10px", fontFamily: FONT_FAMILY, fontWeight: 700, color: BLUE }}>Select your issue topic:</div><select value={selectedTopic} onChange={(e) => setSelectedTopic(e.target.value)} style={{ width: "100%", padding: "10px 14px", border: `2px solid ${BLUE}`, borderRadius: "8px", fontSize: "15px", fontFamily: FONT_FAMILY, outline: "none", backgroundColor: WHITE, marginBottom: "14px", color: BLUE, fontWeight: 600 }}><option value="">-- Select topic --</option>{topics.map((t) => <option key={t} value={t}>{t}</option>)}</select><div style={{ display: "flex", gap: "10px" }}><button onClick={startChat} disabled={!selectedTopic} style={{ padding: "8px 20px", backgroundColor: selectedTopic ? BLUE : "#ccc", color: WHITE, border: "none", borderRadius: "8px", fontSize: "14px", fontWeight: 600, cursor: selectedTopic ? "pointer" : "not-allowed", fontFamily: FONT_FAMILY }}>Start Chat</button><button onClick={() => setShowStartChat(false)} style={{ padding: "8px 20px", backgroundColor: "transparent", color: "#666", border: "1px solid #ccc", borderRadius: "8px", fontSize: "14px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY }}>Cancel</button></div></div></div>);
+if (!isAdmin && userTickets.length === 0 && !showStartChat && !chatbotMode) return (<><OnboardingTour steps={tourSteps} onComplete={completeTour} isActive={showTour} currentStep={tourStep} setCurrentStep={setTourStep} /><div style={{ marginTop: "80px", paddingTop: "30px" }}><h3 ref={liveChatTitleRef} data-tour="livechat-title" style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1, marginBottom: "20px" }}>Live Chat Agent</h3><p style={{ fontSize: "15px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "16px" }}>Need help? Chat directly with our agent.</p><button data-tour="start-chat-button" onClick={() => setShowStartChat(true)} style={{ padding: "10px 24px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "8px", fontSize: "15px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY }}>Start Live Chat</button></div></>);
+if (!isAdmin && showStartChat && !chatbotMode) return (<div style={{ marginTop: "80px", paddingTop: "30px" }}><h3 style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1, marginBottom: "20px" }}>Live Chat Agent</h3><div style={{ maxWidth: "400px" }}><div style={{ fontSize: "15px", marginBottom: "10px", fontFamily: FONT_FAMILY, fontWeight: 700, color: BLUE }}>Select your issue topic:</div><select value={selectedTopic} onChange={(e) => setSelectedTopic(e.target.value)} style={{ width: "100%", padding: "10px 14px", border: `2px solid ${BLUE}`, borderRadius: "8px", fontSize: "15px", fontFamily: FONT_FAMILY, outline: "none", backgroundColor: WHITE, marginBottom: "14px", color: BLUE, fontWeight: 600 }}><option value="">-- Select topic --</option>{topics.map((t) => <option key={t} value={t}>{t}</option>)}</select><div style={{ display: "flex", gap: "10px" }}><button onClick={startChat} disabled={!selectedTopic} style={{ padding: "8px 20px", backgroundColor: selectedTopic ? BLUE : "#ccc", color: WHITE, border: "none", borderRadius: "8px", fontSize: "14px", fontWeight: 600, cursor: selectedTopic ? "pointer" : "not-allowed", fontFamily: FONT_FAMILY }}>Start Chat</button><button onClick={() => setShowStartChat(false)} style={{ padding: "8px 20px", backgroundColor: "transparent", color: "#666", border: "1px solid #ccc", borderRadius: "8px", fontSize: "14px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY }}>Cancel</button></div></div></div>);
+
+// ===== JIKA CHATBOT MODE AKTIF - SINGLE PAGE =====
+if (chatbotMode) {
+return (
+<>
+<OnboardingTour steps={tourSteps} onComplete={completeTour} isActive={showTour} currentStep={tourStep} setCurrentStep={setTourStep} />
+<div style={{ marginTop: "80px", paddingTop: "30px" }}>
+<div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+<h3 ref={liveChatTitleRef} data-tour="livechat-title" style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1 }}>Live Chat Agent</h3>
+<div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+<span style={{ fontSize: "12px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, padding: "6px 12px", backgroundColor: LIME, borderRadius: "6px", border: `1.5px solid ${LIME}` }}>CHATBOT MODE</span>
+<button 
+onClick={() => setChatbotMode(false)} 
+style={{ padding: "8px 16px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "8px", fontSize: "12px", fontWeight: 700, cursor: "pointer", fontFamily: FONT_FAMILY, display: "inline-flex", alignItems: "center", gap: "6px" }}
+title="Kembali ke Live Chat Agent"
+>
+<ToggleLayoutIcon size={14} color={WHITE} />
+Live Chat
+</button>
+</div>
+</div>
+{/* SINGLE PAGE CHATBOT LAYOUT */}
+<div style={{ display: "flex", justifyContent: "flex-end" }}>
+{renderChatbotMode()}
+</div>
+</div>
+</>
+);
+}
+
+// ===== LAYOUT DEFAULT: LIVE CHAT AGENT (LEBAR) =====
 const waiting = filter(tickets.filter((t) => t.status === "waiting"));
 const active = filter(tickets.filter((t) => t.status === "active"));
 const resolved = filter(tickets.filter((t) => t.status === "resolved" || t.status === "closed"));
@@ -3141,69 +3307,6 @@ return (
 );
 };
 
-// ===== JIKA CHATBOT MODE AKTIF =====
-if (chatbotMode) {
-return (
-<>
-<OnboardingTour steps={tourSteps} onComplete={completeTour} isActive={showTour} currentStep={tourStep} setCurrentStep={setTourStep} />
-<div style={{ marginTop: "80px", paddingTop: "30px" }}>
-<div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-<h3 ref={liveChatTitleRef} data-tour="livechat-title" style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1 }}>Live Chat Agent</h3>
-<div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-<span style={{ fontSize: "12px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, padding: "6px 12px", backgroundColor: LIME, borderRadius: "6px", border: `1.5px solid ${LIME}` }}>CHATBOT MODE</span>
-<button 
-onClick={() => setChatbotMode(false)} 
-style={{ padding: "8px 16px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "8px", fontSize: "12px", fontWeight: 700, cursor: "pointer", fontFamily: FONT_FAMILY, display: "inline-flex", alignItems: "center", gap: "6px" }}
-title="Kembali ke Live Chat Agent"
->
-<ToggleLayoutIcon size={14} color={WHITE} />
-Live Chat
-</button>
-</div>
-</div>
-<div style={{ display: "flex", gap: "16px", alignItems: "flex-start" }}>
-{renderChatbotMode()}
-{/* SIDEBAR MINI untuk chatbot mode */}
-<div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "12px" }}>
-<div style={{ backgroundColor: BLUE, borderRadius: "12px", padding: "14px 16px", color: WHITE, fontFamily: FONT_FAMILY }}>
-<div style={{ fontSize: "13px", fontWeight: 700, marginBottom: "8px" }}>Quick Access</div>
-<div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
-{!isAdmin && <button data-tour="start-chat-button" onClick={() => setShowStartChat(true)} style={{ padding: "6px 12px", backgroundColor: WHITE, color: BLUE, border: "none", borderRadius: "6px", fontSize: "11px", fontWeight: 800, cursor: "pointer", fontFamily: FONT_FAMILY, textTransform: "uppercase" }}>+ New Chat</button>}
-{isAdmin && appealTickets.length > 0 && <span style={{ padding: "6px 12px", backgroundColor: WHITE, color: BLUE, borderRadius: "6px", fontSize: "11px", fontWeight: 800, fontFamily: FONT_FAMILY }}>{appealTickets.length} Banding</span>}
-</div>
-</div>
-<div style={{ backgroundColor: WHITE, borderRadius: "12px", border: "1px solid rgba(0,0,0,0.08)", overflow: "hidden", maxHeight: "580px", display: "flex", flexDirection: "column" }}>
-<div style={{ padding: "12px 14px", backgroundColor: BLUE, color: WHITE, fontWeight: 700, fontSize: "13px", fontFamily: FONT_FAMILY, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-<span>Chat List</span>
-<span style={{ fontSize: "10px", color: BLUE, padding: "2px 8px", borderRadius: "4px", backgroundColor: WHITE, fontWeight: 800 }}>{isAdmin ? tickets.length : userTickets.length}</span>
-</div>
-{renderSearchBar()}
-<div style={{ overflowY: "auto", flex: 1, minHeight: 0, backgroundColor: BLUE }}>
-{isAdmin ? (
-<>
-{bannedInWaiting.length > 0 && <div>{bannedInWaiting.map((t) => renderListItem(t))}</div>}
-{waiting.length > 0 && <div>{waiting.map((t) => renderListItem(t, { onExtraClick: () => takeTicket(t.id) }))}</div>}
-{active.length > 0 && <div>{active.map((t) => renderListItem(t))}</div>}
-{resolved.length > 0 && <div>{resolved.map((t) => renderListItem(t))}</div>}
-{!waiting.length && !active.length && !resolved.length && !bannedInWaiting.length && <div style={{ padding: "20px 14px", textAlign: "center", color: WHITE, fontSize: "12px" }}>{searchQuery ? "No results" : "No incoming chats"}</div>}
-</>
-) : (
-<>
-{filter(tickets.filter((t) => t.userId === user.uid)).map((t) => renderListItem(t))}
-{!filter(tickets.filter((t) => t.userId === user.uid)).length && <div style={{ padding: "20px 14px", textAlign: "center", color: WHITE, fontSize: "12px" }}>{searchQuery ? "No results" : "No chats yet"}</div>}
-</>
-)}
-{isAdmin && appealTickets.length > 0 && <div style={{ marginTop: "10px" }}><div style={{ padding: "8px 14px", display: "flex", alignItems: "center", gap: "6px", borderBottom: "1px solid rgba(255,255,255,0.1)", borderTop: "1px solid rgba(255,255,255,0.15)" }}><StabiloBadge label={`Banding (${appealTickets.length})`} bg={WHITE} text={BLUE} border={WHITE} size="md" /></div>{appealTickets.map((t) => <div key={t.id} onClick={() => onOpenAppealChat(t)} style={{ padding: "12px 14px", borderBottom: "1px solid rgba(255,255,255,0.08)", cursor: "pointer" }}><div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}><span style={{ fontSize: "13px", fontWeight: 700, color: WHITE }}>{t.userName}</span>{(() => { const m = appealStatusMeta(t.status); return <StabiloBadge label={m.label} bg={m.bg} text={m.text} border={m.border} size="sm" />; })()}</div><div style={{ fontSize: "10px", color: "rgba(255,255,255,0.75)", fontFamily: FONT_FAMILY }}>{t.banReason || "Banding"}</div></div>)}</div>}
-</div>
-</div>
-</div>
-</div>
-</div>
-</>
-);
-}
-
-// ===== LAYOUT DEFAULT: LIVE CHAT AGENT (LEBAR) =====
 return (
 <>
 <OnboardingTour steps={tourSteps} onComplete={completeTour} isActive={showTour} currentStep={tourStep} setCurrentStep={setTourStep} />
@@ -3246,7 +3349,7 @@ Chatbot Mode
 <div style={{ flex: 1, backgroundColor: WHITE, borderRadius: "12px", border: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", overflow: "hidden", height: "700px", minWidth: 0 }}>
 {selectedTicket ? (
 <>
-{/* HEADER CHAT ROOM - dengan nama, verified, status online, typing */}
+{/* HEADER - dengan nama, verified, status online, typing */}
 <div style={{ padding: "16px 20px", backgroundColor: BLUE, display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0, gap: "12px" }}>
 <div style={{ minWidth: 0, flex: 1 }}>
 <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: "4px" }}>
