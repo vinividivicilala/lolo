@@ -596,6 +596,46 @@ const random = String(Math.floor(Math.random() * 10000)).padStart(4, "0");
 return `#TICKET-${yy}${mm}${dd}-${hh}${min}-${random}`;
 };
 
+// ===== BACKGROUND PAGE COMPONENT (BARU) =====
+const BackgroundPage = ({ scrollProgress }: { scrollProgress: number }) => {
+const bgRef = useRef<HTMLDivElement>(null);
+  
+useEffect(() => {
+if (!bgRef.current) return;
+// Animasi muncul perlahan dari atas berdasarkan scroll progress
+const translateY = Math.max(0, (1 - scrollProgress) * -100);
+const opacity = Math.min(1, scrollProgress * 1.5);
+gsap.to(bgRef.current, {
+y: `${translateY}%`,
+opacity: opacity,
+duration: 0.3,
+ease: "power2.out",
+overwrite: "auto"
+});
+}, [scrollProgress]);
+
+return (
+<div 
+ref={bgRef}
+style={{
+position: "fixed",
+top: 0,
+left: "50%",
+transform: "translateX(-50%) translateY(-100%)",
+width: "min(1400px, 92vw)",
+height: "min(1100px, 85vh)",
+backgroundColor: BLUE,
+borderBottomLeftRadius: "40px",
+borderBottomRightRadius: "40px",
+zIndex: 0,
+pointerEvents: "none",
+opacity: 0,
+boxShadow: "0 20px 60px rgba(13,60,252,0.25)",
+}}
+/>
+);
+};
+
 // ===== FARID VERIFIED PANEL =====
 const FaridVerifiedPanel = ({ open, anchorRect, onClose }: { open: boolean; anchorRect: DOMRect | null; onClose: () => void; }) => {
 const [phase, setPhase] = useState<"loading" | "expand" | "fullpage">("loading");
@@ -1009,7 +1049,7 @@ return (
 </div>
 </div>
 <p style={{ margin: 0, color: WHITE, fontSize: "14px", lineHeight: 1.6, opacity: 0.95 }}>
-Google Authenticator menambahkan lapisan keamanan ekstra dengan kode 6 digit yang berubah setiap 30 detik. Setup dilakukan <strong>sekali saja</strong>; setelah aktif, secret tidak bisa diganti tanpa menonaktifkan terlebih dahulu.
+Google Authenticator menambahkan lapisan keamanan ekstra dengan kode 6 digit yang berubah setiap 30 detik.
 </p>
 <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginTop: "8px" }}>
 {!enabled ? (
@@ -1285,7 +1325,7 @@ return (
 </div>
 </div>
 <p style={{ margin: 0, color: WHITE, fontSize: "14px", lineHeight: 1.6, opacity: 0.95 }}>
-Passkey menggunakan standar WebAuthn: fingerprint, Face ID, Windows Hello, PIN perangkat, atau security key USB. Data kriptografi tersimpan di perangkat Anda, tidak pernah dikirim ke server.
+Passkey menggunakan standar WebAuthn: fingerprint, Face ID, Windows Hello, PIN perangkat, atau security key USB.
 </p>
 <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
 {!webAuthnSupported && <span style={{ padding: "6px 12px", backgroundColor: "#fef3c7", color: "#92400e", borderRadius: "8px", fontSize: "12px", fontWeight: 700 }}>Browser tidak mendukung WebAuthn</span>}
@@ -1844,11 +1884,11 @@ const [messages, setMessages] = useState<AppealMessage[]>([]);
 const [messageText, setMessageText] = useState("");
 const [replyTo, setReplyTo] = useState<AppealMessage | null>(null);
 const [encryptionReady, setEncryptionReady] = useState(false);
+const [typingName, setTypingName] = useState<string | null>(null);
 const [status, setStatus] = useState<string>(appealTicket.status);
 const messagesEndRef = useRef<HTMLDivElement>(null);
 const chatRef = useRef<HTMLDivElement>(null);
 const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-const typingName = useRealtimeTypingAppeal(db, appealTicket?.id, user?.uid);
 useEffect(() => { getCryptoKey().then(() => setEncryptionReady(true)).catch(() => setEncryptionReady(true)); }, []);
 useEffect(() => {
 if (!db || !appealTicket) return;
@@ -1866,9 +1906,10 @@ const unsub = onSnapshot(doc(db, "appeal_tickets", appealTicket.id), (snap: any)
 if (!snap.exists()) return;
 const d = snap.data();
 setStatus(d.status || "waiting");
+setTypingName(d.typing && d.typingUserId !== user?.uid ? (d.typingUserName || null) : null);
 });
 return () => unsub();
-}, [db, appealTicket]);
+}, [db, appealTicket, user]);
 useEffect(() => {
 if (!db || !appealTicket || !user) return;
 messages.filter((m) => m.senderId !== user.uid && m.senderId !== "system" && !m.read).forEach(async (msg) => { await updateDoc(doc(db, "appeal_tickets", appealTicket.id, "messages", msg.id), { read: true, deliveryStatus: "read" }); });
@@ -2514,11 +2555,11 @@ const [messages, setMessages] = useState<AppealMessage[]>([]);
 const [messageText, setMessageText] = useState("");
 const [replyTo, setReplyTo] = useState<AppealMessage | null>(null);
 const [encryptionReady, setEncryptionReady] = useState(false);
+const [typingName, setTypingName] = useState<string | null>(null);
 const [status, setStatus] = useState<string>(appealTicket?.status || "waiting");
 const messagesEndRef = useRef<HTMLDivElement>(null);
 const chatRef = useRef<HTMLDivElement>(null);
 const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-const typingName = useRealtimeTypingAppeal(db, appealTicket?.id, user?.uid);
 useEffect(() => { getCryptoKey().then(() => setEncryptionReady(true)).catch(() => setEncryptionReady(true)); }, []);
 useEffect(() => {
 if (!db || !appealTicket) return;
@@ -2536,9 +2577,10 @@ const unsub = onSnapshot(doc(db, "appeal_tickets", appealTicket.id), (snap: any)
 if (!snap.exists()) return;
 const d = snap.data();
 setStatus(d.status || "waiting");
+setTypingName(d.typing && d.typingUserId !== user?.uid ? (d.typingUserName || null) : null);
 });
 return () => unsub();
-}, [db, appealTicket]);
+}, [db, appealTicket, user]);
 useEffect(() => {
 if (!db || !appealTicket || !user) return;
 messages.filter((m) => m.senderId !== user.uid && m.senderId !== "system" && !m.read).forEach(async (msg) => { await updateDoc(doc(db, "appeal_tickets", appealTicket.id, "messages", msg.id), { read: true, deliveryStatus: "read" }); });
@@ -2728,85 +2770,6 @@ return (
 Ticket chat ini telah {status === "resolved" ? "DITERIMA & SELESAI" : "DITOLAK"}.
 </div>
 )}
-</div>
-);
-};
-
-// ===== BACKGROUND HALAMAN TAMBAHAN (BARU) =====
-const ExtraPageBackground = ({ show, liveChatAgentRef }: { show: boolean; liveChatAgentRef: React.RefObject<HTMLDivElement | null> }) => {
-const bgRef = useRef<HTMLDivElement>(null);
-const [height, setHeight] = useState<number>(0);
-
-useEffect(() => {
-if (!show) return;
-const updateHeight = () => {
-if (liveChatAgentRef.current) {
-const rect = liveChatAgentRef.current.getBoundingClientRect();
-const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-const newHeight = rect.top + scrollTop - 44; // 44px untuk top banner
-setHeight(Math.max(0, newHeight));
-}
-};
-
-updateHeight();
-window.addEventListener("resize", updateHeight);
-window.addEventListener("scroll", updateHeight);
-
-return () => {
-window.removeEventListener("resize", updateHeight);
-window.removeEventListener("scroll", updateHeight);
-};
-}, [show, liveChatAgentRef]);
-
-useEffect(() => {
-if (!show || !bgRef.current) return;
-gsap.fromTo(
-bgRef.current,
-{ y: "-100%", opacity: 0 },
-{ y: "0%", opacity: 1, duration: 1.2, ease: "power3.out" }
-);
-}, [show]);
-
-if (!show) return null;
-
-return (
-<div
-ref={bgRef}
-style={{
-position: "absolute",
-top: "44px",
-left: 0,
-right: 0,
-height: `${height}px`,
-backgroundColor: BLUE,
-borderRadius: "0 0 48px 48px",
-zIndex: 0,
-pointerEvents: "none",
-boxShadow: "0 20px 60px rgba(13,60,252,0.15)",
-overflow: "hidden",
-}}
->
-{/* Dekorasi tambahan di bg biru */}
-<div style={{
-position: "absolute",
-top: "10%",
-left: "-5%",
-width: "300px",
-height: "300px",
-borderRadius: "50%",
-backgroundColor: "rgba(255,255,255,0.05)",
-pointerEvents: "none",
-}} />
-<div style={{
-position: "absolute",
-bottom: "15%",
-right: "-10%",
-width: "400px",
-height: "400px",
-borderRadius: "50%",
-backgroundColor: "rgba(255,255,255,0.03)",
-pointerEvents: "none",
-}} />
 </div>
 );
 };
@@ -3129,7 +3092,6 @@ const renderSearchBar = () => (
 
 const renderChatbotMode = () => {
 const effUser = getEffectiveUser();
-  
 if (!effUser) {
 return (
 <div style={{ display: "flex", flexDirection: "column", height: "700px", width: "420px", backgroundColor: WHITE, borderRadius: "20px", border: `2px solid ${BLUE}`, overflow: "hidden", boxShadow: "0 20px 60px rgba(13,60,252,0.2)" }}>
@@ -3374,12 +3336,6 @@ return (
 
 if (checkingBan) return (<div style={{ marginTop: "80px", paddingTop: "30px" }}><h3 style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1 }}>Live Chat Agent</h3><div style={{ padding: "20px", textAlign: "center", color: "#666", fontFamily: FONT_FAMILY }}>Checking account status...</div></div>);
 if (!isMounted) return <div style={{ minHeight: "100px" }} />;
-if (!getEffectiveUser() && !chatbotMode) return (<><OnboardingTour steps={tourSteps} onComplete={completeTour} isActive={showTour} currentStep={tourStep} setCurrentStep={setTourStep} /><div style={{ marginTop: "80px", paddingTop: "30px" }}><h3 ref={liveChatTitleRef} data-tour="livechat-title" style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1, marginBottom: "20px" }}>Live Chat Agent</h3><p style={{ fontSize: "15px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "10px" }}>Please login to use Live Chat Agent</p><div style={{ display: "flex", gap: "10px", alignItems: "center" }}><Link href="/" style={{ textDecoration: "none" }}><button data-tour="login-button" style={{ padding: "8px 20px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "6px", fontSize: "14px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY }}>Login</button></Link><button onClick={() => setChatbotMode(true)} style={{ padding: "8px 20px", backgroundColor: WHITE, color: BLUE, border: `2px solid ${BLUE}`, borderRadius: "6px", fontSize: "14px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY, display: "inline-flex", alignItems: "center", gap: "6px" }}><ToggleChatbotIcon size={14} color={BLUE} />Chatbot Mode</button></div></div></>);
-if (!isAdmin && isBanned && !chatbotMode) return (<div style={{ marginTop: "80px", paddingTop: "30px" }}><h3 style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1, marginBottom: "20px" }}>Live Chat Agent</h3><BannedInfoBanner banReason={banReason} banMessage={banMessage || ""} onAppeal={createAppealTicket} hasAppeal={hasAppeal} appealStatus={appealTickets.find((t) => t.userId === getEffectiveUser()?.uid)?.status} /></div>);
-const effUser = getEffectiveUser();
-const userTickets = effUser ? tickets.filter((t) => t.userId === effUser.uid) : [];
-if (!isAdmin && userTickets.length === 0 && !showStartChat && !chatbotMode) return (<><OnboardingTour steps={tourSteps} onComplete={completeTour} isActive={showTour} currentStep={tourStep} setCurrentStep={setTourStep} /><div style={{ marginTop: "80px", paddingTop: "30px" }}><h3 ref={liveChatTitleRef} data-tour="livechat-title" style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1, marginBottom: "20px" }}>Live Chat Agent</h3><p style={{ fontSize: "15px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "16px" }}>Need help? Chat directly with our agent.</p><div style={{ display: "flex", gap: "10px" }}><button data-tour="start-chat-button" onClick={() => setShowStartChat(true)} style={{ padding: "10px 24px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "8px", fontSize: "15px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY }}>Start Live Chat</button><button onClick={() => setChatbotMode(true)} style={{ padding: "10px 24px", backgroundColor: WHITE, color: BLUE, border: `2px solid ${BLUE}`, borderRadius: "8px", fontSize: "15px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY, display: "inline-flex", alignItems: "center", gap: "8px" }}><ToggleChatbotIcon size={16} color={BLUE} />Chatbot Mode</button></div></div></>);
-if (!isAdmin && showStartChat && !chatbotMode) return (<div style={{ marginTop: "80px", paddingTop: "30px" }}><h3 style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1, marginBottom: "20px" }}>Live Chat Agent</h3><div style={{ maxWidth: "400px" }}><div style={{ fontSize: "15px", marginBottom: "10px", fontFamily: FONT_FAMILY, fontWeight: 700, color: BLUE }}>Select your issue topic:</div><select value={selectedTopic} onChange={(e) => setSelectedTopic(e.target.value)} style={{ width: "100%", padding: "10px 14px", border: `2px solid ${BLUE}`, borderRadius: "8px", fontSize: "15px", fontFamily: FONT_FAMILY, outline: "none", backgroundColor: WHITE, marginBottom: "14px", color: BLUE, fontWeight: 600 }}><option value="">-- Select topic --</option>{topics.map((t) => <option key={t} value={t}>{t}</option>)}</select><div style={{ display: "flex", gap: "10px" }}><button onClick={startChat} disabled={!selectedTopic} style={{ padding: "8px 20px", backgroundColor: selectedTopic ? BLUE : "#ccc", color: WHITE, border: "none", borderRadius: "8px", fontSize: "14px", fontWeight: 600, cursor: selectedTopic ? "pointer" : "not-allowed", fontFamily: FONT_FAMILY }}>Start Chat</button><button onClick={() => setShowStartChat(false)} style={{ padding: "8px 20px", backgroundColor: "transparent", color: "#666", border: "1px solid #ccc", borderRadius: "8px", fontSize: "14px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY }}>Cancel</button></div></div></div>);
 
 if (chatbotMode) {
 return (
@@ -3407,6 +3363,13 @@ Live Chat
 </>
 );
 }
+
+const effUser = getEffectiveUser();
+if (!effUser) return (<><OnboardingTour steps={tourSteps} onComplete={completeTour} isActive={showTour} currentStep={tourStep} setCurrentStep={setTourStep} /><div style={{ marginTop: "80px", paddingTop: "30px" }}><h3 ref={liveChatTitleRef} data-tour="livechat-title" style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1, marginBottom: "20px" }}>Live Chat Agent</h3><p style={{ fontSize: "15px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "10px" }}>Please login to use Live Chat Agent</p><div style={{ display: "flex", gap: "10px", alignItems: "center" }}><Link href="/" style={{ textDecoration: "none" }}><button data-tour="login-button" style={{ padding: "8px 20px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "6px", fontSize: "14px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY }}>Login</button></Link><button onClick={() => setChatbotMode(true)} style={{ padding: "8px 20px", backgroundColor: WHITE, color: BLUE, border: `2px solid ${BLUE}`, borderRadius: "6px", fontSize: "14px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY, display: "inline-flex", alignItems: "center", gap: "6px" }}><ToggleChatbotIcon size={14} color={BLUE} />Chatbot Mode</button></div></div></>);
+if (!isAdmin && isBanned) return (<div style={{ marginTop: "80px", paddingTop: "30px" }}><h3 style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1, marginBottom: "20px" }}>Live Chat Agent</h3><BannedInfoBanner banReason={banReason} banMessage={banMessage || ""} onAppeal={createAppealTicket} hasAppeal={hasAppeal} appealStatus={appealTickets.find((t) => t.userId === effUser.uid)?.status} /></div>);
+const userTickets = effUser ? tickets.filter((t) => t.userId === effUser.uid) : [];
+if (!isAdmin && userTickets.length === 0 && !showStartChat) return (<><OnboardingTour steps={tourSteps} onComplete={completeTour} isActive={showTour} currentStep={tourStep} setCurrentStep={setTourStep} /><div style={{ marginTop: "80px", paddingTop: "30px" }}><h3 ref={liveChatTitleRef} data-tour="livechat-title" style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1, marginBottom: "20px" }}>Live Chat Agent</h3><p style={{ fontSize: "15px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "16px" }}>Need help? Chat directly with our agent.</p><div style={{ display: "flex", gap: "10px" }}><button data-tour="start-chat-button" onClick={() => setShowStartChat(true)} style={{ padding: "10px 24px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "8px", fontSize: "15px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY }}>Start Live Chat</button><button onClick={() => setChatbotMode(true)} style={{ padding: "10px 24px", backgroundColor: WHITE, color: BLUE, border: `2px solid ${BLUE}`, borderRadius: "8px", fontSize: "15px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY, display: "inline-flex", alignItems: "center", gap: "8px" }}><ToggleChatbotIcon size={16} color={BLUE} />Chatbot Mode</button></div></div></>);
+if (!isAdmin && showStartChat) return (<div style={{ marginTop: "80px", paddingTop: "30px" }}><h3 style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1, marginBottom: "20px" }}>Live Chat Agent</h3><div style={{ maxWidth: "400px" }}><div style={{ fontSize: "15px", marginBottom: "10px", fontFamily: FONT_FAMILY, fontWeight: 700, color: BLUE }}>Select your issue topic:</div><select value={selectedTopic} onChange={(e) => setSelectedTopic(e.target.value)} style={{ width: "100%", padding: "10px 14px", border: `2px solid ${BLUE}`, borderRadius: "8px", fontSize: "15px", fontFamily: FONT_FAMILY, outline: "none", backgroundColor: WHITE, marginBottom: "14px", color: BLUE, fontWeight: 600 }}><option value="">-- Select topic --</option>{topics.map((t) => <option key={t} value={t}>{t}</option>)}</select><div style={{ display: "flex", gap: "10px" }}><button onClick={startChat} disabled={!selectedTopic} style={{ padding: "8px 20px", backgroundColor: selectedTopic ? BLUE : "#ccc", color: WHITE, border: "none", borderRadius: "8px", fontSize: "14px", fontWeight: 600, cursor: selectedTopic ? "pointer" : "not-allowed", fontFamily: FONT_FAMILY }}>Start Chat</button><button onClick={() => setShowStartChat(false)} style={{ padding: "8px 20px", backgroundColor: "transparent", color: "#666", border: "1px solid #ccc", borderRadius: "8px", fontSize: "14px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY }}>Cancel</button></div></div></div>);
 
 const waiting = filter(tickets.filter((t) => t.status === "waiting"));
 const active = filter(tickets.filter((t) => t.status === "active"));
@@ -3543,15 +3506,39 @@ const [showAdminAppealSection, setShowAdminAppealSection] = useState(false);
 const [bannedAppealTicket, setBannedAppealTicket] = useState<AppealTicket | null>(null);
 const [showBannedAppealSection, setShowBannedAppealSection] = useState(false);
 const [showDashboard, setShowDashboard] = useState(false);
-// ===== STATE BARU: KONTROL BG TAMBAHAN =====
-const [showExtraBg, setShowExtraBg] = useState(false);
-const liveChatAgentRef = useRef<HTMLDivElement>(null);
+// ===== STATE BARU: SCROLL PROGRESS UNTUK BACKGROUND PAGE =====
+const [scrollProgress, setScrollProgress] = useState(0);
 const preloaderRef = useRef<HTMLDivElement>(null);
 const textRef = useRef<HTMLSpanElement>(null);
 const counterRef = useRef<HTMLSpanElement>(null);
 const mainPageRef = useRef<HTMLDivElement>(null);
 const wrapperRef = useRef<HTMLDivElement>(null);
+const liveChatSectionRef = useRef<HTMLDivElement>(null);
+
 useEffect(() => setIsMounted(true), []);
+
+// ===== EFFECT: TRACK SCROLL PROGRESS UNTUK BACKGROUND PAGE =====
+useEffect(() => {
+if (typeof window === "undefined") return;
+const handleScroll = () => {
+const scrollTop = window.scrollY;
+const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+// Progress dari 0 sampai 1 (batas sampai Live Chat Agent)
+const liveChatEl = liveChatSectionRef.current;
+if (liveChatEl) {
+const liveChatTop = liveChatEl.offsetTop;
+const progress = Math.min(1, Math.max(0, scrollTop / (liveChatTop + 200)));
+setScrollProgress(progress);
+} else {
+const progress = Math.min(1, Math.max(0, scrollTop / Math.max(1, docHeight)));
+setScrollProgress(progress);
+}
+};
+window.addEventListener("scroll", handleScroll, { passive: true });
+handleScroll();
+return () => window.removeEventListener("scroll", handleScroll);
+}, []);
+
 useEffect(() => {
 if (!auth || !isMounted) return;
 const unsub = onAuthStateChanged(auth, async (cu: any) => {
@@ -3574,11 +3561,7 @@ const co = { value: 1 }; ct.textContent = "01";
 const tl = gsap.timeline();
 tl.to(tx, { y: 0, opacity: 1, duration: 1.0, ease: "back.out(1.7)" }).to(tx, { duration: 0.8 }).to(tx, { opacity: 0, y: -20, scale: 0.9, duration: 0.5, ease: "power2.out", onComplete: () => { if (tx) tx.textContent = "Note"; } }).to(tx, { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: "back.out(1.7)" }).to(tx, { duration: 1.2 });
 tl.to(co, { value: 100, duration: 6.5, ease: "power2.inOut", onUpdate: () => { if (ct) ct.textContent = String(Math.round(co.value)).padStart(2, "0"); } }, 0);
-tl.to(tx, { scale: 0.3, opacity: 0, duration: 0.8, ease: "power2.in" }).to(ct, { scale: 0.6, opacity: 0, duration: 0.8, ease: "power2.in" }, "-=0.8").to(pre, { xPercent: -100, duration: 1.2, ease: "power3.inOut", onComplete: () => { 
-if (pre) pre.style.display = "none"; 
-// ===== PERBAIKAN: TAMPILKAN BG TAMBAHAN SETELAH PRELOADER SELESAI =====
-setTimeout(() => setShowExtraBg(true), 200);
-} }, "-=0.2").to(mn, { xPercent: 0, duration: 1.2, ease: "power3.inOut", onComplete: () => { if (killed) return; gsap.set(mn, { clearProps: "transform,willChange" }); setTimeout(() => ScrollTrigger.refresh(), 300); } }, "<");
+tl.to(tx, { scale: 0.3, opacity: 0, duration: 0.8, ease: "power2.in" }).to(ct, { scale: 0.6, opacity: 0, duration: 0.8, ease: "power2.in" }, "-=0.8").to(pre, { xPercent: -100, duration: 1.2, ease: "power3.inOut", onComplete: () => { if (pre) pre.style.display = "none"; } }, "-=0.2").to(mn, { xPercent: 0, duration: 1.2, ease: "power3.inOut", onComplete: () => { if (killed) return; gsap.set(mn, { clearProps: "transform,willChange" }); setTimeout(() => ScrollTrigger.refresh(), 300); } }, "<");
 return () => { killed = true; tl.kill(); };
 }, [isMounted, loading]);
 if (!isMounted || loading) {
@@ -3610,6 +3593,10 @@ return (
 </div>
 </div>
 </div>
+
+{/* ===== BACKGROUND PAGE TAMBAHAN (BARU) ===== */}
+{showMain && <BackgroundPage scrollProgress={scrollProgress} />}
+
 {showDashboard && (
 <DashboardOverlay
 user={user}
@@ -3644,19 +3631,24 @@ setTimeout(() => { const el = document.getElementById("banned-appeal-section"); 
 }}
 />
 )}
-<div ref={mainPageRef} style={{ position: "relative", width: "100%", minHeight: "100vh", backgroundColor: WHITE, margin: 0, padding: 0, fontFamily: FONT_FAMILY, overflow: "visible", display: "flex", flexDirection: "column", willChange: "transform" }}>
+<div ref={mainPageRef} style={{ position: "relative", width: "100%", minHeight: "100vh", backgroundColor: "transparent", margin: 0, padding: 0, fontFamily: FONT_FAMILY, overflow: "visible", display: "flex", flexDirection: "column", willChange: "transform" }}>
 <TopBanner />
-{/* ===== BACKGROUND HALAMAN TAMBAHAN (BARU) ===== */}
-<ExtraPageBackground show={showExtraBg} liveChatAgentRef={liveChatAgentRef} />
 <div style={{ position: "fixed", top: "44px", left: 0, width: "200px", height: "120px", pointerEvents: "none", zIndex: 8500, backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)", maskImage: "linear-gradient(to right, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%)", WebkitMaskImage: "linear-gradient(to right, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%)" }} />
 <div style={{ position: "fixed", top: "44px", right: 0, width: "200px", height: "120px", pointerEvents: "none", zIndex: 8500, backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)", maskImage: "linear-gradient(to left, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%)", WebkitMaskImage: "linear-gradient(to left, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%)" }} />
 <LeftNavbar shifted={navbarShifted} />
 <RightNavbar user={user} auth={auth} db={db} onOpenDashboard={() => setShowDashboard(true)} />
 <div style={{ marginTop: "44px" }}><div style={{ paddingTop: "120px" }} /></div>
-<div style={{ position: "relative", zIndex: 1, flex: "1 0 auto", backgroundColor: "transparent" }}>
+
+{/* ===== TINGGI TAMBAHAN UNTUK TESTING BACKGROUND PAGE ===== */}
+<div style={{ 
+position: "relative", 
+zIndex: 1, 
+flex: "1 0 auto", 
+backgroundColor: "transparent",
+minHeight: "1600px",
+}}>
 <div style={{ padding: "0 40px", maxWidth: "1600px", margin: "0 auto", width: "100%" }}>
-{/* ===== REF UNTUK BATAS BG TAMBAHAN ===== */}
-<div ref={liveChatAgentRef}>
+<div ref={liveChatSectionRef}>
 <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} onOpenAppealChat={(t: AppealTicket) => { setAdminAppealTicket(t); setShowAdminAppealSection(true); }} onOpenBannedAppealChat={(t: AppealTicket) => { setBannedAppealTicket(t); setShowBannedAppealSection(true); }} />
 </div>
 {isAdmin && showAdminAppealSection && adminAppealTicket && <div style={{ marginTop: "30px", height: "600px" }}><div style={{ fontSize: "13px", fontWeight: 800, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "0.5px", textTransform: "uppercase", marginBottom: "12px" }}>Chat Ajukan Banding</div><AppealChatRoom user={user} isAdmin={true} db={db} appealTicket={adminAppealTicket} onClose={() => { setShowAdminAppealSection(false); setAdminAppealTicket(null); }} /></div>}
@@ -3667,6 +3659,35 @@ setTimeout(() => { const el = document.getElementById("banned-appeal-section"); 
 </div>
 )}
 </div>
+
+{/* ===== SPACER TAMBAHAN UNTUK TESTING BACKGROUND PAGE ===== */}
+<div style={{ 
+height: "400px", 
+display: "flex", 
+alignItems: "center", 
+justifyContent: "center",
+position: "relative",
+zIndex: 1,
+}}>
+<div style={{ 
+padding: "20px 40px", 
+backgroundColor: "rgba(13,60,252,0.05)", 
+borderRadius: "16px",
+border: "2px dashed rgba(13,60,252,0.3)",
+textAlign: "center",
+maxWidth: "600px",
+}}>
+<div style={{ fontSize: "14px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, marginBottom: "8px" }}>
+📏 Background Page Test Area
+</div>
+<div style={{ fontSize: "12px", color: "#666", fontFamily: FONT_FAMILY, lineHeight: 1.6 }}>
+Scroll Progress: <strong>{(scrollProgress * 100).toFixed(1)}%</strong>
+<br />
+Background halaman tambahan akan muncul perlahan saat scroll dan berhenti sebelum footer.
+</div>
+</div>
+</div>
+
 <FooterSection />
 </div>
 </div>
