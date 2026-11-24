@@ -839,41 +839,8 @@ return (
 );
 };
 
-// ===== NAVBAR BUTTON - DENGAN DUKUNGAN LINK ITEMS =====
-interface ResourceItem {
-icon: React.ReactNode;
-title: string;
-description: string;
-href: string;
-}
-
-const NavbarButton = ({ 
-label, 
-panelTitle, 
-panelDescription, 
-panelImage, 
-panelRightTitle, 
-panelRightDescription, 
-iconType, 
-bigPanelWidth = 850, 
-bigPanelHeight = 260, 
-buttonColor = BLUE, 
-buttonHoverColor = "#000000", 
-panelColor = BLUE, 
-iconButtonColor = "#000000", 
-iconButtonHoverColor = BLUE, 
-panelBoxColor = "rgba(255,255,255,0.12)", 
-panelBoxBorder = "rgba(255,255,255,0.25)", 
-labelTextColor = "#ffffff", 
-labelTextHoverColor = "#ffffff", 
-titleTextColor = "#ffffff", 
-descriptionTextColor = "rgba(255,255,255,0.9)", 
-iconComponent = null, 
-isResources = false,
-resourceItems = null,
-panelLink = null,
-panelLinkText = null,
-}: any) => {
+// ===== NAVBAR BUTTON - DIPERBAIKI: ITEM PANEL BG PUTIH TEKS BIRU + ARROW 30PX =====
+const NavbarButton = ({ label, panelTitle, panelDescription, panelImage, panelRightTitle, panelRightDescription, iconType, bigPanelWidth = 850, bigPanelHeight = 260, buttonColor = BLUE, buttonHoverColor = "#000000", panelColor = BLUE, iconButtonColor = "#000000", iconButtonHoverColor = BLUE, panelBoxColor = "rgba(255,255,255,0.12)", panelBoxBorder = "rgba(255,255,255,0.25)", labelTextColor = "#ffffff", labelTextHoverColor = "#ffffff", titleTextColor = "#ffffff", descriptionTextColor = "rgba(255,255,255,0.9)", iconComponent = null, isResources = false }: any) => {
 const [open, setOpen] = useState(false);
 const linesTopRef = useRef<SVGLineElement>(null);
 const linesBottomRef = useRef<SVGLineElement>(null);
@@ -893,6 +860,94 @@ if (open) gsap.fromTo(panelRef.current, { opacity: 0, y: -20, scale: 0.96 }, { o
 else gsap.to(panelRef.current, { opacity: 0, y: -20, scale: 0.96, duration: 0.25, ease: "power2.in" });
 }, [open]);
 const strokeColor = open ? labelTextHoverColor : labelTextColor;
+
+// ===== KOMPONEN ITEM PANEL: BG PUTIH + TEKS BIRU + ICON + ARROW 30PX =====
+const PanelItem = ({ icon, title, description, linkHref = "#" }: { icon: React.ReactNode; title: string; description: string; linkHref?: string }) => (
+<Link href={linkHref} style={{ textDecoration: "none", display: "block" }}>
+<div style={{ 
+display: "flex", 
+alignItems: "center", 
+gap: "14px", 
+backgroundColor: WHITE, 
+border: `1.5px solid ${BLUE}20`, 
+borderRadius: "12px", 
+padding: "14px 16px", 
+cursor: "pointer",
+transition: "all 0.2s ease",
+boxShadow: "0 2px 8px rgba(13,60,252,0.08)"
+}}
+onMouseEnter={(e) => {
+e.currentTarget.style.backgroundColor = BLUE;
+e.currentTarget.style.borderColor = BLUE;
+const texts = e.currentTarget.querySelectorAll("[data-text]");
+texts.forEach((t: any) => { t.style.color = WHITE; });
+const iconWrap = e.currentTarget.querySelector("[data-icon-wrap]") as HTMLElement;
+if (iconWrap) { iconWrap.style.backgroundColor = WHITE; }
+const iconSvg = e.currentTarget.querySelector("[data-icon-svg]") as HTMLElement;
+if (iconSvg) { iconSvg.style.color = BLUE; }
+const arrow = e.currentTarget.querySelector("[data-arrow]") as HTMLElement;
+if (arrow) { arrow.style.color = WHITE; }
+}}
+onMouseLeave={(e) => {
+e.currentTarget.style.backgroundColor = WHITE;
+e.currentTarget.style.borderColor = `${BLUE}20`;
+const texts = e.currentTarget.querySelectorAll("[data-text]");
+texts.forEach((t: any) => { t.style.color = BLUE; });
+const iconWrap = e.currentTarget.querySelector("[data-icon-wrap]") as HTMLElement;
+if (iconWrap) { iconWrap.style.backgroundColor = BLUE; }
+const iconSvg = e.currentTarget.querySelector("[data-icon-svg]") as HTMLElement;
+if (iconSvg) { iconSvg.style.color = WHITE; }
+const arrow = e.currentTarget.querySelector("[data-arrow]") as HTMLElement;
+if (arrow) { arrow.style.color = BLUE; }
+}}
+>
+<div data-icon-wrap style={{ 
+width: "44px", 
+height: "44px", 
+borderRadius: "10px", 
+backgroundColor: BLUE, 
+display: "flex", 
+alignItems: "center", 
+justifyContent: "center", 
+flexShrink: 0,
+transition: "background-color 0.2s ease"
+}}>
+<div data-icon-svg style={{ display: "flex", alignItems: "center", justifyContent: "center", color: WHITE, transition: "color 0.2s ease" }}>
+{icon}
+</div>
+</div>
+<div style={{ flex: 1, minWidth: 0 }}>
+<div data-text style={{ 
+fontSize: "15px", 
+fontWeight: 700, 
+color: BLUE, 
+fontFamily: FONT_FAMILY, 
+marginBottom: "2px",
+transition: "color 0.2s ease"
+}}>{title}</div>
+<div data-text style={{ 
+fontSize: "12px", 
+color: BLUE, 
+opacity: 0.75, 
+fontFamily: FONT_FAMILY, 
+lineHeight: 1.4,
+transition: "color 0.2s ease"
+}}>{description}</div>
+</div>
+<div data-arrow style={{ 
+display: "flex", 
+alignItems: "center", 
+justifyContent: "center", 
+color: BLUE, 
+flexShrink: 0,
+transition: "color 0.2s ease"
+}}>
+<ArrowRightIcon size={30} color="currentColor" />
+</div>
+</div>
+</Link>
+);
+
 return (
 <div style={{ position: "relative" }} onMouseEnter={handleEnter} onMouseLeave={handleLeave}>
 <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "8px 14px", backgroundColor: open ? buttonHoverColor : buttonColor, backdropFilter: "blur(20px)", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.18)", boxShadow: open ? "0 8px 24px rgba(0,0,0,0.35)" : `0 8px 24px ${buttonColor}55`, transition: "background-color 0.25s ease", cursor: "pointer", position: "relative", zIndex: 2 }}>
@@ -909,94 +964,42 @@ return (
 {open && (
 <div ref={panelRef} onMouseEnter={handleEnter} onMouseLeave={handleLeave} style={{ position: "absolute", top: "calc(100% + 10px)", left: "0px", width: `${bigPanelWidth}px`, minHeight: `${bigPanelHeight}px`, backgroundColor: panelColor, backdropFilter: "blur(24px)", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.2)", boxShadow: `0 8px 32px ${panelColor}55`, zIndex: 1, fontFamily: FONT_FAMILY, color: titleTextColor, padding: "22px 26px", display: "flex", gap: "20px", alignItems: "flex-start" }}>
 <div style={{ flex: "1 1 0", minWidth: 0, display: "flex", flexDirection: "column", gap: "12px" }}>
-{isResources && resourceItems ? (
-// ===== RESOURCES MODE: Multiple items dengan link =====
+{isResources ? (
 <>
-<div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "4px" }}>
-{iconComponent ? iconComponent : <ResourcesIcon size={26} color={titleTextColor} />}
-<span style={{ fontSize: "20px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>{panelTitle}</span>
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", marginBottom: "8px" }}>
+<div style={{ display: "flex", alignItems: "center", gap: "10px" }}><DocsIcon size={22} color={titleTextColor} /><span style={{ fontSize: "16px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>Docs</span></div>
+<p style={{ fontSize: "12px", lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY, maxWidth: "340px" }}>Complete documentation of product guides, API, and Menuru tutorials.</p>
 </div>
-<p style={{ fontSize: "13px", lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY, maxWidth: "340px" }}>{panelDescription}</p>
-<div style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "4px" }}>
-{resourceItems.map((item: ResourceItem, idx: number) => (
-<Link 
-key={idx} 
-href={item.href} 
-style={{ 
-display: "flex", 
-alignItems: "center", 
-gap: "12px", 
-padding: "12px 14px", 
-backgroundColor: "rgba(255,255,255,0.08)", 
-border: "1px solid rgba(255,255,255,0.15)", 
-borderRadius: "10px", 
-textDecoration: "none",
-transition: "all 0.2s ease",
-cursor: "pointer",
-}}
-onMouseEnter={(e) => {
-e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.15)";
-e.currentTarget.style.borderColor = "rgba(255,255,255,0.3)";
-}}
-onMouseLeave={(e) => {
-e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.08)";
-e.currentTarget.style.borderColor = "rgba(255,255,255,0.15)";
-}}
->
-<div style={{ display: "flex", alignItems: "center", gap: "10px", flex: 1 }}>
-{item.icon}
-<div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-<span style={{ fontSize: "15px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>{item.title}</span>
-<span style={{ fontSize: "12px", lineHeight: 1.4, color: descriptionTextColor, fontFamily: FONT_FAMILY }}>{item.description}</span>
+<PanelItem 
+icon={<DocsIcon size={22} color={WHITE} />} 
+title="Documentation" 
+description="Product guides, API references, and tutorials" 
+linkHref="/docs"
+/>
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", marginTop: "12px", marginBottom: "8px" }}>
+<div style={{ display: "flex", alignItems: "center", gap: "10px" }}><BrandIcon size={22} color={titleTextColor} /><span style={{ fontSize: "16px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>Brand</span></div>
+<p style={{ fontSize: "12px", lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY, maxWidth: "340px" }}>Visual assets, logos, and Menuru brand identity guidelines.</p>
 </div>
-</div>
-<div style={{ display: "flex", alignItems: "center", gap: "6px", flexShrink: 0 }}>
-<NorthEastArrow size={14} color={titleTextColor} />
-<NorthEastArrow size={14} color={titleTextColor} />
-</div>
-</Link>
-))}
-</div>
+<PanelItem 
+icon={<BrandIcon size={22} color={WHITE} />} 
+title="Brand Assets" 
+description="Logos, visual identity, and brand guidelines" 
+linkHref="/brand"
+/>
 </>
 ) : (
-// ===== DEFAULT MODE: Single panel dengan link =====
 <>
-<div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+<div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "8px" }}>
 {iconComponent ? iconComponent : iconType === "trust" ? <TrustIcon size={26} color={titleTextColor} /> : iconType === "career" ? <CareerIcon size={26} color={titleTextColor} /> : <ResourcesIcon size={26} color={titleTextColor} />}
 <span style={{ fontSize: "20px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>{panelTitle}</span>
 </div>
-<p style={{ fontSize: "13px", lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY, maxWidth: "340px" }}>{panelDescription}</p>
-{panelLink && panelLinkText && (
-<Link 
-href={panelLink}
-style={{ 
-display: "inline-flex", 
-alignItems: "center", 
-gap: "8px", 
-marginTop: "8px",
-padding: "10px 16px", 
-backgroundColor: "rgba(255,255,255,0.1)", 
-border: "1px solid rgba(255,255,255,0.2)", 
-borderRadius: "8px", 
-textDecoration: "none",
-transition: "all 0.2s ease",
-}}
-onMouseEnter={(e) => {
-e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.2)";
-e.currentTarget.style.borderColor = "rgba(255,255,255,0.35)";
-}}
-onMouseLeave={(e) => {
-e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)";
-e.currentTarget.style.borderColor = "rgba(255,255,255,0.2)";
-}}
->
-<span style={{ fontSize: "13px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>{panelLinkText}</span>
-<div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-<NorthEastArrow size={13} color={titleTextColor} />
-<NorthEastArrow size={13} color={titleTextColor} />
-</div>
-</Link>
-)}
+<p style={{ fontSize: "13px", lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY, maxWidth: "340px", marginBottom: "12px" }}>{panelDescription}</p>
+<PanelItem 
+icon={iconComponent ? iconComponent : iconType === "trust" ? <TrustIcon size={22} color={WHITE} /> : iconType === "career" ? <CareerIcon size={22} color={WHITE} /> : <ResourcesIcon size={22} color={WHITE} />} 
+title={panelRightTitle} 
+description={panelRightDescription} 
+linkHref={iconType === "trust" ? "/trust" : iconType === "career" ? "/careers" : "/resources"}
+/>
 </>
 )}
 </div>
@@ -1020,32 +1023,11 @@ return (
 <img src="/images/gfssa.jpg" alt="Menuru" style={{ height: "60px", width: "auto", maxWidth: "none", objectFit: "contain", display: "block", flexShrink: 0, mixBlendMode: "multiply" }} />
 <span style={{ color: BLUE, fontSize: "60px", fontWeight: 700, letterSpacing: "-0.03em", fontFamily: FONT_FAMILY, lineHeight: 1, whiteSpace: "nowrap" }}>Menuru</span>
 </Link>
-<NavbarButton 
-label="Teams" 
-panelTitle="Trust" 
-panelDescription="Your security and privacy are our top priorities with end-to-end encryption." 
-panelImage="/images/p0l.jpg" 
-panelRightTitle="Why Trust Us" 
-panelRightDescription="Our systems are monitored 24/7 to protect your data." 
-iconType="trust" 
-bigPanelWidth={850} 
-bigPanelHeight={260}
-panelLink="/profile"
-panelLinkText="Learn more about our team"
-/>
-<NavbarButton 
-label="Individual" 
-panelTitle="Careers" 
-panelDescription="Join our team and build a meaningful career in a supportive environment." 
-panelImage="/images/xxz.jpg" 
-panelRightTitle="Life at Menuru" 
-panelRightDescription="A collaborative, flexible work culture with plenty of opportunities to grow together." 
-iconType="career" 
-bigPanelWidth={850} 
-bigPanelHeight={260}
-panelLink="/profile"
-panelLinkText="Explore career opportunities"
-/>
+{/* TEAMS - BG BIRU */}
+<NavbarButton label="Teams" panelTitle="Trust" panelDescription="Your security and privacy are our top priorities with end-to-end encryption." panelImage="/images/p0l.jpg" panelRightTitle="Why Trust Us" panelRightDescription="Our systems are monitored 24/7 to protect your data." iconType="trust" bigPanelWidth={850} bigPanelHeight={260} />
+{/* INDIVIDUALS - BG BIRU */}
+<NavbarButton label="Individual" panelTitle="Careers" panelDescription="Join our team and build a meaningful career in a supportive environment." panelImage="/images/xxz.jpg" panelRightTitle="Life at Menuru" panelRightDescription="A collaborative, flexible work culture with plenty of opportunities to grow together." iconType="career" bigPanelWidth={850} bigPanelHeight={260} />
+{/* RESOURCES - DIPERBAIKI: BG BIRU + ICON RESOURCES */}
 <NavbarButton 
 label="Resources" 
 panelTitle="Docs & Brand" 
@@ -1054,12 +1036,12 @@ panelImage="/images/p0l.jpg"
 panelRightTitle="Docs & Brand" 
 panelRightDescription="Guides, visual assets, and official Menuru brand references." 
 iconType="resources" 
-iconComponent={<StriperIcon size={22} color="#ffffff" />} 
+iconComponent={<ResourcesIcon size={22} color="#ffffff" />} 
 bigPanelWidth={850} 
-bigPanelHeight={380} 
+bigPanelHeight={340} 
 buttonColor={BLUE} 
 buttonHoverColor={BLUE} 
-panelColor={BLUE}
+panelColor={BLUE} 
 iconButtonColor="#000000" 
 iconButtonHoverColor="#000000" 
 panelBoxColor="rgba(255,255,255,0.12)" 
@@ -1068,21 +1050,7 @@ labelTextColor="#ffffff"
 labelTextHoverColor="#ffffff" 
 titleTextColor="#ffffff" 
 descriptionTextColor="rgba(255,255,255,0.92)" 
-isResources={true}
-resourceItems={[
-{
-icon: <DocsIcon size={22} color="#ffffff" />,
-title: "Docs",
-description: "Complete documentation of product guides, API, and Menuru tutorials.",
-href: "/notes",
-},
-{
-icon: <BrandIcon size={22} color="#ffffff" />,
-title: "Brand",
-description: "Visual assets, logos, and Menuru brand identity guidelines.",
-href: "/profile",
-},
-]}
+isResources={true} 
 />
 </div>
 );
@@ -2679,11 +2647,11 @@ const [messages, setMessages] = useState<AppealMessage[]>([]);
 const [messageText, setMessageText] = useState("");
 const [replyTo, setReplyTo] = useState<AppealMessage | null>(null);
 const [encryptionReady, setEncryptionReady] = useState(false);
-const [typingName, setTypingName] = useState<string | null>(null);
 const [status, setStatus] = useState<string>(appealTicket?.status || "waiting");
 const messagesEndRef = useRef<HTMLDivElement>(null);
 const chatRef = useRef<HTMLDivElement>(null);
 const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+const typingName = useRealtimeTypingAppeal(db, appealTicket?.id, user?.uid);
 useEffect(() => { getCryptoKey().then(() => setEncryptionReady(true)).catch(() => setEncryptionReady(true)); }, []);
 useEffect(() => {
 if (!db || !appealTicket) return;
@@ -2701,10 +2669,9 @@ const unsub = onSnapshot(doc(db, "appeal_tickets", appealTicket.id), (snap: any)
 if (!snap.exists()) return;
 const d = snap.data();
 setStatus(d.status || "waiting");
-setTypingName(d.typing && d.typingUserId !== user?.uid ? (d.typingUserName || null) : null);
 });
 return () => unsub();
-}, [db, appealTicket, user]);
+}, [db, appealTicket]);
 useEffect(() => {
 if (!db || !appealTicket || !user) return;
 messages.filter((m) => m.senderId !== user.uid && m.senderId !== "system" && !m.read).forEach(async (msg) => { await updateDoc(doc(db, "appeal_tickets", appealTicket.id, "messages", msg.id), { read: true, deliveryStatus: "read" }); });
@@ -2898,7 +2865,7 @@ Ticket chat ini telah {status === "resolved" ? "DITERIMA & SELESAI" : "DITOLAK"}
 );
 };
 
-// ===== LIVE CHAT AGENT - DENGAN CHATBOT MODE SINGLE PAGE =====
+// ===== LIVE CHAT AGENT =====
 const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBannedAppealChat }: any) => {
 const [tickets, setTickets] = useState<Ticket[]>([]);
 const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
@@ -2928,7 +2895,6 @@ const [tourStep, setTourStep] = useState(0);
 const [showCloseConfirm, setShowCloseConfirm] = useState(false);
 const [chatbotMode, setChatbotMode] = useState(false);
 const [guestUser, setGuestUser] = useState<any>(null);
-
 const messagesEndRef = useRef<HTMLDivElement>(null);
 const chatRef = useRef<HTMLDivElement>(null);
 const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -3240,7 +3206,7 @@ const renderSearchBar = () => (
 </div>
 );
 
-// ===== RENDER CHATBOT MODE - SINGLE PAGE LAYOUT =====
+// ===== RENDER CHATBOT MODE =====
 const renderChatbotMode = () => {
 const effUser = getEffectiveUser();
   
@@ -3405,9 +3371,7 @@ return (
 );
 }
 
-const ss = STATUS_STYLES[selectedTicket.status] || STATUS_STYLES.active;
 const displayUserName = isAdmin ? selectedTicket.userName : AGENT_NAME;
-const displayUserPhoto = isAdmin ? selectedTicket.userPhoto : "";
 const showVerified = !isAdmin;
 
 return (
@@ -3416,7 +3380,7 @@ return (
 <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0, flex: 1 }}>
 <div style={{ width: 38, height: 38, borderRadius: "50%", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", flexShrink: 0 }}>
 {isAdmin ? (
-displayUserPhoto ? <img src={displayUserPhoto} alt={displayUserName} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <span style={{ fontSize: 15, fontWeight: 800, color: BLUE }}>{displayUserName?.charAt(0).toUpperCase()}</span>
+selectedTicket.userPhoto ? <img src={selectedTicket.userPhoto} alt={selectedTicket.userName} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <span style={{ fontSize: 15, fontWeight: 800, color: BLUE }}>{selectedTicket.userName?.charAt(0).toUpperCase()}</span>
 ) : (
 <AgentIcon size={22} color={BLUE} />
 )}
@@ -3518,14 +3482,15 @@ Live Chat
 }
 
 const effUser = getEffectiveUser();
-
-if (!effUser) return (<><OnboardingTour steps={tourSteps} onComplete={completeTour} isActive={showTour} currentStep={tourStep} setCurrentStep={setTourStep} /><div style={{ marginTop: "80px", paddingTop: "30px" }}><h3 ref={liveChatTitleRef} data-tour="livechat-title" style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1, marginBottom: "20px" }}>Live Chat Agent</h3><p style={{ fontSize: "15px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "10px" }}>Please login to use Live Chat Agent</p><div style={{ display: "flex", gap: "10px", alignItems: "center" }}><Link href="/" style={{ textDecoration: "none" }}><button data-tour="login-button" style={{ padding: "8px 20px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "6px", fontSize: "14px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY }}>Login</button></Link><button onClick={() => setChatbotMode(true)} style={{ padding: "8px 20px", backgroundColor: WHITE, color: BLUE, border: `2px solid ${BLUE}`, borderRadius: "6px", fontSize: "14px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY, display: "inline-flex", alignItems: "center", gap: "6px" }}><ToggleChatbotIcon size={14} color={BLUE} />Chatbot Mode</button></div></div></>);
-if (!isAdmin && isBanned) return (<div style={{ marginTop: "80px", paddingTop: "30px" }}><h3 style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1, marginBottom: "20px" }}>Live Chat Agent</h3><BannedInfoBanner banReason={banReason} banMessage={banMessage || ""} onAppeal={createAppealTicket} hasAppeal={hasAppeal} appealStatus={appealTickets.find((t) => t.userId === effUser.uid)?.status} /></div>);
-
 const userTickets = effUser ? tickets.filter((t) => t.userId === effUser.uid) : [];
 
-if (!isAdmin && userTickets.length === 0 && !showStartChat) return (<><OnboardingTour steps={tourSteps} onComplete={completeTour} isActive={showTour} currentStep={tourStep} setCurrentStep={setTourStep} /><div style={{ marginTop: "80px", paddingTop: "30px" }}><h3 ref={liveChatTitleRef} data-tour="livechat-title" style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1, marginBottom: "20px" }}>Live Chat Agent</h3><p style={{ fontSize: "15px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "16px" }}>Need help? Chat directly with our agent.</p><div style={{ display: "flex", gap: "10px" }}><button data-tour="start-chat-button" onClick={() => setShowStartChat(true)} style={{ padding: "10px 24px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "8px", fontSize: "15px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY }}>Start Live Chat</button><button onClick={() => setChatbotMode(true)} style={{ padding: "10px 24px", backgroundColor: WHITE, color: BLUE, border: `2px solid ${BLUE}`, borderRadius: "8px", fontSize: "15px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY, display: "inline-flex", alignItems: "center", gap: "8px" }}><ToggleChatbotIcon size={16} color={BLUE} />Chatbot Mode</button></div></div></>);
-if (!isAdmin && showStartChat) return (<div style={{ marginTop: "80px", paddingTop: "30px" }}><h3 style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1, marginBottom: "20px" }}>Live Chat Agent</h3><div style={{ maxWidth: "400px" }}><div style={{ fontSize: "15px", marginBottom: "10px", fontFamily: FONT_FAMILY, fontWeight: 700, color: BLUE }}>Select your issue topic:</div><select value={selectedTopic} onChange={(e) => setSelectedTopic(e.target.value)} style={{ width: "100%", padding: "10px 14px", border: `2px solid ${BLUE}`, borderRadius: "8px", fontSize: "15px", fontFamily: FONT_FAMILY, outline: "none", backgroundColor: WHITE, marginBottom: "14px", color: BLUE, fontWeight: 600 }}><option value="">-- Select topic --</option>{topics.map((t) => <option key={t} value={t}>{t}</option>)}</select><div style={{ display: "flex", gap: "10px" }}><button onClick={startChat} disabled={!selectedTopic} style={{ padding: "8px 20px", backgroundColor: selectedTopic ? BLUE : "#ccc", color: WHITE, border: "none", borderRadius: "8px", fontSize: "14px", fontWeight: 600, cursor: selectedTopic ? "pointer" : "not-allowed", fontFamily: FONT_FAMILY }}>Start Chat</button><button onClick={() => setShowStartChat(false)} style={{ padding: "8px 20px", backgroundColor: "transparent", color: "#666", border: "1px solid #ccc", borderRadius: "8px", fontSize: "14px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY }}>Cancel</button></div></div></div>);
+if (!effUser) return (<><OnboardingTour steps={tourSteps} onComplete={completeTour} isActive={showTour} currentStep={tourStep} setCurrentStep={setTourStep} /><div style={{ marginTop: "80px", paddingTop: "30px" }}><div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}><h3 ref={liveChatTitleRef} data-tour="livechat-title" style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1 }}>Live Chat Agent</h3><button onClick={() => setChatbotMode(true)} style={{ padding: "10px 18px", backgroundColor: BLUE, color: WHITE, border: `2px solid ${BLUE}`, borderRadius: "10px", fontSize: "13px", fontWeight: 800, cursor: "pointer", fontFamily: FONT_FAMILY, display: "inline-flex", alignItems: "center", gap: "8px", boxShadow: "0 6px 20px rgba(13,60,252,0.3)" }} title="Ubah ke tampilan Chatbot"><ToggleChatbotIcon size={16} color={WHITE} />Chatbot Mode</button></div><p style={{ fontSize: "15px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "10px" }}>Please login to use Live Chat Agent</p><div style={{ display: "flex", gap: "10px" }}><Link href="/" style={{ textDecoration: "none" }}><button data-tour="login-button" style={{ padding: "8px 20px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "6px", fontSize: "14px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY }}>Login</button></Link></div></div></>);
+
+if (!isAdmin && isBanned) return (<div style={{ marginTop: "80px", paddingTop: "30px" }}><div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}><h3 style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1 }}>Live Chat Agent</h3><button onClick={() => setChatbotMode(true)} style={{ padding: "10px 18px", backgroundColor: BLUE, color: WHITE, border: `2px solid ${BLUE}`, borderRadius: "10px", fontSize: "13px", fontWeight: 800, cursor: "pointer", fontFamily: FONT_FAMILY, display: "inline-flex", alignItems: "center", gap: "8px", boxShadow: "0 6px 20px rgba(13,60,252,0.3)" }} title="Ubah ke tampilan Chatbot"><ToggleChatbotIcon size={16} color={WHITE} />Chatbot Mode</button></div><BannedInfoBanner banReason={banReason} banMessage={banMessage || ""} onAppeal={createAppealTicket} hasAppeal={hasAppeal} appealStatus={appealTickets.find((t) => t.userId === effUser.uid)?.status} /></div>);
+
+if (!isAdmin && userTickets.length === 0 && !showStartChat) return (<><OnboardingTour steps={tourSteps} onComplete={completeTour} isActive={showTour} currentStep={tourStep} setCurrentStep={setTourStep} /><div style={{ marginTop: "80px", paddingTop: "30px" }}><div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}><h3 ref={liveChatTitleRef} data-tour="livechat-title" style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1 }}>Live Chat Agent</h3><button onClick={() => setChatbotMode(true)} style={{ padding: "10px 18px", backgroundColor: BLUE, color: WHITE, border: `2px solid ${BLUE}`, borderRadius: "10px", fontSize: "13px", fontWeight: 800, cursor: "pointer", fontFamily: FONT_FAMILY, display: "inline-flex", alignItems: "center", gap: "8px", boxShadow: "0 6px 20px rgba(13,60,252,0.3)" }} title="Ubah ke tampilan Chatbot"><ToggleChatbotIcon size={16} color={WHITE} />Chatbot Mode</button></div><p style={{ fontSize: "15px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "16px" }}>Need help? Chat directly with our agent.</p><div style={{ display: "flex", gap: "10px" }}><button data-tour="start-chat-button" onClick={() => setShowStartChat(true)} style={{ padding: "10px 24px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "8px", fontSize: "15px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY }}>Start Live Chat</button></div></div></>);
+
+if (!isAdmin && showStartChat) return (<div style={{ marginTop: "80px", paddingTop: "30px" }}><div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}><h3 style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1 }}>Live Chat Agent</h3><button onClick={() => setChatbotMode(true)} style={{ padding: "10px 18px", backgroundColor: BLUE, color: WHITE, border: `2px solid ${BLUE}`, borderRadius: "10px", fontSize: "13px", fontWeight: 800, cursor: "pointer", fontFamily: FONT_FAMILY, display: "inline-flex", alignItems: "center", gap: "8px", boxShadow: "0 6px 20px rgba(13,60,252,0.3)" }} title="Ubah ke tampilan Chatbot"><ToggleChatbotIcon size={16} color={WHITE} />Chatbot Mode</button></div><div style={{ maxWidth: "400px" }}><div style={{ fontSize: "15px", marginBottom: "10px", fontFamily: FONT_FAMILY, fontWeight: 700, color: BLUE }}>Select your issue topic:</div><select value={selectedTopic} onChange={(e) => setSelectedTopic(e.target.value)} style={{ width: "100%", padding: "10px 14px", border: `2px solid ${BLUE}`, borderRadius: "8px", fontSize: "15px", fontFamily: FONT_FAMILY, outline: "none", backgroundColor: WHITE, marginBottom: "14px", color: BLUE, fontWeight: 600 }}><option value="">-- Select topic --</option>{topics.map((t) => <option key={t} value={t}>{t}</option>)}</select><div style={{ display: "flex", gap: "10px" }}><button onClick={startChat} disabled={!selectedTopic} style={{ padding: "8px 20px", backgroundColor: selectedTopic ? BLUE : "#ccc", color: WHITE, border: "none", borderRadius: "8px", fontSize: "14px", fontWeight: 600, cursor: selectedTopic ? "pointer" : "not-allowed", fontFamily: FONT_FAMILY }}>Start Chat</button><button onClick={() => setShowStartChat(false)} style={{ padding: "8px 20px", backgroundColor: "transparent", color: "#666", border: "1px solid #ccc", borderRadius: "8px", fontSize: "14px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY }}>Cancel</button></div></div></div>);
 
 const waiting = filter(tickets.filter((t) => t.status === "waiting"));
 const active = filter(tickets.filter((t) => t.status === "active"));
