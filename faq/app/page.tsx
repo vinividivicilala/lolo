@@ -596,86 +596,6 @@ const random = String(Math.floor(Math.random() * 10000)).padStart(4, "0");
 return `#TICKET-${yy}${mm}${dd}-${hh}${min}-${random}`;
 };
 
-// ===== BACKGROUND HALAMAN TAMBAHAN (BIRU) DENGAN SCROLL ANIMATION =====
-const AdditionalBackground = ({ liveChatRef }: { liveChatRef: React.RefObject<HTMLDivElement> }) => {
-const bgRef = useRef<HTMLDivElement>(null);
-const ctxRef = useRef<gsap.Context | null>(null);
-
-useEffect(() => {
-if (typeof window === "undefined" || !bgRef.current || !liveChatRef.current) return;
-
-// Cleanup previous
-if (ctxRef.current) {
-ctxRef.current.revert();
-}
-
-const ctx = gsap.context(() => {
-// Set initial state - bg tersembunyi di atas
-gsap.set(bgRef.current, {
-yPercent: -100,
-opacity: 0,
-});
-
-// Animasi muncul perlahan saat scroll
-gsap.to(bgRef.current, {
-yPercent: 0,
-opacity: 1,
-ease: "none",
-scrollTrigger: {
-trigger: bgRef.current,
-start: "top top",
-end: () => {
-// Batas sampai Live Chat Agent
-if (liveChatRef.current) {
-const rect = liveChatRef.current.getBoundingClientRect();
-const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-return scrollTop + rect.top;
-}
-return "+=1500";
-},
-scrub: 1.2, // Smooth mengikuti scroll
-invalidateOnRefresh: true,
-},
-});
-}, bgRef.current);
-
-ctxRef.current = ctx;
-
-// Refresh ScrollTrigger setelah beberapa saat untuk memastikan perhitungan benar
-const refreshTimer = setTimeout(() => {
-ScrollTrigger.refresh();
-}, 500);
-
-return () => {
-clearTimeout(refreshTimer);
-if (ctxRef.current) {
-ctxRef.current.revert();
-ctxRef.current = null;
-}
-};
-}, [liveChatRef]);
-
-return (
-<div
-ref={bgRef}
-style={{
-position: "fixed",
-top: 0,
-left: 0,
-width: "100%",
-height: "100vh",
-backgroundColor: BLUE,
-zIndex: 0,
-pointerEvents: "none",
-borderBottomLeftRadius: "60px",
-borderBottomRightRadius: "60px",
-boxShadow: "0 20px 60px rgba(13, 60, 252, 0.3)",
-willChange: "transform, opacity",
-}}
-/>
-);
-};
-
 // ===== FARID VERIFIED PANEL =====
 const FaridVerifiedPanel = ({ open, anchorRect, onClose }: { open: boolean; anchorRect: DOMRect | null; onClose: () => void; }) => {
 const [phase, setPhase] = useState<"loading" | "expand" | "fullpage">("loading");
@@ -919,8 +839,41 @@ return (
 );
 };
 
-// ===== NAVBAR BUTTON =====
-const NavbarButton = ({ label, panelTitle, panelDescription, panelImage, panelRightTitle, panelRightDescription, iconType, bigPanelWidth = 850, bigPanelHeight = 260, buttonColor = BLUE, buttonHoverColor = "#000000", panelColor = BLUE, iconButtonColor = "#000000", iconButtonHoverColor = BLUE, panelBoxColor = "rgba(255,255,255,0.12)", panelBoxBorder = "rgba(255,255,255,0.25)", labelTextColor = "#ffffff", labelTextHoverColor = "#ffffff", titleTextColor = "#ffffff", descriptionTextColor = "rgba(255,255,255,0.9)", iconComponent = null, isResources = false }: any) => {
+// ===== NAVBAR BUTTON - DENGAN DUKUNGAN LINK ITEMS =====
+interface ResourceItem {
+icon: React.ReactNode;
+title: string;
+description: string;
+href: string;
+}
+
+const NavbarButton = ({ 
+label, 
+panelTitle, 
+panelDescription, 
+panelImage, 
+panelRightTitle, 
+panelRightDescription, 
+iconType, 
+bigPanelWidth = 850, 
+bigPanelHeight = 260, 
+buttonColor = BLUE, 
+buttonHoverColor = "#000000", 
+panelColor = BLUE, 
+iconButtonColor = "#000000", 
+iconButtonHoverColor = BLUE, 
+panelBoxColor = "rgba(255,255,255,0.12)", 
+panelBoxBorder = "rgba(255,255,255,0.25)", 
+labelTextColor = "#ffffff", 
+labelTextHoverColor = "#ffffff", 
+titleTextColor = "#ffffff", 
+descriptionTextColor = "rgba(255,255,255,0.9)", 
+iconComponent = null, 
+isResources = false,
+resourceItems = null,
+panelLink = null,
+panelLinkText = null,
+}: any) => {
 const [open, setOpen] = useState(false);
 const linesTopRef = useRef<SVGLineElement>(null);
 const linesBottomRef = useRef<SVGLineElement>(null);
@@ -956,24 +909,94 @@ return (
 {open && (
 <div ref={panelRef} onMouseEnter={handleEnter} onMouseLeave={handleLeave} style={{ position: "absolute", top: "calc(100% + 10px)", left: "0px", width: `${bigPanelWidth}px`, minHeight: `${bigPanelHeight}px`, backgroundColor: panelColor, backdropFilter: "blur(24px)", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.2)", boxShadow: `0 8px 32px ${panelColor}55`, zIndex: 1, fontFamily: FONT_FAMILY, color: titleTextColor, padding: "22px 26px", display: "flex", gap: "20px", alignItems: "flex-start" }}>
 <div style={{ flex: "1 1 0", minWidth: 0, display: "flex", flexDirection: "column", gap: "12px" }}>
-{isResources ? (
+{isResources && resourceItems ? (
+// ===== RESOURCES MODE: Multiple items dengan link =====
 <>
-<div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-<div style={{ display: "flex", alignItems: "center", gap: "10px" }}><DocsIcon size={22} color={titleTextColor} /><span style={{ fontSize: "16px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>Docs</span></div>
-<p style={{ fontSize: "12px", lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY, maxWidth: "340px" }}>Complete documentation of product guides, API, and Menuru tutorials.</p>
+<div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "4px" }}>
+{iconComponent ? iconComponent : <ResourcesIcon size={26} color={titleTextColor} />}
+<span style={{ fontSize: "20px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>{panelTitle}</span>
 </div>
-<div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-<div style={{ display: "flex", alignItems: "center", gap: "10px" }}><BrandIcon size={22} color={titleTextColor} /><span style={{ fontSize: "16px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>Brand</span></div>
-<p style={{ fontSize: "12px", lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY, maxWidth: "340px" }}>Visual assets, logos, and Menuru brand identity guidelines.</p>
+<p style={{ fontSize: "13px", lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY, maxWidth: "340px" }}>{panelDescription}</p>
+<div style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "4px" }}>
+{resourceItems.map((item: ResourceItem, idx: number) => (
+<Link 
+key={idx} 
+href={item.href} 
+style={{ 
+display: "flex", 
+alignItems: "center", 
+gap: "12px", 
+padding: "12px 14px", 
+backgroundColor: "rgba(255,255,255,0.08)", 
+border: "1px solid rgba(255,255,255,0.15)", 
+borderRadius: "10px", 
+textDecoration: "none",
+transition: "all 0.2s ease",
+cursor: "pointer",
+}}
+onMouseEnter={(e) => {
+e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.15)";
+e.currentTarget.style.borderColor = "rgba(255,255,255,0.3)";
+}}
+onMouseLeave={(e) => {
+e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.08)";
+e.currentTarget.style.borderColor = "rgba(255,255,255,0.15)";
+}}
+>
+<div style={{ display: "flex", alignItems: "center", gap: "10px", flex: 1 }}>
+{item.icon}
+<div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+<span style={{ fontSize: "15px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>{item.title}</span>
+<span style={{ fontSize: "12px", lineHeight: 1.4, color: descriptionTextColor, fontFamily: FONT_FAMILY }}>{item.description}</span>
+</div>
+</div>
+<div style={{ display: "flex", alignItems: "center", gap: "6px", flexShrink: 0 }}>
+<NorthEastArrow size={14} color={titleTextColor} />
+<NorthEastArrow size={14} color={titleTextColor} />
+</div>
+</Link>
+))}
 </div>
 </>
 ) : (
+// ===== DEFAULT MODE: Single panel dengan link =====
 <>
 <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
 {iconComponent ? iconComponent : iconType === "trust" ? <TrustIcon size={26} color={titleTextColor} /> : iconType === "career" ? <CareerIcon size={26} color={titleTextColor} /> : <ResourcesIcon size={26} color={titleTextColor} />}
 <span style={{ fontSize: "20px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>{panelTitle}</span>
 </div>
 <p style={{ fontSize: "13px", lineHeight: 1.5, color: descriptionTextColor, margin: 0, fontFamily: FONT_FAMILY, maxWidth: "340px" }}>{panelDescription}</p>
+{panelLink && panelLinkText && (
+<Link 
+href={panelLink}
+style={{ 
+display: "inline-flex", 
+alignItems: "center", 
+gap: "8px", 
+marginTop: "8px",
+padding: "10px 16px", 
+backgroundColor: "rgba(255,255,255,0.1)", 
+border: "1px solid rgba(255,255,255,0.2)", 
+borderRadius: "8px", 
+textDecoration: "none",
+transition: "all 0.2s ease",
+}}
+onMouseEnter={(e) => {
+e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.2)";
+e.currentTarget.style.borderColor = "rgba(255,255,255,0.35)";
+}}
+onMouseLeave={(e) => {
+e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)";
+e.currentTarget.style.borderColor = "rgba(255,255,255,0.2)";
+}}
+>
+<span style={{ fontSize: "13px", fontWeight: 700, fontFamily: FONT_FAMILY, color: titleTextColor }}>{panelLinkText}</span>
+<div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+<NorthEastArrow size={13} color={titleTextColor} />
+<NorthEastArrow size={13} color={titleTextColor} />
+</div>
+</Link>
+)}
 </>
 )}
 </div>
@@ -997,9 +1020,70 @@ return (
 <img src="/images/gfssa.jpg" alt="Menuru" style={{ height: "60px", width: "auto", maxWidth: "none", objectFit: "contain", display: "block", flexShrink: 0, mixBlendMode: "multiply" }} />
 <span style={{ color: BLUE, fontSize: "60px", fontWeight: 700, letterSpacing: "-0.03em", fontFamily: FONT_FAMILY, lineHeight: 1, whiteSpace: "nowrap" }}>Menuru</span>
 </Link>
-<NavbarButton label="Teams" panelTitle="Trust" panelDescription="Your security and privacy are our top priorities with end-to-end encryption." panelImage="/images/p0l.jpg" panelRightTitle="Why Trust Us" panelRightDescription="Our systems are monitored 24/7 to protect your data." iconType="trust" bigPanelWidth={850} bigPanelHeight={260} />
-<NavbarButton label="Individual" panelTitle="Careers" panelDescription="Join our team and build a meaningful career in a supportive environment." panelImage="/images/xxz.jpg" panelRightTitle="Life at Menuru" panelRightDescription="A collaborative, flexible work culture with plenty of opportunities to grow together." iconType="career" bigPanelWidth={850} bigPanelHeight={260} />
-<NavbarButton label="Resources" panelTitle="Docs & Brand" panelDescription="Access complete documentation and Menuru brand assets in one place." panelImage="/images/p0l.jpg" panelRightTitle="Docs & Brand" panelRightDescription="Guides, visual assets, and official Menuru brand references." iconType="resources" iconComponent={<StriperIcon size={22} color="#ffffff" />} bigPanelWidth={850} bigPanelHeight={340} buttonColor={BLUE} buttonHoverColor={BLUE} panelColor="#000000" iconButtonColor="#000000" iconButtonHoverColor="#000000" panelBoxColor="rgba(255,255,255,0.12)" panelBoxBorder="rgba(255,255,255,0.25)" labelTextColor="#ffffff" labelTextHoverColor="#ffffff" titleTextColor="#ffffff" descriptionTextColor="rgba(255,255,255,0.92)" isResources={true} />
+<NavbarButton 
+label="Teams" 
+panelTitle="Trust" 
+panelDescription="Your security and privacy are our top priorities with end-to-end encryption." 
+panelImage="/images/p0l.jpg" 
+panelRightTitle="Why Trust Us" 
+panelRightDescription="Our systems are monitored 24/7 to protect your data." 
+iconType="trust" 
+bigPanelWidth={850} 
+bigPanelHeight={260}
+panelLink="/profile"
+panelLinkText="Learn more about our team"
+/>
+<NavbarButton 
+label="Individual" 
+panelTitle="Careers" 
+panelDescription="Join our team and build a meaningful career in a supportive environment." 
+panelImage="/images/xxz.jpg" 
+panelRightTitle="Life at Menuru" 
+panelRightDescription="A collaborative, flexible work culture with plenty of opportunities to grow together." 
+iconType="career" 
+bigPanelWidth={850} 
+bigPanelHeight={260}
+panelLink="/profile"
+panelLinkText="Explore career opportunities"
+/>
+<NavbarButton 
+label="Resources" 
+panelTitle="Docs & Brand" 
+panelDescription="Access complete documentation and Menuru brand assets in one place." 
+panelImage="/images/p0l.jpg" 
+panelRightTitle="Docs & Brand" 
+panelRightDescription="Guides, visual assets, and official Menuru brand references." 
+iconType="resources" 
+iconComponent={<StriperIcon size={22} color="#ffffff" />} 
+bigPanelWidth={850} 
+bigPanelHeight={380} 
+buttonColor={BLUE} 
+buttonHoverColor={BLUE} 
+panelColor={BLUE}
+iconButtonColor="#000000" 
+iconButtonHoverColor="#000000" 
+panelBoxColor="rgba(255,255,255,0.12)" 
+panelBoxBorder="rgba(255,255,255,0.25)" 
+labelTextColor="#ffffff" 
+labelTextHoverColor="#ffffff" 
+titleTextColor="#ffffff" 
+descriptionTextColor="rgba(255,255,255,0.92)" 
+isResources={true}
+resourceItems={[
+{
+icon: <DocsIcon size={22} color="#ffffff" />,
+title: "Docs",
+description: "Complete documentation of product guides, API, and Menuru tutorials.",
+href: "/notes",
+},
+{
+icon: <BrandIcon size={22} color="#ffffff" />,
+title: "Brand",
+description: "Visual assets, logos, and Menuru brand identity guidelines.",
+href: "/profile",
+},
+]}
+/>
 </div>
 );
 };
@@ -1089,7 +1173,7 @@ return (
 </div>
 </div>
 <p style={{ margin: 0, color: WHITE, fontSize: "14px", lineHeight: 1.6, opacity: 0.95 }}>
-Google Authenticator menambahkan lapisan keamanan ekstra dengan kode 6 digit yang berubah setiap 30 detik. Setup dilakukan <strong>sekali saja</strong>; setelah aktif, secret tidak bisa diganti tanpa menonaktifkan terlebih dahulu.
+Google Authenticator menambahkan lapisan keamanan ekstra dengan kode 6 digit yang berubah setiap 30 detik.
 </p>
 <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginTop: "8px" }}>
 {!enabled ? (
@@ -1365,7 +1449,7 @@ return (
 </div>
 </div>
 <p style={{ margin: 0, color: WHITE, fontSize: "14px", lineHeight: 1.6, opacity: 0.95 }}>
-Passkey menggunakan standar WebAuthn: fingerprint, Face ID, Windows Hello, PIN perangkat, atau security key USB. Data kriptografi tersimpan di perangkat Anda, tidak pernah dikirim ke server.
+Passkey menggunakan standar WebAuthn: fingerprint, Face ID, Windows Hello, PIN perangkat, atau security key USB.
 </p>
 <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
 {!webAuthnSupported && <span style={{ padding: "6px 12px", backgroundColor: "#fef3c7", color: "#92400e", borderRadius: "8px", fontSize: "12px", fontWeight: 700 }}>Browser tidak mendukung WebAuthn</span>}
@@ -1924,11 +2008,11 @@ const [messages, setMessages] = useState<AppealMessage[]>([]);
 const [messageText, setMessageText] = useState("");
 const [replyTo, setReplyTo] = useState<AppealMessage | null>(null);
 const [encryptionReady, setEncryptionReady] = useState(false);
+const [typingName, setTypingName] = useState<string | null>(null);
 const [status, setStatus] = useState<string>(appealTicket.status);
 const messagesEndRef = useRef<HTMLDivElement>(null);
 const chatRef = useRef<HTMLDivElement>(null);
 const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-const typingName = useRealtimeTypingAppeal(db, appealTicket?.id, user?.uid);
 useEffect(() => { getCryptoKey().then(() => setEncryptionReady(true)).catch(() => setEncryptionReady(true)); }, []);
 useEffect(() => {
 if (!db || !appealTicket) return;
@@ -1946,9 +2030,10 @@ const unsub = onSnapshot(doc(db, "appeal_tickets", appealTicket.id), (snap: any)
 if (!snap.exists()) return;
 const d = snap.data();
 setStatus(d.status || "waiting");
+setTypingName(d.typing && d.typingUserId !== user?.uid ? (d.typingUserName || null) : null);
 });
 return () => unsub();
-}, [db, appealTicket]);
+}, [db, appealTicket, user]);
 useEffect(() => {
 if (!db || !appealTicket || !user) return;
 messages.filter((m) => m.senderId !== user.uid && m.senderId !== "system" && !m.read).forEach(async (msg) => { await updateDoc(doc(db, "appeal_tickets", appealTicket.id, "messages", msg.id), { read: true, deliveryStatus: "read" }); });
@@ -2813,7 +2898,7 @@ Ticket chat ini telah {status === "resolved" ? "DITERIMA & SELESAI" : "DITOLAK"}
 );
 };
 
-// ===== LIVE CHAT AGENT =====
+// ===== LIVE CHAT AGENT - DENGAN CHATBOT MODE SINGLE PAGE =====
 const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBannedAppealChat }: any) => {
 const [tickets, setTickets] = useState<Ticket[]>([]);
 const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
@@ -2843,6 +2928,7 @@ const [tourStep, setTourStep] = useState(0);
 const [showCloseConfirm, setShowCloseConfirm] = useState(false);
 const [chatbotMode, setChatbotMode] = useState(false);
 const [guestUser, setGuestUser] = useState<any>(null);
+
 const messagesEndRef = useRef<HTMLDivElement>(null);
 const chatRef = useRef<HTMLDivElement>(null);
 const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -3154,6 +3240,7 @@ const renderSearchBar = () => (
 </div>
 );
 
+// ===== RENDER CHATBOT MODE - SINGLE PAGE LAYOUT =====
 const renderChatbotMode = () => {
 const effUser = getEffectiveUser();
   
@@ -3320,6 +3407,7 @@ return (
 
 const ss = STATUS_STYLES[selectedTicket.status] || STATUS_STYLES.active;
 const displayUserName = isAdmin ? selectedTicket.userName : AGENT_NAME;
+const displayUserPhoto = isAdmin ? selectedTicket.userPhoto : "";
 const showVerified = !isAdmin;
 
 return (
@@ -3328,7 +3416,7 @@ return (
 <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0, flex: 1 }}>
 <div style={{ width: 38, height: 38, borderRadius: "50%", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", flexShrink: 0 }}>
 {isAdmin ? (
-selectedTicket.userPhoto ? <img src={selectedTicket.userPhoto} alt={selectedTicket.userName} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <span style={{ fontSize: 15, fontWeight: 800, color: BLUE }}>{selectedTicket.userName?.charAt(0).toUpperCase()}</span>
+displayUserPhoto ? <img src={displayUserPhoto} alt={displayUserName} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <span style={{ fontSize: 15, fontWeight: 800, color: BLUE }}>{displayUserName?.charAt(0).toUpperCase()}</span>
 ) : (
 <AgentIcon size={22} color={BLUE} />
 )}
@@ -3431,14 +3519,12 @@ Live Chat
 
 const effUser = getEffectiveUser();
 
-if (!effUser) return (<><OnboardingTour steps={tourSteps} onComplete={completeTour} isActive={showTour} currentStep={tourStep} setCurrentStep={setTourStep} /><div style={{ marginTop: "80px", paddingTop: "30px" }}><h3 ref={liveChatTitleRef} data-tour="livechat-title" style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1, marginBottom: "20px" }}>Live Chat Agent</h3><p style={{ fontSize: "15px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "10px" }}>Please login to use Live Chat Agent</p><div style={{ display: "flex", gap: "10px", alignItems: "center" }}><Link href="/signin" style={{ textDecoration: "none" }}><button data-tour="login-button" style={{ padding: "8px 20px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "6px", fontSize: "14px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY }}>Login</button></Link><button onClick={() => setChatbotMode(true)} style={{ padding: "8px 20px", backgroundColor: WHITE, color: BLUE, border: `2px solid ${BLUE}`, borderRadius: "6px", fontSize: "14px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY, display: "inline-flex", alignItems: "center", gap: "6px" }}><ToggleChatbotIcon size={14} color={BLUE} />Chatbot Mode</button></div></div></>);
-
+if (!effUser) return (<><OnboardingTour steps={tourSteps} onComplete={completeTour} isActive={showTour} currentStep={tourStep} setCurrentStep={setTourStep} /><div style={{ marginTop: "80px", paddingTop: "30px" }}><h3 ref={liveChatTitleRef} data-tour="livechat-title" style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1, marginBottom: "20px" }}>Live Chat Agent</h3><p style={{ fontSize: "15px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "10px" }}>Please login to use Live Chat Agent</p><div style={{ display: "flex", gap: "10px", alignItems: "center" }}><Link href="/" style={{ textDecoration: "none" }}><button data-tour="login-button" style={{ padding: "8px 20px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "6px", fontSize: "14px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY }}>Login</button></Link><button onClick={() => setChatbotMode(true)} style={{ padding: "8px 20px", backgroundColor: WHITE, color: BLUE, border: `2px solid ${BLUE}`, borderRadius: "6px", fontSize: "14px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY, display: "inline-flex", alignItems: "center", gap: "6px" }}><ToggleChatbotIcon size={14} color={BLUE} />Chatbot Mode</button></div></div></>);
 if (!isAdmin && isBanned) return (<div style={{ marginTop: "80px", paddingTop: "30px" }}><h3 style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1, marginBottom: "20px" }}>Live Chat Agent</h3><BannedInfoBanner banReason={banReason} banMessage={banMessage || ""} onAppeal={createAppealTicket} hasAppeal={hasAppeal} appealStatus={appealTickets.find((t) => t.userId === effUser.uid)?.status} /></div>);
 
 const userTickets = effUser ? tickets.filter((t) => t.userId === effUser.uid) : [];
 
 if (!isAdmin && userTickets.length === 0 && !showStartChat) return (<><OnboardingTour steps={tourSteps} onComplete={completeTour} isActive={showTour} currentStep={tourStep} setCurrentStep={setTourStep} /><div style={{ marginTop: "80px", paddingTop: "30px" }}><h3 ref={liveChatTitleRef} data-tour="livechat-title" style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1, marginBottom: "20px" }}>Live Chat Agent</h3><p style={{ fontSize: "15px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "16px" }}>Need help? Chat directly with our agent.</p><div style={{ display: "flex", gap: "10px" }}><button data-tour="start-chat-button" onClick={() => setShowStartChat(true)} style={{ padding: "10px 24px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "8px", fontSize: "15px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY }}>Start Live Chat</button><button onClick={() => setChatbotMode(true)} style={{ padding: "10px 24px", backgroundColor: WHITE, color: BLUE, border: `2px solid ${BLUE}`, borderRadius: "8px", fontSize: "15px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY, display: "inline-flex", alignItems: "center", gap: "8px" }}><ToggleChatbotIcon size={16} color={BLUE} />Chatbot Mode</button></div></div></>);
-
 if (!isAdmin && showStartChat) return (<div style={{ marginTop: "80px", paddingTop: "30px" }}><h3 style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1, marginBottom: "20px" }}>Live Chat Agent</h3><div style={{ maxWidth: "400px" }}><div style={{ fontSize: "15px", marginBottom: "10px", fontFamily: FONT_FAMILY, fontWeight: 700, color: BLUE }}>Select your issue topic:</div><select value={selectedTopic} onChange={(e) => setSelectedTopic(e.target.value)} style={{ width: "100%", padding: "10px 14px", border: `2px solid ${BLUE}`, borderRadius: "8px", fontSize: "15px", fontFamily: FONT_FAMILY, outline: "none", backgroundColor: WHITE, marginBottom: "14px", color: BLUE, fontWeight: 600 }}><option value="">-- Select topic --</option>{topics.map((t) => <option key={t} value={t}>{t}</option>)}</select><div style={{ display: "flex", gap: "10px" }}><button onClick={startChat} disabled={!selectedTopic} style={{ padding: "8px 20px", backgroundColor: selectedTopic ? BLUE : "#ccc", color: WHITE, border: "none", borderRadius: "8px", fontSize: "14px", fontWeight: 600, cursor: selectedTopic ? "pointer" : "not-allowed", fontFamily: FONT_FAMILY }}>Start Chat</button><button onClick={() => setShowStartChat(false)} style={{ padding: "8px 20px", backgroundColor: "transparent", color: "#666", border: "1px solid #ccc", borderRadius: "8px", fontSize: "14px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY }}>Cancel</button></div></div></div>);
 
 const waiting = filter(tickets.filter((t) => t.status === "waiting"));
@@ -3581,9 +3667,6 @@ const textRef = useRef<HTMLSpanElement>(null);
 const counterRef = useRef<HTMLSpanElement>(null);
 const mainPageRef = useRef<HTMLDivElement>(null);
 const wrapperRef = useRef<HTMLDivElement>(null);
-// ===== REF UNTUK LIVE CHAT AGENT (BATAS BG TAMBAHAN) =====
-const liveChatSectionRef = useRef<HTMLDivElement>(null);
-
 useEffect(() => setIsMounted(true), []);
 useEffect(() => {
 if (!auth || !isMounted) return;
@@ -3610,16 +3693,6 @@ tl.to(co, { value: 100, duration: 6.5, ease: "power2.inOut", onUpdate: () => { i
 tl.to(tx, { scale: 0.3, opacity: 0, duration: 0.8, ease: "power2.in" }).to(ct, { scale: 0.6, opacity: 0, duration: 0.8, ease: "power2.in" }, "-=0.8").to(pre, { xPercent: -100, duration: 1.2, ease: "power3.inOut", onComplete: () => { if (pre) pre.style.display = "none"; } }, "-=0.2").to(mn, { xPercent: 0, duration: 1.2, ease: "power3.inOut", onComplete: () => { if (killed) return; gsap.set(mn, { clearProps: "transform,willChange" }); setTimeout(() => ScrollTrigger.refresh(), 300); } }, "<");
 return () => { killed = true; tl.kill(); };
 }, [isMounted, loading]);
-
-// Refresh ScrollTrigger setelah komponen mount untuk memastikan bg tambahan bekerja
-useEffect(() => {
-if (!isMounted || loading) return;
-const timer = setTimeout(() => {
-ScrollTrigger.refresh();
-}, 800);
-return () => clearTimeout(timer);
-}, [isMounted, loading]);
-
 if (!isMounted || loading) {
 return (
 <div style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999, fontFamily: FONT_FAMILY }}>
@@ -3649,10 +3722,6 @@ return (
 </div>
 </div>
 </div>
-
-{/* ===== BACKGROUND HALAMAN TAMBAHAN (BIRU) - MUNCUL SAAT SCROLL ===== */}
-<AdditionalBackground liveChatRef={liveChatSectionRef} />
-
 {showDashboard && (
 <DashboardOverlay
 user={user}
@@ -3687,69 +3756,15 @@ setTimeout(() => { const el = document.getElementById("banned-appeal-section"); 
 }}
 />
 )}
-<div ref={mainPageRef} style={{ position: "relative", width: "100%", minHeight: "100vh", backgroundColor: "transparent", margin: 0, padding: 0, fontFamily: FONT_FAMILY, overflow: "visible", display: "flex", flexDirection: "column", willChange: "transform" }}>
+<div ref={mainPageRef} style={{ position: "relative", width: "100%", minHeight: "100vh", backgroundColor: WHITE, margin: 0, padding: 0, fontFamily: FONT_FAMILY, overflow: "visible", display: "flex", flexDirection: "column", willChange: "transform" }}>
 <TopBanner />
 <div style={{ position: "fixed", top: "44px", left: 0, width: "200px", height: "120px", pointerEvents: "none", zIndex: 8500, backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)", maskImage: "linear-gradient(to right, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%)", WebkitMaskImage: "linear-gradient(to right, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%)" }} />
 <div style={{ position: "fixed", top: "44px", right: 0, width: "200px", height: "120px", pointerEvents: "none", zIndex: 8500, backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)", maskImage: "linear-gradient(to left, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%)", WebkitMaskImage: "linear-gradient(to left, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%)" }} />
 <LeftNavbar shifted={navbarShifted} />
 <RightNavbar user={user} auth={auth} db={db} onOpenDashboard={() => setShowDashboard(true)} />
 <div style={{ marginTop: "44px" }}><div style={{ paddingTop: "120px" }} /></div>
-
-{/* ===== KONTEN HALAMAN UTAMA (DI ATAS BG TAMBAHAN) ===== */}
-<div style={{ position: "relative", zIndex: 1, flex: "1 0 auto", backgroundColor: "transparent" }}>
+<div style={{ position: "relative", zIndex: 1, flex: "1 0 auto", backgroundColor: WHITE }}>
 <div style={{ padding: "0 40px", maxWidth: "1600px", margin: "0 auto", width: "100%" }}>
-
-{/* ===== SPACER AWAL UNTUK TESTING BG TAMBAHAN ===== */}
-<div style={{ 
-minHeight: "100vh", 
-display: "flex", 
-flexDirection: "column",
-alignItems: "center",
-justifyContent: "center",
-padding: "60px 20px",
-textAlign: "center"
-}}>
-<div style={{ 
-fontSize: "14px", 
-fontWeight: 700, 
-color: BLUE, 
-fontFamily: FONT_FAMILY, 
-letterSpacing: "0.1em",
-textTransform: "uppercase",
-marginBottom: "20px",
-padding: "8px 16px",
-backgroundColor: LIME,
-borderRadius: "8px",
-border: `2px solid ${LIME}`
-}}>
-↓ SCROLL KE BAWAH UNTUK MELIHAT BG TAMBAHAN ↓
-</div>
-<h1 style={{ 
-fontSize: "clamp(40px, 8vw, 100px)", 
-fontWeight: 800, 
-color: BLUE, 
-fontFamily: FONT_FAMILY, 
-letterSpacing: "-0.03em", 
-margin: 0, 
-lineHeight: 1.1,
-marginBottom: "20px"
-}}>
-Welcome to Menuru
-</h1>
-<p style={{ 
-fontSize: "18px", 
-color: "#555", 
-fontFamily: FONT_FAMILY, 
-maxWidth: "600px",
-lineHeight: 1.6,
-margin: "0 auto"
-}}>
-Background halaman tambahan akan muncul perlahan saat Anda scroll ke bawah. BG ini berwarna biru dengan border radius di sisi kiri dan kanan bawah, dan akan berhenti di batas Live Chat Agent.
-</p>
-</div>
-
-{/* ===== SECTION LIVE CHAT AGENT (BATAS BG TAMBAHAN) ===== */}
-<div ref={liveChatSectionRef} style={{ position: "relative", zIndex: 2, backgroundColor: WHITE, borderRadius: "32px 32px 0 0", padding: "40px 0", marginTop: "40px" }}>
 <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} onOpenAppealChat={(t: AppealTicket) => { setAdminAppealTicket(t); setShowAdminAppealSection(true); }} onOpenBannedAppealChat={(t: AppealTicket) => { setBannedAppealTicket(t); setShowBannedAppealSection(true); }} />
 {isAdmin && showAdminAppealSection && adminAppealTicket && <div style={{ marginTop: "30px", height: "600px" }}><div style={{ fontSize: "13px", fontWeight: 800, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "0.5px", textTransform: "uppercase", marginBottom: "12px" }}>Chat Ajukan Banding</div><AppealChatRoom user={user} isAdmin={true} db={db} appealTicket={adminAppealTicket} onClose={() => { setShowAdminAppealSection(false); setAdminAppealTicket(null); }} /></div>}
 {!isAdmin && showBannedAppealSection && bannedAppealTicket && (
@@ -3759,9 +3774,6 @@ Background halaman tambahan akan muncul perlahan saat Anda scroll ke bawah. BG i
 </div>
 )}
 </div>
-</div>
-
-{/* ===== FOOTER (DI ATAS BG TAMBAHAN) ===== */}
 <FooterSection />
 </div>
 </div>
