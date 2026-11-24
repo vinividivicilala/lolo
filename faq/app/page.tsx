@@ -596,27 +596,6 @@ const random = String(Math.floor(Math.random() * 10000)).padStart(4, "0");
 return `#TICKET-${yy}${mm}${dd}-${hh}${min}-${random}`;
 };
 
-// ===== BACKGROUND PAGE COMPONENT =====
-const BackgroundPage = ({ show }: { show: boolean }) => {
-return (
-<div 
-style={{
-position: "fixed",
-top: 0,
-left: 0,
-right: 0,
-bottom: 0,
-backgroundColor: BLUE,
-zIndex: -1,
-borderRadius: "0 0 60px 60px",
-opacity: show ? 1 : 0,
-transition: "opacity 0.5s ease-in-out",
-pointerEvents: "none",
-}}
-/>
-);
-};
-
 // ===== FARID VERIFIED PANEL =====
 const FaridVerifiedPanel = ({ open, anchorRect, onClose }: { open: boolean; anchorRect: DOMRect | null; onClose: () => void; }) => {
 const [phase, setPhase] = useState<"loading" | "expand" | "fullpage">("loading");
@@ -2753,7 +2732,86 @@ Ticket chat ini telah {status === "resolved" ? "DITERIMA & SELESAI" : "DITOLAK"}
 );
 };
 
-// ===== LIVE CHAT AGENT - DENGAN CHATBOT MODE =====
+// ===== BACKGROUND HALAMAN TAMBAHAN (BARU) =====
+const ExtraPageBackground = ({ show, liveChatAgentRef }: { show: boolean; liveChatAgentRef: React.RefObject<HTMLDivElement | null> }) => {
+const bgRef = useRef<HTMLDivElement>(null);
+const [height, setHeight] = useState<number>(0);
+
+useEffect(() => {
+if (!show) return;
+const updateHeight = () => {
+if (liveChatAgentRef.current) {
+const rect = liveChatAgentRef.current.getBoundingClientRect();
+const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+const newHeight = rect.top + scrollTop - 44; // 44px untuk top banner
+setHeight(Math.max(0, newHeight));
+}
+};
+
+updateHeight();
+window.addEventListener("resize", updateHeight);
+window.addEventListener("scroll", updateHeight);
+
+return () => {
+window.removeEventListener("resize", updateHeight);
+window.removeEventListener("scroll", updateHeight);
+};
+}, [show, liveChatAgentRef]);
+
+useEffect(() => {
+if (!show || !bgRef.current) return;
+gsap.fromTo(
+bgRef.current,
+{ y: "-100%", opacity: 0 },
+{ y: "0%", opacity: 1, duration: 1.2, ease: "power3.out" }
+);
+}, [show]);
+
+if (!show) return null;
+
+return (
+<div
+ref={bgRef}
+style={{
+position: "absolute",
+top: "44px",
+left: 0,
+right: 0,
+height: `${height}px`,
+backgroundColor: BLUE,
+borderRadius: "0 0 48px 48px",
+zIndex: 0,
+pointerEvents: "none",
+boxShadow: "0 20px 60px rgba(13,60,252,0.15)",
+overflow: "hidden",
+}}
+>
+{/* Dekorasi tambahan di bg biru */}
+<div style={{
+position: "absolute",
+top: "10%",
+left: "-5%",
+width: "300px",
+height: "300px",
+borderRadius: "50%",
+backgroundColor: "rgba(255,255,255,0.05)",
+pointerEvents: "none",
+}} />
+<div style={{
+position: "absolute",
+bottom: "15%",
+right: "-10%",
+width: "400px",
+height: "400px",
+borderRadius: "50%",
+backgroundColor: "rgba(255,255,255,0.03)",
+pointerEvents: "none",
+}} />
+</div>
+);
+};
+
+// ===== LIVE CHAT AGENT =====
 const LiveChatAgent = ({ user, isAdmin, db, auth, onOpenAppealChat, onOpenBannedAppealChat }: any) => {
 const [tickets, setTickets] = useState<Ticket[]>([]);
 const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
@@ -2783,7 +2841,6 @@ const [tourStep, setTourStep] = useState(0);
 const [showCloseConfirm, setShowCloseConfirm] = useState(false);
 const [chatbotMode, setChatbotMode] = useState(false);
 const [guestUser, setGuestUser] = useState<any>(null);
-
 const messagesEndRef = useRef<HTMLDivElement>(null);
 const chatRef = useRef<HTMLDivElement>(null);
 const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -2807,9 +2864,7 @@ if (!tid) return;
 const t = tickets.find((x) => x.id === tid);
 if (t) { setSelectedTicket(t); window.history.replaceState({}, "", "/live-chat-agent"); }
 }, [tickets]);
-
 const topics = ["Product Inquiry", "Technical Support", "Account Issues", "Donation", "Partnership", "Billing & Payment", "Feature Request", "Bug Report", "General Question", "Feedback & Suggestion", "Other"];
-
 const tourSteps: TourStep[] = [
 { target: "login-button", title: "Login First", content: "Login untuk mulai chat dengan agent.", position: "bottom", isLoginStep: true },
 { target: "livechat-title", title: "Live Chat Agent", content: "Bagian live chat dengan tim support.", position: "bottom" },
@@ -2818,7 +2873,6 @@ const tourSteps: TourStep[] = [
 { target: "search-bar", title: "Search Chats", content: "Cari chat berdasarkan nama atau isi pesan.", position: "bottom" },
 { target: "start-chat-button", title: "Start New Chat", content: "Klik untuk memulai chat baru.", position: "top" },
 ];
-
 useEffect(() => { setIsMounted(true); getCryptoKey().then(() => setEncryptionReady(true)).catch(() => setEncryptionReady(true)); }, []);
 useEffect(() => {
 if (!isMounted || isAdmin) return;
@@ -2831,7 +2885,6 @@ const split = new SplitText(liveChatTitleRef.current, { type: "chars", charsClas
 gsap.fromTo(split.chars, { opacity: 0, y: 30, filter: "blur(8px)" }, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.8, stagger: 0.05, ease: "back.out(1.2)", scrollTrigger: { trigger: liveChatTitleRef.current, start: "top 85%", end: "bottom 70%", toggleActions: "play none none reverse" } });
 return () => { ScrollTrigger.getAll().forEach((t) => t.kill()); };
 }, [isMounted]);
-
 useEffect(() => {
 const effUser = getEffectiveUser();
 if (!effUser || !isMounted) { setCheckingBan(false); return; }
@@ -2845,14 +2898,12 @@ else { setIsBanned(false); setBanReason(""); setCanCreateTicket(true); setCanSen
 } catch (e) { console.error(e); } finally { setCheckingBan(false); }
 })();
 }, [getEffectiveUser, isMounted]);
-
 useEffect(() => {
 const effUser = getEffectiveUser();
 if (!db || !effUser || !isMounted) return;
 const unsub = onSnapshot(query(collection(db, "appeal_tickets"), where("userId", "==", effUser.uid), orderBy("createdAt", "desc"), limit(1)), (s: any) => setHasAppeal(!s.empty));
 return () => unsub();
 }, [db, getEffectiveUser, isMounted]);
-
 useEffect(() => {
 const effUser = getEffectiveUser();
 if (!db || !effUser || !isMounted) return;
@@ -2860,7 +2911,6 @@ const q = isAdmin ? query(collection(db, "appeal_tickets"), orderBy("createdAt",
 const unsub = onSnapshot(q, (s: any) => { const list: AppealTicket[] = []; s.forEach((d: any) => list.push({ id: d.id, ...d.data() } as AppealTicket)); setAppealTickets(list); });
 return () => unsub();
 }, [db, getEffectiveUser, isAdmin, isMounted]);
-
 useEffect(() => {
 if (!db || !isMounted) return;
 const unsub = onSnapshot(query(collection(db, "users"), where("online", "==", true)), (s: any) => {
@@ -2870,7 +2920,6 @@ setOnlineUsers(users);
 });
 return () => unsub();
 }, [db, isMounted]);
-
 useEffect(() => {
 const effUser = getEffectiveUser();
 if (!db || !effUser || !isMounted) return;
@@ -2878,7 +2927,6 @@ const q = isAdmin ? query(collection(db, "livechat_tickets"), orderBy("createdAt
 const unsub = onSnapshot(q, (s: any) => { const list: Ticket[] = []; s.forEach((d: any) => list.push({ id: d.id, ...d.data() } as Ticket)); setTickets(list); setSelectedTicket((p) => p ? list.find((t) => t.id === p.id) || p : p); });
 return () => unsub();
 }, [db, getEffectiveUser, isAdmin, isMounted]);
-
 useEffect(() => {
 if (!db || !tickets.length || !isMounted) return;
 const unsubs: (() => void)[] = [];
@@ -2894,7 +2942,6 @@ unsubs.push(u);
 });
 return () => unsubs.forEach((u) => u());
 }, [db, tickets, isMounted]);
-
 useEffect(() => {
 if (!db || !selectedTicket || !isMounted) return;
 const tid = selectedTicket.id;
@@ -2911,15 +2958,12 @@ requestAnimationFrame(() => { if (chatRef.current) chatRef.current.scrollTop = c
 });
 return () => unsub();
 }, [db, selectedTicket, isMounted]);
-
 useEffect(() => { setLatestRollingMessage(null); prevLenRef.current = cacheRef.current[selectedTicket?.id || ""]?.length || 0; setShowCloseConfirm(false); setReplyTo(null); }, [selectedTicket?.id]);
-
 useEffect(() => {
 const effUser = getEffectiveUser();
 if (!db || !selectedTicket || !effUser || !isAdmin || !isMounted) return;
 messages.filter((m) => m.senderId !== effUser.uid && !m.read).forEach(async (msg) => { await updateDoc(doc(db, "livechat_tickets", selectedTicket.id, "messages", msg.id), { read: true, deliveryStatus: "read" }); });
 }, [messages, selectedTicket, db, getEffectiveUser, isAdmin, isMounted]);
-
 const hasAuto = useRef(false);
 useEffect(() => {
 const effUser = getEffectiveUser();
@@ -2929,14 +2973,12 @@ if (!ut.length) return;
 const act = ut.find((t) => t.status === "waiting" || t.status === "active") || ut[0];
 setSelectedTicket(act); hasAuto.current = true;
 }, [tickets, getEffectiveUser, isAdmin, selectedTicket, isMounted]);
-
 const formatTime = useCallback((t: any) => { if (!t) return ""; const d = t.toDate ? t.toDate() : new Date(t); return d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }); }, []);
 const getTyping = (t: Ticket | null) => t?.typing ? `${t.typingUserName || "Someone"} is typing...` : null;
 const filter = useCallback((list: Ticket[]) => {
 const q = searchQuery.trim().toLowerCase(); if (!q) return list;
 return list.filter((t) => t.userName?.toLowerCase().includes(q) || t.userEmail?.toLowerCase().includes(q) || t.topic?.toLowerCase().includes(q) || generateRandomTicketId(t.createdAt).toLowerCase().includes(q) || (ticketPreviews[t.id] || []).some((p) => p.text?.toLowerCase().includes(q)));
 }, [searchQuery, ticketPreviews]);
-
 const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
 const v = e.target.value; setMessageText(v);
 const effUser = getEffectiveUser();
@@ -2947,14 +2989,12 @@ else await updateDoc(ref, { typing: false, typingUserId: null, typingUserName: n
 if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
 typingTimeoutRef.current = setTimeout(async () => { await updateDoc(ref, { typing: false, typingUserId: null, typingUserName: null }); }, 2000);
 };
-
 const checkBanBefore = async (): Promise<boolean> => {
 const effUser = getEffectiveUser();
 if (!effUser) return true;
 try { const s = await checkBanStatus(effUser.uid); if (s.isBanned) { setIsBanned(true); setBanReason(s.reason); setCanCreateTicket(s.canCreateTicket); setCanSendMessage(s.canSendMessage); setBanMessage(`YOUR ACCOUNT HAS BEEN PERMANENTLY BANNED
 Reason: ${s.reason}`); return true; } return false; } catch { return false; }
 };
-
 const startChatAsGuest = async () => {
 if (!db) return;
 try {
@@ -2976,7 +3016,6 @@ console.error(e);
 alert("Gagal memulai chat sebagai guest.");
 }
 };
-
 const startChat = async () => {
 const effUser = getEffectiveUser();
 if (!db || !effUser || !selectedTopic) { setShowStartChat(false); return; }
@@ -3001,7 +3040,6 @@ setSelectedTicket(newTicket);
 }
 } catch (e) { console.error(e); alert("An error occurred."); }
 };
-
 const sendMessage = async () => {
 const effUser = getEffectiveUser();
 if (!db || !selectedTicket || !messageText.trim() || !effUser) return;
@@ -3024,7 +3062,6 @@ setMessageText(""); setBanMessage(null); setReplyTo(null);
 if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
 } catch (e) { console.error(e); alert("An error occurred."); }
 };
-
 const takeTicket = async (id: string) => { 
 const effUser = getEffectiveUser();
 if (!db || !isAdmin || !effUser) return; 
@@ -3032,7 +3069,6 @@ try { await updateDoc(doc(db, "livechat_tickets", id), { agentId: effUser.uid, a
 };
 const resolveTicket = async (id: string) => { if (!db || !isAdmin) return; try { await updateDoc(doc(db, "livechat_tickets", id), { status: "resolved" }); } catch {} };
 const handleCloseRoom = async () => { if (!db || !selectedTicket) return; try { await updateDoc(doc(db, "livechat_tickets", selectedTicket.id), { status: "closed" }); setShowCloseConfirm(true); setTimeout(() => setShowCloseConfirm(false), 2200); } catch {} };
-
 const createAppealTicket = async () => {
 const effUser = getEffectiveUser();
 if (!db || !effUser || !isBanned) return;
@@ -3048,7 +3084,6 @@ onOpenBannedAppealChat({ id: ref.id, userId: effUser.uid, userName: effUser.disp
 setHasAppeal(true);
 } catch (e) { console.error(e); alert("Gagal membuat tiket banding."); }
 };
-
 const renderDeliveryStatus = (msg: ChatMessage, isMine: boolean) => {
 if (!isMine) return null;
 let label = "Sent"; let icon = <CheckIcon size={11} color="#ffffff" />;
@@ -3058,7 +3093,6 @@ else if (msg.deliveryStatus === "sending") { label = "Sending"; icon = <ClockIco
 else if (msg.deliveryStatus === "failed") { label = "Failed"; icon = <ErrorIcon size={11} color="#ffffff" />; }
 return (<span style={{ display: "inline-flex", alignItems: "center", gap: "3px", fontSize: "10px", color: "#ffffff", fontFamily: FONT_FAMILY, fontWeight: 500 }}>{label}{icon}</span>);
 };
-
 const renderOnlinePanel = () => {
 if (!isAdmin) return null;
 return (
@@ -3078,13 +3112,11 @@ return (
 </div>
 );
 };
-
 const renderTicketPreview = (ticketId: string) => {
 const prevs = ticketPreviews[ticketId] || [];
 if (!prevs.length) return null;
 return (<div style={{ marginTop: "6px", display: "flex", flexDirection: "column", gap: "3px" }}>{[...prevs].reverse().map((p, i) => (<div key={i} style={{ fontSize: "11px", color: "#ffffff", fontStyle: "italic", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontFamily: FONT_FAMILY, display: "flex", alignItems: "center", gap: "4px" }}><span style={{ fontWeight: 700, color: "#ffffff", flexShrink: 0 }}>{p.senderName}:</span><span style={{ overflow: "hidden", textOverflow: "ellipsis", color: "#ffffff" }}>{typeof p.text === "string" && p.text.length > 30 ? p.text.substring(0, 30) + "..." : p.text}</span></div>))}</div>);
 };
-
 const renderSearchBar = () => (
 <div data-tour="search-bar" style={{ padding: "10px 14px", borderBottom: "1px solid rgba(255,255,255,0.15)", flexShrink: 0 }}>
 <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "8px 12px", backgroundColor: "#ffffff", border: "1px solid #ffffff", borderRadius: "8px" }}>
@@ -3095,7 +3127,6 @@ const renderSearchBar = () => (
 </div>
 );
 
-// ===== RENDER CHATBOT MODE =====
 const renderChatbotMode = () => {
 const effUser = getEffectiveUser();
   
@@ -3343,6 +3374,12 @@ return (
 
 if (checkingBan) return (<div style={{ marginTop: "80px", paddingTop: "30px" }}><h3 style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1 }}>Live Chat Agent</h3><div style={{ padding: "20px", textAlign: "center", color: "#666", fontFamily: FONT_FAMILY }}>Checking account status...</div></div>);
 if (!isMounted) return <div style={{ minHeight: "100px" }} />;
+if (!getEffectiveUser() && !chatbotMode) return (<><OnboardingTour steps={tourSteps} onComplete={completeTour} isActive={showTour} currentStep={tourStep} setCurrentStep={setTourStep} /><div style={{ marginTop: "80px", paddingTop: "30px" }}><h3 ref={liveChatTitleRef} data-tour="livechat-title" style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1, marginBottom: "20px" }}>Live Chat Agent</h3><p style={{ fontSize: "15px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "10px" }}>Please login to use Live Chat Agent</p><div style={{ display: "flex", gap: "10px", alignItems: "center" }}><Link href="/" style={{ textDecoration: "none" }}><button data-tour="login-button" style={{ padding: "8px 20px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "6px", fontSize: "14px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY }}>Login</button></Link><button onClick={() => setChatbotMode(true)} style={{ padding: "8px 20px", backgroundColor: WHITE, color: BLUE, border: `2px solid ${BLUE}`, borderRadius: "6px", fontSize: "14px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY, display: "inline-flex", alignItems: "center", gap: "6px" }}><ToggleChatbotIcon size={14} color={BLUE} />Chatbot Mode</button></div></div></>);
+if (!isAdmin && isBanned && !chatbotMode) return (<div style={{ marginTop: "80px", paddingTop: "30px" }}><h3 style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1, marginBottom: "20px" }}>Live Chat Agent</h3><BannedInfoBanner banReason={banReason} banMessage={banMessage || ""} onAppeal={createAppealTicket} hasAppeal={hasAppeal} appealStatus={appealTickets.find((t) => t.userId === getEffectiveUser()?.uid)?.status} /></div>);
+const effUser = getEffectiveUser();
+const userTickets = effUser ? tickets.filter((t) => t.userId === effUser.uid) : [];
+if (!isAdmin && userTickets.length === 0 && !showStartChat && !chatbotMode) return (<><OnboardingTour steps={tourSteps} onComplete={completeTour} isActive={showTour} currentStep={tourStep} setCurrentStep={setTourStep} /><div style={{ marginTop: "80px", paddingTop: "30px" }}><h3 ref={liveChatTitleRef} data-tour="livechat-title" style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1, marginBottom: "20px" }}>Live Chat Agent</h3><p style={{ fontSize: "15px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "16px" }}>Need help? Chat directly with our agent.</p><div style={{ display: "flex", gap: "10px" }}><button data-tour="start-chat-button" onClick={() => setShowStartChat(true)} style={{ padding: "10px 24px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "8px", fontSize: "15px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY }}>Start Live Chat</button><button onClick={() => setChatbotMode(true)} style={{ padding: "10px 24px", backgroundColor: WHITE, color: BLUE, border: `2px solid ${BLUE}`, borderRadius: "8px", fontSize: "15px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY, display: "inline-flex", alignItems: "center", gap: "8px" }}><ToggleChatbotIcon size={16} color={BLUE} />Chatbot Mode</button></div></div></>);
+if (!isAdmin && showStartChat && !chatbotMode) return (<div style={{ marginTop: "80px", paddingTop: "30px" }}><h3 style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1, marginBottom: "20px" }}>Live Chat Agent</h3><div style={{ maxWidth: "400px" }}><div style={{ fontSize: "15px", marginBottom: "10px", fontFamily: FONT_FAMILY, fontWeight: 700, color: BLUE }}>Select your issue topic:</div><select value={selectedTopic} onChange={(e) => setSelectedTopic(e.target.value)} style={{ width: "100%", padding: "10px 14px", border: `2px solid ${BLUE}`, borderRadius: "8px", fontSize: "15px", fontFamily: FONT_FAMILY, outline: "none", backgroundColor: WHITE, marginBottom: "14px", color: BLUE, fontWeight: 600 }}><option value="">-- Select topic --</option>{topics.map((t) => <option key={t} value={t}>{t}</option>)}</select><div style={{ display: "flex", gap: "10px" }}><button onClick={startChat} disabled={!selectedTopic} style={{ padding: "8px 20px", backgroundColor: selectedTopic ? BLUE : "#ccc", color: WHITE, border: "none", borderRadius: "8px", fontSize: "14px", fontWeight: 600, cursor: selectedTopic ? "pointer" : "not-allowed", fontFamily: FONT_FAMILY }}>Start Chat</button><button onClick={() => setShowStartChat(false)} style={{ padding: "8px 20px", backgroundColor: "transparent", color: "#666", border: "1px solid #ccc", borderRadius: "8px", fontSize: "14px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY }}>Cancel</button></div></div></div>);
 
 if (chatbotMode) {
 return (
@@ -3370,17 +3407,6 @@ Live Chat
 </>
 );
 }
-
-const effUser = getEffectiveUser();
-const userTickets = effUser ? tickets.filter((t) => t.userId === effUser.uid) : [];
-
-if (!effUser) return (<><OnboardingTour steps={tourSteps} onComplete={completeTour} isActive={showTour} currentStep={tourStep} setCurrentStep={setTourStep} /><div style={{ marginTop: "80px", paddingTop: "30px" }}><h3 ref={liveChatTitleRef} data-tour="livechat-title" style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1, marginBottom: "20px" }}>Live Chat Agent</h3><p style={{ fontSize: "15px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "10px" }}>Please login to use Live Chat Agent</p><div style={{ display: "flex", gap: "10px", alignItems: "center" }}><Link href="/" style={{ textDecoration: "none" }}><button data-tour="login-button" style={{ padding: "8px 20px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "6px", fontSize: "14px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY }}>Login</button></Link><button onClick={() => setChatbotMode(true)} style={{ padding: "8px 20px", backgroundColor: WHITE, color: BLUE, border: `2px solid ${BLUE}`, borderRadius: "6px", fontSize: "14px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY, display: "inline-flex", alignItems: "center", gap: "6px" }}><ToggleChatbotIcon size={14} color={BLUE} />Chatbot Mode</button></div></div></>);
-
-if (!isAdmin && isBanned) return (<div style={{ marginTop: "80px", paddingTop: "30px" }}><h3 style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1, marginBottom: "20px" }}>Live Chat Agent</h3><BannedInfoBanner banReason={banReason} banMessage={banMessage || ""} onAppeal={createAppealTicket} hasAppeal={hasAppeal} appealStatus={appealTickets.find((t) => t.userId === effUser.uid)?.status} /></div>);
-
-if (!isAdmin && userTickets.length === 0 && !showStartChat) return (<><OnboardingTour steps={tourSteps} onComplete={completeTour} isActive={showTour} currentStep={tourStep} setCurrentStep={setTourStep} /><div style={{ marginTop: "80px", paddingTop: "30px" }}><h3 ref={liveChatTitleRef} data-tour="livechat-title" style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1, marginBottom: "20px" }}>Live Chat Agent</h3><p style={{ fontSize: "15px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "16px" }}>Need help? Chat directly with our agent.</p><div style={{ display: "flex", gap: "10px" }}><button data-tour="start-chat-button" onClick={() => setShowStartChat(true)} style={{ padding: "10px 24px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "8px", fontSize: "15px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY }}>Start Live Chat</button><button onClick={() => setChatbotMode(true)} style={{ padding: "10px 24px", backgroundColor: WHITE, color: BLUE, border: `2px solid ${BLUE}`, borderRadius: "8px", fontSize: "15px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY, display: "inline-flex", alignItems: "center", gap: "8px" }}><ToggleChatbotIcon size={16} color={BLUE} />Chatbot Mode</button></div></div></>);
-
-if (!isAdmin && showStartChat) return (<div style={{ marginTop: "80px", paddingTop: "30px" }}><h3 style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1, marginBottom: "20px" }}>Live Chat Agent</h3><div style={{ maxWidth: "400px" }}><div style={{ fontSize: "15px", marginBottom: "10px", fontFamily: FONT_FAMILY, fontWeight: 700, color: BLUE }}>Select your issue topic:</div><select value={selectedTopic} onChange={(e) => setSelectedTopic(e.target.value)} style={{ width: "100%", padding: "10px 14px", border: `2px solid ${BLUE}`, borderRadius: "8px", fontSize: "15px", fontFamily: FONT_FAMILY, outline: "none", backgroundColor: WHITE, marginBottom: "14px", color: BLUE, fontWeight: 600 }}><option value="">-- Select topic --</option>{topics.map((t) => <option key={t} value={t}>{t}</option>)}</select><div style={{ display: "flex", gap: "10px" }}><button onClick={startChat} disabled={!selectedTopic} style={{ padding: "8px 20px", backgroundColor: selectedTopic ? BLUE : "#ccc", color: WHITE, border: "none", borderRadius: "8px", fontSize: "14px", fontWeight: 600, cursor: selectedTopic ? "pointer" : "not-allowed", fontFamily: FONT_FAMILY }}>Start Chat</button><button onClick={() => setShowStartChat(false)} style={{ padding: "8px 20px", backgroundColor: "transparent", color: "#666", border: "1px solid #ccc", borderRadius: "8px", fontSize: "14px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY }}>Cancel</button></div></div></div>);
 
 const waiting = filter(tickets.filter((t) => t.status === "waiting"));
 const active = filter(tickets.filter((t) => t.status === "active"));
@@ -3507,7 +3533,6 @@ return (
 // ===== MAIN PAGE =====
 export default function HomePage(): React.JSX.Element {
 const [showMain, setShowMain] = useState(false);
-const [showBackground, setShowBackground] = useState(false);
 const [user, setUser] = useState<any>(null);
 const [isAdmin, setIsAdmin] = useState(false);
 const [loading, setLoading] = useState(true);
@@ -3518,6 +3543,9 @@ const [showAdminAppealSection, setShowAdminAppealSection] = useState(false);
 const [bannedAppealTicket, setBannedAppealTicket] = useState<AppealTicket | null>(null);
 const [showBannedAppealSection, setShowBannedAppealSection] = useState(false);
 const [showDashboard, setShowDashboard] = useState(false);
+// ===== STATE BARU: KONTROL BG TAMBAHAN =====
+const [showExtraBg, setShowExtraBg] = useState(false);
+const liveChatAgentRef = useRef<HTMLDivElement>(null);
 const preloaderRef = useRef<HTMLDivElement>(null);
 const textRef = useRef<HTMLSpanElement>(null);
 const counterRef = useRef<HTMLSpanElement>(null);
@@ -3546,7 +3574,11 @@ const co = { value: 1 }; ct.textContent = "01";
 const tl = gsap.timeline();
 tl.to(tx, { y: 0, opacity: 1, duration: 1.0, ease: "back.out(1.7)" }).to(tx, { duration: 0.8 }).to(tx, { opacity: 0, y: -20, scale: 0.9, duration: 0.5, ease: "power2.out", onComplete: () => { if (tx) tx.textContent = "Note"; } }).to(tx, { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: "back.out(1.7)" }).to(tx, { duration: 1.2 });
 tl.to(co, { value: 100, duration: 6.5, ease: "power2.inOut", onUpdate: () => { if (ct) ct.textContent = String(Math.round(co.value)).padStart(2, "0"); } }, 0);
-tl.to(tx, { scale: 0.3, opacity: 0, duration: 0.8, ease: "power2.in" }).to(ct, { scale: 0.6, opacity: 0, duration: 0.8, ease: "power2.in" }, "-=0.8").to(pre, { xPercent: -100, duration: 1.2, ease: "power3.inOut", onComplete: () => { if (pre) pre.style.display = "none"; setShowBackground(true); } }, "-=0.2").to(mn, { xPercent: 0, duration: 1.2, ease: "power3.inOut", onComplete: () => { if (killed) return; gsap.set(mn, { clearProps: "transform,willChange" }); setTimeout(() => ScrollTrigger.refresh(), 300); } }, "<");
+tl.to(tx, { scale: 0.3, opacity: 0, duration: 0.8, ease: "power2.in" }).to(ct, { scale: 0.6, opacity: 0, duration: 0.8, ease: "power2.in" }, "-=0.8").to(pre, { xPercent: -100, duration: 1.2, ease: "power3.inOut", onComplete: () => { 
+if (pre) pre.style.display = "none"; 
+// ===== PERBAIKAN: TAMPILKAN BG TAMBAHAN SETELAH PRELOADER SELESAI =====
+setTimeout(() => setShowExtraBg(true), 200);
+} }, "-=0.2").to(mn, { xPercent: 0, duration: 1.2, ease: "power3.inOut", onComplete: () => { if (killed) return; gsap.set(mn, { clearProps: "transform,willChange" }); setTimeout(() => ScrollTrigger.refresh(), 300); } }, "<");
 return () => { killed = true; tl.kill(); };
 }, [isMounted, loading]);
 if (!isMounted || loading) {
@@ -3568,8 +3600,7 @@ return (
 <meta name="theme-color" content={BLUE} />
 <link rel="icon" href="/images/ai.jpg" type="image/jpeg" />
 </Head>
-<BackgroundPage show={showBackground} />
-<div ref={wrapperRef} style={{ position: "relative", width: "100%", minHeight: "100vh", overflow: "hidden", backgroundColor: "transparent" }}>
+<div ref={wrapperRef} style={{ position: "relative", width: "100%", minHeight: "100vh", overflow: "hidden", backgroundColor: WHITE }}>
 <div ref={preloaderRef} style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", backgroundColor: WHITE, zIndex: 9999, fontFamily: FONT_FAMILY, overflow: "hidden", willChange: "transform" }}>
 <span ref={counterRef} style={{ position: "absolute", top: "10px", right: "40px", fontSize: "400px", fontWeight: 400, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.04em", lineHeight: 0.9, display: "inline-block", userSelect: "none", pointerEvents: "none" }}>01</span>
 <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -3613,8 +3644,10 @@ setTimeout(() => { const el = document.getElementById("banned-appeal-section"); 
 }}
 />
 )}
-<div ref={mainPageRef} style={{ position: "relative", width: "100%", minHeight: "300vh", backgroundColor: "transparent", margin: 0, padding: 0, fontFamily: FONT_FAMILY, overflow: "visible", display: "flex", flexDirection: "column", willChange: "transform" }}>
+<div ref={mainPageRef} style={{ position: "relative", width: "100%", minHeight: "100vh", backgroundColor: WHITE, margin: 0, padding: 0, fontFamily: FONT_FAMILY, overflow: "visible", display: "flex", flexDirection: "column", willChange: "transform" }}>
 <TopBanner />
+{/* ===== BACKGROUND HALAMAN TAMBAHAN (BARU) ===== */}
+<ExtraPageBackground show={showExtraBg} liveChatAgentRef={liveChatAgentRef} />
 <div style={{ position: "fixed", top: "44px", left: 0, width: "200px", height: "120px", pointerEvents: "none", zIndex: 8500, backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)", maskImage: "linear-gradient(to right, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%)", WebkitMaskImage: "linear-gradient(to right, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%)" }} />
 <div style={{ position: "fixed", top: "44px", right: 0, width: "200px", height: "120px", pointerEvents: "none", zIndex: 8500, backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)", maskImage: "linear-gradient(to left, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%)", WebkitMaskImage: "linear-gradient(to left, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 100%)" }} />
 <LeftNavbar shifted={navbarShifted} />
@@ -3622,7 +3655,10 @@ setTimeout(() => { const el = document.getElementById("banned-appeal-section"); 
 <div style={{ marginTop: "44px" }}><div style={{ paddingTop: "120px" }} /></div>
 <div style={{ position: "relative", zIndex: 1, flex: "1 0 auto", backgroundColor: "transparent" }}>
 <div style={{ padding: "0 40px", maxWidth: "1600px", margin: "0 auto", width: "100%" }}>
+{/* ===== REF UNTUK BATAS BG TAMBAHAN ===== */}
+<div ref={liveChatAgentRef}>
 <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} onOpenAppealChat={(t: AppealTicket) => { setAdminAppealTicket(t); setShowAdminAppealSection(true); }} onOpenBannedAppealChat={(t: AppealTicket) => { setBannedAppealTicket(t); setShowBannedAppealSection(true); }} />
+</div>
 {isAdmin && showAdminAppealSection && adminAppealTicket && <div style={{ marginTop: "30px", height: "600px" }}><div style={{ fontSize: "13px", fontWeight: 800, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "0.5px", textTransform: "uppercase", marginBottom: "12px" }}>Chat Ajukan Banding</div><AppealChatRoom user={user} isAdmin={true} db={db} appealTicket={adminAppealTicket} onClose={() => { setShowAdminAppealSection(false); setAdminAppealTicket(null); }} /></div>}
 {!isAdmin && showBannedAppealSection && bannedAppealTicket && (
 <div id="banned-appeal-section" style={{ marginTop: "30px", height: "600px" }}>
@@ -3638,7 +3674,7 @@ setTimeout(() => { const el = document.getElementById("banned-appeal-section"); 
 <style jsx global>{`
 html { overflow: auto !important; -ms-overflow-style: none !important; scrollbar-width: none !important; height: 100% !important; }
 html::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
-body { overflow: auto !important; -ms-overflow-style: none !important; scrollbar-width: none !important; margin: 0; padding: 0; background-color: transparent !important; min-height: 100% !important; height: auto !important; }
+body { overflow: auto !important; -ms-overflow-style: none !important; scrollbar-width: none !important; margin: 0; padding: 0; background-color: #ffffff !important; min-height: 100% !important; height: auto !important; }
 body::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
 * { background-color: transparent; }
 .split-char-livechat { display: inline-block; will-change: transform, opacity, filter; }
