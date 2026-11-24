@@ -596,41 +596,81 @@ const random = String(Math.floor(Math.random() * 10000)).padStart(4, "0");
 return `#TICKET-${yy}${mm}${dd}-${hh}${min}-${random}`;
 };
 
-// ===== BACKGROUND PAGE COMPONENT (BARU) =====
-const BackgroundPage = ({ scrollProgress }: { scrollProgress: number }) => {
+// ===== BACKGROUND HALAMAN TAMBAHAN (BIRU) DENGAN SCROLL ANIMATION =====
+const AdditionalBackground = ({ liveChatRef }: { liveChatRef: React.RefObject<HTMLDivElement> }) => {
 const bgRef = useRef<HTMLDivElement>(null);
-  
+const ctxRef = useRef<gsap.Context | null>(null);
+
 useEffect(() => {
-if (!bgRef.current) return;
-// Animasi muncul perlahan dari atas berdasarkan scroll progress
-const translateY = Math.max(0, (1 - scrollProgress) * -100);
-const opacity = Math.min(1, scrollProgress * 1.5);
-gsap.to(bgRef.current, {
-y: `${translateY}%`,
-opacity: opacity,
-duration: 0.3,
-ease: "power2.out",
-overwrite: "auto"
+if (typeof window === "undefined" || !bgRef.current || !liveChatRef.current) return;
+
+// Cleanup previous
+if (ctxRef.current) {
+ctxRef.current.revert();
+}
+
+const ctx = gsap.context(() => {
+// Set initial state - bg tersembunyi di atas
+gsap.set(bgRef.current, {
+yPercent: -100,
+opacity: 0,
 });
-}, [scrollProgress]);
+
+// Animasi muncul perlahan saat scroll
+gsap.to(bgRef.current, {
+yPercent: 0,
+opacity: 1,
+ease: "none",
+scrollTrigger: {
+trigger: bgRef.current,
+start: "top top",
+end: () => {
+// Batas sampai Live Chat Agent
+if (liveChatRef.current) {
+const rect = liveChatRef.current.getBoundingClientRect();
+const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+return scrollTop + rect.top;
+}
+return "+=1500";
+},
+scrub: 1.2, // Smooth mengikuti scroll
+invalidateOnRefresh: true,
+},
+});
+}, bgRef.current);
+
+ctxRef.current = ctx;
+
+// Refresh ScrollTrigger setelah beberapa saat untuk memastikan perhitungan benar
+const refreshTimer = setTimeout(() => {
+ScrollTrigger.refresh();
+}, 500);
+
+return () => {
+clearTimeout(refreshTimer);
+if (ctxRef.current) {
+ctxRef.current.revert();
+ctxRef.current = null;
+}
+};
+}, [liveChatRef]);
 
 return (
-<div 
+<div
 ref={bgRef}
 style={{
 position: "fixed",
 top: 0,
-left: "50%",
-transform: "translateX(-50%) translateY(-100%)",
-width: "min(1400px, 92vw)",
-height: "min(1100px, 85vh)",
+left: 0,
+width: "100%",
+height: "100vh",
 backgroundColor: BLUE,
-borderBottomLeftRadius: "40px",
-borderBottomRightRadius: "40px",
 zIndex: 0,
 pointerEvents: "none",
-opacity: 0,
-boxShadow: "0 20px 60px rgba(13,60,252,0.25)",
+borderBottomLeftRadius: "60px",
+borderBottomRightRadius: "60px",
+boxShadow: "0 20px 60px rgba(13, 60, 252, 0.3)",
+willChange: "transform, opacity",
 }}
 />
 );
@@ -1049,7 +1089,7 @@ return (
 </div>
 </div>
 <p style={{ margin: 0, color: WHITE, fontSize: "14px", lineHeight: 1.6, opacity: 0.95 }}>
-Google Authenticator menambahkan lapisan keamanan ekstra dengan kode 6 digit yang berubah setiap 30 detik.
+Google Authenticator menambahkan lapisan keamanan ekstra dengan kode 6 digit yang berubah setiap 30 detik. Setup dilakukan <strong>sekali saja</strong>; setelah aktif, secret tidak bisa diganti tanpa menonaktifkan terlebih dahulu.
 </p>
 <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginTop: "8px" }}>
 {!enabled ? (
@@ -1325,7 +1365,7 @@ return (
 </div>
 </div>
 <p style={{ margin: 0, color: WHITE, fontSize: "14px", lineHeight: 1.6, opacity: 0.95 }}>
-Passkey menggunakan standar WebAuthn: fingerprint, Face ID, Windows Hello, PIN perangkat, atau security key USB.
+Passkey menggunakan standar WebAuthn: fingerprint, Face ID, Windows Hello, PIN perangkat, atau security key USB. Data kriptografi tersimpan di perangkat Anda, tidak pernah dikirim ke server.
 </p>
 <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
 {!webAuthnSupported && <span style={{ padding: "6px 12px", backgroundColor: "#fef3c7", color: "#92400e", borderRadius: "8px", fontSize: "12px", fontWeight: 700 }}>Browser tidak mendukung WebAuthn</span>}
@@ -1884,11 +1924,11 @@ const [messages, setMessages] = useState<AppealMessage[]>([]);
 const [messageText, setMessageText] = useState("");
 const [replyTo, setReplyTo] = useState<AppealMessage | null>(null);
 const [encryptionReady, setEncryptionReady] = useState(false);
-const [typingName, setTypingName] = useState<string | null>(null);
 const [status, setStatus] = useState<string>(appealTicket.status);
 const messagesEndRef = useRef<HTMLDivElement>(null);
 const chatRef = useRef<HTMLDivElement>(null);
 const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+const typingName = useRealtimeTypingAppeal(db, appealTicket?.id, user?.uid);
 useEffect(() => { getCryptoKey().then(() => setEncryptionReady(true)).catch(() => setEncryptionReady(true)); }, []);
 useEffect(() => {
 if (!db || !appealTicket) return;
@@ -1906,10 +1946,9 @@ const unsub = onSnapshot(doc(db, "appeal_tickets", appealTicket.id), (snap: any)
 if (!snap.exists()) return;
 const d = snap.data();
 setStatus(d.status || "waiting");
-setTypingName(d.typing && d.typingUserId !== user?.uid ? (d.typingUserName || null) : null);
 });
 return () => unsub();
-}, [db, appealTicket, user]);
+}, [db, appealTicket]);
 useEffect(() => {
 if (!db || !appealTicket || !user) return;
 messages.filter((m) => m.senderId !== user.uid && m.senderId !== "system" && !m.read).forEach(async (msg) => { await updateDoc(doc(db, "appeal_tickets", appealTicket.id, "messages", msg.id), { read: true, deliveryStatus: "read" }); });
@@ -2538,7 +2577,7 @@ return (
 <span style={{ fontSize: 13, color: WHITE, fontWeight: 700, fontFamily: FONT_FAMILY }}>
 {appealStatus === "resolved" ? "Banding telah diterima & selesai" : appealStatus === "closed" ? "Banding telah ditolak" : "Banding sedang diproses"}
 </span>
-<StabiloBadge label={meta.label} bg={WHITE} text={BLUE} border={WHITE} size="sm" />
+<StabiloBadge label={meta.label} bg={meta.bg} text={meta.text} border={meta.border} size="sm" />
 </div>
 )}
 <button onClick={onAppeal} style={{ alignSelf: "flex-start", padding: "10px 18px", backgroundColor: WHITE, color: BLUE, border: `1.5px solid ${WHITE}`, borderRadius: "8px", fontSize: "13px", fontWeight: 800, cursor: "pointer", fontFamily: FONT_FAMILY, letterSpacing: "0.5px", textTransform: "uppercase", display: "inline-flex", alignItems: "center", gap: "8px" }}>
@@ -2827,7 +2866,9 @@ if (!tid) return;
 const t = tickets.find((x) => x.id === tid);
 if (t) { setSelectedTicket(t); window.history.replaceState({}, "", "/live-chat-agent"); }
 }, [tickets]);
+
 const topics = ["Product Inquiry", "Technical Support", "Account Issues", "Donation", "Partnership", "Billing & Payment", "Feature Request", "Bug Report", "General Question", "Feedback & Suggestion", "Other"];
+
 const tourSteps: TourStep[] = [
 { target: "login-button", title: "Login First", content: "Login untuk mulai chat dengan agent.", position: "bottom", isLoginStep: true },
 { target: "livechat-title", title: "Live Chat Agent", content: "Bagian live chat dengan tim support.", position: "bottom" },
@@ -2836,6 +2877,7 @@ const tourSteps: TourStep[] = [
 { target: "search-bar", title: "Search Chats", content: "Cari chat berdasarkan nama atau isi pesan.", position: "bottom" },
 { target: "start-chat-button", title: "Start New Chat", content: "Klik untuk memulai chat baru.", position: "top" },
 ];
+
 useEffect(() => { setIsMounted(true); getCryptoKey().then(() => setEncryptionReady(true)).catch(() => setEncryptionReady(true)); }, []);
 useEffect(() => {
 if (!isMounted || isAdmin) return;
@@ -2848,6 +2890,7 @@ const split = new SplitText(liveChatTitleRef.current, { type: "chars", charsClas
 gsap.fromTo(split.chars, { opacity: 0, y: 30, filter: "blur(8px)" }, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.8, stagger: 0.05, ease: "back.out(1.2)", scrollTrigger: { trigger: liveChatTitleRef.current, start: "top 85%", end: "bottom 70%", toggleActions: "play none none reverse" } });
 return () => { ScrollTrigger.getAll().forEach((t) => t.kill()); };
 }, [isMounted]);
+
 useEffect(() => {
 const effUser = getEffectiveUser();
 if (!effUser || !isMounted) { setCheckingBan(false); return; }
@@ -2861,12 +2904,14 @@ else { setIsBanned(false); setBanReason(""); setCanCreateTicket(true); setCanSen
 } catch (e) { console.error(e); } finally { setCheckingBan(false); }
 })();
 }, [getEffectiveUser, isMounted]);
+
 useEffect(() => {
 const effUser = getEffectiveUser();
 if (!db || !effUser || !isMounted) return;
 const unsub = onSnapshot(query(collection(db, "appeal_tickets"), where("userId", "==", effUser.uid), orderBy("createdAt", "desc"), limit(1)), (s: any) => setHasAppeal(!s.empty));
 return () => unsub();
 }, [db, getEffectiveUser, isMounted]);
+
 useEffect(() => {
 const effUser = getEffectiveUser();
 if (!db || !effUser || !isMounted) return;
@@ -2874,6 +2919,7 @@ const q = isAdmin ? query(collection(db, "appeal_tickets"), orderBy("createdAt",
 const unsub = onSnapshot(q, (s: any) => { const list: AppealTicket[] = []; s.forEach((d: any) => list.push({ id: d.id, ...d.data() } as AppealTicket)); setAppealTickets(list); });
 return () => unsub();
 }, [db, getEffectiveUser, isAdmin, isMounted]);
+
 useEffect(() => {
 if (!db || !isMounted) return;
 const unsub = onSnapshot(query(collection(db, "users"), where("online", "==", true)), (s: any) => {
@@ -2883,6 +2929,7 @@ setOnlineUsers(users);
 });
 return () => unsub();
 }, [db, isMounted]);
+
 useEffect(() => {
 const effUser = getEffectiveUser();
 if (!db || !effUser || !isMounted) return;
@@ -2890,6 +2937,7 @@ const q = isAdmin ? query(collection(db, "livechat_tickets"), orderBy("createdAt
 const unsub = onSnapshot(q, (s: any) => { const list: Ticket[] = []; s.forEach((d: any) => list.push({ id: d.id, ...d.data() } as Ticket)); setTickets(list); setSelectedTicket((p) => p ? list.find((t) => t.id === p.id) || p : p); });
 return () => unsub();
 }, [db, getEffectiveUser, isAdmin, isMounted]);
+
 useEffect(() => {
 if (!db || !tickets.length || !isMounted) return;
 const unsubs: (() => void)[] = [];
@@ -2905,6 +2953,7 @@ unsubs.push(u);
 });
 return () => unsubs.forEach((u) => u());
 }, [db, tickets, isMounted]);
+
 useEffect(() => {
 if (!db || !selectedTicket || !isMounted) return;
 const tid = selectedTicket.id;
@@ -2921,12 +2970,15 @@ requestAnimationFrame(() => { if (chatRef.current) chatRef.current.scrollTop = c
 });
 return () => unsub();
 }, [db, selectedTicket, isMounted]);
+
 useEffect(() => { setLatestRollingMessage(null); prevLenRef.current = cacheRef.current[selectedTicket?.id || ""]?.length || 0; setShowCloseConfirm(false); setReplyTo(null); }, [selectedTicket?.id]);
+
 useEffect(() => {
 const effUser = getEffectiveUser();
 if (!db || !selectedTicket || !effUser || !isAdmin || !isMounted) return;
 messages.filter((m) => m.senderId !== effUser.uid && !m.read).forEach(async (msg) => { await updateDoc(doc(db, "livechat_tickets", selectedTicket.id, "messages", msg.id), { read: true, deliveryStatus: "read" }); });
 }, [messages, selectedTicket, db, getEffectiveUser, isAdmin, isMounted]);
+
 const hasAuto = useRef(false);
 useEffect(() => {
 const effUser = getEffectiveUser();
@@ -2936,12 +2988,14 @@ if (!ut.length) return;
 const act = ut.find((t) => t.status === "waiting" || t.status === "active") || ut[0];
 setSelectedTicket(act); hasAuto.current = true;
 }, [tickets, getEffectiveUser, isAdmin, selectedTicket, isMounted]);
+
 const formatTime = useCallback((t: any) => { if (!t) return ""; const d = t.toDate ? t.toDate() : new Date(t); return d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }); }, []);
 const getTyping = (t: Ticket | null) => t?.typing ? `${t.typingUserName || "Someone"} is typing...` : null;
 const filter = useCallback((list: Ticket[]) => {
 const q = searchQuery.trim().toLowerCase(); if (!q) return list;
 return list.filter((t) => t.userName?.toLowerCase().includes(q) || t.userEmail?.toLowerCase().includes(q) || t.topic?.toLowerCase().includes(q) || generateRandomTicketId(t.createdAt).toLowerCase().includes(q) || (ticketPreviews[t.id] || []).some((p) => p.text?.toLowerCase().includes(q)));
 }, [searchQuery, ticketPreviews]);
+
 const handleTyping = async (e: React.ChangeEvent<HTMLInputElement>) => {
 const v = e.target.value; setMessageText(v);
 const effUser = getEffectiveUser();
@@ -2952,12 +3006,14 @@ else await updateDoc(ref, { typing: false, typingUserId: null, typingUserName: n
 if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
 typingTimeoutRef.current = setTimeout(async () => { await updateDoc(ref, { typing: false, typingUserId: null, typingUserName: null }); }, 2000);
 };
+
 const checkBanBefore = async (): Promise<boolean> => {
 const effUser = getEffectiveUser();
 if (!effUser) return true;
 try { const s = await checkBanStatus(effUser.uid); if (s.isBanned) { setIsBanned(true); setBanReason(s.reason); setCanCreateTicket(s.canCreateTicket); setCanSendMessage(s.canSendMessage); setBanMessage(`YOUR ACCOUNT HAS BEEN PERMANENTLY BANNED
 Reason: ${s.reason}`); return true; } return false; } catch { return false; }
 };
+
 const startChatAsGuest = async () => {
 if (!db) return;
 try {
@@ -2979,6 +3035,7 @@ console.error(e);
 alert("Gagal memulai chat sebagai guest.");
 }
 };
+
 const startChat = async () => {
 const effUser = getEffectiveUser();
 if (!db || !effUser || !selectedTopic) { setShowStartChat(false); return; }
@@ -3003,6 +3060,7 @@ setSelectedTicket(newTicket);
 }
 } catch (e) { console.error(e); alert("An error occurred."); }
 };
+
 const sendMessage = async () => {
 const effUser = getEffectiveUser();
 if (!db || !selectedTicket || !messageText.trim() || !effUser) return;
@@ -3025,6 +3083,7 @@ setMessageText(""); setBanMessage(null); setReplyTo(null);
 if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
 } catch (e) { console.error(e); alert("An error occurred."); }
 };
+
 const takeTicket = async (id: string) => { 
 const effUser = getEffectiveUser();
 if (!db || !isAdmin || !effUser) return; 
@@ -3032,6 +3091,7 @@ try { await updateDoc(doc(db, "livechat_tickets", id), { agentId: effUser.uid, a
 };
 const resolveTicket = async (id: string) => { if (!db || !isAdmin) return; try { await updateDoc(doc(db, "livechat_tickets", id), { status: "resolved" }); } catch {} };
 const handleCloseRoom = async () => { if (!db || !selectedTicket) return; try { await updateDoc(doc(db, "livechat_tickets", selectedTicket.id), { status: "closed" }); setShowCloseConfirm(true); setTimeout(() => setShowCloseConfirm(false), 2200); } catch {} };
+
 const createAppealTicket = async () => {
 const effUser = getEffectiveUser();
 if (!db || !effUser || !isBanned) return;
@@ -3047,6 +3107,7 @@ onOpenBannedAppealChat({ id: ref.id, userId: effUser.uid, userName: effUser.disp
 setHasAppeal(true);
 } catch (e) { console.error(e); alert("Gagal membuat tiket banding."); }
 };
+
 const renderDeliveryStatus = (msg: ChatMessage, isMine: boolean) => {
 if (!isMine) return null;
 let label = "Sent"; let icon = <CheckIcon size={11} color="#ffffff" />;
@@ -3056,6 +3117,7 @@ else if (msg.deliveryStatus === "sending") { label = "Sending"; icon = <ClockIco
 else if (msg.deliveryStatus === "failed") { label = "Failed"; icon = <ErrorIcon size={11} color="#ffffff" />; }
 return (<span style={{ display: "inline-flex", alignItems: "center", gap: "3px", fontSize: "10px", color: "#ffffff", fontFamily: FONT_FAMILY, fontWeight: 500 }}>{label}{icon}</span>);
 };
+
 const renderOnlinePanel = () => {
 if (!isAdmin) return null;
 return (
@@ -3075,11 +3137,13 @@ return (
 </div>
 );
 };
+
 const renderTicketPreview = (ticketId: string) => {
 const prevs = ticketPreviews[ticketId] || [];
 if (!prevs.length) return null;
 return (<div style={{ marginTop: "6px", display: "flex", flexDirection: "column", gap: "3px" }}>{[...prevs].reverse().map((p, i) => (<div key={i} style={{ fontSize: "11px", color: "#ffffff", fontStyle: "italic", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontFamily: FONT_FAMILY, display: "flex", alignItems: "center", gap: "4px" }}><span style={{ fontWeight: 700, color: "#ffffff", flexShrink: 0 }}>{p.senderName}:</span><span style={{ overflow: "hidden", textOverflow: "ellipsis", color: "#ffffff" }}>{typeof p.text === "string" && p.text.length > 30 ? p.text.substring(0, 30) + "..." : p.text}</span></div>))}</div>);
 };
+
 const renderSearchBar = () => (
 <div data-tour="search-bar" style={{ padding: "10px 14px", borderBottom: "1px solid rgba(255,255,255,0.15)", flexShrink: 0 }}>
 <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "8px 12px", backgroundColor: "#ffffff", border: "1px solid #ffffff", borderRadius: "8px" }}>
@@ -3092,6 +3156,7 @@ const renderSearchBar = () => (
 
 const renderChatbotMode = () => {
 const effUser = getEffectiveUser();
+  
 if (!effUser) {
 return (
 <div style={{ display: "flex", flexDirection: "column", height: "700px", width: "420px", backgroundColor: WHITE, borderRadius: "20px", border: `2px solid ${BLUE}`, overflow: "hidden", boxShadow: "0 20px 60px rgba(13,60,252,0.2)" }}>
@@ -3365,10 +3430,15 @@ Live Chat
 }
 
 const effUser = getEffectiveUser();
-if (!effUser) return (<><OnboardingTour steps={tourSteps} onComplete={completeTour} isActive={showTour} currentStep={tourStep} setCurrentStep={setTourStep} /><div style={{ marginTop: "80px", paddingTop: "30px" }}><h3 ref={liveChatTitleRef} data-tour="livechat-title" style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1, marginBottom: "20px" }}>Live Chat Agent</h3><p style={{ fontSize: "15px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "10px" }}>Please login to use Live Chat Agent</p><div style={{ display: "flex", gap: "10px", alignItems: "center" }}><Link href="/" style={{ textDecoration: "none" }}><button data-tour="login-button" style={{ padding: "8px 20px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "6px", fontSize: "14px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY }}>Login</button></Link><button onClick={() => setChatbotMode(true)} style={{ padding: "8px 20px", backgroundColor: WHITE, color: BLUE, border: `2px solid ${BLUE}`, borderRadius: "6px", fontSize: "14px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY, display: "inline-flex", alignItems: "center", gap: "6px" }}><ToggleChatbotIcon size={14} color={BLUE} />Chatbot Mode</button></div></div></>);
+
+if (!effUser) return (<><OnboardingTour steps={tourSteps} onComplete={completeTour} isActive={showTour} currentStep={tourStep} setCurrentStep={setTourStep} /><div style={{ marginTop: "80px", paddingTop: "30px" }}><h3 ref={liveChatTitleRef} data-tour="livechat-title" style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1, marginBottom: "20px" }}>Live Chat Agent</h3><p style={{ fontSize: "15px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "10px" }}>Please login to use Live Chat Agent</p><div style={{ display: "flex", gap: "10px", alignItems: "center" }}><Link href="/signin" style={{ textDecoration: "none" }}><button data-tour="login-button" style={{ padding: "8px 20px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "6px", fontSize: "14px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY }}>Login</button></Link><button onClick={() => setChatbotMode(true)} style={{ padding: "8px 20px", backgroundColor: WHITE, color: BLUE, border: `2px solid ${BLUE}`, borderRadius: "6px", fontSize: "14px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY, display: "inline-flex", alignItems: "center", gap: "6px" }}><ToggleChatbotIcon size={14} color={BLUE} />Chatbot Mode</button></div></div></>);
+
 if (!isAdmin && isBanned) return (<div style={{ marginTop: "80px", paddingTop: "30px" }}><h3 style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1, marginBottom: "20px" }}>Live Chat Agent</h3><BannedInfoBanner banReason={banReason} banMessage={banMessage || ""} onAppeal={createAppealTicket} hasAppeal={hasAppeal} appealStatus={appealTickets.find((t) => t.userId === effUser.uid)?.status} /></div>);
+
 const userTickets = effUser ? tickets.filter((t) => t.userId === effUser.uid) : [];
+
 if (!isAdmin && userTickets.length === 0 && !showStartChat) return (<><OnboardingTour steps={tourSteps} onComplete={completeTour} isActive={showTour} currentStep={tourStep} setCurrentStep={setTourStep} /><div style={{ marginTop: "80px", paddingTop: "30px" }}><h3 ref={liveChatTitleRef} data-tour="livechat-title" style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1, marginBottom: "20px" }}>Live Chat Agent</h3><p style={{ fontSize: "15px", color: "#666", fontFamily: FONT_FAMILY, marginBottom: "16px" }}>Need help? Chat directly with our agent.</p><div style={{ display: "flex", gap: "10px" }}><button data-tour="start-chat-button" onClick={() => setShowStartChat(true)} style={{ padding: "10px 24px", backgroundColor: BLUE, color: WHITE, border: "none", borderRadius: "8px", fontSize: "15px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY }}>Start Live Chat</button><button onClick={() => setChatbotMode(true)} style={{ padding: "10px 24px", backgroundColor: WHITE, color: BLUE, border: `2px solid ${BLUE}`, borderRadius: "8px", fontSize: "15px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY, display: "inline-flex", alignItems: "center", gap: "8px" }}><ToggleChatbotIcon size={16} color={BLUE} />Chatbot Mode</button></div></div></>);
+
 if (!isAdmin && showStartChat) return (<div style={{ marginTop: "80px", paddingTop: "30px" }}><h3 style={{ fontSize: "80px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.1, marginBottom: "20px" }}>Live Chat Agent</h3><div style={{ maxWidth: "400px" }}><div style={{ fontSize: "15px", marginBottom: "10px", fontFamily: FONT_FAMILY, fontWeight: 700, color: BLUE }}>Select your issue topic:</div><select value={selectedTopic} onChange={(e) => setSelectedTopic(e.target.value)} style={{ width: "100%", padding: "10px 14px", border: `2px solid ${BLUE}`, borderRadius: "8px", fontSize: "15px", fontFamily: FONT_FAMILY, outline: "none", backgroundColor: WHITE, marginBottom: "14px", color: BLUE, fontWeight: 600 }}><option value="">-- Select topic --</option>{topics.map((t) => <option key={t} value={t}>{t}</option>)}</select><div style={{ display: "flex", gap: "10px" }}><button onClick={startChat} disabled={!selectedTopic} style={{ padding: "8px 20px", backgroundColor: selectedTopic ? BLUE : "#ccc", color: WHITE, border: "none", borderRadius: "8px", fontSize: "14px", fontWeight: 600, cursor: selectedTopic ? "pointer" : "not-allowed", fontFamily: FONT_FAMILY }}>Start Chat</button><button onClick={() => setShowStartChat(false)} style={{ padding: "8px 20px", backgroundColor: "transparent", color: "#666", border: "1px solid #ccc", borderRadius: "8px", fontSize: "14px", fontWeight: 600, cursor: "pointer", fontFamily: FONT_FAMILY }}>Cancel</button></div></div></div>);
 
 const waiting = filter(tickets.filter((t) => t.status === "waiting"));
@@ -3506,39 +3576,15 @@ const [showAdminAppealSection, setShowAdminAppealSection] = useState(false);
 const [bannedAppealTicket, setBannedAppealTicket] = useState<AppealTicket | null>(null);
 const [showBannedAppealSection, setShowBannedAppealSection] = useState(false);
 const [showDashboard, setShowDashboard] = useState(false);
-// ===== STATE BARU: SCROLL PROGRESS UNTUK BACKGROUND PAGE =====
-const [scrollProgress, setScrollProgress] = useState(0);
 const preloaderRef = useRef<HTMLDivElement>(null);
 const textRef = useRef<HTMLSpanElement>(null);
 const counterRef = useRef<HTMLSpanElement>(null);
 const mainPageRef = useRef<HTMLDivElement>(null);
 const wrapperRef = useRef<HTMLDivElement>(null);
+// ===== REF UNTUK LIVE CHAT AGENT (BATAS BG TAMBAHAN) =====
 const liveChatSectionRef = useRef<HTMLDivElement>(null);
 
 useEffect(() => setIsMounted(true), []);
-
-// ===== EFFECT: TRACK SCROLL PROGRESS UNTUK BACKGROUND PAGE =====
-useEffect(() => {
-if (typeof window === "undefined") return;
-const handleScroll = () => {
-const scrollTop = window.scrollY;
-const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-// Progress dari 0 sampai 1 (batas sampai Live Chat Agent)
-const liveChatEl = liveChatSectionRef.current;
-if (liveChatEl) {
-const liveChatTop = liveChatEl.offsetTop;
-const progress = Math.min(1, Math.max(0, scrollTop / (liveChatTop + 200)));
-setScrollProgress(progress);
-} else {
-const progress = Math.min(1, Math.max(0, scrollTop / Math.max(1, docHeight)));
-setScrollProgress(progress);
-}
-};
-window.addEventListener("scroll", handleScroll, { passive: true });
-handleScroll();
-return () => window.removeEventListener("scroll", handleScroll);
-}, []);
-
 useEffect(() => {
 if (!auth || !isMounted) return;
 const unsub = onAuthStateChanged(auth, async (cu: any) => {
@@ -3564,6 +3610,16 @@ tl.to(co, { value: 100, duration: 6.5, ease: "power2.inOut", onUpdate: () => { i
 tl.to(tx, { scale: 0.3, opacity: 0, duration: 0.8, ease: "power2.in" }).to(ct, { scale: 0.6, opacity: 0, duration: 0.8, ease: "power2.in" }, "-=0.8").to(pre, { xPercent: -100, duration: 1.2, ease: "power3.inOut", onComplete: () => { if (pre) pre.style.display = "none"; } }, "-=0.2").to(mn, { xPercent: 0, duration: 1.2, ease: "power3.inOut", onComplete: () => { if (killed) return; gsap.set(mn, { clearProps: "transform,willChange" }); setTimeout(() => ScrollTrigger.refresh(), 300); } }, "<");
 return () => { killed = true; tl.kill(); };
 }, [isMounted, loading]);
+
+// Refresh ScrollTrigger setelah komponen mount untuk memastikan bg tambahan bekerja
+useEffect(() => {
+if (!isMounted || loading) return;
+const timer = setTimeout(() => {
+ScrollTrigger.refresh();
+}, 800);
+return () => clearTimeout(timer);
+}, [isMounted, loading]);
+
 if (!isMounted || loading) {
 return (
 <div style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", backgroundColor: WHITE, display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999, fontFamily: FONT_FAMILY }}>
@@ -3594,8 +3650,8 @@ return (
 </div>
 </div>
 
-{/* ===== BACKGROUND PAGE TAMBAHAN (BARU) ===== */}
-{showMain && <BackgroundPage scrollProgress={scrollProgress} />}
+{/* ===== BACKGROUND HALAMAN TAMBAHAN (BIRU) - MUNCUL SAAT SCROLL ===== */}
+<AdditionalBackground liveChatRef={liveChatSectionRef} />
 
 {showDashboard && (
 <DashboardOverlay
@@ -3639,18 +3695,62 @@ setTimeout(() => { const el = document.getElementById("banned-appeal-section"); 
 <RightNavbar user={user} auth={auth} db={db} onOpenDashboard={() => setShowDashboard(true)} />
 <div style={{ marginTop: "44px" }}><div style={{ paddingTop: "120px" }} /></div>
 
-{/* ===== TINGGI TAMBAHAN UNTUK TESTING BACKGROUND PAGE ===== */}
-<div style={{ 
-position: "relative", 
-zIndex: 1, 
-flex: "1 0 auto", 
-backgroundColor: "transparent",
-minHeight: "1600px",
-}}>
+{/* ===== KONTEN HALAMAN UTAMA (DI ATAS BG TAMBAHAN) ===== */}
+<div style={{ position: "relative", zIndex: 1, flex: "1 0 auto", backgroundColor: "transparent" }}>
 <div style={{ padding: "0 40px", maxWidth: "1600px", margin: "0 auto", width: "100%" }}>
-<div ref={liveChatSectionRef}>
-<LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} onOpenAppealChat={(t: AppealTicket) => { setAdminAppealTicket(t); setShowAdminAppealSection(true); }} onOpenBannedAppealChat={(t: AppealTicket) => { setBannedAppealTicket(t); setShowBannedAppealSection(true); }} />
+
+{/* ===== SPACER AWAL UNTUK TESTING BG TAMBAHAN ===== */}
+<div style={{ 
+minHeight: "100vh", 
+display: "flex", 
+flexDirection: "column",
+alignItems: "center",
+justifyContent: "center",
+padding: "60px 20px",
+textAlign: "center"
+}}>
+<div style={{ 
+fontSize: "14px", 
+fontWeight: 700, 
+color: BLUE, 
+fontFamily: FONT_FAMILY, 
+letterSpacing: "0.1em",
+textTransform: "uppercase",
+marginBottom: "20px",
+padding: "8px 16px",
+backgroundColor: LIME,
+borderRadius: "8px",
+border: `2px solid ${LIME}`
+}}>
+↓ SCROLL KE BAWAH UNTUK MELIHAT BG TAMBAHAN ↓
 </div>
+<h1 style={{ 
+fontSize: "clamp(40px, 8vw, 100px)", 
+fontWeight: 800, 
+color: BLUE, 
+fontFamily: FONT_FAMILY, 
+letterSpacing: "-0.03em", 
+margin: 0, 
+lineHeight: 1.1,
+marginBottom: "20px"
+}}>
+Welcome to Menuru
+</h1>
+<p style={{ 
+fontSize: "18px", 
+color: "#555", 
+fontFamily: FONT_FAMILY, 
+maxWidth: "600px",
+lineHeight: 1.6,
+margin: "0 auto"
+}}>
+Background halaman tambahan akan muncul perlahan saat Anda scroll ke bawah. BG ini berwarna biru dengan border radius di sisi kiri dan kanan bawah, dan akan berhenti di batas Live Chat Agent.
+</p>
+</div>
+
+{/* ===== SECTION LIVE CHAT AGENT (BATAS BG TAMBAHAN) ===== */}
+<div ref={liveChatSectionRef} style={{ position: "relative", zIndex: 2, backgroundColor: WHITE, borderRadius: "32px 32px 0 0", padding: "40px 0", marginTop: "40px" }}>
+<LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} onOpenAppealChat={(t: AppealTicket) => { setAdminAppealTicket(t); setShowAdminAppealSection(true); }} onOpenBannedAppealChat={(t: AppealTicket) => { setBannedAppealTicket(t); setShowBannedAppealSection(true); }} />
 {isAdmin && showAdminAppealSection && adminAppealTicket && <div style={{ marginTop: "30px", height: "600px" }}><div style={{ fontSize: "13px", fontWeight: 800, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "0.5px", textTransform: "uppercase", marginBottom: "12px" }}>Chat Ajukan Banding</div><AppealChatRoom user={user} isAdmin={true} db={db} appealTicket={adminAppealTicket} onClose={() => { setShowAdminAppealSection(false); setAdminAppealTicket(null); }} /></div>}
 {!isAdmin && showBannedAppealSection && bannedAppealTicket && (
 <div id="banned-appeal-section" style={{ marginTop: "30px", height: "600px" }}>
@@ -3659,35 +3759,9 @@ minHeight: "1600px",
 </div>
 )}
 </div>
-
-{/* ===== SPACER TAMBAHAN UNTUK TESTING BACKGROUND PAGE ===== */}
-<div style={{ 
-height: "400px", 
-display: "flex", 
-alignItems: "center", 
-justifyContent: "center",
-position: "relative",
-zIndex: 1,
-}}>
-<div style={{ 
-padding: "20px 40px", 
-backgroundColor: "rgba(13,60,252,0.05)", 
-borderRadius: "16px",
-border: "2px dashed rgba(13,60,252,0.3)",
-textAlign: "center",
-maxWidth: "600px",
-}}>
-<div style={{ fontSize: "14px", fontWeight: 700, color: BLUE, fontFamily: FONT_FAMILY, marginBottom: "8px" }}>
-📏 Background Page Test Area
-</div>
-<div style={{ fontSize: "12px", color: "#666", fontFamily: FONT_FAMILY, lineHeight: 1.6 }}>
-Scroll Progress: <strong>{(scrollProgress * 100).toFixed(1)}%</strong>
-<br />
-Background halaman tambahan akan muncul perlahan saat scroll dan berhenti sebelum footer.
-</div>
-</div>
 </div>
 
+{/* ===== FOOTER (DI ATAS BG TAMBAHAN) ===== */}
 <FooterSection />
 </div>
 </div>
