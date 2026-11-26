@@ -839,7 +839,7 @@ return (
 );
 };
 
-// ===== NAVBAR BUTTON - DIPERBAIKI: ITEM PANEL BG PUTIH TEKS BIRU + ARROW 30PX =====
+// ===== NAVBAR BUTTON =====
 const NavbarButton = ({ label, panelTitle, panelDescription, panelImage, panelRightTitle, panelRightDescription, iconType, bigPanelWidth = 850, bigPanelHeight = 260, buttonColor = BLUE, buttonHoverColor = "#000000", panelColor = BLUE, iconButtonColor = "#000000", iconButtonHoverColor = BLUE, panelBoxColor = "rgba(255,255,255,0.12)", panelBoxBorder = "rgba(255,255,255,0.25)", labelTextColor = "#ffffff", labelTextHoverColor = "#ffffff", titleTextColor = "#ffffff", descriptionTextColor = "rgba(255,255,255,0.9)", iconComponent = null, isResources = false }: any) => {
 const [open, setOpen] = useState(false);
 const linesTopRef = useRef<SVGLineElement>(null);
@@ -861,7 +861,6 @@ else gsap.to(panelRef.current, { opacity: 0, y: -20, scale: 0.96, duration: 0.25
 }, [open]);
 const strokeColor = open ? labelTextHoverColor : labelTextColor;
 
-// ===== KOMPONEN ITEM PANEL: BG PUTIH + TEKS BIRU + ICON + ARROW 30PX =====
 const PanelItem = ({ icon, title, description, linkHref = "#" }: { icon: React.ReactNode; title: string; description: string; linkHref?: string }) => (
 <Link href={linkHref} style={{ textDecoration: "none", display: "block" }}>
 <div style={{ 
@@ -1018,16 +1017,29 @@ linkHref={iconType === "trust" ? "/trust" : iconType === "career" ? "/careers" :
 
 const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
 return (
-<div style={{ position: "fixed", top: "64px", left: shifted ? "340px" : "60px", zIndex: 9000, display: "flex", alignItems: "center", gap: "8px", fontFamily: FONT_FAMILY, transition: "left 0.6s cubic-bezier(0.65, 0, 0.35, 1)", willChange: "left" }}>
-<Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "12px", marginRight: "16px" }}>
+<div style={{ position: "fixed", top: "64px", left: shifted ? "340px" : "60px", zIndex: 9000, display: "flex", flexDirection: "column", alignItems: "flex-start", gap: "4px", fontFamily: FONT_FAMILY, transition: "left 0.6s cubic-bezier(0.65, 0, 0.35, 1)", willChange: "left" }}>
+<div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "8px" }}>
+<Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "12px" }}>
 <img src="/images/gfssa.jpg" alt="Menuru" style={{ height: "60px", width: "auto", maxWidth: "none", objectFit: "contain", display: "block", flexShrink: 0, mixBlendMode: "multiply" }} />
 <span style={{ color: BLUE, fontSize: "60px", fontWeight: 700, letterSpacing: "-0.03em", fontFamily: FONT_FAMILY, lineHeight: 1, whiteSpace: "nowrap" }}>Menuru</span>
 </Link>
-{/* TEAMS - BG BIRU */}
+</div>
+{/* TAGLINE DI BAWAH JUDUL */}
+<div style={{ marginLeft: "72px", marginTop: "-8px", marginBottom: "12px" }}>
+<span style={{ 
+fontFamily: FONT_FAMILY, 
+fontSize: "14px", 
+fontWeight: 400, 
+color: BLACK, 
+letterSpacing: "0.01em",
+lineHeight: 1.4
+}}>
+Providing ease without cost across all products
+</span>
+</div>
+<div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
 <NavbarButton label="Teams" panelTitle="Trust" panelDescription="Your security and privacy are our top priorities with end-to-end encryption." panelImage="/images/p0l.jpg" panelRightTitle="Why Trust Us" panelRightDescription="Our systems are monitored 24/7 to protect your data." iconType="trust" bigPanelWidth={850} bigPanelHeight={260} />
-{/* INDIVIDUALS - BG BIRU */}
 <NavbarButton label="Individual" panelTitle="Careers" panelDescription="Join our team and build a meaningful career in a supportive environment." panelImage="/images/xxz.jpg" panelRightTitle="Life at Menuru" panelRightDescription="A collaborative, flexible work culture with plenty of opportunities to grow together." iconType="career" bigPanelWidth={850} bigPanelHeight={260} />
-{/* RESOURCES - DIPERBAIKI: BG BIRU + ICON RESOURCES */}
 <NavbarButton 
 label="Resources" 
 panelTitle="Docs & Brand" 
@@ -1052,6 +1064,7 @@ titleTextColor="#ffffff"
 descriptionTextColor="rgba(255,255,255,0.92)" 
 isResources={true} 
 />
+</div>
 </div>
 );
 };
@@ -1976,11 +1989,11 @@ const [messages, setMessages] = useState<AppealMessage[]>([]);
 const [messageText, setMessageText] = useState("");
 const [replyTo, setReplyTo] = useState<AppealMessage | null>(null);
 const [encryptionReady, setEncryptionReady] = useState(false);
-const [typingName, setTypingName] = useState<string | null>(null);
 const [status, setStatus] = useState<string>(appealTicket.status);
 const messagesEndRef = useRef<HTMLDivElement>(null);
 const chatRef = useRef<HTMLDivElement>(null);
 const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+const typingName = useRealtimeTypingAppeal(db, appealTicket?.id, user?.uid);
 useEffect(() => { getCryptoKey().then(() => setEncryptionReady(true)).catch(() => setEncryptionReady(true)); }, []);
 useEffect(() => {
 if (!db || !appealTicket) return;
@@ -1998,10 +2011,9 @@ const unsub = onSnapshot(doc(db, "appeal_tickets", appealTicket.id), (snap: any)
 if (!snap.exists()) return;
 const d = snap.data();
 setStatus(d.status || "waiting");
-setTypingName(d.typing && d.typingUserId !== user?.uid ? (d.typingUserName || null) : null);
 });
 return () => unsub();
-}, [db, appealTicket, user]);
+}, [db, appealTicket]);
 useEffect(() => {
 if (!db || !appealTicket || !user) return;
 messages.filter((m) => m.senderId !== user.uid && m.senderId !== "system" && !m.read).forEach(async (msg) => { await updateDoc(doc(db, "appeal_tickets", appealTicket.id, "messages", msg.id), { read: true, deliveryStatus: "read" }); });
@@ -3206,7 +3218,6 @@ const renderSearchBar = () => (
 </div>
 );
 
-// ===== RENDER CHATBOT MODE =====
 const renderChatbotMode = () => {
 const effUser = getEffectiveUser();
   
