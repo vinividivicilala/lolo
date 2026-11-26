@@ -839,7 +839,7 @@ return (
 );
 };
 
-// ===== NAVBAR BUTTON =====
+// ===== NAVBAR BUTTON - DIPERBAIKI: ITEM PANEL BG PUTIH TEKS BIRU + ARROW 30PX =====
 const NavbarButton = ({ label, panelTitle, panelDescription, panelImage, panelRightTitle, panelRightDescription, iconType, bigPanelWidth = 850, bigPanelHeight = 260, buttonColor = BLUE, buttonHoverColor = "#000000", panelColor = BLUE, iconButtonColor = "#000000", iconButtonHoverColor = BLUE, panelBoxColor = "rgba(255,255,255,0.12)", panelBoxBorder = "rgba(255,255,255,0.25)", labelTextColor = "#ffffff", labelTextHoverColor = "#ffffff", titleTextColor = "#ffffff", descriptionTextColor = "rgba(255,255,255,0.9)", iconComponent = null, isResources = false }: any) => {
 const [open, setOpen] = useState(false);
 const linesTopRef = useRef<SVGLineElement>(null);
@@ -861,7 +861,7 @@ else gsap.to(panelRef.current, { opacity: 0, y: -20, scale: 0.96, duration: 0.25
 }, [open]);
 const strokeColor = open ? labelTextHoverColor : labelTextColor;
 
-// ===== KOMPONEN ITEM PANEL: BG PUTIH + TEKS BIRU + ARROW 30PX =====
+// ===== KOMPONEN ITEM PANEL: BG PUTIH + TEKS BIRU + ICON + ARROW 30PX =====
 const PanelItem = ({ icon, title, description, linkHref = "#" }: { icon: React.ReactNode; title: string; description: string; linkHref?: string }) => (
 <Link href={linkHref} style={{ textDecoration: "none", display: "block" }}>
 <div style={{ 
@@ -1025,7 +1025,30 @@ return (
 </Link>
 <NavbarButton label="Teams" panelTitle="Trust" panelDescription="Your security and privacy are our top priorities with end-to-end encryption." panelImage="/images/p0l.jpg" panelRightTitle="Why Trust Us" panelRightDescription="Our systems are monitored 24/7 to protect your data." iconType="trust" bigPanelWidth={850} bigPanelHeight={260} />
 <NavbarButton label="Individual" panelTitle="Careers" panelDescription="Join our team and build a meaningful career in a supportive environment." panelImage="/images/xxz.jpg" panelRightTitle="Life at Menuru" panelRightDescription="A collaborative, flexible work culture with plenty of opportunities to grow together." iconType="career" bigPanelWidth={850} bigPanelHeight={260} />
-<NavbarButton label="Resources" panelTitle="Docs & Brand" panelDescription="Access complete documentation and Menuru brand assets in one place." panelImage="/images/p0l.jpg" panelRightTitle="Docs & Brand" panelRightDescription="Guides, visual assets, and official Menuru brand references." iconType="resources" iconComponent={<ResourcesIcon size={22} color="#ffffff" />} bigPanelWidth={850} bigPanelHeight={340} buttonColor={BLUE} buttonHoverColor={BLUE} panelColor={BLUE} iconButtonColor="#000000" iconButtonHoverColor="#000000" panelBoxColor="rgba(255,255,255,0.12)" panelBoxBorder="rgba(255,255,255,0.25)" labelTextColor="#ffffff" labelTextHoverColor="#ffffff" titleTextColor="#ffffff" descriptionTextColor="rgba(255,255,255,0.92)" isResources={true} />
+<NavbarButton 
+label="Resources" 
+panelTitle="Docs & Brand" 
+panelDescription="Access complete documentation and Menuru brand assets in one place." 
+panelImage="/images/p0l.jpg" 
+panelRightTitle="Docs & Brand" 
+panelRightDescription="Guides, visual assets, and official Menuru brand references." 
+iconType="resources" 
+iconComponent={<ResourcesIcon size={22} color="#ffffff" />} 
+bigPanelWidth={850} 
+bigPanelHeight={340} 
+buttonColor={BLUE} 
+buttonHoverColor={BLUE} 
+panelColor={BLUE} 
+iconButtonColor="#000000" 
+iconButtonHoverColor="#000000" 
+panelBoxColor="rgba(255,255,255,0.12)" 
+panelBoxBorder="rgba(255,255,255,0.25)" 
+labelTextColor="#ffffff" 
+labelTextHoverColor="#ffffff" 
+titleTextColor="#ffffff" 
+descriptionTextColor="rgba(255,255,255,0.92)" 
+isResources={true} 
+/>
 </div>
 );
 };
@@ -1950,11 +1973,11 @@ const [messages, setMessages] = useState<AppealMessage[]>([]);
 const [messageText, setMessageText] = useState("");
 const [replyTo, setReplyTo] = useState<AppealMessage | null>(null);
 const [encryptionReady, setEncryptionReady] = useState(false);
+const [typingName, setTypingName] = useState<string | null>(null);
 const [status, setStatus] = useState<string>(appealTicket.status);
 const messagesEndRef = useRef<HTMLDivElement>(null);
 const chatRef = useRef<HTMLDivElement>(null);
 const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-const typingName = useRealtimeTypingAppeal(db, appealTicket?.id, user?.uid);
 useEffect(() => { getCryptoKey().then(() => setEncryptionReady(true)).catch(() => setEncryptionReady(true)); }, []);
 useEffect(() => {
 if (!db || !appealTicket) return;
@@ -1972,9 +1995,10 @@ const unsub = onSnapshot(doc(db, "appeal_tickets", appealTicket.id), (snap: any)
 if (!snap.exists()) return;
 const d = snap.data();
 setStatus(d.status || "waiting");
+setTypingName(d.typing && d.typingUserId !== user?.uid ? (d.typingUserName || null) : null);
 });
 return () => unsub();
-}, [db, appealTicket]);
+}, [db, appealTicket, user]);
 useEffect(() => {
 if (!db || !appealTicket || !user) return;
 messages.filter((m) => m.senderId !== user.uid && m.senderId !== "system" && !m.read).forEach(async (msg) => { await updateDoc(doc(db, "appeal_tickets", appealTicket.id, "messages", msg.id), { read: true, deliveryStatus: "read" }); });
@@ -2620,11 +2644,11 @@ const [messages, setMessages] = useState<AppealMessage[]>([]);
 const [messageText, setMessageText] = useState("");
 const [replyTo, setReplyTo] = useState<AppealMessage | null>(null);
 const [encryptionReady, setEncryptionReady] = useState(false);
+const [typingName, setTypingName] = useState<string | null>(null);
 const [status, setStatus] = useState<string>(appealTicket?.status || "waiting");
 const messagesEndRef = useRef<HTMLDivElement>(null);
 const chatRef = useRef<HTMLDivElement>(null);
 const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-const typingName = useRealtimeTypingAppeal(db, appealTicket?.id, user?.uid);
 useEffect(() => { getCryptoKey().then(() => setEncryptionReady(true)).catch(() => setEncryptionReady(true)); }, []);
 useEffect(() => {
 if (!db || !appealTicket) return;
@@ -2642,9 +2666,10 @@ const unsub = onSnapshot(doc(db, "appeal_tickets", appealTicket.id), (snap: any)
 if (!snap.exists()) return;
 const d = snap.data();
 setStatus(d.status || "waiting");
+setTypingName(d.typing && d.typingUserId !== user?.uid ? (d.typingUserName || null) : null);
 });
 return () => unsub();
-}, [db, appealTicket]);
+}, [db, appealTicket, user]);
 useEffect(() => {
 if (!db || !appealTicket || !user) return;
 messages.filter((m) => m.senderId !== user.uid && m.senderId !== "system" && !m.read).forEach(async (msg) => { await updateDoc(doc(db, "appeal_tickets", appealTicket.id, "messages", msg.id), { read: true, deliveryStatus: "read" }); });
@@ -3703,21 +3728,23 @@ setTimeout(() => { const el = document.getElementById("banned-appeal-section"); 
 <div style={{ marginTop: "44px" }}><div style={{ paddingTop: "120px" }} /></div>
 <div style={{ position: "relative", zIndex: 1, flex: "1 0 auto", backgroundColor: WHITE }}>
 <div style={{ padding: "0 40px", maxWidth: "1600px", margin: "0 auto", width: "100%" }}>
-{/* ===== SUBTITLE DI BAWAH JUDUL MENURU ===== */}
+{/* ===== TEKS DESKRIPSI DI BAWAH JUDUL MENURU (AREA KONTEN UTAMA) ===== */}
 <div style={{ 
-position: "fixed", 
-top: "140px", 
-left: "60px", 
-zIndex: 8999, 
-fontFamily: FONT_FAMILY, 
-color: BLACK, 
-fontSize: "18px", 
-fontWeight: 400, 
-lineHeight: 1.4,
-maxWidth: "300px",
-pointerEvents: "none"
+marginTop: "20px",
+marginBottom: "40px",
+maxWidth: "1000px"
 }}>
-Providing ease without cost<br/>in all products
+<div style={{ 
+fontSize: "70px", 
+fontWeight: 400, 
+color: BLACK, 
+fontFamily: FONT_FAMILY, 
+letterSpacing: "-0.03em", 
+lineHeight: 1.05,
+margin: 0
+}}>
+Providing ease<br />without cost in all products
+</div>
 </div>
 <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} onOpenAppealChat={(t: AppealTicket) => { setAdminAppealTicket(t); setShowAdminAppealSection(true); }} onOpenBannedAppealChat={(t: AppealTicket) => { setBannedAppealTicket(t); setShowBannedAppealSection(true); }} />
 {isAdmin && showAdminAppealSection && adminAppealTicket && <div style={{ marginTop: "30px", height: "600px" }}><div style={{ fontSize: "13px", fontWeight: 800, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "0.5px", textTransform: "uppercase", marginBottom: "12px" }}>Chat Ajukan Banding</div><AppealChatRoom user={user} isAdmin={true} db={db} appealTicket={adminAppealTicket} onClose={() => { setShowAdminAppealSection(false); setAdminAppealTicket(null); }} /></div>}
