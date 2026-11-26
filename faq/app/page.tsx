@@ -839,7 +839,7 @@ return (
 );
 };
 
-// ===== NAVBAR BUTTON =====
+// ===== NAVBAR BUTTON - DIPERBAIKI: ITEM PANEL BG PUTIH TEKS BIRU + ARROW 30PX =====
 const NavbarButton = ({ label, panelTitle, panelDescription, panelImage, panelRightTitle, panelRightDescription, iconType, bigPanelWidth = 850, bigPanelHeight = 260, buttonColor = BLUE, buttonHoverColor = "#000000", panelColor = BLUE, iconButtonColor = "#000000", iconButtonHoverColor = BLUE, panelBoxColor = "rgba(255,255,255,0.12)", panelBoxBorder = "rgba(255,255,255,0.25)", labelTextColor = "#ffffff", labelTextHoverColor = "#ffffff", titleTextColor = "#ffffff", descriptionTextColor = "rgba(255,255,255,0.9)", iconComponent = null, isResources = false }: any) => {
 const [open, setOpen] = useState(false);
 const linesTopRef = useRef<SVGLineElement>(null);
@@ -1016,33 +1016,17 @@ linkHref={iconType === "trust" ? "/trust" : iconType === "career" ? "/careers" :
 );
 };
 
-// ===== LEFT NAVBAR - DIPERBAIKI: TAMBAH TEKS DESKRIPSI DI BAWAH JUDUL MENURU =====
+// ===== LEFT NAVBAR - DIPERBAIKI: TAMBAH TAGLINE DI BAWAH MENURU =====
 const LeftNavbar = ({ shifted }: { shifted: boolean }) => {
 return (
-<div style={{ position: "fixed", top: "64px", left: shifted ? "340px" : "60px", zIndex: 9000, display: "flex", flexDirection: "column", gap: "8px", fontFamily: FONT_FAMILY, transition: "left 0.6s cubic-bezier(0.65, 0, 0.35, 1)", willChange: "left" }}>
-{/* BARIS ATAS: LOGO + JUDUL MENURU */}
-<div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-<Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "12px" }}>
-<img src="/images/gfssa.jpg" alt="Menuru" style={{ height: "60px", width: "auto", maxWidth: "none", objectFit: "contain", display: "block", flexShrink: 0, mixBlendMode: "multiply" }} />
+<div style={{ position: "fixed", top: "64px", left: shifted ? "340px" : "60px", zIndex: 9000, display: "flex", alignItems: "flex-start", gap: "12px", fontFamily: FONT_FAMILY, transition: "left 0.6s cubic-bezier(0.65, 0, 0.35, 1)", willChange: "left" }}>
+<img src="/images/gfssa.jpg" alt="Menuru" style={{ height: "60px", width: "auto", maxWidth: "none", objectFit: "contain", display: "block", flexShrink: 0, mixBlendMode: "multiply", marginTop: "15px" }} />
+<div style={{ display: "flex", flexDirection: "column" }}>
+<div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+<Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center" }}>
 <span style={{ color: BLUE, fontSize: "60px", fontWeight: 700, letterSpacing: "-0.03em", fontFamily: FONT_FAMILY, lineHeight: 1, whiteSpace: "nowrap" }}>Menuru</span>
 </Link>
-</div>
-{/* BARIS BAWAH: TEKS DESKRIPSI - FONT 70PX, HITAM, TIDAK TEBAL, HANYA TEKS */}
-<div style={{ 
-fontFamily: FONT_FAMILY, 
-fontSize: "70px", 
-fontWeight: 400, 
-color: BLACK, 
-letterSpacing: "-0.02em", 
-lineHeight: 1, 
-whiteSpace: "nowrap",
-margin: 0,
-padding: 0
-}}>
-Providing ease without cost across all products
-</div>
-{/* BARIS TOMBOL NAVBAR */}
-<div style={{ display: "flex", alignItems: "center", gap: "8px", marginTop: "8px" }}>
+<div style={{ display: "flex", alignItems: "center", gap: "8px", marginLeft: "8px" }}>
 <NavbarButton label="Teams" panelTitle="Trust" panelDescription="Your security and privacy are our top priorities with end-to-end encryption." panelImage="/images/p0l.jpg" panelRightTitle="Why Trust Us" panelRightDescription="Our systems are monitored 24/7 to protect your data." iconType="trust" bigPanelWidth={850} bigPanelHeight={260} />
 <NavbarButton label="Individual" panelTitle="Careers" panelDescription="Join our team and build a meaningful career in a supportive environment." panelImage="/images/xxz.jpg" panelRightTitle="Life at Menuru" panelRightDescription="A collaborative, flexible work culture with plenty of opportunities to grow together." iconType="career" bigPanelWidth={850} bigPanelHeight={260} />
 <NavbarButton 
@@ -1069,6 +1053,22 @@ titleTextColor="#ffffff"
 descriptionTextColor="rgba(255,255,255,0.92)" 
 isResources={true} 
 />
+</div>
+</div>
+{/* ===== TAGLINE BARU: DI BAWAH JUDUL MENURU ===== */}
+<span style={{ 
+color: BLACK, 
+fontSize: "70px", 
+fontWeight: 400, 
+letterSpacing: "-0.02em", 
+fontFamily: FONT_FAMILY, 
+lineHeight: 1, 
+whiteSpace: "nowrap", 
+marginTop: "2px",
+display: "block"
+}}>
+Providing ease without cost<br />across all products
+</span>
 </div>
 </div>
 );
@@ -1159,7 +1159,7 @@ return (
 </div>
 </div>
 <p style={{ margin: 0, color: WHITE, fontSize: "14px", lineHeight: 1.6, opacity: 0.95 }}>
-Google Authenticator menambahkan lapisan keamanan ekstra dengan kode 6 digit yang berubah setiap 30 detik. Setup dilakukan <strong>sekali saja</strong>; setelah aktif, secret tidak bisa diganti tanpa menonaktifkan terlebih dahulu.
+Google Authenticator menambahkan lapisan keamanan ekstra dengan kode 6 digit yang berubah setiap 30 detik.
 </p>
 <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginTop: "8px" }}>
 {!enabled ? (
@@ -1435,7 +1435,7 @@ return (
 </div>
 </div>
 <p style={{ margin: 0, color: WHITE, fontSize: "14px", lineHeight: 1.6, opacity: 0.95 }}>
-Passkey menggunakan standar WebAuthn: fingerprint, Face ID, Windows Hello, PIN perangkat, atau security key USB. Data kriptografi tersimpan di perangkat Anda, tidak pernah dikirim ke server.
+Passkey menggunakan standar WebAuthn: fingerprint, Face ID, Windows Hello, PIN perangkat, atau security key USB.
 </p>
 <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
 {!webAuthnSupported && <span style={{ padding: "6px 12px", backgroundColor: "#fef3c7", color: "#92400e", borderRadius: "8px", fontSize: "12px", fontWeight: 700 }}>Browser tidak mendukung WebAuthn</span>}
@@ -2647,7 +2647,7 @@ return (
 <span style={{ fontSize: 13, color: WHITE, fontWeight: 700, fontFamily: FONT_FAMILY }}>
 {appealStatus === "resolved" ? "Banding telah diterima & selesai" : appealStatus === "closed" ? "Banding telah ditolak" : "Banding sedang diproses"}
 </span>
-<StabiloBadge label={meta.label} bg={WHITE} text={BLUE} border={WHITE} size="sm" />
+<StabiloBadge label={meta.label} bg={meta.bg} text={meta.text} border={meta.border} size="sm" />
 </div>
 )}
 <button onClick={onAppeal} style={{ alignSelf: "flex-start", padding: "10px 18px", backgroundColor: WHITE, color: BLUE, border: `1.5px solid ${WHITE}`, borderRadius: "8px", fontSize: "13px", fontWeight: 800, cursor: "pointer", fontFamily: FONT_FAMILY, letterSpacing: "0.5px", textTransform: "uppercase", display: "inline-flex", alignItems: "center", gap: "8px" }}>
