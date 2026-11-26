@@ -861,7 +861,7 @@ else gsap.to(panelRef.current, { opacity: 0, y: -20, scale: 0.96, duration: 0.25
 }, [open]);
 const strokeColor = open ? labelTextHoverColor : labelTextColor;
 
-// ===== KOMPONEN ITEM PANEL: BG PUTIH + TEKS BIRU + ICON + ARROW 30PX =====
+// ===== KOMPONEN ITEM PANEL: BG PUTIH + TEKS BIRU + ARROW 30PX =====
 const PanelItem = ({ icon, title, description, linkHref = "#" }: { icon: React.ReactNode; title: string; description: string; linkHref?: string }) => (
 <Link href={linkHref} style={{ textDecoration: "none", display: "block" }}>
 <div style={{ 
@@ -1025,30 +1025,7 @@ return (
 </Link>
 <NavbarButton label="Teams" panelTitle="Trust" panelDescription="Your security and privacy are our top priorities with end-to-end encryption." panelImage="/images/p0l.jpg" panelRightTitle="Why Trust Us" panelRightDescription="Our systems are monitored 24/7 to protect your data." iconType="trust" bigPanelWidth={850} bigPanelHeight={260} />
 <NavbarButton label="Individual" panelTitle="Careers" panelDescription="Join our team and build a meaningful career in a supportive environment." panelImage="/images/xxz.jpg" panelRightTitle="Life at Menuru" panelRightDescription="A collaborative, flexible work culture with plenty of opportunities to grow together." iconType="career" bigPanelWidth={850} bigPanelHeight={260} />
-<NavbarButton 
-label="Resources" 
-panelTitle="Docs & Brand" 
-panelDescription="Access complete documentation and Menuru brand assets in one place." 
-panelImage="/images/p0l.jpg" 
-panelRightTitle="Docs & Brand" 
-panelRightDescription="Guides, visual assets, and official Menuru brand references." 
-iconType="resources" 
-iconComponent={<ResourcesIcon size={22} color="#ffffff" />} 
-bigPanelWidth={850} 
-bigPanelHeight={340} 
-buttonColor={BLUE} 
-buttonHoverColor={BLUE} 
-panelColor={BLUE} 
-iconButtonColor="#000000" 
-iconButtonHoverColor="#000000" 
-panelBoxColor="rgba(255,255,255,0.12)" 
-panelBoxBorder="rgba(255,255,255,0.25)" 
-labelTextColor="#ffffff" 
-labelTextHoverColor="#ffffff" 
-titleTextColor="#ffffff" 
-descriptionTextColor="rgba(255,255,255,0.92)" 
-isResources={true} 
-/>
+<NavbarButton label="Resources" panelTitle="Docs & Brand" panelDescription="Access complete documentation and Menuru brand assets in one place." panelImage="/images/p0l.jpg" panelRightTitle="Docs & Brand" panelRightDescription="Guides, visual assets, and official Menuru brand references." iconType="resources" iconComponent={<ResourcesIcon size={22} color="#ffffff" />} bigPanelWidth={850} bigPanelHeight={340} buttonColor={BLUE} buttonHoverColor={BLUE} panelColor={BLUE} iconButtonColor="#000000" iconButtonHoverColor="#000000" panelBoxColor="rgba(255,255,255,0.12)" panelBoxBorder="rgba(255,255,255,0.25)" labelTextColor="#ffffff" labelTextHoverColor="#ffffff" titleTextColor="#ffffff" descriptionTextColor="rgba(255,255,255,0.92)" isResources={true} />
 </div>
 );
 };
@@ -2626,7 +2603,7 @@ return (
 <span style={{ fontSize: 13, color: WHITE, fontWeight: 700, fontFamily: FONT_FAMILY }}>
 {appealStatus === "resolved" ? "Banding telah diterima & selesai" : appealStatus === "closed" ? "Banding telah ditolak" : "Banding sedang diproses"}
 </span>
-<StabiloBadge label={meta.label} bg={WHITE} text={BLUE} border={WHITE} size="sm" />
+<StabiloBadge label={meta.label} bg={meta.bg} text={meta.text} border={meta.border} size="sm" />
 </div>
 )}
 <button onClick={onAppeal} style={{ alignSelf: "flex-start", padding: "10px 18px", backgroundColor: WHITE, color: BLUE, border: `1.5px solid ${WHITE}`, borderRadius: "8px", fontSize: "13px", fontWeight: 800, cursor: "pointer", fontFamily: FONT_FAMILY, letterSpacing: "0.5px", textTransform: "uppercase", display: "inline-flex", alignItems: "center", gap: "8px" }}>
@@ -3525,24 +3502,6 @@ title="Ubah ke tampilan Chatbot"
 Chatbot Mode
 </button>
 </div>
-
-{/* ===== TEKS BARU: DESKRIPSI 2 BARIS DI BAWAH JUDUL LIVE CHAT AGENT ===== */}
-<div style={{ marginBottom: "30px" }}>
-<div style={{ 
-fontSize: "70px", 
-fontWeight: 400, 
-color: BLACK, 
-fontFamily: FONT_FAMILY, 
-lineHeight: 1.05, 
-letterSpacing: "-0.02em",
-margin: 0,
-padding: 0
-}}>
-<div>Providing ease without cost</div>
-<div>across all products</div>
-</div>
-</div>
-
 <div style={{ display: "flex", gap: "16px", height: "700px", width: "100%", overflow: "hidden", borderRadius: "12px" }}>
 {renderOnlinePanel()}
 <div data-tour="chat-list" className="chat-list-container" style={{ width: "360px", backgroundColor: BLUE, borderRadius: "12px", overflow: "hidden", flexShrink: 0, height: "700px", color: WHITE, fontFamily: FONT_FAMILY, display: "flex", flexDirection: "column" }}>
@@ -3744,6 +3703,22 @@ setTimeout(() => { const el = document.getElementById("banned-appeal-section"); 
 <div style={{ marginTop: "44px" }}><div style={{ paddingTop: "120px" }} /></div>
 <div style={{ position: "relative", zIndex: 1, flex: "1 0 auto", backgroundColor: WHITE }}>
 <div style={{ padding: "0 40px", maxWidth: "1600px", margin: "0 auto", width: "100%" }}>
+{/* ===== SUBTITLE DI BAWAH JUDUL MENURU ===== */}
+<div style={{ 
+position: "fixed", 
+top: "140px", 
+left: "60px", 
+zIndex: 8999, 
+fontFamily: FONT_FAMILY, 
+color: BLACK, 
+fontSize: "18px", 
+fontWeight: 400, 
+lineHeight: 1.4,
+maxWidth: "300px",
+pointerEvents: "none"
+}}>
+Providing ease without cost<br/>in all products
+</div>
 <LiveChatAgent user={user} isAdmin={isAdmin} db={db} auth={auth} onOpenAppealChat={(t: AppealTicket) => { setAdminAppealTicket(t); setShowAdminAppealSection(true); }} onOpenBannedAppealChat={(t: AppealTicket) => { setBannedAppealTicket(t); setShowBannedAppealSection(true); }} />
 {isAdmin && showAdminAppealSection && adminAppealTicket && <div style={{ marginTop: "30px", height: "600px" }}><div style={{ fontSize: "13px", fontWeight: 800, color: BLUE, fontFamily: FONT_FAMILY, letterSpacing: "0.5px", textTransform: "uppercase", marginBottom: "12px" }}>Chat Ajukan Banding</div><AppealChatRoom user={user} isAdmin={true} db={db} appealTicket={adminAppealTicket} onClose={() => { setShowAdminAppealSection(false); setAdminAppealTicket(null); }} /></div>}
 {!isAdmin && showBannedAppealSection && bannedAppealTicket && (
